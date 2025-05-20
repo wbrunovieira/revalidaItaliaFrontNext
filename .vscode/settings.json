@@ -1,23 +1,23 @@
 // .vscode/settings.json (frontend)
 {
   "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "#0C3559", // 
-    "titleBar.activeForeground": "#F2ECE9", // brand-offwhite
-    "titleBar.inactiveBackground": "#0F2940", // brand-navy-dark
-    "titleBar.inactiveForeground": "#D9C5C1", // brand-rose-light
-    "activityBar.background": "#0C3559", // brand-navy
+    "titleBar.activeBackground": "#e97c67", // 
+    "titleBar.activeForeground": "#0C3559", // brand-offwhite
+    "titleBar.inactiveBackground": "#0C3559", // brand-navy-dark
+    "titleBar.inactiveForeground": "#0C3559", // brand-rose-light
+    "activityBar.background": "#e97c67", // brand-navy
     "activityBar.foreground": "#F2ECE9",
-    "activityBar.inactiveForeground": "#D9C5C1",
+    "activityBar.inactiveForeground": "#0C3559",
     "activityBarBadge.background": "#79BED9", // brand-sky
     "activityBarBadge.foreground": "#0C3559",
     "statusBar.background": "#0C3559",
-    "statusBar.foreground": "#F2ECE9",
+    "statusBar.foreground": "#0C3559",
     "statusBar.debuggingBackground": "#3887A6", // brand-teal
     "window.activeBorder": "#79BED9", // destaque
-    "editorGroupHeader.tabsBackground": "#0F2940",
-    "tab.activeBackground": "#0C3559",
-    "tab.activeForeground": "#F2ECE9",
-    "tab.inactiveBackground": "#0F2940",
-    "tab.inactiveForeground": "#D9C5C1"
+    "editorGroupHeader.tabsBackground": "#3887A6",
+    "tab.activeBackground": "#e97c67",
+    "tab.activeForeground": "#0C3559",
+    "tab.inactiveBackground": "#e97c67",
+    "tab.inactiveForeground": "#0C3559"
   }
 }

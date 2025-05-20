@@ -1,9 +1,31 @@
-export default function Home() {
-  return (
-    <div className="bg-primary text-border grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <div>
-        <h1>Revalida Italia</h1>
-      </div>
-    </div>
-  );
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { normalizeLocale } from '@/lib/normalizelocale';
+
+function parseAcceptLanguage(
+  acceptLanguage: string
+): string {
+  const languages = acceptLanguage
+    .split(',')
+    .map(lang => {
+      const [code, qValue] = lang.split(';q=');
+      return {
+        code: code.trim(),
+        q: qValue ? parseFloat(qValue) : 1.0,
+      };
+    })
+    .sort((a, b) => b.q - a.q);
+
+  return languages[0]?.code || '';
+}
+
+export default async function RootPage() {
+  const requestHeaders = await headers(); // ✅ uso correto
+  const acceptLanguage =
+    requestHeaders.get('accept-language') || '';
+
+  const preferredLang = parseAcceptLanguage(acceptLanguage);
+  const normalizedLocale = normalizeLocale(preferredLang);
+
+  redirect(`/${normalizedLocale}`);
 }

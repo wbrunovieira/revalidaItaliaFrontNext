@@ -1,45 +1,39 @@
 @import "tailwindcss";
 
 :root {
+  /* — Design Tokens (core palette) */
+  --primary: #0C3559;
+  /* Primary       */
+  --primary-dark: #0F2940;
+  /* Primary-dark  */
+  --background: #F2ECE9;
+  /* Background    */
+  --accent-warm: #D9B2A9;
+  /* Accent-warm   */
+  --neutral: #D9C5C1;
+  /* Neutral       */
+  --secondary: #3887A6;
+  /* Secondary     */
+  --accent: #79BED9;
+  /* Accent        */
+  --accent-light: #8BCAD9;
+  /* Accent-light  */
+
   /* — Cores básicas */
-  --background: #ffffff;
   --foreground: #171717;
 
-  /* — Palette de marca */
-  --brand-navy: #0C3559;
-  /* Deep navy */
-  --brand-navy-dark: #0F2940;
-  /* Navy escuro */
-  --brand-offwhite: #F2ECE9;
-  /* Off-white suave */
-  --brand-rose: #D9B2A9;
-  /* Rosê médio */
-  --brand-rose-light: #D9C5C1;
-  /* Rosê claro */
-  --brand-teal: #3887A6;
-  /* Teal escuro */
-  --brand-sky: #79BED9;
-  /* Azul céu */
-  --brand-sky-light: #8BCAD9;
-  /* Azul céu claro */
-
-  /* — Cores semânticas */
-  --color-primary: var(--brand-navy);
-  --color-primary-dark: var(--brand-navy-dark);
-  --color-secondary: var(--brand-rose);
-  --color-accent: var(--brand-teal);
-  --color-surface: var(--brand-offwhite);
-  --color-muted: var(--brand-rose-light);
+  /* — Cores semânticas (mapeando para os tokens) */
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-surface: var(--background);
+  --color-muted: var(--neutral);
   --color-border: #E2E8F0;
-  /* cinza muito claro */
   --color-info: #63B3ED;
-  /* azul-400 */
   --color-success: #48BB78;
-  /* verde-500 */
   --color-warning: #ECC94B;
-  /* amarelo-400 */
   --color-error: #F56565;
-  /* vermelho-500 */
 
   /* — Tipografia */
   --font-sans: var(--font-geist-sans);
@@ -47,16 +41,17 @@
 }
 
 @theme inline {
+  /* usando tokens */
   --color-bg: var(--background);
   --color-text: var(--foreground);
 
-  --color-primary: var(--color-primary);
-  --color-primary-dark: var(--color-primary-dark);
-  --color-secondary: var(--color-secondary);
-  --color-accent: var(--color-accent);
-  --color-surface: var(--color-surface);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-surface: var(--background);
   --color-border: var(--color-border);
-  --color-muted: var(--color-muted);
+  --color-muted: var(--neutral);
 
   --color-info: var(--color-info);
   --color-success: var(--color-success);
@@ -67,6 +62,7 @@
   --font-mono: var(--font-mono);
 }
 
+/* Modo escuro (mantém override de bg/text) */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -77,6 +73,4 @@
 body {
   @apply bg-[var(--color-bg)] text-[var(--color-text)];
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
 }

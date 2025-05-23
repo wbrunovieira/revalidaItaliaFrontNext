@@ -1,11 +1,14 @@
-// global.d.ts
-import React from 'react';
+// types/lottie-player.d.ts
+import type {
+  DetailedHTMLProps,
+  HTMLAttributes,
+} from 'react';
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'lottie-player': React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
+      'lottie-player': DetailedHTMLProps<
+        HTMLAttributes<HTMLElement> & {
           src: string;
           background?: string;
           speed?: number | string;
@@ -17,3 +20,4 @@ declare global {
     }
   }
 }
+export {};

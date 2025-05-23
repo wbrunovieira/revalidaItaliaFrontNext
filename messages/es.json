@@ -1,4 +1,3 @@
-
 {
   "Nav": {
     "home": "Inicio",
@@ -9,5 +8,12 @@
   "meta": {
     "title": "Revalida Italia",
     "description": "Revalida Italia - Revalidación de diploma en Italia"
+  },
+  "Login": {
+    "title": "¡Bienvenido!",
+    "subtitle": "Introduce tu correo electrónico y contraseña para continuar.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "button": "Acceder"
   }
 }

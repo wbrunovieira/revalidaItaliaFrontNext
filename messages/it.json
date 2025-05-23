@@ -8,5 +8,12 @@
   "meta": {
     "title": "Revalida Italia",
     "description": "Revalida Italia - Riconvalida del diploma in Italia"
+  },
+  "Login": {
+    "title": "Benvenuto!",
+    "subtitle": "Inserisci la tua e-mail e password per continuare.",
+    "email": "Email",
+    "password": "Password",
+    "button": "Accedi"
   }
 }

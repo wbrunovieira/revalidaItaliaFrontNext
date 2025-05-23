@@ -27,6 +27,7 @@
   --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
   --color-surface: var(--background);
   --color-muted: var(--neutral);
   --color-border: #E2E8F0;
@@ -38,6 +39,12 @@
   /* — Tipografia */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --font-plus-jakarta-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-spectral: 'Spectral', serif;
+    /* — Mapeamento de fonte padrão */
+    --font-sans: var(--font-plus-jakarta-sans);
+    --font-serif: var(--font-spectral);
 }
 
 @theme inline {
@@ -49,6 +56,7 @@
   --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-accent-ligth: var(--accenyt-light);
   --color-surface: var(--background);
   --color-border: var(--color-border);
   --color-muted: var(--neutral);
@@ -73,4 +81,11 @@
 body {
   @apply bg-[var(--color-bg)] text-[var(--color-text)];
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-serif), serif; }
 }

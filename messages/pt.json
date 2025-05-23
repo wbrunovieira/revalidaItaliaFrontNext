@@ -8,7 +8,12 @@
   "meta": {
     "title": "Revalida Italia",
     "description": "Revalida Italia - Revalidação de diploma na Itália"
+  },
+  "Login": {
+    "title": "Bem-vindo !",
+    "subtitle": "Insira seu e-mail e senha para continuar.",
+    "email": "E-mail",
+    "password": "Senha",
+    "button": "Acessar"
   }
-
-
 }

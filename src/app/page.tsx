@@ -20,7 +20,7 @@ function parseAcceptLanguage(
 }
 
 export default async function RootPage() {
-  const requestHeaders = await headers(); // ✅ uso correto
+  const requestHeaders = await headers();
   const acceptLanguage =
     requestHeaders.get('accept-language') || '';
 

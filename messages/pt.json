@@ -1,4 +1,3 @@
-
 {
   "Nav": {
     "home": "Início",
@@ -16,6 +15,14 @@
     "email": "E-mail",
     "password": "Senha",
     "button": "Acessar",
-    "forgotPassword": "Esqueci minha senha?"
+    "buttonSuccess": "Sucesso!",
+    "forgotPassword": "Esqueci minha senha?",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "Formato de e-mail inválido",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMinLength": "Senha precisa ter ao menos {min} caracteres",
+    "passwordUppercase": "A senha precisa conter pelo menos uma letra maiúscula",
+    "passwordNumber": "A senha precisa conter pelo menos um número",
+    "passwordSpecial": "A senha precisa conter pelo menos um caractere especial"
   }
 }

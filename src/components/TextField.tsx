@@ -1,27 +1,32 @@
 // src/components/TextField.tsx
-import React from 'react';
+'use client';
 
-type Props = {
-  label: string;
-  name: string;
-  type?: string;
-  placeholder?: string;
-};
+import React from 'react';
+import type { InputHTMLAttributes } from 'react';
+
+type TextFieldProps =
+  InputHTMLAttributes<HTMLInputElement> & {
+    /** Label acima do input */
+    label: string;
+  };
 
 export default function TextField({
   label,
-  name,
-  type = 'text',
-  placeholder,
-}: Props) {
+  className = '',
+  id,
+  ...inputProps
+}: TextFieldProps) {
+  const inputId = id || inputProps.name;
+
   return (
-    <label className="block text-background-white">
-      <span className="text-sm">{label}</span>
+    <label htmlFor={inputId} className="block">
+      <span className="text-sm text-foreground">
+        {label}
+      </span>
       <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        className="mt-1 block w-full rounded bg-background-white px-3 py-2 text-muted focus:outline-none"
+        id={inputId}
+        className={`mt-1 block w-full rounded bg-background px-3 py-2 focus:outline-none focus:ring-1 focus:ring-secondary ${className}`}
+        {...inputProps}
       />
     </label>
   );

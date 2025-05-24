@@ -1,23 +1,19 @@
+// src/components/Button.tsx
 'use client';
 
 import React from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 
-type ButtonProps = {
-  /**
-   * Tamanho do botão: 'small', 'medium' ou 'large'
-   * Default: 'medium'
-   */
-  size?: 'small' | 'medium' | 'large';
-  /** Texto exibido no botão */
-  text: string;
-  /** Função executada no click */
-  onClick?: () => void;
-  /** Desabilita o botão */
-  disabled?: boolean;
-};
+type ButtonProps =
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    /** Tamanho do botão: 'small' | 'medium' | 'large' */
+    size?: 'small' | 'medium' | 'large';
+    /** Texto interno */
+    text: string;
+  };
 
 const sizeClasses: Record<
-  Required<ButtonProps>['size'],
+  NonNullable<ButtonProps['size']>,
   string
 > = {
   small: 'px-3 py-1 text-sm',
@@ -28,16 +24,18 @@ const sizeClasses: Record<
 const Button: React.FC<ButtonProps> = ({
   size = 'medium',
   text,
-  onClick,
-  disabled = false,
+  className = '',
+  disabled,
+  ...buttonProps
 }) => {
   const baseClasses =
-    'bg-secondary cursor-pointer hover:bg-accent text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ease-in-out';
-  const classes = `${baseClasses} ${sizeClasses[size]}`;
+    'bg-secondary hover:bg-accent text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ease-in-out';
+  const classes = `${baseClasses} ${sizeClasses[size]} ${className}`;
 
   return (
     <button
-      onClick={onClick}
+      {...buttonProps}
+      type={buttonProps.type || 'button'}
       className={classes}
       disabled={disabled}
     >

@@ -36,8 +36,11 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="antialiased">{children}</body>
-      <Toaster />
+      <body className="antialiased">
+        {children}
+
+        <Toaster />
+      </body>
     </html>
   );
 }

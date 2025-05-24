@@ -6,7 +6,7 @@
   /* Primary       */
   --primary-dark: #0F2940;
   /* Primary-dark  */
-  --background: #F2ECE9;
+  --background-white: #F2ECE9;
   /* Background    */
   --accent-warm: #D9B2A9;
   /* Accent-warm   */
@@ -28,9 +28,10 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
-  --color-surface: var(--background);
+  --color-background-white: var(--background-white);
   --color-muted: var(--neutral);
   --color-border: #E2E8F0;
+
   --color-info: #63B3ED;
   --color-success: #48BB78;
   --color-warning: #ECC94B;
@@ -57,7 +58,7 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-accent-ligth: var(--accenyt-light);
-  --color-surface: var(--background);
+  --color-background-white: var(--background-white);
   --color-border: var(--color-border);
   --color-muted: var(--neutral);
 

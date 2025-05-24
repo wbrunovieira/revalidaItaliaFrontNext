@@ -15,7 +15,7 @@
     "statusBar.debuggingBackground": "#3887A6", // brand-teal
     "window.activeBorder": "#79BED9", // destaque
     "editorGroupHeader.tabsBackground": "#3887A6",
-    "tab.activeBackground": "#e97c67",
+    "tab.activeBackground": "#79BED9",
     "tab.activeForeground": "#0C3559",
     "tab.inactiveBackground": "#e97c67",
     "tab.inactiveForeground": "#0C3559"

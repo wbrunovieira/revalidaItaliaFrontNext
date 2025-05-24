@@ -1,7 +1,39 @@
 // src/app/[locale]/login/page.tsx
 import React from 'react';
-import AuthLayout from '@/components/AuthLayout';
+import ImageSection from '@/components/ImageSection';
+import AuthPanel from '@/components/AuthPanel';
 
 export default function LoginPage() {
-  return <AuthLayout />;
+  return (
+    <div
+      className="
+        relative bg-accent h-screen
+        overflow-hidden lg:overflow-visible
+        lg:flex lg:flex-row
+      "
+    >
+      {/* === IMAGEM === */}
+      <div
+        className="
+          absolute inset-0
+          lg:static lg:h-auto lg:w-1/2
+          overflow-hidden
+        "
+      >
+        <ImageSection />
+      </div>
+
+      {/* === PAINEL === */}
+      <div
+        className="
+          relative z-10 flex items-end justify-center h-full
+          lg:items-center lg:justify-center lg:w-1/2
+        "
+      >
+        <div className="w-full sm:w-3/4 lg:w-full lg:h-full max-w-sm lg:max-w-none">
+          <AuthPanel />
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -9,21 +9,22 @@ export default function AuthPanel() {
   return (
     <div
       className="
-        flex-1 bg-primary flex flex-col justify-between
+        h-full flex-1 bg-primary flex flex-col justify-between
+        border-t-16 border-[var(--color-secondary)] lg:border-t-0
         rounded-t-3xl lg:rounded-none
         lg:border-l-4 lg:border-secondary
-        overflow-hidden
+        
       "
     >
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-8">
           <LoginHeader />
-          <hr className="mt-4 border-t-2 border-[var(--color-secondary)] w-96 mx-auto" />
+          <hr className="mt-4 border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto" />
           <LoginForm />
-          <hr className="mt-4 border-t-2 border-[var(--color-secondary)] w-96 mx-auto" />
+          <hr className="mt-4 border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto" />
         </div>
       </div>
-      <footer className="p-6 flex justify-center">
+      <footer className="p-6 lg:pb-32 flex justify-center">
         <Logo />
       </footer>
     </div>

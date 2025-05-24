@@ -15,13 +15,13 @@ export default function TextField({
   placeholder,
 }: Props) {
   return (
-    <label className="block text-white">
+    <label className="block text-background-white">
       <span className="text-sm">{label}</span>
       <input
         name={name}
         type={type}
         placeholder={placeholder}
-        className="mt-1 block w-full rounded bg-white px-3 py-2 text-gray-700 focus:outline-none"
+        className="mt-1 block w-full rounded bg-background-white px-3 py-2 text-muted focus:outline-none"
       />
     </label>
   );

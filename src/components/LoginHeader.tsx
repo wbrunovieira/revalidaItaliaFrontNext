@@ -7,7 +7,7 @@ import pisaAnimation from '../../public/icons/pisa.json';
 export default function LoginHeader() {
   const t = useTranslations('Login');
   return (
-    <header className="text-center text-white">
+    <header className="text-center text-background-white">
       <div className="flex items-center justify-center gap-2">
         <Lottie
           animationData={pisaAnimation}

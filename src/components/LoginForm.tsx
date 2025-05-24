@@ -28,7 +28,18 @@ export default function LoginForm() {
         type="password"
         placeholder={t('password')}
       />
+
+      <div className="text-end">
+        <a
+          href="/forgot-password"
+          className="text-sm text-secondary hover:underline"
+        >
+          {t('forgotPassword')}
+        </a>
+      </div>
       <Button text={t('button')} size="large" />
+
+      {/* Link discreto para “Esqueci minha senha” */}
     </form>
   );
 }

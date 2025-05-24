@@ -1,3 +1,4 @@
+
 {
   "Nav": {
     "home": "Inizio",
@@ -14,6 +15,7 @@
     "subtitle": "Inserisci la tua e-mail e password per continuare.",
     "email": "Email",
     "password": "Password",
-    "button": "Accedi"
+    "button": "Accedi",
+    "forgotPassword": "Password dimenticata?"
   }
 }

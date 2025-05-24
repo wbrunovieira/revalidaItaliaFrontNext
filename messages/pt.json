@@ -1,6 +1,7 @@
+
 {
   "Nav": {
-    "home": "Inicio",
+    "home": "Início",
     "blog": "Suporte",
     "FAQ": "Perguntas Frequentes",
     "cursos": "Cursos"
@@ -14,6 +15,7 @@
     "subtitle": "Insira seu e-mail e senha para continuar.",
     "email": "E-mail",
     "password": "Senha",
-    "button": "Acessar"
+    "button": "Acessar",
+    "forgotPassword": "Esqueci minha senha?"
   }
 }

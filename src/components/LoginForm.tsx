@@ -5,6 +5,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import TextField from './TextField';
 import Button from './Button';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
@@ -30,13 +31,14 @@ export default function LoginForm() {
       />
 
       <div className="text-end">
-        <a
+        <Link
           href="/forgot-password"
           className="text-sm text-secondary hover:underline"
         >
           {t('forgotPassword')}
-        </a>
+        </Link>
       </div>
+
       <Button text={t('button')} size="large" />
 
       {/* Link discreto para “Esqueci minha senha” */}

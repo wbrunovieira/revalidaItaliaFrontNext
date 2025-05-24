@@ -40,8 +40,6 @@ export default function LoginForm() {
       </div>
 
       <Button text={t('button')} size="large" />
-
-      {/* Link discreto para “Esqueci minha senha” */}
     </form>
   );
 }

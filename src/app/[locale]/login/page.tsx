@@ -2,6 +2,7 @@
 import React from 'react';
 import ImageSection from '@/components/ImageSection';
 import AuthPanel from '@/components/AuthPanel';
+import LanguageButton from '@/components/LanguageButton';
 
 export default function LoginPage() {
   return (
@@ -12,6 +13,9 @@ export default function LoginPage() {
         lg:flex lg:flex-row
       "
     >
+      <div className="absolute top-0 right-0 p-6 z-20">
+        <LanguageButton />
+      </div>
       {/* === IMAGEM === */}
       <div
         className="

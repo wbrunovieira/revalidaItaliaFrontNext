@@ -1,0 +1,49 @@
+- name: Deploy Frontend Next.js (produção)
+  hosts: frontend
+  become: true
+
+  vars:
+    app_dir: /home/ubuntu/app
+    repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNextJS.git
+
+  tasks:
+    - name: Instala Node.js
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+      args:
+        executable: /bin/bash
+
+    - name: Instala PM2 (gerenciador de processos)
+      shell: npm install -g pm2
+      args:
+        executable: /bin/bash
+
+    - name: Clona o repositório do frontend
+      git:
+        repo: '{{ repo_url }}'
+        dest: '{{ app_dir }}'
+        version: main
+        force: yes
+      become_user: ubuntu
+
+    - name: Instala dependências
+      shell: npm install
+      args:
+        chdir: '{{ app_dir }}'
+        executable: /bin/bash
+
+    - name: Build do projeto
+      shell: npm run build
+      args:
+        chdir: '{{ app_dir }}'
+        executable: /bin/bash
+
+    - name: Inicia com PM2
+      shell: pm2 start npm --name "frontend" -- start
+      args:
+        chdir: '{{ app_dir }}'
+        executable: /bin/bash
+
+    - name: Salva processos do PM2
+      shell: pm2 save

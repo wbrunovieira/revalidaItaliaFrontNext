@@ -16,7 +16,7 @@ export default function LoginPage() {
       <div className="absolute top-0 right-0 p-6 z-20">
         <LanguageButton />
       </div>
-      {/* === IMAGEM === */}
+
       <div
         className="
           absolute inset-0
@@ -27,7 +27,6 @@ export default function LoginPage() {
         <ImageSection />
       </div>
 
-      {/* === PAINEL === */}
       <div
         className="
           relative z-10 flex items-end justify-center h-full

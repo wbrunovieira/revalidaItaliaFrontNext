@@ -30,7 +30,6 @@ export default function RootLayout({
       className={`${plusJakarta.variable} ${spectral.variable}`}
     >
       <head>
-        {/* Carrega o web-component do Lottie antes do React */}
         <Script
           src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"
           strategy="beforeInteractive"

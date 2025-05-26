@@ -1,0 +1,4 @@
+resource "local_file" "ansible_inventory_frontend" {
+content  = <<EOF [frontend]
+${aws_instance.frontend.public_ip} EOF filename =
+"${path.module}/../ansible/inventory_frontend.yml" }

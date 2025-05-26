@@ -6,9 +6,8 @@ import type { ButtonHTMLAttributes } from 'react';
 
 type ButtonProps =
   ButtonHTMLAttributes<HTMLButtonElement> & {
-    /** Tamanho do botão: 'small' | 'medium' | 'large' */
     size?: 'small' | 'medium' | 'large';
-    /** Texto interno */
+
     text: string;
   };
 

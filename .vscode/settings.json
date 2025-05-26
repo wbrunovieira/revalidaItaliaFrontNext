@@ -19,5 +19,6 @@
     "tab.activeForeground": "#0C3559",
     "tab.inactiveBackground": "#e97c67",
     "tab.inactiveForeground": "#0C3559"
-  }
+  },
+  "ansible.python.interpreterPath": "/usr/bin/python3"
 }

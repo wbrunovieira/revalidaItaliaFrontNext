@@ -6,7 +6,6 @@ import type { InputHTMLAttributes } from 'react';
 
 type TextFieldProps =
   InputHTMLAttributes<HTMLInputElement> & {
-    /** Label acima do input */
     label: string;
   };
 

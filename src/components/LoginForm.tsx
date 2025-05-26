@@ -28,7 +28,6 @@ export default function LoginForm() {
   });
   type LoginData = z.infer<typeof loginSchema>;
 
-  // 2) Inicia RHF com modo onBlur (valida required e min)
   const {
     register,
     handleSubmit,
@@ -47,7 +46,6 @@ export default function LoginForm() {
     reValidateMode: 'onBlur',
   });
 
-  // 3) Foca no email ao montar
   useEffect(() => {
     setFocus('email');
   }, [setFocus]);
@@ -57,7 +55,6 @@ export default function LoginForm() {
     console.log('login', data);
   };
 
-  // 4) Watch + touched para validações em tempo real
   const password = watch('password') || '';
   const showCriteria = Boolean(touchedFields.password);
 
@@ -73,7 +70,6 @@ export default function LoginForm() {
       className="space-y-6"
       noValidate
     >
-      {/* EMAIL */}
       <div>
         <TextField
           label={t('email')}
@@ -90,7 +86,6 @@ export default function LoginForm() {
         )}
       </div>
 
-      {/* SENHA */}
       <div>
         <TextField
           label={t('password')}
@@ -103,14 +98,12 @@ export default function LoginForm() {
           }
         />
 
-        {/* erros zod (required + min length) */}
         {errors.password && (
           <p className="mt-1 text-sm text-red-500">
             {errors.password.message}
           </p>
         )}
 
-        {/* critérios adicionais, só depois do primeiro blur */}
         {showCriteria && !errors.password && (
           <ul className="mt-2 space-y-1 text-sm">
             {!hasUppercase && (
@@ -132,7 +125,6 @@ export default function LoginForm() {
         )}
       </div>
 
-      {/* ESQUECI A SENHA */}
       <div className="text-right">
         <Link
           href="/forgot-password"
@@ -142,7 +134,6 @@ export default function LoginForm() {
         </Link>
       </div>
 
-      {/* BOTÃO */}
       <Button
         type="submit"
         text={

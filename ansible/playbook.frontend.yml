@@ -1,25 +1,53 @@
+---
 - name: Deploy Frontend Next.js (produção)
   hosts: frontend
   become: true
 
   vars:
-    app_dir: /home/ubuntu/app
-    repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNextJS.git
+    app_dir: /home/ubuntu/frontend
+    repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
 
   tasks:
-    - name: Instala Node.js
+    - name: Ensure /home/ubuntu/frontend exists
+      file:
+        path: '{{ app_dir }}'
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Log debug info
+      shell:
+        echo "[DEBUG] Entrou na playbook $(date)" >>
+        /home/ubuntu/deploy.log
+
+    # ─── Preparação do sistema ────────────────────────────────────────────────
+    - name: Atualiza cache do apt e instala pacotes básicos
+      apt:
+        update_cache: yes
+        name:
+          - curl
+          - git
+          - build-essential
+          - python3
+          - python3-apt
+        state: present
+
+    - name: Instala Node.js e npm (via NodeSource)
       shell: |
         curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-        sudo apt-get install -y nodejs
+        apt-get install -y nodejs
       args:
         executable: /bin/bash
+    # ─── Fim preparação ───────────────────────────────────────────────────────
 
-    - name: Instala PM2 (gerenciador de processos)
-      shell: npm install -g pm2
-      args:
-        executable: /bin/bash
+    - name: Instala PM2 globalmente
+      npm:
+        name: pm2
+        global: yes
+      become_user: ubuntu
 
-    - name: Clona o repositório do frontend
+    - name: Clona ou atualiza o repositório do frontend
       git:
         repo: '{{ repo_url }}'
         dest: '{{ app_dir }}'
@@ -27,23 +55,32 @@
         force: yes
       become_user: ubuntu
 
-    - name: Instala dependências
-      shell: npm install
+    - name: Instala dependências do projeto
+      command: npm install
       args:
         chdir: '{{ app_dir }}'
-        executable: /bin/bash
+      become_user: ubuntu
 
-    - name: Build do projeto
-      shell: npm run build
+    - name: Realiza build do projeto
+      command: npm run build
       args:
         chdir: '{{ app_dir }}'
-        executable: /bin/bash
+      become_user: ubuntu
 
-    - name: Inicia com PM2
-      shell: pm2 start npm --name "frontend" -- start
+    - name: Inicia aplicação com PM2
+      command: pm2 start npm --name frontend -- start
       args:
         chdir: '{{ app_dir }}'
-        executable: /bin/bash
+      become_user: ubuntu
 
-    - name: Salva processos do PM2
-      shell: pm2 save
+    - name: Salva configuração do PM2
+      command: pm2 save
+      become_user: ubuntu
+
+    - name: Ativa startup do PM2 no boot
+      shell: |
+        pm2 startup systemd -u ubuntu --hp /home/ubuntu
+        pm2 save
+      args:
+        executable: /bin/bash
+      become_user: ubuntu

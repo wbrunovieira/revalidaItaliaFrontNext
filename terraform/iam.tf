@@ -15,6 +15,18 @@ data "aws_iam_policy_document" "ssm_assume" {
   }
 }
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "ssm-for-frontend-profile"
   role = aws_iam_role.ssm.name

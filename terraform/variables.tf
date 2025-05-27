@@ -1,5 +1,26 @@
+# variables.tf
+variable "aws_region" {
+  description = "AWS region"
+  default     = "us-east-2"
+}
+
+variable "aws_profile" {
+  description = "AWS CLI profile"
+  default     = "bruno-admin-revalida-aws"
+}
+
+variable "key_name" {
+  description = "Name for the EC2 key pair in AWS"
+  default     = "revalida-key"
+}
+
+variable "public_key_path" {
+  description = "Absolute path to your public key (no tilde)"
+  default     = "/Users/brunovieira/.ssh/revalida-key.pub"
+}
+
 variable "frontend_instance_type" {
-  default = "t3.micro"
+  default = "t3.small"
 }
 
 variable "frontend_ami" {

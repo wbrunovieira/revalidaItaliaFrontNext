@@ -1,4 +1,9 @@
+# provider.tf
+terraform {
+  required_version = ">= 1.12.1"
+}
+
 provider "aws" {
-  region  = "us-east-2"
-  profile = "bruno-admin-revalida-aws"
+  region  = var.aws_region
+  profile = var.aws_profile
 }

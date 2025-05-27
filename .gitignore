@@ -44,7 +44,14 @@ next-env.d.ts
 
 /ansible/inventory_frontend.yml
 
-# Terraform
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/.terraform/
+# ─── Terraform State & Cache ───────────────────────────────
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+**/*terraform.tfvars
+
+# ─── Ansible inventories gerados ────────────────────────────
+ansible/inventory_*.yml
+
+# ─── Backups diversos ───────────────────────────────────────
+**/*.backup

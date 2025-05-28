@@ -65,6 +65,7 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      console.log('res:', res);
 
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
@@ -73,15 +74,12 @@ export default function LoginForm() {
 
       const { accessToken } = await res.json();
 
-      // 🚧 Em protótipo guardamos em cookie de front-end.
-      //   Em produção, prefira Set-Cookie HttpOnly no servidor!
       document.cookie = [
         `token=${accessToken}`,
         `Path=/`,
         `SameSite=Lax`,
-        // Só em HTTPS:
-        `Secure`,
       ].join('; ');
+      console.log('first cookie:', document.cookie);
 
       router.push(`/${locale}`);
     } catch (err: unknown) {
@@ -91,7 +89,6 @@ export default function LoginForm() {
     }
   };
 
-  // — validações instantâneas de senha —
   const password = watch('password') ?? '';
   const showCriteria = Boolean(touchedFields.password);
   const hasUppercase = /[A-Z]/.test(password);

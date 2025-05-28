@@ -23,6 +23,7 @@
     "passwordMinLength": "Senha precisa ter ao menos {min} caracteres",
     "passwordUppercase": "A senha precisa conter pelo menos uma letra maiúscula",
     "passwordNumber": "A senha precisa conter pelo menos um número",
-    "passwordSpecial": "A senha precisa conter pelo menos um caractere especial"
+    "passwordSpecial": "A senha precisa conter pelo menos um caractere especial",
+      "loginFailed":       "Usuário ou senha inválidos"
   }
 }

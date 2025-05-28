@@ -1,8 +1,8 @@
-// src/components/LoginForm.tsx
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter, useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,8 +12,15 @@ import Link from 'next/link';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
+  const API = process.env.NEXT_PUBLIC_API_URL!;
+  const router = useRouter();
+  const { locale } =
+    (useParams() as { locale?: string }) ?? 'pt';
 
-  // 1) Schema zod para *required* e *min length*
+  const [formError, setFormError] = useState<string | null>(
+    null
+  );
+
   const loginSchema = z.object({
     email: z
       .string()
@@ -51,13 +58,41 @@ export default function LoginForm() {
   }, [setFocus]);
 
   const onSubmit = async (data: LoginData) => {
-    // TODO: chamar sua API de login
-    console.log('login', data);
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message ?? 'Login failed');
+      }
+
+      const { accessToken } = await res.json();
+
+      // 🚧 Em protótipo guardamos em cookie de front-end.
+      //   Em produção, prefira Set-Cookie HttpOnly no servidor!
+      document.cookie = [
+        `token=${accessToken}`,
+        `Path=/`,
+        `SameSite=Lax`,
+        // Só em HTTPS:
+        `Secure`,
+      ].join('; ');
+
+      router.push(`/${locale}`);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Login failed';
+      setFormError(message);
+    }
   };
 
-  const password = watch('password') || '';
+  // — validações instantâneas de senha —
+  const password = watch('password') ?? '';
   const showCriteria = Boolean(touchedFields.password);
-
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(
@@ -70,65 +105,70 @@ export default function LoginForm() {
       className="space-y-6"
       noValidate
     >
-      <div>
-        <TextField
-          label={t('email')}
-          type="email"
-          placeholder={t('email')}
-          {...register('email')}
-          onFocus={() => clearErrors('email')}
-          className={errors.email ? 'border-red-500' : ''}
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.email.message}
-          </p>
-        )}
-      </div>
+      {formError && (
+        <p className="text-center text-red-500">
+          {formError}
+        </p>
+      )}
 
-      <div>
-        <TextField
-          label={t('password')}
-          type="password"
-          placeholder={t('password')}
-          {...register('password')}
-          onFocus={() => clearErrors('password')}
-          className={
-            errors.password ? 'border-red-500' : ''
-          }
-        />
+      <TextField
+        label={t('email')}
+        type="email"
+        placeholder={t('email')}
+        {...register('email')}
+        onFocus={() => {
+          clearErrors('email');
+          setFormError(null);
+        }}
+        className={errors.email ? 'border-red-500' : ''}
+      />
+      {errors.email && (
+        <p className="mt-1 text-sm text-red-500">
+          {errors.email.message}
+        </p>
+      )}
 
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.password.message}
-          </p>
-        )}
+      <TextField
+        label={t('password')}
+        type="password"
+        placeholder={t('password')}
+        {...register('password')}
+        onFocus={() => {
+          clearErrors('password');
+          setFormError(null);
+        }}
+        className={errors.password ? 'border-red-500' : ''}
+      />
+      {errors.password && (
+        <p className="mt-1 text-sm text-red-500">
+          {errors.password.message}
+        </p>
+      )}
 
-        {showCriteria && !errors.password && (
-          <ul className="mt-2 space-y-1 text-sm">
-            {!hasUppercase && (
-              <li className="text-red-500">
-                {t('passwordUppercase')}
-              </li>
-            )}
-            {!hasNumber && (
-              <li className="text-red-500">
-                {t('passwordNumber')}
-              </li>
-            )}
-            {!hasSpecial && (
-              <li className="text-red-500">
-                {t('passwordSpecial')}
-              </li>
-            )}
-          </ul>
-        )}
-      </div>
+      {showCriteria && !errors.password && (
+        <ul className="mt-2 space-y-1 text-sm">
+          {!hasUppercase && (
+            <li className="text-red-500">
+              {t('passwordUppercase')}
+            </li>
+          )}
+          {!hasNumber && (
+            <li className="text-red-500">
+              {t('passwordNumber')}
+            </li>
+          )}
+          {!hasSpecial && (
+            <li className="text-red-500">
+              {t('passwordSpecial')}
+            </li>
+          )}
+        </ul>
+      )}
 
       <div className="text-right">
         <Link
-          href="/forgot-password"
-          className="text-sm text-secondary hover:underline focus:outline-none focus:ring-1 focus:ring-secondary"
+          href={`/${locale}/forgot-password`}
+          className="text-sm text-secondary hover:underline focus:ring-secondary"
         >
           {t('forgotPassword')}
         </Link>

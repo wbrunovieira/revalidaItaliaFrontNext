@@ -23,6 +23,7 @@
     "passwordMinLength": "La password deve contenere almeno {min} caratteri",
     "passwordUppercase": "La password deve contenere almeno una lettera maiuscola",
     "passwordNumber": "La password deve contenere almeno un numero",
-    "passwordSpecial": "La password deve contenere almeno un carattere speciale"
+    "passwordSpecial": "La password deve contenere almeno un carattere speciale",
+    "loginFailed": "Utente o password non validi"
   }
 }

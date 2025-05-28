@@ -28,9 +28,7 @@ variable "frontend_ami" {
   default     = "ami-04f167a56786e4b09"
 }
 
-variable "frontend_key_name" {
-  default = "revalida-key"
-}
+
 
 variable "frontend_port" {
   default = 3000

@@ -45,7 +45,8 @@
       npm:
         name: pm2
         global: yes
-      become_user: ubuntu
+        state: present
+      become: yes
 
     - name: Clona ou atualiza o repositório do frontend
       git:

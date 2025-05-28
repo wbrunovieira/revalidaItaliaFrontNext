@@ -1,3 +1,4 @@
+# terraform/keypair.tf
 resource "aws_key_pair" "revalida" {
   key_name   = var.key_name
   public_key = file(var.public_key_path)
@@ -6,4 +7,7 @@ resource "aws_key_pair" "revalida" {
     prevent_destroy = true
     ignore_changes  = [public_key]
   }
+}
+data "aws_key_pair" "revalida" {
+  key_name = var.key_name
 }

@@ -189,12 +189,12 @@ export default function LoginForm() {
       )}
 
       <div className="text-right">
-        <Link
-          href={`/${locale}/forgot-password`}
+        <div
+          // href={`/${locale}/forgot-password`}
           className="text-sm text-secondary hover:underline"
         >
           {t('forgotPassword')}
-        </Link>
+        </div>
       </div>
 
       <Button

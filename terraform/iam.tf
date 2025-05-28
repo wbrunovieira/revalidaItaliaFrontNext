@@ -3,6 +3,11 @@ resource "aws_iam_role" "ssm" {
 
   assume_role_policy = data.aws_iam_policy_document.ssm_assume.json
 }
+resource "aws_ssm_parameter" "next_public_api_url" {
+  name  = "/revalida/NEXT_PUBLIC_API_URL"
+  type  = "String"
+  value = var.NEXT_PUBLIC_API_URL
+}
 
 data "aws_iam_policy_document" "ssm_assume" {
   statement {
@@ -26,11 +31,10 @@ data "aws_subnets" "default" {
   }
 }
 
-data "aws_ssm_parameter" "next_public_url" {
-  name            = "/revalida/NEXT_PUBLIC_URL"
+data "aws_ssm_parameter" "next_public_api_url" {
+  name            = aws_ssm_parameter.next_public_api_url.name
   with_decryption = false
 }
-
 
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "ssm-for-frontend-profile"

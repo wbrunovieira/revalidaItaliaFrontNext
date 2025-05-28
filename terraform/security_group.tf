@@ -38,6 +38,17 @@ resource "aws_security_group" "frontend_sg" {
     security_groups  = []
     self             = false
   }
+  ingress {
+    description      = "Next.js (porta 3000)"
+    protocol         = "tcp"
+    from_port        = 3000
+    to_port          = 3000
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
   egress {
     description      = "Allow all outbound"
     protocol         = "-1"

@@ -9,4 +9,4 @@ all:
       ansible_ssh_private_key_file: '~/.ssh/${key_name}'
 
   vars:
-    NEXT_PUBLIC_URL: "${next_public_url}"
+    NEXT_PUBLIC_API_URL: "${next_public_api_url}"

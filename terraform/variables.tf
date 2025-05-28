@@ -39,8 +39,8 @@ variable "private_key_path" {
   default     = "/Users/brunovieira/.ssh/revalida-key"
 }
 
-variable "NEXT_PUBLIC_URL" {
+variable "NEXT_PUBLIC_API_URL" {
 
   type    = string
-  default = "3.17.237.231:3333"
+  default = "http://3.17.237.231:3333"
 }

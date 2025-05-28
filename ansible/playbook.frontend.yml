@@ -8,7 +8,7 @@
     repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
 
   tasks:
-    - name: Ensure /home/ubuntu/frontend exists
+    - name: Ensure {{ app_dir }} exists
       file:
         path: '{{ app_dir }}'
         state: directory
@@ -16,13 +16,7 @@
         group: ubuntu
         mode: '0755'
 
-    - name: Log debug info
-      shell:
-        echo "[DEBUG] Entrou na playbook $(date)" >>
-        /home/ubuntu/deploy.log
-
-    # ─── Preparação do sistema ────────────────────────────────────────────────
-    - name: Atualiza cache do apt e instala pacotes básicos
+    - name: Update apt and install base packages
       apt:
         update_cache: yes
         name:
@@ -33,22 +27,20 @@
           - python3-apt
         state: present
 
-    - name: Instala Node.js e npm (via NodeSource)
+    - name: Install Node.js & npm (NodeSource)
       shell: |
         curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
         apt-get install -y nodejs
       args:
         executable: /bin/bash
-    # ─── Fim preparação ───────────────────────────────────────────────────────
 
-    - name: Instala PM2 globalmente
+    - name: Install PM2 globally
       npm:
         name: pm2
         global: yes
         state: present
-      become: yes
 
-    - name: Clona ou atualiza o repositório do frontend
+    - name: Clone or update repo
       git:
         repo: '{{ repo_url }}'
         dest: '{{ app_dir }}'
@@ -56,29 +48,60 @@
         force: yes
       become_user: ubuntu
 
-    - name: Instala dependências do projeto
+    # --- Debug: checar variável antes de template ---
+    - name: Debug NEXT_PUBLIC_API_URL antes de gerar .env
+      debug:
+        msg: 'NEXT_PUBLIC_API_URL={{ NEXT_PUBLIC_API_URL }}'
+
+    - name: Generate .env for Next.js
+      template:
+        src: 'templates/.env.prod.j2'
+        dest: '{{ app_dir }}/.env'
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+      become_user: ubuntu
+
+    # --- Debug: exibir conteúdo gerado ---
+    - name: Show generated .env
+      command: cat {{ app_dir }}/.env
+      register: env_prod
+      become_user: ubuntu
+
+    - name: Debug conteúdo de .env
+      debug:
+        var: env_prod.stdout_lines
+
+    - name: Install project dependencies
       command: npm install
       args:
         chdir: '{{ app_dir }}'
       become_user: ubuntu
 
-    - name: Realiza build do projeto
+    - name: Build project
       command: npm run build
       args:
         chdir: '{{ app_dir }}'
       become_user: ubuntu
 
-    - name: Inicia aplicação com PM2
-      command: pm2 start npm --name frontend -- start
+    - name: Kill any process on TCP port 3000
+      shell: |
+        lsof -ti tcp:3000 | xargs -r kill -9
+      ignore_errors: yes
+
+    - name: Start or restart frontend in PM2
+      shell: |
+        if pm2 describe frontend &>/dev/null; then
+          pm2 restart frontend
+        else
+          pm2 start npm --name frontend -- start -- -p 3000 -H 0.0.0.0
+        fi
+        pm2 save
       args:
         chdir: '{{ app_dir }}'
       become_user: ubuntu
 
-    - name: Salva configuração do PM2
-      command: pm2 save
-      become_user: ubuntu
-
-    - name: Ativa startup do PM2 no boot
+    - name: Setup PM2 startup at boot
       shell: |
         pm2 startup systemd -u ubuntu --hp /home/ubuntu
         pm2 save

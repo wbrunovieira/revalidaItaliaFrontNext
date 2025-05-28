@@ -38,3 +38,9 @@ variable "private_key_path" {
   description = "Absolute path to your private key"
   default     = "/Users/brunovieira/.ssh/revalida-key"
 }
+
+variable "NEXT_PUBLIC_URL" {
+
+  type    = string
+  default = "3.17.237.231:3333"
+}

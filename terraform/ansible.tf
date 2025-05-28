@@ -4,8 +4,10 @@ resource "local_file" "ansible_inventory_frontend" {
   content = templatefile(
     "${path.module}/../ansible/inventory_frontend.tpl",
     {
-      public_ip = aws_instance.frontend.public_ip,
-      key_name  = aws_key_pair.revalida.key_name
+      public_ip       = aws_instance.frontend.public_ip,
+      key_name        = aws_key_pair.revalida.key_name,
+      next_public_url = var.NEXT_PUBLIC_URL
+
     }
   )
 }

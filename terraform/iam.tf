@@ -26,6 +26,11 @@ data "aws_subnets" "default" {
   }
 }
 
+data "aws_ssm_parameter" "next_public_url" {
+  name            = "/revalida/NEXT_PUBLIC_URL"
+  with_decryption = false
+}
+
 
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "ssm-for-frontend-profile"

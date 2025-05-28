@@ -7,3 +7,6 @@ all:
       ansible_connection: ssh
       ansible_port: 22
       ansible_ssh_private_key_file: '~/.ssh/${key_name}'
+
+  vars:
+    NEXT_PUBLIC_URL: "${next_public_url}"

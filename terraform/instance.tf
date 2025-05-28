@@ -1,4 +1,4 @@
-# instance.tf
+# terraform/instance.tf
 resource "aws_instance" "frontend" {
 
   ami           = var.frontend_ami
@@ -23,7 +23,18 @@ resource "aws_instance" "frontend" {
 apt-get clean
 EOF
 
+
+
   tags = {
     Name = "frontend"
+  }
+}
+
+resource "aws_eip" "frontend" {
+  instance = aws_instance.frontend.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "frontend-eip"
   }
 }

@@ -14,8 +14,9 @@ export default function LoginForm() {
   const t = useTranslations('Login');
   const API = process.env.NEXT_PUBLIC_API_URL!;
   const router = useRouter();
-  const { locale } =
-    (useParams() as { locale?: string }) ?? 'pt';
+  const { locale } = (useParams() as {
+    locale?: string;
+  }) ?? { locale: 'pt' };
 
   const [formError, setFormError] = useState<string | null>(
     null
@@ -59,36 +60,45 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginData) => {
     try {
-      console.log('API URL:', API);
       const res = await fetch(`${API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      console.log('res:', res);
 
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message ?? 'Login failed');
+        // Se a API retornar "Invalid credentials", jogamos uma chave
+        if (payload?.message === 'Invalid credentials') {
+          throw new Error('loginFailed');
+        }
+        throw new Error(payload?.message ?? 'loginFailed');
       }
 
       const { accessToken } = await res.json();
-
       document.cookie = [
         `token=${accessToken}`,
         `Path=/`,
         `SameSite=Lax`,
       ].join('; ');
-      console.log('first cookie:', document.cookie);
-
       router.push(`/${locale}`);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Login failed';
+      // mapeia a chave de erro para tradução
+      let message: string;
+      if (err instanceof Error) {
+        // se for nossa chave, puxa do dicionário; senão, exibe literal
+        message =
+          err.message === 'loginFailed'
+            ? t('loginFailed')
+            : err.message;
+      } else {
+        message = t('loginFailed');
+      }
       setFormError(message);
     }
   };
 
+  // validações instantâneas de senha
   const password = watch('password') ?? '';
   const showCriteria = Boolean(touchedFields.password);
   const hasUppercase = /[A-Z]/.test(password);
@@ -166,7 +176,7 @@ export default function LoginForm() {
       <div className="text-right">
         <Link
           href={`/${locale}/forgot-password`}
-          className="text-sm text-secondary hover:underline focus:ring-secondary"
+          className="text-sm text-secondary hover:underline"
         >
           {t('forgotPassword')}
         </Link>

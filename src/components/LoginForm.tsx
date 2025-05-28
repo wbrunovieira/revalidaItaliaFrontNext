@@ -9,18 +9,19 @@ import * as z from 'zod';
 import TextField from './TextField';
 import Button from './Button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
   const API = process.env.NEXT_PUBLIC_API_URL!;
   const router = useRouter();
-  const { locale } = (useParams() as {
-    locale?: string;
-  }) ?? { locale: 'pt' };
+  const { locale } =
+    (useParams() as { locale?: string }) ?? 'pt';
 
   const [formError, setFormError] = useState<string | null>(
     null
   );
+  const [showPassword, setShowPassword] = useState(false);
 
   const loginSchema = z.object({
     email: z
@@ -65,16 +66,10 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        // Se a API retornar "Invalid credentials", jogamos uma chave
-        if (payload?.message === 'Invalid credentials') {
-          throw new Error('loginFailed');
-        }
         throw new Error(payload?.message ?? 'loginFailed');
       }
-
       const { accessToken } = await res.json();
       document.cookie = [
         `token=${accessToken}`,
@@ -83,10 +78,8 @@ export default function LoginForm() {
       ].join('; ');
       router.push(`/${locale}`);
     } catch (err: unknown) {
-      // mapeia a chave de erro para tradução
       let message: string;
       if (err instanceof Error) {
-        // se for nossa chave, puxa do dicionário; senão, exibe literal
         message =
           err.message === 'loginFailed'
             ? t('loginFailed')
@@ -98,7 +91,6 @@ export default function LoginForm() {
     }
   };
 
-  // validações instantâneas de senha
   const password = watch('password') ?? '';
   const showCriteria = Boolean(touchedFields.password);
   const hasUppercase = /[A-Z]/.test(password);
@@ -136,17 +128,40 @@ export default function LoginForm() {
         </p>
       )}
 
-      <TextField
-        label={t('password')}
-        type="password"
-        placeholder={t('password')}
-        {...register('password')}
-        onFocus={() => {
-          clearErrors('password');
-          setFormError(null);
-        }}
-        className={errors.password ? 'border-red-500' : ''}
-      />
+      <div className="relative">
+        <TextField
+          label={t('password')}
+          type={showPassword ? 'text' : 'password'}
+          placeholder={t('password')}
+          {...register('password')}
+          onFocus={() => {
+            clearErrors('password');
+            setFormError(null);
+          }}
+          className={
+            errors.password ? 'border-red-500' : ''
+          }
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-3 top-9 flex items-center"
+          aria-label={
+            showPassword ? 'Hide password' : 'Show password'
+          }
+        >
+          <Image
+            src={
+              showPassword
+                ? '/icons/visionOpen.svg'
+                : '/icons/VIsionClosed.svg'
+            }
+            alt={showPassword ? 'Hide' : 'Show'}
+            width={18}
+            height={18}
+          />
+        </button>
+      </div>
       {errors.password && (
         <p className="mt-1 text-sm text-red-500">
           {errors.password.message}

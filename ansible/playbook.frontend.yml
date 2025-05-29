@@ -16,6 +16,14 @@
         group: ubuntu
         mode: '0755'
 
+    - name: Wait for apt to be available (lock released)
+      shell: |
+        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+          echo "Waiting for other apt processes to finish...";
+          sleep 3;
+        done
+      changed_when: false
+
     - name: Update apt and install base packages
       apt:
         update_cache: yes
@@ -48,7 +56,6 @@
         force: yes
       become_user: ubuntu
 
-    # --- Debug: checar variável antes de template ---
     - name: Debug NEXT_PUBLIC_API_URL antes de gerar .env
       debug:
         msg: 'NEXT_PUBLIC_API_URL={{ NEXT_PUBLIC_API_URL }}'
@@ -62,7 +69,6 @@
         mode: '0600'
       become_user: ubuntu
 
-    # --- Debug: exibir conteúdo gerado ---
     - name: Show generated .env
       command: cat {{ app_dir }}/.env
       register: env_prod
@@ -71,6 +77,31 @@
     - name: Debug conteúdo de .env
       debug:
         var: env_prod.stdout_lines
+
+    - name: Stop and delete PM2 process if exists
+      shell: |
+        pm2 delete frontend || true
+        pm2 flush
+      args:
+        chdir: '{{ app_dir }}'
+      become_user: ubuntu
+
+    - name:
+        Force kill any process using port 3000 (even
+        orphaned)
+      shell: |
+        fuser -k 3000/tcp || true
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: Wait until port 3000 is free
+      shell: |
+        while fuser 3000/tcp >/dev/null 2>&1; do
+          echo "Port 3000 still in use... waiting.";
+          sleep 2;
+        done
+      changed_when: false
+      become_user: ubuntu
 
     - name: Install project dependencies
       command: npm install
@@ -84,18 +115,9 @@
         chdir: '{{ app_dir }}'
       become_user: ubuntu
 
-    - name: Kill any process on TCP port 3000
+    - name: Start frontend in PM2
       shell: |
-        lsof -ti tcp:3000 | xargs -r kill -9
-      ignore_errors: yes
-
-    - name: Start or restart frontend in PM2
-      shell: |
-        if pm2 describe frontend &>/dev/null; then
-          pm2 restart frontend
-        else
-          pm2 start npm --name frontend -- start -- -p 3000 -H 0.0.0.0
-        fi
+        pm2 start npm --name frontend -- start -- -p 3000 -H 0.0.0.0
         pm2 save
       args:
         chdir: '{{ app_dir }}'

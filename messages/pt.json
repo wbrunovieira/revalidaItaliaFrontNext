@@ -25,5 +25,8 @@
     "passwordNumber": "A senha precisa conter pelo menos um número",
     "passwordSpecial": "A senha precisa conter pelo menos um caractere especial",
       "loginFailed":       "Usuário ou senha inválidos"
+  },
+  "Dashboard": {
+    "title": "Área do Aluno"
   }
 }

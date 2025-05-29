@@ -25,5 +25,8 @@
     "passwordNumber": "La contraseña debe contener al menos un número",
     "passwordSpecial": "La contraseña debe contener al menos un carácter especial",
     "loginFailed": "Usuario o contraseña inválidos"
+  },
+  "Dashboard": {
+    "title": "Área del Estudiante"
   }
 }

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import LanguageButton from '@/components/LanguageButton';
+import LogoutButton from '@/components/LogoutButton';
 
 export function generateStaticParams(): {
   locale: string;
@@ -41,6 +42,7 @@ export default async function IndexPage({
     >
       <div className="absolute top-0 right-0 p-6 z-20">
         <LanguageButton />
+        <LogoutButton />
       </div>
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-4xl space-y-8 text-center">

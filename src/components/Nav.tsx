@@ -3,36 +3,30 @@
 
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { Menu } from 'lucide-react';
+
 import MenuToggle from './MenuToggle';
+import Logo from './Logo';
+import SearchInput from './SearchInput';
 
 export default function Nav() {
   const t = useTranslations('Nav');
-  const locale = useLocale(); // 'pt', 'es' ou 'it'
+  const locale = useLocale();
 
   return (
     <nav>
-      <ul
-        style={{
-          display: 'flex',
-          gap: '1rem',
-          listStyle: 'none',
-        }}
-      >
+      <ul className="flex gap-4 list-none items-center">
         <li>
           <MenuToggle />
+        </li>
+        <li>
+          <Logo />
+        </li>
+        <li>
+          <SearchInput />
+        </li>
+
+        <li>
           <Link href={`/${locale}`}>{t('home')}</Link>
-        </li>
-        <li>
-          <Link href={`/${locale}/blog`}>{t('blog')}</Link>
-        </li>
-        <li>
-          <Link href={`/${locale}/faq`}>{t('FAQ')}</Link>
-        </li>
-        <li>
-          <Link href={`/${locale}/cursos`}>
-            {t('cursos')}
-          </Link>
         </li>
       </ul>
     </nav>

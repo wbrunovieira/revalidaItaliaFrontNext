@@ -28,5 +28,9 @@
   },
   "Dashboard": {
     "title": "Área del Estudiante"
-  }
+  },
+  "SearchInput": {
+  "placeholder": "Buscar curso",
+  "iconAlt": "Icono de búsqueda"
+}
 }

@@ -1,4 +1,3 @@
-// src/components/Nav.tsx
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
@@ -10,30 +9,37 @@ import LanguageButton from './LanguageButton';
 import LogoutButton from './LogoutButton';
 import Notifications from './Notifications';
 
-export default function Nav() {
+interface NavProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+export default function Nav({
+  collapsed,
+  onToggle,
+}: NavProps) {
   const t = useTranslations('Nav');
   const locale = useLocale();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 flex flex-col md:flex-row md:items-center justify-between px-4 py-3 bg-primary shadow">
-      <div className="flex items-center gap-4 mb-4 md:mb-0">
-        <MenuToggle />
+    <nav className="fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-4 bg-primary shadow-2xl z-20">
+      <div className="flex items-center gap-4">
+        <MenuToggle
+          collapsed={collapsed}
+          onToggle={onToggle}
+        />
         <Logo />
       </div>
 
-      <div className="w-full mb-4 md:mb-0 md:flex-1 md:px-8">
+      <div className="hidden md:flex-1 md:px-8">
         <SearchInput />
       </div>
 
-      <div className="flex flex-col items-end gap-4">
-        <div className="flex items-center gap-4">
-          <LanguageButton />
-          <LogoutButton />
-        </div>
-        <div className="flex items-center gap-4">
-          <Avatar />
-          <Notifications />
-        </div>
+      <div className="hidden md:flex items-center gap-4">
+        <LanguageButton />
+        <LogoutButton />
+        <Avatar />
+        <Notifications />
       </div>
     </nav>
   );

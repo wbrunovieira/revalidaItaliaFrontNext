@@ -35,5 +35,13 @@
 },"LogoutButton": {
   "logout": "Salir",
   "iconAlt": "Salir"
+},
+"Sidebar": {
+  "home": "Inicio",
+  "courses": "Cursos",
+  "support": "Soporte",
+  "faq": "Preguntas Frecuentes",
+  "expand": "Expandir menú",
+  "collapse": "Cerrar menú"
 }
 }

@@ -36,5 +36,13 @@
 "LogoutButton": {
   "logout": "Sair",
   "iconAlt": "Sair"
+},
+"Sidebar": {
+  "home": "Início",
+  "courses": "Cursos",
+  "support": "Suporte",
+  "faq": "Perguntas Frequentes",
+  "expand": "Expandir menu",
+  "collapse": "Recolher menu"
 }
 }

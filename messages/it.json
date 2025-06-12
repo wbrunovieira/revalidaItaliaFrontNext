@@ -36,5 +36,13 @@
 "LogoutButton": {
   "logout": "Esci",
   "iconAlt": "Esci"
+},
+"Sidebar": {
+  "home": "Inizio",
+  "courses": "Corsi",
+  "support": "Supporto",
+  "faq": "Domande Frequenti",
+  "expand": "Espandi menu",
+  "collapse": "Comprimi menu"
 }
 }

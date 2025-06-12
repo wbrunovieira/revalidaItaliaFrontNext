@@ -1,16 +1,21 @@
-import { useState } from 'react';
+'use client';
 
-export default function MenuToggle() {
-  const [isOpen, setIsOpen] = useState(false);
+interface MenuToggleProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
 
+export default function MenuToggle({
+  collapsed,
+  onToggle,
+}: MenuToggleProps) {
   return (
     <button
-      aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
-      onClick={() => setIsOpen(prev => !prev)}
-      // Aumentado para tela desktop: dobro do tamanho (48x48px)
+      aria-label={collapsed ? 'Abrir menu' : 'Fechar menu'}
+      onClick={onToggle}
       className="relative w-12 h-12 focus:outline-none"
     >
-      {/* Ícone "open" */}
+      {/* ícone “open” */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -18,7 +23,7 @@ export default function MenuToggle() {
         height="100%"
         fill="none"
         className={`absolute inset-0 transition-opacity duration-300 ease-in-out ${
-          isOpen ? 'opacity-0' : 'opacity-100'
+          collapsed ? 'opacity-100' : 'opacity-0'
         }`}
         stroke="#3887A6"
         strokeWidth={1.5}
@@ -33,7 +38,7 @@ export default function MenuToggle() {
         />
       </svg>
 
-      {/* Ícone "close" */}
+      {/* ícone “close” */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -41,7 +46,7 @@ export default function MenuToggle() {
         height="100%"
         fill="none"
         className={`absolute inset-0 transition-opacity duration-300 ease-in-out ${
-          isOpen ? 'opacity-100' : 'opacity-0'
+          collapsed ? 'opacity-0' : 'opacity-100'
         }`}
         stroke="#3887A6"
         strokeWidth={1.5}

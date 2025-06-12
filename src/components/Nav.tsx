@@ -3,6 +3,8 @@
 
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
+import { Menu } from 'lucide-react';
+import MenuToggle from './MenuToggle';
 
 export default function Nav() {
   const t = useTranslations('Nav');
@@ -18,6 +20,7 @@ export default function Nav() {
         }}
       >
         <li>
+          <MenuToggle />
           <Link href={`/${locale}`}>{t('home')}</Link>
         </li>
         <li>

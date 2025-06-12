@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import LanguageButton from '@/components/LanguageButton';
 import LogoutButton from '@/components/LogoutButton';
+import Nav from '@/components/Nav';
 
 export function generateStaticParams(): {
   locale: string;
@@ -37,9 +38,10 @@ export default async function IndexPage({
         h-screen flex-1 bg-primary flex flex-col justify-between
         border-t-16 border-[var(--color-secondary)] lg:border-t-0
         rounded-t-3xl lg:rounded-none
-        lg:border-l-4 lg:border-secondary 
+        lg:border-l-4 lg:border-secondary px-8 py-4
       "
     >
+      <Nav />
       <div className="absolute top-0 right-0 p-6 z-20">
         <LanguageButton />
         <LogoutButton />

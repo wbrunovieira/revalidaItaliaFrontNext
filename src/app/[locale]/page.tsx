@@ -42,10 +42,7 @@ export default async function IndexPage({
       "
     >
       <Nav />
-      <div className="absolute top-0 right-0 p-6 z-20">
-        <LanguageButton />
-        <LogoutButton />
-      </div>
+      <div className="absolute top-0 right-0 p-6 z-20"></div>
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-4xl space-y-8 text-center">
           <h1 className="text-3xl font-bold text-white">

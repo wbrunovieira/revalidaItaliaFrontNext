@@ -32,5 +32,8 @@
   "SearchInput": {
   "placeholder": "Buscar curso",
   "iconAlt": "Icono de búsqueda"
+},"LogoutButton": {
+  "logout": "Salir",
+  "iconAlt": "Salir"
 }
 }

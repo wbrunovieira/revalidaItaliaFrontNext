@@ -31,11 +31,11 @@ export default function Nav({
         <Logo />
       </div>
 
-      <div className="hidden md:flex-1 md:px-8">
+      <div className=" md:flex-1 md:px-8">
         <SearchInput />
       </div>
 
-      <div className="hidden md:flex items-center gap-4">
+      <div className="md:flex items-center gap-4">
         <LanguageButton />
         <LogoutButton />
         <Avatar />

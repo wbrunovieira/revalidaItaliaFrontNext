@@ -27,7 +27,9 @@
       "loginFailed":       "Usuário ou senha inválidos"
   },
   "Dashboard": {
-    "title": "Área do Aluno"
+    "title": "Área do Aluno",
+    "trails": "Trilhas",
+    "courses": "Cursos"
   },
   "SearchInput": {
   "placeholder": "Buscar curso",

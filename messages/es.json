@@ -27,7 +27,9 @@
     "loginFailed": "Usuario o contraseña inválidos"
   },
   "Dashboard": {
-    "title": "Área del Estudiante"
+    "title": "Área del Estudiante",
+    "trails": "Rutas",
+    "courses": "Cursos"
   },
   "SearchInput": {
   "placeholder": "Buscar curso",

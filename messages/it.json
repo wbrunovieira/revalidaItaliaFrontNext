@@ -27,7 +27,9 @@
     "loginFailed": "Utente o password non validi"
   },
   "Dashboard": {
-    "title": "Area Studente"
+    "title": "Area Studente",
+    "trails": "Tracce",
+    "courses": "Corsi"
   },
   "SearchInput": {
   "placeholder": "Cerca corso",

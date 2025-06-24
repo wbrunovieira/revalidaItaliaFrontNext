@@ -62,6 +62,25 @@
       "description": "O curso que você está procurando não existe ou foi removido."
     }
   },
+  "Module": {
+    "back": "Voltar ao Curso",
+    "lessons": "aulas",
+    "estimated": "Estimado: {hours}h",
+    "moduleNumber": "Módulo {number}",
+    "lessonsInModule": "Aulas deste Módulo",
+    "noLessons": "Nenhuma aula encontrada para este módulo.",
+    "lessonOrder": "Aula {order} de {total}",
+    "moduleNavigation": "Navegação do Módulo",
+    "previousModule": "Módulo Anterior",
+    "nextModule": "Próximo Módulo",
+    "breadcrumb": {
+      "dashboard": "Dashboard"
+    },
+    "notFound": {
+      "title": "Módulo não encontrado",
+      "description": "O módulo que você está procurando não existe ou foi removido."
+    }
+  },
   "SearchInput": {
     "placeholder": "Buscar curso",
     "iconAlt": "Ícone de busca"

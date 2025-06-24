@@ -89,7 +89,7 @@ export default async function CoursePage({
       description: '',
     };
 
-  const estimatedHours = courseModules.length * 1.5; // 1.5h por módulo
+  const estimatedHours = courseModules.length * 1.5;
   const totalModules = courseModules.length;
 
   return (
@@ -101,7 +101,6 @@ export default async function CoursePage({
             className="inline-flex items-center gap-2 text-white hover:text-secondary transition-colors"
           >
             <ArrowLeft size={20} />
-
             {tCourse('back')}
           </Link>
         </div>
@@ -128,19 +127,21 @@ export default async function CoursePage({
               <div className="flex gap-6 text-white">
                 <div className="flex items-center gap-2">
                   <BookOpen size={20} />
-
                   <span>
                     {totalModules} {tCourse('modules')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={20} />
-
                   <span>
                     {tCourse('estimated', {
                       hours: estimatedHours.toFixed(1),
                     })}
                   </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Play size={20} />
+                  <span>{tCourse('level.beginner')}</span>
                 </div>
               </div>
             </div>
@@ -184,6 +185,7 @@ export default async function CoursePage({
                           module.imageUrl ||
                           courseFound.imageUrl
                         }
+                        href={`/${locale}/courses/${slug}/modules/${module.slug}`}
                       />
 
                       <div className="mt-2 text-center">
@@ -219,10 +221,19 @@ export default async function CoursePage({
             <p className="text-gray-300 mb-4">
               {tCourse('startCourseDescription')}
             </p>
-            <button className="bg-secondary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors inline-flex items-center gap-2">
-              <Play size={20} />
-              {tCourse('startFirstModule')}
-            </button>
+            {courseModules.length > 0 && (
+              <Link
+                href={`/${locale}/courses/${slug}/modules/${
+                  courseModules.sort(
+                    (a, b) => a.order - b.order
+                  )[0].slug
+                }`}
+                className="bg-secondary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors inline-flex items-center gap-2"
+              >
+                <Play size={20} />
+                {tCourse('startFirstModule')}
+              </Link>
+            )}
           </div>
         </div>
       </div>

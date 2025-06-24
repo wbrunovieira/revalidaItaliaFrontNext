@@ -60,7 +60,6 @@ export default async function IndexPage({
   }
   const tracks: Track[] = await resTracks.json();
 
-  // Fetch courses
   const resCourses = await fetch(
     'http://localhost:3333/courses',
     {
@@ -86,7 +85,6 @@ export default async function IndexPage({
           <hr className="mt-4 border-t-2 border-secondary w-48 lg:w-96" />
         </div>
 
-        {/* Trails Section */}
         <div className="flex gap-8 items-center mt-8">
           <Image
             src="/icons/trail.svg"
@@ -118,7 +116,6 @@ export default async function IndexPage({
           })}
         </div>
 
-        {/* Courses Section */}
         <div className="flex gap-8 items-center mt-12">
           <BookOpen
             size={48}
@@ -141,7 +138,7 @@ export default async function IndexPage({
                 key={course.id}
                 name={translation.title}
                 imageUrl={course.imageUrl}
-                href={`/${locale}/courses/${course.slug}`} // ✅ Link para página do course
+                href={`/${locale}/courses/${course.slug}`}
               />
             );
           })}

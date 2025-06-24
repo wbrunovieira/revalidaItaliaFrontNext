@@ -112,7 +112,7 @@ export default async function IndexPage({
                 key={track.id}
                 name={translation.title}
                 imageUrl={track.imageUrl}
-                href={`/${locale}/tracks/${track.slug}`} // ✅ Link para página do track
+                href={`/${locale}/tracks/${track.slug}`}
               />
             );
           })}
@@ -141,7 +141,7 @@ export default async function IndexPage({
                 key={course.id}
                 name={translation.title}
                 imageUrl={course.imageUrl}
-                // href={`/${locale}/courses/${course.slug}`} // ✅ Para futuras páginas de curso
+                href={`/${locale}/courses/${course.slug}`} // ✅ Link para página do course
               />
             );
           })}

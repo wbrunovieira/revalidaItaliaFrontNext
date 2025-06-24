@@ -42,6 +42,26 @@
       "description": "La traccia che stai cercando non esiste o è stata rimossa."
     }
   },
+  "Course": {
+    "back": "Indietro",
+    "modules": "moduli",
+    "estimated": "Stimato: {hours}h",
+    "level": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzato"
+    },
+    "modulesInCourse": "Moduli di questo Corso",
+    "noModules": "Nessun modulo trovato per questo corso.",
+    "moduleOrder": "Modulo {order} di {total}",
+    "startCourse": "Inizia questo corso",
+    "startCourseDescription": "Inizia il tuo percorso di apprendimento con il primo modulo di questo corso.",
+    "startFirstModule": "Inizia Primo Modulo",
+    "notFound": {
+      "title": "Corso non trovato",
+      "description": "Il corso che stai cercando non esiste o è stato rimosso."
+    }
+  },
   "SearchInput": {
     "placeholder": "Cerca corso",
     "iconAlt": "Icona di ricerca"

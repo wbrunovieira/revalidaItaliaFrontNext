@@ -31,20 +31,32 @@
     "trails": "Rutas",
     "courses": "Cursos"
   },
+  "Track": {
+    "back": "Volver",
+    "courses": "cursos",
+    "estimated": "Estimado: {hours}h",
+    "coursesInTrack": "Cursos de esta Ruta",
+    "noCourses": "No se encontraron cursos para esta ruta.",
+    "notFound": {
+      "title": "Ruta no encontrada",
+      "description": "La ruta que estás buscando no existe o ha sido eliminada."
+    }
+  },
   "SearchInput": {
-  "placeholder": "Buscar curso",
-  "iconAlt": "Icono de búsqueda"
-},"LogoutButton": {
-  "logout": "Salir",
-  "iconAlt": "Salir"
-},
-"Sidebar": {
-  "home": "Inicio",
-  "courses": "Cursos",
-  "trails": "Rutas",
-  "support": "Soporte",
-  "faq": "Preguntas Frecuentes",
-  "expand": "Expandir menú",
-  "collapse": "Cerrar menú"
-}
+    "placeholder": "Buscar curso",
+    "iconAlt": "Icono de búsqueda"
+  },
+  "LogoutButton": {
+    "logout": "Salir",
+    "iconAlt": "Salir"
+  },
+  "Sidebar": {
+    "home": "Inicio",
+    "courses": "Cursos",
+    "trails": "Rutas",
+    "support": "Soporte",
+    "faq": "Preguntas Frecuentes",
+    "expand": "Expandir menú",
+    "collapse": "Cerrar menú"
+  }
 }

@@ -24,28 +24,39 @@
     "passwordUppercase": "A senha precisa conter pelo menos uma letra maiúscula",
     "passwordNumber": "A senha precisa conter pelo menos um número",
     "passwordSpecial": "A senha precisa conter pelo menos um caractere especial",
-      "loginFailed":       "Usuário ou senha inválidos"
+    "loginFailed": "Usuário ou senha inválidos"
   },
   "Dashboard": {
     "title": "Área do Aluno",
     "trails": "Trilhas",
     "courses": "Cursos"
   },
+  "Track": {
+    "back": "Voltar",
+    "courses": "cursos",
+    "estimated": "Estimado: {hours}h",
+    "coursesInTrack": "Cursos desta Trilha",
+    "noCourses": "Nenhum curso encontrado para esta trilha.",
+    "notFound": {
+      "title": "Trilha não encontrada",
+      "description": "A trilha que você está procurando não existe ou foi removida."
+    }
+  },
   "SearchInput": {
-  "placeholder": "Buscar curso",
-  "iconAlt": "Ícone de busca"
-},
-"LogoutButton": {
-  "logout": "Sair",
-  "iconAlt": "Sair"
-},
-"Sidebar": {
-  "home": "Início",
-  "courses": "Cursos",
-  "trails": "Trilhas",
-  "support": "Suporte",
-  "faq": "Perguntas Frequentes",
-  "expand": "Expandir menu",
-  "collapse": "Recolher menu"
-}
+    "placeholder": "Buscar curso",
+    "iconAlt": "Ícone de busca"
+  },
+  "LogoutButton": {
+    "logout": "Sair",
+    "iconAlt": "Sair"
+  },
+  "Sidebar": {
+    "home": "Início",
+    "courses": "Cursos",
+    "trails": "Trilhas",
+    "support": "Suporte",
+    "faq": "Perguntas Frequentes",
+    "expand": "Expandir menu",
+    "collapse": "Recolher menu"
+  }
 }

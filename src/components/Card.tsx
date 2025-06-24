@@ -1,27 +1,43 @@
-'use client';
-
+// src/components/Card.tsx
 import Image from 'next/image';
-import React from 'react';
+import Link from 'next/link';
 
 interface CardProps {
   name: string;
   imageUrl: string;
+  href?: string;
 }
 
 export default function Card({
   name,
   imageUrl,
+  href,
 }: CardProps) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl shadow-lg transition-transform transform hover:scale-[1.025] duration-300 ease-in-out hover:shadow-2xl">
-      <div className="relative h-64 w-full">
-        <Image src={imageUrl} alt={name} fill />
+  const cardContent = (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer">
+      <div className="relative h-48 w-full">
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          className="object-cover"
+        />
       </div>
-      <div className="bg-primary p-4 text-center transition-colors  group-hover:bg-secondary duration-700 ease-in-out">
-        <h3 className="text-3xl font-semibold text-foreground font-sans">
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-800 truncate">
           {name}
         </h3>
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

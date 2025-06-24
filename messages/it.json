@@ -31,21 +31,32 @@
     "trails": "Tracce",
     "courses": "Corsi"
   },
+  "Track": {
+    "back": "Indietro",
+    "courses": "corsi",
+    "estimated": "Stimato: {hours}h",
+    "coursesInTrack": "Corsi di questa Traccia",
+    "noCourses": "Nessun corso trovato per questa traccia.",
+    "notFound": {
+      "title": "Traccia non trovata",
+      "description": "La traccia che stai cercando non esiste o è stata rimossa."
+    }
+  },
   "SearchInput": {
-  "placeholder": "Cerca corso",
-  "iconAlt": "Icona di ricerca"
-},
-"LogoutButton": {
-  "logout": "Esci",
-  "iconAlt": "Esci"
-},
-"Sidebar": {
-  "home": "Inizio",
-  "courses": "Corsi",
-  "trails": "Tracce",
-  "support": "Supporto",
-  "faq": "Domande Frequenti",
-  "expand": "Espandi menu",
-  "collapse": "Comprimi menu"
-}
+    "placeholder": "Cerca corso",
+    "iconAlt": "Icona di ricerca"
+  },
+  "LogoutButton": {
+    "logout": "Esci",
+    "iconAlt": "Esci"
+  },
+  "Sidebar": {
+    "home": "Inizio",
+    "courses": "Corsi",
+    "trails": "Tracce",
+    "support": "Supporto",
+    "faq": "Domande Frequenti",
+    "expand": "Espandi menu",
+    "collapse": "Comprimi menu"
+  }
 }

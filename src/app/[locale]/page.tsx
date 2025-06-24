@@ -60,7 +60,6 @@ export default async function IndexPage({
   }
   const tracks: Track[] = await resTracks.json();
 
-  // @name list-courses
   // Fetch courses
   const resCourses = await fetch(
     'http://localhost:3333/courses',
@@ -113,6 +112,7 @@ export default async function IndexPage({
                 key={track.id}
                 name={translation.title}
                 imageUrl={track.imageUrl}
+                href={`/${locale}/tracks/${track.slug}`} // ✅ Link para página do track
               />
             );
           })}
@@ -141,6 +141,7 @@ export default async function IndexPage({
                 key={course.id}
                 name={translation.title}
                 imageUrl={course.imageUrl}
+                // href={`/${locale}/courses/${course.slug}`} // ✅ Para futuras páginas de curso
               />
             );
           })}

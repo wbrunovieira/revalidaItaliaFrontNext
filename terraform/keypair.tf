@@ -4,8 +4,8 @@ resource "aws_key_pair" "revalida" {
   public_key = file(var.public_key_path)
 
   lifecycle {
-    # prevent_destroy = true
-    ignore_changes = [public_key]
+    prevent_destroy = true
+    ignore_changes  = [public_key]
   }
 }
 data "aws_key_pair" "revalida" {

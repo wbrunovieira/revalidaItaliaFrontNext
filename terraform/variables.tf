@@ -44,3 +44,8 @@ variable "NEXT_PUBLIC_API_URL" {
   type    = string
   default = "http://3.17.237.231:3333"
 }
+
+variable "storage_type" {
+  description = "Tipo de storage p/ Next.js"
+  default     = "local"
+}

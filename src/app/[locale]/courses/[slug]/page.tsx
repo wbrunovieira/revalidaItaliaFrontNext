@@ -19,15 +19,13 @@ interface Translation {
   title: string;
   description: string;
 }
-
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
   translations: Translation[];
 }
-
-interface Module {
+interface ModuleData {
   id: string;
   slug: string;
   imageUrl: string | null;
@@ -38,63 +36,53 @@ interface Module {
 export default async function CoursePage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { locale, slug } = params;
+  const { locale, slug } = await params;
 
-  const [tDashboard, tCourse] = await Promise.all([
+  // Carrega apenas tCourse, descartando tDashboard
+  const [, tCourse] = await Promise.all([
     getTranslations({ locale, namespace: 'Dashboard' }),
     getTranslations({ locale, namespace: 'Course' }),
   ]);
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = (await cookies()).get('token')?.value;
+  if (!token) redirect(`/${locale}/login`);
 
-  if (!token) {
-    redirect(`/${locale}/login`);
-  }
-
-  const resAllCourses = await fetch(
-    'http://localhost:3333/courses',
-    {
-      cache: 'no-store',
-    }
+  // Buscar curso e módulos
+  const resCourses = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+    { cache: 'no-store' }
   );
-  if (!resAllCourses.ok) {
+  if (!resCourses.ok)
     throw new Error('Failed to fetch courses');
-  }
-  const allCourses: Course[] = await resAllCourses.json();
-
-  const courseFound = allCourses.find(c => c.slug === slug);
-  if (!courseFound) {
-    notFound();
-  }
+  const allCourses: Course[] = await resCourses.json();
+  const courseFound =
+    allCourses.find(c => c.slug === slug) ?? notFound();
 
   const resModules = await fetch(
-    `http://localhost:3333/courses/${courseFound.id}/modules`,
-    {
-      cache: 'no-store',
-    }
+    `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseFound.id}/modules`,
+    { cache: 'no-store' }
   );
-  if (!resModules.ok) {
-    throw new Error('Failed to fetch course modules');
-  }
-  const courseModules: Module[] = await resModules.json();
+  if (!resModules.ok)
+    throw new Error('Failed to fetch modules');
+  const courseModules: ModuleData[] =
+    await resModules.json();
 
-  const courseTranslation = courseFound.translations.find(
-    tr => tr.locale === locale
-  ) ??
-    courseFound.translations[0] ?? {
-      title: '',
-      description: '',
-    };
+  // Traduções do curso
+  const courseTrans =
+    courseFound.translations.find(
+      tr => tr.locale === locale
+    ) ?? courseFound.translations[0];
 
-  const estimatedHours = courseModules.length * 1.5;
+  // Cálculos de estatísticas
   const totalModules = courseModules.length;
+  const estHours = (totalModules * 1.5).toFixed(1);
 
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
+        {/* Voltar */}
         <div className="p-6">
           <Link
             href={`/${locale}`}
@@ -105,25 +93,24 @@ export default async function CoursePage({
           </Link>
         </div>
 
+        {/* Header do curso */}
         <div className="px-6 pb-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden">
               <Image
                 src={courseFound.imageUrl}
-                alt={courseTranslation.title}
+                alt={courseTrans.title}
                 fill
                 className="object-cover"
               />
             </div>
-
             <div className="flex-1">
               <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-                {courseTranslation.title}
+                {courseTrans.title}
               </h1>
               <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                {courseTranslation.description}
+                {courseTrans.description}
               </p>
-
               <div className="flex gap-6 text-white">
                 <div className="flex items-center gap-2">
                   <BookOpen size={20} />
@@ -135,7 +122,7 @@ export default async function CoursePage({
                   <Clock size={20} />
                   <span>
                     {tCourse('estimated', {
-                      hours: estimatedHours.toFixed(1),
+                      hours: estHours,
                     })}
                   </span>
                 </div>
@@ -148,6 +135,7 @@ export default async function CoursePage({
           </div>
         </div>
 
+        {/* Lista de módulos */}
         <div className="px-6 pb-8">
           <div className="flex items-center gap-4 mb-6">
             <BookOpen size={32} className="text-white" />
@@ -161,37 +149,31 @@ export default async function CoursePage({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {courseModules
                 .sort((a, b) => a.order - b.order)
-                .map((module, index) => {
-                  const moduleTranslation =
-                    module.translations.find(
+                .map(moduleData => {
+                  const modTrans =
+                    moduleData.translations.find(
                       tr => tr.locale === locale
-                    ) ??
-                      module.translations[0] ?? {
-                        title: '',
-                        description: '',
-                      };
-
+                    ) ?? moduleData.translations[0];
                   return (
                     <div
-                      key={module.id}
+                      key={moduleData.id}
                       className="relative"
                     >
                       <div className="absolute -top-2 -left-2 bg-secondary text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm z-10">
-                        {module.order}
+                        {moduleData.order}
                       </div>
                       <Card
-                        name={moduleTranslation.title}
+                        name={modTrans.title}
                         imageUrl={
-                          module.imageUrl ||
+                          moduleData.imageUrl ||
                           courseFound.imageUrl
                         }
-                        href={`/${locale}/courses/${slug}/modules/${module.slug}`}
+                        href={`/${locale}/courses/${slug}/modules/${moduleData.slug}`}
                       />
-
                       <div className="mt-2 text-center">
                         <span className="text-xs text-gray-400">
                           {tCourse('moduleOrder', {
-                            order: module.order,
+                            order: moduleData.order,
                             total: totalModules,
                           })}
                         </span>
@@ -213,15 +195,16 @@ export default async function CoursePage({
           )}
         </div>
 
-        <div className="px-6 pb-8">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl">
-            <h3 className="text-xl font-bold text-white mb-4">
-              {tCourse('startCourse')}
-            </h3>
-            <p className="text-gray-300 mb-4">
-              {tCourse('startCourseDescription')}
-            </p>
-            {courseModules.length > 0 && (
+        {/* Iniciar curso */}
+        {courseModules.length > 0 && (
+          <div className="px-6 pb-8">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-2xl">
+              <h3 className="text-xl font-bold text-white mb-4">
+                {tCourse('startCourse')}
+              </h3>
+              <p className="text-gray-300 mb-4">
+                {tCourse('startCourseDescription')}
+              </p>
               <Link
                 href={`/${locale}/courses/${slug}/modules/${
                   courseModules.sort(
@@ -230,12 +213,12 @@ export default async function CoursePage({
                 }`}
                 className="bg-secondary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors inline-flex items-center gap-2"
               >
-                <Play size={20} />
+                <Play size={20} />{' '}
                 {tCourse('startFirstModule')}
               </Link>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </NavSidebar>
   );

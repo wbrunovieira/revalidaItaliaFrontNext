@@ -73,6 +73,9 @@
     "moduleNavigation": "Navegación del Módulo",
     "previousModule": "Módulo Anterior",
     "nextModule": "Próximo Módulo",
+    "startModule": "Comenzar Módulo",
+    "startModuleDescription": "Comienza con la primera lección de este módulo.",
+    "startFirstLesson": "Iniciar Primera Lección",
     "breadcrumb": {
       "dashboard": "Dashboard"
     },
@@ -97,5 +100,21 @@
     "faq": "Preguntas Frecuentes",
     "expand": "Expandir menú",
     "collapse": "Cerrar menú"
+  },
+  "Lesson": {
+    "breadcrumb": {
+      "dashboard": "Panel"
+    },
+    "back": "Volver al módulo",
+    "lessonNumber": "Lección {number}",
+    "minutes": "minutos",
+    "noVideo": "No hay video disponible para esta lección",
+    "navigation": "Navegación",
+    "previousLesson": "Lección anterior",
+    "nextLesson": "Siguiente lección",
+    "allLessons": "Todas las lecciones",
+    "completed": "Completada",
+    "current": "Actual",
+    "locked": "Bloqueada"
   }
 }

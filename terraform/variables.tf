@@ -49,3 +49,46 @@ variable "storage_type" {
   description = "Tipo de storage p/ Next.js"
   default     = "local"
 }
+
+
+variable "s3_region" {
+  description = "Região do bucket S3"
+  type        = string
+  default     = "us-east-2"
+}
+
+variable "s3_bucket_name" {
+  description = "Nome do bucket S3"
+  type        = string
+  default     = "revalida-documents-891ff933"
+}
+
+variable "s3_base_url" {
+  description = "URL base para acesso público aos objetos S3"
+  type        = string
+  default     = "https://revalida-documents-891ff933.s3.amazonaws.com"
+}
+
+variable "panda_api_key" {
+  description = "Chave de API do PandaConvert ou serviço similar"
+  type        = string
+  default     = "" # preencha aqui, ou defina via -var na linha de comando
+}
+
+variable "max_file_size" {
+  description = "Tamanho máximo de upload de arquivo (em bytes)"
+  type        = number
+  default     = 10485760 # por exemplo 10 MB
+}
+
+variable "allowed_file_types" {
+  description = "Lista de extensões de arquivo permitidas para upload"
+  type        = list(string)
+  default     = ["pdf", "doc", "docx", "jpg", "png"]
+}
+
+variable "next_public_url" {
+  description = "URL pública do frontend Next.js"
+  type        = string
+  default     = "http://ec2-3-18-51-87.us-east-2.compute.amazonaws.com:3000"
+}

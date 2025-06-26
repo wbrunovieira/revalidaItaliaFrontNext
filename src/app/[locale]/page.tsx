@@ -47,25 +47,22 @@ export default async function IndexPage({
 
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3333';
 
   // Fetch tracks
-  const resTracks = await fetch(
-    'http://localhost:3333/tracks',
-    {
-      cache: 'no-store',
-    }
-  );
+  const resTracks = await fetch(`${apiUrl}/tracks`, {
+    cache: 'no-store',
+  });
   if (!resTracks.ok) {
     throw new Error('Failed to fetch tracks');
   }
   const tracks: Track[] = await resTracks.json();
 
-  const resCourses = await fetch(
-    'http://localhost:3333/courses',
-    {
-      cache: 'no-store',
-    }
-  );
+  const resCourses = await fetch(`${apiUrl}//courses`, {
+    cache: 'no-store',
+  });
   if (!resCourses.ok) {
     throw new Error('Failed to fetch courses');
   }

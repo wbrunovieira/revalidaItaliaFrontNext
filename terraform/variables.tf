@@ -42,7 +42,7 @@ variable "private_key_path" {
 variable "NEXT_PUBLIC_API_URL" {
 
   type    = string
-  default = "http://3.17.237.231:3333"
+  default = "http://3.131.246.201:3333"
 }
 
 variable "storage_type" {

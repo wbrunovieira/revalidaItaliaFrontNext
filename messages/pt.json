@@ -225,7 +225,81 @@
   "usersList": {
     "title": "Lista de Usuários",
     "comingSoon": "A lista de usuários estará disponível em breve."
+  },
+  "courses": {
+    "create": "Criar Curso",
+    "list": "Listar Cursos"
+  },
+  "createCourse": {
+    "title": "Novo Curso",
+    "create": "Criar Curso",
+    "creating": "Criando...",
+    "fields": {
+      "slug": "Slug (URL)",
+      "imageUrl": "URL da Imagem",
+      "title": "Título",
+      "description": "Descrição"
+    },
+    "placeholders": {
+      "slug": "matematica-basica",
+      "imageUrl": "/images/curso-matematica.jpg",
+      "title": "Digite o título do curso",
+      "description": "Digite a descrição do curso"
+    },
+    "hints": {
+      "slug": "Use apenas letras minúsculas, números e hífens"
+    },
+    "translations": {
+      "title": "Traduções",
+      "portuguese": "Português",
+      "spanish": "Espanhol",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "slugRequired": "Slug é obrigatório",
+      "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
+      "imageRequired": "URL da imagem é obrigatória",
+      "titleRequired": "Título é obrigatório",
+      "descriptionRequired": "Descrição é obrigatória"
+    },
+    "success": {
+      "title": "Curso criado!",
+      "description": "O curso foi criado com sucesso."
+    },
+    "error": {
+      "title": "Erro ao criar curso",
+      "description": "Ocorreu um erro ao criar o curso. Tente novamente."
+    }
+  },
+  "coursesList": {
+    "title": "Lista de Cursos",
+    "searchPlaceholder": "Buscar cursos...",
+    "languages": "idiomas",
+    "noResults": "Nenhum curso encontrado com este termo.",
+    "noCourses": "Nenhum curso cadastrado ainda.",
+    "deleteConfirm": "Tem certeza que deseja excluir este curso?",
+    "stats": {
+      "total": "Total de Cursos",
+      "complete": "Completos",
+      "incomplete": "Incompletos"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "success": {
+      "deleteTitle": "Curso excluído!",
+      "deleteDescription": "O curso foi excluído com sucesso."
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar cursos",
+      "fetchDescription": "Não foi possível carregar a lista de cursos.",
+      "deleteTitle": "Erro ao excluir",
+      "deleteDescription": "Não foi possível excluir o curso."
+    }
   }
+
 }
 
 }

@@ -11,6 +11,7 @@ import {
   BookOpen,
   Clock,
   Play,
+  CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -79,13 +80,18 @@ export default async function CoursePage({
   const totalModules = courseModules.length;
   const estHours = (totalModules * 1.5).toFixed(1);
 
+  // Ordenar módulos uma vez
+  const sortedModules = courseModules.sort(
+    (a, b) => a.order - b.order
+  );
+
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
         {/* Voltar */}
         <div className="p-6">
           <Link
-            href={`/${locale}`}
+            href={`/${locale}/courses`}
             className="inline-flex items-center gap-2 text-white hover:text-secondary transition-colors"
           >
             <ArrowLeft size={20} />
@@ -96,13 +102,14 @@ export default async function CoursePage({
         {/* Header do curso */}
         <div className="px-6 pb-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden">
+            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden shadow-xl">
               <Image
                 src={courseFound.imageUrl}
                 alt={courseTrans.title}
                 fill
                 className="object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div className="flex-1">
               <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
@@ -145,23 +152,47 @@ export default async function CoursePage({
           </div>
           <hr className="border-t-2 border-secondary w-32 mb-8" />
 
-          {courseModules.length > 0 ? (
+          {sortedModules.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courseModules
-                .sort((a, b) => a.order - b.order)
-                .map(moduleData => {
-                  const modTrans =
-                    moduleData.translations.find(
-                      tr => tr.locale === locale
-                    ) ?? moduleData.translations[0];
-                  return (
-                    <div
-                      key={moduleData.id}
-                      className="relative"
-                    >
-                      <div className="absolute -top-2 -left-2 bg-secondary text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm z-10">
-                        {moduleData.order}
+              {sortedModules.map((moduleData, index) => {
+                const modTrans =
+                  moduleData.translations.find(
+                    tr => tr.locale === locale
+                  ) ?? moduleData.translations[0];
+                const moduleNumber = index + 1; // Numeração baseada no índice
+                const isCompleted = false; // Você pode implementar lógica de progresso aqui
+
+                return (
+                  <div
+                    key={moduleData.id}
+                    className="group relative transform transition-all duration-300 hover:scale-105"
+                  >
+                    {/* Badge de número do módulo */}
+                    <div className="absolute -top-3 -left-3 z-20 transition-all duration-300 group-hover:scale-110">
+                      <div
+                        className={`
+                        relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm
+                        ${
+                          isCompleted
+                            ? 'bg-green-500 text-white'
+                            : 'bg-secondary text-primary shadow-lg'
+                        }
+                      `}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle size={20} />
+                        ) : (
+                          moduleNumber
+                        )}
                       </div>
+                      {/* Anel pulsante no hover */}
+                      {!isCompleted && (
+                        <div className="absolute inset-0 rounded-full bg-secondary animate-ping opacity-0 group-hover:opacity-75" />
+                      )}
+                    </div>
+
+                    {/* Card do módulo com efeitos hover */}
+                    <div className="relative overflow-hidden rounded-lg shadow-lg transition-all duration-300 group-hover:shadow-2xl">
                       <Card
                         name={modTrans.title}
                         imageUrl={
@@ -170,17 +201,45 @@ export default async function CoursePage({
                         }
                         href={`/${locale}/courses/${slug}/modules/${moduleData.slug}`}
                       />
-                      <div className="mt-2 text-center">
-                        <span className="text-xs text-gray-400">
-                          {tCourse('moduleOrder', {
-                            order: moduleData.order,
-                            total: totalModules,
-                          })}
-                        </span>
+
+                      {/* Overlay gradient no hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-secondary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                      {/* Barra de progresso (opcional) */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                        <div
+                          className="h-full bg-secondary transition-all duration-300"
+                          style={{
+                            width: isCompleted
+                              ? '100%'
+                              : '0%',
+                          }}
+                        />
                       </div>
                     </div>
-                  );
-                })}
+
+                    {/* Informações do módulo */}
+                    <div className="mt-3 text-center space-y-1">
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                        {tCourse('moduleOrder', {
+                          order: moduleNumber,
+                          total: totalModules,
+                        })}
+                      </p>
+                      {modTrans.description && (
+                        <p className="text-xs text-gray-500 line-clamp-2 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          {modTrans.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Linha conectora entre módulos (apenas se não for o último) */}
+                    {index < sortedModules.length - 1 && (
+                      <div className="hidden lg:block absolute top-5 -right-3 w-6 h-0.5 bg-gray-600" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -195,27 +254,64 @@ export default async function CoursePage({
           )}
         </div>
 
-        {/* Iniciar curso */}
-        {courseModules.length > 0 && (
+        {/* Progresso do curso (opcional) */}
+        {sortedModules.length > 0 && (
           <div className="px-6 pb-8">
-            <div className="bg-gray-800 rounded-lg p-6 max-w-2xl">
-              <h3 className="text-xl font-bold text-white mb-4">
-                {tCourse('startCourse')}
-              </h3>
-              <p className="text-gray-300 mb-4">
-                {tCourse('startCourseDescription')}
-              </p>
-              <Link
-                href={`/${locale}/courses/${slug}/modules/${
-                  courseModules.sort(
-                    (a, b) => a.order - b.order
-                  )[0].slug
-                }`}
-                className="bg-secondary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors inline-flex items-center gap-2"
-              >
-                <Play size={20} />{' '}
-                {tCourse('startFirstModule')}
-              </Link>
+            <div className="bg-gray-800/50 rounded-lg p-4 max-w-2xl">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-400">
+                  {tCourse('progress')}
+                </span>
+                <span className="text-sm font-bold text-white">
+                  0/{totalModules}{' '}
+                  {tCourse('modulesCompleted')}
+                </span>
+              </div>
+              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-secondary transition-all duration-500 ease-out"
+                  style={{ width: '0%' }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Iniciar curso */}
+        {sortedModules.length > 0 && (
+          <div className="px-6 pb-8">
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-8 max-w-2xl shadow-xl border border-gray-700 relative overflow-hidden">
+              {/* Padrão de fundo decorativo */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/10 rounded-full blur-2xl" />
+
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="w-2 h-8 bg-secondary rounded-full" />
+                  {tCourse('startCourse')}
+                </h3>
+                <p className="text-gray-300 mb-6 text-lg">
+                  {tCourse('startCourseDescription')}
+                </p>
+                <Link
+                  href={`/${locale}/courses/${slug}/modules/${sortedModules[0].slug}`}
+                  className="group relative bg-secondary text-primary px-8 py-4 rounded-lg font-semibold transition-all duration-300 inline-flex items-center gap-3 shadow-lg hover:shadow-2xl hover:scale-105 overflow-hidden"
+                >
+                  {/* Efeito de overlay no hover */}
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+
+                  {/* Efeito de shine/sweep */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700" />
+
+                  <Play
+                    size={24}
+                    className="relative z-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
+                  />
+                  <span className="relative z-10 text-lg">
+                    {tCourse('startFirstModule')}
+                  </span>
+                </Link>
+              </div>
             </div>
           </div>
         )}

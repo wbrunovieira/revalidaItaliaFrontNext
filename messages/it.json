@@ -60,7 +60,9 @@
     "notFound": {
       "title": "Corso non trovato",
       "description": "Il corso che stai cercando non esiste o è stato rimosso."
-    }
+    },
+      "progress": "Progresso del Corso",
+  "modulesCompleted": "moduli completati"
   },
   "Module": {
     "back": "Torna al Corso",

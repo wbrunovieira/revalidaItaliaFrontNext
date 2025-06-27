@@ -1,5 +1,3 @@
-// src/app/[locale]/admin/page.tsx
-
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import {
   Users,
-  GraduationCap,
   BookOpen,
   Settings,
   UserPlus,
@@ -15,6 +12,7 @@ import {
   BarChart3,
   Globe,
   Route,
+  Package,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -34,6 +32,8 @@ import CreateCourseForm from '@/components/CreateCourseForm';
 import CoursesList from '@/components/CoursesList';
 import CreateTrackForm from '@/components/CreateTrackForm';
 import TracksList from '@/components/TracksList';
+import CreateModuleForm from '@/components/CreateModuleForm';
+import ModulesList from '@/components/ModulesList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -50,9 +50,9 @@ export default function AdminPage() {
             {t('title')}
           </h1>
           <div className="flex items-center gap-4">
-            {/* Indicador de idioma atual */}
             <div className="flex items-center gap-2 text-gray-400 text-sm">
               <Globe size={16} />
+              {locale.toUpperCase()}
             </div>
             <LanguageButton />
           </div>
@@ -69,7 +69,7 @@ export default function AdminPage() {
           <TabsList className="relative mb-6 h-auto w-full gap-1 bg-transparent p-0">
             <TabsTrigger
               value="overview"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <BarChart3
                 className="-ms-0.5 me-2 opacity-60"
@@ -81,7 +81,7 @@ export default function AdminPage() {
 
             <TabsTrigger
               value="users"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <Users
                 className="-ms-0.5 me-2 opacity-60"
@@ -93,7 +93,7 @@ export default function AdminPage() {
 
             <TabsTrigger
               value="courses"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <BookOpen
                 className="-ms-0.5 me-2 opacity-60"
@@ -105,7 +105,7 @@ export default function AdminPage() {
 
             <TabsTrigger
               value="tracks"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <Route
                 className="-ms-0.5 me-2 opacity-60"
@@ -116,8 +116,20 @@ export default function AdminPage() {
             </TabsTrigger>
 
             <TabsTrigger
+              value="modules"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Package
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.modules')}
+            </TabsTrigger>
+
+            <TabsTrigger
               value="settings"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <Settings
                 className="-ms-0.5 me-2 opacity-60"
@@ -130,127 +142,120 @@ export default function AdminPage() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        {/* Conteúdo das Tabs */}
         <div className="mt-6 rounded-lg bg-gray-800/50 p-6 shadow-xl">
-          <TabsContent value="overview" className="mt-0">
+          <TabsContent value="overview">
             <DashboardStats />
           </TabsContent>
 
-          <TabsContent value="users" className="mt-0">
-            <div className="space-y-6">
-              {/* Sub-tabs para usuários */}
-              <Tabs
-                defaultValue="create"
-                className="w-full"
-              >
-                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
-                  <TabsTrigger
-                    value="create"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <UserPlus className="mr-2" size={16} />
-                    {t('users.create')}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="list"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <List className="mr-2" size={16} />
-                    {t('users.list')}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent
+          <TabsContent value="users">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
                   value="create"
-                  className="mt-6"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
                 >
-                  <CreateUserForm />
-                </TabsContent>
-
-                <TabsContent value="list" className="mt-6">
-                  <UsersList />
-                </TabsContent>
-              </Tabs>
-            </div>
+                  <UserPlus className="mr-2" size={16} />
+                  {t('users.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('users.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <CreateUserForm />
+              </TabsContent>
+              <TabsContent value="list">
+                <UsersList />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="courses" className="mt-0">
-            <div className="space-y-6">
-              {/* Sub-tabs para cursos */}
-              <Tabs
-                defaultValue="create"
-                className="w-full"
-              >
-                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
-                  <TabsTrigger
-                    value="create"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <BookOpen className="mr-2" size={16} />
-                    {t('courses.create')}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="list"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <List className="mr-2" size={16} />
-                    {t('courses.list')}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent
+          <TabsContent value="courses">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
                   value="create"
-                  className="mt-6"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
                 >
-                  <CreateCourseForm />
-                </TabsContent>
-
-                <TabsContent value="list" className="mt-6">
-                  <CoursesList />
-                </TabsContent>
-              </Tabs>
-            </div>
+                  <BookOpen className="mr-2" size={16} />
+                  {t('courses.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('courses.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <CreateCourseForm />
+              </TabsContent>
+              <TabsContent value="list">
+                <CoursesList />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="tracks" className="mt-0">
-            <div className="space-y-6">
-              {/* Sub-tabs para trilhas */}
-              <Tabs
-                defaultValue="create"
-                className="w-full"
-              >
-                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
-                  <TabsTrigger
-                    value="create"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <Route className="mr-2" size={16} />
-                    {t('tracks.create')}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="list"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <List className="mr-2" size={16} />
-                    {t('tracks.list')}
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent
+          <TabsContent value="tracks">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
                   value="create"
-                  className="mt-6"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
                 >
-                  <CreateTrackForm />
-                </TabsContent>
-
-                <TabsContent value="list" className="mt-6">
-                  <TracksList />
-                </TabsContent>
-              </Tabs>
-            </div>
+                  <Route className="mr-2" size={16} />
+                  {t('tracks.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('tracks.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <CreateTrackForm />
+              </TabsContent>
+              <TabsContent value="list">
+                <TracksList />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-0">
+          <TabsContent value="modules">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <Package className="mr-2" size={16} />
+                  {t('modules.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('modules.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <CreateModuleForm />
+              </TabsContent>
+              <TabsContent value="list">
+                <ModulesList />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          <TabsContent value="settings">
             <div className="text-center py-12">
               <Settings
                 size={64}

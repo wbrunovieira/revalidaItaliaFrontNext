@@ -164,6 +164,7 @@
     "users": "Usuarios",
     "courses": "Cursos",
     "tracks": "Rutas",
+    "modules": "Módulos",
     "settings": "Configuraciones"
   },
   "users": {
@@ -381,6 +382,95 @@
       "deleteTitle": "Error al eliminar",
       "deleteDescription": "No fue posible eliminar la ruta."
     }
+  },
+
+  "modules": {
+  "create": "Crear Módulo",
+  "list": "Listar Módulos"
+},
+"createModule": {
+  "title": "Nuevo Módulo",
+  "create": "Crear Módulo",
+  "creating": "Creando...",
+  "info": {
+    "lessonsNote": "Las lecciones (videos) deberán agregarse posteriormente a través de la edición del módulo."
+  },
+  "selectedCourse": "Curso seleccionado",
+  "fields": {
+    "course": "Curso",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL de la Imagen",
+    "order": "Orden",
+    "title": "Título",
+    "description": "Descripción"
+  },
+  "placeholders": {
+    "course": "Seleccione un curso",
+    "slug": "introduccion-matematica",
+    "imageUrl": "/images/modulo-ejemplo.jpg",
+    "order": "1",
+    "title": "Ingrese el título del módulo",
+    "description": "Ingrese la descripción del módulo"
+  },
+  "hints": {
+    "slug": "Use solo letras minúsculas, números y guiones",
+    "imageUrl": "Opcional - deje en blanco para usar imagen predeterminada",
+    "order": "Orden de visualización del módulo en el curso"
+  },
+  "translations": {
+    "title": "Traducciones",
+    "portuguese": "Portugués",
+    "spanish": "Español",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "courseRequired": "Curso es obligatorio",
+    "slugRequired": "Slug es obligatorio",
+    "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+    "orderRequired": "Orden es obligatorio",
+    "titleRequired": "Título es obligatorio",
+    "descriptionRequired": "Descripción es obligatoria",
+    "fetchCoursesTitle": "Error al cargar cursos",
+    "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+  },
+  "success": {
+    "title": "¡Módulo creado!",
+    "description": "El módulo fue creado con éxito."
+  },
+  "error": {
+    "title": "Error al crear módulo",
+    "description": "Ocurrió un error al crear el módulo. Intente nuevamente."
   }
+},
+"modulesList": {
+  "title": "Lista de Módulos",
+  "searchPlaceholder": "Buscar módulos...",
+  "modules": "módulos",
+  "lessonsCount": "{count} lecciones",
+  "noModules": "Ningún módulo en este curso",
+  "noResults": "Ningún módulo encontrado con este término.",
+  "noCourses": "Ningún curso registrado aún.",
+  "deleteConfirm": "¿Está seguro que desea eliminar este módulo?",
+  "stats": {
+    "totalCourses": "Total de Cursos",
+    "totalModules": "Total de Módulos",
+    "coursesWithModules": "Cursos con Módulos"
+  },
+  "actions": {
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "success": {
+    "deleteTitle": "¡Módulo eliminado!",
+    "deleteDescription": "El módulo fue eliminado con éxito."
+  },
+  "error": {
+    "fetchTitle": "Error al cargar módulos",
+    "fetchDescription": "No fue posible cargar la lista de módulos.",
+    "deleteTitle": "Error al eliminar",
+    "deleteDescription": "No fue posible eliminar el módulo."
+  }
+}
 } 
 }

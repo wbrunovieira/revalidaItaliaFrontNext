@@ -60,7 +60,8 @@ export default async function IndexPage({
   }
   const tracks: Track[] = await resTracks.json();
 
-  const resCourses = await fetch(`${apiUrl}//courses`, {
+  // CORREÇÃO: Removida a dupla barra
+  const resCourses = await fetch(`${apiUrl}/courses`, {
     cache: 'no-store',
   });
   if (!resCourses.ok) {

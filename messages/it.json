@@ -155,5 +155,77 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzato"
   }
+},
+"Admin": {
+  "title": "Pannello Amministrativo",
+  "description": "Gestisci utenti, corsi e impostazioni del sistema",
+  "comingSoon": "Prossimamente...",
+  "tabs": {
+    "overview": "Panoramica",
+    "users": "Utenti",
+    "courses": "Corsi",
+    "settings": "Impostazioni"
+  },
+  "users": {
+    "create": "Crea Utente",
+    "list": "Elenco Utenti"
+  },
+  "dashboard": {
+    "title": "Statistiche Generali",
+    "stats": {
+      "totalUsers": "Totale Utenti",
+      "activeStudents": "Studenti Attivi",
+      "totalCourses": "Totale Corsi",
+      "completionRate": "Tasso di Completamento"
+    }
+  },
+  "createUser": {
+    "title": "Nuovo Utente",
+    "create": "Crea Utente",
+    "creating": "Creazione...",
+    "fields": {
+      "name": "Nome Completo",
+      "email": "E-mail",
+      "password": "Password",
+      "confirmPassword": "Conferma Password",
+      "role": "Ruolo",
+      "cpf": "CPF"
+    },
+    "placeholders": {
+      "name": "Inserisci il nome completo",
+      "email": "utente@esempio.com",
+      "password": "Minimo 8 caratteri",
+      "confirmPassword": "Inserisci nuovamente la password",
+      "role": "Seleziona un ruolo",
+      "cpf": "000.000.000-00"
+    },
+    "roles": {
+      "student": "Studente",
+      "tutor": "Tutor",
+      "admin": "Amministratore"
+    },
+    "errors": {
+      "nameRequired": "Il nome è obbligatorio",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Email non valida",
+      "passwordRequired": "La password è obbligatoria",
+      "passwordMin": "La password deve avere almeno 8 caratteri",
+      "passwordMismatch": "Le password non corrispondono",
+      "cpfRequired": "CPF è obbligatorio",
+      "cpfInvalid": "CPF non valido"
+    },
+    "success": {
+      "title": "Utente creato!",
+      "description": "L'utente è stato creato con successo."
+    },
+    "error": {
+      "title": "Errore nella creazione dell'utente",
+      "description": "Si è verificato un errore durante la creazione dell'utente. Riprova."
+    }
+  },
+  "usersList": {
+    "title": "Elenco Utenti",
+    "comingSoon": "L'elenco degli utenti sarà disponibile a breve."
+  }
 }
 }

@@ -1,0 +1,187 @@
+// src/app/[locale]/admin/page.tsx
+
+'use client';
+
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  Settings,
+  UserPlus,
+  List,
+  BarChart3,
+  Globe,
+} from 'lucide-react';
+import {
+  ScrollArea,
+  ScrollBar,
+} from '@/components/ui/scroll-area';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import LanguageButton from '@/components/LanguageButton';
+import DashboardStats from '@/components/DashboardStats';
+import CreateUserForm from '@/components/CreateUserForm';
+import UsersList from '@/components/UsersList';
+
+export default function AdminPage() {
+  const t = useTranslations('Admin');
+  const params = useParams();
+  const locale = params.locale as string;
+  const [activeTab, setActiveTab] = useState('overview');
+
+  return (
+    <div className="p-6 bg-primary min-h-screen">
+      {/* Cabeçalho com título e botão de idiomas */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-4xl font-bold text-white">
+            {t('title')}
+          </h1>
+          <div className="flex items-center gap-4">
+            {/* Indicador de idioma atual */}
+            <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <Globe size={16} />
+            </div>
+            <LanguageButton />
+          </div>
+        </div>
+        <p className="text-gray-300">{t('description')}</p>
+      </div>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <ScrollArea className="w-full">
+          <TabsList className="relative mb-6 h-auto w-full gap-1 bg-transparent p-0">
+            <TabsTrigger
+              value="overview"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <BarChart3
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.overview')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="users"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Users
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.users')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="courses"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <BookOpen
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.courses')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="settings"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Settings
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.settings')}
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
+        {/* Conteúdo das Tabs */}
+        <div className="mt-6 rounded-lg bg-gray-800/50 p-6 shadow-xl">
+          <TabsContent value="overview" className="mt-0">
+            <DashboardStats />
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-0">
+            <div className="space-y-6">
+              {/* Sub-tabs para usuários */}
+              <Tabs
+                defaultValue="create"
+                className="w-full"
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <UserPlus className="mr-2" size={16} />
+                    {t('users.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('users.list')}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent
+                  value="create"
+                  className="mt-6"
+                >
+                  <CreateUserForm />
+                </TabsContent>
+
+                <TabsContent value="list" className="mt-6">
+                  <UsersList />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="courses" className="mt-0">
+            <div className="text-center py-12">
+              <GraduationCap
+                size={64}
+                className="text-gray-500 mx-auto mb-4"
+              />
+              <p className="text-gray-400">
+                {t('comingSoon')}
+              </p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-0">
+            <div className="text-center py-12">
+              <Settings
+                size={64}
+                className="text-gray-500 mx-auto mb-4"
+              />
+              <p className="text-gray-400">
+                {t('comingSoon')}
+              </p>
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
+  );
+}

@@ -154,5 +154,77 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzado"
   }
+},
+"Admin": {
+  "title": "Panel Administrativo",
+  "description": "Gestiona usuarios, cursos y configuraciones del sistema",
+  "comingSoon": "Próximamente...",
+  "tabs": {
+    "overview": "Vista General",
+    "users": "Usuarios",
+    "courses": "Cursos",
+    "settings": "Configuraciones"
+  },
+  "users": {
+    "create": "Crear Usuario",
+    "list": "Listar Usuarios"
+  },
+  "dashboard": {
+    "title": "Estadísticas Generales",
+    "stats": {
+      "totalUsers": "Total de Usuarios",
+      "activeStudents": "Estudiantes Activos",
+      "totalCourses": "Total de Cursos",
+      "completionRate": "Tasa de Finalización"
+    }
+  },
+  "createUser": {
+    "title": "Nuevo Usuario",
+    "create": "Crear Usuario",
+    "creating": "Creando...",
+    "fields": {
+      "name": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "role": "Función",
+      "cpf": "CPF"
+    },
+    "placeholders": {
+      "name": "Ingrese el nombre completo",
+      "email": "usuario@ejemplo.com",
+      "password": "Mínimo 8 caracteres",
+      "confirmPassword": "Ingrese la contraseña nuevamente",
+      "role": "Seleccione una función",
+      "cpf": "000.000.000-00"
+    },
+    "roles": {
+      "student": "Estudiante",
+      "tutor": "Tutor",
+      "admin": "Administrador"
+    },
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Correo electrónico inválido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "cpfRequired": "CPF es obligatorio",
+      "cpfInvalid": "CPF inválido"
+    },
+    "success": {
+      "title": "¡Usuario creado!",
+      "description": "El usuario fue creado con éxito."
+    },
+    "error": {
+      "title": "Error al crear usuario",
+      "description": "Ocurrió un error al crear el usuario. Intente nuevamente."
+    }
+  },
+  "usersList": {
+    "title": "Lista de Usuarios",
+    "comingSoon": "La lista de usuarios estará disponible pronto."
+  }
 }
 }

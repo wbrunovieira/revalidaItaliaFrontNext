@@ -51,7 +51,6 @@ export default async function IndexPage({
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
 
-  // Fetch tracks
   const resTracks = await fetch(`${apiUrl}/tracks`, {
     cache: 'no-store',
   });
@@ -60,7 +59,6 @@ export default async function IndexPage({
   }
   const tracks: Track[] = await resTracks.json();
 
-  // CORREÇÃO: Removida a dupla barra
   const resCourses = await fetch(`${apiUrl}/courses`, {
     cache: 'no-store',
   });

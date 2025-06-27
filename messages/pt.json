@@ -154,6 +154,78 @@
     "intermediate": "Intermediário",
     "advanced": "Avançado"
   }
+},
+"Admin": {
+  "title": "Painel Administrativo",
+  "description": "Gerencie usuários, cursos e configurações do sistema",
+  "comingSoon": "Em breve...",
+  "tabs": {
+    "overview": "Visão Geral",
+    "users": "Usuários",
+    "courses": "Cursos",
+    "settings": "Configurações"
+  },
+  "users": {
+    "create": "Criar Usuário",
+    "list": "Listar Usuários"
+  },
+  "dashboard": {
+    "title": "Estatísticas Gerais",
+    "stats": {
+      "totalUsers": "Total de Usuários",
+      "activeStudents": "Alunos Ativos",
+      "totalCourses": "Total de Cursos",
+      "completionRate": "Taxa de Conclusão"
+    }
+  },
+  "createUser": {
+    "title": "Novo Usuário",
+    "create": "Criar Usuário",
+    "creating": "Criando...",
+    "fields": {
+      "name": "Nome Completo",
+      "email": "E-mail",
+      "password": "Senha",
+      "confirmPassword": "Confirmar Senha",
+      "role": "Função",
+      "cpf": "CPF"
+    },
+    "placeholders": {
+      "name": "Digite o nome completo",
+      "email": "usuario@exemplo.com",
+      "password": "Mínimo 8 caracteres",
+      "confirmPassword": "Digite a senha novamente",
+      "role": "Selecione uma função",
+      "cpf": "000.000.000-00"
+    },
+    "roles": {
+      "student": "Aluno",
+      "tutor": "Tutor",
+      "admin": "Administrador"
+    },
+    "errors": {
+      "nameRequired": "Nome é obrigatório",
+      "emailRequired": "E-mail é obrigatório",
+      "emailInvalid": "E-mail inválido",
+      "passwordRequired": "Senha é obrigatória",
+      "passwordMin": "Senha deve ter no mínimo 8 caracteres",
+      "passwordMismatch": "As senhas não coincidem",
+      "cpfRequired": "CPF é obrigatório",
+      "cpfInvalid": "CPF inválido"
+    },
+    "success": {
+      "title": "Usuário criado!",
+      "description": "O usuário foi criado com sucesso."
+    },
+    "error": {
+      "title": "Erro ao criar usuário",
+      "description": "Ocorreu um erro ao criar o usuário. Tente novamente."
+    }
+  },
+  "usersList": {
+    "title": "Lista de Usuários",
+    "comingSoon": "A lista de usuários estará disponível em breve."
+  }
 }
 
 }

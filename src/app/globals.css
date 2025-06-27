@@ -42,10 +42,10 @@
   --font-mono: var(--font-geist-mono);
 
   --font-plus-jakarta-sans: 'Plus Jakarta Sans', sans-serif;
-    --font-spectral: 'Spectral', serif;
-    /* — Mapeamento de fonte padrão */
-    --font-sans: var(--font-plus-jakarta-sans);
-    --font-serif: var(--font-spectral);
+  --font-spectral: 'Spectral', serif;
+  /* — Mapeamento de fonte padrão */
+  --font-sans: var(--font-plus-jakarta-sans);
+  --font-serif: var(--font-spectral);
 }
 
 @theme inline {
@@ -82,11 +82,13 @@
 body {
   @apply bg-[var(--color-bg)] text-[var(--color-text)];
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+
   h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      font-family: var(--font-serif), serif; }
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif), serif;
+  }
 }

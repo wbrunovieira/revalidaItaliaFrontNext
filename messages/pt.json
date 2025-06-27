@@ -84,7 +84,11 @@
     "notFound": {
       "title": "Módulo não encontrado",
       "description": "O módulo que você está procurando não existe ou foi removido."
-    }
+    },
+    "videoLessons": "vídeo-aulas",
+    "videoLessonsInModule": "Vídeo-aulas do Módulo",
+    "clickToWatch": "Clique para assistir",
+    "watchFirstVideo": "Assistir Primeiro Vídeo"
   },
   "SearchInput": {
     "placeholder": "Buscar curso",

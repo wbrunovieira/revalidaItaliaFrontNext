@@ -14,6 +14,7 @@ import {
   List,
   BarChart3,
   Globe,
+  Route,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -31,6 +32,8 @@ import CreateUserForm from '@/components/CreateUserForm';
 import UsersList from '@/components/UsersList';
 import CreateCourseForm from '@/components/CreateCourseForm';
 import CoursesList from '@/components/CoursesList';
+import CreateTrackForm from '@/components/CreateTrackForm';
+import TracksList from '@/components/TracksList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -98,6 +101,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.courses')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="tracks"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 transition-all duration-200 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Route
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.tracks')}
             </TabsTrigger>
 
             <TabsTrigger
@@ -192,6 +207,44 @@ export default function AdminPage() {
 
                 <TabsContent value="list" className="mt-6">
                   <CoursesList />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tracks" className="mt-0">
+            <div className="space-y-6">
+              {/* Sub-tabs para trilhas */}
+              <Tabs
+                defaultValue="create"
+                className="w-full"
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Route className="mr-2" size={16} />
+                    {t('tracks.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('tracks.list')}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent
+                  value="create"
+                  className="mt-6"
+                >
+                  <CreateTrackForm />
+                </TabsContent>
+
+                <TabsContent value="list" className="mt-6">
+                  <TracksList />
                 </TabsContent>
               </Tabs>
             </div>

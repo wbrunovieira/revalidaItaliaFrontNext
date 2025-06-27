@@ -163,6 +163,7 @@
     "overview": "Vista General",
     "users": "Usuarios",
     "courses": "Cursos",
+    "tracks": "Rutas",
     "settings": "Configuraciones"
   },
   "users": {
@@ -298,6 +299,88 @@
       "deleteTitle": "Error al eliminar",
       "deleteDescription": "No fue posible eliminar el curso."
     }
+  },
+  "tracks": {
+    "create": "Crear Ruta",
+    "list": "Listar Rutas"
+  },
+  "createTrack": {
+    "title": "Nueva Ruta",
+    "create": "Crear Ruta",
+    "creating": "Creando...",
+    "fields": {
+      "slug": "Slug (URL)",
+      "imageUrl": "URL de la Imagen",
+      "title": "Título",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "slug": "ruta-principiantes",
+      "imageUrl": "/images/ruta-ejemplo.jpg",
+      "title": "Ingrese el título de la ruta",
+      "description": "Ingrese la descripción de la ruta"
+    },
+    "hints": {
+      "slug": "Use solo letras minúsculas, números y guiones"
+    },
+    "courses": {
+      "title": "Cursos de la Ruta",
+      "description": "Seleccione uno o más cursos para componer esta ruta",
+      "noCourses": "No hay cursos disponibles para seleccionar"
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "slugRequired": "Slug es obligatorio",
+      "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+      "imageRequired": "URL de la imagen es obligatoria",
+      "coursesRequired": "Seleccione al menos un curso",
+      "titleRequired": "Título es obligatorio",
+      "descriptionRequired": "Descripción es obligatoria",
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+    },
+    "success": {
+      "title": "¡Ruta creada!",
+      "description": "La ruta fue creada con éxito."
+    },
+    "error": {
+      "title": "Error al crear ruta",
+      "description": "Ocurrió un error al crear la ruta. Intente nuevamente."
+    }
+  },
+  "tracksList": {
+    "title": "Lista de Rutas",
+    "searchPlaceholder": "Buscar rutas...",
+    "languages": "idiomas",
+    "courses": "Cursos",
+    "noResults": "Ninguna ruta encontrada con este término.",
+    "noTracks": "Ninguna ruta registrada aún.",
+    "deleteConfirm": "¿Está seguro que desea eliminar esta ruta?",
+    "stats": {
+      "total": "Total de Rutas",
+      "totalCourses": "Total de Cursos",
+      "complete": "Completas"
+    },
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "success": {
+      "deleteTitle": "¡Ruta eliminada!",
+      "deleteDescription": "La ruta fue eliminada con éxito."
+    },
+    "error": {
+      "fetchTitle": "Error al cargar rutas",
+      "fetchDescription": "No fue posible cargar la lista de rutas.",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No fue posible eliminar la ruta."
+    }
   }
-}
+} 
 }

@@ -163,6 +163,7 @@
     "overview": "Visão Geral",
     "users": "Usuários",
     "courses": "Cursos",
+    "tracks": "Trilhas",
     "settings": "Configurações"
   },
   "users": {
@@ -297,6 +298,88 @@
       "fetchDescription": "Não foi possível carregar a lista de cursos.",
       "deleteTitle": "Erro ao excluir",
       "deleteDescription": "Não foi possível excluir o curso."
+    }
+  },
+  "tracks": {
+    "create": "Criar Trilha",
+    "list": "Listar Trilhas"
+  },
+  "createTrack": {
+    "title": "Nova Trilha",
+    "create": "Criar Trilha",
+    "creating": "Criando...",
+    "fields": {
+      "slug": "Slug (URL)",
+      "imageUrl": "URL da Imagem",
+      "title": "Título",
+      "description": "Descrição"
+    },
+    "placeholders": {
+      "slug": "trilha-iniciantes",
+      "imageUrl": "/images/trilha-exemplo.jpg",
+      "title": "Digite o título da trilha",
+      "description": "Digite a descrição da trilha"
+    },
+    "hints": {
+      "slug": "Use apenas letras minúsculas, números e hífens"
+    },
+    "courses": {
+      "title": "Cursos da Trilha",
+      "description": "Selecione um ou mais cursos para compor esta trilha",
+      "noCourses": "Nenhum curso disponível para seleção"
+    },
+    "translations": {
+      "title": "Traduções",
+      "portuguese": "Português",
+      "spanish": "Espanhol",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "slugRequired": "Slug é obrigatório",
+      "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
+      "imageRequired": "URL da imagem é obrigatória",
+      "coursesRequired": "Selecione pelo menos um curso",
+      "titleRequired": "Título é obrigatório",
+      "descriptionRequired": "Descrição é obrigatória",
+      "fetchCoursesTitle": "Erro ao carregar cursos",
+      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
+    },
+    "success": {
+      "title": "Trilha criada!",
+      "description": "A trilha foi criada com sucesso."
+    },
+    "error": {
+      "title": "Erro ao criar trilha",
+      "description": "Ocorreu um erro ao criar a trilha. Tente novamente."
+    }
+  },
+  "tracksList": {
+    "title": "Lista de Trilhas",
+    "searchPlaceholder": "Buscar trilhas...",
+    "languages": "idiomas",
+    "courses": "Cursos",
+    "noResults": "Nenhuma trilha encontrada com este termo.",
+    "noTracks": "Nenhuma trilha cadastrada ainda.",
+    "deleteConfirm": "Tem certeza que deseja excluir esta trilha?",
+    "stats": {
+      "total": "Total de Trilhas",
+      "totalCourses": "Total de Cursos",
+      "complete": "Completas"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "success": {
+      "deleteTitle": "Trilha excluída!",
+      "deleteDescription": "A trilha foi excluída com sucesso."
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar trilhas",
+      "fetchDescription": "Não foi possível carregar a lista de trilhas.",
+      "deleteTitle": "Erro ao excluir",
+      "deleteDescription": "Não foi possível excluir a trilha."
     }
   }
 

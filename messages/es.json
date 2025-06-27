@@ -165,6 +165,7 @@
     "courses": "Cursos",
     "tracks": "Rutas",
     "modules": "Módulos",
+    "lessons": "Lecciones",
     "settings": "Configuraciones"
   },
   "users": {
@@ -471,6 +472,89 @@
     "deleteTitle": "Error al eliminar",
     "deleteDescription": "No fue posible eliminar el módulo."
   }
-}
+},
+
+"lessons": {
+  "create": "Crear Lección",
+  "list": "Listar Lecciones"
+},
+"createLesson": {
+    "title": "Nueva Lección",
+    "create": "Crear Lección",
+    "creating": "Creando...",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "imageUrl": "URL de la Imagen",
+      "video": "Video",
+      "title": "Título","description": "Descripción"
+    },
+    "placeholders": {
+      "course": "Seleccione un curso",
+      "module": "Seleccione un módulo",
+      "imageUrl": "/images/leccion-ejemplo.jpg",
+      "video": "Seleccione un video (opcional)",
+      "title": "Ingrese el título de la lección",
+      "description": "Ingrese la descripción de la lección"
+    },
+    "hints": {
+      "imageUrl": "Opcional - deje en blanco para usar imagen predeterminada",
+      "video": "Opcional - vincule un video a la lección"
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "courseRequired": "Curso es obligatorio",
+      "moduleRequired": "Módulo es obligatorio",
+      "titleRequired": "Título es obligatorio",
+      "descriptionRequired": "Descripción es obligatoria",
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+    },
+    "success": {
+      "title": "¡Lección creada!",
+      "description": "La lección fue creada con éxito."
+    },
+    "error": {
+      "title": "Error al crear lección",
+      "description": "Ocurrió un error al crear la lección. Intente nuevamente."
+    }
+  },
+  "lessonsList": {
+    "title": "Lista de Lecciones",
+    "searchPlaceholder": "Buscar lecciones...",
+    "modules": "módulos",
+    "lessons": "lecciones",
+    "hasVideo": "Con video",
+    "noLessons": "Ninguna lección en este módulo",
+    "noModules": "Ningún módulo en este curso",
+    "noResults": "Ninguna lección encontrada con este término.",
+    "noCourses": "Ningún curso registrado aún.",
+    "deleteConfirm": "¿Está seguro que desea eliminar esta lección?",
+    "stats": {
+      "totalCourses": "Total de Cursos",
+      "totalModules": "Total de Módulos",
+      "totalLessons": "Total de Lecciones"
+    },
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "success": {
+      "deleteTitle": "¡Lección eliminada!",
+      "deleteDescription": "La lección fue eliminada con éxito."
+    },
+    "error": {
+      "fetchTitle": "Error al cargar lecciones",
+      "fetchDescription": "No fue posible cargar la lista de lecciones.",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No fue posible eliminar la lección."
+    }
+  }
 } 
 }

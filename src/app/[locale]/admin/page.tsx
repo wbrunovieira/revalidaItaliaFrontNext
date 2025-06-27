@@ -13,6 +13,7 @@ import {
   Globe,
   Route,
   Package,
+  Play,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -34,6 +35,8 @@ import CreateTrackForm from '@/components/CreateTrackForm';
 import TracksList from '@/components/TracksList';
 import CreateModuleForm from '@/components/CreateModuleForm';
 import ModulesList from '@/components/ModulesList';
+import CreateLessonForm from '@/components/CreateLessonForm';
+import LessonsList from '@/components/LessonsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -125,6 +128,19 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.modules')}
+            </TabsTrigger>
+
+            {/* Nova tab de lições */}
+            <TabsTrigger
+              value="lessons"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Play
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.lessons')}
             </TabsTrigger>
 
             <TabsTrigger
@@ -251,6 +267,34 @@ export default function AdminPage() {
               </TabsContent>
               <TabsContent value="list">
                 <ModulesList />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Novo conteúdo de tab de lições */}
+          <TabsContent value="lessons">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <Play className="mr-2" size={16} />
+                  {t('lessons.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('lessons.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <CreateLessonForm />
+              </TabsContent>
+              <TabsContent value="list">
+                <LessonsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

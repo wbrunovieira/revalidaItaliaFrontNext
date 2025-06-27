@@ -128,5 +128,26 @@
   "totalHours": "Ore di Contenuto",
   "courses": "corsi",
   "popular": "Popolare"
+},
+
+"Courses": {
+  "title": "Catalogo dei Corsi",
+  "description": "Scopri la nostra collezione completa di corsi progettati per accelerare il tuo apprendimento e sviluppo professionale.",
+  "back": "Indietro",
+  "courseCount": "{count} corsi disponibili",
+  "noCourses": "Nessun corso disponibile al momento",
+  "totalCourses": "Corsi",
+  "totalModules": "Totale Moduli",
+  "totalHours": "Ore di Contenuto",
+  "totalStudents": "Studenti Iscritti",
+  "modules": "moduli",
+  "popular": "Popolare",
+  "filterByLevel": "Filtra",
+  "level": {
+    "all": "Tutti",
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzato"
+  }
 }
 }

@@ -116,5 +116,17 @@
     "completed": "Concluída",
     "current": "Atual",
     "locked": "Bloqueada"
-  }
+  },
+  "Trails": {
+  "title": "Trilhas de Aprendizado",
+  "description": "Explore nossas trilhas de aprendizado cuidadosamente organizadas para guiar sua jornada educacional.",
+  "back": "Voltar",
+  "trackCount": "{count} trilhas disponíveis",
+  "noTracks": "Nenhuma trilha disponível no momento",
+  "totalTracks": "Trilhas",
+  "totalCourses": "Total de Cursos",
+  "totalHours": "Horas de Conteúdo",
+  "courses": "cursos",
+  "popular": "Popular"
+}
 }

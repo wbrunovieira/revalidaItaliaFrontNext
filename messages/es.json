@@ -116,5 +116,17 @@
     "completed": "Completada",
     "current": "Actual",
     "locked": "Bloqueada"
-  }
+  },
+  "Trails": {
+  "title": "Rutas de Aprendizaje",
+  "description": "Explora nuestras rutas de aprendizaje cuidadosamente organizadas para guiar tu viaje educativo.",
+  "back": "Volver",
+  "trackCount": "{count} rutas disponibles",
+  "noTracks": "No hay rutas disponibles en este momento",
+  "totalTracks": "Rutas",
+  "totalCourses": "Total de Cursos",
+  "totalHours": "Horas de Contenido",
+  "courses": "cursos",
+  "popular": "Popular"
+}
 }

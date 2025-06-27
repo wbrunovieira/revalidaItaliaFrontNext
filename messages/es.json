@@ -166,6 +166,7 @@
     "tracks": "Rutas",
     "modules": "Módulos",
     "lessons": "Lecciones",
+     "videos": "Videos",
     "settings": "Configuraciones"
   },
   "users": {
@@ -555,6 +556,94 @@
       "deleteTitle": "Error al eliminar",
       "deleteDescription": "No fue posible eliminar la lección."
     }
+  },
+
+  "videos": {
+    "create": "Crear Video",
+    "list": "Listar Videos"
+  },
+  "createVideo": {
+    "title": "Nuevo Video",
+    "create": "Crear Video",
+    "creating": "Creando...",
+    "fields": {
+      "course": "Curso",
+      "lesson": "Lección",
+      "slug": "Slug (URL)",
+      "providerVideoId": "ID del Proveedor de Video",
+      "title": "Título",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "course": "Seleccione un curso",
+      "lesson": "Seleccione una lección",
+      "slug": "intro-derivadas",
+      "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
+      "title": "Ingrese el título del video",
+      "description": "Ingrese la descripción del video"
+    },
+    "hints": {
+      "slug": "Use solo letras minúsculas, números y guiones",
+      "providerVideoId": "ID único del video en el proveedor (ej: YouTube, Vimeo)"
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "courseRequired": "Curso es obligatorio",
+      "lessonRequired": "Lección es obligatoria",
+      "slugRequired": "Slug es obligatorio",
+      "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+      "providerVideoIdRequired": "ID del proveedor de video es obligatorio",
+      "titleRequired": "Título es obligatorio",
+      "descriptionRequired": "Descripción es obligatoria",
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+    },
+    "success": {
+      "title": "¡Video creado!",
+      "description": "El video fue creado con éxito."
+    },
+    "error": {
+      "title": "Error al crear video",
+      "description": "Ocurrió un error al crear el video. Intente nuevamente."
+    }
+  },
+  "videosList": {
+    "title": "Lista de Videos",
+    "searchPlaceholder": "Buscar videos...",
+    "videos": "videos",
+    "noVideos": "Ningún video en esta lección",
+    "noLessons": "Ninguna lección en este módulo",
+    "noModules": "Ningún módulo en este curso",
+    "noResults": "Ningún video encontrado con este término.",
+    "noCourses": "Ningún curso registrado aún.",
+    "deleteConfirm": "¿Está seguro que desea eliminar este video?",
+    "stats": {
+      "totalCourses": "Total de Cursos",
+      "totalModules": "Total de Módulos",
+      "totalLessons": "Total de Lecciones",
+      "totalVideos": "Total de Videos"
+    },
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "success": {
+      "deleteTitle": "¡Video eliminado!",
+      "deleteDescription": "El video fue eliminado con éxito."
+    },
+    "error": {
+      "fetchTitle": "Error al cargar videos",
+      "fetchDescription": "No fue posible cargar la lista de videos.",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No fue posible eliminar el video."
+    }
   }
+
 } 
 }

@@ -133,6 +133,7 @@ export default function CreateCourseForm() {
       });
       setErrors({});
     } catch (error) {
+      console.error(error);
       toast({
         title: t('error.title'),
         description: t('error.description'),

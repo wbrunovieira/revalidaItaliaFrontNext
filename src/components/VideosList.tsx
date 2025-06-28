@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/VideosList.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -17,8 +15,8 @@ import {
   Package,
   Play,
   Clock,
-  BookOpen,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -40,6 +38,7 @@ interface Lesson {
   id: string;
   moduleId: string;
   order: number;
+  imageUrl?: string;
   translations: Translation[];
   videos?: VideoItem[];
 }
@@ -81,18 +80,137 @@ export default function VideosList() {
     Set<string>
   >(new Set());
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Função para tratamento centralizado de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
 
-  const fetchData = async () => {
+      if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+      }
+    },
+    []
+  );
+
+  // Função para buscar vídeos de uma aula específica
+  const fetchVideosForLesson = useCallback(
+    async (
+      courseId: string,
+      lessonId: string
+    ): Promise<VideoItem[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        return await response.json();
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching videos for lesson ${lessonId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError]
+  );
+
+  // Função para buscar aulas de um módulo específico
+  const fetchLessonsForModule = useCallback(
+    async (
+      courseId: string,
+      moduleId: string
+    ): Promise<Lesson[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const lessonsData = await response.json();
+        const lessons = lessonsData.lessons || [];
+
+        // Buscar vídeos para cada aula
+        const lessonsWithVideos = await Promise.all(
+          lessons.map(async (lesson: Lesson) => {
+            const videos = await fetchVideosForLesson(
+              courseId,
+              lesson.id
+            );
+            return { ...lesson, videos };
+          })
+        );
+
+        return lessonsWithVideos;
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching lessons for module ${moduleId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError, fetchVideosForLesson]
+  );
+
+  // Função para buscar módulos de um curso específico
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const modules: Module[] = await response.json();
+
+        // Buscar aulas e vídeos para cada módulo
+        const modulesWithData = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(
+              courseId,
+              module.id
+            );
+            return { ...module, lessons };
+          })
+        );
+
+        return modulesWithData;
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching modules for course ${courseId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError, fetchLessonsForModule]
+  );
+
+  // Função principal para buscar todos os dados
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+
     try {
       const coursesResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`
       );
 
       if (!coursesResponse.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error(
+          `Failed to fetch courses: ${coursesResponse.status}`
+        );
       }
 
       const courses: Course[] =
@@ -100,91 +218,16 @@ export default function VideosList() {
 
       const coursesWithData = await Promise.all(
         courses.map(async course => {
-          try {
-            const modulesResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules`
-            );
-
-            if (modulesResponse.ok) {
-              const modules = await modulesResponse.json();
-
-              // Buscar aulas e vídeos para cada módulo
-              const modulesWithData = await Promise.all(
-                modules.map(async (module: Module) => {
-                  try {
-                    const lessonsResponse = await fetch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${module.id}/lessons`
-                    );
-
-                    if (lessonsResponse.ok) {
-                      const lessonsData =
-                        await lessonsResponse.json();
-
-                      // Buscar vídeos para cada aula
-                      const lessonsWithVideos =
-                        await Promise.all(
-                          (lessonsData.lessons || []).map(
-                            async (lesson: Lesson) => {
-                              try {
-                                const videosResponse =
-                                  await fetch(
-                                    `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/lessons/${lesson.id}/videos`
-                                  );
-
-                                if (videosResponse.ok) {
-                                  const videos =
-                                    await videosResponse.json();
-                                  return {
-                                    ...lesson,
-                                    videos,
-                                  };
-                                }
-                              } catch (error) {
-                                console.error(
-                                  `Error fetching videos for lesson ${lesson.id}:`,
-                                  error
-                                );
-                              }
-                              return {
-                                ...lesson,
-                                videos: [],
-                              };
-                            }
-                          )
-                        );
-
-                      return {
-                        ...module,
-                        lessons: lessonsWithVideos,
-                      };
-                    }
-                  } catch (error) {
-                    console.error(
-                      `Error fetching lessons for module ${module.id}:`,
-                      error
-                    );
-                  }
-                  return { ...module, lessons: [] };
-                })
-              );
-
-              return {
-                ...course,
-                modules: modulesWithData,
-              };
-            }
-          } catch (error) {
-            console.error(
-              `Error fetching modules for course ${course.id}:`,
-              error
-            );
-          }
-          return { ...course, modules: [] };
+          const modules = await fetchModulesForCourse(
+            course.id
+          );
+          return { ...course, modules };
         })
       );
 
       setCoursesWithVideos(coursesWithData);
     } catch (error) {
+      handleApiError(error, 'Courses fetch error');
       toast({
         title: t('error.fetchTitle'),
         description: t('error.fetchDescription'),
@@ -193,87 +236,123 @@ export default function VideosList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, t, handleApiError, fetchModulesForCourse]);
 
-  const handleDelete = async (
-    courseId: string,
-    lessonId: string,
-    videoId: string
-  ) => {
-    if (!confirm(t('deleteConfirm'))) return;
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
-        {
-          method: 'DELETE',
+  const handleDelete = useCallback(
+    async (
+      courseId: string,
+      lessonId: string,
+      videoId: string
+    ) => {
+      if (!confirm(t('deleteConfirm'))) return;
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to delete video: ${response.status}`
+          );
         }
-      );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete video');
+        toast({
+          title: t('success.deleteTitle'),
+          description: t('success.deleteDescription'),
+        });
+
+        await fetchData();
+      } catch (error) {
+        handleApiError(error, 'Video deletion error');
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
       }
+    },
+    [t, toast, fetchData, handleApiError]
+  );
 
-      toast({
-        title: t('success.deleteTitle'),
-        description: t('success.deleteDescription'),
-      });
+  const toggleCourse = useCallback((courseId: string) => {
+    setExpandedCourses(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(courseId)) {
+        newExpanded.delete(courseId);
+      } else {
+        newExpanded.add(courseId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-      fetchData();
-    } catch (error) {
-      toast({
-        title: t('error.deleteTitle'),
-        description: t('error.deleteDescription'),
-        variant: 'destructive',
-      });
-    }
-  };
+  const toggleModule = useCallback((moduleId: string) => {
+    setExpandedModules(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(moduleId)) {
+        newExpanded.delete(moduleId);
+      } else {
+        newExpanded.add(moduleId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const toggleCourse = (courseId: string) => {
-    const newExpanded = new Set(expandedCourses);
-    if (newExpanded.has(courseId)) {
-      newExpanded.delete(courseId);
-    } else {
-      newExpanded.add(courseId);
-    }
-    setExpandedCourses(newExpanded);
-  };
+  const toggleLesson = useCallback((lessonId: string) => {
+    setExpandedLessons(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(lessonId)) {
+        newExpanded.delete(lessonId);
+      } else {
+        newExpanded.add(lessonId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const toggleModule = (moduleId: string) => {
-    const newExpanded = new Set(expandedModules);
-    if (newExpanded.has(moduleId)) {
-      newExpanded.delete(moduleId);
-    } else {
-      newExpanded.add(moduleId);
-    }
-    setExpandedModules(newExpanded);
-  };
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
 
-  const toggleLesson = (lessonId: string) => {
-    const newExpanded = new Set(expandedLessons);
-    if (newExpanded.has(lessonId)) {
-      newExpanded.delete(lessonId);
-    } else {
-      newExpanded.add(lessonId);
-    }
-    setExpandedLessons(newExpanded);
-  };
-
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
+  const formatDuration = useCallback((seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes
+        .toString()
+        .padStart(2, '0')}:${remainingSeconds
+        .toString()
+        .padStart(2, '0')}`;
+    }
     return `${minutes}:${remainingSeconds
       .toString()
       .padStart(2, '0')}`;
-  };
+  }, []);
 
   // Filtrar baseado na busca
   const filteredCourses = coursesWithVideos.filter(
     course => {
-      const courseTranslation =
-        course.translations.find(
-          t => t.locale === locale
-        ) || course.translations[0];
+      const courseTranslation = getTranslationByLocale(
+        course.translations,
+        locale
+      );
       const courseMatches =
         course.slug
           .toLowerCase()
@@ -285,10 +364,10 @@ export default function VideosList() {
       if (courseMatches) return true;
 
       return course.modules?.some(module => {
-        const moduleTranslation =
-          module.translations.find(
-            t => t.locale === locale
-          ) || module.translations[0];
+        const moduleTranslation = getTranslationByLocale(
+          module.translations,
+          locale
+        );
         const moduleMatches =
           module.slug
             .toLowerCase()
@@ -300,21 +379,25 @@ export default function VideosList() {
         if (moduleMatches) return true;
 
         return module.lessons?.some(lesson => {
-          const lessonTranslation =
-            lesson.translations.find(
-              t => t.locale === locale
-            ) || lesson.translations[0];
-          const lessonMatches = lessonTranslation?.title
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase());
+          const lessonTranslation = getTranslationByLocale(
+            lesson.translations,
+            locale
+          );
+          const lessonMatches =
+            lessonTranslation?.title
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            lessonTranslation?.description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase());
 
           if (lessonMatches) return true;
 
           return lesson.videos?.some(video => {
-            const videoTranslation =
-              video.translations.find(
-                t => t.locale === locale
-              ) || video.translations[0];
+            const videoTranslation = getTranslationByLocale(
+              video.translations,
+              locale
+            );
             return (
               video.slug
                 .toLowerCase()
@@ -447,12 +530,14 @@ export default function VideosList() {
         <div className="space-y-4">
           {filteredCourses.map(course => {
             const courseTranslation =
-              course.translations.find(
-                t => t.locale === locale
-              ) || course.translations[0];
+              getTranslationByLocale(
+                course.translations,
+                locale
+              );
             const isCourseExpanded = expandedCourses.has(
               course.id
             );
+            const moduleCount = course.modules?.length || 0;
 
             return (
               <div
@@ -475,8 +560,13 @@ export default function VideosList() {
                     )}
                   </button>
 
-                  <div className="flex items-center justify-center w-12 h-8 bg-blue-500/20 text-blue-400 rounded font-bold">
-                    <BookOpen size={16} />
+                  <div className="relative w-16 h-12 rounded overflow-hidden flex-shrink-0">
+                    <Image
+                      src={course.imageUrl}
+                      alt={courseTranslation?.title || ''}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
 
                   <div className="flex-1">
@@ -484,29 +574,37 @@ export default function VideosList() {
                       {courseTranslation?.title ||
                         'Sem título'}
                     </h4>
-                    <p className="text-xs text-gray-500">
-                      Slug: {course.slug}
-                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>Slug: {course.slug}</span>
+                      <span className="flex items-center gap-1">
+                        <Package size={12} />
+                        {moduleCount} {t('modules')}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Módulos do curso */}
                 {isCourseExpanded && (
                   <div className="bg-gray-800/50 p-4">
-                    {course.modules &&
-                    course.modules.length > 0 ? (
+                    {moduleCount > 0 ? (
                       <div className="space-y-3">
                         {course.modules
-                          .sort((a, b) => a.order - b.order)
+                          ?.sort(
+                            (a, b) => a.order - b.order
+                          )
                           .map(module => {
                             const moduleTranslation =
-                              module.translations.find(
-                                t => t.locale === locale
-                              ) || module.translations[0];
+                              getTranslationByLocale(
+                                module.translations,
+                                locale
+                              );
                             const isModuleExpanded =
                               expandedModules.has(
                                 module.id
                               );
+                            const lessonCount =
+                              module.lessons?.length || 0;
 
                             return (
                               <div
@@ -539,50 +637,79 @@ export default function VideosList() {
                                     {module.order}
                                   </div>
 
+                                  {module.imageUrl ? (
+                                    <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
+                                      <Image
+                                        src={
+                                          module.imageUrl
+                                        }
+                                        alt={
+                                          moduleTranslation?.title ||
+                                          ''
+                                        }
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                      <Package
+                                        size={12}
+                                        className="text-gray-400"
+                                      />
+                                    </div>
+                                  )}
+
                                   <div className="flex-1">
                                     <h5 className="text-white font-medium">
                                       {moduleTranslation?.title ||
                                         'Sem título'}
                                     </h5>
-                                    <p className="text-xs text-gray-500">
-                                      Slug: {module.slug}
-                                    </p>
+                                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                                      <span>
+                                        Slug: {module.slug}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Play size={10} />
+                                        {lessonCount}{' '}
+                                        {t('lessons')}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
 
                                 {/* Aulas do módulo */}
                                 {isModuleExpanded && (
                                   <div className="bg-gray-800/30 p-3">
-                                    {module.lessons &&
-                                    module.lessons.length >
-                                      0 ? (
+                                    {lessonCount > 0 ? (
                                       <div className="space-y-2">
                                         {module.lessons
-                                          .sort(
+                                          ?.sort(
                                             (a, b) =>
                                               a.order -
                                               b.order
                                           )
                                           .map(lesson => {
                                             const lessonTranslation =
-                                              lesson.translations.find(
-                                                t =>
-                                                  t.locale ===
-                                                  locale
-                                              ) ||
-                                              lesson
-                                                .translations[0];
+                                              getTranslationByLocale(
+                                                lesson.translations,
+                                                locale
+                                              );
                                             const isLessonExpanded =
                                               expandedLessons.has(
                                                 lesson.id
                                               );
+                                            const videoCount =
+                                              lesson.videos
+                                                ?.length ||
+                                              0;
 
                                             return (
                                               <div
                                                 key={
                                                   lesson.id
                                                 }
-                                                className="border border-gray-500 rounded-lg overflow-hidden"
+                                                className="border border-gray-600 rounded-lg overflow-hidden"
                                               >
                                                 {/* Cabeçalho da aula */}
                                                 <div
@@ -618,42 +745,67 @@ export default function VideosList() {
                                                     }
                                                   </div>
 
+                                                  {lesson.imageUrl ? (
+                                                    <div className="relative w-8 h-5 rounded overflow-hidden flex-shrink-0">
+                                                      <Image
+                                                        src={
+                                                          lesson.imageUrl
+                                                        }
+                                                        alt={
+                                                          lessonTranslation?.title ||
+                                                          ''
+                                                        }
+                                                        fill
+                                                        className="object-cover"
+                                                      />
+                                                    </div>
+                                                  ) : (
+                                                    <div className="w-8 h-5 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                                      <Play
+                                                        size={
+                                                          10
+                                                        }
+                                                        className="text-gray-400"
+                                                      />
+                                                    </div>
+                                                  )}
+
                                                   <div className="flex-1">
                                                     <h6 className="text-white text-sm font-medium">
                                                       {lessonTranslation?.title ||
                                                         'Sem título'}
                                                     </h6>
-                                                    <p className="text-xs text-gray-500">
-                                                      {lesson
-                                                        .videos
-                                                        ?.length ||
-                                                        0}{' '}
-                                                      {t(
-                                                        'videos'
-                                                      )}
-                                                    </p>
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                      <span className="flex items-center gap-1">
+                                                        <Video
+                                                          size={
+                                                            10
+                                                          }
+                                                        />
+                                                        {
+                                                          videoCount
+                                                        }{' '}
+                                                        {t(
+                                                          'videos'
+                                                        )}
+                                                      </span>
+                                                    </div>
                                                   </div>
                                                 </div>
 
                                                 {/* Vídeos da aula */}
                                                 {isLessonExpanded && (
                                                   <div className="bg-gray-800/20 p-2">
-                                                    {lesson.videos &&
-                                                    lesson
-                                                      .videos
-                                                      .length >
-                                                      0 ? (
+                                                    {videoCount >
+                                                    0 ? (
                                                       <div className="space-y-1">
-                                                        {lesson.videos.map(
+                                                        {lesson.videos?.map(
                                                           video => {
                                                             const videoTranslation =
-                                                              video.translations.find(
-                                                                t =>
-                                                                  t.locale ===
-                                                                  locale
-                                                              ) ||
-                                                              video
-                                                                .translations[0];
+                                                              getTranslationByLocale(
+                                                                video.translations,
+                                                                locale
+                                                              );
 
                                                             return (
                                                               <div
@@ -662,20 +814,21 @@ export default function VideosList() {
                                                                 }
                                                                 className="flex items-center gap-2 p-2 bg-gray-700/10 rounded hover:bg-gray-700/30 transition-colors"
                                                               >
-                                                                <div className="flex items-center justify-center w-5 h-5 bg-red-500/20 text-red-400 rounded">
-                                                                  <Video
+                                                                <div className="w-6 h-4 bg-red-600 rounded flex items-center justify-center flex-shrink-0">
+                                                                  <Play
                                                                     size={
-                                                                      10
+                                                                      8
                                                                     }
+                                                                    className="text-white"
                                                                   />
                                                                 </div>
 
-                                                                <div className="flex-1">
-                                                                  <h4 className="text-white text-xs font-medium">
+                                                                <div className="flex-1 min-w-0">
+                                                                  <p className="text-white text-xs font-medium truncate">
                                                                     {videoTranslation?.title ||
                                                                       'Sem título'}
-                                                                  </h4>
-                                                                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                                                  </p>
+                                                                  <div className="flex items-center gap-2 text-xs text-gray-500">
                                                                     <span>
                                                                       Slug:{' '}
                                                                       {
@@ -691,6 +844,12 @@ export default function VideosList() {
                                                                       {formatDuration(
                                                                         video.durationInSeconds
                                                                       )}
+                                                                    </span>
+                                                                    <span>
+                                                                      ID:{' '}
+                                                                      {
+                                                                        video.providerVideoId
+                                                                      }
                                                                     </span>
                                                                   </div>
                                                                 </div>
@@ -751,12 +910,12 @@ export default function VideosList() {
                                                         )}
                                                       </div>
                                                     ) : (
-                                                      <div className="text-center py-4">
+                                                      <div className="text-center py-2">
                                                         <Video
                                                           size={
                                                             24
                                                           }
-                                                          className="text-gray-500 mx-auto mb-2"
+                                                          className="text-gray-500 mx-auto mb-1"
                                                         />
                                                         <p className="text-gray-400 text-xs">
                                                           {t(

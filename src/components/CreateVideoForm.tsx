@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/CreateVideoForm.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -16,9 +14,7 @@ import {
   FileText,
   Globe,
   BookOpen,
-  Package,
   Play,
-  Clock,
 } from 'lucide-react';
 
 interface Translation {
@@ -63,15 +59,26 @@ interface FormData {
   };
 }
 
+interface CreateVideoPayload {
+  slug: string;
+  providerVideoId: string;
+  translations: Translation[];
+}
+
+interface LessonWithModule extends Lesson {
+  moduleName: string;
+}
+
 export default function CreateVideoForm() {
   const t = useTranslations('Admin.createVideo');
   const params = useParams();
   const locale = params.locale as string;
   const { toast } = useToast();
+
   const [loading, setLoading] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
+  const [courses, setCourses] = useState<Course[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
@@ -89,74 +96,114 @@ export default function CreateVideoForm() {
     Record<string, string>
   >({});
 
-  useEffect(() => {
-    fetchCourses();
-  }, []);
+  // Função para tratamento centralizado de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
 
-  const fetchCourses = async () => {
+      if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+      }
+    },
+    []
+  );
+
+  // Função para buscar aulas de um módulo específico
+  const fetchLessonsForModule = useCallback(
+    async (
+      courseId: string,
+      moduleId: string
+    ): Promise<Lesson[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching lessons for module ${moduleId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError]
+  );
+
+  // Função para buscar módulos de um curso específico
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const modules: Module[] = await response.json();
+
+        // Buscar aulas para cada módulo
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(
+              courseId,
+              module.id
+            );
+            return { ...module, lessons };
+          })
+        );
+
+        return modulesWithLessons;
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching modules for course ${courseId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError, fetchLessonsForModule]
+  );
+
+  // Função para buscar cursos com módulos e aulas
+  const fetchCourses = useCallback(async () => {
+    setLoadingCourses(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error(
+          `Failed to fetch courses: ${response.status}`
+        );
       }
 
-      const coursesData = await response.json();
+      const coursesData: Course[] = await response.json();
 
       // Buscar módulos e aulas para cada curso
       const coursesWithData = await Promise.all(
-        coursesData.map(async (course: Course) => {
-          try {
-            const modulesResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules`
-            );
-            if (modulesResponse.ok) {
-              const modules = await modulesResponse.json();
-
-              // Buscar aulas para cada módulo
-              const modulesWithLessons = await Promise.all(
-                modules.map(async (module: Module) => {
-                  try {
-                    const lessonsResponse = await fetch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${module.id}/lessons`
-                    );
-                    if (lessonsResponse.ok) {
-                      const lessonsData =
-                        await lessonsResponse.json();
-                      return {
-                        ...module,
-                        lessons: lessonsData.lessons || [],
-                      };
-                    }
-                  } catch (error) {
-                    console.error(
-                      `Error fetching lessons for module ${module.id}:`,
-                      error
-                    );
-                  }
-                  return { ...module, lessons: [] };
-                })
-              );
-
-              return {
-                ...course,
-                modules: modulesWithLessons,
-              };
-            }
-          } catch (error) {
-            console.error(
-              `Error fetching modules for course ${course.id}:`,
-              error
-            );
-          }
-          return { ...course, modules: [] };
+        coursesData.map(async course => {
+          const modules = await fetchModulesForCourse(
+            course.id
+          );
+          return { ...course, modules };
         })
       );
 
       setCourses(coursesWithData);
     } catch (error) {
+      handleApiError(error, 'Courses fetch error');
       toast({
         title: t('error.fetchCoursesTitle'),
         description: t('error.fetchCoursesDescription'),
@@ -165,9 +212,13 @@ export default function CreateVideoForm() {
     } finally {
       setLoadingCourses(false);
     }
-  };
+  }, [toast, t, handleApiError, fetchModulesForCourse]);
 
-  const validateForm = (): boolean => {
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.courseId) {
@@ -191,8 +242,7 @@ export default function CreateVideoForm() {
     }
 
     // Validar traduções
-    const locales = ['pt', 'es', 'it'] as const;
-    locales.forEach(locale => {
+    (['pt', 'es', 'it'] as const).forEach(locale => {
       if (!formData.translations[locale].title.trim()) {
         newErrors[`title_${locale}`] = t(
           'errors.titleRequired'
@@ -209,19 +259,10 @@ export default function CreateVideoForm() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      const translations = Object.values(
-        formData.translations
-      );
-
+  const createVideo = useCallback(
+    async (payload: CreateVideoPayload): Promise<void> => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses/${formData.courseId}/lessons/${formData.lessonId}/videos`,
         {
@@ -229,37 +270,58 @@ export default function CreateVideoForm() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            slug: formData.slug,
-            providerVideoId: formData.providerVideoId,
-            translations,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create video');
+        throw new Error(
+          `Failed to create video: ${response.status}`
+        );
       }
+    },
+    [formData.courseId, formData.lessonId]
+  );
+
+  const resetForm = useCallback(() => {
+    setFormData({
+      courseId: '',
+      lessonId: '',
+      slug: '',
+      providerVideoId: '',
+      translations: {
+        pt: { locale: 'pt', title: '', description: '' },
+        es: { locale: 'es', title: '', description: '' },
+        it: { locale: 'it', title: '', description: '' },
+      },
+    });
+    setErrors({});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      const payload: CreateVideoPayload = {
+        slug: formData.slug,
+        providerVideoId: formData.providerVideoId,
+        translations: Object.values(formData.translations),
+      };
+
+      await createVideo(payload);
 
       toast({
         title: t('success.title'),
         description: t('success.description'),
       });
 
-      // Limpar formulário
-      setFormData({
-        courseId: '',
-        lessonId: '',
-        slug: '',
-        providerVideoId: '',
-        translations: {
-          pt: { locale: 'pt', title: '', description: '' },
-          es: { locale: 'es', title: '', description: '' },
-          it: { locale: 'it', title: '', description: '' },
-        },
-      });
-      setErrors({});
+      resetForm();
     } catch (error) {
+      handleApiError(error, 'Video creation error');
       toast({
         title: t('error.title'),
         description: t('error.description'),
@@ -270,34 +332,85 @@ export default function CreateVideoForm() {
     }
   };
 
-  const updateTranslation = (
-    locale: 'pt' | 'es' | 'it',
-    field: 'title' | 'description',
-    value: string
-  ) => {
-    setFormData({
-      ...formData,
-      translations: {
-        ...formData.translations,
-        [locale]: {
-          ...formData.translations[locale],
-          [field]: value,
+  const updateTranslation = useCallback(
+    (
+      locale: 'pt' | 'es' | 'it',
+      field: 'title' | 'description',
+      value: string
+    ) => {
+      setFormData(prev => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            [field]: value,
+          },
         },
-      },
-    });
-  };
+      }));
+    },
+    []
+  );
+
+  const handleCourseChange = useCallback(
+    (courseId: string) => {
+      setFormData(prev => ({
+        ...prev,
+        courseId,
+        lessonId: '', // Reset lesson when course changes
+      }));
+    },
+    []
+  );
+
+  const handleLessonChange = useCallback(
+    (lessonId: string) => {
+      setFormData(prev => ({ ...prev, lessonId }));
+    },
+    []
+  );
+
+  const handleSlugChange = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      slug: value.toLowerCase().replace(/\s/g, '-'),
+    }));
+  }, []);
+
+  const handleProviderVideoIdChange = useCallback(
+    (value: string) => {
+      setFormData(prev => ({
+        ...prev,
+        providerVideoId: value,
+      }));
+    },
+    []
+  );
+
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
 
   const selectedCourse = courses.find(
-    c => c.id === formData.courseId
+    course => course.id === formData.courseId
   );
-  const availableLessons =
+
+  const availableLessons: LessonWithModule[] =
     selectedCourse?.modules?.flatMap(
       module =>
         module.lessons?.map(lesson => ({
           ...lesson,
           moduleName:
-            module.translations.find(
-              t => t.locale === locale
+            getTranslationByLocale(
+              module.translations,
+              locale
             )?.title || module.slug,
         })) || []
     ) || [];
@@ -320,33 +433,39 @@ export default function CreateVideoForm() {
               <BookOpen size={16} />
               {t('fields.course')}
             </Label>
-            <select
-              value={formData.courseId}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  courseId: e.target.value,
-                  lessonId: '', // Reset lesson when course changes
-                });
-              }}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
-            >
-              <option value="">
-                {t('placeholders.course')}
-              </option>
-              {courses.map(course => {
-                const courseTranslation =
-                  course.translations.find(
-                    t => t.locale === locale
-                  ) || course.translations[0];
-                return (
-                  <option key={course.id} value={course.id}>
-                    {courseTranslation?.title ||
-                      course.slug}
-                  </option>
-                );
-              })}
-            </select>
+            {loadingCourses ? (
+              <div className="animate-pulse">
+                <div className="h-10 bg-gray-700 rounded"></div>
+              </div>
+            ) : (
+              <select
+                value={formData.courseId}
+                onChange={e =>
+                  handleCourseChange(e.target.value)
+                }
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                <option value="">
+                  {t('placeholders.course')}
+                </option>
+                {courses.map(course => {
+                  const courseTranslation =
+                    getTranslationByLocale(
+                      course.translations,
+                      locale
+                    );
+                  return (
+                    <option
+                      key={course.id}
+                      value={course.id}
+                    >
+                      {courseTranslation?.title ||
+                        course.slug}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
             {errors.courseId && (
               <p className="text-xs text-red-500">
                 {errors.courseId}
@@ -362,10 +481,7 @@ export default function CreateVideoForm() {
             <select
               value={formData.lessonId}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  lessonId: e.target.value,
-                })
+                handleLessonChange(e.target.value)
               }
               disabled={!formData.courseId}
               className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white disabled:opacity-50"
@@ -375,9 +491,10 @@ export default function CreateVideoForm() {
               </option>
               {availableLessons.map(lesson => {
                 const lessonTranslation =
-                  lesson.translations.find(
-                    t => t.locale === locale
-                  ) || lesson.translations[0];
+                  getTranslationByLocale(
+                    lesson.translations,
+                    locale
+                  );
                 return (
                   <option key={lesson.id} value={lesson.id}>
                     {lesson.moduleName} -{' '}
@@ -406,12 +523,7 @@ export default function CreateVideoForm() {
               placeholder={t('placeholders.slug')}
               value={formData.slug}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  slug: e.target.value
-                    .toLowerCase()
-                    .replace(/\s/g, '-'),
-                })
+                handleSlugChange(e.target.value)
               }
               error={errors.slug}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -432,10 +544,7 @@ export default function CreateVideoForm() {
               )}
               value={formData.providerVideoId}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  providerVideoId: e.target.value,
-                })
+                handleProviderVideoIdChange(e.target.value)
               }
               error={errors.providerVideoId}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -453,158 +562,73 @@ export default function CreateVideoForm() {
             {t('translations.title')}
           </h4>
 
-          {/* Português */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇧🇷 {t('translations.portuguese')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.pt.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'pt',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_pt}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.pt.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'pt',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_pt}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Espanhol */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇪🇸 {t('translations.spanish')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.es.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'es',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_es}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.es.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'es',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_es}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
+          {(['pt', 'es', 'it'] as const).map(loc => (
+            <div
+              key={loc}
+              className="border border-gray-700 rounded-lg p-4"
+            >
+              <h5 className="text-white font-medium mb-4 flex items-center gap-2">
+                {loc === 'pt'
+                  ? '🇧🇷'
+                  : loc === 'es'
+                  ? '🇪🇸'
+                  : '🇮🇹'}
+                {t(
+                  `translations.${
+                    loc === 'pt'
+                      ? 'portuguese'
+                      : loc === 'es'
+                      ? 'spanish'
+                      : 'italian'
+                  }`
+                )}
+              </h5>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <Type size={16} />
+                    {t('fields.title')}
+                  </Label>
+                  <TextField
+                    placeholder={t('placeholders.title')}
+                    value={formData.translations[loc].title}
+                    onChange={e =>
+                      updateTranslation(
+                        loc,
+                        'title',
+                        e.target.value
+                      )
+                    }
+                    error={errors[`title_${loc}`]}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <FileText size={16} />
+                    {t('fields.description')}
+                  </Label>
+                  <TextField
+                    placeholder={t(
+                      'placeholders.description'
+                    )}
+                    value={
+                      formData.translations[loc].description
+                    }
+                    onChange={e =>
+                      updateTranslation(
+                        loc,
+                        'description',
+                        e.target.value
+                      )
+                    }
+                    error={errors[`description_${loc}`]}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Italiano */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇮🇹 {t('translations.italian')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.it.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'it',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_it}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.it.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'it',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_it}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="mt-6 flex justify-end">

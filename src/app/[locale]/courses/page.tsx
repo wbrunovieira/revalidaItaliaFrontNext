@@ -1,7 +1,7 @@
 // src/app/[locale]/courses/page.tsx
 
 import { cookies } from 'next/headers';
-import Image from 'next/image';
+
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
@@ -32,12 +32,12 @@ interface Course {
   enrolledCount?: number;
 }
 
-interface Module {
-  id: string;
-  courseId: string;
-  title: string;
-  lessons?: any[];
-}
+// interface Module {
+//   id: string;
+//   courseId: string;
+//   title: string;
+//   lessons?: any[];
+// }
 
 export default async function CoursesPage({
   params,

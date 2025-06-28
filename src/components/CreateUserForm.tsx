@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/CreateUserForm.tsx
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import TextField from '@/components/TextField';
@@ -35,10 +33,19 @@ interface FormData {
   cpf: string;
 }
 
+interface CreateUserPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  cpf: string;
+}
+
 export default function CreateUserForm() {
   const t = useTranslations('Admin.createUser');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -52,7 +59,20 @@ export default function CreateUserForm() {
     {}
   );
 
-  const validateForm = (): boolean => {
+  // Função para tratamento centralizado de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
+
+      if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+      }
+    },
+    []
+  );
+
+  const validateForm = useCallback((): boolean => {
     const newErrors: Partial<FormData> = {};
 
     if (!formData.name.trim()) {
@@ -87,15 +107,10 @@ export default function CreateUserForm() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
+  const createUser = useCallback(
+    async (payload: CreateUserPayload): Promise<void> => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/students`,
         {
@@ -103,36 +118,57 @@ export default function CreateUserForm() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role,
-            cpf: formData.cpf.replace(/\D/g, ''),
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create user');
+        throw new Error(
+          `Failed to create user: ${response.status}`
+        );
       }
+    },
+    []
+  );
+
+  const resetForm = useCallback(() => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      role: 'student',
+      cpf: '',
+    });
+    setErrors({});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      const payload: CreateUserPayload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        cpf: formData.cpf.replace(/\D/g, ''),
+      };
+
+      await createUser(payload);
 
       toast({
         title: t('success.title'),
         description: t('success.description'),
       });
 
-      // Limpar formulário
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        role: 'student',
-        cpf: '',
-      });
-      setErrors({});
+      resetForm();
     } catch (error) {
+      handleApiError(error, 'User creation error');
       toast({
         title: t('error.title'),
         description: t('error.description'),
@@ -143,7 +179,7 @@ export default function CreateUserForm() {
     }
   };
 
-  const formatCPF = (value: string) => {
+  const formatCPF = useCallback((value: string) => {
     const cleaned = value.replace(/\D/g, '');
     const match = cleaned.match(
       /^(\d{3})(\d{3})(\d{3})(\d{2})$/
@@ -152,7 +188,49 @@ export default function CreateUserForm() {
       return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
     }
     return value;
-  };
+  }, []);
+
+  const handleNameChange = useCallback((value: string) => {
+    setFormData(prev => ({ ...prev, name: value }));
+  }, []);
+
+  const handleEmailChange = useCallback((value: string) => {
+    setFormData(prev => ({ ...prev, email: value }));
+  }, []);
+
+  const handlePasswordChange = useCallback(
+    (value: string) => {
+      setFormData(prev => ({ ...prev, password: value }));
+    },
+    []
+  );
+
+  const handleConfirmPasswordChange = useCallback(
+    (value: string) => {
+      setFormData(prev => ({
+        ...prev,
+        confirmPassword: value,
+      }));
+    },
+    []
+  );
+
+  const handleRoleChange = useCallback(
+    (value: UserRole) => {
+      setFormData(prev => ({ ...prev, role: value }));
+    },
+    []
+  );
+
+  const handleCpfChange = useCallback(
+    (value: string) => {
+      const formatted = formatCPF(value);
+      if (formatted.length <= 14) {
+        setFormData(prev => ({ ...prev, cpf: formatted }));
+      }
+    },
+    [formatCPF]
+  );
 
   return (
     <form
@@ -180,10 +258,7 @@ export default function CreateUserForm() {
               placeholder={t('placeholders.name')}
               value={formData.name}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  name: e.target.value,
-                })
+                handleNameChange(e.target.value)
               }
               error={errors.name}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -205,10 +280,7 @@ export default function CreateUserForm() {
               placeholder={t('placeholders.email')}
               value={formData.email}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  email: e.target.value,
-                })
+                handleEmailChange(e.target.value)
               }
               error={errors.email}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -228,15 +300,9 @@ export default function CreateUserForm() {
               id="cpf"
               placeholder={t('placeholders.cpf')}
               value={formData.cpf}
-              onChange={e => {
-                const formatted = formatCPF(e.target.value);
-                if (formatted.length <= 14) {
-                  setFormData({
-                    ...formData,
-                    cpf: formatted,
-                  });
-                }
-              }}
+              onChange={e =>
+                handleCpfChange(e.target.value)
+              }
               error={errors.cpf}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
@@ -253,9 +319,7 @@ export default function CreateUserForm() {
             </Label>
             <Select
               value={formData.role}
-              onValueChange={(value: UserRole) =>
-                setFormData({ ...formData, role: value })
-              }
+              onValueChange={handleRoleChange}
             >
               <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                 <SelectValue
@@ -300,10 +364,7 @@ export default function CreateUserForm() {
               placeholder={t('placeholders.password')}
               value={formData.password}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  password: e.target.value,
-                })
+                handlePasswordChange(e.target.value)
               }
               error={errors.password}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -327,10 +388,7 @@ export default function CreateUserForm() {
               )}
               value={formData.confirmPassword}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  confirmPassword: e.target.value,
-                })
+                handleConfirmPasswordChange(e.target.value)
               }
               error={errors.confirmPassword}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"

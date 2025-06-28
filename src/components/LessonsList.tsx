@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/LessonsList.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -71,18 +69,97 @@ export default function LessonsList() {
     Set<string>
   >(new Set());
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Função para tratamento centralizado de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
 
-  const fetchData = async () => {
+      if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+      }
+    },
+    []
+  );
+
+  // Função para buscar aulas de um módulo específico
+  const fetchLessonsForModule = useCallback(
+    async (
+      courseId: string,
+      moduleId: string
+    ): Promise<Lesson[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching lessons for module ${moduleId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError]
+  );
+
+  // Função para buscar módulos de um curso específico
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const modules: Module[] = await response.json();
+
+        // Buscar aulas para cada módulo
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(
+              courseId,
+              module.id
+            );
+            return { ...module, lessons };
+          })
+        );
+
+        return modulesWithLessons;
+      } catch (error) {
+        handleApiError(
+          error,
+          `Error fetching modules for course ${courseId}`
+        );
+        return [];
+      }
+    },
+    [handleApiError, fetchLessonsForModule]
+  );
+
+  // Função principal para buscar todos os dados
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+
     try {
       const coursesResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`
       );
 
       if (!coursesResponse.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error(
+          `Failed to fetch courses: ${coursesResponse.status}`
+        );
       }
 
       const courses: Course[] =
@@ -90,57 +167,16 @@ export default function LessonsList() {
 
       const coursesWithData = await Promise.all(
         courses.map(async course => {
-          try {
-            const modulesResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules`
-            );
-
-            if (modulesResponse.ok) {
-              const modules = await modulesResponse.json();
-
-              // Buscar aulas para cada módulo
-              const modulesWithLessons = await Promise.all(
-                modules.map(async (module: Module) => {
-                  try {
-                    const lessonsResponse = await fetch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${module.id}/lessons`
-                    );
-
-                    if (lessonsResponse.ok) {
-                      const lessonsData =
-                        await lessonsResponse.json();
-                      return {
-                        ...module,
-                        lessons: lessonsData.lessons || [],
-                      };
-                    }
-                  } catch (error) {
-                    console.error(
-                      `Error fetching lessons for module ${module.id}:`,
-                      error
-                    );
-                  }
-                  return { ...module, lessons: [] };
-                })
-              );
-
-              return {
-                ...course,
-                modules: modulesWithLessons,
-              };
-            }
-          } catch (error) {
-            console.error(
-              `Error fetching modules for course ${course.id}:`,
-              error
-            );
-          }
-          return { ...course, modules: [] };
+          const modules = await fetchModulesForCourse(
+            course.id
+          );
+          return { ...course, modules };
         })
       );
 
       setCoursesWithLessons(coursesWithData);
     } catch (error) {
+      handleApiError(error, 'Courses fetch error');
       toast({
         title: t('error.fetchTitle'),
         description: t('error.fetchDescription'),
@@ -149,69 +185,94 @@ export default function LessonsList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, t, handleApiError, fetchModulesForCourse]);
 
-  const handleDelete = async (
-    courseId: string,
-    moduleId: string,
-    lessonId: string
-  ) => {
-    if (!confirm(t('deleteConfirm'))) return;
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
-        {
-          method: 'DELETE',
+  const handleDelete = useCallback(
+    async (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ) => {
+      if (!confirm(t('deleteConfirm'))) return;
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to delete lesson: ${response.status}`
+          );
         }
-      );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete lesson');
+        toast({
+          title: t('success.deleteTitle'),
+          description: t('success.deleteDescription'),
+        });
+
+        await fetchData();
+      } catch (error) {
+        handleApiError(error, 'Lesson deletion error');
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
       }
+    },
+    [t, toast, fetchData, handleApiError]
+  );
 
-      toast({
-        title: t('success.deleteTitle'),
-        description: t('success.deleteDescription'),
-      });
+  const toggleCourse = useCallback((courseId: string) => {
+    setExpandedCourses(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(courseId)) {
+        newExpanded.delete(courseId);
+      } else {
+        newExpanded.add(courseId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-      fetchData();
-    } catch (error) {
-      toast({
-        title: t('error.deleteTitle'),
-        description: t('error.deleteDescription'),
-        variant: 'destructive',
-      });
-    }
-  };
+  const toggleModule = useCallback((moduleId: string) => {
+    setExpandedModules(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(moduleId)) {
+        newExpanded.delete(moduleId);
+      } else {
+        newExpanded.add(moduleId);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const toggleCourse = (courseId: string) => {
-    const newExpanded = new Set(expandedCourses);
-    if (newExpanded.has(courseId)) {
-      newExpanded.delete(courseId);
-    } else {
-      newExpanded.add(courseId);
-    }
-    setExpandedCourses(newExpanded);
-  };
-
-  const toggleModule = (moduleId: string) => {
-    const newExpanded = new Set(expandedModules);
-    if (newExpanded.has(moduleId)) {
-      newExpanded.delete(moduleId);
-    } else {
-      newExpanded.add(moduleId);
-    }
-    setExpandedModules(newExpanded);
-  };
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
 
   // Filtrar baseado na busca
   const filteredCourses = coursesWithLessons.filter(
     course => {
-      const courseTranslation =
-        course.translations.find(
-          t => t.locale === locale
-        ) || course.translations[0];
+      const courseTranslation = getTranslationByLocale(
+        course.translations,
+        locale
+      );
       const courseMatches =
         course.slug
           .toLowerCase()
@@ -223,10 +284,10 @@ export default function LessonsList() {
       if (courseMatches) return true;
 
       return course.modules?.some(module => {
-        const moduleTranslation =
-          module.translations.find(
-            t => t.locale === locale
-          ) || module.translations[0];
+        const moduleTranslation = getTranslationByLocale(
+          module.translations,
+          locale
+        );
         const moduleMatches =
           module.slug
             .toLowerCase()
@@ -238,10 +299,10 @@ export default function LessonsList() {
         if (moduleMatches) return true;
 
         return module.lessons?.some(lesson => {
-          const lessonTranslation =
-            lesson.translations.find(
-              t => t.locale === locale
-            ) || lesson.translations[0];
+          const lessonTranslation = getTranslationByLocale(
+            lesson.translations,
+            locale
+          );
           return (
             lessonTranslation?.title
               .toLowerCase()
@@ -347,9 +408,10 @@ export default function LessonsList() {
         <div className="space-y-4">
           {filteredCourses.map(course => {
             const courseTranslation =
-              course.translations.find(
-                t => t.locale === locale
-              ) || course.translations[0];
+              getTranslationByLocale(
+                course.translations,
+                locale
+              );
             const isCourseExpanded = expandedCourses.has(
               course.id
             );
@@ -411,9 +473,10 @@ export default function LessonsList() {
                           )
                           .map(module => {
                             const moduleTranslation =
-                              module.translations.find(
-                                t => t.locale === locale
-                              ) || module.translations[0];
+                              getTranslationByLocale(
+                                module.translations,
+                                locale
+                              );
                             const isModuleExpanded =
                               expandedModules.has(
                                 module.id
@@ -506,13 +569,10 @@ export default function LessonsList() {
                                           )
                                           .map(lesson => {
                                             const lessonTranslation =
-                                              lesson.translations.find(
-                                                t =>
-                                                  t.locale ===
-                                                  locale
-                                              ) ||
-                                              lesson
-                                                .translations[0];
+                                              getTranslationByLocale(
+                                                lesson.translations,
+                                                locale
+                                              );
 
                                             return (
                                               <div

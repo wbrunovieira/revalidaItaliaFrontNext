@@ -8,7 +8,6 @@ import NavSidebar from '@/components/NavSidebar';
 import {
   ArrowLeft,
   Clock,
-  Play,
   ChevronRight,
   PlayCircle,
   Video,

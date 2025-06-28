@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/CoursesList.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +10,6 @@ import {
   Trash2,
   Eye,
   Search,
-  Filter,
   Globe,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -32,31 +29,28 @@ interface Course {
 
 export default function CoursesList() {
   const t = useTranslations('Admin.coursesList');
+  const { toast } = useToast();
   const params = useParams();
   const locale = params.locale as string;
-  const { toast } = useToast();
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchCourses();
-  }, []);
-
-  const fetchCourses = async () => {
+  // 1. fetchCourses com useCallback
+  const fetchCourses = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`
       );
-
       if (!response.ok) {
         throw new Error('Failed to fetch courses');
       }
-
-      const data = await response.json();
+      const data: Course[] = await response.json();
       setCourses(data);
     } catch (error) {
+      console.error(error); // usa a variável error
       toast({
         title: t('error.fetchTitle'),
         description: t('error.fetchDescription'),
@@ -65,7 +59,12 @@ export default function CoursesList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t, toast]);
+
+  // 2. agora sim, inclui fetchCourses no array de deps
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   const handleDelete = async (courseId: string) => {
     if (!confirm(t('deleteConfirm'))) return;
@@ -73,23 +72,18 @@ export default function CoursesList() {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`,
-        {
-          method: 'DELETE',
-        }
+        { method: 'DELETE' }
       );
-
       if (!response.ok) {
         throw new Error('Failed to delete course');
       }
-
       toast({
         title: t('success.deleteTitle'),
         description: t('success.deleteDescription'),
       });
-
-      // Atualizar lista
-      fetchCourses();
+      await fetchCourses(); // refetch após apagar
     } catch (error) {
+      console.error(error); // usa a variável error
       toast({
         title: t('error.deleteTitle'),
         description: t('error.deleteDescription'),
@@ -98,19 +92,20 @@ export default function CoursesList() {
     }
   };
 
-  // Filtrar cursos baseado na busca
+  // Filtra resultados
   const filteredCourses = courses.filter(course => {
-    const translation =
-      course.translations.find(t => t.locale === locale) ||
-      course.translations[0];
+    const tr =
+      course.translations.find(
+        tr => tr.locale === locale
+      ) ?? course.translations[0];
     return (
       course.slug
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      translation?.title
+      tr.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      translation?.description
+      tr.description
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
@@ -141,8 +136,6 @@ export default function CoursesList() {
           <BookOpen size={24} className="text-secondary" />
           {t('title')}
         </h3>
-
-        {/* Barra de busca */}
         <div className="relative">
           <Search
             size={20}
@@ -193,43 +186,38 @@ export default function CoursesList() {
         </div>
       </div>
 
-      {/* Lista de cursos */}
+      {/* Lista */}
       {filteredCourses.length > 0 ? (
         <div className="space-y-4">
           {filteredCourses.map(course => {
-            const translation =
+            const tr =
               course.translations.find(
-                t => t.locale === locale
-              ) || course.translations[0];
-
+                tr => tr.locale === locale
+              ) ?? course.translations[0];
             return (
               <div
                 key={course.id}
                 className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                {/* Imagem do curso */}
                 <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
                   <Image
                     src={course.imageUrl}
-                    alt={translation?.title || ''}
+                    alt={tr.title}
                     fill
                     className="object-cover"
                   />
                 </div>
-
-                {/* Informações do curso */}
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold text-white">
-                    {translation?.title || 'Sem título'}
+                    {tr.title}
                   </h4>
                   <p className="text-sm text-gray-400 line-clamp-1">
-                    {translation?.description ||
-                      'Sem descrição'}
+                    {tr.description}
                   </p>
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                     <span>Slug: {course.slug}</span>
                     <span>
-                      ID: {course.id.slice(0, 8)}...
+                      ID: {course.id.slice(0, 8)}…
                     </span>
                     <span className="flex items-center gap-1">
                       <Globe size={12} />
@@ -238,25 +226,23 @@ export default function CoursesList() {
                     </span>
                   </div>
                 </div>
-
-                {/* Ações */}
                 <div className="flex items-center gap-2">
                   <button
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                     title={t('actions.view')}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
                     <Eye size={18} />
                   </button>
                   <button
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                     title={t('actions.edit')}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
                     <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(course.id)}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-all"
                     title={t('actions.delete')}
+                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
                   >
                     <Trash2 size={18} />
                   </button>

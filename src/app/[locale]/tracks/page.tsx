@@ -1,4 +1,4 @@
-// src/app/[locale]/tracks/page.tsx (versão aprimorada)
+// src/app/[locale]/tracks/page.tsx (ajustado)
 
 import { cookies } from 'next/headers';
 import Image from 'next/image';
@@ -25,13 +25,6 @@ interface Track {
   slug: string;
   imageUrl: string;
   courseIds?: string[];
-  translations?: Translation[];
-}
-
-interface Course {
-  id: string;
-  slug: string;
-  imageUrl: string;
   translations?: Translation[];
 }
 
@@ -68,16 +61,6 @@ export default async function TracksPage({
   }
 
   const tracks: Track[] = await resTracks.json();
-
-  // Buscar todos os cursos para contar quantos cursos tem em cada trilha
-  const resCourses = await fetch(`${apiUrl}/courses`, {
-    cache: 'no-store',
-  });
-
-  let allCourses: Course[] = [];
-  if (resCourses.ok) {
-    allCourses = await resCourses.json();
-  }
 
   // Enriquecer trilhas com contagem de cursos
   const enrichedTracks = tracks.map(track => {
@@ -233,7 +216,7 @@ export default async function TracksPage({
                       </div>
                     </div>
 
-                    {/* Badge de destaque (opcional) */}
+                    {/* Badge de destaque */}
                     {track.courseCount > 5 && (
                       <div className="absolute top-2 right-2 bg-secondary text-white text-xs px-2 py-1 rounded-full">
                         {t('popular')}

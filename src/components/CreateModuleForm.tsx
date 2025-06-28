@@ -1,8 +1,6 @@
-// src/app/[locale]/admin/components/CreateModuleForm.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -53,11 +51,19 @@ interface FormData {
   };
 }
 
+interface CreateModulePayload {
+  slug: string;
+  imageUrl: string | null;
+  order: number;
+  translations: Translation[];
+}
+
 export default function CreateModuleForm() {
   const t = useTranslations('Admin.createModule');
   const params = useParams();
   const locale = params.locale as string;
   const { toast } = useToast();
+
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] =
@@ -79,23 +85,38 @@ export default function CreateModuleForm() {
     Record<string, string>
   >({});
 
-  useEffect(() => {
-    fetchCourses();
-  }, []);
+  // Função para tratamento centralizado de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
 
-  const fetchCourses = async () => {
+      if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+      }
+    },
+    []
+  );
+
+  // Função para buscar cursos
+  const fetchCourses = useCallback(async () => {
+    setLoadingCourses(true);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error(
+          `Failed to fetch courses: ${response.status}`
+        );
       }
 
-      const data = await response.json();
+      const data: Course[] = await response.json();
       setCourses(data);
     } catch (error) {
+      handleApiError(error, 'Courses fetch error');
       toast({
         title: t('error.fetchCoursesTitle'),
         description: t('error.fetchCoursesDescription'),
@@ -104,9 +125,13 @@ export default function CreateModuleForm() {
     } finally {
       setLoadingCourses(false);
     }
-  };
+  }, [toast, t, handleApiError]);
 
-  const validateForm = (): boolean => {
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  const validateForm = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.courseId) {
@@ -124,8 +149,7 @@ export default function CreateModuleForm() {
     }
 
     // Validar traduções
-    const locales = ['pt', 'es', 'it'] as const;
-    locales.forEach(locale => {
+    (['pt', 'es', 'it'] as const).forEach(locale => {
       if (!formData.translations[locale].title.trim()) {
         newErrors[`title_${locale}`] = t(
           'errors.titleRequired'
@@ -142,19 +166,10 @@ export default function CreateModuleForm() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      const translations = Object.values(
-        formData.translations
-      );
-
+  const createModule = useCallback(
+    async (payload: CreateModulePayload): Promise<void> => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses/${formData.courseId}/modules`,
         {
@@ -162,38 +177,59 @@ export default function CreateModuleForm() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            slug: formData.slug,
-            imageUrl: formData.imageUrl || null,
-            order: formData.order,
-            translations,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to create module');
+        throw new Error(
+          `Failed to create module: ${response.status}`
+        );
       }
+    },
+    [formData.courseId]
+  );
+
+  const resetForm = useCallback(() => {
+    setFormData(prev => ({
+      ...prev,
+      slug: '',
+      imageUrl: '',
+      order: prev.order + 1, // Incrementa a ordem para o próximo módulo
+      translations: {
+        pt: { locale: 'pt', title: '', description: '' },
+        es: { locale: 'es', title: '', description: '' },
+        it: { locale: 'it', title: '', description: '' },
+      },
+    }));
+    setErrors({});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      const payload: CreateModulePayload = {
+        slug: formData.slug,
+        imageUrl: formData.imageUrl || null,
+        order: formData.order,
+        translations: Object.values(formData.translations),
+      };
+
+      await createModule(payload);
 
       toast({
         title: t('success.title'),
         description: t('success.description'),
       });
 
-      // Limpar formulário (mantém o curso selecionado)
-      setFormData({
-        ...formData,
-        slug: '',
-        imageUrl: '',
-        order: formData.order + 1, // Incrementa a ordem para o próximo módulo
-        translations: {
-          pt: { locale: 'pt', title: '', description: '' },
-          es: { locale: 'es', title: '', description: '' },
-          it: { locale: 'it', title: '', description: '' },
-        },
-      });
-      setErrors({});
+      resetForm();
     } catch (error) {
+      handleApiError(error, 'Module creation error');
       toast({
         title: t('error.title'),
         description: t('error.description'),
@@ -204,30 +240,80 @@ export default function CreateModuleForm() {
     }
   };
 
-  const updateTranslation = (
-    locale: 'pt' | 'es' | 'it',
-    field: 'title' | 'description',
-    value: string
-  ) => {
-    setFormData({
-      ...formData,
-      translations: {
-        ...formData.translations,
-        [locale]: {
-          ...formData.translations[locale],
-          [field]: value,
+  const updateTranslation = useCallback(
+    (
+      locale: 'pt' | 'es' | 'it',
+      field: 'title' | 'description',
+      value: string
+    ) => {
+      setFormData(prev => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            [field]: value,
+          },
         },
-      },
-    });
-  };
+      }));
+    },
+    []
+  );
+
+  const handleCourseChange = useCallback(
+    (courseId: string) => {
+      setFormData(prev => ({
+        ...prev,
+        courseId,
+      }));
+    },
+    []
+  );
+
+  const handleSlugChange = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      slug: value.toLowerCase().replace(/\s/g, '-'),
+    }));
+  }, []);
+
+  const handleImageUrlChange = useCallback(
+    (value: string) => {
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: value,
+      }));
+    },
+    []
+  );
+
+  const handleOrderChange = useCallback((value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      order: parseInt(value) || 1,
+    }));
+  }, []);
+
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
 
   const selectedCourse = courses.find(
-    c => c.id === formData.courseId
+    course => course.id === formData.courseId
   );
-  const courseTranslation =
-    selectedCourse?.translations.find(
-      t => t.locale === locale
-    ) || selectedCourse?.translations[0];
+  const courseTranslation = selectedCourse
+    ? getTranslationByLocale(
+        selectedCourse.translations,
+        locale
+      )
+    : null;
 
   return (
     <form
@@ -268,12 +354,7 @@ export default function CreateModuleForm() {
           ) : (
             <Select
               value={formData.courseId}
-              onValueChange={value =>
-                setFormData({
-                  ...formData,
-                  courseId: value,
-                })
-              }
+              onValueChange={handleCourseChange}
             >
               <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                 <SelectValue
@@ -283,9 +364,10 @@ export default function CreateModuleForm() {
               <SelectContent className="bg-gray-700 border-gray-600">
                 {courses.map(course => {
                   const translation =
-                    course.translations.find(
-                      t => t.locale === locale
-                    ) || course.translations[0];
+                    getTranslationByLocale(
+                      course.translations,
+                      locale
+                    );
                   return (
                     <SelectItem
                       key={course.id}
@@ -337,12 +419,7 @@ export default function CreateModuleForm() {
               placeholder={t('placeholders.slug')}
               value={formData.slug}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  slug: e.target.value
-                    .toLowerCase()
-                    .replace(/\s/g, '-'),
-                })
+                handleSlugChange(e.target.value)
               }
               error={errors.slug}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -365,10 +442,7 @@ export default function CreateModuleForm() {
               placeholder={t('placeholders.imageUrl')}
               value={formData.imageUrl}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  imageUrl: e.target.value,
-                })
+                handleImageUrlChange(e.target.value)
               }
               error={errors.imageUrl}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -393,10 +467,7 @@ export default function CreateModuleForm() {
               placeholder={t('placeholders.order')}
               value={formData.order.toString()}
               onChange={e =>
-                setFormData({
-                  ...formData,
-                  order: parseInt(e.target.value) || 1,
-                })
+                handleOrderChange(e.target.value)
               }
               error={errors.order}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
@@ -414,158 +485,73 @@ export default function CreateModuleForm() {
             {t('translations.title')}
           </h4>
 
-          {/* Português */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇧🇷 {t('translations.portuguese')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.pt.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'pt',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_pt}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.pt.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'pt',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_pt}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Espanhol */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇪🇸 {t('translations.spanish')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.es.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'es',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_es}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.es.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'es',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_es}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
+          {(['pt', 'es', 'it'] as const).map(loc => (
+            <div
+              key={loc}
+              className="border border-gray-700 rounded-lg p-4"
+            >
+              <h5 className="text-white font-medium mb-4 flex items-center gap-2">
+                {loc === 'pt'
+                  ? '🇧🇷'
+                  : loc === 'es'
+                  ? '🇪🇸'
+                  : '🇮🇹'}
+                {t(
+                  `translations.${
+                    loc === 'pt'
+                      ? 'portuguese'
+                      : loc === 'es'
+                      ? 'spanish'
+                      : 'italian'
+                  }`
+                )}
+              </h5>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <Type size={16} />
+                    {t('fields.title')}
+                  </Label>
+                  <TextField
+                    placeholder={t('placeholders.title')}
+                    value={formData.translations[loc].title}
+                    onChange={e =>
+                      updateTranslation(
+                        loc,
+                        'title',
+                        e.target.value
+                      )
+                    }
+                    error={errors[`title_${loc}`]}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <FileText size={16} />
+                    {t('fields.description')}
+                  </Label>
+                  <TextField
+                    placeholder={t(
+                      'placeholders.description'
+                    )}
+                    value={
+                      formData.translations[loc].description
+                    }
+                    onChange={e =>
+                      updateTranslation(
+                        loc,
+                        'description',
+                        e.target.value
+                      )
+                    }
+                    error={errors[`description_${loc}`]}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Italiano */}
-          <div className="border border-gray-700 rounded-lg p-4">
-            <h5 className="text-white font-medium mb-4 flex items-center gap-2">
-              🇮🇹 {t('translations.italian')}
-            </h5>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <Type size={16} />
-                  {t('fields.title')}
-                </Label>
-                <TextField
-                  placeholder={t('placeholders.title')}
-                  value={formData.translations.it.title}
-                  onChange={e =>
-                    updateTranslation(
-                      'it',
-                      'title',
-                      e.target.value
-                    )
-                  }
-                  error={errors.title_it}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-gray-300 flex items-center gap-2">
-                  <FileText size={16} />
-                  {t('fields.description')}
-                </Label>
-                <TextField
-                  placeholder={t(
-                    'placeholders.description'
-                  )}
-                  value={
-                    formData.translations.it.description
-                  }
-                  onChange={e =>
-                    updateTranslation(
-                      'it',
-                      'description',
-                      e.target.value
-                    )
-                  }
-                  error={errors.description_it}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="mt-6 flex justify-end">

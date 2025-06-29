@@ -13,8 +13,10 @@ import {
   User,
   Mail,
   CreditCard,
+  X,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
+import UserEditModal from './UserEditModal';
 
 interface User {
   id: string;
@@ -24,6 +26,14 @@ interface User {
   role: 'admin' | 'student';
   createdAt: string;
   updatedAt: string;
+}
+
+interface UserEditData {
+  id: string;
+  name: string;
+  email: string;
+  cpf: string;
+  role: 'admin' | 'student';
 }
 
 interface UsersResponse {
@@ -41,21 +51,19 @@ export default function UsersList() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [apiSearchTerm, setApiSearchTerm] = useState('');
+  const [apiSearchLoading, setApiSearchLoading] =
+    useState(false);
+  const [isApiSearchActive, setIsApiSearchActive] =
+    useState(false);
   const [viewingUserId, setViewingUserId] = useState<
     string | null
   >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Funções para o modal de visualização
-  const handleViewUser = (userId: string) => {
-    setViewingUserId(userId);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setViewingUserId(null);
-  };
+  const [editingUser, setEditingUser] =
+    useState<UserEditData | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] =
+    useState(false);
 
   // Função para ler cookies no client-side
   const getCookie = (name: string): string | null => {
@@ -67,7 +75,7 @@ export default function UsersList() {
     return null;
   };
 
-  // 1. fetchUsers com useCallback
+  // 1. fetchUsers com useCallback - DEFINIDO PRIMEIRO
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -117,10 +125,154 @@ export default function UsersList() {
     }
   }, [t, toast]);
 
-  // 2. agora sim, inclui fetchUsers no array de deps
+  // Busca por API
+  const searchUsersAPI = useCallback(
+    async (searchQuery: string) => {
+      if (!searchQuery.trim()) {
+        setIsApiSearchActive(false);
+        return;
+      }
+
+      setApiSearchLoading(true);
+      setIsApiSearchActive(true);
+
+      try {
+        const tokenFromCookie = getCookie('token');
+        const tokenFromStorage =
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+        const token = tokenFromCookie || tokenFromStorage;
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        // Detectar tipo de busca (email tem @, CPF tem apenas números, resto é nome)
+        let searchParams = '';
+        const cleanQuery = searchQuery.trim();
+
+        if (cleanQuery.includes('@')) {
+          searchParams = `email=${encodeURIComponent(
+            cleanQuery
+          )}`;
+        } else if (
+          /^\d+$/.test(cleanQuery.replace(/\D/g, ''))
+        ) {
+          searchParams = `cpf=${encodeURIComponent(
+            cleanQuery.replace(/\D/g, '')
+          )}`;
+        } else {
+          searchParams = `name=${encodeURIComponent(
+            cleanQuery
+          )}`;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/students/search?${searchParams}`,
+          { headers }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error(
+              'Acesso negado - É necessário fazer login como administrador'
+            );
+          }
+          throw new Error('Failed to search users');
+        }
+
+        const data: UsersResponse = await response.json();
+        setUsers(data.users);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: t('error.searchTitle'),
+          description:
+            error instanceof Error
+              ? error.message
+              : t('error.searchDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setApiSearchLoading(false);
+      }
+    },
+    [t, toast]
+  );
+
+  // Limpar busca API - AGORA PODE USAR fetchUsers
+  const clearApiSearch = () => {
+    setApiSearchTerm('');
+    setIsApiSearchActive(false);
+    fetchUsers();
+  };
+
+  // Funções para o modal de visualização
+  const handleViewUser = (userId: string) => {
+    setViewingUserId(userId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setViewingUserId(null);
+  };
+
+  // Funções para o modal de edição
+  const handleEditUser = (user: User) => {
+    setEditingUser({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      cpf: user.cpf,
+      role: user.role,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleSaveUser = (updatedUser: UserEditData) => {
+    // Atualizar a lista local de usuários
+    setUsers(prev =>
+      prev.map(user =>
+        user.id === updatedUser.id
+          ? { ...user, ...updatedUser }
+          : user
+      )
+    );
+  };
+
+  // 2. useEffect que carrega usuários iniciais
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  // Debounce para busca por API - AGORA PODE USAR fetchUsers
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (apiSearchTerm) {
+        searchUsersAPI(apiSearchTerm);
+      } else if (isApiSearchActive) {
+        setIsApiSearchActive(false);
+        fetchUsers(); // Voltar para lista completa
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    apiSearchTerm,
+    searchUsersAPI,
+    isApiSearchActive,
+    fetchUsers,
+  ]);
 
   const handleDelete = async (userId: string) => {
     if (!confirm(t('deleteConfirm'))) return;
@@ -176,21 +328,23 @@ export default function UsersList() {
     }
   };
 
-  // Filtra resultados
-  const filteredUsers = users.filter(user => {
-    return (
-      user.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      user.email
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      user.cpf.includes(searchTerm) ||
-      user.role
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-  });
+  // Filtra resultados (apenas para busca local)
+  const filteredUsers = !isApiSearchActive
+    ? users.filter(user => {
+        return (
+          user.name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          user.email
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          user.cpf.includes(searchTerm) ||
+          user.role
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        );
+      })
+    : users;
 
   // Estatísticas
   const totalUsers = users.length;
@@ -226,19 +380,67 @@ export default function UsersList() {
           <Users size={24} className="text-secondary" />
           {t('title')}
         </h3>
-        <div className="relative">
+
+        {/* Busca por API */}
+        <div className="relative mb-4">
           <Search
             size={20}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
           />
           <input
             type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+            placeholder={t('apiSearchPlaceholder')}
+            value={apiSearchTerm}
+            onChange={e => setApiSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-12 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
           />
+          {apiSearchLoading && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary"></div>
+            </div>
+          )}
+          {isApiSearchActive && !apiSearchLoading && (
+            <button
+              onClick={clearApiSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
+
+        {/* Indicador de tipo de busca */}
+        {isApiSearchActive && (
+          <div className="mb-4 p-3 bg-secondary/10 border border-secondary/30 rounded-lg">
+            <p className="text-secondary text-sm flex items-center gap-2">
+              <Search size={16} />
+              {t('apiSearchActive')} "{apiSearchTerm}"
+              <button
+                onClick={clearApiSearch}
+                className="ml-auto text-xs bg-secondary/20 hover:bg-secondary/30 px-2 py-1 rounded"
+              >
+                {t('clearSearch')}
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* Busca local (apenas quando não há busca ativa por API) */}
+        {!isApiSearchActive && (
+          <div className="relative">
+            <Search
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              placeholder={t('localSearchPlaceholder')}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+            />
+          </div>
+        )}
       </div>
 
       {/* Estatísticas */}
@@ -337,6 +539,7 @@ export default function UsersList() {
                     <Eye size={18} />
                   </button>
                   <button
+                    onClick={() => handleEditUser(user)}
                     title={t('actions.edit')}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
@@ -361,7 +564,14 @@ export default function UsersList() {
             className="text-gray-500 mx-auto mb-4"
           />
           <p className="text-gray-400">
-            {searchTerm ? t('noResults') : t('noUsers')}
+            {isApiSearchActive
+              ? t('noApiResults').replace(
+                  '{term}',
+                  apiSearchTerm
+                )
+              : searchTerm
+              ? t('noLocalResults')
+              : t('noUsers')}
           </p>
         </div>
       )}
@@ -371,6 +581,14 @@ export default function UsersList() {
         userId={viewingUserId}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+      />
+
+      {/* Modal de edição */}
+      <UserEditModal
+        user={editingUser}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveUser}
       />
     </div>
   );

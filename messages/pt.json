@@ -702,6 +702,113 @@
       "fetchAddressesTitle": "Erro ao carregar endereços",
       "fetchAddressesDescription": "Não foi possível carregar os endereços do usuário"
     }
+  },
+"usersList": {
+    "title": "Lista de Usuários",
+    "apiSearchPlaceholder": "🔍 Buscar no servidor por nome, email ou CPF...",
+    "localSearchPlaceholder": "🔍 Filtrar lista atual...",
+    "apiSearchActive": "Buscando no servidor:",
+    "clearSearch": "Limpar busca",
+    "stats": {
+      "total": "Total",
+      "admins": "Admins", 
+      "students": "Estudantes"
+    },
+    "roleAdmin": "Admin",
+    "roleStudent": "Estudante", 
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "deleteConfirm": "Tem certeza que deseja excluir este usuário?",
+    "noApiResults": "Nenhum usuário encontrado no servidor para '{term}'",
+    "noLocalResults": "Nenhum usuário encontrado na lista atual",
+    "noUsers": "Nenhum usuário cadastrado",
+    "error": {
+      "fetchTitle": "Erro ao carregar",
+      "fetchDescription": "Não foi possível carregar os usuários",
+      "searchTitle": "Erro na busca",
+      "searchDescription": "Não foi possível buscar usuários no servidor",
+      "deleteTitle": "Erro ao excluir", 
+      "deleteDescription": "Não foi possível excluir o usuário"
+    },
+    "success": {
+      "deleteTitle": "Sucesso",
+      "deleteDescription": "Usuário excluído com sucesso"
+    }
+  },
+  "userView": {
+    "title": "Detalhes do Usuário",
+    "roleAdmin": "Administrador",
+    "roleStudent": "Estudante",
+    "fields": {
+      "id": "ID do Usuário",
+      "email": "E-mail",
+      "cpf": "CPF",
+      "createdAt": "Data de Criação",
+      "updatedAt": "Última Atualização"
+    },
+    "addresses": {
+      "title": "Endereços",
+      "address": "Endereço",
+      "street": "Rua/Avenida",
+      "number": "Número",
+      "complement": "Complemento",
+      "district": "Bairro",
+      "city": "Cidade",
+      "state": "Estado",
+      "country": "País",
+      "postalCode": "CEP",
+      "createdAt": "Cadastrado em",
+      "noAddresses": "Nenhum endereço cadastrado"
+    },
+    "copySuccess": "Copiado!",
+    "copyError": "Erro ao copiar",
+    "userNotFound": "Usuário não encontrado",
+    "close": "Fechar",
+    "error": {
+      "fetchTitle": "Erro ao carregar usuário",
+      "fetchDescription": "Não foi possível carregar os detalhes do usuário",
+      "fetchAddressesTitle": "Erro ao carregar endereços",
+      "fetchAddressesDescription": "Não foi possível carregar os endereços do usuário"
+    }
+  },
+  "userEdit": {
+    "title": "Editar Usuário",
+    "fields": {
+      "name": "Nome Completo",
+      "email": "E-mail",
+      "cpf": "CPF",
+      "role": "Função"
+    },
+    "placeholders": {
+      "name": "Digite o nome completo",
+      "email": "usuario@exemplo.com",
+      "cpf": "12345678901"
+    },
+    "roles": {
+      "student": "Estudante",
+      "admin": "Administrador"
+    },
+    "errors": {
+      "nameRequired": "Nome é obrigatório",
+      "emailRequired": "E-mail é obrigatório",
+      "emailInvalid": "E-mail inválido",
+      "cpfRequired": "CPF é obrigatório",
+      "cpfInvalid": "CPF deve ter 11 dígitos"
+    },
+    "success": {
+      "title": "Usuário atualizado!",
+      "description": "As informações do usuário foram atualizadas com sucesso."
+    },
+    "error": {
+      "title": "Erro ao atualizar",
+      "description": "Não foi possível atualizar as informações do usuário."
+    },
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar"
   }
 }
 

@@ -228,7 +228,10 @@
   },
   "usersList": {
     "title": "Lista de Usuarios",
-    "searchPlaceholder": "Buscar usuarios...",
+    "apiSearchPlaceholder": "🔍 Buscar en el servidor por nombre, email o CPF...",
+    "localSearchPlaceholder": "🔍 Filtrar lista actual...",
+    "apiSearchActive": "Buscando en el servidor:",
+    "clearSearch": "Limpiar búsqueda",
     "stats": {
       "total": "Total",
       "admins": "Admin", 
@@ -242,11 +245,14 @@
       "delete": "Eliminar"
     },
     "deleteConfirm": "¿Está seguro que desea eliminar este usuario?",
-    "noResults": "Ningún usuario encontrado",
+    "noApiResults": "Ningún usuario encontrado en el servidor para '{term}'",
+    "noLocalResults": "Ningún usuario encontrado en la lista actual",
     "noUsers": "Ningún usuario registrado",
     "error": {
       "fetchTitle": "Error al cargar",
       "fetchDescription": "No fue posible cargar los usuarios",
+      "searchTitle": "Error en la búsqueda",
+      "searchDescription": "No fue posible buscar usuarios en el servidor",
       "deleteTitle": "Error al eliminar", 
       "deleteDescription": "No fue posible eliminar el usuario"
     },
@@ -254,6 +260,78 @@
       "deleteTitle": "Éxito",
       "deleteDescription": "Usuario eliminado con éxito"
     }
+  },
+  "userView": {
+    "title": "Detalles del Usuario",
+    "roleAdmin": "Administrador",
+    "roleStudent": "Estudiante",
+    "fields": {
+      "id": "ID del Usuario",
+      "email": "Correo Electrónico",
+      "cpf": "CPF",
+      "createdAt": "Fecha de Creación",
+      "updatedAt": "Última Actualización"
+    },
+    "addresses": {
+      "title": "Direcciones",
+      "address": "Dirección",
+      "street": "Calle/Avenida",
+      "number": "Número",
+      "complement": "Complemento",
+      "district": "Barrio",
+      "city": "Ciudad",
+      "state": "Estado/Provincia",
+      "country": "País",
+      "postalCode": "Código Postal",
+      "createdAt": "Registrado el",
+      "noAddresses": "Ninguna dirección registrada"
+    },
+    "copySuccess": "¡Copiado!",
+    "copyError": "Error al copiar",
+    "userNotFound": "Usuario no encontrado",
+    "close": "Cerrar",
+    "error": {
+      "fetchTitle": "Error al cargar usuario",
+      "fetchDescription": "No fue posible cargar los detalles del usuario",
+      "fetchAddressesTitle": "Error al cargar direcciones",
+      "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
+    }
+  },
+  "userEdit": {
+    "title": "Editar Usuario",
+    "fields": {
+      "name": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "cpf": "CPF",
+      "role": "Función"
+    },
+    "placeholders": {
+      "name": "Ingrese el nombre completo",
+      "email": "usuario@ejemplo.com",
+      "cpf": "12345678901"
+    },
+    "roles": {
+      "student": "Estudiante",
+      "admin": "Administrador"
+    },
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Correo electrónico inválido",
+      "cpfRequired": "CPF es obligatorio",
+      "cpfInvalid": "CPF debe tener 11 dígitos"
+    },
+    "success": {
+      "title": "¡Usuario actualizado!",
+      "description": "La información del usuario fue actualizada con éxito."
+    },
+    "error": {
+      "title": "Error al actualizar",
+      "description": "No fue posible actualizar la información del usuario."
+    },
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar"
   },
   "courses": {
     "create": "Crear Curso",
@@ -702,6 +780,42 @@
         "fetchAddressesTitle": "Error al cargar direcciones",
         "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
       }
-    }
+    },
+    "userEdit": {
+    "title": "Editar Usuario",
+    "fields": {
+      "name": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "cpf": "CPF",
+      "role": "Función"
+    },
+    "placeholders": {
+      "name": "Ingrese el nombre completo",
+      "email": "usuario@ejemplo.com",
+      "cpf": "12345678901"
+    },
+    "roles": {
+      "student": "Estudiante",
+      "admin": "Administrador"
+    },
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Correo electrónico inválido",
+      "cpfRequired": "CPF es obligatorio",
+      "cpfInvalid": "CPF debe tener 11 dígitos"
+    },
+    "success": {
+      "title": "¡Usuario actualizado!",
+      "description": "La información del usuario fue actualizada con éxito."
+    },
+    "error": {
+      "title": "Error al actualizar",
+      "description": "No fue posible actualizar la información del usuario."
+    },
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar"
+  }
 }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+
 import {
   Users,
   BookOpen,
@@ -53,8 +53,7 @@ interface UserInfo {
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
-  const params = useParams();
-  const locale = params.locale as string;
+
   const [activeTab, setActiveTab] = useState('overview');
   const [userInfo, setUserInfo] = useState<UserInfo | null>(
     null

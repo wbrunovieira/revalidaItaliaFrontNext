@@ -44,6 +44,16 @@ interface UsersResponse {
   };
 }
 
+// Função utilitária movida para fora para evitar recriação
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2)
+    return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
 export default function UsersList() {
   const t = useTranslations('Admin.usersList');
   const { toast } = useToast();
@@ -65,35 +75,18 @@ export default function UsersList() {
   const [isEditModalOpen, setIsEditModalOpen] =
     useState(false);
 
-  // Função para ler cookies no client-side
-  const getCookie = (name: string): string | null => {
-    if (typeof document === 'undefined') return null;
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2)
-      return parts.pop()?.split(';').shift() || null;
-    return null;
-  };
-
-  // 1. fetchUsers com useCallback - DEFINIDO PRIMEIRO
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      // Busca o token dos cookies (como na página principal) ou localStorage como fallback
-      const tokenFromCookie = getCookie('token');
-      const tokenFromStorage =
+      const token =
+        getCookie('token') ||
         localStorage.getItem('accessToken') ||
         sessionStorage.getItem('accessToken');
-      const token = tokenFromCookie || tokenFromStorage;
-
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
-
-      // Só adiciona Authorization se tiver token
-      if (token) {
+      if (token)
         headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/students`,
@@ -101,12 +94,11 @@ export default function UsersList() {
       );
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error(
-            'Acesso negado - É necessário fazer login como administrador'
-          );
-        }
-        throw new Error('Failed to fetch users');
+        throw new Error(
+          response.status === 401
+            ? 'Acesso negado - É necessário fazer login como administrador'
+            : 'Failed to fetch users'
+        );
       }
       const data: UsersResponse = await response.json();
       setUsers(data.users);
@@ -125,33 +117,26 @@ export default function UsersList() {
     }
   }, [t, toast]);
 
-  // Busca por API
   const searchUsersAPI = useCallback(
     async (searchQuery: string) => {
       if (!searchQuery.trim()) {
         setIsApiSearchActive(false);
         return;
       }
-
       setApiSearchLoading(true);
       setIsApiSearchActive(true);
 
       try {
-        const tokenFromCookie = getCookie('token');
-        const tokenFromStorage =
+        const token =
+          getCookie('token') ||
           localStorage.getItem('accessToken') ||
           sessionStorage.getItem('accessToken');
-        const token = tokenFromCookie || tokenFromStorage;
-
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         };
-
-        if (token) {
+        if (token)
           headers['Authorization'] = `Bearer ${token}`;
-        }
 
-        // Detectar tipo de busca (email tem @, CPF tem apenas números, resto é nome)
         let searchParams = '';
         const cleanQuery = searchQuery.trim();
 
@@ -175,14 +160,12 @@ export default function UsersList() {
           `${process.env.NEXT_PUBLIC_API_URL}/students/search?${searchParams}`,
           { headers }
         );
-
         if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error(
-              'Acesso negado - É necessário fazer login como administrador'
-            );
-          }
-          throw new Error('Failed to search users');
+          throw new Error(
+            response.status === 401
+              ? 'Acesso negado - É necessário fazer login como administrador'
+              : 'Failed to search users'
+          );
         }
 
         const data: UsersResponse = await response.json();
@@ -204,26 +187,23 @@ export default function UsersList() {
     [t, toast]
   );
 
-  // Limpar busca API - AGORA PODE USAR fetchUsers
-  const clearApiSearch = () => {
+  const clearApiSearch = useCallback(() => {
     setApiSearchTerm('');
     setIsApiSearchActive(false);
     fetchUsers();
-  };
+  }, [fetchUsers]);
 
-  // Funções para o modal de visualização
-  const handleViewUser = (userId: string) => {
+  const handleViewUser = useCallback((userId: string) => {
     setViewingUserId(userId);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setViewingUserId(null);
-  };
+  }, []);
 
-  // Funções para o modal de edição
-  const handleEditUser = (user: User) => {
+  const handleEditUser = useCallback((user: User) => {
     setEditingUser({
       id: user.id,
       name: user.name,
@@ -232,40 +212,85 @@ export default function UsersList() {
       role: user.role,
     });
     setIsEditModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseEditModal = () => {
+  const handleCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
     setEditingUser(null);
-  };
+  }, []);
 
-  const handleSaveUser = (updatedUser: UserEditData) => {
-    // Atualizar a lista local de usuários
-    setUsers(prev =>
-      prev.map(user =>
-        user.id === updatedUser.id
-          ? { ...user, ...updatedUser }
-          : user
-      )
-    );
-  };
+  const handleSaveUser = useCallback(
+    (updatedUser: UserEditData) => {
+      setUsers(prev =>
+        prev.map(user =>
+          user.id === updatedUser.id
+            ? { ...user, ...updatedUser }
+            : user
+        )
+      );
+    },
+    []
+  );
 
-  // 2. useEffect que carrega usuários iniciais
+  const handleDelete = useCallback(
+    async (userId: string) => {
+      if (!confirm(t('deleteConfirm'))) return;
+
+      try {
+        const token =
+          getCookie('token') ||
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (token)
+          headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`,
+          { method: 'DELETE', headers }
+        );
+        if (!response.ok) {
+          throw new Error(
+            response.status === 401
+              ? 'Acesso negado - É necessário fazer login como administrador'
+              : 'Failed to delete user'
+          );
+        }
+        toast({
+          title: t('success.deleteTitle'),
+          description: t('success.deleteDescription'),
+        });
+        await fetchUsers();
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: t('error.deleteTitle'),
+          description:
+            error instanceof Error
+              ? error.message
+              : t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [t, toast, fetchUsers]
+  );
+
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Debounce para busca por API - AGORA PODE USAR fetchUsers
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (apiSearchTerm) {
         searchUsersAPI(apiSearchTerm);
       } else if (isApiSearchActive) {
         setIsApiSearchActive(false);
-        fetchUsers(); // Voltar para lista completa
+        fetchUsers();
       }
     }, 500);
-
     return () => clearTimeout(timeoutId);
   }, [
     apiSearchTerm,
@@ -274,64 +299,9 @@ export default function UsersList() {
     fetchUsers,
   ]);
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm(t('deleteConfirm'))) return;
-
-    try {
-      // Busca o token dos cookies (como na página principal) ou localStorage como fallback
-      const tokenFromCookie = getCookie('token');
-      const tokenFromStorage =
-        localStorage.getItem('accessToken') ||
-        sessionStorage.getItem('accessToken');
-      const token = tokenFromCookie || tokenFromStorage;
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      // Só adiciona Authorization se tiver token
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`,
-        {
-          method: 'DELETE',
-          headers,
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error(
-            'Acesso negado - É necessário fazer login como administrador'
-          );
-        }
-        throw new Error('Failed to delete user');
-      }
-      toast({
-        title: t('success.deleteTitle'),
-        description: t('success.deleteDescription'),
-      });
-      await fetchUsers(); // refetch após apagar
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: t('error.deleteTitle'),
-        description:
-          error instanceof Error
-            ? error.message
-            : t('error.deleteDescription'),
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Filtra resultados (apenas para busca local)
   const filteredUsers = !isApiSearchActive
-    ? users.filter(user => {
-        return (
+    ? users.filter(
+        user =>
           user.name
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
@@ -342,11 +312,9 @@ export default function UsersList() {
           user.role
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
-        );
-      })
+      )
     : users;
 
-  // Estatísticas
   const totalUsers = users.length;
   const adminUsers = users.filter(
     user => user.role === 'admin'
@@ -380,8 +348,6 @@ export default function UsersList() {
           <Users size={24} className="text-secondary" />
           {t('title')}
         </h3>
-
-        {/* Busca por API */}
         <div className="relative mb-4">
           <Search
             size={20}
@@ -408,13 +374,13 @@ export default function UsersList() {
             </button>
           )}
         </div>
-
-        {/* Indicador de tipo de busca */}
         {isApiSearchActive && (
           <div className="mb-4 p-3 bg-secondary/10 border border-secondary/30 rounded-lg">
             <p className="text-secondary text-sm flex items-center gap-2">
               <Search size={16} />
-              {t('apiSearchActive')} "{apiSearchTerm}"
+              {t('apiSearchActive', {
+                term: apiSearchTerm,
+              })}
               <button
                 onClick={clearApiSearch}
                 className="ml-auto text-xs bg-secondary/20 hover:bg-secondary/30 px-2 py-1 rounded"
@@ -424,8 +390,6 @@ export default function UsersList() {
             </p>
           </div>
         )}
-
-        {/* Busca local (apenas quando não há busca ativa por API) */}
         {!isApiSearchActive && (
           <div className="relative">
             <Search
@@ -442,8 +406,6 @@ export default function UsersList() {
           </div>
         )}
       </div>
-
-      {/* Estatísticas */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
@@ -470,92 +432,85 @@ export default function UsersList() {
           </p>
         </div>
       </div>
-
-      {/* Lista */}
       {filteredUsers.length > 0 ? (
         <div className="space-y-4">
-          {filteredUsers.map(user => {
-            return (
-              <div
-                key={user.id}
-                className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
-                  {user.role === 'admin' ? (
-                    <Shield
-                      size={20}
-                      className="text-white"
-                    />
-                  ) : (
-                    <User
-                      size={20}
-                      className="text-white"
-                    />
-                  )}
+          {filteredUsers.map(user => (
+            <div
+              key={user.id}
+              className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
+                {user.role === 'admin' ? (
+                  <Shield
+                    size={20}
+                    className="text-white"
+                  />
+                ) : (
+                  <User size={20} className="text-white" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="text-lg font-semibold text-white">
+                    {user.name}
+                  </h4>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      user.role === 'admin'
+                        ? 'bg-red-900/30 text-red-400 border border-red-800'
+                        : 'bg-blue-900/30 text-blue-400 border border-blue-800'
+                    }`}
+                  >
+                    {user.role === 'admin'
+                      ? t('roleAdmin')
+                      : t('roleStudent')}
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-lg font-semibold text-white">
-                      {user.name}
-                    </h4>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        user.role === 'admin'
-                          ? 'bg-red-900/30 text-red-400 border border-red-800'
-                          : 'bg-blue-900/30 text-blue-400 border border-blue-800'
-                      }`}
-                    >
-                      {user.role === 'admin'
-                        ? t('roleAdmin')
-                        : t('roleStudent')}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Mail size={12} />
-                      {user.email}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <CreditCard size={12} />
-                      {user.cpf}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                    <span>ID: {user.id.slice(0, 8)}…</span>
-                    <span>
-                      Criado:{' '}
-                      {new Date(
-                        user.createdAt
-                      ).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <Mail size={12} />
+                    {user.email}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CreditCard size={12} />
+                    {user.cpf}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleViewUser(user.id)}
-                    title={t('actions.view')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleEditUser(user)}
-                    title={t('actions.edit')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    title={t('actions.delete')}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                  <span>ID: {user.id.slice(0, 8)}…</span>
+                  <span>
+                    Criado:{' '}
+                    {new Date(
+                      user.createdAt
+                    ).toLocaleDateString('pt-BR')}
+                  </span>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleViewUser(user.id)}
+                  title={t('actions.view')}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                >
+                  <Eye size={18} />
+                </button>
+                <button
+                  onClick={() => handleEditUser(user)}
+                  title={t('actions.edit')}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                >
+                  <Edit size={18} />
+                </button>
+                <button
+                  onClick={() => handleDelete(user.id)}
+                  title={t('actions.delete')}
+                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="text-center py-12">
@@ -565,25 +520,19 @@ export default function UsersList() {
           />
           <p className="text-gray-400">
             {isApiSearchActive
-              ? t('noApiResults').replace(
-                  '{term}',
-                  apiSearchTerm
-                )
+              ? // CORREÇÃO: Usar a interpolação do `next-intl` em vez de `.replace()`
+                t('noApiResults', { term: apiSearchTerm })
               : searchTerm
               ? t('noLocalResults')
               : t('noUsers')}
           </p>
         </div>
       )}
-
-      {/* Modal de visualização */}
       <UserViewModal
         userId={viewingUserId}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
       />
-
-      {/* Modal de edição */}
       <UserEditModal
         user={editingUser}
         isOpen={isEditModalOpen}

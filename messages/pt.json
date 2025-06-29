@@ -678,13 +678,29 @@
       "createdAt": "Data de Criação",
       "updatedAt": "Última Atualização"
     },
+    "addresses": {
+      "title": "Endereços",
+      "address": "Endereço",
+      "street": "Rua/Avenida",
+      "number": "Número",
+      "complement": "Complemento",
+      "district": "Bairro",
+      "city": "Cidade",
+      "state": "Estado",
+      "country": "País",
+      "postalCode": "CEP",
+      "createdAt": "Cadastrado em",
+      "noAddresses": "Nenhum endereço cadastrado"
+    },
     "copySuccess": "Copiado!",
     "copyError": "Erro ao copiar",
     "userNotFound": "Usuário não encontrado",
     "close": "Fechar",
     "error": {
       "fetchTitle": "Erro ao carregar usuário",
-      "fetchDescription": "Não foi possível carregar os detalhes do usuário"
+      "fetchDescription": "Não foi possível carregar os detalhes do usuário",
+      "fetchAddressesTitle": "Erro ao carregar endereços",
+      "fetchAddressesDescription": "Não foi possível carregar os endereços do usuário"
     }
   }
 }

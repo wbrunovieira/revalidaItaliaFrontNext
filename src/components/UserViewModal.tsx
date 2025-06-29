@@ -13,6 +13,9 @@ import {
   Clock,
   Copy,
   Check,
+  MapPin,
+  Home,
+  Building,
 } from 'lucide-react';
 
 interface UserDetails {
@@ -21,6 +24,20 @@ interface UserDetails {
   email: string;
   cpf: string;
   role: 'admin' | 'student';
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Address {
+  id: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,7 +59,10 @@ export default function UserViewModal({
   const [user, setUser] = useState<UserDetails | null>(
     null
   );
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingAddresses, setLoadingAddresses] =
+    useState(false);
   const [copiedField, setCopiedField] = useState<
     string | null
   >(null);
@@ -55,6 +75,56 @@ export default function UserViewModal({
     if (parts.length === 2)
       return parts.pop()?.split(';').shift() || null;
     return null;
+  };
+
+  // Fetch user addresses
+  const fetchUserAddresses = async (userId: string) => {
+    setLoadingAddresses(true);
+    try {
+      const tokenFromCookie = getCookie('token');
+      const tokenFromStorage =
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('accessToken');
+      const token = tokenFromCookie || tokenFromStorage;
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userId}`,
+        { headers }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error(
+            'Acesso negado - É necessário fazer login como administrador'
+          );
+        }
+        throw new Error('Failed to fetch user addresses');
+      }
+
+      const addressesData: Address[] =
+        await response.json();
+      setAddresses(addressesData);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: t('error.fetchAddressesTitle'),
+        description:
+          error instanceof Error
+            ? error.message
+            : t('error.fetchAddressesDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingAddresses(false);
+    }
   };
 
   // Fetch user details
@@ -144,8 +214,10 @@ export default function UserViewModal({
   useEffect(() => {
     if (isOpen && userId) {
       fetchUserDetails(userId);
+      fetchUserAddresses(userId);
     } else {
       setUser(null);
+      setAddresses([]);
     }
   }, [isOpen, userId]);
 
@@ -177,9 +249,9 @@ export default function UserViewModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
+      <div className="relative bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <User size={28} className="text-secondary" />
             {t('title')}
@@ -192,8 +264,8 @@ export default function UserViewModal({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Content with scroll */}
+        <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             // Loading state
             <div className="animate-pulse space-y-6">
@@ -396,6 +468,169 @@ export default function UserViewModal({
                   </div>
                 </div>
               </div>
+
+              {/* Addresses Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 border-b border-gray-700 pb-3">
+                  <MapPin
+                    size={24}
+                    className="text-secondary"
+                  />
+                  <h4 className="text-xl font-bold text-white">
+                    {t('addresses.title')}
+                  </h4>
+                </div>
+
+                {loadingAddresses ? (
+                  // Loading addresses
+                  <div className="animate-pulse space-y-3">
+                    {[1, 2].map(i => (
+                      <div
+                        key={i}
+                        className="h-32 bg-gray-700 rounded-lg"
+                      ></div>
+                    ))}
+                  </div>
+                ) : addresses.length > 0 ? (
+                  // Addresses list
+                  <div className="space-y-4">
+                    {addresses.map((address, index) => (
+                      <div
+                        key={address.id}
+                        className="bg-gray-700/50 rounded-lg p-4 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <Home
+                              size={18}
+                              className="text-secondary"
+                            />
+                            {t('addresses.address')}{' '}
+                            {index + 1}
+                          </h5>
+                          <button
+                            onClick={() =>
+                              copyToClipboard(
+                                `${address.street}, ${
+                                  address.number
+                                }${
+                                  address.complement
+                                    ? ', ' +
+                                      address.complement
+                                    : ''
+                                }, ${address.district}, ${
+                                  address.city
+                                } - ${address.state}, ${
+                                  address.country
+                                }, ${address.postalCode}`,
+                                `Endereço ${index + 1}`
+                              )
+                            }
+                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
+                          >
+                            {copiedField ===
+                            `Endereço ${index + 1}` ? (
+                              <Check
+                                size={16}
+                                className="text-green-400"
+                              />
+                            ) : (
+                              <Copy size={16} />
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.street')}
+                            </p>
+                            <p className="text-white">
+                              {address.street}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.number')}
+                            </p>
+                            <p className="text-white">
+                              {address.number}
+                            </p>
+                          </div>
+                          {address.complement && (
+                            <div>
+                              <p className="text-gray-400">
+                                {t('addresses.complement')}
+                              </p>
+                              <p className="text-white">
+                                {address.complement}
+                              </p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.district')}
+                            </p>
+                            <p className="text-white">
+                              {address.district}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.city')}
+                            </p>
+                            <p className="text-white">
+                              {address.city}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.state')}
+                            </p>
+                            <p className="text-white">
+                              {address.state}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.country')}
+                            </p>
+                            <p className="text-white">
+                              {address.country}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">
+                              {t('addresses.postalCode')}
+                            </p>
+                            <p className="text-white font-mono">
+                              {address.postalCode}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-600 text-xs text-gray-500">
+                          <p>
+                            {t('addresses.createdAt')}:{' '}
+                            {formatDate(address.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // No addresses
+                  <div className="text-center py-8">
+                    <Building
+                      size={48}
+                      className="text-gray-500 mx-auto mb-3"
+                    />
+                    <p className="text-gray-400">
+                      {t('addresses.noAddresses')}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             // Error state
@@ -412,7 +647,7 @@ export default function UserViewModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-700">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-700 flex-shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"

@@ -668,7 +668,7 @@
         "deleteDescription": "Non è stato possibile eliminare il video."
       }
     },
-    "userView": {
+   "userView": {
     "title": "Dettagli Utente",
     "roleAdmin": "Amministratore",
     "roleStudent": "Studente",
@@ -679,13 +679,29 @@
       "createdAt": "Data di Creazione",
       "updatedAt": "Ultimo Aggiornamento"
     },
+    "addresses": {
+      "title": "Indirizzi",
+      "address": "Indirizzo",
+      "street": "Via/Corso",
+      "number": "Numero",
+      "complement": "Complemento",
+      "district": "Quartiere",
+      "city": "Città",
+      "state": "Stato/Provincia",
+      "country": "Paese",
+      "postalCode": "Codice Postale",
+      "createdAt": "Registrato il",
+      "noAddresses": "Nessun indirizzo registrato"
+    },
     "copySuccess": "Copiato!",
     "copyError": "Errore nella copia",
     "userNotFound": "Utente non trovato",
     "close": "Chiudi",
     "error": {
       "fetchTitle": "Errore nel caricamento utente",
-      "fetchDescription": "Non è stato possibile caricare i dettagli dell'utente"
+      "fetchDescription": "Non è stato possibile caricare i dettagli dell'utente",
+      "fetchAddressesTitle": "Errore nel caricamento indirizzi",
+      "fetchAddressesDescription": "Non è stato possibile caricare gli indirizzi dell'utente"
     }
   }
 }

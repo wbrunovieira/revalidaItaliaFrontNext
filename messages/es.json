@@ -678,13 +678,29 @@
         "createdAt": "Fecha de Creación",
         "updatedAt": "Última Actualización"
       },
+      "addresses": {
+        "title": "Direcciones",
+        "address": "Dirección",
+        "street": "Calle/Avenida",
+        "number": "Número",
+        "complement": "Complemento",
+        "district": "Barrio",
+        "city": "Ciudad",
+        "state": "Estado/Provincia",
+        "country": "País",
+        "postalCode": "Código Postal",
+        "createdAt": "Registrado el",
+        "noAddresses": "Ninguna dirección registrada"
+      },
       "copySuccess": "¡Copiado!",
       "copyError": "Error al copiar",
       "userNotFound": "Usuario no encontrado",
       "close": "Cerrar",
       "error": {
         "fetchTitle": "Error al cargar usuario",
-        "fetchDescription": "No fue posible cargar los detalles del usuario"
+        "fetchDescription": "No fue posible cargar los detalles del usuario",
+        "fetchAddressesTitle": "Error al cargar direcciones",
+        "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
       }
     }
 }

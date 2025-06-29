@@ -14,6 +14,7 @@ import {
   Mail,
   CreditCard,
 } from 'lucide-react';
+import UserViewModal from './UserViewModal';
 
 interface User {
   id: string;
@@ -40,6 +41,21 @@ export default function UsersList() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewingUserId, setViewingUserId] = useState<
+    string | null
+  >(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Funções para o modal de visualização
+  const handleViewUser = (userId: string) => {
+    setViewingUserId(userId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setViewingUserId(null);
+  };
 
   // Função para ler cookies no client-side
   const getCookie = (name: string): string | null => {
@@ -314,6 +330,7 @@ export default function UsersList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => handleViewUser(user.id)}
                     title={t('actions.view')}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
@@ -348,6 +365,13 @@ export default function UsersList() {
           </p>
         </div>
       )}
+
+      {/* Modal de visualização */}
+      <UserViewModal
+        userId={viewingUserId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

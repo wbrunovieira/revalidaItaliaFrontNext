@@ -666,6 +666,26 @@
         "deleteTitle": "Error al eliminar",
         "deleteDescription": "No fue posible eliminar el video."
       }
+    },
+    "userView": {
+      "title": "Detalles del Usuario",
+      "roleAdmin": "Administrador",
+      "roleStudent": "Estudiante",
+      "fields": {
+        "id": "ID del Usuario",
+        "email": "Correo Electrónico",
+        "cpf": "CPF",
+        "createdAt": "Fecha de Creación",
+        "updatedAt": "Última Actualización"
+      },
+      "copySuccess": "¡Copiado!",
+      "copyError": "Error al copiar",
+      "userNotFound": "Usuario no encontrado",
+      "close": "Cerrar",
+      "error": {
+        "fetchTitle": "Error al cargar usuario",
+        "fetchDescription": "No fue posible cargar los detalles del usuario"
+      }
     }
 }
 }

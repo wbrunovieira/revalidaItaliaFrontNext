@@ -666,6 +666,26 @@
       "deleteTitle": "Erro ao excluir",
       "deleteDescription": "Não foi possível excluir o vídeo."
     }
+  },
+  "userView": {
+    "title": "Detalhes do Usuário",
+    "roleAdmin": "Administrador",
+    "roleStudent": "Estudante",
+    "fields": {
+      "id": "ID do Usuário",
+      "email": "E-mail",
+      "cpf": "CPF",
+      "createdAt": "Data de Criação",
+      "updatedAt": "Última Atualização"
+    },
+    "copySuccess": "Copiado!",
+    "copyError": "Erro ao copiar",
+    "userNotFound": "Usuário não encontrado",
+    "close": "Fechar",
+    "error": {
+      "fetchTitle": "Erro ao carregar usuário",
+      "fetchDescription": "Não foi possível carregar os detalhes do usuário"
+    }
   }
 }
 

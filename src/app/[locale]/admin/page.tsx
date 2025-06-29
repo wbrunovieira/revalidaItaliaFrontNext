@@ -49,7 +49,6 @@ export default function AdminPage() {
 
   return (
     <div className="p-6 bg-primary min-h-screen">
-      {/* Cabeçalho com título e botão de idiomas */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-4xl font-bold text-white">
@@ -145,7 +144,6 @@ export default function AdminPage() {
               {t('tabs.lessons')}
             </TabsTrigger>
 
-            {/* Tab de vídeos movida para a posição correta */}
             <TabsTrigger
               value="videos"
               className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"

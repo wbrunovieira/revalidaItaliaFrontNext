@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import {
@@ -15,6 +15,8 @@ import {
   Package,
   Play,
   Video,
+  User,
+  Shield,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -40,12 +42,96 @@ import CreateLessonForm from '@/components/CreateLessonForm';
 import LessonsList from '@/components/LessonsList';
 import CreateVideoForm from '@/components/CreateVideoForm';
 import VideosList from '@/components/VideosList';
+import LogoutButton from '@/components/LogoutButton';
+
+interface UserInfo {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'student';
+}
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
   const params = useParams();
   const locale = params.locale as string;
   const [activeTab, setActiveTab] = useState('overview');
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(
+    null
+  );
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Função para ler cookies no client-side
+  const getCookie = (name: string): string | null => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2)
+      return parts.pop()?.split(';').shift() || null;
+    return null;
+  };
+
+  // Buscar informações do usuário logado
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const tokenFromCookie = getCookie('token');
+        const tokenFromStorage =
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+        const token = tokenFromCookie || tokenFromStorage;
+
+        if (!token) {
+          setLoadingUser(false);
+          return;
+        }
+
+        // Decodificar JWT para pegar o ID do usuário
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url
+          .replace(/-/g, '+')
+          .replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(
+              c =>
+                '%' +
+                ('00' + c.charCodeAt(0).toString(16)).slice(
+                  -2
+                )
+            )
+            .join('')
+        );
+        const payload = JSON.parse(jsonPayload);
+
+        // Buscar dados completos do usuário na API
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/students/${payload.sub}`,
+          { headers }
+        );
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUserInfo(userData.user);
+        }
+      } catch (error) {
+        console.error(
+          'Erro ao buscar informações do usuário:',
+          error
+        );
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   return (
     <div className="p-6 bg-primary min-h-screen">
@@ -57,9 +143,51 @@ export default function AdminPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm">
               <Globe size={16} />
-              {locale.toUpperCase()}
             </div>
-            <LanguageButton />
+
+            {/* Informações do usuário logado */}
+            {!loadingUser && userInfo && (
+              <div className="flex items-center gap-3 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary">
+                  {userInfo.role === 'admin' ? (
+                    <Shield
+                      size={16}
+                      className="text-white"
+                    />
+                  ) : (
+                    <User
+                      size={16}
+                      className="text-white"
+                    />
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-white text-sm font-medium">
+                    {userInfo.name}
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    {userInfo.role === 'admin'
+                      ? 'Administrador'
+                      : 'Usuário'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {loadingUser && (
+              <div className="flex items-center gap-3 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse"></div>
+                <div className="text-right">
+                  <div className="w-20 h-4 bg-gray-700 rounded animate-pulse mb-1"></div>
+                  <div className="w-16 h-3 bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col items-end gap-2">
+              <LanguageButton />
+              <LogoutButton />
+            </div>
           </div>
         </div>
         <p className="text-gray-300">{t('description')}</p>

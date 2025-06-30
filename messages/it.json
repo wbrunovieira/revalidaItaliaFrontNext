@@ -326,7 +326,10 @@
       "fetchTitle": "Errore nel caricamento dei corsi",
       "fetchDescription": "Non è stato possibile caricare l'elenco dei corsi.",
       "deleteTitle": "Errore nell'eliminazione",
-      "deleteDescription": "Non è stato possibile eliminare il corso."
+      "deleteDescription": "Non è stato possibile eliminare il corso.",
+      "deleteWithDependencies": "Questo corso non può essere eliminato perché ha moduli, lezioni o è utilizzato in qualche percorso. Rimuovi prima tutte le dipendenze.",
+      "unauthorized": "Non hai il permesso di eliminare questo corso.",
+      "notFound": "Corso non trovato."
     }
   },
   "tracks": {
@@ -766,6 +769,39 @@
   "error": {
     "fetchTitle": "Errore nel caricamento del corso",
     "fetchDescription": "Non è stato possibile caricare i dettagli del corso"
+  }
+},
+"courseDependencies": {
+  "title": "Non è possibile eliminare il corso",
+  "subtitle": "Il corso \"{courseName}\" ha le seguenti dipendenze:",
+  "stats": {
+    "modules": "Moduli",
+    "tracks": "Percorsi",
+    "lessons": "Lezioni",
+    "videos": "Video"
+  },
+  "warning": {
+    "title": "Attenzione!",
+    "description": "Per eliminare questo corso, è necessario prima rimuovere tutte le dipendenze elencate di seguito. Questo evita la perdita accidentale di contenuti."
+  },
+  "dependencies": {
+    "title": "Dipendenze trovate:",
+    "lessons": "lezioni",
+    "videos": "video"
+  },
+  "steps": {
+    "title": "Passi per eliminare questo corso:",
+    "step1": "Rimuovi il corso da tutti i percorsi dove viene utilizzato",
+    "step2": "Elimina tutti i video dalle lezioni dei moduli",
+    "step3": "Elimina tutte le lezioni dai moduli",
+    "step4": "Elimina tutti i moduli dal corso"
+  },
+  "footer": {
+    "total": "Totale di {count} dipendenze trovate"
+  },
+  "buttons": {
+    "understand": "Ho capito",
+    "proceedAnyway": "Forza eliminazione"
   }
 }
 }

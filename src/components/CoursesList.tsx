@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import CourseViewModal from './CourseViewModal';
+import CourseDependenciesModal from './CourseDependenciesModal';
 
 interface Translation {
   locale: string;
@@ -26,6 +27,8 @@ interface Course {
   slug: string;
   imageUrl: string;
   translations: Translation[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function CoursesList() {
@@ -37,22 +40,63 @@ export default function CoursesList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<
+    string | null
+  >(null);
 
-  // Estados para o modal
+  // Estados para o modal de visualização
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<
     string | null
   >(null);
 
+  // Estados para o modal de dependências
+  const [dependenciesModalOpen, setDependenciesModalOpen] =
+    useState(false);
+  const [selectedCourseName, setSelectedCourseName] =
+    useState('');
+  const [dependenciesData, setDependenciesData] =
+    useState<any>(null);
+
+  // Função auxiliar para obter o token
+  const getAuthToken = () => {
+    const getCookie = (name: string): string | null => {
+      if (typeof document === 'undefined') return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2)
+        return parts.pop()?.split(';').shift() || null;
+      return null;
+    };
+
+    return (
+      getCookie('token') ||
+      localStorage.getItem('accessToken') ||
+      sessionStorage.getItem('accessToken')
+    );
+  };
+
   const fetchCourses = useCallback(async () => {
     setLoading(true);
     try {
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+        { headers }
       );
+
       if (!response.ok) {
         throw new Error('Failed to fetch courses');
       }
+
       const data: Course[] = await response.json();
       setCourses(data);
     } catch (error) {
@@ -71,33 +115,108 @@ export default function CoursesList() {
     fetchCourses();
   }, [fetchCourses]);
 
-  const handleDelete = async (courseId: string) => {
-    if (!confirm(t('deleteConfirm'))) return;
+  const handleDelete = async (
+    courseId: string,
+    skipConfirmation = false
+  ) => {
+    if (!skipConfirmation && !confirm(t('deleteConfirm')))
+      return;
+
+    // Encontrar o nome do curso
+    const course = courses.find(c => c.id === courseId);
+    const courseName =
+      course?.translations.find(tr => tr.locale === locale)
+        ?.title ||
+      course?.translations[0]?.title ||
+      course?.slug ||
+      '';
+
+    setDeletingId(courseId);
 
     try {
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`,
-        { method: 'DELETE' }
+        {
+          method: 'DELETE',
+          headers,
+        }
       );
-      if (!response.ok) {
-        throw new Error('Failed to delete course');
+
+      // Tentar obter dados da resposta
+      let responseData: any = null;
+      try {
+        responseData = await response.json();
+      } catch {
+        // Se não conseguir fazer parse do JSON, continuar sem dados
       }
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Curso não encontrado');
+        } else if (response.status === 401) {
+          throw new Error(
+            'Não autorizado - faça login novamente'
+          );
+        } else if (
+          response.status === 400 &&
+          responseData?.error === 'COURSE_HAS_DEPENDENCIES'
+        ) {
+          // Abrir modal de dependências
+          setSelectedCourseName(courseName);
+          setDependenciesData(responseData);
+          setDependenciesModalOpen(true);
+          return; // Não mostrar toast de erro, apenas abrir o modal
+        } else if (
+          response.status === 400 ||
+          response.status === 409
+        ) {
+          throw new Error(
+            responseData?.message ||
+              'Não é possível excluir este curso. Verifique se não há módulos, lições ou se o curso não está sendo usado em alguma trilha.'
+          );
+        } else {
+          throw new Error(
+            responseData?.message || 'Erro ao excluir curso'
+          );
+        }
+      }
+
       toast({
         title: t('success.deleteTitle'),
         description: t('success.deleteDescription'),
       });
+
+      // Recarregar a lista de cursos
       await fetchCourses();
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao deletar curso:', error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : t('error.deleteDescription');
+
       toast({
         title: t('error.deleteTitle'),
-        description: t('error.deleteDescription'),
+        description: message,
         variant: 'destructive',
       });
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const handleView = (courseId: string) => {
+    if (deletingId !== null) return; // Não abrir modal durante exclusão
     setSelectedCourseId(courseId);
     setViewModalOpen(true);
   };
@@ -159,7 +278,8 @@ export default function CoursesList() {
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+              disabled={deletingId !== null}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         </div>
@@ -243,14 +363,16 @@ export default function CoursesList() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleView(course.id)}
+                      disabled={deletingId !== null}
                       title={t('actions.view')}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Eye size={18} />
                     </button>
                     <button
+                      disabled={deletingId !== null}
                       title={t('actions.edit')}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Edit size={18} />
                     </button>
@@ -258,10 +380,15 @@ export default function CoursesList() {
                       onClick={() =>
                         handleDelete(course.id)
                       }
+                      disabled={deletingId === course.id}
                       title={t('actions.delete')}
-                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Trash2 size={18} />
+                      {deletingId === course.id ? (
+                        <div className="animate-spin h-[18px] w-[18px] border-2 border-red-400 border-t-transparent rounded-full" />
+                      ) : (
+                        <Trash2 size={18} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -289,6 +416,17 @@ export default function CoursesList() {
           setViewModalOpen(false);
           setSelectedCourseId(null);
         }}
+      />
+
+      {/* Modal de dependências */}
+      <CourseDependenciesModal
+        isOpen={dependenciesModalOpen}
+        onClose={() => {
+          setDependenciesModalOpen(false);
+          setDependenciesData(null);
+        }}
+        courseName={selectedCourseName}
+        dependenciesData={dependenciesData}
       />
     </>
   );

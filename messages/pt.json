@@ -321,12 +321,15 @@
       "deleteTitle": "Curso excluído!",
       "deleteDescription": "O curso foi excluído com sucesso."
     },
-    "error": {
-      "fetchTitle": "Erro ao carregar cursos",
-      "fetchDescription": "Não foi possível carregar a lista de cursos.",
-      "deleteTitle": "Erro ao excluir",
-      "deleteDescription": "Não foi possível excluir o curso."
-    }
+  "error": {
+  "fetchTitle": "Erro ao carregar cursos",
+  "fetchDescription": "Não foi possível carregar a lista de cursos.",
+  "deleteTitle": "Erro ao excluir",
+  "deleteDescription": "Não foi possível excluir o curso.",
+  "deleteWithDependencies": "Este curso não pode ser excluído pois possui módulos, lições ou está sendo usado em alguma trilha. Remova primeiro todas as dependências.",
+  "unauthorized": "Você não tem permissão para excluir este curso.",
+  "notFound": "Curso não encontrado."
+}
   },
   "tracks": {
     "create": "Criar Trilha",
@@ -836,6 +839,39 @@
   "error": {
     "fetchTitle": "Erro ao carregar curso",
     "fetchDescription": "Não foi possível carregar os detalhes do curso"
+  }
+},
+"courseDependencies": {
+  "title": "Não é possível excluir o curso",
+  "subtitle": "O curso \"{courseName}\" possui as seguintes dependências:",
+  "stats": {
+    "modules": "Módulos",
+    "tracks": "Trilhas",
+    "lessons": "Aulas",
+    "videos": "Vídeos"
+  },
+  "warning": {
+    "title": "Atenção!",
+    "description": "Para excluir este curso, você precisa primeiro remover todas as dependências listadas abaixo. Isso evita a perda acidental de conteúdo."
+  },
+  "dependencies": {
+    "title": "Dependências encontradas:",
+    "lessons": "aulas",
+    "videos": "vídeos"
+  },
+  "steps": {
+    "title": "Passos para excluir este curso:",
+    "step1": "Remova o curso de todas as trilhas onde está sendo usado",
+    "step2": "Delete todos os vídeos das aulas dos módulos",
+    "step3": "Delete todas as aulas dos módulos",
+    "step4": "Delete todos os módulos do curso"
+  },
+  "footer": {
+    "total": "Total de {count} dependências encontradas"
+  },
+  "buttons": {
+    "understand": "Entendi",
+    "proceedAnyway": "Forçar exclusão"
   }
 }
 

@@ -13,6 +13,7 @@ import {
   Globe,
 } from 'lucide-react';
 import Image from 'next/image';
+import CourseViewModal from './CourseViewModal';
 
 interface Translation {
   locale: string;
@@ -37,7 +38,12 @@ export default function CoursesList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 1. fetchCourses com useCallback
+  // Estados para o modal
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<
+    string | null
+  >(null);
+
   const fetchCourses = useCallback(async () => {
     setLoading(true);
     try {
@@ -50,7 +56,7 @@ export default function CoursesList() {
       const data: Course[] = await response.json();
       setCourses(data);
     } catch (error) {
-      console.error(error); // usa a variável error
+      console.error(error);
       toast({
         title: t('error.fetchTitle'),
         description: t('error.fetchDescription'),
@@ -61,7 +67,6 @@ export default function CoursesList() {
     }
   }, [t, toast]);
 
-  // 2. agora sim, inclui fetchCourses no array de deps
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
@@ -81,9 +86,9 @@ export default function CoursesList() {
         title: t('success.deleteTitle'),
         description: t('success.deleteDescription'),
       });
-      await fetchCourses(); // refetch após apagar
+      await fetchCourses();
     } catch (error) {
-      console.error(error); // usa a variável error
+      console.error(error);
       toast({
         title: t('error.deleteTitle'),
         description: t('error.deleteDescription'),
@@ -92,7 +97,11 @@ export default function CoursesList() {
     }
   };
 
-  // Filtra resultados
+  const handleView = (courseId: string) => {
+    setSelectedCourseId(courseId);
+    setViewModalOpen(true);
+  };
+
   const filteredCourses = courses.filter(course => {
     const tr =
       course.translations.find(
@@ -130,138 +139,157 @@ export default function CoursesList() {
   }
 
   return (
-    <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
-          <BookOpen size={24} className="text-secondary" />
-          {t('title')}
-        </h3>
-        <div className="relative">
-          <Search
-            size={20}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
-          />
+    <>
+      <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+            <BookOpen
+              size={24}
+              className="text-secondary"
+            />
+            {t('title')}
+          </h3>
+          <div className="relative">
+            <Search
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              placeholder={t('searchPlaceholder')}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
-            {courses.length}
-          </p>
-          <p className="text-sm text-gray-400">
-            {t('stats.total')}
-          </p>
+        {/* Estatísticas */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold text-white">
+              {courses.length}
+            </p>
+            <p className="text-sm text-gray-400">
+              {t('stats.total')}
+            </p>
+          </div>
+          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold text-white">
+              {
+                courses.filter(
+                  c => c.translations.length === 3
+                ).length
+              }
+            </p>
+            <p className="text-sm text-gray-400">
+              {t('stats.complete')}
+            </p>
+          </div>
+          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold text-white">
+              {
+                courses.filter(
+                  c => c.translations.length < 3
+                ).length
+              }
+            </p>
+            <p className="text-sm text-gray-400">
+              {t('stats.incomplete')}
+            </p>
+          </div>
         </div>
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
-            {
-              courses.filter(
-                c => c.translations.length === 3
-              ).length
-            }
-          </p>
-          <p className="text-sm text-gray-400">
-            {t('stats.complete')}
-          </p>
-        </div>
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
-            {
-              courses.filter(c => c.translations.length < 3)
-                .length
-            }
-          </p>
-          <p className="text-sm text-gray-400">
-            {t('stats.incomplete')}
-          </p>
-        </div>
-      </div>
 
-      {/* Lista */}
-      {filteredCourses.length > 0 ? (
-        <div className="space-y-4">
-          {filteredCourses.map(course => {
-            const tr =
-              course.translations.find(
-                tr => tr.locale === locale
-              ) ?? course.translations[0];
-            return (
-              <div
-                key={course.id}
-                className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
-                  <Image
-                    src={course.imageUrl}
-                    alt={tr.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold text-white">
-                    {tr.title}
-                  </h4>
-                  <p className="text-sm text-gray-400 line-clamp-1">
-                    {tr.description}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                    <span>Slug: {course.slug}</span>
-                    <span>
-                      ID: {course.id.slice(0, 8)}…
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Globe size={12} />
-                      {course.translations.length}/3{' '}
-                      {t('languages')}
-                    </span>
+        {/* Lista */}
+        {filteredCourses.length > 0 ? (
+          <div className="space-y-4">
+            {filteredCourses.map(course => {
+              const tr =
+                course.translations.find(
+                  tr => tr.locale === locale
+                ) ?? course.translations[0];
+              return (
+                <div
+                  key={course.id}
+                  className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
+                    <Image
+                      src={course.imageUrl}
+                      alt={tr.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-white">
+                      {tr.title}
+                    </h4>
+                    <p className="text-sm text-gray-400 line-clamp-1">
+                      {tr.description}
+                    </p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>Slug: {course.slug}</span>
+                      <span>
+                        ID: {course.id.slice(0, 8)}…
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Globe size={12} />
+                        {course.translations.length}/3{' '}
+                        {t('languages')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleView(course.id)}
+                      title={t('actions.view')}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      title={t('actions.edit')}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDelete(course.id)
+                      }
+                      title={t('actions.delete')}
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    title={t('actions.view')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    title={t('actions.edit')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(course.id)}
-                    title={t('actions.delete')}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <BookOpen
-            size={64}
-            className="text-gray-500 mx-auto mb-4"
-          />
-          <p className="text-gray-400">
-            {searchTerm ? t('noResults') : t('noCourses')}
-          </p>
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <BookOpen
+              size={64}
+              className="text-gray-500 mx-auto mb-4"
+            />
+            <p className="text-gray-400">
+              {searchTerm ? t('noResults') : t('noCourses')}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Modal de visualização */}
+      <CourseViewModal
+        courseId={selectedCourseId}
+        isOpen={viewModalOpen}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedCourseId(null);
+        }}
+      />
+    </>
   );
 }

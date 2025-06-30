@@ -739,6 +739,34 @@
     "save": "Salva",
     "saving": "Salvataggio...",
     "cancel": "Annulla"
+  },
+  "courseView": {
+  "title": "Dettagli del Corso",
+  "fields": {
+    "id": "ID del Corso",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL dell'Immagine",
+    "createdAt": "Data di Creazione",
+    "updatedAt": "Ultimo Aggiornamento",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "copySuccess": "Copiato!",
+  "copyDescription": "copiato negli appunti",
+  "copyError": "Errore nella copia",
+  "copyErrorDescription": "Non è stato possibile copiare negli appunti",
+  "courseNotFound": "Corso non trovato",
+  "close": "Chiudi",
+  "error": {
+    "fetchTitle": "Errore nel caricamento del corso",
+    "fetchDescription": "Non è stato possibile caricare i dettagli del corso"
   }
+}
 }
 }

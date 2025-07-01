@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import TrackViewModal from './TrackViewModal';
+import TrackEditModal from './TrackEditModal';
 
 interface Translation {
   locale: string;
@@ -34,6 +35,8 @@ interface Track {
   imageUrl: string;
   translations: Translation[];
   courses?: Course[];
+  courseIds?: string[];
+  trackCourses?: { course: Course }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -51,6 +54,9 @@ export default function TracksList() {
   const [selectedTrackId, setSelectedTrackId] = useState<
     string | null
   >(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedTrackForEdit, setSelectedTrackForEdit] =
+    useState<any>(null);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -63,30 +69,6 @@ export default function TracksList() {
       }
     },
     []
-  );
-
-  // Função para buscar cursos de uma trilha específica
-  const fetchCoursesForTrack = useCallback(
-    async (trackId: string): Promise<Course[]> => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}/courses`
-        );
-
-        if (!response.ok) {
-          return [];
-        }
-
-        return await response.json();
-      } catch (error) {
-        handleApiError(
-          error,
-          `Error fetching courses for track ${trackId}`
-        );
-        return [];
-      }
-    },
-    [handleApiError]
   );
 
   // Função principal para buscar todos os dados
@@ -107,17 +89,30 @@ export default function TracksList() {
       const tracksData: Track[] =
         await tracksResponse.json();
 
-      // Buscar cursos para cada trilha
-      const tracksWithCourses = await Promise.all(
-        tracksData.map(async track => {
-          const courses = await fetchCoursesForTrack(
-            track.id
-          );
-          return { ...track, courses };
-        })
-      );
+      // Processar as tracks para garantir que tenham o campo courses
+      const processedTracks = tracksData.map(track => {
+        // Se os cursos vierem em trackCourses, extrair deles
+        let courses: Course[] = [];
 
-      setTracks(tracksWithCourses);
+        if (track.courses && Array.isArray(track.courses)) {
+          courses = track.courses;
+        } else if (
+          track.trackCourses &&
+          Array.isArray(track.trackCourses)
+        ) {
+          // Se os cursos vierem aninhados em trackCourses
+          courses = track.trackCourses
+            .map(tc => tc.course)
+            .filter(course => course != null);
+        }
+
+        return {
+          ...track,
+          courses,
+        };
+      });
+
+      setTracks(processedTracks);
     } catch (error) {
       handleApiError(error, 'Tracks fetch error');
       toast({
@@ -128,7 +123,7 @@ export default function TracksList() {
     } finally {
       setLoading(false);
     }
-  }, [toast, t, handleApiError, fetchCoursesForTrack]);
+  }, [toast, t, handleApiError]);
 
   useEffect(() => {
     fetchData();
@@ -174,6 +169,69 @@ export default function TracksList() {
     setSelectedTrackId(trackId);
     setViewModalOpen(true);
   }, []);
+
+  const handleEdit = useCallback(
+    async (trackId: string) => {
+      try {
+        // Buscar detalhes completos da trilha
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            'Erro ao buscar detalhes da trilha'
+          );
+        }
+
+        const trackData = await response.json();
+        console.log(
+          'Dados da trilha para edição:',
+          trackData
+        );
+
+        // Processar os dados para garantir que tenham o formato correto
+        const processedTrack = {
+          ...trackData,
+          courseIds: trackData.courseIds || [],
+        };
+
+        // Se courseIds estiver vazio, tentar extrair de outras fontes
+        if (processedTrack.courseIds.length === 0) {
+          if (
+            trackData.trackCourses &&
+            Array.isArray(trackData.trackCourses)
+          ) {
+            processedTrack.courseIds =
+              trackData.trackCourses.map(
+                (tc: any) => tc.courseId
+              );
+          } else if (
+            trackData.courses &&
+            Array.isArray(trackData.courses)
+          ) {
+            processedTrack.courseIds =
+              trackData.courses.map((c: any) => c.id);
+          }
+        }
+
+        setSelectedTrackForEdit(processedTrack);
+        setEditModalOpen(true);
+      } catch (error) {
+        console.error(
+          'Erro ao carregar trilha para edição:',
+          error
+        );
+        toast({
+          title: 'Erro ao carregar trilha',
+          description:
+            'Não foi possível carregar os dados da trilha para edição',
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast]
+  );
 
   const getTranslationByLocale = useCallback(
     (translations: Translation[], targetLocale: string) => {
@@ -366,6 +424,7 @@ export default function TracksList() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => handleEdit(track.id)}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                       title={t('actions.edit')}
                     >
@@ -454,6 +513,21 @@ export default function TracksList() {
         onClose={() => {
           setViewModalOpen(false);
           setSelectedTrackId(null);
+        }}
+      />
+
+      {/* Modal de Edição */}
+      <TrackEditModal
+        track={selectedTrackForEdit}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedTrackForEdit(null);
+        }}
+        onSave={() => {
+          setEditModalOpen(false);
+          setSelectedTrackForEdit(null);
+          fetchData();
         }}
       />
     </div>

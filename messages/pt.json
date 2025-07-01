@@ -950,6 +950,57 @@
     "fetchTitle": "Erro ao carregar trilha",
     "fetchDescription": "Não foi possível carregar os detalhes da trilha"
   }
+},
+
+"trackEdit": {
+  "title": "Editar Trilha",
+  "fields": {
+    "slug": "Slug (URL)",
+    "imageUrl": "URL da Imagem",
+    "title": "Título",
+    "description": "Descrição"
+  },
+  "placeholders": {
+    "slug": "trilha-iniciantes",
+    "imageUrl": "/images/trilha-exemplo.jpg",
+    "title": "Digite o título da trilha",
+    "description": "Digite a descrição da trilha"
+  },
+  "hints": {
+    "slug": "Use apenas letras minúsculas, números e hífens"
+  },
+  "courses": {
+    "title": "Cursos da Trilha",
+    "description": "Selecione um ou mais cursos para compor esta trilha",
+    "noCourses": "Nenhum curso disponível para seleção"
+  },
+  "translations": {
+    "title": "Traduções",
+    "portuguese": "Português",
+    "spanish": "Espanhol",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "Slug é obrigatório",
+    "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
+    "imageRequired": "URL da imagem é obrigatória",
+    "coursesRequired": "Selecione pelo menos um curso",
+    "titleRequired": "Título é obrigatório",
+    "descriptionRequired": "Descrição é obrigatória",
+    "fetchCoursesTitle": "Erro ao carregar cursos",
+    "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
+  },
+  "success": {
+    "title": "Trilha atualizada!",
+    "description": "As informações da trilha foram atualizadas com sucesso."
+  },
+  "error": {
+    "title": "Erro ao atualizar",
+    "description": "Não foi possível atualizar as informações da trilha."
+  },
+  "save": "Salvar",
+  "saving": "Salvando...",
+  "cancel": "Cancelar"
 }
 }
 

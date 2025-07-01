@@ -878,6 +878,56 @@
     "fetchTitle": "Errore nel caricamento del percorso",
     "fetchDescription": "Non è stato possibile caricare i dettagli del percorso"
   }
+},
+"trackEdit": {
+  "title": "Modifica Percorso",
+  "fields": {
+    "slug": "Slug (URL)",
+    "imageUrl": "URL dell'Immagine",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "placeholders": {
+    "slug": "percorso-principianti",
+    "imageUrl": "/images/percorso-esempio.jpg",
+    "title": "Inserisci il titolo del percorso",
+    "description": "Inserisci la descrizione del percorso"
+  },
+  "hints": {
+    "slug": "Usa solo lettere minuscole, numeri e trattini"
+  },
+  "courses": {
+    "title": "Corsi del Percorso",
+    "description": "Seleziona uno o più corsi per comporre questo percorso",
+    "noCourses": "Nessun corso disponibile per la selezione"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "Slug è obbligatorio",
+    "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini",
+    "imageRequired": "URL dell'immagine è obbligatoria",
+    "coursesRequired": "Seleziona almeno un corso",
+    "titleRequired": "Titolo è obbligatorio",
+    "descriptionRequired": "Descrizione è obbligatoria",
+    "fetchCoursesTitle": "Errore nel caricamento dei corsi",
+    "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili"
+  },
+  "success": {
+    "title": "Percorso aggiornato!",
+    "description": "Le informazioni del percorso sono state aggiornate con successo."
+  },
+  "error": {
+    "title": "Errore nell'aggiornamento",
+    "description": "Non è stato possibile aggiornare le informazioni del percorso."
+  },
+  "save": "Salva",
+  "saving": "Salvataggio...",
+  "cancel": "Annulla"
 }
 }
 }

@@ -38,6 +38,7 @@ interface TrackViewData {
   courseIds: string[];
   translations: Translation[];
   courses?: Course[];
+  trackCourses?: { course: Course }[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -70,7 +71,7 @@ export default function TrackViewModal({
 
     setLoading(true);
     try {
-      // Buscar trilha
+      // Buscar trilha com detalhes completos
       const trackResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
       );
@@ -81,24 +82,27 @@ export default function TrackViewModal({
 
       const trackData: TrackViewData =
         await trackResponse.json();
-      setTrack(trackData);
 
-      // Buscar cursos da trilha
+      // Processar os cursos da trilha
+      let courses: Course[] = [];
+
       if (
-        trackData.courseIds &&
-        trackData.courseIds.length > 0
+        trackData.courses &&
+        Array.isArray(trackData.courses)
       ) {
-        const coursesResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}/courses`
-        );
-
-        if (coursesResponse.ok) {
-          const coursesData = await coursesResponse.json();
-          setCourses(coursesData);
-        }
-      } else {
-        setCourses([]);
+        courses = trackData.courses;
+      } else if (
+        trackData.trackCourses &&
+        Array.isArray(trackData.trackCourses)
+      ) {
+        // Se os cursos vierem aninhados em trackCourses
+        courses = trackData.trackCourses
+          .map(tc => tc.course)
+          .filter(course => course != null);
       }
+
+      setTrack(trackData);
+      setCourses(courses);
     } catch (error) {
       console.error(
         'Erro ao carregar detalhes da trilha:',

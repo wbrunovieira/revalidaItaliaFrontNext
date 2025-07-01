@@ -955,6 +955,57 @@
     "fetchTitle": "Error al cargar ruta",
     "fetchDescription": "No fue posible cargar los detalles de la ruta"
   }
+},
+
+"trackEdit": {
+  "title": "Editar Ruta",
+  "fields": {
+    "slug": "Slug (URL)",
+    "imageUrl": "URL de la Imagen",
+    "title": "Título",
+    "description": "Descripción"
+  },
+  "placeholders": {
+    "slug": "ruta-principiantes",
+    "imageUrl": "/images/ruta-ejemplo.jpg",
+    "title": "Ingrese el título de la ruta",
+    "description": "Ingrese la descripción de la ruta"
+  },
+  "hints": {
+    "slug": "Use solo letras minúsculas, números y guiones"
+  },
+  "courses": {
+    "title": "Cursos de la Ruta",
+    "description": "Seleccione uno o más cursos para componer esta ruta",
+    "noCourses": "No hay cursos disponibles para seleccionar"
+  },
+  "translations": {
+    "title": "Traducciones",
+    "portuguese": "Portugués",
+    "spanish": "Español",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "Slug es obligatorio",
+    "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+    "imageRequired": "URL de la imagen es obligatoria",
+    "coursesRequired": "Seleccione al menos un curso",
+    "titleRequired": "Título es obligatorio",
+    "descriptionRequired": "Descripción es obligatoria",
+    "fetchCoursesTitle": "Error al cargar cursos",
+    "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+  },
+  "success": {
+    "title": "¡Ruta actualizada!",
+    "description": "La información de la ruta fue actualizada con éxito."
+  },
+  "error": {
+    "title": "Error al actualizar",
+    "description": "No fue posible actualizar la información de la ruta."
+  },
+  "save": "Guardar",
+  "saving": "Guardando...",
+  "cancel": "Cancelar"
 }
 }
 }

@@ -873,6 +873,48 @@
     "understand": "Entendi",
     "proceedAnyway": "Forçar exclusão"
   }
+},
+"courseEdit": {
+  "title": "Editar Curso",
+  "fields": {
+    "slug": "Slug (URL)",
+    "imageUrl": "URL da Imagem",
+    "title": "Título",
+    "description": "Descrição"
+  },
+  "placeholders": {
+    "slug": "matematica-basica",
+    "imageUrl": "/images/curso-matematica.jpg",
+    "title": "Digite o título do curso",
+    "description": "Digite a descrição do curso"
+  },
+  "hints": {
+    "slug": "Use apenas letras minúsculas, números e hífens"
+  },
+  "translations": {
+    "title": "Traduções",
+    "portuguese": "Português",
+    "spanish": "Espanhol",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "Slug é obrigatório",
+    "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
+    "imageRequired": "URL da imagem é obrigatória",
+    "titleRequired": "Título é obrigatório",
+    "descriptionRequired": "Descrição é obrigatória"
+  },
+  "success": {
+    "title": "Curso atualizado!",
+    "description": "As informações do curso foram atualizadas com sucesso."
+  },
+  "error": {
+    "title": "Erro ao atualizar",
+    "description": "Não foi possível atualizar as informações do curso."
+  },
+  "save": "Salvar",
+  "saving": "Salvando...",
+  "cancel": "Cancelar"
 }
 
 }

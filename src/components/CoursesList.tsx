@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import CourseViewModal from './CourseViewModal';
+import CourseEditModal from './CourseEditModal';
 import CourseDependenciesModal from './CourseDependenciesModal';
 
 interface Translation {
@@ -49,6 +50,11 @@ export default function CoursesList() {
   const [selectedCourseId, setSelectedCourseId] = useState<
     string | null
   >(null);
+
+  // Estados para o modal de edição
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] =
+    useState<Course | null>(null);
 
   // Estados para o modal de dependências
   const [dependenciesModalOpen, setDependenciesModalOpen] =
@@ -221,6 +227,12 @@ export default function CoursesList() {
     setViewModalOpen(true);
   };
 
+  const handleEdit = (course: Course) => {
+    if (deletingId !== null) return; // Não abrir modal durante exclusão
+    setEditingCourse(course);
+    setEditModalOpen(true);
+  };
+
   const filteredCourses = courses.filter(course => {
     const tr =
       course.translations.find(
@@ -370,6 +382,7 @@ export default function CoursesList() {
                       <Eye size={18} />
                     </button>
                     <button
+                      onClick={() => handleEdit(course)}
                       disabled={deletingId !== null}
                       title={t('actions.edit')}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
@@ -415,6 +428,21 @@ export default function CoursesList() {
         onClose={() => {
           setViewModalOpen(false);
           setSelectedCourseId(null);
+        }}
+      />
+
+      {/* Modal de edição */}
+      <CourseEditModal
+        course={editingCourse}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingCourse(null);
+        }}
+        onSave={() => {
+          setEditModalOpen(false);
+          setEditingCourse(null);
+          fetchCourses(); // Recarregar a lista
         }}
       />
 

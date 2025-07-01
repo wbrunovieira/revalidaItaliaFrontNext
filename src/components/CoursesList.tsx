@@ -32,6 +32,33 @@ interface Course {
   updatedAt?: string;
 }
 
+interface DependencyEntity {
+  type: 'module' | 'track';
+  id: string;
+  name: string;
+  description: string;
+  actionRequired: string;
+  relatedEntities?: {
+    lessons?: number;
+    videos?: number;
+  };
+}
+
+interface DependenciesData {
+  error: string;
+  message: string;
+  canDelete: boolean;
+  dependencies: DependencyEntity[];
+  summary: {
+    modules: number;
+    tracks: number;
+    lessons: number;
+    videos: number;
+  };
+  totalDependencies: number;
+  actionRequired: string;
+}
+
 export default function CoursesList() {
   const t = useTranslations('Admin.coursesList');
   const { toast } = useToast();
@@ -62,7 +89,7 @@ export default function CoursesList() {
   const [selectedCourseName, setSelectedCourseName] =
     useState('');
   const [dependenciesData, setDependenciesData] =
-    useState<any>(null);
+    useState<DependenciesData | null>(null);
 
   // Função auxiliar para obter o token
   const getAuthToken = () => {
@@ -80,6 +107,47 @@ export default function CoursesList() {
       localStorage.getItem('accessToken') ||
       sessionStorage.getItem('accessToken')
     );
+  };
+
+  // Função auxiliar para verificar se é uma resposta de dependências
+  const isDependenciesResponse = (
+    data: unknown
+  ): data is DependenciesData => {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'error' in data &&
+      'dependencies' in data &&
+      'summary' in data
+    );
+  };
+
+  // Função auxiliar para verificar se tem erro de dependências
+  const hasCourseDependenciesError = (
+    data: unknown
+  ): boolean => {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'error' in data &&
+      (data as { error?: unknown }).error ===
+        'COURSE_HAS_DEPENDENCIES'
+    );
+  };
+
+  // Função auxiliar para obter mensagem de erro
+  const getErrorMessage = (
+    data: unknown
+  ): string | undefined => {
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'message' in data
+    ) {
+      const msg = (data as { message?: unknown }).message;
+      return typeof msg === 'string' ? msg : undefined;
+    }
+    return undefined;
   };
 
   const fetchCourses = useCallback(async () => {
@@ -158,7 +226,7 @@ export default function CoursesList() {
       );
 
       // Tentar obter dados da resposta
-      let responseData: any = null;
+      let responseData: unknown = null;
       try {
         responseData = await response.json();
       } catch {
@@ -174,7 +242,8 @@ export default function CoursesList() {
           );
         } else if (
           response.status === 400 &&
-          responseData?.error === 'COURSE_HAS_DEPENDENCIES'
+          hasCourseDependenciesError(responseData) &&
+          isDependenciesResponse(responseData)
         ) {
           // Abrir modal de dependências
           setSelectedCourseName(courseName);
@@ -185,14 +254,15 @@ export default function CoursesList() {
           response.status === 400 ||
           response.status === 409
         ) {
-          throw new Error(
-            responseData?.message ||
-              'Não é possível excluir este curso. Verifique se não há módulos, lições ou se o curso não está sendo usado em alguma trilha.'
-          );
+          const errorMessage =
+            getErrorMessage(responseData) ||
+            'Não é possível excluir este curso. Verifique se não há módulos, lições ou se o curso não está sendo usado em alguma trilha.';
+          throw new Error(errorMessage);
         } else {
-          throw new Error(
-            responseData?.message || 'Erro ao excluir curso'
-          );
+          const errorMessage =
+            getErrorMessage(responseData) ||
+            'Erro ao excluir curso';
+          throw new Error(errorMessage);
         }
       }
 

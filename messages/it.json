@@ -845,6 +845,39 @@
   "save": "Salva",
   "saving": "Salvataggio...",
   "cancel": "Annulla"
+},
+
+"trackView": {
+  "title": "Dettagli del Percorso",
+  "fields": {
+    "id": "ID del Percorso",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL dell'Immagine",
+    "createdAt": "Data di Creazione",
+    "updatedAt": "Ultimo Aggiornamento",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "courses": {
+    "title": "Corsi del Percorso",
+    "noCourses": "Nessun corso associato a questo percorso"
+  },
+  "copySuccess": "Copiato!",
+  "copyDescription": "copiato negli appunti",
+  "copyError": "Errore nella copia",
+  "copyErrorDescription": "Non è stato possibile copiare negli appunti",
+  "trackNotFound": "Percorso non trovato",
+  "close": "Chiudi",
+  "error": {
+    "fetchTitle": "Errore nel caricamento del percorso",
+    "fetchDescription": "Non è stato possibile caricare i dettagli del percorso"
+  }
 }
 }
 }

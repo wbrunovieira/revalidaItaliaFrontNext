@@ -13,6 +13,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import Image from 'next/image';
+import TrackViewModal from './TrackViewModal';
 
 interface Translation {
   locale: string;
@@ -46,6 +47,10 @@ export default function TracksList() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedTrackId, setSelectedTrackId] = useState<
+    string | null
+  >(null);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -165,6 +170,11 @@ export default function TracksList() {
     [t, toast, fetchData, handleApiError]
   );
 
+  const handleView = useCallback((trackId: string) => {
+    setSelectedTrackId(trackId);
+    setViewModalOpen(true);
+  }, []);
+
   const getTranslationByLocale = useCallback(
     (translations: Translation[], targetLocale: string) => {
       return (
@@ -272,7 +282,7 @@ export default function TracksList() {
             {totalTracks}
           </p>
           <p className="text-sm text-gray-400">
-            {t('stats.totalTracks')}
+            {t('stats.total')}
           </p>
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
@@ -348,6 +358,7 @@ export default function TracksList() {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
+                      onClick={() => handleView(track.id)}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                       title={t('actions.view')}
                     >
@@ -435,6 +446,16 @@ export default function TracksList() {
           </p>
         </div>
       )}
+
+      {/* Modal de Visualização */}
+      <TrackViewModal
+        trackId={selectedTrackId}
+        isOpen={viewModalOpen}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedTrackId(null);
+        }}
+      />
     </div>
   );
 }

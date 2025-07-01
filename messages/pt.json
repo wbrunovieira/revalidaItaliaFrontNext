@@ -394,7 +394,9 @@
     "deleteConfirm": "Tem certeza que deseja excluir esta trilha?",
     "stats": {
       "total": "Total de Trilhas",
+      "totalTracks": "Total de Trilhas",
       "totalCourses": "Total de Cursos",
+      "averageCourses": "Media de Cursos",
       "complete": "Completas"
     },
     "actions": {
@@ -915,8 +917,40 @@
   "save": "Salvar",
   "saving": "Salvando...",
   "cancel": "Cancelar"
-}
+},
 
+"trackView": {
+  "title": "Detalhes da Trilha",
+  "fields": {
+    "id": "ID da Trilha",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL da Imagem",
+    "createdAt": "Data de Criação",
+    "updatedAt": "Última Atualização",
+    "title": "Título",
+    "description": "Descrição"
+  },
+  "translations": {
+    "title": "Traduções",
+    "portuguese": "Português",
+    "spanish": "Espanhol",
+    "italian": "Italiano"
+  },
+  "courses": {
+    "title": "Cursos da Trilha",
+    "noCourses": "Nenhum curso associado a esta trilha"
+  },
+  "copySuccess": "Copiado!",
+  "copyDescription": "copiado para a área de transferência",
+  "copyError": "Erro ao copiar",
+  "copyErrorDescription": "Não foi possível copiar para a área de transferência",
+  "trackNotFound": "Trilha não encontrada",
+  "close": "Fechar",
+  "error": {
+    "fetchTitle": "Erro ao carregar trilha",
+    "fetchDescription": "Não foi possível carregar os detalhes da trilha"
+  }
+}
 }
 
 }

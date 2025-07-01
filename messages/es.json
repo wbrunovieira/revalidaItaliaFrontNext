@@ -922,6 +922,39 @@
   "save": "Guardar",
   "saving": "Guardando...",
   "cancel": "Cancelar"
+},
+
+"trackView": {
+  "title": "Detalles de la Ruta",
+  "fields": {
+    "id": "ID de la Ruta",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL de la Imagen",
+    "createdAt": "Fecha de Creación",
+    "updatedAt": "Última Actualización",
+    "title": "Título",
+    "description": "Descripción"
+  },
+  "translations": {
+    "title": "Traducciones",
+    "portuguese": "Portugués",
+    "spanish": "Español",
+    "italian": "Italiano"
+  },
+  "courses": {
+    "title": "Cursos de la Ruta",
+    "noCourses": "Ningún curso asociado a esta ruta"
+  },
+  "copySuccess": "¡Copiado!",
+  "copyDescription": "copiado al portapapeles",
+  "copyError": "Error al copiar",
+  "copyErrorDescription": "No fue posible copiar al portapapeles",
+  "trackNotFound": "Ruta no encontrada",
+  "close": "Cerrar",
+  "error": {
+    "fetchTitle": "Error al cargar ruta",
+    "fetchDescription": "No fue posible cargar los detalles de la ruta"
+  }
 }
 }
 }

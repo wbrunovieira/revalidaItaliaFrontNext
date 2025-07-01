@@ -8,8 +8,6 @@ import {
   BookOpen,
   Link,
   Image as ImageIcon,
-  Calendar,
-  Clock,
   Copy,
   Check,
   Globe,
@@ -29,8 +27,6 @@ interface CourseDetails {
   slug: string;
   imageUrl: string;
   translations: Translation[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface CourseViewModalProps {
@@ -38,16 +34,6 @@ interface CourseViewModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
 
 export default function CourseViewModal({
   courseId,
@@ -64,42 +50,50 @@ export default function CourseViewModal({
     string | null
   >(null);
 
-  const copyToClipboard = useCallback(
-    async (text: string, field: string) => {
-      try {
-        await navigator.clipboard.writeText(text);
-        setCopiedField(field);
-        setTimeout(() => setCopiedField(null), 2000);
-        toast({
-          title: t('copySuccess'),
-          description: `${field} copiado para a área de transferência`,
-        });
-      } catch (error) {
-        console.error(
-          'Falha ao copiar para a área de transferência:',
-          error
-        );
-        toast({
-          title: t('copyError'),
-          description:
-            'Não foi possível copiar para a área de transferência',
-          variant: 'destructive',
-        });
-      }
-    },
-    [t, toast]
-  );
-
   const fetchCourseDetails = useCallback(
     async (id: string) => {
       setLoading(true);
       try {
+        // Função auxiliar para obter cookie
+        const getCookie = (name: string): string | null => {
+          if (typeof document === 'undefined') return null;
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2)
+            return parts.pop()?.split(';').shift() || null;
+          return null;
+        };
+
+        const token =
+          getCookie('token') ||
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`,
+          { headers }
         );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch course details');
+          if (response.status === 404) {
+            throw new Error('Curso não encontrado');
+          } else if (response.status === 401) {
+            throw new Error(
+              'Não autorizado - faça login novamente'
+            );
+          } else {
+            throw new Error(
+              'Erro ao carregar detalhes do curso'
+            );
+          }
         }
 
         const data = await response.json();
@@ -108,11 +102,36 @@ export default function CourseViewModal({
         console.error(error);
         toast({
           title: t('error.fetchTitle'),
-          description: t('error.fetchDescription'),
+          description:
+            error instanceof Error
+              ? error.message
+              : t('error.fetchDescription'),
           variant: 'destructive',
         });
       } finally {
         setLoading(false);
+      }
+    },
+    [t, toast]
+  );
+
+  const copyToClipboard = useCallback(
+    async (text: string, field: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 2000);
+        toast({
+          title: t('copySuccess'),
+          description: `${field} ${t('copyDescription')}`,
+        });
+      } catch (_error) {
+        console.error('Falha ao copiar:', _error);
+        toast({
+          title: t('copyError'),
+          description: t('copyErrorDescription'),
+          variant: 'destructive',
+        });
       }
     },
     [t, toast]
@@ -150,7 +169,7 @@ export default function CourseViewModal({
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -172,7 +191,8 @@ export default function CourseViewModal({
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="animate-pulse space-y-6">
-              <div className="h-48 bg-gray-700 rounded"></div>
+              <div className="h-48 bg-gray-700 rounded-lg"></div>
+              <div className="h-8 bg-gray-700 rounded w-1/3"></div>
               <div className="space-y-4">
                 {[1, 2, 3, 4].map(i => (
                   <div
@@ -184,7 +204,7 @@ export default function CourseViewModal({
             </div>
           ) : course ? (
             <div className="space-y-6">
-              {/* Imagem do curso */}
+              {/* Course Image */}
               <div className="relative w-full h-48 rounded-lg overflow-hidden">
                 <Image
                   src={course.imageUrl}
@@ -194,7 +214,7 @@ export default function CourseViewModal({
                 />
               </div>
 
-              {/* Informações básicas */}
+              {/* Basic Info */}
               <div className="grid gap-4">
                 {/* ID */}
                 <div className="bg-gray-700/50 rounded-lg p-4">
@@ -270,7 +290,7 @@ export default function CourseViewModal({
                   </div>
                 </div>
 
-                {/* URL da Imagem */}
+                {/* Image URL */}
                 <div className="bg-gray-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -293,12 +313,13 @@ export default function CourseViewModal({
                       onClick={() =>
                         copyToClipboard(
                           course.imageUrl,
-                          'URL da Imagem'
+                          t('fields.imageUrl')
                         )
                       }
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
                     >
-                      {copiedField === 'URL da Imagem' ? (
+                      {copiedField ===
+                      t('fields.imageUrl') ? (
                         <Check
                           size={16}
                           className="text-green-400"
@@ -309,49 +330,9 @@ export default function CourseViewModal({
                     </button>
                   </div>
                 </div>
-
-                {/* Datas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-700/50 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                        <Calendar
-                          size={20}
-                          className="text-secondary"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('fields.createdAt')}
-                        </p>
-                        <p className="text-white">
-                          {formatDate(course.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-gray-700/50 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                        <Clock
-                          size={20}
-                          className="text-secondary"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('fields.updatedAt')}
-                        </p>
-                        <p className="text-white">
-                          {formatDate(course.updatedAt)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Traduções */}
+              {/* Translations */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3 border-b border-gray-700 pb-3">
                   <Globe
@@ -364,122 +345,67 @@ export default function CourseViewModal({
                 </div>
 
                 <div className="space-y-4">
-                  {/* Português */}
-                  {course.translations.find(
-                    t => t.locale === 'pt'
-                  ) && (
-                    <div className="bg-gray-700/50 rounded-lg p-4">
-                      <h5 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                        🇧🇷 {t('translations.portuguese')}
-                      </h5>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <Type size={16} />
-                            {t('fields.title')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'pt'
-                              )?.title
-                            }
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <FileText size={16} />
-                            {t('fields.description')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'pt'
-                              )?.description
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {course.translations.map(translation => {
+                    const flagEmoji =
+                      translation.locale === 'pt'
+                        ? '🇧🇷'
+                        : translation.locale === 'es'
+                        ? '🇪🇸'
+                        : translation.locale === 'it'
+                        ? '🇮🇹'
+                        : '🌍';
+                    const languageName =
+                      translation.locale === 'pt'
+                        ? t('translations.portuguese')
+                        : translation.locale === 'es'
+                        ? t('translations.spanish')
+                        : translation.locale === 'it'
+                        ? t('translations.italian')
+                        : translation.locale;
 
-                  {/* Espanhol */}
-                  {course.translations.find(
-                    t => t.locale === 'es'
-                  ) && (
-                    <div className="bg-gray-700/50 rounded-lg p-4">
-                      <h5 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                        🇪🇸 {t('translations.spanish')}
-                      </h5>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <Type size={16} />
-                            {t('fields.title')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'es'
-                              )?.title
-                            }
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <FileText size={16} />
-                            {t('fields.description')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'es'
-                              )?.description
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    return (
+                      <div
+                        key={translation.locale}
+                        className="bg-gray-700/50 rounded-lg p-4 space-y-3"
+                      >
+                        <h5 className="text-lg font-semibold text-white flex items-center gap-2">
+                          {flagEmoji} {languageName}
+                        </h5>
 
-                  {/* Italiano */}
-                  {course.translations.find(
-                    t => t.locale === 'it'
-                  ) && (
-                    <div className="bg-gray-700/50 rounded-lg p-4">
-                      <h5 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                        🇮🇹 {t('translations.italian')}
-                      </h5>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <Type size={16} />
-                            {t('fields.title')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'it'
-                              )?.title
-                            }
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400 flex items-center gap-2">
-                            <FileText size={16} />
-                            {t('fields.description')}
-                          </p>
-                          <p className="text-white">
-                            {
-                              course.translations.find(
-                                t => t.locale === 'it'
-                              )?.description
-                            }
-                          </p>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Type
+                                size={16}
+                                className="text-gray-400"
+                              />
+                              <p className="text-sm text-gray-400">
+                                {t('fields.title')}
+                              </p>
+                            </div>
+                            <p className="text-white pl-6">
+                              {translation.title}
+                            </p>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <FileText
+                                size={16}
+                                className="text-gray-400"
+                              />
+                              <p className="text-sm text-gray-400">
+                                {t('fields.description')}
+                              </p>
+                            </div>
+                            <p className="text-white pl-6">
+                              {translation.description}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -28,8 +28,6 @@ interface Course {
   slug: string;
   imageUrl: string;
   translations: Translation[];
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 interface DependencyEntity {

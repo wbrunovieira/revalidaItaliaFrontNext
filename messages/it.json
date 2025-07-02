@@ -641,6 +641,8 @@
     },
     "videosList": {
       "title": "Elenco Video",
+      "modules":"Moduli",
+      "lessons":"Lezioni",
       "searchPlaceholder": "Cerca video...",
       "videos": "video",
       "noVideos": "Nessun video in questa lezione",

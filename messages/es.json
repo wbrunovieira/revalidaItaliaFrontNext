@@ -718,6 +718,8 @@
     },
     "videosList": {
       "title": "Lista de Videos",
+      "modules":"Módulos",
+      "lessons":"Lecciones",
       "searchPlaceholder": "Buscar videos...",
       "videos": "videos",
       "noVideos": "Ningún video en esta lección",

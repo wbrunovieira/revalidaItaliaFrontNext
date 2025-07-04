@@ -595,6 +595,7 @@
     "title": "Nuevo Módulo",
     "create": "Crear Módulo",
     "creating": "Creando...",
+    "generateSlug": "Generar automáticamente",
     "info": {
       "lessonsNote": "Las lecciones (videos) deberán agregarse posteriormente a través de la edición del módulo."
     },
@@ -626,23 +627,61 @@
       "spanish": "Español",
       "italian": "Italiano"
     },
+    "validation": {
+      "courseValid": "Curso seleccionado",
+      "slugValid": "Slug válido",
+      "slugGenerated": "Slug generado automáticamente",
+      "imageValid": "URL válida",
+      "orderValid": "Orden válida"
+    },
     "errors": {
       "courseRequired": "Curso es obligatorio",
       "slugRequired": "Slug es obligatorio",
       "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+      "slugMin": "Slug debe tener al menos 3 caracteres",
+      "slugMax": "Slug no puede tener más de 50 caracteres",
+      "slugFormat": "Slug no puede empezar o terminar con guión",
+      "slugDoubleHyphen": "Slug no puede contener guiones dobles",
+      "imageInvalid": "URL de imagen inválida",
       "orderRequired": "Orden es obligatorio",
+      "orderMax": "Orden no puede ser mayor que 999",
       "titleRequired": "Título es obligatorio",
+      "titleMin": "Título debe tener al menos 3 caracteres",
+      "titleMax": "Título no puede tener más de 100 caracteres",
       "descriptionRequired": "Descripción es obligatoria",
+      "descriptionMin": "Descripción debe tener al menos 3 caracteres",
+      "descriptionMax": "Descripción no puede tener más de 500 caracteres",
       "fetchCoursesTitle": "Error al cargar cursos",
-      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Por favor, corrija los errores en el formulario",
+      "serverTitle": "Error del servidor",
+      "serverDescription": "Ocurrió un error interno del servidor. Intente nuevamente más tarde",
+      "conflictTitle": "El módulo ya existe",
+      "conflictDescription": "Ya existe un módulo con este título o slug en este curso",
+      "authTitle": "No autorizado",
+      "authDescription": "No tiene permiso para realizar esta acción",
+      "permissionTitle": "Sin permiso",
+      "permissionDescription": "No tiene los permisos necesarios"
     },
     "success": {
       "title": "¡Módulo creado!",
-      "description": "El módulo fue creado con éxito."
+      "description": "El módulo fue creado con éxito.",
+      "slugGenerated": "Slug generado automáticamente"
     },
     "error": {
       "title": "Error al crear módulo",
-      "description": "Ocurrió un error al crear el módulo. Intente nuevamente."
+      "description": "Ocurrió un error al crear el módulo. Intente nuevamente.",
+      "serverTitle": "Error del servidor",
+      "serverDescription": "Ocurrió un error interno del servidor. Intente nuevamente más tarde",
+      "conflictTitle": "El módulo ya existe",
+      "conflictDescription": "Ya existe un módulo con este título o slug en este curso",
+      "authTitle": "No autorizado",
+      "authDescription": "No tiene permiso para realizar esta acción",
+      "permissionTitle": "Sin permiso",
+      "permissionDescription": "No tiene los permisos necesarios",
+      "slugGenerationTitle": "Error al generar slug",
+      "slugGenerationDescription": "Escriba el título en portugués primero"
     }
   },
   "modulesList": {

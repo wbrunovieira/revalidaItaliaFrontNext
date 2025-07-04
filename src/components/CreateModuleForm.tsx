@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { generateSlug, formatSlugInput } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,9 @@ import {
   BookOpen,
   Hash,
   AlertCircle,
+  Check,
+  X,
+  Wand2,
 } from 'lucide-react';
 
 interface Translation {
@@ -51,12 +55,33 @@ interface FormData {
   };
 }
 
+interface FormErrors {
+  courseId?: string;
+  slug?: string;
+  imageUrl?: string;
+  order?: string;
+  title_pt?: string;
+  title_es?: string;
+  title_it?: string;
+  description_pt?: string;
+  description_es?: string;
+  description_it?: string;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+}
+
 interface CreateModulePayload {
   slug: string;
   imageUrl: string | null;
   order: number;
   translations: Translation[];
 }
+
+type Locale = 'pt' | 'es' | 'it';
+type TranslationField = 'title' | 'description';
 
 export default function CreateModuleForm() {
   const t = useTranslations('Admin.createModule');
@@ -68,6 +93,7 @@ export default function CreateModuleForm() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
+  const [slugGenerated, setSlugGenerated] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
@@ -81,9 +107,263 @@ export default function CreateModuleForm() {
     },
   });
 
-  const [errors, setErrors] = useState<
-    Record<string, string>
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof FormErrors, boolean>>
   >({});
+
+  // Função para gerar slug automaticamente
+  const handleGenerateSlug = useCallback(() => {
+    const ptTitle = formData.translations.pt.title.trim();
+
+    if (!ptTitle) {
+      toast({
+        title: t('error.slugGenerationTitle'),
+        description: t('error.slugGenerationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const generatedSlug = generateSlug(ptTitle);
+    setFormData(prev => ({ ...prev, slug: generatedSlug }));
+    setSlugGenerated(true);
+
+    // Marca o campo como touched e valida
+    setTouched(prev => ({ ...prev, slug: true }));
+
+    // Valida o slug gerado
+    const validation = validateSlug(generatedSlug);
+    if (validation.isValid) {
+      setErrors(prev => ({ ...prev, slug: undefined }));
+      toast({
+        title: t('success.slugGenerated'),
+        description: generatedSlug,
+        variant: 'success',
+      });
+    }
+  }, [formData.translations.pt.title, t, toast]);
+
+  // Validação de URL
+  const validateUrl = useCallback(
+    (url: string): boolean => {
+      if (!url.trim()) return true; // URL é opcional
+      try {
+        // Aceita URLs relativas (começando com /)
+        if (url.startsWith('/')) {
+          return true;
+        }
+        // Valida URLs absolutas
+        const urlObj = new URL(url);
+        return (
+          urlObj.protocol === 'http:' ||
+          urlObj.protocol === 'https:'
+        );
+      } catch {
+        return false;
+      }
+    },
+    []
+  );
+
+  // Validação de slug
+  const validateSlug = useCallback(
+    (slug: string): ValidationResult => {
+      if (!slug.trim()) {
+        return {
+          isValid: false,
+          message: t('errors.slugRequired'),
+        };
+      }
+      if (slug.trim().length < 3) {
+        return {
+          isValid: false,
+          message: t('errors.slugMin'),
+        };
+      }
+      if (slug.length > 50) {
+        return {
+          isValid: false,
+          message: t('errors.slugMax'),
+        };
+      }
+      if (!/^[a-z0-9-]+$/.test(slug)) {
+        return {
+          isValid: false,
+          message: t('errors.slugInvalid'),
+        };
+      }
+      if (slug.startsWith('-') || slug.endsWith('-')) {
+        return {
+          isValid: false,
+          message: t('errors.slugFormat'),
+        };
+      }
+      if (slug.includes('--')) {
+        return {
+          isValid: false,
+          message: t('errors.slugDoubleHyphen'),
+        };
+      }
+      return { isValid: true };
+    },
+    [t]
+  );
+
+  // Validação de campos de texto
+  const validateTextField = useCallback(
+    (
+      value: string,
+      fieldType: 'title' | 'description'
+    ): ValidationResult => {
+      if (!value.trim()) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Required`),
+        };
+      }
+      if (value.trim().length < 3) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Min`),
+        };
+      }
+
+      const maxLength = fieldType === 'title' ? 100 : 500;
+      if (value.length > maxLength) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Max`),
+        };
+      }
+
+      return { isValid: true };
+    },
+    [t]
+  );
+
+  // Validação individual de campos
+  const validateField = useCallback(
+    (
+      field: string,
+      value?: string | number
+    ): ValidationResult => {
+      if (field === 'courseId') {
+        if (!formData.courseId) {
+          return {
+            isValid: false,
+            message: t('errors.courseRequired'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      if (field === 'slug') {
+        return validateSlug(value as string);
+      }
+
+      if (field === 'imageUrl') {
+        const url = value as string;
+        if (url && !validateUrl(url)) {
+          return {
+            isValid: false,
+            message: t('errors.imageInvalid'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      if (field === 'order') {
+        const orderValue = value as number;
+        if (!orderValue || orderValue < 1) {
+          return {
+            isValid: false,
+            message: t('errors.orderRequired'),
+          };
+        }
+        if (orderValue > 999) {
+          return {
+            isValid: false,
+            message: t('errors.orderMax'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      // Validação de campos de tradução
+      const match = field.match(
+        /^(title|description)_(\w+)$/
+      );
+      if (match) {
+        const [, fieldType, locale] = match;
+        const translation =
+          formData.translations[locale as Locale];
+        if (translation) {
+          const fieldValue =
+            translation[fieldType as TranslationField];
+          return validateTextField(
+            fieldValue,
+            fieldType as TranslationField
+          );
+        }
+      }
+
+      return { isValid: true };
+    },
+    [
+      formData.translations,
+      formData.courseId,
+      t,
+      validateSlug,
+      validateUrl,
+      validateTextField,
+    ]
+  );
+
+  // Validação em tempo real
+  const handleFieldValidation = useCallback(
+    (field: string, value?: string | number) => {
+      if (touched[field as keyof FormErrors]) {
+        // Para campos de tradução, buscar o valor correto
+        let fieldValue = value;
+
+        if (!fieldValue && field.includes('_')) {
+          const match = field.match(
+            /^(title|description)_(\w+)$/
+          );
+          if (match) {
+            const [, fieldType, locale] = match;
+            const translation =
+              formData.translations[locale as Locale];
+            if (translation) {
+              fieldValue =
+                translation[fieldType as TranslationField];
+            }
+          }
+        } else if (!fieldValue && field === 'order') {
+          fieldValue = formData.order;
+        } else if (!fieldValue) {
+          // Para campos diretos como slug e imageUrl
+          fieldValue =
+            formData[
+              field as keyof Pick<
+                FormData,
+                'slug' | 'imageUrl' | 'courseId'
+              >
+            ];
+        }
+
+        const validation = validateField(field, fieldValue);
+        setErrors(prev => ({
+          ...prev,
+          [field]: validation.isValid
+            ? undefined
+            : validation.message,
+        }));
+      }
+    },
+    [touched, validateField, formData]
+  );
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -93,9 +373,78 @@ export default function CreateModuleForm() {
       if (error instanceof Error) {
         console.error(`Error message: ${error.message}`);
         console.error(`Stack trace: ${error.stack}`);
+
+        // Tratamento de erro de validação do NestJS
+        if (
+          error.message.includes('500') &&
+          error.message.includes('Internal server error')
+        ) {
+          toast({
+            title: t('error.serverTitle'),
+            description: t('error.serverDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        // Tratamento de erro de módulo duplicado
+        if (
+          error.message.includes('409') ||
+          error.message.includes('conflict') ||
+          error.message.includes('already exists')
+        ) {
+          toast({
+            title: t('error.conflictTitle'),
+            description: t('error.conflictDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('400') ||
+          error.message.includes('Bad Request')
+        ) {
+          toast({
+            title: t('error.validationTitle'),
+            description: t('error.validationDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('401') ||
+          error.message.includes('Unauthorized')
+        ) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.authDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('403') ||
+          error.message.includes('Forbidden')
+        ) {
+          toast({
+            title: t('error.permissionTitle'),
+            description: t('error.permissionDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
       }
+
+      toast({
+        title: t('error.title'),
+        description: t('error.description'),
+        variant: 'destructive',
+      });
     },
-    []
+    [toast, t]
   );
 
   // Função para buscar cursos
@@ -103,9 +452,10 @@ export default function CreateModuleForm() {
     setLoadingCourses(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
-      );
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/courses`);
 
       if (!response.ok) {
         throw new Error(
@@ -132,59 +482,108 @@ export default function CreateModuleForm() {
   }, [fetchCourses]);
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: FormErrors = {};
+    let isValid = true;
 
+    // Validar curso
     if (!formData.courseId) {
       newErrors.courseId = t('errors.courseRequired');
+      isValid = false;
     }
 
-    if (!formData.slug.trim()) {
-      newErrors.slug = t('errors.slugRequired');
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = t('errors.slugInvalid');
+    // Validar slug
+    const slugValidation = validateSlug(formData.slug);
+    if (!slugValidation.isValid) {
+      newErrors.slug = slugValidation.message;
+      isValid = false;
     }
 
+    // Validar imageUrl (opcional)
+    if (
+      formData.imageUrl &&
+      !validateUrl(formData.imageUrl)
+    ) {
+      newErrors.imageUrl = t('errors.imageInvalid');
+      isValid = false;
+    }
+
+    // Validar ordem
     if (!formData.order || formData.order < 1) {
       newErrors.order = t('errors.orderRequired');
+      isValid = false;
+    } else if (formData.order > 999) {
+      newErrors.order = t('errors.orderMax');
+      isValid = false;
     }
 
     // Validar traduções
-    (['pt', 'es', 'it'] as const).forEach(locale => {
-      if (!formData.translations[locale].title.trim()) {
-        newErrors[`title_${locale}`] = t(
-          'errors.titleRequired'
-        );
+    const locales: Locale[] = ['pt', 'es', 'it'];
+    locales.forEach(locale => {
+      const titleValidation = validateTextField(
+        formData.translations[locale].title,
+        'title'
+      );
+      if (!titleValidation.isValid) {
+        newErrors[`title_${locale}` as keyof FormErrors] =
+          titleValidation.message;
+        isValid = false;
       }
-      if (
-        !formData.translations[locale].description.trim()
-      ) {
-        newErrors[`description_${locale}`] = t(
-          'errors.descriptionRequired'
-        );
+
+      const descValidation = validateTextField(
+        formData.translations[locale].description,
+        'description'
+      );
+      if (!descValidation.isValid) {
+        newErrors[
+          `description_${locale}` as keyof FormErrors
+        ] = descValidation.message;
+        isValid = false;
       }
     });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, t]);
+    return isValid;
+  }, [
+    formData,
+    t,
+    validateSlug,
+    validateUrl,
+    validateTextField,
+  ]);
 
   const createModule = useCallback(
     async (payload: CreateModulePayload): Promise<void> => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${formData.courseId}/modules`,
-        {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:3333';
+      const url = `${apiUrl}/courses/${formData.courseId}/modules`;
+
+      console.log('🌐 API URL:', url);
+      console.log('📦 Payload:', payload);
+
+      try {
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify(payload),
-        }
-      );
+        });
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to create module: ${response.status}`
-        );
+        const responseText = await response.text();
+        console.log('📨 Response status:', response.status);
+        console.log('📨 Response text:', responseText);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to create module: ${response.status} - ${responseText}`
+          );
+        }
+      } catch (error) {
+        console.error('🔴 Fetch error:', error);
+        throw error;
       }
     },
     [formData.courseId]
@@ -203,47 +602,142 @@ export default function CreateModuleForm() {
       },
     }));
     setErrors({});
+    setTouched({});
+    setSlugGenerated(false);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // Marcar todos os campos como tocados
+    const allFields = [
+      'courseId',
+      'slug',
+      'imageUrl',
+      'order',
+      'title_pt',
+      'title_es',
+      'title_it',
+      'description_pt',
+      'description_es',
+      'description_it',
+    ];
+
+    const allTouched = allFields.reduce((acc, field) => {
+      acc[field as keyof FormErrors] = true;
+      return acc;
+    }, {} as Record<keyof FormErrors, boolean>);
+
+    setTouched(allTouched);
+
+    if (!validateForm()) {
+      toast({
+        title: t('error.validationTitle'),
+        description: t('error.validationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
 
     try {
+      // Garantir que as traduções estão no formato correto
+      const translations = [];
+
+      // Adicionar cada tradução individualmente para garantir a ordem
+      if (
+        formData.translations.pt.title &&
+        formData.translations.pt.description
+      ) {
+        translations.push({
+          locale: 'pt',
+          title: formData.translations.pt.title.trim(),
+          description:
+            formData.translations.pt.description.trim(),
+        });
+      }
+
+      if (
+        formData.translations.es.title &&
+        formData.translations.es.description
+      ) {
+        translations.push({
+          locale: 'es',
+          title: formData.translations.es.title.trim(),
+          description:
+            formData.translations.es.description.trim(),
+        });
+      }
+
+      if (
+        formData.translations.it.title &&
+        formData.translations.it.description
+      ) {
+        translations.push({
+          locale: 'it',
+          title: formData.translations.it.title.trim(),
+          description:
+            formData.translations.it.description.trim(),
+        });
+      }
+
       const payload: CreateModulePayload = {
-        slug: formData.slug,
-        imageUrl: formData.imageUrl || null,
+        slug: formData.slug.trim(),
+        imageUrl: formData.imageUrl.trim() || null,
         order: formData.order,
-        translations: Object.values(formData.translations),
+        translations: translations,
       };
+
+      console.log(
+        '📤 Enviando payload:',
+        JSON.stringify(payload, null, 2)
+      );
 
       await createModule(payload);
 
       toast({
         title: t('success.title'),
         description: t('success.description'),
+        variant: 'success',
       });
 
       resetForm();
     } catch (error) {
       handleApiError(error, 'Module creation error');
-      toast({
-        title: t('error.title'),
-        description: t('error.description'),
-        variant: 'destructive',
-      });
     } finally {
       setLoading(false);
     }
   };
 
+  // Handlers para mudança de valores
+  const handleInputChange = useCallback(
+    (field: 'slug' | 'imageUrl') => (value: string) => {
+      if (field === 'slug') {
+        // Formatar slug automaticamente
+        value = formatSlugInput(value);
+        // Se o usuário editar manualmente, marca como não gerado automaticamente
+        setSlugGenerated(false);
+      }
+
+      setFormData(prev => ({ ...prev, [field]: value }));
+      handleFieldValidation(field, value);
+    },
+    [handleFieldValidation]
+  );
+
+  const handleInputBlur = useCallback(
+    (field: string) => () => {
+      setTouched(prev => ({ ...prev, [field]: true }));
+      handleFieldValidation(field);
+    },
+    [handleFieldValidation]
+  );
+
   const updateTranslation = useCallback(
     (
-      locale: 'pt' | 'es' | 'it',
-      field: 'title' | 'description',
+      locale: Locale,
+      field: TranslationField,
       value: string
     ) => {
       setFormData(prev => ({
@@ -256,8 +750,11 @@ export default function CreateModuleForm() {
           },
         },
       }));
+
+      const fieldKey = `${field}_${locale}`;
+      handleFieldValidation(fieldKey, value);
     },
-    []
+    [handleFieldValidation]
   );
 
   const handleCourseChange = useCallback(
@@ -266,33 +763,53 @@ export default function CreateModuleForm() {
         ...prev,
         courseId,
       }));
+      setTouched(prev => ({ ...prev, courseId: true }));
+      handleFieldValidation('courseId', courseId);
     },
-    []
+    [handleFieldValidation]
   );
 
-  const handleSlugChange = useCallback((value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      slug: value.toLowerCase().replace(/\s/g, '-'),
-    }));
-  }, []);
-
-  const handleImageUrlChange = useCallback(
+  const handleOrderChange = useCallback(
     (value: string) => {
+      const order = parseInt(value) || 1;
       setFormData(prev => ({
         ...prev,
-        imageUrl: value,
+        order,
       }));
+      handleFieldValidation('order', order);
     },
-    []
+    [handleFieldValidation]
   );
 
-  const handleOrderChange = useCallback((value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      order: parseInt(value) || 1,
-    }));
-  }, []);
+  // Verificar status de validação para cada idioma
+  const getTranslationStatus = useCallback(
+    (
+      locale: Locale
+    ): { hasError: boolean; isValid: boolean } => {
+      const titleError =
+        errors[`title_${locale}` as keyof FormErrors];
+      const descError =
+        errors[`description_${locale}` as keyof FormErrors];
+      const titleTouched =
+        touched[`title_${locale}` as keyof FormErrors];
+      const descTouched =
+        touched[
+          `description_${locale}` as keyof FormErrors
+        ];
+
+      const hasError = !!(titleError || descError);
+      const isValid =
+        !hasError &&
+        !!(titleTouched && descTouched) &&
+        formData.translations[locale].title.trim().length >=
+          3 &&
+        formData.translations[locale].description.trim()
+          .length >= 3;
+
+      return { hasError, isValid };
+    },
+    [errors, touched, formData.translations]
+  );
 
   const getTranslationByLocale = useCallback(
     (translations: Translation[], targetLocale: string) => {
@@ -326,26 +843,12 @@ export default function CreateModuleForm() {
           {t('title')}
         </h3>
 
-        {/* Aviso sobre aulas */}
-        <div className="mb-6 p-4 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertCircle
-              size={20}
-              className="text-yellow-500 mt-0.5"
-            />
-            <div>
-              <p className="text-sm text-yellow-200">
-                {t('info.lessonsNote')}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Seleção do Curso */}
         <div className="mb-8">
           <Label className="text-gray-300 flex items-center gap-2 mb-2">
             <BookOpen size={16} />
             {t('fields.course')}
+            <span className="text-red-400">*</span>
           </Label>
           {loadingCourses ? (
             <div className="animate-pulse">
@@ -382,11 +885,19 @@ export default function CreateModuleForm() {
               </SelectContent>
             </Select>
           )}
-          {errors.courseId && (
+          {errors.courseId && touched.courseId && (
             <p className="mt-1 text-xs text-red-500">
               {errors.courseId}
             </p>
           )}
+          {formData.courseId &&
+            !errors.courseId &&
+            touched.courseId && (
+              <div className="mt-1 flex items-center gap-1 text-green-400 text-sm">
+                <Check size={14} />
+                {t('validation.courseValid')}
+              </div>
+            )}
         </div>
 
         {/* Curso selecionado */}
@@ -405,30 +916,7 @@ export default function CreateModuleForm() {
         )}
 
         {/* Informações básicas */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <div className="space-y-2">
-            <Label
-              htmlFor="slug"
-              className="text-gray-300 flex items-center gap-2"
-            >
-              <Link size={16} />
-              {t('fields.slug')}
-            </Label>
-            <TextField
-              id="slug"
-              placeholder={t('placeholders.slug')}
-              value={formData.slug}
-              onChange={e =>
-                handleSlugChange(e.target.value)
-              }
-              error={errors.slug}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500">
-              {t('hints.slug')}
-            </p>
-          </div>
-
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
           <div className="space-y-2">
             <Label
               htmlFor="imageUrl"
@@ -442,14 +930,25 @@ export default function CreateModuleForm() {
               placeholder={t('placeholders.imageUrl')}
               value={formData.imageUrl}
               onChange={e =>
-                handleImageUrlChange(e.target.value)
+                handleInputChange('imageUrl')(
+                  e.target.value
+                )
               }
+              onBlur={handleInputBlur('imageUrl')}
               error={errors.imageUrl}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
             <p className="text-xs text-gray-500">
               {t('hints.imageUrl')}
             </p>
+            {formData.imageUrl &&
+              !errors.imageUrl &&
+              touched.imageUrl && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.imageValid')}
+                </div>
+              )}
           </div>
 
           <div className="space-y-2">
@@ -459,27 +958,36 @@ export default function CreateModuleForm() {
             >
               <Hash size={16} />
               {t('fields.order')}
+              <span className="text-red-400">*</span>
             </Label>
             <TextField
               id="order"
               type="number"
               min="1"
+              max="999"
               placeholder={t('placeholders.order')}
               value={formData.order.toString()}
               onChange={e =>
                 handleOrderChange(e.target.value)
               }
+              onBlur={handleInputBlur('order')}
               error={errors.order}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
             <p className="text-xs text-gray-500">
               {t('hints.order')}
             </p>
+            {!errors.order && touched.order && (
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <Check size={14} />
+                {t('validation.orderValid')}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Traduções */}
-        <div className="space-y-6">
+        <div className="space-y-6 mb-8">
           <h4 className="text-lg font-semibold text-white flex items-center gap-2">
             <Globe size={20} />
             {t('translations.title')}
@@ -488,7 +996,13 @@ export default function CreateModuleForm() {
           {(['pt', 'es', 'it'] as const).map(loc => (
             <div
               key={loc}
-              className="border border-gray-700 rounded-lg p-4"
+              className={`border rounded-lg p-4 transition-colors ${
+                getTranslationStatus(loc).hasError
+                  ? 'border-red-500/50'
+                  : getTranslationStatus(loc).isValid
+                  ? 'border-green-500/50'
+                  : 'border-gray-700'
+              }`}
             >
               <h5 className="text-white font-medium mb-4 flex items-center gap-2">
                 {loc === 'pt'
@@ -505,12 +1019,22 @@ export default function CreateModuleForm() {
                       : 'italian'
                   }`
                 )}
+                {getTranslationStatus(loc).isValid && (
+                  <Check
+                    size={16}
+                    className="text-green-400"
+                  />
+                )}
+                {getTranslationStatus(loc).hasError && (
+                  <X size={16} className="text-red-400" />
+                )}
               </h5>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-gray-300 flex items-center gap-2">
                     <Type size={16} />
                     {t('fields.title')}
+                    <span className="text-red-400">*</span>
                   </Label>
                   <TextField
                     placeholder={t('placeholders.title')}
@@ -522,6 +1046,7 @@ export default function CreateModuleForm() {
                         e.target.value
                       )
                     }
+                    onBlur={handleInputBlur(`title_${loc}`)}
                     error={errors[`title_${loc}`]}
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                   />
@@ -530,6 +1055,7 @@ export default function CreateModuleForm() {
                   <Label className="text-gray-300 flex items-center gap-2">
                     <FileText size={16} />
                     {t('fields.description')}
+                    <span className="text-red-400">*</span>
                   </Label>
                   <TextField
                     placeholder={t(
@@ -545,6 +1071,9 @@ export default function CreateModuleForm() {
                         e.target.value
                       )
                     }
+                    onBlur={handleInputBlur(
+                      `description_${loc}`
+                    )}
                     error={errors[`description_${loc}`]}
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                   />
@@ -552,6 +1081,62 @@ export default function CreateModuleForm() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Slug (URL) - Movido para depois das traduções */}
+        <div className="mb-8">
+          <div className="space-y-2">
+            <Label
+              htmlFor="slug"
+              className="text-gray-300 flex items-center gap-2"
+            >
+              <Link size={16} />
+              {t('fields.slug')}
+              <span className="text-red-400">*</span>
+            </Label>
+            <div className="flex gap-2">
+              <TextField
+                id="slug"
+                placeholder={t('placeholders.slug')}
+                value={formData.slug}
+                onChange={e =>
+                  handleInputChange('slug')(e.target.value)
+                }
+                onBlur={handleInputBlur('slug')}
+                error={errors.slug}
+                className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              />
+              <Button
+                type="button"
+                onClick={handleGenerateSlug}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 flex items-center gap-2"
+                disabled={
+                  !formData.translations.pt.title.trim()
+                }
+              >
+                <Wand2 size={18} />
+                {t('generateSlug')}
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              {t('hints.slug')}
+            </p>
+            {slugGenerated && formData.slug && (
+              <div className="flex items-center gap-1 text-blue-400 text-sm">
+                <Wand2 size={14} />
+                {t('validation.slugGenerated')}
+              </div>
+            )}
+            {formData.slug &&
+              !errors.slug &&
+              touched.slug &&
+              !slugGenerated && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.slugValid')}
+                </div>
+              )}
+          </div>
         </div>
 
         <div className="mt-6 flex justify-end">

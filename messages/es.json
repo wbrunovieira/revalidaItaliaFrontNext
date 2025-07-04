@@ -186,6 +186,7 @@
     "title": "Nuevo Usuario",
     "create": "Crear Usuario",
     "creating": "Creando...",
+    "passwordMatch": "Las contraseñas coinciden",
     "fields": {
       "name": "Nombre Completo",
       "email": "Correo Electrónico",
@@ -227,48 +228,57 @@
     }
   },
  "usersList": {
-    "title": "Lista de Usuarios",
-    "apiSearchPlaceholder": "Buscar por nombre, email o CPF...",
-    "localSearchPlaceholder": "Filtrar usuarios localmente...",
-    "apiSearchActive": "Búsqueda activa para: {term}",
-    "clearSearch": "Limpiar búsqueda",
-    "stats": {
-      "total": "Total",
-      "admins": "Administradores",
-      "tutors": "Tutores",
-      "students": "Estudiantes"
-    },
-    "roleAdmin": "Administrador",
-    "roleTutor": "Tutor",
-    "roleStudent": "Estudiante",
-    "actions": {
-      "view": "Ver",
-      "edit": "Editar",
-      "delete": "Eliminar"
-    },
-    "deleteConfirm": "¿Está seguro de que desea eliminar este usuario?",
-    "noUsers": "No se encontraron usuarios",
-    "noLocalResults": "No se encontraron resultados para el filtro local",
-    "noApiResults": "No se encontraron resultados para: {term}",
-    "pagination": {
-      "showing": "Mostrando {start} a {end} de {total} usuarios",
-      "previous": "Anterior",
-      "next": "Siguiente",
-      "pageOf": "Página {current} de {total}"
-    },
-    "success": {
-      "deleteTitle": "¡Usuario eliminado!",
-      "deleteDescription": "El usuario fue eliminado exitosamente."
-    },
-    "error": {
-      "fetchTitle": "Error al cargar usuarios",
-      "fetchDescription": "Ocurrió un error al cargar la lista de usuarios.",
-      "searchTitle": "Error en la búsqueda",
-      "searchDescription": "Ocurrió un error al buscar usuarios.",
-      "deleteTitle": "Error al eliminar",
-      "deleteDescription": "Ocurrió un error al eliminar el usuario."
-    }
+  "title": "Lista de Usuarios",
+  "apiSearchPlaceholder": "Buscar por nombre, email o CPF...",
+  "localSearchPlaceholder": "Filtrar usuarios localmente...",
+  "apiSearchActive": "Búsqueda activa para: {term}",
+  "clearSearch": "Limpiar búsqueda",
+  "stats": {
+    "total": "Total",
+    "admins": "Administradores",
+    "tutors": "Tutores",
+    "students": "Estudiantes"
   },
+  "roleAdmin": "Administrador",
+  "roleTutor": "Tutor",
+  "roleStudent": "Estudiante",
+  "actions": {
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "deleteConfirm": "¿Está seguro de que desea eliminar este usuario?",
+  "deleteConfirmation": {
+    "title": "⚠️ Confirmar eliminación",
+    "message": "¿Está seguro de que desea eliminar el usuario {userName}?",
+    "email": "Email",
+    "cpf": "CPF",
+    "role": "Tipo",
+    "warning": "¡Esta acción no se puede deshacer!",
+    "confirm": "Confirmar"
+  },
+  "noUsers": "No se encontraron usuarios",
+  "noLocalResults": "No se encontraron resultados para el filtro local",
+  "noApiResults": "No se encontraron resultados para: {term}",
+  "pagination": {
+    "showing": "Mostrando {start} a {end} de {total} usuarios",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {current} de {total}"
+  },
+  "success": {
+    "deleteTitle": "¡Usuario eliminado!",
+    "deleteDescription": "El usuario fue eliminado exitosamente."
+  },
+  "error": {
+    "fetchTitle": "Error al cargar usuarios",
+    "fetchDescription": "Ocurrió un error al cargar la lista de usuarios.",
+    "searchTitle": "Error en la búsqueda",
+    "searchDescription": "Ocurrió un error al buscar usuarios.",
+    "deleteTitle": "Error al eliminar",
+    "deleteDescription": "Ocurrió un error al eliminar el usuario."
+  }
+},
   "userView": {
     "title": "Detalles del Usuario",
     "roleAdmin": "Administrador",

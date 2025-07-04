@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
+  AlertTriangle,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
@@ -254,10 +255,9 @@ export default function UsersList() {
     []
   );
 
-  const handleDelete = useCallback(
+  // Função para deletar usuário após confirmação
+  const deleteUser = useCallback(
     async (userId: string) => {
-      if (!confirm(t('deleteConfirm'))) return;
-
       try {
         const token =
           getCookie('token') ||
@@ -281,23 +281,83 @@ export default function UsersList() {
           );
         }
         toast({
-          title: t('success.deleteTitle'),
-          description: t('success.deleteDescription'),
+          title: 'Usuário excluído',
+          description:
+            'O usuário foi excluído com sucesso.',
+          variant: 'success',
         });
         await fetchUsers(currentPage);
       } catch (error) {
         console.error(error);
         toast({
-          title: t('error.deleteTitle'),
+          title: 'Erro ao excluir',
           description:
             error instanceof Error
               ? error.message
-              : t('error.deleteDescription'),
+              : 'Ocorreu um erro ao excluir o usuário.',
           variant: 'destructive',
         });
       }
     },
-    [t, toast, fetchUsers, currentPage]
+    [toast, fetchUsers, currentPage]
+  );
+
+  // Função para mostrar confirmação personalizada usando toast
+  const handleDelete = useCallback(
+    async (userId: string, userName: string) => {
+      const user = users.find(u => u.id === userId);
+      if (!user) return;
+
+      // Toast de confirmação personalizado
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                userName,
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div>
+                  📧 {t('deleteConfirmation.email')}:{' '}
+                  {user.email}
+                </div>
+                <div>
+                  🆔 {t('deleteConfirmation.cpf')}:{' '}
+                  {user.cpf}
+                </div>
+                <div>
+                  👤 {t('deleteConfirmation.role')}:{' '}
+                  {t(
+                    `role${
+                      user.role.charAt(0).toUpperCase() +
+                      user.role.slice(1)
+                    }`
+                  )}
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() => deleteUser(userId)}
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [toast, deleteUser, users]
   );
 
   // Funções de paginação
@@ -582,7 +642,9 @@ export default function UsersList() {
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() =>
+                      handleDelete(user.id, user.name)
+                    }
                     title={t('actions.delete')}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
                   >

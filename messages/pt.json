@@ -182,50 +182,51 @@
       "completionRate": "Taxa de Conclusão"
     }
   },
-  "createUser": {
-    "title": "Novo Usuário",
-    "create": "Criar Usuário",
-    "creating": "Criando...",
-    "fields": {
-      "name": "Nome Completo",
-      "email": "E-mail",
-      "password": "Senha",
-      "confirmPassword": "Confirmar Senha",
-      "role": "Função",
-      "cpf": "CPF"
-    },
-    "placeholders": {
-      "name": "Digite o nome completo",
-      "email": "usuario@exemplo.com",
-      "password": "Mínimo 8 caracteres",
-      "confirmPassword": "Digite a senha novamente",
-      "role": "Selecione uma função",
-      "cpf": "000.000.000-00"
-    },
-    "roles": {
-      "student": "Aluno",
-      "tutor": "Tutor",
-      "admin": "Administrador"
-    },
-    "errors": {
-      "nameRequired": "Nome é obrigatório",
-      "emailRequired": "E-mail é obrigatório",
-      "emailInvalid": "E-mail inválido",
-      "passwordRequired": "Senha é obrigatória",
-      "passwordMin": "Senha deve ter no mínimo 8 caracteres",
-      "passwordMismatch": "As senhas não coincidem",
-      "cpfRequired": "CPF é obrigatório",
-      "cpfInvalid": "CPF inválido"
-    },
-    "success": {
-      "title": "Usuário criado!",
-      "description": "O usuário foi criado com sucesso."
-    },
-    "error": {
-      "title": "Erro ao criar usuário",
-      "description": "Ocorreu um erro ao criar o usuário. Tente novamente."
-    }
+ "createUser": {
+  "title": "Novo Usuário",
+  "create": "Criar Usuário",
+  "creating": "Criando...",
+  "passwordMatch": "As senhas coincidem",
+  "fields": {
+    "name": "Nome Completo",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "role": "Função",
+    "cpf": "CPF"
   },
+  "placeholders": {
+    "name": "Digite o nome completo",
+    "email": "usuario@exemplo.com",
+    "password": "Mínimo 8 caracteres",
+    "confirmPassword": "Digite a senha novamente",
+    "role": "Selecione uma função",
+    "cpf": "000.000.000-00"
+  },
+  "roles": {
+    "student": "Aluno",
+    "tutor": "Tutor",
+    "admin": "Administrador"
+  },
+  "errors": {
+    "nameRequired": "Nome é obrigatório",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "E-mail inválido",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMin": "Senha deve ter no mínimo 8 caracteres",
+    "passwordMismatch": "As senhas não coincidem",
+    "cpfRequired": "CPF é obrigatório",
+    "cpfInvalid": "CPF inválido"
+  },
+  "success": {
+    "title": "Usuário criado!",
+    "description": "O usuário foi criado com sucesso."
+  },
+  "error": {
+    "title": "Erro ao criar usuário",
+    "description": "Ocorreu um erro ao criar o usuário. Tente novamente."
+  }
+},
 
   "courses": {
     "create": "Criar Curso",
@@ -683,48 +684,57 @@
     }
   },
 "usersList": {
-    "title": "Lista de Usuários",
-    "apiSearchPlaceholder": "Buscar por nome, email ou CPF...",
-    "localSearchPlaceholder": "Filtrar usuários localmente...",
-    "apiSearchActive": "Busca ativa para: {term}",
-    "clearSearch": "Limpar busca",
-    "stats": {
-      "total": "Total",
-      "admins": "Administradores",
-      "tutors": "Tutores",
-      "students": "Estudantes"
-    },
-    "roleAdmin": "Administrador",
-    "roleTutor": "Tutor",
-    "roleStudent": "Estudante",
-    "actions": {
-      "view": "Visualizar",
-      "edit": "Editar",
-      "delete": "Excluir"
-    },
-    "deleteConfirm": "Tem certeza que deseja excluir este usuário?",
-    "noUsers": "Nenhum usuário encontrado",
-    "noLocalResults": "Nenhum resultado encontrado para o filtro local",
-    "noApiResults": "Nenhum resultado encontrado para: {term}",
-    "pagination": {
-      "showing": "Mostrando {start} a {end} de {total} usuários",
-      "previous": "Anterior",
-      "next": "Próximo",
-      "pageOf": "Página {current} de {total}"
-    },
-    "success": {
-      "deleteTitle": "Usuário excluído!",
-      "deleteDescription": "O usuário foi excluído com sucesso."
-    },
-    "error": {
-      "fetchTitle": "Erro ao carregar usuários",
-      "fetchDescription": "Ocorreu um erro ao carregar a lista de usuários.",
-      "searchTitle": "Erro na busca",
-      "searchDescription": "Ocorreu um erro ao buscar usuários.",
-      "deleteTitle": "Erro ao excluir",
-      "deleteDescription": "Ocorreu um erro ao excluir o usuário."
-    }
+  "title": "Lista de Usuários",
+  "apiSearchPlaceholder": "Buscar por nome, email ou CPF...",
+  "localSearchPlaceholder": "Filtrar usuários localmente...",
+  "apiSearchActive": "Busca ativa para: {term}",
+  "clearSearch": "Limpar busca",
+  "stats": {
+    "total": "Total",
+    "admins": "Administradores",
+    "tutors": "Tutores",
+    "students": "Estudantes"
   },
+  "roleAdmin": "Administrador",
+  "roleTutor": "Tutor",
+  "roleStudent": "Estudante",
+  "actions": {
+    "view": "Visualizar",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "deleteConfirm": "Tem certeza que deseja excluir este usuário?",
+  "deleteConfirmation": {
+    "title": "⚠️ Confirmar exclusão",
+    "message": "Tem certeza que deseja excluir o usuário {userName}?",
+    "email": "Email",
+    "cpf": "CPF",
+    "role": "Tipo",
+    "warning": "Esta ação não pode ser desfeita!",
+    "confirm": "Confirmar"
+  },
+  "noUsers": "Nenhum usuário encontrado",
+  "noLocalResults": "Nenhum resultado encontrado para o filtro local",
+  "noApiResults": "Nenhum resultado encontrado para: {term}",
+  "pagination": {
+    "showing": "Mostrando {start} a {end} de {total} usuários",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "pageOf": "Página {current} de {total}"
+  },
+  "success": {
+    "deleteTitle": "Usuário excluído!",
+    "deleteDescription": "O usuário foi excluído com sucesso."
+  },
+  "error": {
+    "fetchTitle": "Erro ao carregar usuários",
+    "fetchDescription": "Ocorreu um erro ao carregar a lista de usuários.",
+    "searchTitle": "Erro na busca",
+    "searchDescription": "Ocorreu um erro ao buscar usuários.",
+    "deleteTitle": "Erro ao excluir",
+    "deleteDescription": "Ocorreu um erro ao excluir o usuário."
+  }
+},
   "userEdit": {
     "title": "Editar Usuário",
     "save": "Salvar",

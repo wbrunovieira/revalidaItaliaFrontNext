@@ -354,47 +354,68 @@
     "create": "Crear Curso",
     "list": "Listar Cursos"
   },
-  "createCourse": {
-    "title": "Nuevo Curso",
-    "create": "Crear Curso",
-    "creating": "Creando...",
-    "fields": {
-      "slug": "Slug (URL)",
-      "imageUrl": "URL de la Imagen",
-      "title": "Título",
-      "description": "Descripción"
-    },
-    "placeholders": {
-      "slug": "matematica-basica",
-      "imageUrl": "/images/curso-matematica.jpg",
-      "title": "Ingrese el título del curso",
-      "description": "Ingrese la descripción del curso"
-    },
-    "hints": {
-      "slug": "Use solo letras minúsculas, números y guiones"
-    },
-    "translations": {
-      "title": "Traducciones",
-      "portuguese": "Portugués",
-      "spanish": "Español",
-      "italian": "Italiano"
-    },
-    "errors": {
-      "slugRequired": "Slug es obligatorio",
-      "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
-      "imageRequired": "URL de la imagen es obligatoria",
-      "titleRequired": "Título es obligatorio",
-      "descriptionRequired": "Descripción es obligatoria"
-    },
-    "success": {
-      "title": "¡Curso creado!",
-      "description": "El curso fue creado con éxito."
-    },
-    "error": {
-      "title": "Error al crear curso",
-      "description": "Ocurrió un error al crear el curso. Intente nuevamente."
-    }
+"createCourse": {
+  "title": "Nuevo Curso",
+  "create": "Crear Curso",
+  "creating": "Creando...",
+  "fields": {
+    "slug": "Slug (URL)",
+    "imageUrl": "URL de la Imagen",
+    "title": "Título",
+    "description": "Descripción"
   },
+  "placeholders": {
+    "slug": "matematica-basica",
+    "imageUrl": "/images/curso-matematica.jpg",
+    "title": "Ingrese el título del curso",
+    "description": "Ingrese la descripción del curso"
+  },
+  "hints": {
+    "slug": "Use solo letras minúsculas, números y guiones"
+  },
+  "translations": {
+    "title": "Traducciones",
+    "portuguese": "Portugués",
+    "spanish": "Español",
+    "italian": "Italiano"
+  },
+  "validation": {
+    "slugValid": "Slug válido",
+    "imageValid": "URL válida"
+  },
+  "errors": {
+    "slugRequired": "Slug es obligatorio",
+    "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
+    "slugMin": "Slug debe tener al menos 3 caracteres",
+    "slugMax": "Slug debe tener máximo 50 caracteres",
+    "slugFormat": "Slug no puede empezar o terminar con guión",
+    "slugDoubleHyphen": "Slug no puede contener guiones dobles",
+    "imageRequired": "URL de la imagen es obligatoria",
+    "imageInvalid": "URL de la imagen inválida",
+    "titleRequired": "Título es obligatorio",
+    "titleMin": "Título debe tener al menos 3 caracteres",
+    "titleMax": "Título debe tener máximo 100 caracteres",
+    "descriptionRequired": "Descripción es obligatoria",
+    "descriptionMin": "Descripción debe tener al menos 3 caracteres",
+    "descriptionMax": "Descripción debe tener máximo 500 caracteres"
+  },
+  "success": {
+    "title": "¡Curso creado!",
+    "description": "El curso fue creado con éxito."
+  },
+  "error": {
+    "title": "Error al crear curso",
+    "description": "Ocurrió un error al crear el curso. Intente nuevamente.",
+    "validationTitle": "Error de validación",
+    "validationDescription": "Por favor, corrija los errores en el formulario antes de continuar.",
+    "conflictTitle": "Curso duplicado",
+    "conflictDescription": "Ya existe un curso con este título.",
+    "authTitle": "Error de autenticación",
+    "authDescription": "No tienes permiso para crear cursos.",
+    "permissionTitle": "Permiso denegado",
+    "permissionDescription": "No tienes permiso para realizar esta acción."
+  }
+},
   "coursesList": {
     "title": "Lista de Cursos",
     "searchPlaceholder": "Buscar cursos...",

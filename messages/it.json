@@ -343,8 +343,10 @@
     "spanish": "Spagnolo",
     "italian": "Italiano"
   },
+  "generateSlug": "Genera automaticamente",
   "validation": {
     "slugValid": "Slug valido",
+    "slugGenerated": "Slug generato automaticamente",
     "imageValid": "URL valida"
   },
   "errors": {
@@ -377,9 +379,15 @@
     "authTitle": "Errore di autenticazione",
     "authDescription": "Non hai il permesso di creare corsi.",
     "permissionTitle": "Permesso negato",
-    "permissionDescription": "Non hai il permesso di eseguire questa azione."
-  }
-},
+    "permissionDescription": "Non hai il permesso di eseguire questa azione.",
+    "slugGenerationTitle": "Titolo in portoghese obbligatorio",
+    "slugGenerationDescription": "Inserisci il titolo in portoghese prima di generare lo slug automaticamente."
+  },
+  "success": {
+    "title": "Corso creato!",
+    "description": "Il corso è stato creato con successo.",
+    "slugGenerated": "Slug generato automaticamente"
+  }},
   "coursesList": {
     "title": "Elenco Corsi",
     "searchPlaceholder": "Cerca corsi...",

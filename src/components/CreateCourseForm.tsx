@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { generateSlug, formatSlugInput } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ import {
   Globe,
   Check,
   X,
+  Wand2,
 } from 'lucide-react';
 
 interface Translation {
@@ -58,6 +60,7 @@ export default function CreateCourseForm() {
   const t = useTranslations('Admin.createCourse');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [slugGenerated, setSlugGenerated] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     slug: '',
@@ -73,6 +76,38 @@ export default function CreateCourseForm() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof FormErrors, boolean>>
   >({});
+
+  // Função para gerar slug automaticamente
+  const handleGenerateSlug = useCallback(() => {
+    const ptTitle = formData.translations.pt.title.trim();
+
+    if (!ptTitle) {
+      toast({
+        title: t('error.slugGenerationTitle'),
+        description: t('error.slugGenerationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const generatedSlug = generateSlug(ptTitle);
+    setFormData(prev => ({ ...prev, slug: generatedSlug }));
+    setSlugGenerated(true);
+
+    // Marca o campo como touched e valida
+    setTouched(prev => ({ ...prev, slug: true }));
+
+    // Valida o slug gerado
+    const validation = validateSlug(generatedSlug);
+    if (validation.isValid) {
+      setErrors(prev => ({ ...prev, slug: undefined }));
+      toast({
+        title: t('success.slugGenerated'),
+        description: generatedSlug,
+        variant: 'success',
+      });
+    }
+  }, [formData.translations.pt.title, t, toast]);
 
   // Validação de URL
   const validateUrl = useCallback(
@@ -334,6 +369,19 @@ export default function CreateCourseForm() {
         console.error(`Error message: ${error.message}`);
         console.error(`Stack trace: ${error.stack}`);
 
+        // Tratamento de erro de validação do NestJS
+        if (
+          error.message.includes('500') &&
+          error.message.includes('Internal server error')
+        ) {
+          toast({
+            title: t('error.serverTitle'),
+            description: t('error.serverDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
         // Tratamento de erro de curso duplicado
         if (
           error.message.includes('409') ||
@@ -403,24 +451,49 @@ export default function CreateCourseForm() {
     async (payload: {
       slug: string;
       imageUrl: string;
-      translations: Translation[];
-    }): Promise<void> => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
-        {
+      translations: Array<{
+        locale: string;
+        title: string;
+        description: string;
+      }>;
+    }): Promise<any> => {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:3333';
+      const url = `${apiUrl}/courses`;
+
+      console.log('🌐 API URL:', url);
+      console.log('📦 Payload:', payload);
+
+      try {
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
+          credentials: 'include', // Adiciona cookies se necessário
           body: JSON.stringify(payload),
-        }
-      );
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to create course: ${response.status} - ${errorText}`
-        );
+        const responseText = await response.text();
+        console.log('📨 Response status:', response.status);
+        console.log('📨 Response text:', responseText);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to create course: ${response.status} - ${responseText}`
+          );
+        }
+
+        try {
+          return JSON.parse(responseText);
+        } catch {
+          return responseText;
+        }
+      } catch (error) {
+        console.error('🔴 Fetch error:', error);
+        throw error;
       }
     },
     []
@@ -439,6 +512,7 @@ export default function CreateCourseForm() {
     });
     setErrors({});
     setTouched({});
+    setSlugGenerated(false);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -475,21 +549,60 @@ export default function CreateCourseForm() {
     setLoading(true);
 
     try {
-      const translations = Object.values(
-        formData.translations
-      ).map(trans => ({
-        locale: trans.locale,
-        title: trans.title.trim(),
-        description: trans.description.trim(),
-      }));
+      // Garantir que as traduções estão no formato correto
+      const translations = [];
+
+      // Adicionar cada tradução individualmente para garantir a ordem
+      if (
+        formData.translations.pt.title &&
+        formData.translations.pt.description
+      ) {
+        translations.push({
+          locale: 'pt',
+          title: formData.translations.pt.title.trim(),
+          description:
+            formData.translations.pt.description.trim(),
+        });
+      }
+
+      if (
+        formData.translations.it.title &&
+        formData.translations.it.description
+      ) {
+        translations.push({
+          locale: 'it',
+          title: formData.translations.it.title.trim(),
+          description:
+            formData.translations.it.description.trim(),
+        });
+      }
+
+      if (
+        formData.translations.es.title &&
+        formData.translations.es.description
+      ) {
+        translations.push({
+          locale: 'es',
+          title: formData.translations.es.title.trim(),
+          description:
+            formData.translations.es.description.trim(),
+        });
+      }
 
       const payload = {
         slug: formData.slug.trim(),
         imageUrl: formData.imageUrl.trim(),
-        translations,
+        translations: translations,
       };
 
-      await createCourse(payload);
+      // Log para debug
+      console.log(
+        '📤 Enviando payload:',
+        JSON.stringify(payload, null, 2)
+      );
+
+      const result = await createCourse(payload);
+      console.log('✅ Curso criado com sucesso:', result);
 
       toast({
         title: t('success.title'),
@@ -509,11 +622,10 @@ export default function CreateCourseForm() {
   const handleInputChange = useCallback(
     (field: 'slug' | 'imageUrl') => (value: string) => {
       if (field === 'slug') {
-        // Formatar slug automaticamente
-        value = value
-          .toLowerCase()
-          .replace(/\s/g, '-')
-          .replace(/[^a-z0-9-]/g, '');
+        // Formatar slug automaticamente usando a função do lib
+        value = formatSlugInput(value);
+        // Se o usuário editar manualmente, marca como não gerado automaticamente
+        setSlugGenerated(false);
       }
 
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -594,41 +706,8 @@ export default function CreateCourseForm() {
           {t('title')}
         </h3>
 
-        {/* Informações básicas */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <div className="space-y-2">
-            <Label
-              htmlFor="slug"
-              className="text-gray-300 flex items-center gap-2"
-            >
-              <Link size={16} />
-              {t('fields.slug')}
-              <span className="text-red-400">*</span>
-            </Label>
-            <TextField
-              id="slug"
-              placeholder={t('placeholders.slug')}
-              value={formData.slug}
-              onChange={e =>
-                handleInputChange('slug')(e.target.value)
-              }
-              onBlur={handleInputBlur('slug')}
-              error={errors.slug}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500">
-              {t('hints.slug')}
-            </p>
-            {formData.slug &&
-              !errors.slug &&
-              touched.slug && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.slugValid')}
-                </div>
-              )}
-          </div>
-
+        {/* URL da Imagem */}
+        <div className="mb-8">
           <div className="space-y-2">
             <Label
               htmlFor="imageUrl"
@@ -663,7 +742,7 @@ export default function CreateCourseForm() {
         </div>
 
         {/* Traduções */}
-        <div className="space-y-6">
+        <div className="space-y-6 mb-8">
           <h4 className="text-lg font-semibold text-white flex items-center gap-2">
             <Globe size={20} />
             {t('translations.title')}
@@ -883,6 +962,62 @@ export default function CreateCourseForm() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Slug (URL) */}
+        <div className="mb-8">
+          <div className="space-y-2">
+            <Label
+              htmlFor="slug"
+              className="text-gray-300 flex items-center gap-2"
+            >
+              <Link size={16} />
+              {t('fields.slug')}
+              <span className="text-red-400">*</span>
+            </Label>
+            <div className="flex gap-2">
+              <TextField
+                id="slug"
+                placeholder={t('placeholders.slug')}
+                value={formData.slug}
+                onChange={e =>
+                  handleInputChange('slug')(e.target.value)
+                }
+                onBlur={handleInputBlur('slug')}
+                error={errors.slug}
+                className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              />
+              <Button
+                type="button"
+                onClick={handleGenerateSlug}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 flex items-center gap-2"
+                disabled={
+                  !formData.translations.pt.title.trim()
+                }
+              >
+                <Wand2 size={18} />
+                {t('generateSlug')}
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              {t('hints.slug')}
+            </p>
+            {slugGenerated && formData.slug && (
+              <div className="flex items-center gap-1 text-blue-400 text-sm">
+                <Wand2 size={14} />
+                {t('validation.slugGenerated')}
+              </div>
+            )}
+            {formData.slug &&
+              !errors.slug &&
+              touched.slug &&
+              !slugGenerated && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.slugValid')}
+                </div>
+              )}
           </div>
         </div>
 

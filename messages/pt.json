@@ -291,8 +291,10 @@
     "spanish": "Espanhol",
     "italian": "Italiano"
   },
+  "generateSlug": "Gerar automaticamente",
   "validation": {
     "slugValid": "Slug válido",
+    "slugGenerated": "Slug gerado automaticamente",
     "imageValid": "URL válida"
   },
   "errors": {
@@ -309,7 +311,21 @@
     "titleMax": "Título deve ter no máximo 100 caracteres",
     "descriptionRequired": "Descrição é obrigatória",
     "descriptionMin": "Descrição deve ter pelo menos 3 caracteres",
-    "descriptionMax": "Descrição deve ter no máximo 500 caracteres"
+    "descriptionMax": "Descrição deve ter no máximo 500 caracteres",
+    "title": "Erro ao criar curso",
+    "description": "Ocorreu um erro ao criar o curso. Tente novamente.",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Por favor, corrija os erros no formulário antes de continuar.",
+    "conflictTitle": "Curso duplicado",
+    "conflictDescription": "Já existe um curso com este título.",
+    "authTitle": "Erro de autenticação",
+    "authDescription": "Você não tem permissão para criar cursos.",
+    "permissionTitle": "Permissão negada",
+    "permissionDescription": "Você não tem permissão para realizar esta ação.",
+    "slugGenerationTitle": "Título em português obrigatório",
+    "slugGenerationDescription": "Digite o título em português antes de gerar o slug automaticamente.",
+    "serverTitle": "Erro no servidor",
+    "serverDescription": "Ocorreu um erro interno no servidor. Por favor, verifique os dados e tente novamente."
   },
   "success": {
     "title": "Curso criado!",
@@ -325,9 +341,15 @@
     "authTitle": "Erro de autenticação",
     "authDescription": "Você não tem permissão para criar cursos.",
     "permissionTitle": "Permissão negada",
-    "permissionDescription": "Você não tem permissão para realizar esta ação."
-  }
-},
+    "permissionDescription": "Você não tem permissão para realizar esta ação.",
+    "slugGenerationTitle": "Título em português obrigatório",
+    "slugGenerationDescription": "Digite o título em português antes de gerar o slug automaticamente."
+  },
+  "success": {
+    "title": "Curso criado!",
+    "description": "O curso foi criado com sucesso.",
+    "slugGenerated": "Slug gerado automaticamente"
+  }},
   "coursesList": {
     "title": "Lista de Cursos",
     "searchPlaceholder": "Buscar cursos...",

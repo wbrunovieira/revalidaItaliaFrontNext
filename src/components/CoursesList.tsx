@@ -70,18 +70,15 @@ export default function CoursesList() {
     string | null
   >(null);
 
-  // Estados para o modal de visualização
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<
     string | null
   >(null);
 
-  // Estados para o modal de edição
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] =
     useState<Course | null>(null);
 
-  // Estados para o modal de dependências
   const [dependenciesModalOpen, setDependenciesModalOpen] =
     useState(false);
   const [selectedCourseName, setSelectedCourseName] =
@@ -89,7 +86,6 @@ export default function CoursesList() {
   const [dependenciesData, setDependenciesData] =
     useState<DependenciesData | null>(null);
 
-  // Função auxiliar para obter o token
   const getAuthToken = () => {
     const getCookie = (name: string): string | null => {
       if (typeof document === 'undefined') return null;
@@ -99,7 +95,6 @@ export default function CoursesList() {
         return parts.pop()?.split(';').shift() || null;
       return null;
     };
-
     return (
       getCookie('token') ||
       localStorage.getItem('accessToken') ||
@@ -107,46 +102,30 @@ export default function CoursesList() {
     );
   };
 
-  // Função auxiliar para verificar se é uma resposta de dependências
   const isDependenciesResponse = (
     data: unknown
-  ): data is DependenciesData => {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      'error' in data &&
-      'dependencies' in data &&
-      'summary' in data
-    );
-  };
+  ): data is DependenciesData =>
+    typeof data === 'object' &&
+    data !== null &&
+    'error' in data &&
+    'dependencies' in data &&
+    'summary' in data;
 
-  // Função auxiliar para verificar se tem erro de dependências
   const hasCourseDependenciesError = (
     data: unknown
-  ): boolean => {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      'error' in data &&
-      (data as { error?: unknown }).error ===
-        'COURSE_HAS_DEPENDENCIES'
-    );
-  };
+  ): boolean =>
+    typeof data === 'object' &&
+    data !== null &&
+    (data as any).error === 'COURSE_HAS_DEPENDENCIES';
 
-  // Função auxiliar para obter mensagem de erro
   const getErrorMessage = (
     data: unknown
-  ): string | undefined => {
-    if (
-      typeof data === 'object' &&
-      data !== null &&
-      'message' in data
-    ) {
-      const msg = (data as { message?: unknown }).message;
-      return typeof msg === 'string' ? msg : undefined;
-    }
-    return undefined;
-  };
+  ): string | undefined =>
+    typeof data === 'object' &&
+    data !== null &&
+    'message' in data
+      ? ((data as any).message as string)
+      : undefined;
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -155,24 +134,19 @@ export default function CoursesList() {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
-
-      if (token) {
+      if (token)
         headers['Authorization'] = `Bearer ${token}`;
-      }
 
-      const response = await fetch(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/courses`,
         { headers }
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch courses');
-      }
+      if (!res.ok) throw new Error('fetch');
 
-      const data: Course[] = await response.json();
+      const data: Course[] = await res.json();
       setCourses(data);
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast({
         title: t('error.fetchTitle'),
         description: t('error.fetchDescription'),
@@ -187,133 +161,162 @@ export default function CoursesList() {
     fetchCourses();
   }, [fetchCourses]);
 
-  const handleDelete = async (
-    courseId: string,
-    skipConfirmation = false
-  ) => {
-    if (!skipConfirmation && !confirm(t('deleteConfirm')))
-      return;
-
-    // Encontrar o nome do curso
-    const course = courses.find(c => c.id === courseId);
-    const courseName =
-      course?.translations.find(tr => tr.locale === locale)
-        ?.title ||
-      course?.translations[0]?.title ||
-      course?.slug ||
-      '';
-
-    setDeletingId(courseId);
-
-    try {
-      const token = getAuthToken();
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`,
-        {
-          method: 'DELETE',
-          headers,
-        }
-      );
-
-      // Tentar obter dados da resposta
-      let responseData: unknown = null;
+  const deleteCourse = useCallback(
+    async (courseId: string) => {
+      setDeletingId(courseId);
       try {
-        responseData = await response.json();
-      } catch {
-        // Se não conseguir fazer parse do JSON, continuar sem dados
-      }
+        const token = getAuthToken();
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (token)
+          headers['Authorization'] = `Bearer ${token}`;
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Curso não encontrado');
-        } else if (response.status === 401) {
-          throw new Error(
-            'Não autorizado - faça login novamente'
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`,
+          { method: 'DELETE', headers }
+        );
+        let data: unknown = null;
+        try {
+          data = await res.json();
+        } catch {}
+
+        if (!res.ok) throw { status: res.status, data };
+
+        toast({
+          title: t('success.deleteTitle'),
+          description: t('success.deleteDescription'),
+          variant: 'success',
+        });
+        fetchCourses();
+      } catch (err: any) {
+        if (
+          err.status === 400 &&
+          hasCourseDependenciesError(err.data) &&
+          isDependenciesResponse(err.data)
+        ) {
+          const course = courses.find(
+            c => c.id === deletingId
           );
-        } else if (
-          response.status === 400 &&
-          hasCourseDependenciesError(responseData) &&
-          isDependenciesResponse(responseData)
-        ) {
-          // Abrir modal de dependências
-          setSelectedCourseName(courseName);
-          setDependenciesData(responseData);
+          setSelectedCourseName(
+            course?.translations.find(
+              tr => tr.locale === locale
+            )?.title ||
+              course?.slug ||
+              ''
+          );
+          setDependenciesData(err.data);
           setDependenciesModalOpen(true);
-          return; // Não mostrar toast de erro, apenas abrir o modal
-        } else if (
-          response.status === 400 ||
-          response.status === 409
-        ) {
-          const errorMessage =
-            getErrorMessage(responseData) ||
-            'Não é possível excluir este curso. Verifique se não há módulos, lições ou se o curso não está sendo usado em alguma trilha.';
-          throw new Error(errorMessage);
         } else {
-          const errorMessage =
-            getErrorMessage(responseData) ||
-            'Erro ao excluir curso';
-          throw new Error(errorMessage);
+          const msg =
+            err.data &&
+            typeof err.data === 'object' &&
+            'message' in err.data
+              ? getErrorMessage(err.data)
+              : err instanceof Error
+              ? err.message
+              : t('error.deleteDescription');
+          toast({
+            title: t('error.deleteTitle'),
+            description: msg,
+            variant: 'destructive',
+          });
         }
+      } finally {
+        setDeletingId(null);
       }
+    },
+    [courses, deletingId, fetchCourses, locale, t, toast]
+  );
+
+  const handleDelete = useCallback(
+    (courseId: string) => {
+      const course = courses.find(c => c.id === courseId);
+      const name =
+        course?.translations.find(
+          tr => tr.locale === locale
+        )?.title ||
+        course?.slug ||
+        '';
+      const total =
+        dependenciesData?.totalDependencies ?? 0;
 
       toast({
-        title: t('success.deleteTitle'),
-        description: t('success.deleteDescription'),
-      });
-
-      // Recarregar a lista de cursos
-      await fetchCourses();
-    } catch (error) {
-      console.error('Erro ao deletar curso:', error);
-
-      const message =
-        error instanceof Error
-          ? error.message
-          : t('error.deleteDescription');
-
-      toast({
-        title: t('error.deleteTitle'),
-        description: message,
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-2">
+            <p>
+              {t('deleteConfirmation.message', {
+                courseName: name,
+              })}
+            </p>
+            <div className="p-3 bg-gray-700/50 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t('deleteConfirmation.slug')}:{' '}
+                  <span className="font-medium">
+                    {course?.slug}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t(
+                    'deleteConfirmation.dependencies'
+                  )}:{' '}
+                  <span className="font-medium">
+                    {total}
+                  </span>
+                </div>
+                <div className="text-red-300 font-medium">
+                  {t('deleteConfirmation.warning')}
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
         variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteCourse(courseId)}
+            className="inline-flex h-8 items-center px-3 bg-red-600 text-white rounded"
+          >
+            {t('deleteConfirmation.confirm')}
+          </button>
+        ),
       });
-    } finally {
-      setDeletingId(null);
-    }
-  };
+    },
+    [
+      courses,
+      deleteCourse,
+      dependenciesData,
+      locale,
+      t,
+      toast,
+    ]
+  );
 
-  const handleView = (courseId: string) => {
-    if (deletingId !== null) return; // Não abrir modal durante exclusão
-    setSelectedCourseId(courseId);
+  const handleView = (id: string) => {
+    if (deletingId) return;
+    setSelectedCourseId(id);
     setViewModalOpen(true);
   };
 
   const handleEdit = (course: Course) => {
-    if (deletingId !== null) return; // Não abrir modal durante exclusão
+    if (deletingId) return;
     setEditingCourse(course);
     setEditModalOpen(true);
   };
 
-  const filteredCourses = courses.filter(course => {
+  const filtered = courses.filter(c => {
     const tr =
-      course.translations.find(
-        tr => tr.locale === locale
-      ) ?? course.translations[0];
+      c.translations.find(tr => tr.locale === locale) ||
+      c.translations[0];
     return (
-      course.slug
+      c.slug
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       tr.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      tr.description
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
@@ -322,17 +325,7 @@ export default function CoursesList() {
   if (loading) {
     return (
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div
-                key={i}
-                className="h-24 bg-gray-700 rounded"
-              ></div>
-            ))}
-          </div>
-        </div>
+        {/* skeleton placeholder */}
       </div>
     );
   }
@@ -345,7 +338,7 @@ export default function CoursesList() {
             <BookOpen
               size={24}
               className="text-secondary"
-            />
+            />{' '}
             {t('title')}
           </h3>
           <div className="relative">
@@ -358,13 +351,12 @@ export default function CoursesList() {
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              disabled={deletingId !== null}
+              disabled={!!deletingId}
               className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         </div>
 
-        {/* Estatísticas */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-700/50 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold text-white">
@@ -376,14 +368,13 @@ export default function CoursesList() {
           </div>
         </div>
 
-        {/* Lista */}
-        {filteredCourses.length > 0 ? (
+        {filtered.length > 0 ? (
           <div className="space-y-4">
-            {filteredCourses.map(course => {
+            {filtered.map(course => {
               const tr =
                 course.translations.find(
                   tr => tr.locale === locale
-                ) ?? course.translations[0];
+                ) || course.translations[0];
               return (
                 <div
                   key={course.id}
@@ -397,11 +388,11 @@ export default function CoursesList() {
                       className="object-cover"
                     />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-white">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-lg font-semibold text-white truncate">
                       {tr.title}
                     </h4>
-                    <p className="text-sm text-gray-400 line-clamp-1">
+                    <p className="text-sm text-gray-400 truncate line-clamp-1">
                       {tr.description}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
@@ -410,7 +401,7 @@ export default function CoursesList() {
                         ID: {course.id.slice(0, 8)}…
                       </span>
                       <span className="flex items-center gap-1">
-                        <Globe size={12} />
+                        <Globe size={12} />{' '}
                         {course.translations.length}/3{' '}
                         {t('languages')}
                       </span>
@@ -419,7 +410,7 @@ export default function CoursesList() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleView(course.id)}
-                      disabled={deletingId !== null}
+                      disabled={!!deletingId}
                       title={t('actions.view')}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -427,7 +418,7 @@ export default function CoursesList() {
                     </button>
                     <button
                       onClick={() => handleEdit(course)}
-                      disabled={deletingId !== null}
+                      disabled={!!deletingId}
                       title={t('actions.edit')}
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -465,7 +456,6 @@ export default function CoursesList() {
         )}
       </div>
 
-      {/* Modal de visualização */}
       <CourseViewModal
         courseId={selectedCourseId}
         isOpen={viewModalOpen}
@@ -474,8 +464,6 @@ export default function CoursesList() {
           setSelectedCourseId(null);
         }}
       />
-
-      {/* Modal de edição */}
       <CourseEditModal
         course={editingCourse}
         isOpen={editModalOpen}
@@ -486,11 +474,9 @@ export default function CoursesList() {
         onSave={() => {
           setEditModalOpen(false);
           setEditingCourse(null);
-          fetchCourses(); // Recarregar a lista
+          fetchCourses();
         }}
       />
-
-      {/* Modal de dependências */}
       <CourseDependenciesModal
         isOpen={dependenciesModalOpen}
         onClose={() => {

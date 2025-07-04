@@ -451,6 +451,14 @@
   "deleteWithDependencies": "Este curso no puede ser eliminado porque tiene módulos, lecciones o está siendo usado en alguna ruta. Elimine primero todas las dependencias.",
   "unauthorized": "No tienes permiso para eliminar este curso.",
   "notFound": "Curso no encontrado."
+},
+"deleteConfirmation": {
+  "title": "Eliminar Curso",
+  "message": "¿Está seguro que desea eliminar el curso “{courseName}”?",
+  "slug": "Slug",
+  "dependencies": "Dependencias",
+  "warning": "⚠️ Esta acción no se puede deshacer.",
+  "confirm": "Eliminar"
 }
   },
   "tracks": {

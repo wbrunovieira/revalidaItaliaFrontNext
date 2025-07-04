@@ -415,7 +415,15 @@
       "deleteWithDependencies": "Questo corso non può essere eliminato perché ha moduli, lezioni o è utilizzato in qualche percorso. Rimuovi prima tutte le dipendenze.",
       "unauthorized": "Non hai il permesso di eliminare questo corso.",
       "notFound": "Corso non trovato."
-    }
+    },
+    "deleteConfirmation": {
+  "title": "Elimina Corso",
+  "message": "Sei sicuro di voler eliminare il corso “{courseName}”?",
+  "slug": "Slug",
+  "dependencies": "Dipendenze",
+  "warning": "⚠️ Questa azione non può essere annullata.",
+  "confirm": "Elimina"
+}
   },
   "tracks": {
     "create": "Crea Percorso",

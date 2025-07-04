@@ -378,6 +378,14 @@
   "deleteWithDependencies": "Este curso não pode ser excluído pois possui módulos, lições ou está sendo usado em alguma trilha. Remova primeiro todas as dependências.",
   "unauthorized": "Você não tem permissão para excluir este curso.",
   "notFound": "Curso não encontrado."
+},
+"deleteConfirmation": {
+  "title": "Excluir Curso",
+  "message": "Tem certeza que deseja excluir o curso “{courseName}”?",
+  "slug": "Slug",
+  "dependencies": "Dependências",
+  "warning": "⚠️ Essa ação não pode ser desfeita.",
+  "confirm": "Excluir"
 }
   },
   "tracks": {

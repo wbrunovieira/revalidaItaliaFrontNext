@@ -67,6 +67,7 @@ export default function TrackViewModal({
     null
   );
   const [courses, setCourses] = useState<Course[]>([]);
+  const [courseIds, setCourseIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Buscar detalhes da trilha
@@ -108,8 +109,30 @@ export default function TrackViewModal({
             );
         }
 
+        async function fetchCoursesByIds(
+          ids: string[]
+        ): Promise<Course[]> {
+          const requests = ids.map(id =>
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`
+            ).then(res => {
+              if (!res.ok)
+                throw new Error(
+                  `Curso ${id} não encontrado`
+                );
+              return res.json() as Promise<Course>;
+            })
+          );
+          return Promise.all(requests);
+        }
+
+        const detailedCourses = await fetchCoursesByIds(
+          trackData.courseIds || []
+        );
+        setCourses(detailedCourses);
+
         setTrack(trackData);
-        setCourses(courses);
+        setCourseIds(trackData.courseIds || []);
       } catch (error) {
         console.error(
           'Erro ao carregar detalhes da trilha:',
@@ -504,10 +527,10 @@ export default function TrackViewModal({
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <BookOpen size={20} />
-                  {t('courses.title')} ({courses.length})
+                  {t('courses.title')} ({courseIds.length})
                 </h3>
 
-                {courses.length > 0 ? (
+                {courseIds.length > 0 ? (
                   <div className="grid gap-3">
                     {courses.map(course => {
                       const courseTranslation =

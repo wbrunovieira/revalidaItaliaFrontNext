@@ -392,7 +392,7 @@ export default function TracksList() {
   // Estatísticas
   const totalTracks = tracks.length;
   const totalCourses = tracks.reduce(
-    (sum, track) => sum + (track.courses?.length || 0),
+    (sum, tr) => sum + (tr.courseIds?.length ?? 0),
     0
   );
   const averageCoursesPerTrack =
@@ -510,13 +510,7 @@ export default function TracksList() {
                       <span>Slug: {track.slug}</span>
                       <span className="flex items-center gap-1">
                         <BookOpen size={12} />
-                        {courseCount} {t('courses')}
-                      </span>
-                      <span>
-                        {t('created')}:{' '}
-                        {new Date(
-                          track.createdAt
-                        ).toLocaleDateString()}
+                        {totalCourses} {t('courses')}
                       </span>
                     </div>
                   </div>

@@ -535,36 +535,51 @@
         "permissionDescription": "No tiene permiso para crear rutas."
       }
     },
-  "tracksList": {
-    "title": "Lista de Rutas",
-    "searchPlaceholder": "Buscar rutas...",
-    "languages": "idiomas",
-    "courses": "Cursos",
-    "noResults": "Ninguna ruta encontrada con este término.",
-    "noTracks": "Ninguna ruta registrada aún.",
-    "deleteConfirm": "¿Está seguro que desea eliminar esta ruta?",
-    "stats": {
-      "total": "Total de Rutas",
-      "totalCourses": "Total de Cursos",
-      "complete": "Completas"
+"tracksList": {
+      "title": "Lista de Rutas",
+      "searchPlaceholder": "Buscar rutas...",
+      "languages": "idiomas",
+      "courses": "cursos",
+      "coursesInTrack": "Cursos en esta ruta",
+      "created": "Creado",
+      "noResults": "Ninguna ruta encontrada con este término.",
+      "noTracks": "Ninguna ruta registrada aún.",
+      "deleteConfirm": "¿Está seguro que desea eliminar esta ruta?",
+      "stats": {
+        "total": "Total de Rutas",
+        "totalTracks": "Total de Rutas",
+        "totalCourses": "Total de Cursos",
+        "averageCourses": "Promedio de Cursos",
+        "complete": "Completas"
+      },
+      "actions": {
+        "view": "Ver",
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "deleteConfirmation": {
+        "title": "Confirmar eliminación de ruta",
+        "message": "Está a punto de eliminar la ruta \"{trackName}\".",
+        "slug": "Slug",
+        "courses": "Cursos",
+        "course": "curso",
+        "coursesPlural": "cursos",
+        "created": "Creada el",
+        "warning": "Esta acción es irreversible y eliminará permanentemente esta ruta del sistema.",
+        "confirm": "Sí, eliminar ruta"
+      },
+      "success": {
+        "deleteTitle": "¡Ruta eliminada!",
+        "deleteDescription": "La ruta fue eliminada con éxito."
+      },
+      "error": {
+        "fetchTitle": "Error al cargar rutas",
+        "fetchDescription": "No fue posible cargar la lista de rutas.",
+        "deleteTitle": "Error al eliminar",
+        "deleteDescription": "No fue posible eliminar la ruta."
+      }
     },
-    "actions": {
-      "view": "Ver",
-      "edit": "Editar",
-      "delete": "Eliminar"
-    },
-    "success": {
-      "deleteTitle": "¡Ruta eliminada!",
-      "deleteDescription": "La ruta fue eliminada con éxito."
-    },
-    "error": {
-      "fetchTitle": "Error al cargar rutas",
-      "fetchDescription": "No fue posible cargar la lista de rutas.",
-      "deleteTitle": "Error al eliminar",
-      "deleteDescription": "No fue posible eliminar la ruta."
-    }
-  },
-  "modules": {
+"modules": {
     "create": "Crear Módulo",
     "list": "Listar Módulos"
   },

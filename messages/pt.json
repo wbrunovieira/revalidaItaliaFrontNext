@@ -465,23 +465,37 @@
   },
   "tracksList": {
     "title": "Lista de Trilhas",
+    "message":"",
     "searchPlaceholder": "Buscar trilhas...",
     "languages": "idiomas",
-    "courses": "Cursos",
+    "courses": "cursos",
+    "coursesInTrack": "Cursos nesta trilha",
+    "created": "Criado",
     "noResults": "Nenhuma trilha encontrada com este termo.",
     "noTracks": "Nenhuma trilha cadastrada ainda.",
-    "deleteConfirm": "Tem certeza que deseja excluir esta trilha?",
+    "ation": "Tem certeza que deseja excluir esta trilha?",
     "stats": {
       "total": "Total de Trilhas",
       "totalTracks": "Total de Trilhas",
       "totalCourses": "Total de Cursos",
-      "averageCourses": "Media de Cursos",
+      "averageCourses": "Média de Cursos",
       "complete": "Completas"
     },
     "actions": {
       "view": "Visualizar",
       "edit": "Editar",
       "delete": "Excluir"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar exclusão de trilha",
+      "message": "Você está prestes a excluir a trilha \"{trackName}\".",
+      "slug": "Slug",
+      "courses": "Cursos",
+      "course": "curso",
+      "coursesPlural": "cursos",
+      "created": "Criada em",
+      "warning": "Esta ação é irreversível e removerá permanentemente esta trilha do sistema.",
+      "confirm": "Sim, excluir trilha"
     },
     "success": {
       "deleteTitle": "Trilha excluída!",

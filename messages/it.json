@@ -500,35 +500,52 @@
     }
   
 },
-  "tracksList": {
-    "title": "Elenco Percorsi",
-    "searchPlaceholder": "Cerca percorsi...",
-    "languages": "lingue",
-    "courses": "Corsi",
-    "noResults": "Nessun percorso trovato con questo termine.",
-    "noTracks": "Nessun percorso registrato ancora.",
-    "deleteConfirm": "Sei sicuro di voler eliminare questo percorso?",
-    "stats": {
-      "total": "Totale Percorsi",
-      "totalCourses": "Totale Corsi",
-      "complete": "Completi"
-    },
-    "actions": {
-      "view": "Visualizza",
-      "edit": "Modifica",
-      "delete": "Elimina"
-    },
-    "success": {
-      "deleteTitle": "Percorso eliminato!",
-      "deleteDescription": "Il percorso è stato eliminato con successo."
-    },
-    "error": {
-      "fetchTitle": "Errore nel caricamento dei percorsi",
-      "fetchDescription": "Non è stato possibile caricare l'elenco dei percorsi.",
-      "deleteTitle": "Errore nell'eliminazione",
-      "deleteDescription": "Non è stato possibile eliminare il percorso."
-    }
+"tracksList": {
+  "title": "Elenco Percorsi",
+  "searchPlaceholder": "Cerca percorsi...",
+  "languages": "lingue",
+  "courses": "corsi",
+  "coursesInTrack": "Corsi in questo percorso",
+  "created": "Creato",
+  "noResults": "Nessun percorso trovato con questo termine.",
+  "noTracks": "Nessun percorso registrato ancora.",
+  "deleteConfirm": "Sei sicuro di voler eliminare questo percorso?",
+  "stats": {
+    "total": "Totale Percorsi",
+    "totalTracks": "Totale Percorsi",
+    "totalCourses": "Totale Corsi",
+    "averageCourses": "Media Corsi",
+    "complete": "Completi"
   },
+  "actions": {
+    "view": "Visualizza",
+    "edit": "Modifica",
+    "delete": "Elimina"
+  },
+  "deleteConfirmation": {
+    "title": "Conferma eliminazione percorso",
+    "message": "Stai per eliminare il percorso \"{trackName}\".",
+    "slug": "Slug",
+    "courses": "Corsi",
+    "course": "corso",
+    "coursesPlural": "corsi",
+    "created": "Creato il",
+    "warning": "Questa azione è irreversibile e rimuoverà permanentemente questo percorso dal sistema.",
+    "confirm": "Sì, elimina percorso"
+  },
+  "success": {
+    "deleteTitle": "Percorso eliminato!",
+    "deleteDescription": "Il percorso è stato eliminato con successo."
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento dei percorsi",
+    "fetchDescription": "Non è stato possibile caricare l'elenco dei percorsi.",
+    "deleteTitle": "Errore nell'eliminazione",
+    "deleteDescription": "Non è stato possibile eliminare il percorso."
+  }
+}
+
+  ,
   "modules": {
     "create": "Crea Modulo",
     "list": "Elenco Moduli"

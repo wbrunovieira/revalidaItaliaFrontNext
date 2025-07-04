@@ -80,6 +80,24 @@ export default function TracksList() {
   const [selectedTrackForEdit, setSelectedTrackForEdit] =
     useState<TrackForEdit | null>(null);
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3333';
+
+  const getTranslationByLocale = useCallback(
+    (
+      translations: Translation[],
+      targetLocale: string
+    ): Translation => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
+
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
@@ -99,7 +117,7 @@ export default function TracksList() {
 
     try {
       const tracksResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks`
+        `${apiUrl}/tracks`
       );
 
       if (!tracksResponse.ok) {
@@ -153,13 +171,15 @@ export default function TracksList() {
     fetchData();
   }, [fetchData]);
 
-  const handleDelete = useCallback(
-    async (trackId: string): Promise<void> => {
-      if (!confirm(t('deleteConfirm'))) return;
-
+  // Função para deletar trilha após confirmação
+  const deleteTrack = useCallback(
+    async (trackId: string) => {
       try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          'http://localhost:3333';
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`,
+          `${apiUrl}/tracks/${trackId}`,
           {
             method: 'DELETE',
           }
@@ -174,6 +194,7 @@ export default function TracksList() {
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
+          variant: 'success',
         });
 
         await fetchData();
@@ -189,6 +210,73 @@ export default function TracksList() {
     [t, toast, fetchData, handleApiError]
   );
 
+  // Função para mostrar confirmação personalizada usando toast
+  const handleDelete = useCallback(
+    async (trackId: string) => {
+      const track = tracks.find(t => t.id === trackId);
+      if (!track) return;
+
+      const trackTranslation = getTranslationByLocale(
+        track.translations,
+        locale
+      );
+      const courseCount = track.courses?.length || 0;
+
+      // Toast de confirmação personalizado
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                trackName:
+                  trackTranslation?.title || 'Sem título',
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Route size={14} />
+                  {t('deleteConfirmation.slug')}:{' '}
+                  {track.slug}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t('deleteConfirmation.courses')}:{' '}
+                  {courseCount}{' '}
+                  {courseCount === 1
+                    ? t('deleteConfirmation.course')
+                    : t('deleteConfirmation.coursesPlural')}
+                </div>
+                <div>
+                  📅 {t('deleteConfirmation.created')}:{' '}
+                  {new Date(
+                    track.createdAt
+                  ).toLocaleDateString()}
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() => deleteTrack(trackId)}
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [toast, deleteTrack, tracks, t, locale]
+  );
+
   const handleView = useCallback(
     (trackId: string): void => {
       setSelectedTrackId(trackId);
@@ -201,8 +289,11 @@ export default function TracksList() {
     async (trackId: string): Promise<void> => {
       try {
         // Buscar detalhes completos da trilha
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          'http://localhost:3333';
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
+          `${apiUrl}/tracks/${trackId}`
         );
 
         if (!response.ok) {
@@ -260,20 +351,6 @@ export default function TracksList() {
       }
     },
     [toast]
-  );
-
-  const getTranslationByLocale = useCallback(
-    (
-      translations: Translation[],
-      targetLocale: string
-    ): Translation => {
-      return (
-        translations.find(
-          tr => tr.locale === targetLocale
-        ) || translations[0]
-      );
-    },
-    []
   );
 
   // Filtrar trilhas baseado na busca
@@ -436,7 +513,7 @@ export default function TracksList() {
                         {courseCount} {t('courses')}
                       </span>
                       <span>
-                        Criado:{' '}
+                        {t('created')}:{' '}
                         {new Date(
                           track.createdAt
                         ).toLocaleDateString()}

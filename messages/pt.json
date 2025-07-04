@@ -182,7 +182,7 @@
       "completionRate": "Taxa de Conclusão"
     }
   },
- "createUser": {
+"createUser": {
   "title": "Novo Usuário",
   "create": "Criar Usuário",
   "creating": "Criando...",
@@ -210,13 +210,39 @@
   },
   "errors": {
     "nameRequired": "Nome é obrigatório",
+    "nameMin": "Nome deve ter pelo menos 2 caracteres",
+    "nameMax": "Nome deve ter no máximo 100 caracteres",
+    "nameInvalid": "Nome deve conter apenas letras e espaços",
     "emailRequired": "E-mail é obrigatório",
     "emailInvalid": "E-mail inválido",
+    "emailMax": "E-mail muito longo",
     "passwordRequired": "Senha é obrigatória",
     "passwordMin": "Senha deve ter no mínimo 8 caracteres",
+    "passwordWeak": "Senha muito fraca. Use maiúsculas, minúsculas, números e símbolos",
+    "confirmPasswordRequired": "Confirmação de senha é obrigatória",
     "passwordMismatch": "As senhas não coincidem",
     "cpfRequired": "CPF é obrigatório",
-    "cpfInvalid": "CPF inválido"
+    "cpfInvalid": "CPF inválido",
+    "roleRequired": "Função é obrigatória",
+    "roleInvalid": "Função inválida"
+  },
+  "validation": {
+    "nameValid": "Nome válido",
+    "emailValid": "E-mail válido",
+    "cpfValid": "CPF válido"
+  },
+  "passwordStrength": {
+    "label": "Força da senha",
+    "weak": "Fraca",
+    "medium": "Média",
+    "strong": "Forte"
+  },
+  "passwordRequirements": {
+    "length": "Pelo menos 8 caracteres",
+    "lowercase": "Pelo menos uma letra minúscula",
+    "uppercase": "Pelo menos uma letra maiúscula",
+    "number": "Pelo menos um número",
+    "special": "Pelo menos um caractere especial"
   },
   "success": {
     "title": "Usuário criado!",
@@ -224,7 +250,11 @@
   },
   "error": {
     "title": "Erro ao criar usuário",
-    "description": "Ocorreu um erro ao criar o usuário. Tente novamente."
+    "description": "Ocorreu um erro ao criar o usuário. Tente novamente.",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Por favor, corrija os erros no formulário antes de continuar.",
+    "conflictTitle": "Usuário já existe",
+    "conflictDescription": "Já existe um usuário com este e-mail ou CPF."
   }
 },
 

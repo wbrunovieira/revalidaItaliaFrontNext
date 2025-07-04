@@ -183,51 +183,81 @@
       "completionRate": "Tasso di Completamento"
     }
   },
-  "createUser": {
-    "title": "Nuovo Utente",
-    "create": "Crea Utente",
-    "creating": "Creazione...",
-    "passwordMatch": "Le password corrispondono",
-    "fields": {
-      "name": "Nome Completo",
-      "email": "E-mail",
-      "password": "Password",
-      "confirmPassword": "Conferma Password",
-      "role": "Ruolo",
-      "cpf": "CPF"
-    },
-    "placeholders": {
-      "name": "Inserisci il nome completo",
-      "email": "utente@esempio.com",
-      "password": "Minimo 8 caratteri",
-      "confirmPassword": "Inserisci nuovamente la password",
-      "role": "Seleziona un ruolo",
-      "cpf": "000.000.000-00"
-    },
-    "roles": {
-      "student": "Studente",
-      "tutor": "Tutor",
-      "admin": "Amministratore"
-    },
-    "errors": {
-      "nameRequired": "Il nome è obbligatorio",
-      "emailRequired": "L'email è obbligatoria",
-      "emailInvalid": "Email non valida",
-      "passwordRequired": "La password è obbligatoria",
-      "passwordMin": "La password deve avere almeno 8 caratteri",
-      "passwordMismatch": "Le password non corrispondono",
-      "cpfRequired": "CPF è obbligatorio",
-      "cpfInvalid": "CPF non valido"
-    },
-    "success": {
-      "title": "Utente creato!",
-      "description": "L'utente è stato creato con successo."
-    },
-    "error": {
-      "title": "Errore nella creazione dell'utente",
-      "description": "Si è verificato un errore durante la creazione dell'utente. Riprova."
-    }
+"createUser": {
+  "title": "Nuovo Utente",
+  "create": "Crea Utente",
+  "creating": "Creazione...",
+  "passwordMatch": "Le password corrispondono",
+  "fields": {
+    "name": "Nome Completo",
+    "email": "E-mail",
+    "password": "Password",
+    "confirmPassword": "Conferma Password",
+    "role": "Ruolo",
+    "cpf": "CPF"
   },
+  "placeholders": {
+    "name": "Inserisci il nome completo",
+    "email": "utente@esempio.com",
+    "password": "Minimo 8 caratteri",
+    "confirmPassword": "Inserisci nuovamente la password",
+    "role": "Seleziona un ruolo",
+    "cpf": "000.000.000-00"
+  },
+  "roles": {
+    "student": "Studente",
+    "tutor": "Tutor",
+    "admin": "Amministratore"
+  },
+  "errors": {
+    "nameRequired": "Il nome è obbligatorio",
+    "nameMin": "Il nome deve avere almeno 2 caratteri",
+    "nameMax": "Il nome deve avere massimo 100 caratteri",
+    "nameInvalid": "Il nome deve contenere solo lettere e spazi",
+    "emailRequired": "L'email è obbligatoria",
+    "emailInvalid": "Email non valida",
+    "emailMax": "Email troppo lunga",
+    "passwordRequired": "La password è obbligatoria",
+    "passwordMin": "La password deve avere almeno 8 caratteri",
+    "passwordWeak": "Password troppo debole. Usa maiuscole, minuscole, numeri e simboli",
+    "confirmPasswordRequired": "La conferma password è obbligatoria",
+    "passwordMismatch": "Le password non corrispondono",
+    "cpfRequired": "CPF è obbligatorio",
+    "cpfInvalid": "CPF non valido",
+    "roleRequired": "Il ruolo è obbligatorio",
+    "roleInvalid": "Ruolo non valido"
+  },
+  "validation": {
+    "nameValid": "Nome valido",
+    "emailValid": "Email valida",
+    "cpfValid": "CPF valido"
+  },
+  "passwordStrength": {
+    "label": "Forza password",
+    "weak": "Debole",
+    "medium": "Media",
+    "strong": "Forte"
+  },
+  "passwordRequirements": {
+    "length": "Almeno 8 caratteri",
+    "lowercase": "Almeno una lettera minuscola",
+    "uppercase": "Almeno una lettera maiuscola",
+    "number": "Almeno un numero",
+    "special": "Almeno un carattere speciale"
+  },
+  "success": {
+    "title": "Utente creato!",
+    "description": "L'utente è stato creato con successo."
+  },
+  "error": {
+    "title": "Errore nella creazione dell'utente",
+    "description": "Si è verificato un errore durante la creazione dell'utente. Riprova.",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare.",
+    "conflictTitle": "Utente già esistente",
+    "conflictDescription": "Esiste già un utente con questa email o CPF."
+  }
+},
 "usersList": {
   "title": "Lista Utenti",
   "apiSearchPlaceholder": "Cerca per nome, email o CPF...",

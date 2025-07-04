@@ -21,6 +21,7 @@ import {
   CreditCard,
   Shield,
 } from 'lucide-react';
+import Image from 'next/image';
 
 type UserRole = 'admin' | 'tutor' | 'student';
 
@@ -45,6 +46,9 @@ export default function CreateUserForm() {
   const t = useTranslations('Admin.createUser');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -58,6 +62,14 @@ export default function CreateUserForm() {
   const [errors, setErrors] = useState<Partial<FormData>>(
     {}
   );
+
+  // Verificação em tempo real se as senhas coincidem
+  const passwordsMatch =
+    formData.password &&
+    formData.confirmPassword &&
+    formData.password === formData.confirmPassword;
+  const showPasswordComparison =
+    formData.password && formData.confirmPassword;
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -358,17 +370,62 @@ export default function CreateUserForm() {
               <Lock size={16} />
               {t('fields.password')}
             </Label>
-            <TextField
-              id="password"
-              type="password"
-              placeholder={t('placeholders.password')}
-              value={formData.password}
-              onChange={e =>
-                handlePasswordChange(e.target.value)
-              }
-              error={errors.password}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
+            <div className="relative">
+              <TextField
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t('placeholders.password')}
+                value={formData.password}
+                onChange={e =>
+                  handlePasswordChange(e.target.value)
+                }
+                error={errors.password}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(!showPassword)
+                }
+                className="absolute inset-y-0 right-3 flex items-center"
+                aria-label={
+                  showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
+              >
+                <Image
+                  src={
+                    showPassword
+                      ? '/icons/visionOpen.svg'
+                      : '/icons/VIsionClosed.svg'
+                  }
+                  alt={showPassword ? 'Hide' : 'Show'}
+                  width={18}
+                  height={18}
+                />
+              </button>
+            </div>
+            {showPasswordComparison && (
+              <div
+                className={`mt-1 text-sm flex items-center gap-2 ${
+                  passwordsMatch
+                    ? 'text-green-400'
+                    : 'text-red-400'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    passwordsMatch
+                      ? 'bg-green-400'
+                      : 'bg-red-400'
+                  }`}
+                ></span>
+                {passwordsMatch
+                  ? t('passwordMatch')
+                  : t('errors.passwordMismatch')}
+              </div>
+            )}
           </div>
 
           {/* Confirmar Senha */}
@@ -380,19 +437,52 @@ export default function CreateUserForm() {
               <Lock size={16} />
               {t('fields.confirmPassword')}
             </Label>
-            <TextField
-              id="confirmPassword"
-              type="password"
-              placeholder={t(
-                'placeholders.confirmPassword'
-              )}
-              value={formData.confirmPassword}
-              onChange={e =>
-                handleConfirmPasswordChange(e.target.value)
-              }
-              error={errors.confirmPassword}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
+            <div className="relative">
+              <TextField
+                id="confirmPassword"
+                type={
+                  showConfirmPassword ? 'text' : 'password'
+                }
+                placeholder={t(
+                  'placeholders.confirmPassword'
+                )}
+                value={formData.confirmPassword}
+                onChange={e =>
+                  handleConfirmPasswordChange(
+                    e.target.value
+                  )
+                }
+                error={errors.confirmPassword}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setShowConfirmPassword(
+                    !showConfirmPassword
+                  )
+                }
+                className="absolute inset-y-0 right-3 flex items-center"
+                aria-label={
+                  showConfirmPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
+              >
+                <Image
+                  src={
+                    showConfirmPassword
+                      ? '/icons/visionOpen.svg'
+                      : '/icons/VIsionClosed.svg'
+                  }
+                  alt={
+                    showConfirmPassword ? 'Hide' : 'Show'
+                  }
+                  width={18}
+                  height={18}
+                />
+              </button>
+            </div>
           </div>
         </div>
 

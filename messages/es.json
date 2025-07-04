@@ -208,13 +208,13 @@
       "admin": "Administrador"
     },
     "errors": {
-      "nameRequired": "El nombre es obligatorio",
+ "nameRequired": "El nombre es obligatorio",
       "emailRequired": "El correo electrónico es obligatorio",
       "emailInvalid": "Correo electrónico inválido",
       "passwordRequired": "La contraseña es obligatoria",
       "passwordMin": "La contraseña debe tener al menos 8 caracteres",
       "passwordMismatch": "Las contraseñas no coinciden",
-      "cpfRequired": "CPF es obligatorio",
+      "cpfRequired": "El CPF es obligatorio",
       "cpfInvalid": "CPF inválido"
     },
     "success": {

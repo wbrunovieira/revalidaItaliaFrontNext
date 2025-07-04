@@ -94,6 +94,10 @@ export default function CreateModuleForm() {
   const [loadingCourses, setLoadingCourses] =
     useState(true);
   const [slugGenerated, setSlugGenerated] = useState(false);
+  const [existingOrders, setExistingOrders] = useState<
+    number[]
+  >([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
@@ -287,6 +291,12 @@ export default function CreateModuleForm() {
             message: t('errors.orderMax'),
           };
         }
+        if (existingOrders.includes(orderValue)) {
+          return {
+            isValid: false,
+            message: t('errors.orderExists'),
+          };
+        }
         return { isValid: true };
       }
 
@@ -447,6 +457,70 @@ export default function CreateModuleForm() {
     [toast, t]
   );
 
+  // Função para gerar lista de ordens disponíveis
+  const getAvailableOrders = useCallback(() => {
+    const maxOrder = 50; // Limite máximo de ordem
+    const availableOrders = [];
+
+    for (let i = 1; i <= maxOrder; i++) {
+      if (!existingOrders.includes(i)) {
+        availableOrders.push(i);
+      }
+    }
+
+    return availableOrders;
+  }, [existingOrders]);
+
+  // Função para buscar módulos existentes do curso
+  const fetchExistingModules = useCallback(
+    async (courseId: string) => {
+      setLoadingOrders(true);
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch modules: ${response.status}`
+          );
+        }
+
+        const modules = await response.json();
+        const orders = modules.map(
+          (module: any) => module.order
+        );
+        setExistingOrders(orders);
+
+        // Se não houver módulos, ordem começa em 1
+        // Se houver, sugere a próxima ordem disponível
+        if (orders.length === 0) {
+          setFormData(prev => ({ ...prev, order: 1 }));
+        } else {
+          // Encontra a próxima ordem disponível
+          let nextOrder = 1;
+          while (orders.includes(nextOrder)) {
+            nextOrder++;
+          }
+          setFormData(prev => ({
+            ...prev,
+            order: nextOrder,
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching modules:', error);
+        // Em caso de erro, mantém ordem 1
+        setExistingOrders([]);
+      } finally {
+        setLoadingOrders(false);
+      }
+    },
+    []
+  );
+
   // Função para buscar cursos
   const fetchCourses = useCallback(async () => {
     setLoadingCourses(true);
@@ -513,6 +587,9 @@ export default function CreateModuleForm() {
       isValid = false;
     } else if (formData.order > 999) {
       newErrors.order = t('errors.orderMax');
+      isValid = false;
+    } else if (existingOrders.includes(formData.order)) {
+      newErrors.order = t('errors.orderExists');
       isValid = false;
     }
 
@@ -590,11 +667,19 @@ export default function CreateModuleForm() {
   );
 
   const resetForm = useCallback(() => {
+    // Encontra a próxima ordem disponível para o curso atual
+    let nextOrder = 1;
+    if (formData.courseId && existingOrders.length > 0) {
+      while (existingOrders.includes(nextOrder)) {
+        nextOrder++;
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       slug: '',
       imageUrl: '',
-      order: prev.order + 1, // Incrementa a ordem para o próximo módulo
+      order: nextOrder,
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
@@ -604,7 +689,16 @@ export default function CreateModuleForm() {
     setErrors({});
     setTouched({});
     setSlugGenerated(false);
-  }, []);
+
+    // Recarrega os módulos para atualizar a lista de ordens
+    if (formData.courseId) {
+      fetchExistingModules(formData.courseId);
+    }
+  }, [
+    formData.courseId,
+    existingOrders,
+    fetchExistingModules,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -765,8 +859,15 @@ export default function CreateModuleForm() {
       }));
       setTouched(prev => ({ ...prev, courseId: true }));
       handleFieldValidation('courseId', courseId);
+
+      // Buscar módulos existentes quando o curso for selecionado
+      if (courseId) {
+        fetchExistingModules(courseId);
+      } else {
+        setExistingOrders([]);
+      }
     },
-    [handleFieldValidation]
+    [handleFieldValidation, fetchExistingModules]
   );
 
   const handleOrderChange = useCallback(
@@ -776,6 +877,7 @@ export default function CreateModuleForm() {
         ...prev,
         order,
       }));
+      setTouched(prev => ({ ...prev, order: true }));
       handleFieldValidation('order', order);
     },
     [handleFieldValidation]
@@ -960,29 +1062,72 @@ export default function CreateModuleForm() {
               {t('fields.order')}
               <span className="text-red-400">*</span>
             </Label>
-            <TextField
-              id="order"
-              type="number"
-              min="1"
-              max="999"
-              placeholder={t('placeholders.order')}
-              value={formData.order.toString()}
-              onChange={e =>
-                handleOrderChange(e.target.value)
-              }
-              onBlur={handleInputBlur('order')}
-              error={errors.order}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
+            {!formData.courseId ? (
+              <div className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-400 opacity-50">
+                {t('validation.selectCourseFirst')}
+              </div>
+            ) : loadingOrders ? (
+              <div className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-400">
+                {t('validation.loadingOrders')}
+              </div>
+            ) : (
+              <Select
+                value={formData.order.toString()}
+                onValueChange={handleOrderChange}
+                disabled={
+                  !formData.courseId || loadingOrders
+                }
+              >
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectValue
+                    placeholder={t('placeholders.order')}
+                  />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                  {getAvailableOrders().length === 0 ? (
+                    <div className="px-2 py-4 text-center text-gray-400 text-sm">
+                      {t('validation.noAvailableOrders')}
+                    </div>
+                  ) : (
+                    getAvailableOrders().map(order => (
+                      <SelectItem
+                        key={order}
+                        value={order.toString()}
+                        className="text-white hover:bg-gray-600"
+                      >
+                        {order}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            )}
             <p className="text-xs text-gray-500">
               {t('hints.order')}
             </p>
-            {!errors.order && touched.order && (
-              <div className="flex items-center gap-1 text-green-400 text-sm">
-                <Check size={14} />
-                {t('validation.orderValid')}
-              </div>
+            {errors.order && touched.order && (
+              <p className="text-xs text-red-500">
+                {errors.order}
+              </p>
             )}
+            {existingOrders.length > 0 &&
+              formData.courseId &&
+              !loadingOrders && (
+                <p className="text-xs text-gray-400">
+                  {t('validation.usedOrders')}:{' '}
+                  {existingOrders
+                    .sort((a, b) => a - b)
+                    .join(', ')}
+                </p>
+              )}
+            {!errors.order &&
+              touched.order &&
+              formData.courseId && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.orderValid')}
+                </div>
+              )}
           </div>
         </div>
 

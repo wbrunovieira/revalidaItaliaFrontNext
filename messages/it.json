@@ -599,7 +599,11 @@
       "slugValid": "Slug valido",
       "slugGenerated": "Slug generato automaticamente",
       "imageValid": "URL valido",
-      "orderValid": "Ordine valido"
+      "orderValid": "Ordine valido",
+      "loadingOrders": "Caricamento ordini esistenti...",
+      "selectCourseFirst": "Seleziona prima un corso",
+      "usedOrders": "Ordini già utilizzati",
+      "noAvailableOrders": "Tutti gli ordini sono in uso"
     },
     "errors": {
       "courseRequired": "Corso è obbligatorio",
@@ -612,6 +616,7 @@
       "imageInvalid": "URL dell'immagine non valido",
       "orderRequired": "Ordine è obbligatorio",
       "orderMax": "Ordine non può essere maggiore di 999",
+      "orderExists": "Questo ordine è già utilizzato da un altro modulo",
       "titleRequired": "Titolo è obbligatorio",
       "titleMin": "Titolo deve avere almeno 3 caratteri",
       "titleMax": "Titolo non può avere più di 100 caratteri",
@@ -651,6 +656,7 @@
       "slugGenerationDescription": "Digita prima il titolo in portoghese"
     }
   }
+
 
 ,
   "modulesList": {

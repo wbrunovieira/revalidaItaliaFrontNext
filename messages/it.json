@@ -425,6 +425,7 @@
     "title": "Nuovo Percorso",
     "create": "Crea Percorso",
     "creating": "Creazione...",
+    "generateSlug": "Genera slug",
     "fields": {
       "slug": "Slug (URL)",
       "imageUrl": "URL dell'Immagine",
@@ -438,7 +439,7 @@
       "description": "Inserisci la descrizione del percorso"
     },
     "hints": {
-      "slug": "Usa solo lettere minuscole, numeri e trattini"
+      "slug": "Usa solo lettere minuscole, numeri e trattini. Esempio: percorso-programmazione-web"
     },
     "courses": {
       "title": "Corsi del Percorso",
@@ -451,25 +452,54 @@
       "spanish": "Spagnolo",
       "italian": "Italiano"
     },
+    "validation": {
+      "imageValid": "URL immagine valido",
+      "slugValid": "Slug valido",
+      "slugGenerated": "Slug generato automaticamente",
+      "coursesValid": "{{count}} corsi selezionati"
+    },
     "errors": {
-      "slugRequired": "Slug è obbligatorio",
-      "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini",
-      "imageRequired": "URL dell'immagine è obbligatoria",
+      "slugRequired": "Lo slug è obbligatorio",
+      "slugMin": "Lo slug deve avere almeno 3 caratteri",
+      "slugMax": "Lo slug deve avere al massimo 50 caratteri",
+      "slugInvalid": "Lo slug deve contenere solo lettere minuscole, numeri e trattini",
+      "slugFormat": "Lo slug non può iniziare o terminare con un trattino",
+      "slugDoubleHyphen": "Lo slug non può contenere trattini doppi (--)",
+      "imageRequired": "L'URL dell'immagine è obbligatorio",
+      "imageInvalid": "L'URL dell'immagine deve essere valido (iniziare con / o http:// o https://)",
       "coursesRequired": "Seleziona almeno un corso",
-      "titleRequired": "Titolo è obbligatorio",
-      "descriptionRequired": "Descrizione è obbligatoria",
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMin": "Il titolo deve avere almeno 3 caratteri",
+      "titleMax": "Il titolo deve avere al massimo 100 caratteri",
+      "descriptionRequired": "La descrizione è obbligatoria",
+      "descriptionMin": "La descrizione deve avere almeno 3 caratteri",
+      "descriptionMax": "La descrizione deve avere al massimo 500 caratteri",
       "fetchCoursesTitle": "Errore nel caricamento dei corsi",
       "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili"
     },
     "success": {
       "title": "Percorso creato!",
-      "description": "Il percorso è stato creato con successo."
+      "description": "Il percorso è stato creato con successo.",
+      "slugGenerated": "Slug generato con successo"
     },
     "error": {
       "title": "Errore nella creazione del percorso",
-      "description": "Si è verificato un errore durante la creazione del percorso. Riprova."
+      "description": "Si è verificato un errore durante la creazione del percorso. Riprova.",
+      "slugGenerationTitle": "Errore nella generazione dello slug",
+      "slugGenerationDescription": "Compila il titolo in portoghese per generare automaticamente lo slug",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare",
+      "serverTitle": "Errore del server",
+      "serverDescription": "Si è verificato un errore nel server. Riprova più tardi.",
+      "conflictTitle": "Percorso duplicato",
+      "conflictDescription": "Esiste già un percorso con questo titolo. Per favore, scegli un altro titolo.",
+      "authTitle": "Errore di autenticazione",
+      "authDescription": "Devi essere autenticato per creare un percorso.",
+      "permissionTitle": "Senza permesso",
+      "permissionDescription": "Non hai il permesso di creare percorsi."
     }
-  },
+  
+},
   "tracksList": {
     "title": "Elenco Percorsi",
     "searchPlaceholder": "Cerca percorsi...",

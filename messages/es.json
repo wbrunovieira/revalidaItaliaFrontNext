@@ -457,55 +457,84 @@
     "create": "Crear Ruta",
     "list": "Listar Rutas"
   },
-  "createTrack": {
-    "title": "Nueva Ruta",
-    "create": "Crear Ruta",
-    "creating": "Creando...",
-    "fields": {
-      "slug": "Slug (URL)",
-      "imageUrl": "URL de la Imagen",
-      "title": "Título",
-      "description": "Descripción"
+"createTrack": {
+      "title": "Nueva Ruta",
+      "create": "Crear Ruta",
+      "creating": "Creando...",
+      "generateSlug": "Generar slug",
+      "fields": {
+        "slug": "Slug (URL)",
+        "imageUrl": "URL de la Imagen",
+        "title": "Título",
+        "description": "Descripción"
+      },
+      "placeholders": {
+        "slug": "ruta-principiantes",
+        "imageUrl": "/images/ruta-ejemplo.jpg",
+        "title": "Ingrese el título de la ruta",
+        "description": "Ingrese la descripción de la ruta"
+      },
+      "hints": {
+        "slug": "Use solo letras minúsculas, números y guiones. Ejemplo: ruta-programacion-web"
+      },
+      "courses": {
+        "title": "Cursos de la Ruta",
+        "description": "Seleccione uno o más cursos para componer esta ruta",
+        "noCourses": "No hay cursos disponibles para seleccionar"
+      },
+      "translations": {
+        "title": "Traducciones",
+        "portuguese": "Portugués",
+        "spanish": "Español",
+        "italian": "Italiano"
+      },
+      "validation": {
+        "imageValid": "URL de imagen válida",
+        "slugValid": "Slug válido",
+        "slugGenerated": "Slug generado automáticamente",
+        "coursesValid": "{{count}} cursos seleccionados"
+      },
+      "errors": {
+        "slugRequired": "El slug es obligatorio",
+        "slugMin": "El slug debe tener al menos 3 caracteres",
+        "slugMax": "El slug debe tener como máximo 50 caracteres",
+        "slugInvalid": "El slug debe contener solo letras minúsculas, números y guiones",
+        "slugFormat": "El slug no puede comenzar o terminar con guión",
+        "slugDoubleHyphen": "El slug no puede contener guiones dobles (--)",
+        "imageRequired": "La URL de la imagen es obligatoria",
+        "imageInvalid": "La URL de la imagen debe ser válida (comenzar con / o http:// o https://)",
+        "coursesRequired": "Seleccione al menos un curso",
+        "titleRequired": "El título es obligatorio",
+        "titleMin": "El título debe tener al menos 3 caracteres",
+        "titleMax": "El título debe tener como máximo 100 caracteres",
+        "descriptionRequired": "La descripción es obligatoria",
+        "descriptionMin": "La descripción debe tener al menos 3 caracteres",
+        "descriptionMax": "La descripción debe tener como máximo 500 caracteres",
+        "fetchCoursesTitle": "Error al cargar cursos",
+        "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+      },
+      "success": {
+        "title": "¡Ruta creada!",
+        "description": "La ruta fue creada con éxito.",
+        "slugGenerated": "Slug generado con éxito"
+      },
+      "error": {
+        "title": "Error al crear ruta",
+        "description": "Ocurrió un error al crear la ruta. Intente nuevamente.",
+        "slugGenerationTitle": "Error al generar slug",
+        "slugGenerationDescription": "Complete el título en portugués para generar el slug automáticamente",
+        "validationTitle": "Error de validación",
+        "validationDescription": "Por favor, corrija los errores en el formulario antes de continuar",
+        "serverTitle": "Error del servidor",
+        "serverDescription": "Ocurrió un error en el servidor. Intente nuevamente más tarde.",
+        "conflictTitle": "Ruta duplicada",
+        "conflictDescription": "Ya existe una ruta con este título. Por favor, elija otro título.",
+        "authTitle": "Error de autenticación",
+        "authDescription": "Necesita estar autenticado para crear una ruta.",
+        "permissionTitle": "Sin permiso",
+        "permissionDescription": "No tiene permiso para crear rutas."
+      }
     },
-    "placeholders": {
-      "slug": "ruta-principiantes",
-      "imageUrl": "/images/ruta-ejemplo.jpg",
-      "title": "Ingrese el título de la ruta",
-      "description": "Ingrese la descripción de la ruta"
-    },
-    "hints": {
-      "slug": "Use solo letras minúsculas, números y guiones"
-    },
-    "courses": {
-      "title": "Cursos de la Ruta",
-      "description": "Seleccione uno o más cursos para componer esta ruta",
-      "noCourses": "No hay cursos disponibles para seleccionar"
-    },
-    "translations": {
-      "title": "Traducciones",
-      "portuguese": "Portugués",
-      "spanish": "Español",
-      "italian": "Italiano"
-    },
-    "errors": {
-      "slugRequired": "Slug es obligatorio",
-      "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",
-      "imageRequired": "URL de la imagen es obligatoria",
-      "coursesRequired": "Seleccione al menos un curso",
-      "titleRequired": "Título es obligatorio",
-      "descriptionRequired": "Descripción es obligatoria",
-      "fetchCoursesTitle": "Error al cargar cursos",
-      "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
-    },
-    "success": {
-      "title": "¡Ruta creada!",
-      "description": "La ruta fue creada con éxito."
-    },
-    "error": {
-      "title": "Error al crear ruta",
-      "description": "Ocurrió un error al crear la ruta. Intente nuevamente."
-    }
-  },
   "tracksList": {
     "title": "Lista de Rutas",
     "searchPlaceholder": "Buscar rutas...",

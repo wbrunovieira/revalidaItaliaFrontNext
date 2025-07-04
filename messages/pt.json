@@ -388,6 +388,7 @@
     "title": "Nova Trilha",
     "create": "Criar Trilha",
     "creating": "Criando...",
+    "generateSlug": "Gerar slug",
     "fields": {
       "slug": "Slug (URL)",
       "imageUrl": "URL da Imagem",
@@ -401,7 +402,7 @@
       "description": "Digite a descrição da trilha"
     },
     "hints": {
-      "slug": "Use apenas letras minúsculas, números e hífens"
+      "slug": "Use apenas letras minúsculas, números e hífens. Exemplo: trilha-programacao-web"
     },
     "courses": {
       "title": "Cursos da Trilha",
@@ -414,24 +415,53 @@
       "spanish": "Espanhol",
       "italian": "Italiano"
     },
+    "validation": {
+      "imageValid": "URL da imagem válida",
+      "slugValid": "Slug válido",
+      "slugGenerated": "Slug gerado automaticamente",
+      "coursesValid": "{{count}} cursos selecionados"
+    },
     "errors": {
-      "slugRequired": "Slug é obrigatório",
-      "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
-      "imageRequired": "URL da imagem é obrigatória",
+      "slugRequired": "O slug é obrigatório",
+      "slugMin": "O slug deve ter no mínimo 3 caracteres",
+      "slugMax": "O slug deve ter no máximo 50 caracteres",
+      "slugInvalid": "O slug deve conter apenas letras minúsculas, números e hífens",
+      "slugFormat": "O slug não pode começar ou terminar com hífen",
+      "slugDoubleHyphen": "O slug não pode conter hífens duplos (--)",
+      "imageRequired": "A URL da imagem é obrigatória",
+      "imageInvalid": "A URL da imagem deve ser válida (começar com / ou http:// ou https://)",
       "coursesRequired": "Selecione pelo menos um curso",
-      "titleRequired": "Título é obrigatório",
-      "descriptionRequired": "Descrição é obrigatória",
+      "titleRequired": "O título é obrigatório",
+      "titleMin": "O título deve ter no mínimo 3 caracteres",
+      "titleMax": "O título deve ter no máximo 100 caracteres",
+      "descriptionRequired": "A descrição é obrigatória",
+      "descriptionMin": "A descrição deve ter no mínimo 3 caracteres",
+      "descriptionMax": "A descrição deve ter no máximo 500 caracteres",
       "fetchCoursesTitle": "Erro ao carregar cursos",
       "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
     },
     "success": {
       "title": "Trilha criada!",
-      "description": "A trilha foi criada com sucesso."
+      "description": "A trilha foi criada com sucesso.",
+      "slugGenerated": "Slug gerado com sucesso"
     },
     "error": {
       "title": "Erro ao criar trilha",
-      "description": "Ocorreu um erro ao criar a trilha. Tente novamente."
+      "description": "Ocorreu um erro ao criar a trilha. Tente novamente.",
+      "slugGenerationTitle": "Erro ao gerar slug",
+      "slugGenerationDescription": "Preencha o título em português para gerar o slug automaticamente",
+      "validationTitle": "Erro de validação",
+      "validationDescription": "Por favor, corrija os erros no formulário antes de continuar",
+      "serverTitle": "Erro no servidor",
+      "serverDescription": "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+      "conflictTitle": "Trilha duplicada",
+      "conflictDescription": "Já existe uma trilha com este título. Por favor, escolha outro título.",
+      "authTitle": "Erro de autenticação",
+      "authDescription": "Você precisa estar autenticado para criar uma trilha.",
+      "permissionTitle": "Sem permissão",
+      "permissionDescription": "Você não tem permissão para criar trilhas."
     }
+  
   },
   "tracksList": {
     "title": "Lista de Trilhas",

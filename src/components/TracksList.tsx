@@ -29,6 +29,16 @@ interface Course {
   translations: Translation[];
 }
 
+interface TrackCourse {
+  course: Course;
+  courseId: string;
+}
+
+interface TrackCourseWithOptionalCourse {
+  courseId: string;
+  course?: Course;
+}
+
 interface Track {
   id: string;
   slug: string;
@@ -36,7 +46,19 @@ interface Track {
   translations: Translation[];
   courses?: Course[];
   courseIds?: string[];
-  trackCourses?: { course: Course }[];
+  trackCourses?: TrackCourse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TrackForEdit {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  translations: Translation[];
+  courses?: Course[];
+  courseIds: string[];
+  trackCourses?: TrackCourseWithOptionalCourse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -56,7 +78,7 @@ export default function TracksList() {
   >(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTrackForEdit, setSelectedTrackForEdit] =
-    useState<any>(null);
+    useState<TrackForEdit | null>(null);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -72,7 +94,7 @@ export default function TracksList() {
   );
 
   // Função principal para buscar todos os dados
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (): Promise<void> => {
     setLoading(true);
 
     try {
@@ -103,7 +125,9 @@ export default function TracksList() {
           // Se os cursos vierem aninhados em trackCourses
           courses = track.trackCourses
             .map(tc => tc.course)
-            .filter(course => course != null);
+            .filter(
+              (course): course is Course => course != null
+            );
         }
 
         return {
@@ -130,7 +154,7 @@ export default function TracksList() {
   }, [fetchData]);
 
   const handleDelete = useCallback(
-    async (trackId: string) => {
+    async (trackId: string): Promise<void> => {
       if (!confirm(t('deleteConfirm'))) return;
 
       try {
@@ -165,13 +189,16 @@ export default function TracksList() {
     [t, toast, fetchData, handleApiError]
   );
 
-  const handleView = useCallback((trackId: string) => {
-    setSelectedTrackId(trackId);
-    setViewModalOpen(true);
-  }, []);
+  const handleView = useCallback(
+    (trackId: string): void => {
+      setSelectedTrackId(trackId);
+      setViewModalOpen(true);
+    },
+    []
+  );
 
   const handleEdit = useCallback(
-    async (trackId: string) => {
+    async (trackId: string): Promise<void> => {
       try {
         // Buscar detalhes completos da trilha
         const response = await fetch(
@@ -184,14 +211,15 @@ export default function TracksList() {
           );
         }
 
-        const trackData = await response.json();
+        const trackData: TrackForEdit =
+          await response.json();
         console.log(
           'Dados da trilha para edição:',
           trackData
         );
 
         // Processar os dados para garantir que tenham o formato correto
-        const processedTrack = {
+        const processedTrack: TrackForEdit = {
           ...trackData,
           courseIds: trackData.courseIds || [],
         };
@@ -204,14 +232,15 @@ export default function TracksList() {
           ) {
             processedTrack.courseIds =
               trackData.trackCourses.map(
-                (tc: any) => tc.courseId
+                (tc: TrackCourseWithOptionalCourse) =>
+                  tc.courseId
               );
           } else if (
             trackData.courses &&
             Array.isArray(trackData.courses)
           ) {
             processedTrack.courseIds =
-              trackData.courses.map((c: any) => c.id);
+              trackData.courses.map((c: Course) => c.id);
           }
         }
 
@@ -234,7 +263,10 @@ export default function TracksList() {
   );
 
   const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
+    (
+      translations: Translation[],
+      targetLocale: string
+    ): Translation => {
       return (
         translations.find(
           tr => tr.locale === targetLocale

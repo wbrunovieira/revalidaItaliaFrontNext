@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -31,6 +31,10 @@ interface Course {
   translations: Translation[];
 }
 
+interface TrackCourse {
+  course: Course;
+}
+
 interface TrackViewData {
   id: string;
   slug: string;
@@ -38,7 +42,7 @@ interface TrackViewData {
   courseIds: string[];
   translations: Translation[];
   courses?: Course[];
-  trackCourses?: { course: Course }[];
+  trackCourses?: TrackCourse[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -66,68 +70,71 @@ export default function TrackViewModal({
   const [loading, setLoading] = useState(false);
 
   // Buscar detalhes da trilha
-  const fetchTrackDetails = async () => {
-    if (!trackId) return;
+  const fetchTrackDetails =
+    useCallback(async (): Promise<void> => {
+      if (!trackId) return;
 
-    setLoading(true);
-    try {
-      // Buscar trilha com detalhes completos
-      const trackResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
-      );
+      setLoading(true);
+      try {
+        // Buscar trilha com detalhes completos
+        const trackResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
+        );
 
-      if (!trackResponse.ok) {
-        throw new Error('Erro ao buscar trilha');
+        if (!trackResponse.ok) {
+          throw new Error('Erro ao buscar trilha');
+        }
+
+        const trackData: TrackViewData =
+          await trackResponse.json();
+
+        // Processar os cursos da trilha
+        let courses: Course[] = [];
+
+        if (
+          trackData.courses &&
+          Array.isArray(trackData.courses)
+        ) {
+          courses = trackData.courses;
+        } else if (
+          trackData.trackCourses &&
+          Array.isArray(trackData.trackCourses)
+        ) {
+          // Se os cursos vierem aninhados em trackCourses
+          courses = trackData.trackCourses
+            .map(tc => tc.course)
+            .filter(
+              (course): course is Course => course != null
+            );
+        }
+
+        setTrack(trackData);
+        setCourses(courses);
+      } catch (error) {
+        console.error(
+          'Erro ao carregar detalhes da trilha:',
+          error
+        );
+        toast({
+          title: t('error.fetchTitle'),
+          description: t('error.fetchDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-
-      const trackData: TrackViewData =
-        await trackResponse.json();
-
-      // Processar os cursos da trilha
-      let courses: Course[] = [];
-
-      if (
-        trackData.courses &&
-        Array.isArray(trackData.courses)
-      ) {
-        courses = trackData.courses;
-      } else if (
-        trackData.trackCourses &&
-        Array.isArray(trackData.trackCourses)
-      ) {
-        // Se os cursos vierem aninhados em trackCourses
-        courses = trackData.trackCourses
-          .map(tc => tc.course)
-          .filter(course => course != null);
-      }
-
-      setTrack(trackData);
-      setCourses(courses);
-    } catch (error) {
-      console.error(
-        'Erro ao carregar detalhes da trilha:',
-        error
-      );
-      toast({
-        title: t('error.fetchTitle'),
-        description: t('error.fetchDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, [trackId, t, toast]);
 
   // Buscar dados quando abrir o modal
   useEffect(() => {
     if (isOpen && trackId) {
       fetchTrackDetails();
     }
-  }, [isOpen, trackId]);
+  }, [isOpen, trackId, fetchTrackDetails]);
 
   // Fechar modal com ESC
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose();
     };
 
@@ -146,14 +153,18 @@ export default function TrackViewModal({
   const copyToClipboard = async (
     text: string,
     field: string
-  ) => {
+  ): Promise<void> => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
         title: t('copySuccess'),
         description: `${field} ${t('copyDescription')}`,
       });
-    } catch (error) {
+    } catch (copyError) {
+      console.error(
+        'Erro ao copiar para área de transferência:',
+        copyError
+      );
       toast({
         title: t('copyError'),
         description: t('copyErrorDescription'),
@@ -166,10 +177,20 @@ export default function TrackViewModal({
   const getTranslationByLocale = (
     translations: Translation[],
     targetLocale: string
-  ) => {
+  ): Translation => {
     return (
       translations.find(tr => tr.locale === targetLocale) ||
       translations[0]
+    );
+  };
+
+  // Obter tradução específica por locale
+  const getTranslationForLocale = (
+    translations: Translation[],
+    targetLocale: string
+  ): Translation | undefined => {
+    return translations.find(
+      tr => tr.locale === targetLocale
     );
   };
 
@@ -358,8 +379,9 @@ export default function TrackViewModal({
 
                 <div className="grid gap-4">
                   {/* Português */}
-                  {track.translations.find(
-                    tr => tr.locale === 'pt'
+                  {getTranslationForLocale(
+                    track.translations,
+                    'pt'
                   ) && (
                     <div className="border border-gray-700 rounded-lg p-4">
                       <h4 className="text-white font-medium mb-3 flex items-center gap-2">
@@ -372,8 +394,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'pt'
+                              getTranslationForLocale(
+                                track.translations,
+                                'pt'
                               )?.title
                             }
                           </span>
@@ -384,8 +407,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'pt'
+                              getTranslationForLocale(
+                                track.translations,
+                                'pt'
                               )?.description
                             }
                           </span>
@@ -395,8 +419,9 @@ export default function TrackViewModal({
                   )}
 
                   {/* Espanhol */}
-                  {track.translations.find(
-                    tr => tr.locale === 'es'
+                  {getTranslationForLocale(
+                    track.translations,
+                    'es'
                   ) && (
                     <div className="border border-gray-700 rounded-lg p-4">
                       <h4 className="text-white font-medium mb-3 flex items-center gap-2">
@@ -409,8 +434,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'es'
+                              getTranslationForLocale(
+                                track.translations,
+                                'es'
                               )?.title
                             }
                           </span>
@@ -421,8 +447,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'es'
+                              getTranslationForLocale(
+                                track.translations,
+                                'es'
                               )?.description
                             }
                           </span>
@@ -432,8 +459,9 @@ export default function TrackViewModal({
                   )}
 
                   {/* Italiano */}
-                  {track.translations.find(
-                    tr => tr.locale === 'it'
+                  {getTranslationForLocale(
+                    track.translations,
+                    'it'
                   ) && (
                     <div className="border border-gray-700 rounded-lg p-4">
                       <h4 className="text-white font-medium mb-3 flex items-center gap-2">
@@ -446,8 +474,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'it'
+                              getTranslationForLocale(
+                                track.translations,
+                                'it'
                               )?.title
                             }
                           </span>
@@ -458,8 +487,9 @@ export default function TrackViewModal({
                           </span>{' '}
                           <span className="text-white">
                             {
-                              track.translations.find(
-                                tr => tr.locale === 'it'
+                              getTranslationForLocale(
+                                track.translations,
+                                'it'
                               )?.description
                             }
                           </span>

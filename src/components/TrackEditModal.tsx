@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -32,12 +32,17 @@ interface Course {
   translations: Translation[];
 }
 
+interface TrackCourse {
+  courseId: string;
+  course?: Course;
+}
+
 interface TrackEditData {
   id: string;
   slug: string;
   imageUrl: string;
   courseIds?: string[];
-  trackCourses?: { courseId: string; course?: Course }[];
+  trackCourses?: TrackCourse[];
   courses?: Course[];
   translations: Translation[];
 }
@@ -47,6 +52,23 @@ interface TrackEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+}
+
+interface FormTranslations {
+  pt: Translation;
+  es: Translation;
+  it: Translation;
+}
+
+interface FormData {
+  slug: string;
+  imageUrl: string;
+  courseIds: string[];
+  translations: FormTranslations;
+}
+
+interface FormErrors {
+  [key: string]: string;
 }
 
 export default function TrackEditModal({
@@ -60,28 +82,27 @@ export default function TrackEditModal({
   const locale = params.locale as string;
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     slug: '',
     imageUrl: '',
-    courseIds: [] as string[],
+    courseIds: [],
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
       it: { locale: 'it', title: '', description: '' },
     },
   });
+
   const [availableCourses, setAvailableCourses] = useState<
     Course[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] =
     useState(false);
-  const [errors, setErrors] = useState<
-    Record<string, string>
-  >({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Função para obter o token
-  const getAuthToken = () => {
+  const getAuthToken = (): string | null => {
     const getCookie = (name: string): string | null => {
       if (typeof document === 'undefined') return null;
       const value = `; ${document.cookie}`;
@@ -111,7 +132,7 @@ export default function TrackEditModal({
   };
 
   // Buscar cursos disponíveis
-  const fetchAvailableCourses = async () => {
+  const fetchAvailableCourses = useCallback(async () => {
     setLoadingCourses(true);
     try {
       const response = await fetch(
@@ -122,7 +143,7 @@ export default function TrackEditModal({
         throw new Error('Erro ao buscar cursos');
       }
 
-      const data = await response.json();
+      const data: Course[] = await response.json();
       setAvailableCourses(data);
     } catch (error) {
       console.error('Erro ao buscar cursos:', error);
@@ -134,11 +155,11 @@ export default function TrackEditModal({
     } finally {
       setLoadingCourses(false);
     }
-  };
+  }, [t, toast]);
 
   // Validar formulário
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
 
     if (!formData.slug.trim()) {
       newErrors.slug = t('errors.slugRequired');
@@ -175,96 +196,8 @@ export default function TrackEditModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para mostrar o payload que seria enviado
-  const showPayload = () => {
-    // Converter translations object para array na ordem correta: pt, it, es
-    const translations = [
-      {
-        locale: 'pt',
-        title: formData.translations.pt.title.trim(),
-        description:
-          formData.translations.pt.description.trim(),
-      },
-      {
-        locale: 'it',
-        title: formData.translations.it.title.trim(),
-        description:
-          formData.translations.it.description.trim(),
-      },
-      {
-        locale: 'es',
-        title: formData.translations.es.title.trim(),
-        description:
-          formData.translations.es.description.trim(),
-      },
-    ];
-
-    // Garantir que courseIds seja um array de strings
-    const courseIds = Array.isArray(formData.courseIds)
-      ? formData.courseIds.filter(
-          id => id && typeof id === 'string'
-        )
-      : [];
-
-    // Construir payload EXATAMENTE como o exemplo, SEM o ID
-    const payload = {
-      slug: formData.slug.trim(),
-      courseIds: courseIds,
-      translations: translations,
-    };
-
-    // Adicionar imageUrl apenas se tiver valor
-    if (formData.imageUrl && formData.imageUrl.trim()) {
-      (payload as any).imageUrl = formData.imageUrl.trim();
-    }
-
-    console.log('=== PAYLOAD QUE SERÁ ENVIADO ===');
-    console.log(JSON.stringify(payload, null, 2));
-    console.log('================================');
-
-    // Comparar com o exemplo fornecido
-    console.log('=== EXEMPLO DE PAYLOAD CORRETO ===');
-    console.log(
-      JSON.stringify(
-        {
-          slug: 'trilha-multi-cursos',
-          courseIds: [
-            '1b183dde-064c-4d48-9bec-dacb8e4217e4',
-            '2c294eef-175d-5e59-acfd-ebd9c9e5328f',
-          ],
-          translations: [
-            {
-              locale: 'pt',
-              title: 'Trilha Multi Cursos PT',
-              description:
-                'Uma trilha com múltiplos cursos.',
-            },
-            {
-              locale: 'it',
-              title: 'Traccia Multi Corsi IT',
-              description: 'Una traccia con più corsi.',
-            },
-            {
-              locale: 'es',
-              title: 'Pista Multi Cursos ES',
-              description:
-                'Una pista con múltiples cursos.',
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-    console.log('==================================');
-
-    alert(
-      'Payload foi logado no console. Pressione F12 para ver.'
-    );
-  };
-
   // Função de teste para debug
-  const testApiConnection = async () => {
+  const testApiConnection = async (): Promise<void> => {
     try {
       console.log('Testando conexão com API...');
       const response = await fetch(
@@ -304,7 +237,9 @@ export default function TrackEditModal({
   };
 
   // Submeter formulário
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent
+  ): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm() || !track) return;
@@ -376,10 +311,35 @@ export default function TrackEditModal({
     }
   };
 
+  // Extrair courseIds do track
+  const extractCourseIds = (
+    trackData: TrackEditData
+  ): string[] => {
+    if (
+      trackData.courseIds &&
+      Array.isArray(trackData.courseIds)
+    ) {
+      return trackData.courseIds;
+    } else if (
+      trackData.trackCourses &&
+      Array.isArray(trackData.trackCourses)
+    ) {
+      return trackData.trackCourses.map(
+        (tc: TrackCourse) => tc.courseId
+      );
+    } else if (
+      trackData.courses &&
+      Array.isArray(trackData.courses)
+    ) {
+      return trackData.courses.map((c: Course) => c.id);
+    }
+    return [];
+  };
+
   // Atualizar formulário quando track mudar
   useEffect(() => {
     if (track && isOpen) {
-      const translationsObj = {
+      const translationsObj: FormTranslations = {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
         it: { locale: 'it', title: '', description: '' },
@@ -392,7 +352,9 @@ export default function TrackEditModal({
           trans.locale === 'es' ||
           trans.locale === 'it'
         ) {
-          translationsObj[trans.locale] = {
+          translationsObj[
+            trans.locale as keyof FormTranslations
+          ] = {
             locale: trans.locale,
             title: trans.title,
             description: trans.description,
@@ -400,30 +362,7 @@ export default function TrackEditModal({
         }
       });
 
-      // Extrair courseIds do track
-      let courseIds: string[] = [];
-      if (
-        track.courseIds &&
-        Array.isArray(track.courseIds)
-      ) {
-        courseIds = track.courseIds;
-      } else if (
-        (track as any).trackCourses &&
-        Array.isArray((track as any).trackCourses)
-      ) {
-        // Se os courseIds vierem de trackCourses
-        courseIds = (track as any).trackCourses.map(
-          (tc: any) => tc.courseId
-        );
-      } else if (
-        (track as any).courses &&
-        Array.isArray((track as any).courses)
-      ) {
-        // Se vier com courses completos
-        courseIds = (track as any).courses.map(
-          (c: any) => c.id
-        );
-      }
+      const courseIds = extractCourseIds(track);
 
       setFormData({
         slug: track.slug,
@@ -440,11 +379,11 @@ export default function TrackEditModal({
     if (isOpen) {
       fetchAvailableCourses();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchAvailableCourses]);
 
   // Fechar modal com ESC
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose();
     };
 
@@ -463,7 +402,7 @@ export default function TrackEditModal({
     locale: 'pt' | 'es' | 'it',
     field: 'title' | 'description',
     value: string
-  ) => {
+  ): void => {
     setFormData({
       ...formData,
       translations: {
@@ -476,7 +415,7 @@ export default function TrackEditModal({
     });
   };
 
-  const toggleCourse = (courseId: string) => {
+  const toggleCourse = (courseId: string): void => {
     setFormData(prev => ({
       ...prev,
       courseIds: prev.courseIds.includes(courseId)
@@ -492,7 +431,7 @@ export default function TrackEditModal({
   const getTranslationByLocale = (
     translations: Translation[],
     targetLocale: string
-  ) => {
+  ): Translation => {
     return (
       translations.find(tr => tr.locale === targetLocale) ||
       translations[0]

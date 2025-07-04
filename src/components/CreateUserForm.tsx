@@ -22,7 +22,6 @@ import {
   Shield,
   Check,
   X,
-  AlertCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -110,7 +109,7 @@ export default function CreateUserForm() {
         sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
       }
       let remainder = 11 - (sum % 11);
-      let digit1 = remainder < 2 ? 0 : remainder;
+      const digit1 = remainder < 2 ? 0 : remainder;
 
       if (parseInt(cleanCPF.charAt(9)) !== digit1)
         return false;
@@ -120,7 +119,7 @@ export default function CreateUserForm() {
         sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
       }
       remainder = 11 - (sum % 11);
-      let digit2 = remainder < 2 ? 0 : remainder;
+      const digit2 = remainder < 2 ? 0 : remainder;
 
       return parseInt(cleanCPF.charAt(10)) === digit2;
     },

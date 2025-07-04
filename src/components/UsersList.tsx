@@ -17,7 +17,6 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
-  AlertTriangle,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
@@ -357,7 +356,7 @@ export default function UsersList() {
         ),
       });
     },
-    [toast, deleteUser, users]
+    [toast, deleteUser, users, t]
   );
 
   // Funções de paginação

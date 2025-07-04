@@ -254,7 +254,11 @@
     "validationTitle": "Erro de validação",
     "validationDescription": "Por favor, corrija os erros no formulário antes de continuar.",
     "conflictTitle": "Usuário já existe",
-    "conflictDescription": "Já existe um usuário com este e-mail ou CPF."
+    "conflictDescription": "Já existe um usuário com este e-mail ou CPF.",
+    "authTitle": "Erro de autenticação",
+    "authDescription": "Sua sessão expirou. Por favor, faça login novamente.",
+    "permissionTitle": "Acesso negado",
+    "permissionDescription": "Você não tem permissão para realizar esta ação."
   }
 },
 
@@ -814,7 +818,11 @@
     "validationTitle": "Erro de validação",
     "validationDescription": "Por favor, corrija os erros no formulário antes de continuar.",
     "conflictTitle": "Conflito de dados",
-    "conflictDescription": "Já existe um usuário com este e-mail ou CPF."
+    "conflictDescription": "Já existe um usuário com este e-mail ou CPF.",
+    "authTitle": "Erro de autenticação",
+    "authDescription": "Você não tem permissão para realizar esta ação.",
+    "permissionTitle": "Permissão negada",
+    "permissionDescription": "Você não tem permissão para editar este usuário."
   }
 },
 

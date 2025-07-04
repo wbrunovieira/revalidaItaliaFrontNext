@@ -250,12 +250,16 @@
     "description": "L'utente è stato creato con successo."
   },
   "error": {
-    "title": "Errore nella creazione dell'utente",
+   "title": "Errore nella creazione dell'utente",
     "description": "Si è verificato un errore durante la creazione dell'utente. Riprova.",
     "validationTitle": "Errore di validazione",
     "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare.",
     "conflictTitle": "Utente già esistente",
-    "conflictDescription": "Esiste già un utente con questa email o CPF."
+    "conflictDescription": "Esiste già un utente con questa email o CPF.",
+    "authTitle": "Errore di autenticazione", 
+    "authDescription": "La tua sessione è scaduta. Per favore, effettua nuovamente il login.",
+    "permissionTitle": "Accesso negato",
+    "permissionDescription": "Non hai i permessi per eseguire questa azione."
   }
 },
 "usersList": {
@@ -812,7 +816,11 @@
     "validationTitle": "Errore di validazione",
     "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare.",
     "conflictTitle": "Conflitto di dati",
-    "conflictDescription": "Esiste già un utente con questa email o codice fiscale."
+    "conflictDescription": "Esiste già un utente con questa email o codice fiscale.",
+    "authTitle": "Errore di autenticazione",
+    "authDescription": "Non hai il permesso di eseguire questa azione.",
+    "permissionTitle": "Permesso negato",
+    "permissionDescription": "Non hai il permesso di modificare questo utente."
   }
 },
   "courseView": {

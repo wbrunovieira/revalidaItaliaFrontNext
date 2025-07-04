@@ -95,33 +95,75 @@ export default function CreateUserForm() {
     formData.confirmPassword &&
     formData.password === formData.confirmPassword;
 
-  // Validação de CPF
+  // Validação de CPF CORRIGIDA
   const validateCPF = useCallback(
     (cpf: string): boolean => {
       const cleanCPF = cpf.replace(/\D/g, '');
 
-      if (cleanCPF.length !== 11) return false;
-      if (/^(\d)\1{10}$/.test(cleanCPF)) return false; // CPF com todos os dígitos iguais
+      // Log para debug
+      console.log('🔍 Validando CPF:', cpf);
+      console.log('📄 CPF limpo:', cleanCPF);
 
-      // Validação dos dígitos verificadores
+      if (cleanCPF.length !== 11) {
+        console.log('❌ CPF deve ter 11 dígitos');
+        return false;
+      }
+
+      if (/^(\d)\1{10}$/.test(cleanCPF)) {
+        console.log('❌ CPF com todos os dígitos iguais');
+        return false;
+      }
+
+      // Validação do PRIMEIRO dígito verificador
       let sum = 0;
       for (let i = 0; i < 9; i++) {
         sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
       }
-      let remainder = 11 - (sum % 11);
-      const digit1 = remainder < 2 ? 0 : remainder;
+      let remainder = sum % 11;
+      const digit1 = remainder < 2 ? 0 : 11 - remainder;
 
-      if (parseInt(cleanCPF.charAt(9)) !== digit1)
+      console.log(
+        '🔢 Primeiro dígito - Soma:',
+        sum,
+        'Resto:',
+        remainder,
+        'Dígito calculado:',
+        digit1,
+        'Dígito do CPF:',
+        parseInt(cleanCPF.charAt(9))
+      );
+
+      if (parseInt(cleanCPF.charAt(9)) !== digit1) {
+        console.log(
+          '❌ Primeiro dígito verificador inválido'
+        );
         return false;
+      }
 
+      // Validação do SEGUNDO dígito verificador
       sum = 0;
       for (let i = 0; i < 10; i++) {
         sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
       }
-      remainder = 11 - (sum % 11);
-      const digit2 = remainder < 2 ? 0 : remainder;
+      remainder = sum % 11;
+      const digit2 = remainder < 2 ? 0 : 11 - remainder;
 
-      return parseInt(cleanCPF.charAt(10)) === digit2;
+      console.log(
+        '🔢 Segundo dígito - Soma:',
+        sum,
+        'Resto:',
+        remainder,
+        'Dígito calculado:',
+        digit2,
+        'Dígito do CPF:',
+        parseInt(cleanCPF.charAt(10))
+      );
+
+      const isValid =
+        parseInt(cleanCPF.charAt(10)) === digit2;
+      console.log('✅ CPF válido:', isValid);
+
+      return isValid;
     },
     []
   );
@@ -345,7 +387,9 @@ export default function CreateUserForm() {
         // Tratamento de erros específicos da API
         if (
           error.message.includes('409') ||
-          error.message.includes('conflict')
+          error.message.includes('conflict') ||
+          error.message.includes('already exists') ||
+          error.message.includes('User already exists')
         ) {
           toast({
             title: t('error.conflictTitle'),
@@ -355,10 +399,37 @@ export default function CreateUserForm() {
           return;
         }
 
-        if (error.message.includes('400')) {
+        if (
+          error.message.includes('400') ||
+          error.message.includes('Bad Request')
+        ) {
           toast({
             title: t('error.validationTitle'),
             description: t('error.validationDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('401') ||
+          error.message.includes('Unauthorized')
+        ) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.authDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('403') ||
+          error.message.includes('Forbidden')
+        ) {
+          toast({
+            title: t('error.permissionTitle'),
+            description: t('error.permissionDescription'),
             variant: 'destructive',
           });
           return;

@@ -249,12 +249,16 @@
     "description": "El usuario fue creado con éxito."
   },
   "error": {
-    "title": "Error al crear usuario",
+  "title": "Error al crear usuario",
     "description": "Ocurrió un error al crear el usuario. Intente nuevamente.",
-    "validationTitle": "Error de validación",
+    "validationTitle": "Error de validación", 
     "validationDescription": "Por favor, corrija los errores en el formulario antes de continuar.",
     "conflictTitle": "Usuario ya existe",
-    "conflictDescription": "Ya existe un usuario con este correo o CPF."
+    "conflictDescription": "Ya existe un usuario con este correo o CPF.",
+    "authTitle": "Error de autenticación",
+    "authDescription": "Su sesión ha expirado. Por favor, inicie sesión nuevamente.",
+    "permissionTitle": "Acceso denegado",
+    "permissionDescription": "No tiene permisos para realizar esta acción."
   }
 },
  "usersList": {
@@ -799,7 +803,7 @@
         "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
       }
     },
- "userEdit": {
+"userEdit": {
   "title": "Editar Usuario",
   "save": "Guardar",
   "saving": "Guardando...",
@@ -848,7 +852,11 @@
     "validationTitle": "Error de validación",
     "validationDescription": "Por favor, corrija los errores en el formulario antes de continuar.",
     "conflictTitle": "Conflicto de datos",
-    "conflictDescription": "Ya existe un usuario con este correo o CPF."
+    "conflictDescription": "Ya existe un usuario con este correo o CPF.",
+    "authTitle": "Error de autenticación",
+    "authDescription": "No tienes permiso para realizar esta acción.",
+    "permissionTitle": "Permiso denegado",
+    "permissionDescription": "No tienes permiso para editar este usuario."
   }
 },
   "courseView": {

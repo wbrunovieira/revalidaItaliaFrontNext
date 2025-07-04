@@ -87,33 +87,75 @@ export default function UserEditModal({
     return null;
   };
 
-  // Validação de CPF completa
+  // Validação de CPF CORRIGIDA (igual ao CreateUserForm)
   const validateCPF = useCallback(
     (cpf: string): boolean => {
       const cleanCPF = cpf.replace(/\D/g, '');
 
-      if (cleanCPF.length !== 11) return false;
-      if (/^(\d)\1{10}$/.test(cleanCPF)) return false; // CPF com todos os dígitos iguais
+      // Log para debug
+      console.log('🔍 Validando CPF:', cpf);
+      console.log('📄 CPF limpo:', cleanCPF);
 
-      // Validação dos dígitos verificadores
+      if (cleanCPF.length !== 11) {
+        console.log('❌ CPF deve ter 11 dígitos');
+        return false;
+      }
+
+      if (/^(\d)\1{10}$/.test(cleanCPF)) {
+        console.log('❌ CPF com todos os dígitos iguais');
+        return false;
+      }
+
+      // Validação do PRIMEIRO dígito verificador
       let sum = 0;
       for (let i = 0; i < 9; i++) {
         sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
       }
-      let remainder = 11 - (sum % 11);
-      const digit1 = remainder < 2 ? 0 : remainder;
+      let remainder = sum % 11;
+      const digit1 = remainder < 2 ? 0 : 11 - remainder;
 
-      if (parseInt(cleanCPF.charAt(9)) !== digit1)
+      console.log(
+        '🔢 Primeiro dígito - Soma:',
+        sum,
+        'Resto:',
+        remainder,
+        'Dígito calculado:',
+        digit1,
+        'Dígito do CPF:',
+        parseInt(cleanCPF.charAt(9))
+      );
+
+      if (parseInt(cleanCPF.charAt(9)) !== digit1) {
+        console.log(
+          '❌ Primeiro dígito verificador inválido'
+        );
         return false;
+      }
 
+      // Validação do SEGUNDO dígito verificador
       sum = 0;
       for (let i = 0; i < 10; i++) {
         sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
       }
-      remainder = 11 - (sum % 11);
-      const digit2 = remainder < 2 ? 0 : remainder;
+      remainder = sum % 11;
+      const digit2 = remainder < 2 ? 0 : 11 - remainder;
 
-      return parseInt(cleanCPF.charAt(10)) === digit2;
+      console.log(
+        '🔢 Segundo dígito - Soma:',
+        sum,
+        'Resto:',
+        remainder,
+        'Dígito calculado:',
+        digit2,
+        'Dígito do CPF:',
+        parseInt(cleanCPF.charAt(10))
+      );
+
+      const isValid =
+        parseInt(cleanCPF.charAt(10)) === digit2;
+      console.log('✅ CPF válido:', isValid);
+
+      return isValid;
     },
     []
   );
@@ -330,15 +372,21 @@ export default function UserEditModal({
     [formatCPF, handleFieldValidation]
   );
 
-  // Função para tratamento de erros da API
+  // Função para tratamento centralizado de erros (similar ao CreateUserForm)
   const handleApiError = useCallback(
-    (error: unknown) => {
-      console.error('User update error:', error);
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
 
       if (error instanceof Error) {
+        console.error(`Error message: ${error.message}`);
+        console.error(`Stack trace: ${error.stack}`);
+
+        // Tratamento de erros específicos da API
         if (
           error.message.includes('409') ||
-          error.message.includes('conflict')
+          error.message.includes('conflict') ||
+          error.message.includes('already exists') ||
+          error.message.includes('User already exists')
         ) {
           toast({
             title: t('error.conflictTitle'),
@@ -348,7 +396,10 @@ export default function UserEditModal({
           return;
         }
 
-        if (error.message.includes('400')) {
+        if (
+          error.message.includes('400') ||
+          error.message.includes('Bad Request')
+        ) {
           toast({
             title: t('error.validationTitle'),
             description: t('error.validationDescription'),
@@ -357,20 +408,77 @@ export default function UserEditModal({
           return;
         }
 
-        toast({
-          title: t('error.title'),
-          description: error.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: t('error.title'),
-          description: t('error.description'),
-          variant: 'destructive',
-        });
+        if (
+          error.message.includes('401') ||
+          error.message.includes('Unauthorized')
+        ) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.authDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('403') ||
+          error.message.includes('Forbidden')
+        ) {
+          toast({
+            title: t('error.permissionTitle'),
+            description: t('error.permissionDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
       }
+
+      toast({
+        title: t('error.title'),
+        description: t('error.description'),
+        variant: 'destructive',
+      });
     },
     [toast, t]
+  );
+
+  // Função para atualizar usuário
+  const updateUser = useCallback(
+    async (
+      userId: string,
+      payload: Omit<FormData, 'role'> & { role: UserRole }
+    ): Promise<void> => {
+      const tokenFromCookie = getCookie('token');
+      const tokenFromStorage =
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('accessToken');
+      const token = tokenFromCookie || tokenFromStorage;
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to update user: ${response.status} - ${errorText}`
+        );
+      }
+    },
+    []
   );
 
   // Submeter formulário
@@ -397,41 +505,16 @@ export default function UserEditModal({
     }
 
     setLoading(true);
-    try {
-      const tokenFromCookie = getCookie('token');
-      const tokenFromStorage =
-        localStorage.getItem('accessToken') ||
-        sessionStorage.getItem('accessToken');
-      const token = tokenFromCookie || tokenFromStorage;
 
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        cpf: formData.cpf.replace(/\D/g, ''),
+        role: formData.role,
       };
 
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/students/${user.id}`,
-        {
-          method: 'PATCH',
-          headers,
-          body: JSON.stringify({
-            name: formData.name.trim(),
-            email: formData.email.trim().toLowerCase(),
-            cpf: formData.cpf.replace(/\D/g, ''),
-            role: formData.role,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to update user: ${response.status} - ${errorText}`
-        );
-      }
+      await updateUser(user.id, payload);
 
       toast({
         title: t('success.title'),
@@ -442,16 +525,16 @@ export default function UserEditModal({
       // Chamar callback com dados atualizados incluindo CPF formatado
       const updatedUser: UserEditData = {
         id: user.id,
-        name: formData.name.trim(),
-        email: formData.email.trim().toLowerCase(),
-        cpf: formData.cpf,
-        role: formData.role,
+        name: payload.name,
+        email: payload.email,
+        cpf: formData.cpf, // Mantém formatação
+        role: payload.role,
       };
 
       onSave(updatedUser);
       onClose();
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error, 'User update error');
     } finally {
       setLoading(false);
     }

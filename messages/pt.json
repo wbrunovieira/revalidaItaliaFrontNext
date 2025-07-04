@@ -358,9 +358,8 @@
     "noCourses": "Nenhum curso cadastrado ainda.",
     "deleteConfirm": "Tem certeza que deseja excluir este curso?",
     "stats": {
-      "total": "Total de Cursos",
-      "complete": "Completos",
-      "incomplete": "Incompletos"
+      "total": "Total de Cursos"
+   
     },
     "actions": {
       "view": "Visualizar",

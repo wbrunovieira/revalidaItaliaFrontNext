@@ -396,9 +396,7 @@
     "noCourses": "Nessun corso registrato ancora.",
     "deleteConfirm": "Sei sicuro di voler eliminare questo corso?",
     "stats": {
-      "total": "Totale Corsi",
-      "complete": "Completi",
-      "incomplete": "Incompleti"
+      "total": "Totale Corsi"
     },
     "actions": {
       "view": "Visualizza",

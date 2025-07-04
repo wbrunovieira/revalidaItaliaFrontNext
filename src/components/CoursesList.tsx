@@ -374,30 +374,6 @@ export default function CoursesList() {
               {t('stats.total')}
             </p>
           </div>
-          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-white">
-              {
-                courses.filter(
-                  c => c.translations.length === 3
-                ).length
-              }
-            </p>
-            <p className="text-sm text-gray-400">
-              {t('stats.complete')}
-            </p>
-          </div>
-          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-white">
-              {
-                courses.filter(
-                  c => c.translations.length < 3
-                ).length
-              }
-            </p>
-            <p className="text-sm text-gray-400">
-              {t('stats.incomplete')}
-            </p>
-          </div>
         </div>
 
         {/* Lista */}

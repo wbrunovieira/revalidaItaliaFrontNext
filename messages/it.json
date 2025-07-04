@@ -763,43 +763,58 @@
       "fetchAddressesDescription": "Non è stato possibile caricare gli indirizzi dell'utente"
     }
   },
-  "userEdit": {
-    "title": "Modifica Utente",
-    "save": "Salva",
-    "saving": "Salvando...",
-    "cancel": "Annulla",
-    "fields": {
-      "name": "Nome completo",
-      "email": "Email",
-      "cpf": "Codice fiscale",
-      "role": "Ruolo"
-    },
-    "placeholders": {
-      "name": "Inserisci il nome completo",
-      "email": "utente@esempio.com",
-      "cpf": "000.000.000-00"
-    },
-    "roles": {
-      "student": "Studente",
-      "tutor": "Tutor",
-      "admin": "Amministratore"
-    },
-    "errors": {
-      "nameRequired": "Il nome è obbligatorio",
-      "emailRequired": "L'email è obbligatoria",
-      "emailInvalid": "Email non valida",
-      "cpfRequired": "Il codice fiscale è obbligatorio",
-      "cpfInvalid": "Codice fiscale non valido"
-    },
-    "success": {
-      "title": "Utente aggiornato!",
-      "description": "L'utente è stato aggiornato con successo."
-    },
-    "error": {
-      "title": "Errore durante l'aggiornamento dell'utente",
-      "description": "Si è verificato un errore durante l'aggiornamento dell'utente. Riprova."
-    }
+"userEdit": {
+  "title": "Modifica Utente",
+  "save": "Salva",
+  "saving": "Salvando...",
+  "cancel": "Annulla",
+  "fields": {
+    "name": "Nome Completo",
+    "email": "Email",
+    "cpf": "Codice Fiscale",
+    "role": "Ruolo"
   },
+  "placeholders": {
+    "name": "Inserisci il nome completo",
+    "email": "utente@esempio.com",
+    "cpf": "000.000.000-00"
+  },
+  "roles": {
+    "student": "Studente",
+    "tutor": "Tutor",
+    "admin": "Amministratore"
+  },
+  "errors": {
+    "nameRequired": "Il nome è obbligatorio",
+    "nameMin": "Il nome deve avere almeno 2 caratteri",
+    "nameMax": "Il nome deve avere massimo 100 caratteri",
+    "nameInvalid": "Il nome deve contenere solo lettere e spazi",
+    "emailRequired": "L'email è obbligatoria",
+    "emailInvalid": "Email non valida",
+    "emailMax": "Email troppo lunga",
+    "cpfRequired": "Il codice fiscale è obbligatorio",
+    "cpfInvalid": "Codice fiscale non valido",
+    "roleRequired": "Il ruolo è obbligatorio",
+    "roleInvalid": "Ruolo non valido"
+  },
+  "validation": {
+    "nameValid": "Nome valido",
+    "emailValid": "Email valida",
+    "cpfValid": "Codice fiscale valido"
+  },
+  "success": {
+    "title": "Utente aggiornato!",
+    "description": "L'utente è stato aggiornato con successo."
+  },
+  "error": {
+    "title": "Errore durante l'aggiornamento dell'utente",
+    "description": "Si è verificato un errore durante l'aggiornamento dell'utente. Riprova.",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare.",
+    "conflictTitle": "Conflitto di dati",
+    "conflictDescription": "Esiste già un utente con questa email o codice fiscale."
+  }
+},
   "courseView": {
   "title": "Dettagli del Corso",
   "fields": {

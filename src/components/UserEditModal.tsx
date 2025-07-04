@@ -1,7 +1,7 @@
 // UserEditModal.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -14,6 +14,8 @@ import {
   UserIcon,
   Save,
   Loader2,
+  Check,
+  AlertCircle,
 } from 'lucide-react';
 
 // Tipos atualizados com suporte a tutor
@@ -22,7 +24,7 @@ interface UserEditData {
   name: string;
   email: string;
   cpf: string;
-  role: 'admin' | 'student' | 'tutor'; // ✅ Adicionado 'tutor'
+  role: 'admin' | 'student' | 'tutor';
 }
 
 interface UserEditModalProps {
@@ -34,6 +36,25 @@ interface UserEditModalProps {
 
 type UserRole = 'admin' | 'student' | 'tutor';
 
+interface FormData {
+  name: string;
+  email: string;
+  cpf: string;
+  role: UserRole;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  cpf?: string;
+  role?: string;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+}
+
 export default function UserEditModal({
   user,
   isOpen,
@@ -43,15 +64,17 @@ export default function UserEditModal({
   const t = useTranslations('Admin.userEdit');
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     cpf: '',
-    role: 'student' as UserRole, // ✅ Agora aceita 'tutor'
+    role: 'student',
   });
+
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<
-    Record<string, string>
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof FormData, boolean>>
   >({});
 
   // Função para ler cookies no client-side
@@ -64,8 +87,150 @@ export default function UserEditModal({
     return null;
   };
 
+  // Validação de CPF completa
+  const validateCPF = useCallback(
+    (cpf: string): boolean => {
+      const cleanCPF = cpf.replace(/\D/g, '');
+
+      if (cleanCPF.length !== 11) return false;
+      if (/^(\d)\1{10}$/.test(cleanCPF)) return false; // CPF com todos os dígitos iguais
+
+      // Validação dos dígitos verificadores
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
+      }
+      let remainder = 11 - (sum % 11);
+      let digit1 = remainder < 2 ? 0 : remainder;
+
+      if (parseInt(cleanCPF.charAt(9)) !== digit1)
+        return false;
+
+      sum = 0;
+      for (let i = 0; i < 10; i++) {
+        sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
+      }
+      remainder = 11 - (sum % 11);
+      let digit2 = remainder < 2 ? 0 : remainder;
+
+      return parseInt(cleanCPF.charAt(10)) === digit2;
+    },
+    []
+  );
+
+  // Validação individual de campos
+  const validateField = useCallback(
+    (
+      field: keyof FormData,
+      value: string
+    ): ValidationResult => {
+      switch (field) {
+        case 'name':
+          if (!value.trim()) {
+            return {
+              isValid: false,
+              message: t('errors.nameRequired'),
+            };
+          }
+          if (value.trim().length < 2) {
+            return {
+              isValid: false,
+              message: t('errors.nameMin'),
+            };
+          }
+          if (value.trim().length > 100) {
+            return {
+              isValid: false,
+              message: t('errors.nameMax'),
+            };
+          }
+          if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(value.trim())) {
+            return {
+              isValid: false,
+              message: t('errors.nameInvalid'),
+            };
+          }
+          return { isValid: true };
+
+        case 'email':
+          if (!value.trim()) {
+            return {
+              isValid: false,
+              message: t('errors.emailRequired'),
+            };
+          }
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            return {
+              isValid: false,
+              message: t('errors.emailInvalid'),
+            };
+          }
+          if (value.length > 254) {
+            return {
+              isValid: false,
+              message: t('errors.emailMax'),
+            };
+          }
+          return { isValid: true };
+
+        case 'cpf':
+          if (!value.trim()) {
+            return {
+              isValid: false,
+              message: t('errors.cpfRequired'),
+            };
+          }
+          if (!validateCPF(value)) {
+            return {
+              isValid: false,
+              message: t('errors.cpfInvalid'),
+            };
+          }
+          return { isValid: true };
+
+        case 'role':
+          if (!value) {
+            return {
+              isValid: false,
+              message: t('errors.roleRequired'),
+            };
+          }
+          if (
+            !['admin', 'tutor', 'student'].includes(value)
+          ) {
+            return {
+              isValid: false,
+              message: t('errors.roleInvalid'),
+            };
+          }
+          return { isValid: true };
+
+        default:
+          return { isValid: true };
+      }
+    },
+    [t, validateCPF]
+  );
+
+  // Validação em tempo real
+  const handleFieldValidation = useCallback(
+    (field: keyof FormData, value: string) => {
+      if (touched[field]) {
+        const validation = validateField(field, value);
+        setErrors(prev => ({
+          ...prev,
+          [field]: validation.isValid
+            ? undefined
+            : validation.message,
+        }));
+      }
+    },
+    [touched, validateField]
+  );
+
   // Formatação de CPF
-  const formatCPF = (value: string) => {
+  const formatCPF = useCallback((value: string) => {
     const cleaned = value.replace(/\D/g, '');
     const match = cleaned.match(
       /^(\d{3})(\d{3})(\d{3})(\d{2})$/
@@ -74,17 +239,7 @@ export default function UserEditModal({
       return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
     }
     return value;
-  };
-
-  // Validação de email
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  // Validação de CPF
-  const isValidCPF = (cpf: string) => {
-    return /^\d{11}$/.test(cpf.replace(/\D/g, ''));
-  };
+  }, []);
 
   // Função para obter ícone do papel
   const getRoleIcon = (
@@ -124,44 +279,122 @@ export default function UserEditModal({
     }
   };
 
-  // Validar formulário
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // Validar formulário completo
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
 
-    if (!formData.name.trim()) {
-      newErrors.name = t('errors.nameRequired');
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = t('errors.emailRequired');
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = t('errors.emailInvalid');
-    }
-
-    if (!formData.cpf.trim()) {
-      newErrors.cpf = t('errors.cpfRequired');
-    } else if (!isValidCPF(formData.cpf)) {
-      newErrors.cpf = t('errors.cpfInvalid');
-    }
+    (
+      Object.keys(formData) as Array<keyof FormData>
+    ).forEach(field => {
+      const validation = validateField(
+        field,
+        formData[field]
+      );
+      if (!validation.isValid) {
+        newErrors[field] = validation.message;
+        isValid = false;
+      }
+    });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    return isValid;
+  }, [formData, validateField]);
+
+  // Manipular mudança de inputs
+  const handleInputChange = useCallback(
+    (field: keyof FormData) => (value: string) => {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      handleFieldValidation(field, value);
+    },
+    [handleFieldValidation]
+  );
+
+  const handleInputBlur = useCallback(
+    (field: keyof FormData) => () => {
+      setTouched(prev => ({ ...prev, [field]: true }));
+      handleFieldValidation(field, formData[field]);
+    },
+    [formData, handleFieldValidation]
+  );
 
   // Manipular mudança de CPF com formatação
-  const handleCpfChange = (value: string) => {
-    const formatted = formatCPF(value);
-    if (formatted.length <= 14) {
-      // Permite formato XXX.XXX.XXX-XX
-      setFormData(prev => ({ ...prev, cpf: formatted }));
-    }
-  };
+  const handleCpfChange = useCallback(
+    (value: string) => {
+      const formatted = formatCPF(value);
+      if (formatted.length <= 14) {
+        setFormData(prev => ({ ...prev, cpf: formatted }));
+        handleFieldValidation('cpf', formatted);
+      }
+    },
+    [formatCPF, handleFieldValidation]
+  );
+
+  // Função para tratamento de erros da API
+  const handleApiError = useCallback(
+    (error: unknown) => {
+      console.error('User update error:', error);
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes('409') ||
+          error.message.includes('conflict')
+        ) {
+          toast({
+            title: t('error.conflictTitle'),
+            description: t('error.conflictDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (error.message.includes('400')) {
+          toast({
+            title: t('error.validationTitle'),
+            description: t('error.validationDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        toast({
+          title: t('error.title'),
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: t('error.title'),
+          description: t('error.description'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast, t]
+  );
 
   // Submeter formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm() || !user) return;
+    // Marcar todos os campos como tocados
+    const allTouched = Object.keys(formData).reduce(
+      (acc, field) => {
+        acc[field as keyof FormData] = true;
+        return acc;
+      },
+      {} as Record<keyof FormData, boolean>
+    );
+    setTouched(allTouched);
+
+    if (!validateForm() || !user) {
+      toast({
+        title: t('error.validationTitle'),
+        description: t('error.validationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -186,34 +419,31 @@ export default function UserEditModal({
           headers,
           body: JSON.stringify({
             name: formData.name.trim(),
-            email: formData.email.trim(),
-            cpf: formData.cpf.replace(/\D/g, ''), // Remove formatação antes de enviar
+            email: formData.email.trim().toLowerCase(),
+            cpf: formData.cpf.replace(/\D/g, ''),
             role: formData.role,
           }),
         }
       );
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error(
-            'Acesso negado - É necessário fazer login como administrador'
-          );
-        }
-        throw new Error('Failed to update user');
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to update user: ${response.status} - ${errorText}`
+        );
       }
-
-      const data = await response.json();
 
       toast({
         title: t('success.title'),
         description: t('success.description'),
+        variant: 'success',
       });
 
       // Chamar callback com dados atualizados incluindo CPF formatado
       const updatedUser: UserEditData = {
         id: user.id,
         name: formData.name.trim(),
-        email: formData.email.trim(),
+        email: formData.email.trim().toLowerCase(),
         cpf: formData.cpf,
         role: formData.role,
       };
@@ -221,15 +451,7 @@ export default function UserEditModal({
       onSave(updatedUser);
       onClose();
     } catch (error) {
-      console.error(error);
-      toast({
-        title: t('error.title'),
-        description:
-          error instanceof Error
-            ? error.message
-            : t('error.description'),
-        variant: 'destructive',
-      });
+      handleApiError(error);
     } finally {
       setLoading(false);
     }
@@ -245,6 +467,7 @@ export default function UserEditModal({
         role: user.role,
       });
       setErrors({});
+      setTouched({});
     }
   }, [user, isOpen]);
 
@@ -302,16 +525,15 @@ export default function UserEditModal({
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 <User size={16} className="inline mr-2" />
                 {t('fields.name')}
+                <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={e =>
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                  })
+                  handleInputChange('name')(e.target.value)
                 }
+                onBlur={handleInputBlur('name')}
                 className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.name
                     ? 'border-red-500'
@@ -320,10 +542,19 @@ export default function UserEditModal({
                 placeholder={t('placeholders.name')}
               />
               {errors.name && (
-                <p className="text-red-400 text-sm mt-1">
+                <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
+                  <AlertCircle size={14} />
                   {errors.name}
-                </p>
+                </div>
               )}
+              {formData.name &&
+                !errors.name &&
+                touched.name && (
+                  <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
+                    <Check size={14} />
+                    {t('validation.nameValid')}
+                  </div>
+                )}
             </div>
 
             {/* Email */}
@@ -331,16 +562,15 @@ export default function UserEditModal({
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 <Mail size={16} className="inline mr-2" />
                 {t('fields.email')}
+                <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={e =>
-                  setFormData({
-                    ...formData,
-                    email: e.target.value,
-                  })
+                  handleInputChange('email')(e.target.value)
                 }
+                onBlur={handleInputBlur('email')}
                 className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.email
                     ? 'border-red-500'
@@ -349,10 +579,19 @@ export default function UserEditModal({
                 placeholder={t('placeholders.email')}
               />
               {errors.email && (
-                <p className="text-red-400 text-sm mt-1">
+                <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
+                  <AlertCircle size={14} />
                   {errors.email}
-                </p>
+                </div>
               )}
+              {formData.email &&
+                !errors.email &&
+                touched.email && (
+                  <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
+                    <Check size={14} />
+                    {t('validation.emailValid')}
+                  </div>
+                )}
             </div>
 
             {/* CPF */}
@@ -363,6 +602,7 @@ export default function UserEditModal({
                   className="inline mr-2"
                 />
                 {t('fields.cpf')}
+                <span className="text-red-400 ml-1">*</span>
               </label>
               <input
                 type="text"
@@ -370,19 +610,29 @@ export default function UserEditModal({
                 onChange={e =>
                   handleCpfChange(e.target.value)
                 }
+                onBlur={handleInputBlur('cpf')}
                 className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.cpf
                     ? 'border-red-500'
                     : 'border-gray-600'
                 }`}
                 placeholder={t('placeholders.cpf')}
-                maxLength={14} // Para formato XXX.XXX.XXX-XX
+                maxLength={14}
               />
               {errors.cpf && (
-                <p className="text-red-400 text-sm mt-1">
+                <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
+                  <AlertCircle size={14} />
                   {errors.cpf}
-                </p>
+                </div>
               )}
+              {formData.cpf &&
+                !errors.cpf &&
+                touched.cpf && (
+                  <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
+                    <Check size={14} />
+                    {t('validation.cpfValid')}
+                  </div>
+                )}
             </div>
 
             {/* Role */}
@@ -392,33 +642,30 @@ export default function UserEditModal({
                 <span className="ml-2">
                   {t('fields.role')}
                 </span>
+                <span className="text-red-400 ml-1">*</span>
               </label>
               <select
                 value={formData.role}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    role: e.target.value as UserRole,
-                  })
-                }
+                onChange={e => {
+                  const value = e.target.value as UserRole;
+                  setFormData(prev => ({
+                    ...prev,
+                    role: value,
+                  }));
+                  setTouched(prev => ({
+                    ...prev,
+                    role: true,
+                  }));
+                }}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary transition-colors"
               >
-                <option
-                  value="student"
-                  className="flex items-center"
-                >
+                <option value="student">
                   {t('roles.student')}
                 </option>
-                <option
-                  value="tutor"
-                  className="flex items-center"
-                >
+                <option value="tutor">
                   {t('roles.tutor')}
                 </option>
-                <option
-                  value="admin"
-                  className="flex items-center"
-                >
+                <option value="admin">
                   {t('roles.admin')}
                 </option>
               </select>

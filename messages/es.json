@@ -799,43 +799,58 @@
         "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
       }
     },
-   "userEdit": {
-    "title": "Editar Usuario",
-    "save": "Guardar",
-    "saving": "Guardando...",
-    "cancel": "Cancelar",
-    "fields": {
-      "name": "Nombre completo",
-      "email": "Correo electrónico",
-      "cpf": "CPF",
-      "role": "Rol"
-    },
-    "placeholders": {
-      "name": "Ingresa el nombre completo",
-      "email": "usuario@ejemplo.com",
-      "cpf": "000.000.000-00"
-    },
-    "roles": {
-      "student": "Estudiante",
-      "tutor": "Tutor",
-      "admin": "Administrador"
-    },
-    "errors": {
-      "nameRequired": "El nombre es obligatorio",
-      "emailRequired": "El correo electrónico es obligatorio",
-      "emailInvalid": "Correo electrónico inválido",
-      "cpfRequired": "El CPF es obligatorio",
-      "cpfInvalid": "CPF inválido"
-    },
-    "success": {
-      "title": "¡Usuario actualizado!",
-      "description": "El usuario ha sido actualizado con éxito."
-    },
-    "error": {
-      "title": "Error al actualizar el usuario",
-      "description": "Ocurrió un error al actualizar el usuario. Intenta nuevamente."
-    }
+ "userEdit": {
+  "title": "Editar Usuario",
+  "save": "Guardar",
+  "saving": "Guardando...",
+  "cancel": "Cancelar",
+  "fields": {
+    "name": "Nombre Completo",
+    "email": "Correo Electrónico",
+    "cpf": "CPF",
+    "role": "Rol"
   },
+  "placeholders": {
+    "name": "Ingresa el nombre completo",
+    "email": "usuario@ejemplo.com",
+    "cpf": "000.000.000-00"
+  },
+  "roles": {
+    "student": "Estudiante",
+    "tutor": "Tutor",
+    "admin": "Administrador"
+  },
+  "errors": {
+    "nameRequired": "El nombre es obligatorio",
+    "nameMin": "El nombre debe tener al menos 2 caracteres",
+    "nameMax": "El nombre debe tener máximo 100 caracteres",
+    "nameInvalid": "El nombre debe contener solo letras y espacios",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "emailInvalid": "Correo electrónico inválido",
+    "emailMax": "Correo electrónico demasiado largo",
+    "cpfRequired": "El CPF es obligatorio",
+    "cpfInvalid": "CPF inválido",
+    "roleRequired": "El rol es obligatorio",
+    "roleInvalid": "Rol inválido"
+  },
+  "validation": {
+    "nameValid": "Nombre válido",
+    "emailValid": "Correo válido",
+    "cpfValid": "CPF válido"
+  },
+  "success": {
+    "title": "¡Usuario actualizado!",
+    "description": "El usuario ha sido actualizado con éxito."
+  },
+  "error": {
+    "title": "Error al actualizar el usuario",
+    "description": "Ocurrió un error al actualizar el usuario. Intenta nuevamente.",
+    "validationTitle": "Error de validación",
+    "validationDescription": "Por favor, corrija los errores en el formulario antes de continuar.",
+    "conflictTitle": "Conflicto de datos",
+    "conflictDescription": "Ya existe un usuario con este correo o CPF."
+  }
+},
   "courseView": {
   "title": "Detalles del Curso",
   "fields": {

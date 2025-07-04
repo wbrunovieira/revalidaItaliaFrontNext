@@ -765,43 +765,58 @@
     "deleteDescription": "Ocorreu um erro ao excluir o usuário."
   }
 },
-  "userEdit": {
-    "title": "Editar Usuário",
-    "save": "Salvar",
-    "saving": "Salvando...",
-    "cancel": "Cancelar",
-    "fields": {
-      "name": "Nome Completo",
-      "email": "E-mail",
-      "cpf": "CPF",
-      "role": "Função"
-    },
-    "placeholders": {
-      "name": "Digite o nome completo",
-      "email": "usuario@exemplo.com",
-      "cpf": "000.000.000-00"
-    },
-    "roles": {
-      "student": "Estudante",
-      "tutor": "Tutor",
-      "admin": "Administrador"
-    },
-    "errors": {
-      "nameRequired": "Nome é obrigatório",
-      "emailRequired": "E-mail é obrigatório",
-      "emailInvalid": "E-mail inválido",
-      "cpfRequired": "CPF é obrigatório",
-      "cpfInvalid": "CPF inválido"
-    },
-    "success": {
-      "title": "Usuário atualizado!",
-      "description": "O usuário foi atualizado com sucesso."
-    },
-    "error": {
-      "title": "Erro ao atualizar usuário",
-      "description": "Ocorreu um erro ao atualizar o usuário. Tente novamente."
-    }
+"userEdit": {
+  "title": "Editar Usuário",
+  "save": "Salvar",
+  "saving": "Salvando...",
+  "cancel": "Cancelar",
+  "fields": {
+    "name": "Nome Completo",
+    "email": "E-mail",
+    "cpf": "CPF",
+    "role": "Função"
   },
+  "placeholders": {
+    "name": "Digite o nome completo",
+    "email": "usuario@exemplo.com",
+    "cpf": "000.000.000-00"
+  },
+  "roles": {
+    "student": "Estudante",
+    "tutor": "Tutor",
+    "admin": "Administrador"
+  },
+  "errors": {
+    "nameRequired": "Nome é obrigatório",
+    "nameMin": "Nome deve ter pelo menos 2 caracteres",
+    "nameMax": "Nome deve ter no máximo 100 caracteres",
+    "nameInvalid": "Nome deve conter apenas letras e espaços",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "E-mail inválido",
+    "emailMax": "E-mail muito longo",
+    "cpfRequired": "CPF é obrigatório",
+    "cpfInvalid": "CPF inválido",
+    "roleRequired": "Função é obrigatória",
+    "roleInvalid": "Função inválida"
+  },
+  "validation": {
+    "nameValid": "Nome válido",
+    "emailValid": "E-mail válido",
+    "cpfValid": "CPF válido"
+  },
+  "success": {
+    "title": "Usuário atualizado!",
+    "description": "O usuário foi atualizado com sucesso."
+  },
+  "error": {
+    "title": "Erro ao atualizar usuário",
+    "description": "Ocorreu um erro ao atualizar o usuário. Tente novamente.",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Por favor, corrija os erros no formulário antes de continuar.",
+    "conflictTitle": "Conflito de dados",
+    "conflictDescription": "Já existe um usuário com este e-mail ou CPF."
+  }
+},
 
   
   "userView": {

@@ -1,3 +1,4 @@
+// UserEditModal.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,16 +10,19 @@ import {
   Mail,
   CreditCard,
   Shield,
+  GraduationCap,
+  UserIcon,
   Save,
   Loader2,
 } from 'lucide-react';
 
+// Tipos atualizados com suporte a tutor
 interface UserEditData {
   id: string;
   name: string;
   email: string;
   cpf: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'tutor'; // ✅ Adicionado 'tutor'
 }
 
 interface UserEditModalProps {
@@ -27,6 +31,8 @@ interface UserEditModalProps {
   onClose: () => void;
   onSave: (updatedUser: UserEditData) => void;
 }
+
+type UserRole = 'admin' | 'student' | 'tutor';
 
 export default function UserEditModal({
   user,
@@ -41,7 +47,7 @@ export default function UserEditModal({
     name: '',
     email: '',
     cpf: '',
-    role: 'student' as 'admin' | 'student',
+    role: 'student' as UserRole, // ✅ Agora aceita 'tutor'
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<
@@ -58,14 +64,64 @@ export default function UserEditModal({
     return null;
   };
 
+  // Formatação de CPF
+  const formatCPF = (value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    const match = cleaned.match(
+      /^(\d{3})(\d{3})(\d{3})(\d{2})$/
+    );
+    if (match) {
+      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
+    }
+    return value;
+  };
+
   // Validação de email
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Validação de CPF (básica)
+  // Validação de CPF
   const isValidCPF = (cpf: string) => {
     return /^\d{11}$/.test(cpf.replace(/\D/g, ''));
+  };
+
+  // Função para obter ícone do papel
+  const getRoleIcon = (
+    role: UserRole,
+    size: number = 16
+  ) => {
+    switch (role) {
+      case 'admin':
+        return (
+          <Shield size={size} className="text-red-400" />
+        );
+      case 'tutor':
+        return (
+          <GraduationCap
+            size={size}
+            className="text-green-400"
+          />
+        );
+      case 'student':
+      default:
+        return (
+          <UserIcon size={size} className="text-blue-400" />
+        );
+    }
+  };
+
+  // Função para obter cor do papel
+  const getRoleColor = (role: UserRole) => {
+    switch (role) {
+      case 'admin':
+        return 'text-red-400';
+      case 'tutor':
+        return 'text-green-400';
+      case 'student':
+      default:
+        return 'text-blue-400';
+    }
   };
 
   // Validar formulário
@@ -90,6 +146,15 @@ export default function UserEditModal({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Manipular mudança de CPF com formatação
+  const handleCpfChange = (value: string) => {
+    const formatted = formatCPF(value);
+    if (formatted.length <= 14) {
+      // Permite formato XXX.XXX.XXX-XX
+      setFormData(prev => ({ ...prev, cpf: formatted }));
+    }
   };
 
   // Submeter formulário
@@ -122,7 +187,7 @@ export default function UserEditModal({
           body: JSON.stringify({
             name: formData.name.trim(),
             email: formData.email.trim(),
-            cpf: formData.cpf.replace(/\D/g, ''),
+            cpf: formData.cpf.replace(/\D/g, ''), // Remove formatação antes de enviar
             role: formData.role,
           }),
         }
@@ -144,8 +209,16 @@ export default function UserEditModal({
         description: t('success.description'),
       });
 
-      // Chamar callback com dados atualizados
-      onSave(data.user);
+      // Chamar callback com dados atualizados incluindo CPF formatado
+      const updatedUser: UserEditData = {
+        id: user.id,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        cpf: formData.cpf,
+        role: formData.role,
+      };
+
+      onSave(updatedUser);
       onClose();
     } catch (error) {
       console.error(error);
@@ -239,7 +312,7 @@ export default function UserEditModal({
                     name: e.target.value,
                   })
                 }
-                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.name
                     ? 'border-red-500'
                     : 'border-gray-600'
@@ -268,7 +341,7 @@ export default function UserEditModal({
                     email: e.target.value,
                   })
                 }
-                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.email
                     ? 'border-red-500'
                     : 'border-gray-600'
@@ -295,18 +368,15 @@ export default function UserEditModal({
                 type="text"
                 value={formData.cpf}
                 onChange={e =>
-                  setFormData({
-                    ...formData,
-                    cpf: e.target.value,
-                  })
+                  handleCpfChange(e.target.value)
                 }
-                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
                   errors.cpf
                     ? 'border-red-500'
                     : 'border-gray-600'
                 }`}
                 placeholder={t('placeholders.cpf')}
-                maxLength={11}
+                maxLength={14} // Para formato XXX.XXX.XXX-XX
               />
               {errors.cpf && (
                 <p className="text-red-400 text-sm mt-1">
@@ -318,28 +388,52 @@ export default function UserEditModal({
             {/* Role */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                <Shield size={16} className="inline mr-2" />
-                {t('fields.role')}
+                {getRoleIcon(formData.role)}
+                <span className="ml-2">
+                  {t('fields.role')}
+                </span>
               </label>
               <select
                 value={formData.role}
                 onChange={e =>
                   setFormData({
                     ...formData,
-                    role: e.target.value as
-                      | 'admin'
-                      | 'student',
+                    role: e.target.value as UserRole,
                   })
                 }
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary transition-colors"
               >
-                <option value="student">
+                <option
+                  value="student"
+                  className="flex items-center"
+                >
                   {t('roles.student')}
                 </option>
-                <option value="admin">
+                <option
+                  value="tutor"
+                  className="flex items-center"
+                >
+                  {t('roles.tutor')}
+                </option>
+                <option
+                  value="admin"
+                  className="flex items-center"
+                >
                   {t('roles.admin')}
                 </option>
               </select>
+
+              {/* Indicador visual do papel selecionado */}
+              <div className="mt-2 flex items-center gap-2">
+                {getRoleIcon(formData.role, 20)}
+                <span
+                  className={`text-sm font-medium ${getRoleColor(
+                    formData.role
+                  )}`}
+                >
+                  {t(`roles.${formData.role}`)}
+                </span>
+              </div>
             </div>
           </div>
         </form>

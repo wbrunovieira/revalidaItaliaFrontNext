@@ -14,6 +14,9 @@ import {
   Mail,
   CreditCard,
   X,
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
@@ -23,7 +26,7 @@ interface User {
   name: string;
   email: string;
   cpf: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'tutor';
   createdAt: string;
   updatedAt: string;
 }
@@ -33,7 +36,7 @@ interface UserEditData {
   name: string;
   email: string;
   cpf: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'tutor';
 }
 
 interface UsersResponse {
@@ -41,6 +44,8 @@ interface UsersResponse {
   pagination: {
     page: number;
     pageSize: number;
+    total?: number;
+    totalPages?: number;
   };
 }
 
@@ -75,47 +80,64 @@ export default function UsersList() {
   const [isEditModalOpen, setIsEditModalOpen] =
     useState(false);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const token =
-        getCookie('token') ||
-        localStorage.getItem('accessToken') ||
-        sessionStorage.getItem('accessToken');
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (token)
-        headers['Authorization'] = `Bearer ${token}`;
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/students`,
-        { headers }
-      );
+  const fetchUsers = useCallback(
+    async (page: number = 1) => {
+      setLoading(true);
+      try {
+        const token =
+          getCookie('token') ||
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (token)
+          headers['Authorization'] = `Bearer ${token}`;
 
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? 'Acesso negado - É necessário fazer login como administrador'
-            : 'Failed to fetch users'
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/students?page=${page}&pageSize=${pageSize}`,
+          { headers }
         );
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 401
+              ? 'Acesso negado - É necessário fazer login como administrador'
+              : 'Failed to fetch users'
+          );
+        }
+        const data: UsersResponse = await response.json();
+        setUsers(data.users);
+        setCurrentPage(data.pagination.page);
+        setTotalPages(
+          data.pagination.totalPages ||
+            Math.ceil(data.users.length / pageSize)
+        );
+        setTotalUsers(
+          data.pagination.total || data.users.length
+        );
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: t('error.fetchTitle'),
+          description:
+            error instanceof Error
+              ? error.message
+              : t('error.fetchDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-      const data: UsersResponse = await response.json();
-      setUsers(data.users);
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: t('error.fetchTitle'),
-        description:
-          error instanceof Error
-            ? error.message
-            : t('error.fetchDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [t, toast]);
+    },
+    [t, toast, pageSize]
+  );
 
   const searchUsersAPI = useCallback(
     async (searchQuery: string) => {
@@ -190,7 +212,7 @@ export default function UsersList() {
   const clearApiSearch = useCallback(() => {
     setApiSearchTerm('');
     setIsApiSearchActive(false);
-    fetchUsers();
+    fetchUsers(1);
   }, [fetchUsers]);
 
   const handleViewUser = useCallback((userId: string) => {
@@ -262,7 +284,7 @@ export default function UsersList() {
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
         });
-        await fetchUsers();
+        await fetchUsers(currentPage);
       } catch (error) {
         console.error(error);
         toast({
@@ -275,11 +297,30 @@ export default function UsersList() {
         });
       }
     },
-    [t, toast, fetchUsers]
+    [t, toast, fetchUsers, currentPage]
   );
 
+  // Funções de paginação
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+        fetchUsers(page);
+      }
+    },
+    [totalPages, fetchUsers]
+  );
+
+  const goToPrevPage = useCallback(() => {
+    goToPage(currentPage - 1);
+  }, [currentPage, goToPage]);
+
+  const goToNextPage = useCallback(() => {
+    goToPage(currentPage + 1);
+  }, [currentPage, goToPage]);
+
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1);
   }, [fetchUsers]);
 
   useEffect(() => {
@@ -288,7 +329,7 @@ export default function UsersList() {
         searchUsersAPI(apiSearchTerm);
       } else if (isApiSearchActive) {
         setIsApiSearchActive(false);
-        fetchUsers();
+        fetchUsers(1);
       }
     }, 500);
     return () => clearTimeout(timeoutId);
@@ -315,13 +356,44 @@ export default function UsersList() {
       )
     : users;
 
-  const totalUsers = users.length;
-  const adminUsers = users.filter(
-    user => user.role === 'admin'
-  ).length;
-  const studentUsers = users.filter(
-    user => user.role === 'student'
-  ).length;
+  // Contadores de usuários por papel
+  const userCounts = {
+    total: totalUsers,
+    admins: users.filter(user => user.role === 'admin')
+      .length,
+    tutors: users.filter(user => user.role === 'tutor')
+      .length,
+    students: users.filter(user => user.role === 'student')
+      .length,
+  };
+
+  // Função para obter ícone do papel
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return <Shield size={20} className="text-white" />;
+      case 'tutor':
+        return (
+          <GraduationCap size={20} className="text-white" />
+        );
+      case 'student':
+      default:
+        return <User size={20} className="text-white" />;
+    }
+  };
+
+  // Função para obter estilo do papel
+  const getRoleStyle = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-red-900/30 text-red-400 border border-red-800';
+      case 'tutor':
+        return 'bg-green-900/30 text-green-400 border border-green-800';
+      case 'student':
+      default:
+        return 'bg-blue-900/30 text-blue-400 border border-blue-800';
+    }
+  };
 
   if (loading) {
     return (
@@ -406,10 +478,12 @@ export default function UsersList() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-3 gap-4 mb-6">
+
+      {/* Estatísticas */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {totalUsers}
+            {userCounts.total}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.total')}
@@ -417,7 +491,7 @@ export default function UsersList() {
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {adminUsers}
+            {userCounts.admins}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.admins')}
@@ -425,93 +499,142 @@ export default function UsersList() {
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {studentUsers}
+            {userCounts.tutors}
+          </p>
+          <p className="text-sm text-gray-400">
+            {t('stats.tutors')}
+          </p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">
+            {userCounts.students}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.students')}
           </p>
         </div>
       </div>
+
       {filteredUsers.length > 0 ? (
-        <div className="space-y-4">
-          {filteredUsers.map(user => (
-            <div
-              key={user.id}
-              className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
-                {user.role === 'admin' ? (
-                  <Shield
-                    size={20}
-                    className="text-white"
-                  />
-                ) : (
-                  <User size={20} className="text-white" />
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-lg font-semibold text-white">
-                    {user.name}
-                  </h4>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      user.role === 'admin'
-                        ? 'bg-red-900/30 text-red-400 border border-red-800'
-                        : 'bg-blue-900/30 text-blue-400 border border-blue-800'
-                    }`}
+        <>
+          <div className="space-y-4 mb-6">
+            {filteredUsers.map(user => (
+              <div
+                key={user.id}
+                className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
+                  {getRoleIcon(user.role)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-lg font-semibold text-white">
+                      {user.name}
+                    </h4>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
+                        user.role
+                      )}`}
+                    >
+                      {t(
+                        `role${
+                          user.role
+                            .charAt(0)
+                            .toUpperCase() +
+                          user.role.slice(1)
+                        }`
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Mail size={12} />
+                      {user.email}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <CreditCard size={12} />
+                      {user.cpf}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                    <span>ID: {user.id.slice(0, 8)}…</span>
+                    <span>
+                      Criado:{' '}
+                      {new Date(
+                        user.createdAt
+                      ).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleViewUser(user.id)}
+                    title={t('actions.view')}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
-                    {user.role === 'admin'
-                      ? t('roleAdmin')
-                      : t('roleStudent')}
-                  </span>
+                    <Eye size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleEditUser(user)}
+                    title={t('actions.edit')}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    title={t('actions.delete')}
+                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Mail size={12} />
-                    {user.email}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CreditCard size={12} />
-                    {user.cpf}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                  <span>ID: {user.id.slice(0, 8)}…</span>
-                  <span>
-                    Criado:{' '}
-                    {new Date(
-                      user.createdAt
-                    ).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Paginação */}
+          {!isApiSearchActive && totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-700 pt-4">
+              <div className="text-sm text-gray-400">
+                {t('pagination.showing', {
+                  start: (currentPage - 1) * pageSize + 1,
+                  end: Math.min(
+                    currentPage * pageSize,
+                    totalUsers
+                  ),
+                  total: totalUsers,
+                })}
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleViewUser(user.id)}
-                  title={t('actions.view')}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Eye size={18} />
+                  <ChevronLeft size={16} />
+                  {t('pagination.previous')}
                 </button>
+
+                <span className="px-3 py-2 text-sm text-gray-400">
+                  {t('pagination.pageOf', {
+                    current: currentPage,
+                    total: totalPages,
+                  })}
+                </span>
+
                 <button
-                  onClick={() => handleEditUser(user)}
-                  title={t('actions.edit')}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Edit size={18} />
-                </button>
-                <button
-                  onClick={() => handleDelete(user.id)}
-                  title={t('actions.delete')}
-                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
-                >
-                  <Trash2 size={18} />
+                  {t('pagination.next')}
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12">
           <Users
@@ -520,14 +643,14 @@ export default function UsersList() {
           />
           <p className="text-gray-400">
             {isApiSearchActive
-              ? // CORREÇÃO: Usar a interpolação do `next-intl` em vez de `.replace()`
-                t('noApiResults', { term: apiSearchTerm })
+              ? t('noApiResults', { term: apiSearchTerm })
               : searchTerm
               ? t('noLocalResults')
               : t('noUsers')}
           </p>
         </div>
       )}
+
       <UserViewModal
         userId={viewingUserId}
         isOpen={isModalOpen}

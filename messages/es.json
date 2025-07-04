@@ -226,39 +226,47 @@
       "description": "Ocurrió un error al crear el usuario. Intente nuevamente."
     }
   },
-  "usersList": {
+ "usersList": {
     "title": "Lista de Usuarios",
-    "apiSearchPlaceholder": "🔍 Buscar en el servidor por nombre, email o CPF...",
-    "localSearchPlaceholder": "🔍 Filtrar lista actual...",
-    "apiSearchActive": "Buscando en el servidor:",
+    "apiSearchPlaceholder": "Buscar por nombre, email o CPF...",
+    "localSearchPlaceholder": "Filtrar usuarios localmente...",
+    "apiSearchActive": "Búsqueda activa para: {term}",
     "clearSearch": "Limpiar búsqueda",
     "stats": {
       "total": "Total",
-      "admins": "Admin", 
+      "admins": "Administradores",
+      "tutors": "Tutores",
       "students": "Estudiantes"
     },
-    "roleAdmin": "Admin",
-    "roleStudent": "Estudiante", 
+    "roleAdmin": "Administrador",
+    "roleTutor": "Tutor",
+    "roleStudent": "Estudiante",
     "actions": {
       "view": "Ver",
       "edit": "Editar",
       "delete": "Eliminar"
     },
-    "deleteConfirm": "¿Está seguro que desea eliminar este usuario?",
-    "noApiResults": "Ningún usuario encontrado en el servidor para '{term}'",
-    "noLocalResults": "Ningún usuario encontrado en la lista actual",
-    "noUsers": "Ningún usuario registrado",
-    "error": {
-      "fetchTitle": "Error al cargar",
-      "fetchDescription": "No fue posible cargar los usuarios",
-      "searchTitle": "Error en la búsqueda",
-      "searchDescription": "No fue posible buscar usuarios en el servidor",
-      "deleteTitle": "Error al eliminar", 
-      "deleteDescription": "No fue posible eliminar el usuario"
+    "deleteConfirm": "¿Está seguro de que desea eliminar este usuario?",
+    "noUsers": "No se encontraron usuarios",
+    "noLocalResults": "No se encontraron resultados para el filtro local",
+    "noApiResults": "No se encontraron resultados para: {term}",
+    "pagination": {
+      "showing": "Mostrando {start} a {end} de {total} usuarios",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "pageOf": "Página {current} de {total}"
     },
     "success": {
-      "deleteTitle": "Éxito",
-      "deleteDescription": "Usuario eliminado con éxito"
+      "deleteTitle": "¡Usuario eliminado!",
+      "deleteDescription": "El usuario fue eliminado exitosamente."
+    },
+    "error": {
+      "fetchTitle": "Error al cargar usuarios",
+      "fetchDescription": "Ocurrió un error al cargar la lista de usuarios.",
+      "searchTitle": "Error en la búsqueda",
+      "searchDescription": "Ocurrió un error al buscar usuarios.",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "Ocurrió un error al eliminar el usuario."
     }
   },
   "userView": {
@@ -297,42 +305,7 @@
       "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
     }
   },
-  "userEdit": {
-    "title": "Editar Usuario",
-    "fields": {
-      "name": "Nombre Completo",
-      "email": "Correo Electrónico",
-      "cpf": "CPF",
-      "role": "Función"
-    },
-    "placeholders": {
-      "name": "Ingrese el nombre completo",
-      "email": "usuario@ejemplo.com",
-      "cpf": "12345678901"
-    },
-    "roles": {
-      "student": "Estudiante",
-      "admin": "Administrador"
-    },
-    "errors": {
-      "nameRequired": "El nombre es obligatorio",
-      "emailRequired": "El correo electrónico es obligatorio",
-      "emailInvalid": "Correo electrónico inválido",
-      "cpfRequired": "CPF es obligatorio",
-      "cpfInvalid": "CPF debe tener 11 dígitos"
-    },
-    "success": {
-      "title": "¡Usuario actualizado!",
-      "description": "La información del usuario fue actualizada con éxito."
-    },
-    "error": {
-      "title": "Error al actualizar",
-      "description": "No fue posible actualizar la información del usuario."
-    },
-    "save": "Guardar",
-    "saving": "Guardando...",
-    "cancel": "Cancelar"
-  },
+
   "courses": {
     "create": "Crear Curso",
     "list": "Listar Cursos"
@@ -786,41 +759,42 @@
         "fetchAddressesDescription": "No fue posible cargar las direcciones del usuario"
       }
     },
-    "userEdit": {
+   "userEdit": {
     "title": "Editar Usuario",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
     "fields": {
-      "name": "Nombre Completo",
-      "email": "Correo Electrónico",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
       "cpf": "CPF",
-      "role": "Función"
+      "role": "Rol"
     },
     "placeholders": {
-      "name": "Ingrese el nombre completo",
+      "name": "Ingresa el nombre completo",
       "email": "usuario@ejemplo.com",
-      "cpf": "12345678901"
+      "cpf": "000.000.000-00"
     },
     "roles": {
       "student": "Estudiante",
+      "tutor": "Tutor",
       "admin": "Administrador"
     },
     "errors": {
       "nameRequired": "El nombre es obligatorio",
       "emailRequired": "El correo electrónico es obligatorio",
       "emailInvalid": "Correo electrónico inválido",
-      "cpfRequired": "CPF es obligatorio",
-      "cpfInvalid": "CPF debe tener 11 dígitos"
+      "cpfRequired": "El CPF es obligatorio",
+      "cpfInvalid": "CPF inválido"
     },
     "success": {
       "title": "¡Usuario actualizado!",
-      "description": "La información del usuario fue actualizada con éxito."
+      "description": "El usuario ha sido actualizado con éxito."
     },
     "error": {
-      "title": "Error al actualizar",
-      "description": "No fue posible actualizar la información del usuario."
-    },
-    "save": "Guardar",
-    "saving": "Guardando...",
-    "cancel": "Cancelar"
+      "title": "Error al actualizar el usuario",
+      "description": "Ocurrió un error al actualizar el usuario. Intenta nuevamente."
+    }
   },
   "courseView": {
   "title": "Detalles del Curso",

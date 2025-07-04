@@ -228,32 +228,46 @@
     }
   },
   "usersList": {
-    "title": "Elenco Utenti",
-    "searchPlaceholder": "Cerca utenti...",
+    "title": "Lista Utenti",
+    "apiSearchPlaceholder": "Cerca per nome, email o CPF...",
+    "localSearchPlaceholder": "Filtra utenti localmente...",
+    "apiSearchActive": "Ricerca attiva per: {term}",
+    "clearSearch": "Cancella ricerca",
     "stats": {
       "total": "Totale",
-      "admins": "Admin", 
+      "admins": "Amministratori",
+      "tutors": "Tutor",
       "students": "Studenti"
     },
-    "roleAdmin": "Admin",
-    "roleStudent": "Studente", 
+    "roleAdmin": "Amministratore",
+    "roleTutor": "Tutor",
+    "roleStudent": "Studente",
     "actions": {
       "view": "Visualizza",
       "edit": "Modifica",
       "delete": "Elimina"
     },
     "deleteConfirm": "Sei sicuro di voler eliminare questo utente?",
-    "noResults": "Nessun utente trovato",
-    "noUsers": "Nessun utente registrato",
-    "error": {
-      "fetchTitle": "Errore nel caricamento",
-      "fetchDescription": "Non è stato possibile caricare gli utenti",
-      "deleteTitle": "Errore nell'eliminazione", 
-      "deleteDescription": "Non è stato possibile eliminare l'utente"
+    "noUsers": "Nessun utente trovato",
+    "noLocalResults": "Nessun risultato trovato per il filtro locale",
+    "noApiResults": "Nessun risultato trovato per: {term}",
+    "pagination": {
+      "showing": "Mostrando {start} a {end} di {total} utenti",
+      "previous": "Precedente",
+      "next": "Successivo",
+      "pageOf": "Pagina {current} di {total}"
     },
     "success": {
-      "deleteTitle": "Successo",
-      "deleteDescription": "Utente eliminato con successo"
+      "deleteTitle": "Utente eliminato!",
+      "deleteDescription": "L'utente è stato eliminato con successo."
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento degli utenti",
+      "fetchDescription": "Si è verificato un errore durante il caricamento della lista utenti.",
+      "searchTitle": "Errore nella ricerca",
+      "searchDescription": "Si è verificato un errore durante la ricerca degli utenti.",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Si è verificato un errore durante l'eliminazione dell'utente."
     }
   },
   "courses": {
@@ -711,39 +725,40 @@
   },
   "userEdit": {
     "title": "Modifica Utente",
+    "save": "Salva",
+    "saving": "Salvando...",
+    "cancel": "Annulla",
     "fields": {
-      "name": "Nome Completo",
-      "email": "E-mail",
-      "cpf": "CPF",
+      "name": "Nome completo",
+      "email": "Email",
+      "cpf": "Codice fiscale",
       "role": "Ruolo"
     },
     "placeholders": {
       "name": "Inserisci il nome completo",
       "email": "utente@esempio.com",
-      "cpf": "12345678901"
+      "cpf": "000.000.000-00"
     },
     "roles": {
       "student": "Studente",
+      "tutor": "Tutor",
       "admin": "Amministratore"
     },
     "errors": {
       "nameRequired": "Il nome è obbligatorio",
       "emailRequired": "L'email è obbligatoria",
       "emailInvalid": "Email non valida",
-      "cpfRequired": "CPF è obbligatorio",
-      "cpfInvalid": "CPF deve avere 11 cifre"
+      "cpfRequired": "Il codice fiscale è obbligatorio",
+      "cpfInvalid": "Codice fiscale non valido"
     },
     "success": {
       "title": "Utente aggiornato!",
-      "description": "Le informazioni dell'utente sono state aggiornate con successo."
+      "description": "L'utente è stato aggiornato con successo."
     },
     "error": {
-      "title": "Errore nell'aggiornamento",
-      "description": "Non è stato possibile aggiornare le informazioni dell'utente."
-    },
-    "save": "Salva",
-    "saving": "Salvataggio...",
-    "cancel": "Annulla"
+      "title": "Errore durante l'aggiornamento dell'utente",
+      "description": "Si è verificato un errore durante l'aggiornamento dell'utente. Riprova."
+    }
   },
   "courseView": {
   "title": "Dettagli del Corso",

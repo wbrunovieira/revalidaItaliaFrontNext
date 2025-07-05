@@ -43,6 +43,7 @@ import LessonsList from '@/components/LessonsList';
 import CreateVideoForm from '@/components/CreateVideoForm';
 import VideosList from '@/components/VideosList';
 import LogoutButton from '@/components/LogoutButton';
+import Logo from '@/components/Logo';
 
 interface UserInfo {
   id: string;
@@ -136,13 +137,19 @@ export default function AdminPage() {
     <div className="p-6 bg-primary min-h-screen">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-white">
-            {t('title')}
-          </h1>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-4xl font-bold text-white">
+              {t('title')}
+            </h1>
+
+            <p className="text-gray-300">
+              {t('description')}
+            </p>
+          </div>
+          <Logo />
+
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-400 text-sm">
-              <Globe size={16} />
-            </div>
+            <div className="flex items-center gap-2 text-gray-400 text-sm"></div>
 
             {/* Informações do usuário logado */}
             {!loadingUser && userInfo && (
@@ -189,7 +196,6 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-        <p className="text-gray-300">{t('description')}</p>
       </div>
 
       <Tabs

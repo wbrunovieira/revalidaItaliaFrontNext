@@ -689,36 +689,46 @@
       "slugGenerationDescription": "Escriba el título en portugués primero"
     }
   },
-  "modulesList": {
-    "title": "Lista de Módulos",
-    "searchPlaceholder": "Buscar módulos...",
-    "modules": "módulos",
-    "lessonsCount": "{count} lecciones",
-    "noModules": "Ningún módulo en este curso",
-    "noResults": "Ningún módulo encontrado con este término.",
-    "noCourses": "Ningún curso registrado aún.",
-    "deleteConfirm": "¿Está seguro que desea eliminar este módulo?",
-    "stats": {
-      "totalCourses": "Total de Cursos",
-      "totalModules": "Total de Módulos",
-      "coursesWithModules": "Cursos con Módulos"
-    },
-    "actions": {
-      "view": "Ver",
-      "edit": "Editar",
-      "delete": "Eliminar"
-    },
-    "success": {
-      "deleteTitle": "¡Módulo eliminado!",
-      "deleteDescription": "El módulo fue eliminado con éxito."
-    },
-    "error": {
-      "fetchTitle": "Error al cargar módulos",
-      "fetchDescription": "No fue posible cargar la lista de módulos.",
-      "deleteTitle": "Error al eliminar",
-      "deleteDescription": "No fue posible eliminar el módulo."
+"modulesList": {
+      "title": "Lista de Módulos",
+      "searchPlaceholder": "Buscar módulos...",
+      "modules": "módulos",
+      "lessonsCount": "{count} lecciones",
+      "noModules": "Ningún módulo en este curso",
+      "noResults": "Ningún módulo encontrado con este término.",
+      "noCourses": "Ningún curso registrado aún.",
+      "deleteConfirm": "¿Está seguro que desea eliminar este módulo?",
+      "deleteConfirmation": {
+        "title": "Confirmar Eliminación del Módulo",
+        "message": "¿Está seguro que desea eliminar el módulo \"{moduleName}\"?",
+        "module": "Módulo",
+        "course": "Curso",
+        "order": "Orden",
+        "warning": "Esta acción no se puede deshacer",
+        "confirm": "Eliminar Módulo"
+      },
+      "stats": {
+        "totalCourses": "Total de Cursos",
+        "totalModules": "Total de Módulos",
+        "coursesWithModules": "Cursos con Módulos"
+      },
+      "actions": {
+        "view": "Ver",
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "success": {
+        "deleteTitle": "¡Módulo eliminado!",
+        "deleteDescription": "El módulo fue eliminado con éxito."
+      },
+      "error": {
+        "fetchTitle": "Error al cargar módulos",
+        "fetchDescription": "No fue posible cargar la lista de módulos.",
+        "deleteTitle": "Error al eliminar",
+        "deleteDescription": "No fue posible eliminar el módulo."
+      }
     }
-  },
+  ,
   "lessons": {
     "create": "Crear Lección",
     "list": "Listar Lecciones"

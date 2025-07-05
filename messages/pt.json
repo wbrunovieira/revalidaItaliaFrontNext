@@ -618,36 +618,45 @@
       "slugGenerationDescription": "Digite o título em português primeiro"
     }
   },
-  "modulesList": {
-    "title": "Lista de Módulos",
-    "searchPlaceholder": "Buscar módulos...",
-    "modules": "módulos",
-    "lessonsCount": "{count} aulas",
-    "noModules": "Nenhum módulo neste curso",
-    "noResults": "Nenhum módulo encontrado com este termo.",
-    "noCourses": "Nenhum curso cadastrado ainda.",
-    "deleteConfirm": "Tem certeza que deseja excluir este módulo?",
-    "stats": {
-      "totalCourses": "Total de Cursos",
-      "totalModules": "Total de Módulos",
-      "coursesWithModules": "Cursos com Módulos"
+"modulesList": {
+      "title": "Lista de Módulos",
+      "searchPlaceholder": "Buscar módulos...",
+      "modules": "módulos",
+      "lessonsCount": "{count} aulas",
+      "noModules": "Nenhum módulo neste curso",
+      "noResults": "Nenhum módulo encontrado com este termo.",
+      "noCourses": "Nenhum curso cadastrado ainda.",
+      "deleteConfirm": "Tem certeza que deseja excluir este módulo?",
+      "deleteConfirmation": {
+        "title": "Confirmar Exclusão do Módulo",
+        "message": "Tem certeza que deseja excluir o módulo \"{moduleName}\"?",
+        "module": "Módulo",
+        "course": "Curso",
+        "order": "Ordem",
+        "warning": "Esta ação não pode ser desfeita",
+        "confirm": "Excluir Módulo"
+      },
+      "stats": {
+        "totalCourses": "Total de Cursos",
+        "totalModules": "Total de Módulos",
+        "coursesWithModules": "Cursos com Módulos"
+      },
+      "actions": {
+        "view": "Visualizar",
+        "edit": "Editar",
+        "delete": "Excluir"
+      },
+      "success": {
+        "deleteTitle": "Módulo excluído!",
+        "deleteDescription": "O módulo foi excluído com sucesso."
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar módulos",
+        "fetchDescription": "Não foi possível carregar a lista de módulos.",
+        "deleteTitle": "Erro ao excluir",
+        "deleteDescription": "Não foi possível excluir o módulo."
+      }
     },
-    "actions": {
-      "view": "Visualizar",
-      "edit": "Editar",
-      "delete": "Excluir"
-    },
-    "success": {
-      "deleteTitle": "Módulo excluído!",
-      "deleteDescription": "O módulo foi excluído com sucesso."
-    },
-    "error": {
-      "fetchTitle": "Erro ao carregar módulos",
-      "fetchDescription": "Não foi possível carregar a lista de módulos.",
-      "deleteTitle": "Erro ao excluir",
-      "deleteDescription": "Não foi possível excluir o módulo."
-    }
-  },
   "lessons": {
     "create": "Criar Aula",
     "list": "Listar Aulas"

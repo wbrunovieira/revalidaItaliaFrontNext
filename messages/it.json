@@ -659,36 +659,45 @@
 
 
 ,
-  "modulesList": {
-    "title": "Elenco Moduli",
-    "searchPlaceholder": "Cerca moduli...",
-    "modules": "moduli",
-    "lessonsCount": "{count} lezioni",
-    "noModules": "Nessun modulo in questo corso",
-    "noResults": "Nessun modulo trovato con questo termine.",
-    "noCourses": "Nessun corso registrato ancora.",
-    "deleteConfirm": "Sei sicuro di voler eliminare questo modulo?",
-    "stats": {
-      "totalCourses": "Totale Corsi",
-      "totalModules": "Totale Moduli",
-      "coursesWithModules": "Corsi con Moduli"
-    },
-    "actions": {
-      "view": "Visualizza",
-      "edit": "Modifica",
-      "delete": "Elimina"
-    },
-    "success": {
-      "deleteTitle": "Modulo eliminato!",
-      "deleteDescription": "Il modulo è stato eliminato con successo."
-    },
-    "error": {
-      "fetchTitle": "Errore nel caricamento dei moduli",
-      "fetchDescription": "Non è stato possibile caricare l'elenco dei moduli.",
-      "deleteTitle": "Errore nell'eliminazione",
-      "deleteDescription": "Non è stato possibile eliminare il modulo."
-    }
+"modulesList": {
+  "title": "Elenco Moduli",
+  "searchPlaceholder": "Cerca moduli...",
+  "modules": "moduli",
+  "lessonsCount": "{count} lezioni",
+  "noModules": "Nessun modulo in questo corso",
+  "noResults": "Nessun modulo trovato con questo termine.",
+  "noCourses": "Nessun corso registrato ancora.",
+  "deleteConfirm": "Sei sicuro di voler eliminare questo modulo?",
+  "deleteConfirmation": {
+    "title": "Conferma Eliminazione del Modulo",
+    "message": "Sei sicuro di voler eliminare il modulo \"{moduleName}\"?",
+    "module": "Modulo",
+    "course": "Corso",
+    "order": "Ordine",
+    "warning": "Questa azione non può essere annullata",
+    "confirm": "Elimina Modulo"
   },
+  "stats": {
+    "totalCourses": "Totale Corsi",
+    "totalModules": "Totale Moduli",
+    "coursesWithModules": "Corsi con Moduli"
+  },
+  "actions": {
+    "view": "Visualizza",
+    "edit": "Modifica",
+    "delete": "Elimina"
+  },
+  "success": {
+    "deleteTitle": "Modulo eliminato!",
+    "deleteDescription": "Il modulo è stato eliminato con successo."
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento dei moduli",
+    "fetchDescription": "Non è stato possibile caricare l'elenco dei moduli.",
+    "deleteTitle": "Errore nell'eliminazione",
+    "deleteDescription": "Non è stato possibile eliminare il modulo."
+  }
+},
   "lessons": {
     "create": "Crea Lezione",
     "list": "Elenco Lezioni"

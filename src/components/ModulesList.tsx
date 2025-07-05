@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   Play,
+  BookOpen,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -52,6 +53,10 @@ export default function ModulesList() {
     Set<string>
   >(new Set());
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3333';
+
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
@@ -70,7 +75,7 @@ export default function ModulesList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${apiUrl}/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -86,7 +91,7 @@ export default function ModulesList() {
         return [];
       }
     },
-    [handleApiError]
+    [handleApiError, apiUrl]
   );
 
   // Função principal para buscar todos os dados
@@ -95,7 +100,7 @@ export default function ModulesList() {
 
     try {
       const coursesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${apiUrl}/courses`
       );
 
       if (!coursesResponse.ok) {
@@ -127,19 +132,35 @@ export default function ModulesList() {
     } finally {
       setLoading(false);
     }
-  }, [toast, t, handleApiError, fetchModulesForCourse]);
+  }, [
+    toast,
+    t,
+    handleApiError,
+    fetchModulesForCourse,
+    apiUrl,
+  ]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const handleDelete = useCallback(
-    async (courseId: string, moduleId: string) => {
-      if (!confirm(t('deleteConfirm'))) return;
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
 
+  // Função para deletar módulo após confirmação
+  const deleteModule = useCallback(
+    async (courseId: string, moduleId: string) => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}`,
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}`,
           {
             method: 'DELETE',
           }
@@ -154,6 +175,7 @@ export default function ModulesList() {
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
+          variant: 'default',
         });
 
         await fetchData();
@@ -166,7 +188,104 @@ export default function ModulesList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError]
+    [t, toast, fetchData, handleApiError, apiUrl]
+  );
+
+  // Função para mostrar confirmação personalizada usando toast
+  const handleDelete = useCallback(
+    async (courseId: string, moduleId: string) => {
+      // Encontrar o curso e o módulo
+      const course = coursesWithModules.find(
+        c => c.id === courseId
+      );
+      if (!course) return;
+
+      const module = course.modules?.find(
+        m => m.id === moduleId
+      );
+      if (!module) return;
+
+      const courseTranslation = getTranslationByLocale(
+        course.translations,
+        locale
+      );
+      const moduleTranslation = getTranslationByLocale(
+        module.translations,
+        locale
+      );
+
+      // Toast de confirmação personalizado
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                moduleName:
+                  moduleTranslation?.title || 'Sem título',
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Package size={14} />
+                  {t('deleteConfirmation.module')}:{' '}
+                  {module.slug}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t('deleteConfirmation.course')}:{' '}
+                  {courseTranslation?.title || 'Sem título'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Play size={14} />
+                  {t('deleteConfirmation.order')}:{' '}
+                  {module.order}
+                </div>
+                {moduleTranslation?.description && (
+                  <div className="mt-2 p-2 bg-gray-600/30 rounded text-xs">
+                    "
+                    {moduleTranslation.description.substring(
+                      0,
+                      100
+                    )}
+                    {moduleTranslation.description.length >
+                    100
+                      ? '...'
+                      : ''}
+                    "
+                  </div>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                deleteModule(courseId, moduleId)
+              }
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [
+      toast,
+      deleteModule,
+      coursesWithModules,
+      t,
+      locale,
+      getTranslationByLocale,
+    ]
   );
 
   const toggleCourse = useCallback((courseId: string) => {
@@ -180,17 +299,6 @@ export default function ModulesList() {
       return newExpanded;
     });
   }, []);
-
-  const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
-      return (
-        translations.find(
-          tr => tr.locale === targetLocale
-        ) || translations[0]
-      );
-    },
-    []
-  );
 
   // Filtrar cursos e módulos baseado na busca
   const filteredCourses = coursesWithModules.filter(

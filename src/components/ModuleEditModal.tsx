@@ -1,4 +1,4 @@
-// src/components/TrackEditModal.tsx
+// src/components/ModuleEditModal.tsx
 
 'use client';
 
@@ -8,7 +8,7 @@ import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
   X,
-  Route,
+  BookOpen,
   Link,
   Image as ImageIcon,
   Type,
@@ -16,10 +16,15 @@ import {
   Globe,
   Save,
   Loader2,
-  BookOpen,
-  Check,
+  Hash,
 } from 'lucide-react';
-import Image from 'next/image';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Translation {
   locale: string;
@@ -27,30 +32,17 @@ interface Translation {
   description: string;
 }
 
-interface Course {
+interface ModuleEditData {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
 }
 
-interface TrackCourse {
+interface ModuleEditModalProps {
+  module: ModuleEditData | null;
   courseId: string;
-  course?: Course;
-}
-
-interface TrackEditData {
-  id: string;
-  slug: string;
-  imageUrl: string;
-  courseIds?: string[];
-  trackCourses?: TrackCourse[];
-  courses?: Course[];
-  translations: Translation[];
-}
-
-interface TrackEditModalProps {
-  track: TrackEditData | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
@@ -65,21 +57,22 @@ interface FormTranslations {
 interface FormData {
   slug: string;
   imageUrl: string;
-  courseIds: string[];
+  order: number;
   translations: FormTranslations;
 }
 
 interface FormErrors {
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
-export default function TrackEditModal({
-  track,
+export default function ModuleEditModal({
+  module,
+  courseId,
   isOpen,
   onClose,
   onSave,
-}: TrackEditModalProps) {
-  const t = useTranslations('Admin.trackEdit');
+}: ModuleEditModalProps) {
+  const t = useTranslations('Admin.moduleEdit');
   const params = useParams();
   const locale = params.locale as string;
   const { toast } = useToast();
@@ -87,7 +80,7 @@ export default function TrackEditModal({
   const [formData, setFormData] = useState<FormData>({
     slug: '',
     imageUrl: '',
-    courseIds: [],
+    order: 1,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
@@ -95,13 +88,17 @@ export default function TrackEditModal({
     },
   });
 
-  const [availableCourses, setAvailableCourses] = useState<
-    Course[]
-  >([]);
   const [loading, setLoading] = useState(false);
-  const [loadingCourses, setLoadingCourses] =
-    useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Novos estados para gerenciar orders
+  const [existingOrders, setExistingOrders] = useState<
+    number[]
+  >([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [originalOrder, setOriginalOrder] = useState<
+    number | null
+  >(null);
 
   // Função para obter o token
   const getAuthToken = (): string | null => {
@@ -133,31 +130,65 @@ export default function TrackEditModal({
     );
   };
 
-  // Buscar cursos disponíveis
-  const fetchAvailableCourses = useCallback(async () => {
-    setLoadingCourses(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
-      );
+  // Função para buscar módulos existentes do curso
+  const fetchExistingModules = useCallback(
+    async (courseId: string) => {
+      setLoadingOrders(true);
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/courses/${courseId}/modules`
+        );
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar cursos');
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch modules: ${response.status}`
+          );
+        }
+
+        const modules = await response.json();
+        const orders = modules.map(
+          (module: any) => module.order
+        );
+        setExistingOrders(orders);
+
+        console.log('Orders existentes no curso:', orders);
+      } catch (error) {
+        console.error('Error fetching modules:', error);
+        setExistingOrders([]);
+        toast({
+          title: 'Erro ao carregar módulos',
+          description:
+            'Não foi possível carregar os módulos existentes do curso.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoadingOrders(false);
       }
+    },
+    [toast]
+  );
 
-      const data: Course[] = await response.json();
-      setAvailableCourses(data);
-    } catch (error) {
-      console.error('Erro ao buscar cursos:', error);
-      toast({
-        title: t('errors.fetchCoursesTitle'),
-        description: t('errors.fetchCoursesDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingCourses(false);
+  // Função para gerar lista de ordens disponíveis
+  const getAvailableOrders = useCallback((): number[] => {
+    const maxOrder = 50; // Limite máximo de ordem
+    const availableOrders = [];
+
+    for (let i = 1; i <= maxOrder; i++) {
+      // Incluir o order original (do módulo sendo editado) mesmo que já exista
+      // Excluir outros orders que já existem
+      if (
+        !existingOrders.includes(i) ||
+        i === originalOrder
+      ) {
+        availableOrders.push(i);
+      }
     }
-  }, [t, toast]);
+
+    return availableOrders;
+  }, [existingOrders, originalOrder]);
 
   // Validar formulário
   const validateForm = (): boolean => {
@@ -173,8 +204,15 @@ export default function TrackEditModal({
       newErrors.imageUrl = t('errors.imageRequired');
     }
 
-    if (formData.courseIds.length === 0) {
-      newErrors.courseIds = t('errors.coursesRequired');
+    if (formData.order < 1) {
+      newErrors.order = t('errors.orderRequired');
+    } else if (formData.order > 999) {
+      newErrors.order = t('errors.orderMax');
+    } else if (
+      existingOrders.includes(formData.order) &&
+      formData.order !== originalOrder
+    ) {
+      newErrors.order = t('errors.orderExists');
     }
 
     // Validar traduções
@@ -203,7 +241,7 @@ export default function TrackEditModal({
     try {
       console.log('Testando conexão com API...');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks`,
+        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`,
         {
           method: 'GET',
           headers: {
@@ -212,14 +250,14 @@ export default function TrackEditModal({
         }
       );
       console.log(
-        'Teste GET /tracks:',
+        'Teste GET /courses/{id}/modules:',
         response.status,
         response.ok
       );
 
-      if (track) {
+      if (module) {
         const response2 = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${track.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${module.id}`,
           {
             method: 'GET',
             headers: {
@@ -228,7 +266,7 @@ export default function TrackEditModal({
           }
         );
         console.log(
-          'Teste GET /tracks/{id}:',
+          'Teste GET /courses/{id}/modules/{id}:',
           response2.status,
           response2.ok
         );
@@ -244,7 +282,7 @@ export default function TrackEditModal({
   ): Promise<void> => {
     e.preventDefault();
 
-    if (!validateForm() || !track) return;
+    if (!validateForm() || !module) return;
 
     setLoading(true);
     try {
@@ -263,14 +301,14 @@ export default function TrackEditModal({
       );
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks/${track.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${module.id}`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers,
           body: JSON.stringify({
             slug: formData.slug.trim(),
             imageUrl: formData.imageUrl.trim(),
-            courseIds: formData.courseIds,
+            order: formData.order,
             translations,
           }),
         }
@@ -282,13 +320,13 @@ export default function TrackEditModal({
             'Não autorizado - faça login novamente'
           );
         } else if (response.status === 404) {
-          throw new Error('Trilha não encontrada');
+          throw new Error('Módulo não encontrado');
         } else if (response.status === 409) {
           throw new Error(
-            'Já existe uma trilha com este slug'
+            'Já existe um módulo com este slug ou ordem'
           );
         }
-        throw new Error('Erro ao atualizar trilha');
+        throw new Error('Erro ao atualizar módulo');
       }
 
       toast({
@@ -299,7 +337,7 @@ export default function TrackEditModal({
       onSave();
       onClose();
     } catch (error) {
-      console.error('Erro ao atualizar trilha:', error);
+      console.error('Erro ao atualizar módulo:', error);
       toast({
         title: t('error.title'),
         description:
@@ -313,34 +351,31 @@ export default function TrackEditModal({
     }
   };
 
-  // Extrair courseIds do track
-  const extractCourseIds = (
-    trackData: TrackEditData
-  ): string[] => {
-    if (
-      trackData.courseIds &&
-      Array.isArray(trackData.courseIds)
-    ) {
-      return trackData.courseIds;
-    } else if (
-      trackData.trackCourses &&
-      Array.isArray(trackData.trackCourses)
-    ) {
-      return trackData.trackCourses.map(
-        (tc: TrackCourse) => tc.courseId
-      );
-    } else if (
-      trackData.courses &&
-      Array.isArray(trackData.courses)
-    ) {
-      return trackData.courses.map((c: Course) => c.id);
-    }
-    return [];
-  };
+  // Handler para mudança de order
+  const handleOrderChange = useCallback(
+    (value: string) => {
+      const order = parseInt(value) || 1;
+      setFormData(prev => ({ ...prev, order }));
 
-  // Atualizar formulário quando track mudar
+      // Validar order em tempo real
+      if (
+        existingOrders.includes(order) &&
+        order !== originalOrder
+      ) {
+        setErrors(prev => ({
+          ...prev,
+          order: t('errors.orderExists'),
+        }));
+      } else {
+        setErrors(prev => ({ ...prev, order: undefined }));
+      }
+    },
+    [existingOrders, originalOrder, t]
+  );
+
+  // Atualizar formulário quando module mudar
   useEffect(() => {
-    if (track && isOpen) {
+    if (module && isOpen && courseId) {
       const translationsObj: FormTranslations = {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
@@ -348,7 +383,7 @@ export default function TrackEditModal({
       };
 
       // Preencher traduções existentes
-      track.translations.forEach(trans => {
+      module.translations.forEach(trans => {
         if (
           trans.locale === 'pt' ||
           trans.locale === 'es' ||
@@ -364,24 +399,21 @@ export default function TrackEditModal({
         }
       });
 
-      const courseIds = extractCourseIds(track);
-
       setFormData({
-        slug: track.slug,
-        imageUrl: track.imageUrl || '',
-        courseIds: courseIds,
+        slug: module.slug,
+        imageUrl: module.imageUrl || '',
+        order: module.order || 1,
         translations: translationsObj,
       });
-      setErrors({});
-    }
-  }, [track, isOpen]);
 
-  // Buscar cursos quando abrir o modal
-  useEffect(() => {
-    if (isOpen) {
-      fetchAvailableCourses();
+      // Armazenar o order original
+      setOriginalOrder(module.order || 1);
+      setErrors({});
+
+      // Buscar módulos existentes do curso
+      fetchExistingModules(courseId);
     }
-  }, [isOpen, fetchAvailableCourses]);
+  }, [module, isOpen, courseId, fetchExistingModules]);
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -417,30 +449,7 @@ export default function TrackEditModal({
     });
   };
 
-  const toggleCourse = (courseId: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      courseIds: prev.courseIds.includes(courseId)
-        ? prev.courseIds.filter(id => id !== courseId)
-        : [...prev.courseIds, courseId],
-    }));
-    // Limpar erro de courseIds quando selecionar pelo menos um curso
-    if (errors.courseIds) {
-      setErrors(prev => ({ ...prev, courseIds: '' }));
-    }
-  };
-
-  const getTranslationByLocale = (
-    translations: Translation[],
-    targetLocale: string
-  ): Translation => {
-    return (
-      translations.find(tr => tr.locale === targetLocale) ||
-      translations[0]
-    );
-  };
-
-  if (!isOpen || !track) return null;
+  if (!isOpen || !module) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -455,7 +464,10 @@ export default function TrackEditModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Route size={28} className="text-secondary" />
+            <BookOpen
+              size={28}
+              className="text-secondary"
+            />
             {t('title')}
           </h2>
           <button
@@ -473,7 +485,7 @@ export default function TrackEditModal({
         >
           <div className="space-y-6">
             {/* Informações básicas */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-3">
               {/* Slug */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -508,6 +520,77 @@ export default function TrackEditModal({
                 </p>
               </div>
 
+              {/* Order - Agora como Select */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <Hash size={16} className="inline mr-2" />
+                  {t('fields.order')}
+                </label>
+                {loadingOrders ? (
+                  <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                    <Loader2
+                      size={16}
+                      className="animate-spin inline mr-2"
+                    />
+                    Carregando ordens...
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.order.toString()}
+                    onValueChange={handleOrderChange}
+                    disabled={loadingOrders}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue
+                        placeholder={t(
+                          'placeholders.order'
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                      {getAvailableOrders().length === 0 ? (
+                        <div className="px-2 py-4 text-center text-gray-400 text-sm">
+                          Nenhuma ordem disponível
+                        </div>
+                      ) : (
+                        getAvailableOrders().map(order => (
+                          <SelectItem
+                            key={order}
+                            value={order.toString()}
+                            className="text-white hover:bg-gray-600"
+                          >
+                            {order}
+                            {order === originalOrder && (
+                              <span className="text-xs text-gray-400 ml-2">
+                                (atual)
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+                {errors.order && (
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.order}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('hints.order')}
+                </p>
+                {existingOrders.length > 0 &&
+                  !loadingOrders && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Ordens ocupadas:{' '}
+                      {existingOrders
+                        .filter(o => o !== originalOrder)
+                        .sort((a, b) => a - b)
+                        .join(', ')}
+                    </p>
+                  )}
+              </div>
+
               {/* Image URL */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -539,99 +622,6 @@ export default function TrackEditModal({
                   </p>
                 )}
               </div>
-            </div>
-
-            {/* Seleção de Cursos */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <BookOpen size={20} />
-                {t('courses.title')}
-              </h3>
-              <p className="text-sm text-gray-400">
-                {t('courses.description')}
-              </p>
-
-              {errors.courseIds && (
-                <p className="text-red-400 text-sm">
-                  {errors.courseIds}
-                </p>
-              )}
-
-              {loadingCourses ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2
-                    size={32}
-                    className="animate-spin text-gray-400"
-                  />
-                </div>
-              ) : availableCourses.length > 0 ? (
-                <div className="grid gap-3 max-h-48 overflow-y-auto p-2 bg-gray-700/30 rounded-lg">
-                  {availableCourses.map(course => {
-                    const courseTranslation =
-                      getTranslationByLocale(
-                        course.translations,
-                        locale
-                      );
-                    const isSelected =
-                      formData.courseIds.includes(
-                        course.id
-                      );
-
-                    return (
-                      <div
-                        key={course.id}
-                        onClick={() =>
-                          toggleCourse(course.id)
-                        }
-                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-secondary/20 border border-secondary'
-                            : 'bg-gray-700/50 border border-gray-600 hover:bg-gray-700'
-                        }`}
-                      >
-                        <div className="relative w-12 h-9 rounded overflow-hidden flex-shrink-0">
-                          <Image
-                            src={course.imageUrl}
-                            alt={
-                              courseTranslation?.title || ''
-                            }
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium">
-                            {courseTranslation?.title ||
-                              'Sem título'}
-                          </h4>
-                          <p className="text-xs text-gray-400 line-clamp-1">
-                            {courseTranslation?.description ||
-                              'Sem descrição'}
-                          </p>
-                        </div>
-                        <div
-                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                            isSelected
-                              ? 'bg-secondary border-secondary'
-                              : 'border-gray-500'
-                          }`}
-                        >
-                          {isSelected && (
-                            <Check
-                              size={14}
-                              className="text-primary"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-center py-4">
-                  {t('courses.noCourses')}
-                </p>
-              )}
             </div>
 
             {/* Traduções */}
@@ -890,7 +880,7 @@ export default function TrackEditModal({
             </button>
             <button
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={loading || loadingOrders}
               className="px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {loading ? (

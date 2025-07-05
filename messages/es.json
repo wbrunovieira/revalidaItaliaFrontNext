@@ -756,7 +756,8 @@
         "fetchTitle": "Error al cargar el módulo",
         "fetchDescription": "No se pudieron cargar los detalles del módulo. Inténtalo de nuevo."
       }
-    },    
+    },  
+  
   "lessons": {
     "create": "Crear Lección",
     "list": "Listar Lecciones"

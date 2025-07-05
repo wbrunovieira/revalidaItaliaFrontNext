@@ -726,6 +726,52 @@
     "fetchTitle": "Errore nel caricamento del modulo",
     "fetchDescription": "Impossibile caricare i dettagli del modulo. Riprova."
   }
+},
+"moduleEdit": {
+  "title": "Modifica Modulo",
+  "fields": {
+    "slug": "URL del Modulo",
+    "imageUrl": "URL dell'Immagine",
+    "order": "Ordine",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "placeholders": {
+    "slug": "modulo-introduzione",
+    "imageUrl": "https://esempio.com/immagine.jpg",
+    "order": "1",
+    "title": "Inserisci il titolo del modulo",
+    "description": "Inserisci una breve descrizione"
+  },
+  "hints": {
+    "slug": "Solo lettere minuscole, numeri e trattini",
+    "order": "Ordine di visualizzazione del modulo nel corso"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "L'URL è obbligatorio",
+    "slugInvalid": "L'URL deve contenere solo lettere minuscole, numeri e trattini",
+    "imageRequired": "L'URL dell'immagine è obbligatorio",
+    "orderRequired": "L'ordine deve essere maggiore di 0",
+    "titleRequired": "Il titolo è obbligatorio",
+    "descriptionRequired": "La descrizione è obbligatoria"
+  },
+  "success": {
+    "title": "Successo!",
+    "description": "Modulo aggiornato con successo"
+  },
+  "error": {
+    "title": "Errore",
+    "description": "Errore nell'aggiornamento del modulo"
+  },
+  "cancel": "Annulla",
+  "save": "Salva",
+  "saving": "Salvando..."
 }, 
   "lessons": {
     "create": "Crea Lezione",

@@ -169,6 +169,7 @@
     "videos": "Vídeos",
     "settings": "Configurações"
   },
+  
   "users": {
     "create": "Criar Usuário",
     "list": "Listar Usuários"
@@ -657,7 +658,7 @@
         "deleteDescription": "Não foi possível excluir o módulo."
       }
     },
-    "moduleView": {
+  "moduleView": {
       "title": "Detalhes do Módulo",
       "close": "Fechar",
       "moduleNotFound": "Módulo não encontrado",
@@ -685,6 +686,52 @@
         "fetchTitle": "Erro ao carregar módulo",
         "fetchDescription": "Não foi possível carregar os detalhes do módulo. Tente novamente."
       }
+    },
+    "moduleEdit": {
+      "title": "Editar Módulo",
+      "fields": {
+        "slug": "URL do Módulo",
+        "imageUrl": "URL da Imagem",
+        "order": "Ordem",
+        "title": "Título",
+        "description": "Descrição"
+      },
+      "placeholders": {
+        "slug": "modulo-introducao",
+        "imageUrl": "https://exemplo.com/imagem.jpg",
+        "order": "1",
+        "title": "Digite o título do módulo",
+        "description": "Digite uma breve descrição"
+      },
+      "hints": {
+        "slug": "Apenas letras minúsculas, números e hífens",
+        "order": "Ordem de exibição do módulo no curso"
+      },
+      "translations": {
+        "title": "Traduções",
+        "portuguese": "Português",
+        "spanish": "Espanhol",
+        "italian": "Italiano"
+      },
+      "errors": {
+        "slugRequired": "URL é obrigatória",
+        "slugInvalid": "URL deve conter apenas letras minúsculas, números e hífens",
+        "imageRequired": "URL da imagem é obrigatória",
+        "orderRequired": "Ordem deve ser maior que 0",
+        "titleRequired": "Título é obrigatório",
+        "descriptionRequired": "Descrição é obrigatória"
+      },
+      "success": {
+        "title": "Sucesso!",
+        "description": "Módulo atualizado com sucesso"
+      },
+      "error": {
+        "title": "Erro",
+        "description": "Erro ao atualizar módulo"
+      },
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "saving": "Salvando..."
     },
     
   "lessons": {

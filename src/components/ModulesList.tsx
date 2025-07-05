@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import ModuleViewModal from './ModuleViewModal';
+import ModuleEditModal from './ModuleEditModal';
 
 interface Translation {
   locale: string;
@@ -28,6 +29,14 @@ interface Module {
   id: string;
   slug: string;
   imageUrl: string | null;
+  order: number;
+  translations: Translation[];
+}
+
+interface ModuleForEdit {
+  id: string;
+  slug: string;
+  imageUrl: string;
   order: number;
   translations: Translation[];
 }
@@ -60,6 +69,13 @@ export default function ModulesList() {
   const [selectedModuleId, setSelectedModuleId] = useState<
     string | null
   >(null);
+
+  // Estados para o modal de edição
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedModuleForEdit, setSelectedModuleForEdit] =
+    useState<ModuleForEdit | null>(null);
+  const [selectedCourseForEdit, setSelectedCourseForEdit] =
+    useState<string | null>(null);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -304,6 +320,55 @@ export default function ModulesList() {
       setViewModalOpen(true);
     },
     []
+  );
+
+  // Função para editar módulo
+  const handleEdit = useCallback(
+    async (
+      courseId: string,
+      moduleId: string
+    ): Promise<void> => {
+      try {
+        // Buscar detalhes completos do módulo
+        const response = await fetch(
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            'Erro ao buscar detalhes do módulo'
+          );
+        }
+
+        const moduleData: ModuleForEdit =
+          await response.json();
+        console.log(
+          'Dados do módulo para edição:',
+          moduleData
+        );
+
+        // Processar os dados para garantir que tenham o formato correto
+        const processedModule: ModuleForEdit = {
+          ...moduleData,
+          imageUrl: moduleData.imageUrl || '',
+        };
+
+        setSelectedModuleForEdit(processedModule);
+        setSelectedCourseForEdit(courseId);
+        setEditModalOpen(true);
+      } catch (error) {
+        console.error(
+          'Erro ao carregar módulo para edição:',
+          error
+        );
+        toast({
+          title: t('error.editLoadTitle'),
+          description: t('error.editLoadDescription'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast, t, apiUrl]
   );
 
   const toggleCourse = useCallback((courseId: string) => {
@@ -589,6 +654,12 @@ export default function ModulesList() {
                                   </button>
                                   <button
                                     type="button"
+                                    onClick={() =>
+                                      handleEdit(
+                                        course.id,
+                                        module.id
+                                      )
+                                    }
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                     title={t(
                                       'actions.edit'
@@ -655,6 +726,24 @@ export default function ModulesList() {
           setViewModalOpen(false);
           setSelectedCourseId(null);
           setSelectedModuleId(null);
+        }}
+      />
+
+      {/* Modal de Edição do Módulo */}
+      <ModuleEditModal
+        module={selectedModuleForEdit}
+        courseId={selectedCourseForEdit || ''}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedModuleForEdit(null);
+          setSelectedCourseForEdit(null);
+        }}
+        onSave={() => {
+          setEditModalOpen(false);
+          setSelectedModuleForEdit(null);
+          setSelectedCourseForEdit(null);
+          fetchData();
         }}
       />
     </div>

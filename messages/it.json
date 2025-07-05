@@ -698,6 +698,35 @@
     "deleteDescription": "Non è stato possibile eliminare il modulo."
   }
 },
+"moduleView": {
+  "title": "Dettagli del Modulo",
+  "close": "Chiudi",
+  "moduleNotFound": "Modulo non trovato",
+  "copySuccess": "Copiato!",
+  "copyDescription": "copiato negli appunti",
+  "copyError": "Errore nella copia",
+  "copyErrorDescription": "Impossibile copiare negli appunti",
+  "fields": {
+    "id": "ID",
+    "slug": "Slug",
+    "title": "Titolo",
+    "description": "Descrizione",
+    "imageUrl": "URL dell'Immagine",
+    "order": "Ordine",
+    "createdAt": "Data di Creazione",
+    "updatedAt": "Ultimo Aggiornamento"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento del modulo",
+    "fetchDescription": "Impossibile caricare i dettagli del modulo. Riprova."
+  }
+}, 
   "lessons": {
     "create": "Crea Lezione",
     "list": "Elenco Lezioni"

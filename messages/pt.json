@@ -618,7 +618,7 @@
       "slugGenerationDescription": "Digite o título em português primeiro"
     }
   },
-"modulesList": {
+  "modulesList": {
       "title": "Lista de Módulos",
       "searchPlaceholder": "Buscar módulos...",
       "modules": "módulos",
@@ -657,6 +657,36 @@
         "deleteDescription": "Não foi possível excluir o módulo."
       }
     },
+    "moduleView": {
+      "title": "Detalhes do Módulo",
+      "close": "Fechar",
+      "moduleNotFound": "Módulo não encontrado",
+      "copySuccess": "Copiado!",
+      "copyDescription": "copiado para a área de transferência",
+      "copyError": "Erro ao copiar",
+      "copyErrorDescription": "Não foi possível copiar para a área de transferência",
+      "fields": {
+        "id": "ID",
+        "slug": "Slug",
+        "title": "Título",
+        "description": "Descrição",
+        "imageUrl": "URL da Imagem",
+        "order": "Ordem",
+        "createdAt": "Data de Criação",
+        "updatedAt": "Última Atualização"
+      },
+      "translations": {
+        "title": "Traduções",
+        "portuguese": "Português",
+        "spanish": "Espanhol", 
+        "italian": "Italiano"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar módulo",
+        "fetchDescription": "Não foi possível carregar os detalhes do módulo. Tente novamente."
+      }
+    },
+    
   "lessons": {
     "create": "Criar Aula",
     "list": "Listar Aulas"

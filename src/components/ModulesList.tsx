@@ -16,6 +16,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import Image from 'next/image';
+import ModuleViewModal from './ModuleViewModal';
 
 interface Translation {
   locale: string;
@@ -52,6 +53,13 @@ export default function ModulesList() {
   const [expandedCourses, setExpandedCourses] = useState<
     Set<string>
   >(new Set());
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<
+    string | null
+  >(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<
+    string | null
+  >(null);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -286,6 +294,16 @@ export default function ModulesList() {
       locale,
       getTranslationByLocale,
     ]
+  );
+
+  // Função para abrir o modal de visualização
+  const handleView = useCallback(
+    (courseId: string, moduleId: string): void => {
+      setSelectedCourseId(courseId);
+      setSelectedModuleId(moduleId);
+      setViewModalOpen(true);
+    },
+    []
   );
 
   const toggleCourse = useCallback((courseId: string) => {
@@ -556,6 +574,12 @@ export default function ModulesList() {
                                 <div className="flex items-center gap-2">
                                   <button
                                     type="button"
+                                    onClick={() =>
+                                      handleView(
+                                        course.id,
+                                        module.id
+                                      )
+                                    }
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                     title={t(
                                       'actions.view'
@@ -621,6 +645,18 @@ export default function ModulesList() {
           </p>
         </div>
       )}
+
+      {/* Modal de Visualização do Módulo */}
+      <ModuleViewModal
+        courseId={selectedCourseId}
+        moduleId={selectedModuleId}
+        isOpen={viewModalOpen}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedCourseId(null);
+          setSelectedModuleId(null);
+        }}
+      />
     </div>
   );
 }

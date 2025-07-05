@@ -4,7 +4,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
   X,
@@ -30,6 +29,14 @@ interface Translation {
   locale: string;
   title: string;
   description: string;
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  order: number;
+  imageUrl?: string;
+  translations: Translation[];
 }
 
 interface ModuleEditData {
@@ -73,8 +80,6 @@ export default function ModuleEditModal({
   onSave,
 }: ModuleEditModalProps) {
   const t = useTranslations('Admin.moduleEdit');
-  const params = useParams();
-  const locale = params.locale as string;
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
@@ -148,9 +153,9 @@ export default function ModuleEditModal({
           );
         }
 
-        const modules = await response.json();
+        const modules: Module[] = await response.json();
         const orders = modules.map(
-          (module: any) => module.order
+          (module: Module) => module.order
         );
         setExistingOrders(orders);
 

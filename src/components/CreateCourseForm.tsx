@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { generateSlug, formatSlugInput } from '@/lib/slug';
@@ -53,6 +53,15 @@ interface ValidationResult {
   message?: string;
 }
 
+interface CreateCourseResponse {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  translations: Translation[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 type Locale = 'pt' | 'es' | 'it';
 type TranslationField = 'title' | 'description';
 
@@ -76,38 +85,6 @@ export default function CreateCourseForm() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof FormErrors, boolean>>
   >({});
-
-  // Função para gerar slug automaticamente
-  const handleGenerateSlug = useCallback(() => {
-    const ptTitle = formData.translations.pt.title.trim();
-
-    if (!ptTitle) {
-      toast({
-        title: t('error.slugGenerationTitle'),
-        description: t('error.slugGenerationDescription'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const generatedSlug = generateSlug(ptTitle);
-    setFormData(prev => ({ ...prev, slug: generatedSlug }));
-    setSlugGenerated(true);
-
-    // Marca o campo como touched e valida
-    setTouched(prev => ({ ...prev, slug: true }));
-
-    // Valida o slug gerado
-    const validation = validateSlug(generatedSlug);
-    if (validation.isValid) {
-      setErrors(prev => ({ ...prev, slug: undefined }));
-      toast({
-        title: t('success.slugGenerated'),
-        description: generatedSlug,
-        variant: 'success',
-      });
-    }
-  }, [formData.translations.pt.title, t, toast]);
 
   // Validação de URL
   const validateUrl = useCallback(
@@ -173,6 +150,43 @@ export default function CreateCourseForm() {
     },
     [t]
   );
+
+  // Função para gerar slug automaticamente
+  const handleGenerateSlug = useCallback(() => {
+    const ptTitle = formData.translations.pt.title.trim();
+
+    if (!ptTitle) {
+      toast({
+        title: t('error.slugGenerationTitle'),
+        description: t('error.slugGenerationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const generatedSlug = generateSlug(ptTitle);
+    setFormData(prev => ({ ...prev, slug: generatedSlug }));
+    setSlugGenerated(true);
+
+    // Marca o campo como touched e valida
+    setTouched(prev => ({ ...prev, slug: true }));
+
+    // Valida o slug gerado
+    const validation = validateSlug(generatedSlug);
+    if (validation.isValid) {
+      setErrors(prev => ({ ...prev, slug: undefined }));
+      toast({
+        title: t('success.slugGenerated'),
+        description: generatedSlug,
+        variant: 'success',
+      });
+    }
+  }, [
+    formData.translations.pt.title,
+    t,
+    toast,
+    validateSlug,
+  ]);
 
   // Validação de campos de texto
   const validateTextField = useCallback(
@@ -456,7 +470,7 @@ export default function CreateCourseForm() {
         title: string;
         description: string;
       }>;
-    }): Promise<any> => {
+    }): Promise<CreateCourseResponse | string> => {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
@@ -487,7 +501,9 @@ export default function CreateCourseForm() {
         }
 
         try {
-          return JSON.parse(responseText);
+          return JSON.parse(
+            responseText
+          ) as CreateCourseResponse;
         } catch {
           return responseText;
         }

@@ -57,6 +57,12 @@ interface DependenciesData {
   actionRequired: string;
 }
 
+// Type guard for fetch errors
+interface FetchError {
+  status: number;
+  data: unknown;
+}
+
 export default function CoursesList() {
   const t = useTranslations('Admin.coursesList');
   const { toast } = useToast();
@@ -116,7 +122,9 @@ export default function CoursesList() {
   ): boolean =>
     typeof data === 'object' &&
     data !== null &&
-    (data as any).error === 'COURSE_HAS_DEPENDENCIES';
+    'error' in data &&
+    (data as Record<string, unknown>).error ===
+      'COURSE_HAS_DEPENDENCIES';
 
   const getErrorMessage = (
     data: unknown
@@ -124,7 +132,7 @@ export default function CoursesList() {
     typeof data === 'object' &&
     data !== null &&
     'message' in data
-      ? ((data as any).message as string)
+      ? String((data as Record<string, unknown>).message)
       : undefined;
 
   const fetchCourses = useCallback(async () => {
@@ -189,11 +197,12 @@ export default function CoursesList() {
           variant: 'success',
         });
         fetchCourses();
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const fetchError = err as FetchError;
         if (
-          err.status === 400 &&
-          hasCourseDependenciesError(err.data) &&
-          isDependenciesResponse(err.data)
+          fetchError.status === 400 &&
+          hasCourseDependenciesError(fetchError.data) &&
+          isDependenciesResponse(fetchError.data)
         ) {
           const course = courses.find(
             c => c.id === deletingId
@@ -205,14 +214,14 @@ export default function CoursesList() {
               course?.slug ||
               ''
           );
-          setDependenciesData(err.data);
+          setDependenciesData(fetchError.data);
           setDependenciesModalOpen(true);
         } else {
           const msg =
-            err.data &&
-            typeof err.data === 'object' &&
-            'message' in err.data
-              ? getErrorMessage(err.data)
+            fetchError.data &&
+            typeof fetchError.data === 'object' &&
+            'message' in fetchError.data
+              ? getErrorMessage(fetchError.data)
               : err instanceof Error
               ? err.message
               : t('error.deleteDescription');

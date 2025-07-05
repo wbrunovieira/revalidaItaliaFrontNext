@@ -24,7 +24,6 @@ import {
   Globe,
   BookOpen,
   Hash,
-  AlertCircle,
   Check,
   X,
   Wand2,
@@ -40,6 +39,14 @@ interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  translations: Translation[];
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  order: number;
+  imageUrl?: string;
   translations: Translation[];
 }
 
@@ -116,38 +123,6 @@ export default function CreateModuleForm() {
     Partial<Record<keyof FormErrors, boolean>>
   >({});
 
-  // Função para gerar slug automaticamente
-  const handleGenerateSlug = useCallback(() => {
-    const ptTitle = formData.translations.pt.title.trim();
-
-    if (!ptTitle) {
-      toast({
-        title: t('error.slugGenerationTitle'),
-        description: t('error.slugGenerationDescription'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const generatedSlug = generateSlug(ptTitle);
-    setFormData(prev => ({ ...prev, slug: generatedSlug }));
-    setSlugGenerated(true);
-
-    // Marca o campo como touched e valida
-    setTouched(prev => ({ ...prev, slug: true }));
-
-    // Valida o slug gerado
-    const validation = validateSlug(generatedSlug);
-    if (validation.isValid) {
-      setErrors(prev => ({ ...prev, slug: undefined }));
-      toast({
-        title: t('success.slugGenerated'),
-        description: generatedSlug,
-        variant: 'success',
-      });
-    }
-  }, [formData.translations.pt.title, t, toast]);
-
   // Validação de URL
   const validateUrl = useCallback(
     (url: string): boolean => {
@@ -213,6 +188,43 @@ export default function CreateModuleForm() {
     },
     [t]
   );
+
+  // Função para gerar slug automaticamente
+  const handleGenerateSlug = useCallback(() => {
+    const ptTitle = formData.translations.pt.title.trim();
+
+    if (!ptTitle) {
+      toast({
+        title: t('error.slugGenerationTitle'),
+        description: t('error.slugGenerationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const generatedSlug = generateSlug(ptTitle);
+    setFormData(prev => ({ ...prev, slug: generatedSlug }));
+    setSlugGenerated(true);
+
+    // Marca o campo como touched e valida
+    setTouched(prev => ({ ...prev, slug: true }));
+
+    // Valida o slug gerado
+    const validation = validateSlug(generatedSlug);
+    if (validation.isValid) {
+      setErrors(prev => ({ ...prev, slug: undefined }));
+      toast({
+        title: t('success.slugGenerated'),
+        description: generatedSlug,
+        variant: 'success',
+      });
+    }
+  }, [
+    formData.translations.pt.title,
+    t,
+    toast,
+    validateSlug,
+  ]);
 
   // Validação de campos de texto
   const validateTextField = useCallback(
@@ -327,6 +339,7 @@ export default function CreateModuleForm() {
       validateSlug,
       validateUrl,
       validateTextField,
+      existingOrders,
     ]
   );
 
@@ -489,9 +502,9 @@ export default function CreateModuleForm() {
           );
         }
 
-        const modules = await response.json();
+        const modules: Module[] = await response.json();
         const orders = modules.map(
-          (module: any) => module.order
+          (module: Module) => module.order
         );
         setExistingOrders(orders);
 
@@ -626,6 +639,7 @@ export default function CreateModuleForm() {
     validateSlug,
     validateUrl,
     validateTextField,
+    existingOrders,
   ]);
 
   const createModule = useCallback(

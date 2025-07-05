@@ -80,10 +80,6 @@ export default function TracksList() {
   const [selectedTrackForEdit, setSelectedTrackForEdit] =
     useState<TrackForEdit | null>(null);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:3333';
-
   const getTranslationByLocale = useCallback(
     (
       translations: Translation[],
@@ -116,6 +112,10 @@ export default function TracksList() {
     setLoading(true);
 
     try {
+      // Move apiUrl inside the useCallback to avoid dependency warning
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:3333';
       const tracksResponse = await fetch(
         `${apiUrl}/tracks`
       );
@@ -274,7 +274,14 @@ export default function TracksList() {
         ),
       });
     },
-    [toast, deleteTrack, tracks, t, locale]
+    [
+      toast,
+      deleteTrack,
+      tracks,
+      t,
+      locale,
+      getTranslationByLocale,
+    ] // Added getTranslationByLocale
   );
 
   const handleView = useCallback(

@@ -89,26 +89,6 @@ export default function TrackViewModal({
         const trackData: TrackViewData =
           await trackResponse.json();
 
-        // Processar os cursos da trilha
-        let courses: Course[] = [];
-
-        if (
-          trackData.courses &&
-          Array.isArray(trackData.courses)
-        ) {
-          courses = trackData.courses;
-        } else if (
-          trackData.trackCourses &&
-          Array.isArray(trackData.trackCourses)
-        ) {
-          // Se os cursos vierem aninhados em trackCourses
-          courses = trackData.trackCourses
-            .map(tc => tc.course)
-            .filter(
-              (course): course is Course => course != null
-            );
-        }
-
         async function fetchCoursesByIds(
           ids: string[]
         ): Promise<Course[]> {

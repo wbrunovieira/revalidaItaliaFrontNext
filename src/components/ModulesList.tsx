@@ -224,17 +224,17 @@ export default function ModulesList() {
       );
       if (!course) return;
 
-      const module = course.modules?.find(
+      const moduleItem = course.modules?.find(
         m => m.id === moduleId
       );
-      if (!module) return;
+      if (!moduleItem) return;
 
       const courseTranslation = getTranslationByLocale(
         course.translations,
         locale
       );
       const moduleTranslation = getTranslationByLocale(
-        module.translations,
+        moduleItem.translations,
         locale
       );
 
@@ -254,7 +254,7 @@ export default function ModulesList() {
                 <div className="flex items-center gap-2">
                   <Package size={14} />
                   {t('deleteConfirmation.module')}:{' '}
-                  {module.slug}
+                  {moduleItem.slug}
                 </div>
                 <div className="flex items-center gap-2">
                   <BookOpen size={14} />
@@ -264,11 +264,11 @@ export default function ModulesList() {
                 <div className="flex items-center gap-2">
                   <Play size={14} />
                   {t('deleteConfirmation.order')}:{' '}
-                  {module.order}
+                  {moduleItem.order}
                 </div>
                 {moduleTranslation?.description && (
                   <div className="mt-2 p-2 bg-gray-600/30 rounded text-xs">
-                    "
+                    &ldquo;
                     {moduleTranslation.description.substring(
                       0,
                       100
@@ -277,7 +277,7 @@ export default function ModulesList() {
                     100
                       ? '...'
                       : ''}
-                    "
+                    &rdquo;
                   </div>
                 )}
               </div>
@@ -401,13 +401,13 @@ export default function ModulesList() {
       if (courseMatches) return true;
 
       // Verificar se algum módulo corresponde
-      return course.modules?.some(module => {
+      return course.modules?.some(moduleItem => {
         const moduleTranslation = getTranslationByLocale(
-          module.translations,
+          moduleItem.translations,
           locale
         );
         return (
-          module.slug
+          moduleItem.slug
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
           moduleTranslation?.title
@@ -573,28 +573,30 @@ export default function ModulesList() {
                           ?.sort(
                             (a, b) => a.order - b.order
                           )
-                          .map(module => {
+                          .map(moduleItem => {
                             const moduleTranslation =
                               getTranslationByLocale(
-                                module.translations,
+                                moduleItem.translations,
                                 locale
                               );
 
                             return (
                               <div
-                                key={module.id}
+                                key={moduleItem.id}
                                 className="flex items-center gap-4 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
                               >
                                 {/* Ordem do módulo */}
                                 <div className="flex items-center justify-center w-10 h-10 bg-secondary/20 text-secondary rounded-full font-bold">
-                                  {module.order}
+                                  {moduleItem.order}
                                 </div>
 
                                 {/* Imagem do módulo */}
-                                {module.imageUrl ? (
+                                {moduleItem.imageUrl ? (
                                   <div className="relative w-12 h-8 rounded overflow-hidden flex-shrink-0">
                                     <Image
-                                      src={module.imageUrl}
+                                      src={
+                                        moduleItem.imageUrl
+                                      }
                                       alt={
                                         moduleTranslation?.title ||
                                         ''
@@ -624,7 +626,8 @@ export default function ModulesList() {
                                   </p>
                                   <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
                                     <span>
-                                      Slug: {module.slug}
+                                      Slug:{' '}
+                                      {moduleItem.slug}
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <Play size={10} />
@@ -642,7 +645,7 @@ export default function ModulesList() {
                                     onClick={() =>
                                       handleView(
                                         course.id,
-                                        module.id
+                                        moduleItem.id
                                       )
                                     }
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
@@ -657,7 +660,7 @@ export default function ModulesList() {
                                     onClick={() =>
                                       handleEdit(
                                         course.id,
-                                        module.id
+                                        moduleItem.id
                                       )
                                     }
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
@@ -673,7 +676,7 @@ export default function ModulesList() {
                                       e.stopPropagation();
                                       handleDelete(
                                         course.id,
-                                        module.id
+                                        moduleItem.id
                                       );
                                     }}
                                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-all"

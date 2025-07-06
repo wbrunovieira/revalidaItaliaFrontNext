@@ -82,7 +82,7 @@ interface ValidationResult {
 
 interface CreateModulePayload {
   slug: string;
-  imageUrl: string | null;
+  imageUrl: string;
   order: number;
   translations: Translation[];
 }
@@ -126,7 +126,7 @@ export default function CreateModuleForm() {
   // Validação de URL
   const validateUrl = useCallback(
     (url: string): boolean => {
-      if (!url.trim()) return true; // URL é opcional
+      if (!url || !url.trim()) return false; // URL é obrigatória
       try {
         // Aceita URLs relativas (começando com /)
         if (url.startsWith('/')) {
@@ -280,7 +280,13 @@ export default function CreateModuleForm() {
 
       if (field === 'imageUrl') {
         const url = value as string;
-        if (url && !validateUrl(url)) {
+        if (!url || !url.trim()) {
+          return {
+            isValid: false,
+            message: t('errors.imageRequired'),
+          };
+        }
+        if (!validateUrl(url)) {
           return {
             isValid: false,
             message: t('errors.imageInvalid'),
@@ -585,11 +591,11 @@ export default function CreateModuleForm() {
       isValid = false;
     }
 
-    // Validar imageUrl (opcional)
-    if (
-      formData.imageUrl &&
-      !validateUrl(formData.imageUrl)
-    ) {
+    // Validar imageUrl (obrigatório)
+    if (!formData.imageUrl || !formData.imageUrl.trim()) {
+      newErrors.imageUrl = t('errors.imageRequired');
+      isValid = false;
+    } else if (!validateUrl(formData.imageUrl)) {
       newErrors.imageUrl = t('errors.imageInvalid');
       isValid = false;
     }
@@ -792,7 +798,7 @@ export default function CreateModuleForm() {
 
       const payload: CreateModulePayload = {
         slug: formData.slug.trim(),
-        imageUrl: formData.imageUrl.trim() || null,
+        imageUrl: formData.imageUrl.trim(),
         order: formData.order,
         translations: translations,
       };
@@ -1040,6 +1046,7 @@ export default function CreateModuleForm() {
             >
               <ImageIcon size={16} />
               {t('fields.imageUrl')}
+              <span className="text-red-400">*</span>
             </Label>
             <TextField
               id="imageUrl"
@@ -1057,7 +1064,13 @@ export default function CreateModuleForm() {
             <p className="text-xs text-gray-500">
               {t('hints.imageUrl')}
             </p>
+            {errors.imageUrl && touched.imageUrl && (
+              <p className="text-xs text-red-500">
+                {errors.imageUrl}
+              </p>
+            )}
             {formData.imageUrl &&
+              formData.imageUrl.trim() &&
               !errors.imageUrl &&
               touched.imageUrl && (
                 <div className="flex items-center gap-1 text-green-400 text-sm">

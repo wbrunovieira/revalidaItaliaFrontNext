@@ -558,104 +558,105 @@
     "create": "Crea Modulo",
     "list": "Elenco Moduli"
   },
-  "createModule": {
-    "title": "Nuovo Modulo",
-    "create": "Crea Modulo",
-    "creating": "Creazione...",
-    "generateSlug": "Genera automaticamente",
-    "info": {
-      "lessonsNote": "Le lezioni (video) dovranno essere aggiunte successivamente attraverso la modifica del modulo."
-    },
-    "selectedCourse": "Corso selezionato",
-    "fields": {
-      "course": "Corso",
-      "slug": "Slug (URL)",
-      "imageUrl": "URL dell'Immagine",
-      "order": "Ordine",
-      "title": "Titolo",
-      "description": "Descrizione"
-    },
-    "placeholders": {
-      "course": "Seleziona un corso",
-      "slug": "introduzione-matematica",
-      "imageUrl": "/images/modulo-esempio.jpg",
-      "order": "1",
-      "title": "Inserisci il titolo del modulo",
-      "description": "Inserisci la descrizione del modulo"
-    },
-    "hints": {
-      "slug": "Usa solo lettere minuscole, numeri e trattini",
-      "imageUrl": "Opzionale - lascia vuoto per usare l'immagine predefinita",
-      "order": "Ordine di visualizzazione del modulo nel corso"
-    },
-    "translations": {
-      "title": "Traduzioni",
-      "portuguese": "Portoghese",
-      "spanish": "Spagnolo",
-      "italian": "Italiano"
-    },
-    "validation": {
-      "courseValid": "Corso selezionato",
-      "slugValid": "Slug valido",
-      "slugGenerated": "Slug generato automaticamente",
-      "imageValid": "URL valido",
-      "orderValid": "Ordine valido",
-      "loadingOrders": "Caricamento ordini esistenti...",
-      "selectCourseFirst": "Seleziona prima un corso",
-      "usedOrders": "Ordini già utilizzati",
-      "noAvailableOrders": "Tutti gli ordini sono in uso"
-    },
-    "errors": {
-      "courseRequired": "Corso è obbligatorio",
-      "slugRequired": "Slug è obbligatorio",
-      "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini",
-      "slugMin": "Slug deve avere almeno 3 caratteri",
-      "slugMax": "Slug non può avere più di 50 caratteri",
-      "slugFormat": "Slug non può iniziare o finire con trattino",
-      "slugDoubleHyphen": "Slug non può contenere trattini doppi",
-      "imageInvalid": "URL dell'immagine non valido",
-      "orderRequired": "Ordine è obbligatorio",
-      "orderMax": "Ordine non può essere maggiore di 999",
-      "orderExists": "Questo ordine è già utilizzato da un altro modulo",
-      "titleRequired": "Titolo è obbligatorio",
-      "titleMin": "Titolo deve avere almeno 3 caratteri",
-      "titleMax": "Titolo non può avere più di 100 caratteri",
-      "descriptionRequired": "Descrizione è obbligatoria",
-      "descriptionMin": "Descrizione deve avere almeno 3 caratteri",
-      "descriptionMax": "Descrizione non può avere più di 500 caratteri",
-      "fetchCoursesTitle": "Errore nel caricamento dei corsi",
-      "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili",
-      "validationTitle": "Errore di validazione",
-      "validationDescription": "Si prega di correggere gli errori nel modulo",
-      "serverTitle": "Errore del server",
-      "serverDescription": "Si è verificato un errore interno del server. Riprova più tardi",
-      "conflictTitle": "Il modulo esiste già",
-      "conflictDescription": "Esiste già un modulo con questo titolo o slug in questo corso",
-      "authTitle": "Non autorizzato",
-      "authDescription": "Non hai il permesso di eseguire questa azione",
-      "permissionTitle": "Senza permesso",
-      "permissionDescription": "Non hai i permessi necessari"
-    },
-    "success": {
-      "title": "Modulo creato!",
-      "description": "Il modulo è stato creato con successo.",
-      "slugGenerated": "Slug generato automaticamente"
-    },
-    "error": {
-      "title": "Errore nella creazione del modulo",
-      "description": "Si è verificato un errore durante la creazione del modulo. Riprova.",
-      "serverTitle": "Errore del server",
-      "serverDescription": "Si è verificato un errore interno del server. Riprova più tardi",
-      "conflictTitle": "Il modulo esiste già",
-      "conflictDescription": "Esiste già un modulo con questo titolo o slug in questo corso",
-      "authTitle": "Non autorizzato",
-      "authDescription": "Non hai il permesso di eseguire questa azione",
-      "permissionTitle": "Senza permesso",
-      "permissionDescription": "Non hai i permessi necessari",
-      "slugGenerationTitle": "Errore nella generazione dello slug",
-      "slugGenerationDescription": "Digita prima il titolo in portoghese"
-    }
+"createModule": {
+  "title": "Nuovo Modulo",
+  "create": "Crea Modulo",
+  "creating": "Creazione...",
+  "generateSlug": "Genera automaticamente",
+  "info": {
+    "lessonsNote": "Le lezioni (video) dovranno essere aggiunte successivamente attraverso la modifica del modulo."
+  },
+  "selectedCourse": "Corso selezionato",
+  "fields": {
+    "course": "Corso",
+    "slug": "Slug (URL)",
+    "imageUrl": "URL dell'Immagine",
+    "order": "Ordine",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "placeholders": {
+    "course": "Seleziona un corso",
+    "slug": "introduzione-matematica",
+    "imageUrl": "/images/modulo-esempio.jpg",
+    "order": "1",
+    "title": "Inserisci il titolo del modulo",
+    "description": "Inserisci la descrizione del modulo"
+  },
+  "hints": {
+    "slug": "Usa solo lettere minuscole, numeri e trattini",
+    "imageUrl": "URL dell'immagine di copertina del modulo",
+    "order": "Ordine di visualizzazione del modulo nel corso"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "validation": {
+    "courseValid": "Corso selezionato",
+    "slugValid": "Slug valido",
+    "slugGenerated": "Slug generato automaticamente",
+    "imageValid": "URL valido",
+    "orderValid": "Ordine valido",
+    "loadingOrders": "Caricamento ordini esistenti...",
+    "selectCourseFirst": "Seleziona prima un corso",
+    "usedOrders": "Ordini già utilizzati",
+    "noAvailableOrders": "Tutti gli ordini sono in uso"
+  },
+  "errors": {
+    "courseRequired": "Corso è obbligatorio",
+    "slugRequired": "Slug è obbligatorio",
+    "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini",
+    "slugMin": "Slug deve avere almeno 3 caratteri",
+    "slugMax": "Slug non può avere più di 50 caratteri",
+    "slugFormat": "Slug non può iniziare o finire con trattino",
+    "slugDoubleHyphen": "Slug non può contenere trattini doppi",
+    "imageRequired": "L'URL dell'immagine è obbligatorio",
+    "imageInvalid": "URL dell'immagine non valido",
+    "orderRequired": "Ordine è obbligatorio",
+    "orderMax": "Ordine non può essere maggiore di 999",
+    "orderExists": "Questo ordine è già utilizzato da un altro modulo",
+    "titleRequired": "Titolo è obbligatorio",
+    "titleMin": "Titolo deve avere almeno 3 caratteri",
+    "titleMax": "Titolo non può avere più di 100 caratteri",
+    "descriptionRequired": "Descrizione è obbligatoria",
+    "descriptionMin": "Descrizione deve avere almeno 3 caratteri",
+    "descriptionMax": "Descrizione non può avere più di 500 caratteri",
+    "fetchCoursesTitle": "Errore nel caricamento dei corsi",
+    "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Si prega di correggere gli errori nel modulo",
+    "serverTitle": "Errore del server",
+    "serverDescription": "Si è verificato un errore interno del server. Riprova più tardi",
+    "conflictTitle": "Il modulo esiste già",
+    "conflictDescription": "Esiste già un modulo con questo titolo o slug in questo corso",
+    "authTitle": "Non autorizzato",
+    "authDescription": "Non hai il permesso di eseguire questa azione",
+    "permissionTitle": "Senza permesso",
+    "permissionDescription": "Non hai i permessi necessari"
+  },
+  "success": {
+    "title": "Modulo creato!",
+    "description": "Il modulo è stato creato con successo.",
+    "slugGenerated": "Slug generato automaticamente"
+  },
+  "error": {
+    "title": "Errore nella creazione del modulo",
+    "description": "Si è verificato un errore durante la creazione del modulo. Riprova.",
+    "serverTitle": "Errore del server",
+    "serverDescription": "Si è verificato un errore interno del server. Riprova più tardi",
+    "conflictTitle": "Il modulo esiste già",
+    "conflictDescription": "Esiste già un modulo con questo titolo o slug in questo corso",
+    "authTitle": "Non autorizzato",
+    "authDescription": "Non hai il permesso di eseguire questa azione",
+    "permissionTitle": "Senza permesso",
+    "permissionDescription": "Non hai i permessi necessari",
+    "slugGenerationTitle": "Errore nella generazione dello slug",
+    "slugGenerationDescription": "Digita prima il titolo in portoghese"
   }
+}
 
 
 ,

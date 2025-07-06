@@ -620,7 +620,7 @@
     "slugGenerationDescription": "Digite o título em português primeiro"
   }
 },
-  "modulesList": {
+"modulesList": {
       "title": "Lista de Módulos",
       "searchPlaceholder": "Buscar módulos...",
       "modules": "módulos",
@@ -659,7 +659,7 @@
         "deleteDescription": "Não foi possível excluir o módulo."
       }
     },
-  "moduleView": {
+"moduleView": {
       "title": "Detalhes do Módulo",
       "close": "Fechar",
       "moduleNotFound": "Módulo não encontrado",
@@ -688,7 +688,7 @@
         "fetchDescription": "Não foi possível carregar os detalhes do módulo. Tente novamente."
       }
     },
-  "moduleEdit": {
+"moduleEdit": {
       "title": "Editar Módulo",
       "fields": {
         "slug": "URL do Módulo",
@@ -735,7 +735,7 @@
       "saving": "Salvando..."
     },
     
-  "lessons": {
+"lessons": {
     "create": "Criar Aula",
     "list": "Listar Aulas"
   }, 
@@ -816,7 +816,7 @@
     "description": "A aula foi criada com sucesso."
   }
 },
-  "lessonsList": {
+"lessonsList": {
     "title": "Lista de Aulas",
     "searchPlaceholder": "Buscar aulas...",
     "modules": "módulos",

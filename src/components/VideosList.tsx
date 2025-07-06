@@ -149,7 +149,10 @@ export default function VideosList() {
           })
         );
 
-        return lessonsWithVideos;
+        // Garantir que as aulas estejam ordenadas por order
+        return lessonsWithVideos.sort(
+          (a: Lesson, b: Lesson) => a.order - b.order
+        );
       } catch (error) {
         handleApiError(
           error,
@@ -186,7 +189,10 @@ export default function VideosList() {
           })
         );
 
-        return modulesWithData;
+        // Garantir que os módulos estejam ordenados
+        return modulesWithData.sort(
+          (a, b) => a.order - b.order
+        );
       } catch (error) {
         handleApiError(
           error,
@@ -589,363 +595,350 @@ export default function VideosList() {
                   <div className="bg-gray-800/50 p-4">
                     {moduleCount > 0 ? (
                       <div className="space-y-3">
-                        {course.modules
-                          ?.sort(
-                            (a, b) => a.order - b.order
-                          )
-                          .map(module => {
-                            const moduleTranslation =
-                              getTranslationByLocale(
-                                module.translations,
-                                locale
-                              );
-                            const isModuleExpanded =
-                              expandedModules.has(
-                                module.id
-                              );
-                            const lessonCount =
-                              module.lessons?.length || 0;
+                        {course.modules?.map(module => {
+                          const moduleTranslation =
+                            getTranslationByLocale(
+                              module.translations,
+                              locale
+                            );
+                          const isModuleExpanded =
+                            expandedModules.has(module.id);
+                          const lessonCount =
+                            module.lessons?.length || 0;
 
-                            return (
+                          return (
+                            <div
+                              key={module.id}
+                              className="border border-gray-600 rounded-lg overflow-hidden"
+                            >
+                              {/* Cabeçalho do módulo */}
                               <div
-                                key={module.id}
-                                className="border border-gray-600 rounded-lg overflow-hidden"
+                                onClick={() =>
+                                  toggleModule(module.id)
+                                }
+                                className="flex items-center gap-4 p-3 bg-gray-700/30 hover:bg-gray-700/50 transition-colors cursor-pointer"
                               >
-                                {/* Cabeçalho do módulo */}
-                                <div
-                                  onClick={() =>
-                                    toggleModule(module.id)
-                                  }
-                                  className="flex items-center gap-4 p-3 bg-gray-700/30 hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                <button
+                                  type="button"
+                                  className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                  <button
-                                    type="button"
-                                    className="text-gray-400 hover:text-white transition-colors"
-                                  >
-                                    {isModuleExpanded ? (
-                                      <ChevronDown
-                                        size={16}
-                                      />
-                                    ) : (
-                                      <ChevronRight
-                                        size={16}
-                                      />
-                                    )}
-                                  </button>
-
-                                  <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
-                                    {module.order}
-                                  </div>
-
-                                  {module.imageUrl ? (
-                                    <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
-                                      <Image
-                                        src={
-                                          module.imageUrl
-                                        }
-                                        alt={
-                                          moduleTranslation?.title ||
-                                          ''
-                                        }
-                                        fill
-                                        className="object-cover"
-                                      />
-                                    </div>
+                                  {isModuleExpanded ? (
+                                    <ChevronDown
+                                      size={16}
+                                    />
                                   ) : (
-                                    <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
-                                      <Package
-                                        size={12}
-                                        className="text-gray-400"
-                                      />
-                                    </div>
+                                    <ChevronRight
+                                      size={16}
+                                    />
                                   )}
+                                </button>
 
-                                  <div className="flex-1">
-                                    <h5 className="text-white font-medium">
-                                      {moduleTranslation?.title ||
-                                        'Sem título'}
-                                    </h5>
-                                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                                      <span>
-                                        Slug: {module.slug}
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        <Play size={10} />
-                                        {lessonCount}{' '}
-                                        {t('lessons')}
-                                      </span>
-                                    </div>
-                                  </div>
+                                <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
+                                  {module.order}
                                 </div>
 
-                                {/* Aulas do módulo */}
-                                {isModuleExpanded && (
-                                  <div className="bg-gray-800/30 p-3">
-                                    {lessonCount > 0 ? (
-                                      <div className="space-y-2">
-                                        {module.lessons
-                                          ?.sort(
-                                            (a, b) =>
-                                              a.order -
-                                              b.order
-                                          )
-                                          .map(lesson => {
-                                            const lessonTranslation =
-                                              getTranslationByLocale(
-                                                lesson.translations,
-                                                locale
-                                              );
-                                            const isLessonExpanded =
-                                              expandedLessons.has(
-                                                lesson.id
-                                              );
-                                            const videoCount =
-                                              lesson.videos
-                                                ?.length ||
-                                              0;
-
-                                            return (
-                                              <div
-                                                key={
-                                                  lesson.id
-                                                }
-                                                className="border border-gray-600 rounded-lg overflow-hidden"
-                                              >
-                                                {/* Cabeçalho da aula */}
-                                                <div
-                                                  onClick={() =>
-                                                    toggleLesson(
-                                                      lesson.id
-                                                    )
-                                                  }
-                                                  className="flex items-center gap-3 p-2 bg-gray-700/20 hover:bg-gray-700/40 transition-colors cursor-pointer"
-                                                >
-                                                  <button
-                                                    type="button"
-                                                    className="text-gray-400 hover:text-white transition-colors"
-                                                  >
-                                                    {isLessonExpanded ? (
-                                                      <ChevronDown
-                                                        size={
-                                                          14
-                                                        }
-                                                      />
-                                                    ) : (
-                                                      <ChevronRight
-                                                        size={
-                                                          14
-                                                        }
-                                                      />
-                                                    )}
-                                                  </button>
-
-                                                  <div className="flex items-center justify-center w-6 h-6 bg-primary/20 text-primary rounded-full font-bold text-xs">
-                                                    {
-                                                      lesson.order
-                                                    }
-                                                  </div>
-
-                                                  {lesson.imageUrl ? (
-                                                    <div className="relative w-8 h-5 rounded overflow-hidden flex-shrink-0">
-                                                      <Image
-                                                        src={
-                                                          lesson.imageUrl
-                                                        }
-                                                        alt={
-                                                          lessonTranslation?.title ||
-                                                          ''
-                                                        }
-                                                        fill
-                                                        className="object-cover"
-                                                      />
-                                                    </div>
-                                                  ) : (
-                                                    <div className="w-8 h-5 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
-                                                      <Play
-                                                        size={
-                                                          10
-                                                        }
-                                                        className="text-gray-400"
-                                                      />
-                                                    </div>
-                                                  )}
-
-                                                  <div className="flex-1">
-                                                    <h6 className="text-white text-sm font-medium">
-                                                      {lessonTranslation?.title ||
-                                                        'Sem título'}
-                                                    </h6>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                      <span className="flex items-center gap-1">
-                                                        <Video
-                                                          size={
-                                                            10
-                                                          }
-                                                        />
-                                                        {
-                                                          videoCount
-                                                        }{' '}
-                                                        {t(
-                                                          'videos'
-                                                        )}
-                                                      </span>
-                                                    </div>
-                                                  </div>
-                                                </div>
-
-                                                {/* Vídeos da aula */}
-                                                {isLessonExpanded && (
-                                                  <div className="bg-gray-800/20 p-2">
-                                                    {videoCount >
-                                                    0 ? (
-                                                      <div className="space-y-1">
-                                                        {lesson.videos?.map(
-                                                          video => {
-                                                            const videoTranslation =
-                                                              getTranslationByLocale(
-                                                                video.translations,
-                                                                locale
-                                                              );
-
-                                                            return (
-                                                              <div
-                                                                key={
-                                                                  video.id
-                                                                }
-                                                                className="flex items-center gap-2 p-2 bg-gray-700/10 rounded hover:bg-gray-700/30 transition-colors"
-                                                              >
-                                                                <div className="w-6 h-4 bg-red-600 rounded flex items-center justify-center flex-shrink-0">
-                                                                  <Play
-                                                                    size={
-                                                                      8
-                                                                    }
-                                                                    className="text-white"
-                                                                  />
-                                                                </div>
-
-                                                                <div className="flex-1 min-w-0">
-                                                                  <p className="text-white text-xs font-medium truncate">
-                                                                    {videoTranslation?.title ||
-                                                                      'Sem título'}
-                                                                  </p>
-                                                                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                                    <span>
-                                                                      Slug:{' '}
-                                                                      {
-                                                                        video.slug
-                                                                      }
-                                                                    </span>
-                                                                    <span className="flex items-center gap-1">
-                                                                      <Clock
-                                                                        size={
-                                                                          8
-                                                                        }
-                                                                      />
-                                                                      {formatDuration(
-                                                                        video.durationInSeconds
-                                                                      )}
-                                                                    </span>
-                                                                    <span>
-                                                                      ID:{' '}
-                                                                      {
-                                                                        video.providerVideoId
-                                                                      }
-                                                                    </span>
-                                                                  </div>
-                                                                </div>
-
-                                                                {/* Ações */}
-                                                                <div className="flex items-center gap-1">
-                                                                  <button
-                                                                    type="button"
-                                                                    className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
-                                                                    title={t(
-                                                                      'actions.view'
-                                                                    )}
-                                                                  >
-                                                                    <Eye
-                                                                      size={
-                                                                        12
-                                                                      }
-                                                                    />
-                                                                  </button>
-                                                                  <button
-                                                                    type="button"
-                                                                    className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
-                                                                    title={t(
-                                                                      'actions.edit'
-                                                                    )}
-                                                                  >
-                                                                    <Edit
-                                                                      size={
-                                                                        12
-                                                                      }
-                                                                    />
-                                                                  </button>
-                                                                  <button
-                                                                    type="button"
-                                                                    onClick={e => {
-                                                                      e.stopPropagation();
-                                                                      handleDelete(
-                                                                        course.id,
-                                                                        lesson.id,
-                                                                        video.id
-                                                                      );
-                                                                    }}
-                                                                    className="p-1 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-all"
-                                                                    title={t(
-                                                                      'actions.delete'
-                                                                    )}
-                                                                  >
-                                                                    <Trash2
-                                                                      size={
-                                                                        12
-                                                                      }
-                                                                    />
-                                                                  </button>
-                                                                </div>
-                                                              </div>
-                                                            );
-                                                          }
-                                                        )}
-                                                      </div>
-                                                    ) : (
-                                                      <div className="text-center py-2">
-                                                        <Video
-                                                          size={
-                                                            24
-                                                          }
-                                                          className="text-gray-500 mx-auto mb-1"
-                                                        />
-                                                        <p className="text-gray-400 text-xs">
-                                                          {t(
-                                                            'noVideos'
-                                                          )}
-                                                        </p>
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            );
-                                          })}
-                                      </div>
-                                    ) : (
-                                      <div className="text-center py-4">
-                                        <Play
-                                          size={32}
-                                          className="text-gray-500 mx-auto mb-2"
-                                        />
-                                        <p className="text-gray-400 text-sm">
-                                          {t('noLessons')}
-                                        </p>
-                                      </div>
-                                    )}
+                                {module.imageUrl ? (
+                                  <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
+                                    <Image
+                                      src={module.imageUrl}
+                                      alt={
+                                        moduleTranslation?.title ||
+                                        ''
+                                      }
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                    <Package
+                                      size={12}
+                                      className="text-gray-400"
+                                    />
                                   </div>
                                 )}
+
+                                <div className="flex-1">
+                                  <h5 className="text-white font-medium">
+                                    {moduleTranslation?.title ||
+                                      'Sem título'}
+                                  </h5>
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span>
+                                      Slug: {module.slug}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Play size={10} />
+                                      {lessonCount}{' '}
+                                      {t('lessons')}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            );
-                          })}
+
+                              {/* Aulas do módulo */}
+                              {isModuleExpanded && (
+                                <div className="bg-gray-800/30 p-4">
+                                  {lessonCount > 0 ? (
+                                    <div className="space-y-3 pl-2">
+                                      {module.lessons?.map(
+                                        lesson => {
+                                          const lessonTranslation =
+                                            getTranslationByLocale(
+                                              lesson.translations,
+                                              locale
+                                            );
+                                          const isLessonExpanded =
+                                            expandedLessons.has(
+                                              lesson.id
+                                            );
+                                          const videoCount =
+                                            lesson.videos
+                                              ?.length || 0;
+
+                                          return (
+                                            <div
+                                              key={
+                                                lesson.id
+                                              }
+                                              className="border border-gray-600 rounded-lg overflow-hidden"
+                                            >
+                                              {/* Cabeçalho da aula */}
+                                              <div
+                                                onClick={() =>
+                                                  toggleLesson(
+                                                    lesson.id
+                                                  )
+                                                }
+                                                className="flex items-center gap-4 p-3 bg-gray-700/30 border border-gray-700/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                              >
+                                                <button
+                                                  type="button"
+                                                  className="text-gray-400 hover:text-white transition-colors"
+                                                >
+                                                  {isLessonExpanded ? (
+                                                    <ChevronDown
+                                                      size={
+                                                        16
+                                                      }
+                                                    />
+                                                  ) : (
+                                                    <ChevronRight
+                                                      size={
+                                                        16
+                                                      }
+                                                    />
+                                                  )}
+                                                </button>
+
+                                                <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
+                                                  {
+                                                    lesson.order
+                                                  }
+                                                </div>
+
+                                                {lesson.imageUrl ? (
+                                                  <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
+                                                    <Image
+                                                      src={
+                                                        lesson.imageUrl
+                                                      }
+                                                      alt={
+                                                        lessonTranslation?.title ||
+                                                        ''
+                                                      }
+                                                      fill
+                                                      className="object-cover"
+                                                    />
+                                                  </div>
+                                                ) : (
+                                                  <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                                    <Play
+                                                      size={
+                                                        14
+                                                      }
+                                                      className="text-gray-400"
+                                                    />
+                                                  </div>
+                                                )}
+
+                                                <div className="flex-1">
+                                                  <h6 className="text-white text-base font-medium">
+                                                    {lessonTranslation?.title ||
+                                                      'Sem título'}
+                                                  </h6>
+                                                  <div className="flex items-center gap-3 text-sm text-gray-500">
+                                                    <span className="flex items-center gap-1.5">
+                                                      <Video
+                                                        size={
+                                                          12
+                                                        }
+                                                      />
+                                                      {
+                                                        videoCount
+                                                      }{' '}
+                                                      {t(
+                                                        'videos'
+                                                      )}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              {/* Vídeos da aula */}
+                                              {isLessonExpanded && (
+                                                <div className="bg-gray-800/20 p-3">
+                                                  {videoCount >
+                                                  0 ? (
+                                                    <div className="space-y-2 pl-2">
+                                                      {lesson.videos?.map(
+                                                        video => {
+                                                          const videoTranslation =
+                                                            getTranslationByLocale(
+                                                              video.translations,
+                                                              locale
+                                                            );
+
+                                                          return (
+                                                            <div
+                                                              key={
+                                                                video.id
+                                                              }
+                                                              className="flex items-center gap-3 p-2 bg-gray-700/20 rounded hover:bg-gray-700/40 transition-colors"
+                                                            >
+                                                              <div className="w-8 h-6 bg-red-600 rounded flex items-center justify-center flex-shrink-0">
+                                                                <Play
+                                                                  size={
+                                                                    12
+                                                                  }
+                                                                  className="text-white"
+                                                                />
+                                                              </div>
+
+                                                              <div className="flex-1 min-w-0">
+                                                                <p className="text-white text-sm font-medium truncate">
+                                                                  {videoTranslation?.title ||
+                                                                    'Sem título'}
+                                                                </p>
+                                                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                                  <span>
+                                                                    Slug:{' '}
+                                                                    {
+                                                                      video.slug
+                                                                    }
+                                                                  </span>
+                                                                  <span className="flex items-center gap-1">
+                                                                    <Clock
+                                                                      size={
+                                                                        10
+                                                                      }
+                                                                    />
+                                                                    {formatDuration(
+                                                                      video.durationInSeconds
+                                                                    )}
+                                                                  </span>
+                                                                  <span>
+                                                                    ID:{' '}
+                                                                    {
+                                                                      video.providerVideoId
+                                                                    }
+                                                                  </span>
+                                                                </div>
+                                                              </div>
+
+                                                              {/* Ações */}
+                                                              <div className="flex items-center gap-2">
+                                                                <button
+                                                                  type="button"
+                                                                  className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                                                                  title={t(
+                                                                    'actions.view'
+                                                                  )}
+                                                                >
+                                                                  <Eye
+                                                                    size={
+                                                                      16
+                                                                    }
+                                                                  />
+                                                                </button>
+                                                                <button
+                                                                  type="button"
+                                                                  className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                                                                  title={t(
+                                                                    'actions.edit'
+                                                                  )}
+                                                                >
+                                                                  <Edit
+                                                                    size={
+                                                                      16
+                                                                    }
+                                                                  />
+                                                                </button>
+                                                                <button
+                                                                  type="button"
+                                                                  onClick={e => {
+                                                                    e.stopPropagation();
+                                                                    handleDelete(
+                                                                      course.id,
+                                                                      lesson.id,
+                                                                      video.id
+                                                                    );
+                                                                  }}
+                                                                  className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded transition-all"
+                                                                  title={t(
+                                                                    'actions.delete'
+                                                                  )}
+                                                                >
+                                                                  <Trash2
+                                                                    size={
+                                                                      16
+                                                                    }
+                                                                  />
+                                                                </button>
+                                                              </div>
+                                                            </div>
+                                                          );
+                                                        }
+                                                      )}
+                                                    </div>
+                                                  ) : (
+                                                    <div className="text-center py-4">
+                                                      <Video
+                                                        size={
+                                                          32
+                                                        }
+                                                        className="text-gray-500 mx-auto mb-2"
+                                                      />
+                                                      <p className="text-gray-400 text-sm">
+                                                        {t(
+                                                          'noVideos'
+                                                        )}
+                                                      </p>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        }
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="text-center py-4">
+                                      <Play
+                                        size={32}
+                                        className="text-gray-500 mx-auto mb-2"
+                                      />
+                                      <p className="text-gray-400 text-sm">
+                                        {t('noLessons')}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-center py-8">

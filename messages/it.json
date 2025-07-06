@@ -778,52 +778,82 @@
     "list": "Elenco Lezioni"
   },
   "createLesson": {
-    "title": "Nuova Lezione",
-    "create": "Crea Lezione",
-    "creating": "Creazione...",
-    "fields": {
-      "course": "Corso",
-      "module": "Modulo",
-      "imageUrl": "URL dell'Immagine",
-      "video": "Video",
-      "title": "Titolo",
-        "description": "Descrizione"
-      },
-      "placeholders": {
-        "course": "Seleziona un corso",
-        "module": "Seleziona un modulo",
-        "imageUrl": "/images/lezione-esempio.jpg",
-        "video": "Seleziona un video (opzionale)",
-        "title": "Inserisci il titolo della lezione",
-        "description": "Inserisci la descrizione della lezione"
-      },
-      "hints": {
-        "imageUrl": "Opzionale - lascia vuoto per usare l'immagine predefinita",
-        "video": "Opzionale - collega un video alla lezione"
-      },
-      "translations": {
-        "title": "Traduzioni",
-        "portuguese": "Portoghese",
-        "spanish": "Spagnolo",
-        "italian": "Italiano"
-      },
-      "errors": {
-        "courseRequired": "Corso è obbligatorio",
-        "moduleRequired": "Modulo è obbligatorio",
-        "titleRequired": "Titolo è obbligatorio",
-        "descriptionRequired": "Descrizione è obbligatoria",
-        "fetchCoursesTitle": "Errore nel caricamento dei corsi",
-        "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili"
-      },
-      "success": {
-        "title": "Lezione creata!",
-        "description": "La lezione è stata creata con successo."
-      },
-      "error": {
-        "title": "Errore nella creazione della lezione",
-        "description": "Si è verificato un errore durante la creazione della lezione. Riprova."
-      }
-    },
+  "title": "Nuova Lezione",
+  "create": "Crea Lezione",
+  "creating": "Creazione...",
+  "selectedModule": "Modulo selezionato",
+  "fields": {
+    "course": "Corso",
+    "module": "Modulo",
+    "imageUrl": "URL dell'Immagine",
+    "video": "Video",
+    "title": "Titolo",
+    "description": "Descrizione",
+    "order": "Ordine"
+  },
+  "placeholders": {
+    "course": "Seleziona un corso",
+    "module": "Seleziona un modulo",
+    "imageUrl": "/images/lezione-esempio.jpg",
+    "video": "Seleziona un video (opzionale)",
+    "noVideo": "Senza video",
+    "title": "Inserisci il titolo della lezione",
+    "description": "Inserisci la descrizione della lezione",
+    "order": "Numero dell'ordine"
+  },
+  "hints": {
+    "imageUrl": "URL dell'immagine di copertina della lezione",
+    "video": "Opzionale - collega un video alla lezione",
+    "order": "Definisce la posizione della lezione nel modulo"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "validation": {
+    "courseValid": "Corso valido",
+    "moduleValid": "Modulo valido",
+    "orderValid": "Ordine valido",
+    "imageValid": "URL valido",
+    "selectModuleFirst": "Seleziona prima un modulo",
+    "loadingOrders": "Caricamento ordini disponibili...",
+    "noAvailableOrders": "Nessun ordine disponibile",
+    "usedOrders": "Ordini in uso"
+  },
+  "errors": {
+    "title": "Errore nella creazione della lezione",
+    "description": "Si è verificato un errore durante la creazione della lezione. Riprova.",
+    "courseRequired": "Il corso è obbligatorio",
+    "moduleRequired": "Il modulo è obbligatorio",
+    "titleRequired": "Il titolo è obbligatorio",
+    "titleMin": "Il titolo deve avere almeno 3 caratteri",
+    "titleMax": "Il titolo deve avere massimo 100 caratteri",
+    "descriptionRequired": "La descrizione è obbligatoria",
+    "descriptionMin": "La descrizione deve avere almeno 3 caratteri",
+    "descriptionMax": "La descrizione deve avere massimo 500 caratteri",
+    "imageRequired": "L'URL dell'immagine è obbligatorio",
+    "imageInvalid": "URL dell'immagine non valido",
+    "orderRequired": "L'ordine è obbligatorio",
+    "orderMax": "L'ordine deve essere inferiore a 999",
+    "orderExists": "Questo ordine è già in uso in questo modulo",
+    "fetchCoursesTitle": "Errore nel caricamento dei corsi",
+    "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Per favore, correggi gli errori nel modulo prima di continuare",
+    "serverTitle": "Errore del server",
+    "serverDescription": "Si è verificato un errore interno. Per favore, riprova",
+    "conflictTitle": "Lezione duplicata",
+    "conflictDescription": "Esiste già una lezione con queste informazioni",
+    "noModulesTitle": "Questo corso non ha moduli",
+    "noModulesDescription": "È necessario creare almeno un modulo per questo corso prima di aggiungere lezioni. Per favore, crea prima un modulo e poi ritorna per creare la lezione."
+  },
+  "success": {
+    "title": "Lezione creata!",
+    "description": "La lezione è stata creata con successo."
+  }
+},
     "lessonsList": {
       "title": "Elenco Lezioni",
       "searchPlaceholder": "Cerca lezioni...",

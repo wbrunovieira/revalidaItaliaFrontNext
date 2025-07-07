@@ -168,11 +168,15 @@
     "modules": "Moduli",
     "lessons": "Lezioni",
      "videos": "Video",
-    "settings": "Impostazioni"
+    "documents": "Documenti"
   },
   "users": {
     "create": "Crea Utente",
     "list": "Elenco Utenti"
+  },
+  "documents": {
+    "create": "Crea Documento",
+    "list": "Elenco Documenti"
   },
   "dashboard": {
     "title": "Statistiche Generali",

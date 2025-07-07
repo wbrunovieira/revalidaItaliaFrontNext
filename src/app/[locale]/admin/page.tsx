@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Users,
   BookOpen,
-  Settings,
+  FileText,
   UserPlus,
   List,
   BarChart3,
@@ -47,7 +47,6 @@ export default function AdminPage() {
 
   return (
     <div>
-
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -140,15 +139,15 @@ export default function AdminPage() {
             </TabsTrigger>
 
             <TabsTrigger
-              value="settings"
+              value="documents"
               className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
-              <Settings
+              <FileText
                 className="-ms-0.5 me-2 opacity-60"
                 size={18}
                 aria-hidden="true"
               />
-              {t('tabs.settings')}
+              {t('tabs.documents')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
@@ -294,7 +293,6 @@ export default function AdminPage() {
             </Tabs>
           </TabsContent>
 
-          {/* Conteúdo da tab de vídeos */}
           <TabsContent value="videos">
             <Tabs defaultValue="create" className="w-full">
               <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
@@ -322,16 +320,26 @@ export default function AdminPage() {
             </Tabs>
           </TabsContent>
 
-          <TabsContent value="settings">
-            <div className="text-center py-12">
-              <Settings
-                size={64}
-                className="text-gray-500 mx-auto mb-4"
-              />
-              <p className="text-gray-400">
-                {t('comingSoon')}
-              </p>
-            </div>
+          <TabsContent value="documents">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <FileText className="mr-2" size={16} />
+                  {t('documents.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('documents.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create"></TabsContent>
+            </Tabs>
           </TabsContent>
         </div>
       </Tabs>

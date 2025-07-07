@@ -167,7 +167,7 @@
     "modules": "Módulos",
     "lessons": "Aulas",
     "videos": "Vídeos",
-    "settings": "Configurações"
+     "documents": "Documentos"
   },
   
   "users": {
@@ -261,6 +261,10 @@
     "permissionTitle": "Acesso negado",
     "permissionDescription": "Você não tem permissão para realizar esta ação."
   }
+},
+"documents": {
+  "create": "Criar Documento",
+  "list": "Listar Documentos"
 },
 
   "courses": {

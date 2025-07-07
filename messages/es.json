@@ -167,11 +167,15 @@
     "modules": "Módulos",
     "lessons": "Lecciones",
      "videos": "Videos",
-    "settings": "Configuraciones"
+      "documents": "Documentos"
   },
   "users": {
     "create": "Crear Usuario",
     "list": "Listar Usuarios"
+  },
+  "documents": {
+    "create": "Crear Documento",
+    "list": "Lista de Documentos"
   },
   "dashboard": {
     "title": "Estadísticas Generales",

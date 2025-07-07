@@ -23,11 +23,23 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import LessonViewModal from './LessonViewModal';
+import LessonEditModal from './LessonEditModal';
 
 interface Translation {
   locale: string;
   title: string;
   description: string;
+}
+
+interface VideoData {
+  id: string;
+  slug: string;
+  providerVideoId: string;
+  durationInSeconds: number;
+  isSeen: boolean;
+  translations: Translation[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Lesson {
@@ -36,9 +48,26 @@ interface Lesson {
   order: number;
   imageUrl?: string;
   videoId?: string;
+  flashcardIds: string[];
+  quizIds: string[];
+  commentIds: string[];
   translations: Translation[];
+  video?: VideoData;
   createdAt: string;
   updatedAt: string;
+}
+
+interface LessonForEdit {
+  id: string;
+  moduleId: string;
+  order: number;
+  videoId?: string;
+  flashcardIds: string[];
+  quizIds: string[];
+  commentIds: string[];
+  imageUrl: string;
+  translations: Translation[];
+  video?: VideoData;
 }
 
 interface Module {
@@ -87,6 +116,19 @@ export default function LessonsList() {
     string | null
   >(null);
 
+  // Estados para o modal de edição
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedLessonForEdit, setSelectedLessonForEdit] =
+    useState<LessonForEdit | null>(null);
+  const [selectedCourseForEdit, setSelectedCourseForEdit] =
+    useState<string | null>(null);
+  const [selectedModuleForEdit, setSelectedModuleForEdit] =
+    useState<string | null>(null);
+
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3333';
+
   // 1. Função auxiliar para obter tradução por locale
   const getTranslationByLocale = useCallback(
     (translations: Translation[], targetLocale: string) => {
@@ -120,7 +162,7 @@ export default function LessonsList() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -141,7 +183,7 @@ export default function LessonsList() {
         return [];
       }
     },
-    [handleApiError]
+    [handleApiError, apiUrl]
   );
 
   // 4. Função para buscar módulos de um curso específico
@@ -149,7 +191,7 @@ export default function LessonsList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${apiUrl}/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -190,7 +232,7 @@ export default function LessonsList() {
 
     try {
       const coursesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${apiUrl}/courses`
       );
 
       if (!coursesResponse.ok) {
@@ -237,7 +279,7 @@ export default function LessonsList() {
     ) => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
           {
             method: 'DELETE',
           }
@@ -521,7 +563,61 @@ export default function LessonsList() {
     []
   );
 
-  // 9. Função para expandir/contrair curso
+  // 9. Função para editar lição
+  const handleEdit = useCallback(
+    async (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ): Promise<void> => {
+      try {
+        // Buscar detalhes completos da lição
+        const response = await fetch(
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            'Erro ao buscar detalhes da lição'
+          );
+        }
+
+        const lessonData: LessonForEdit =
+          await response.json();
+        console.log(
+          'Dados da lição para edição:',
+          lessonData
+        );
+
+        // Processar os dados para garantir que tenham o formato correto
+        const processedLesson: LessonForEdit = {
+          ...lessonData,
+          imageUrl: lessonData.imageUrl || '',
+          flashcardIds: lessonData.flashcardIds || [],
+          quizIds: lessonData.quizIds || [],
+          commentIds: lessonData.commentIds || [],
+        };
+
+        setSelectedLessonForEdit(processedLesson);
+        setSelectedCourseForEdit(courseId);
+        setSelectedModuleForEdit(moduleId);
+        setEditModalOpen(true);
+      } catch (error) {
+        console.error(
+          'Erro ao carregar lição para edição:',
+          error
+        );
+        toast({
+          title: t('error.editLoadTitle'),
+          description: t('error.editLoadDescription'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast, t, apiUrl]
+  );
+
+  // 10. Função para expandir/contrair curso
   const toggleCourse = useCallback((courseId: string) => {
     setExpandedCourses(prev => {
       const newExpanded = new Set(prev);
@@ -534,7 +630,7 @@ export default function LessonsList() {
     });
   }, []);
 
-  // 10. Função para expandir/contrair módulo
+  // 11. Função para expandir/contrair módulo
   const toggleModule = useCallback((moduleId: string) => {
     setExpandedModules(prev => {
       const newExpanded = new Set(prev);
@@ -940,6 +1036,14 @@ export default function LessonsList() {
                                                 </button>
                                                 <button
                                                   type="button"
+                                                  onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleEdit(
+                                                      course.id,
+                                                      module.id,
+                                                      lesson.id
+                                                    );
+                                                  }}
                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                   title={t(
                                                     'actions.edit'
@@ -1035,6 +1139,27 @@ export default function LessonsList() {
           setSelectedCourseId(null);
           setSelectedModuleId(null);
           setSelectedLessonId(null);
+        }}
+      />
+
+      {/* Modal de Edição da Lição */}
+      <LessonEditModal
+        lesson={selectedLessonForEdit}
+        courseId={selectedCourseForEdit || ''}
+        moduleId={selectedModuleForEdit || ''}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedLessonForEdit(null);
+          setSelectedCourseForEdit(null);
+          setSelectedModuleForEdit(null);
+        }}
+        onSave={() => {
+          setEditModalOpen(false);
+          setSelectedLessonForEdit(null);
+          setSelectedCourseForEdit(null);
+          setSelectedModuleForEdit(null);
+          fetchData();
         }}
       />
     </div>

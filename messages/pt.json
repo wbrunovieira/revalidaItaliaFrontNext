@@ -926,7 +926,135 @@
       "fetchTitle": "Erro ao carregar lição",
       "fetchDescription": "Não foi possível carregar os detalhes da lição. Tente novamente."
     }
-  },  
+  },
+"lessonEdit": {
+      "title": "Editar Aula",
+      "fields": {
+        "imageUrl": "URL da Imagem",
+        "order": "Ordem",
+        "title": "Título",
+        "description": "Descrição",
+        "video": "Vídeo",
+        "videoId": "ID do Vídeo",
+        "flashcardIds": "IDs dos Flashcards",
+        "quizIds": "IDs dos Questionários",
+        "commentIds": "IDs dos Comentários"
+      },
+      "placeholders": {
+        "imageUrl": "https://exemplo.com/imagem.jpg",
+        "order": "1",
+        "title": "Digite o título da aula",
+        "description": "Digite uma breve descrição",
+        "selectVideo": "Selecione um vídeo...",
+        "videoId": "video-123",
+        "flashcardIds": "flashcard-1, flashcard-2",
+        "quizIds": "quiz-1, quiz-2",
+        "commentIds": "comment-1, comment-2"
+      },
+      "hints": {
+        "order": "Ordem de exibição da aula no módulo",
+        "videoId": "ID do vídeo associado a esta aula (opcional)",
+        "videoSelection": "Selecione um vídeo da lista ou deixe em branco",
+        "multipleIds": "Separe múltiplos IDs com vírgulas"
+      },
+      "translations": {
+        "title": "Traduções",
+        "portuguese": "Português",
+        "spanish": "Espanhol",
+        "italian": "Italiano"
+      },
+      "errors": {
+        "imageRequired": "URL da imagem é obrigatória",
+        "orderRequired": "Ordem deve ser maior que 0",
+        "orderMax": "Ordem não pode ser maior que 999",
+        "orderExists": "Esta ordem já está sendo usada por outra aula",
+        "titleRequired": "Título é obrigatório",
+        "descriptionRequired": "Descrição é obrigatória",
+        "editLoadTitle": "Erro ao carregar aula",
+        "editLoadDescription": "Não foi possível carregar os dados da aula para edição"
+      },
+      "success": {
+        "title": "Sucesso!",
+        "description": "Aula atualizada com sucesso"
+      },
+      "error": {
+        "title": "Erro",
+        "description": "Erro ao atualizar aula"
+      },
+      "loadingOrders": "Carregando ordens...",
+      "loadingVideos": "Carregando vídeos...",
+      "noOrdersAvailable": "Nenhuma ordem disponível",
+      "noVideosAvailable": "Nenhum vídeo disponível",
+      "noVideo": "Nenhum vídeo",
+      "current": "atual",
+      "occupiedOrders": "Ordens ocupadas",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "saving": "Salvando..."
+    },
+    "lessonsList": {
+      "title": "Lista de Aulas",
+      "searchPlaceholder": "Buscar aulas...",
+      "modules": "módulos",
+      "lessons": "aulas",
+      "hasVideo": "Com vídeo",
+      "noLessons": "Nenhuma aula neste módulo",
+      "noModules": "Nenhum módulo neste curso",
+      "noResults": "Nenhuma aula encontrada com este termo.",
+      "noCourses": "Nenhum curso registrado ainda.",
+      "deleteConfirm": "Tem certeza que deseja excluir esta aula?",
+      "deleteConfirmation": {
+        "title": "Confirmar Exclusão",
+        "message": "Tem certeza que deseja excluir a aula \"{lessonName}\"?",
+        "lesson": "Aula",
+        "module": "Módulo",
+        "course": "Curso",
+        "order": "Ordem",
+        "hasVideo": "Possui vídeo",
+        "warning": "Esta ação não pode ser desfeita",
+        "confirm": "Excluir"
+      },
+      "dependencies": {
+        "total": "{count} dependência(s) encontrada(s)",
+        "videos": "{count} vídeo(s)",
+        "documents": "{count} documento(s)",
+        "flashcards": "{count} flashcard(s)",
+        "quizzes": "{count} questionário(s)",
+        "comments": "{count} comentário(s)",
+        "andMore": "e mais {count}...",
+        "type": {
+          "video": "vídeo",
+          "document": "documento",
+          "flashcard": "flashcard",
+          "quiz": "questionário",
+          "comment": "comentário"
+        }
+      },
+      "stats": {
+        "totalCourses": "Total de Cursos",
+        "totalModules": "Total de Módulos",
+        "totalLessons": "Total de Aulas"
+      },
+      "actions": {
+        "view": "Visualizar",
+        "edit": "Editar",
+        "delete": "Excluir"
+      },
+      "success": {
+        "deleteTitle": "Aula excluída!",
+        "deleteDescription": "A aula foi excluída com sucesso."
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar aulas",
+        "fetchDescription": "Não foi possível carregar a lista de aulas.",
+        "deleteTitle": "Erro ao excluir",
+        "deleteDescription": "Não foi possível excluir a aula.",
+        "deleteDependencyTitle": "Não é possível excluir",
+        "deleteDependencyMessage": "Esta aula possui dependências que impedem sua exclusão.",
+        "deleteDependencyWarning": "Remova as dependências antes de excluir a aula.",
+        "editLoadTitle": "Erro ao carregar aula",
+        "editLoadDescription": "Não foi possível carregar os dados da aula para edição"
+      }},  
   "videos": {
     "create": "Criar Vídeo",
     "list": "Listar Vídeos"

@@ -937,6 +937,63 @@
       "fetchDescription": "Impossibile caricare i dettagli della lezione. Riprova."
     }
   },
+"lessonEdit": {
+    "title": "Modifica Lezione",
+    "fields": {
+      "imageUrl": "URL dell'Immagine",
+      "order": "Ordine",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "videoId": "ID del Video",
+      "flashcardIds": "ID delle Flashcard",
+      "quizIds": "ID dei Quiz",
+      "commentIds": "ID dei Commenti"
+    },
+    "placeholders": {
+      "imageUrl": "https://esempio.com/immagine.jpg",
+      "order": "1",
+      "title": "Inserisci il titolo della lezione",
+      "description": "Inserisci una breve descrizione",
+      "videoId": "video-123",
+      "flashcardIds": "flashcard-1, flashcard-2",
+      "quizIds": "quiz-1, quiz-2",
+      "commentIds": "comment-1, comment-2"
+    },
+    "hints": {
+      "order": "Ordine di visualizzazione della lezione nel modulo",
+      "videoId": "ID del video associato a questa lezione (opzionale)",
+      "multipleIds": "Separa più ID con virgole"
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "spanish": "Spagnolo",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "imageRequired": "URL dell'immagine è obbligatoria",
+      "orderRequired": "L'ordine deve essere maggiore di 0",
+      "orderMax": "L'ordine non può essere maggiore di 999",
+      "orderExists": "Questo ordine è già utilizzato da un'altra lezione",
+      "titleRequired": "Il titolo è obbligatorio",
+      "descriptionRequired": "La descrizione è obbligatoria"
+    },
+    "success": {
+      "title": "Successo!",
+      "description": "Lezione aggiornata con successo"
+    },
+    "error": {
+      "title": "Errore",
+      "description": "Errore nell'aggiornamento della lezione"
+    },
+    "loadingOrders": "Caricamento ordini...",
+    "noOrdersAvailable": "Nessun ordine disponibile",
+    "current": "attuale",
+    "occupiedOrders": "Ordini occupati",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio..."
+  },
     "videos": {
       "create": "Crea Video",
       "list": "Elenco Video"

@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   X,
   BookOpen,
-  Link,
   Image as ImageIcon,
   Calendar,
   Clock,

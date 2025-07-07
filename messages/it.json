@@ -1087,6 +1087,18 @@
       "fetchDescription": "Non è stato possibile caricare l'elenco dei video.",
       "deleteTitle": "Errore nell'eliminazione",
       "deleteDescription": "Non è stato possibile eliminare il video."
+    },
+    "deleteConfirmation": {
+      "title": "Conferma eliminazione",
+      "message": "Sei sicuro di voler eliminare il video \"{videoName}\"?",
+      "video": "Video",
+      "lesson": "Lezione",
+      "module": "Modulo",
+      "course": "Corso", 
+      "duration": "Durata",
+      "providerId": "ID Provider",
+      "warning": "Questa azione non può essere annullata!",
+      "confirm": "Elimina video"
     }
   },
    "userView": {

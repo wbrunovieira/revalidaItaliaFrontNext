@@ -1071,7 +1071,19 @@
         "fetchDescription": "No fue posible cargar la lista de videos.",
         "deleteTitle": "Error al eliminar",
         "deleteDescription": "No fue posible eliminar el video."
-      }
+      },
+      "deleteConfirmation": {
+    "title": "Confirmar eliminación",
+    "message": "¿Está seguro que desea eliminar el video \"{videoName}\"?",
+    "video": "Video",
+    "lesson": "Lección",
+    "module": "Módulo",
+    "course": "Curso",
+    "duration": "Duración", 
+    "providerId": "ID del Proveedor",
+    "warning": "¡Esta acción no se puede deshacer!",
+    "confirm": "Eliminar video"
+  }
     }
   ,
     "userView": {

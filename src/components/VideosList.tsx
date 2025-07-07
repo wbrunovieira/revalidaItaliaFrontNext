@@ -20,6 +20,8 @@ import {
   Package,
   Play,
   Clock,
+  BookOpen,
+  ListOrdered,
 } from 'lucide-react';
 import Image from 'next/image';
 import VideoViewModal from './VideoViewModal';
@@ -107,6 +109,10 @@ export default function VideosList() {
       videoId: string;
     } | null>(null);
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3333';
+
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
@@ -127,7 +133,7 @@ export default function VideosList() {
     ): Promise<VideoItem[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos`
+          `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos`
         );
 
         if (!response.ok) {
@@ -143,7 +149,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError]
+    [handleApiError, apiUrl]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -154,7 +160,7 @@ export default function VideosList() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -187,7 +193,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError, fetchVideosForLesson]
+    [handleApiError, fetchVideosForLesson, apiUrl]
   );
 
   // Função para buscar módulos de um curso específico
@@ -195,7 +201,7 @@ export default function VideosList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${apiUrl}/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -227,7 +233,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule]
+    [handleApiError, fetchLessonsForModule, apiUrl]
   );
 
   // Função principal para buscar todos os dados
@@ -236,7 +242,7 @@ export default function VideosList() {
 
     try {
       const coursesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${apiUrl}/courses`
       );
 
       if (!coursesResponse.ok) {
@@ -268,23 +274,58 @@ export default function VideosList() {
     } finally {
       setLoading(false);
     }
-  }, [toast, t, handleApiError, fetchModulesForCourse]);
+  }, [
+    toast,
+    t,
+    handleApiError,
+    fetchModulesForCourse,
+    apiUrl,
+  ]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const handleDelete = useCallback(
+  // Função auxiliar para obter tradução por locale
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
+
+  // Função para formatar duração
+  const formatDuration = useCallback((seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes
+        .toString()
+        .padStart(2, '0')}:${remainingSeconds
+        .toString()
+        .padStart(2, '0')}`;
+    }
+    return `${minutes}:${remainingSeconds
+      .toString()
+      .padStart(2, '0')}`;
+  }, []);
+
+  // Função para deletar vídeo após confirmação
+  const deleteVideo = useCallback(
     async (
       courseId: string,
       lessonId: string,
       videoId: string
     ) => {
-      if (!confirm(t('deleteConfirm'))) return;
-
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
+          `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
           {
             method: 'DELETE',
           }
@@ -299,6 +340,7 @@ export default function VideosList() {
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
+          variant: 'default',
         });
 
         await fetchData();
@@ -311,7 +353,142 @@ export default function VideosList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError]
+    [t, toast, fetchData, handleApiError, apiUrl]
+  );
+
+  // Função para mostrar confirmação personalizada usando toast
+  const handleDelete = useCallback(
+    async (
+      courseId: string,
+      lessonId: string,
+      videoId: string
+    ) => {
+      // Encontrar o curso, módulo, lição e vídeo
+      const course = coursesWithVideos.find(
+        c => c.id === courseId
+      );
+      if (!course) return;
+
+      const lesson = course.modules
+        ?.flatMap(m => m.lessons || [])
+        .find(l => l.id === lessonId);
+      if (!lesson) return;
+
+      const module = course.modules?.find(m =>
+        m.lessons?.some(l => l.id === lessonId)
+      );
+      if (!module) return;
+
+      const video = lesson.videos?.find(
+        v => v.id === videoId
+      );
+      if (!video) return;
+
+      const courseTranslation = getTranslationByLocale(
+        course.translations,
+        locale
+      );
+      const moduleTranslation = getTranslationByLocale(
+        module.translations,
+        locale
+      );
+      const lessonTranslation = getTranslationByLocale(
+        lesson.translations,
+        locale
+      );
+      const videoTranslation = getTranslationByLocale(
+        video.translations,
+        locale
+      );
+
+      // Toast de confirmação personalizado
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                videoName:
+                  videoTranslation?.title || t('noTitle'),
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Video size={14} />
+                  {t('deleteConfirmation.video')}:{' '}
+                  {videoTranslation?.title || t('noTitle')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Play size={14} />
+                  {t('deleteConfirmation.lesson')}:{' '}
+                  {lessonTranslation?.title || t('noTitle')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Package size={14} />
+                  {t('deleteConfirmation.module')}:{' '}
+                  {moduleTranslation?.title || t('noTitle')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t('deleteConfirmation.course')}:{' '}
+                  {courseTranslation?.title || t('noTitle')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} />
+                  {t('deleteConfirmation.duration')}:{' '}
+                  {formatDuration(video.durationInSeconds)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <ListOrdered size={14} />
+                  {t('deleteConfirmation.providerId')}:{' '}
+                  {video.providerVideoId}
+                </div>
+                {videoTranslation?.description && (
+                  <div className="mt-2 p-2 bg-gray-600/30 rounded text-xs">
+                    &ldquo;
+                    {videoTranslation.description.substring(
+                      0,
+                      100
+                    )}
+                    {videoTranslation.description.length >
+                    100
+                      ? '...'
+                      : ''}
+                    &rdquo;
+                  </div>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                deleteVideo(courseId, lessonId, videoId)
+              }
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [
+      toast,
+      deleteVideo,
+      coursesWithVideos,
+      t,
+      locale,
+      getTranslationByLocale,
+      formatDuration,
+    ]
   );
 
   const toggleCourse = useCallback((courseId: string) => {
@@ -365,34 +542,6 @@ export default function VideosList() {
   const handleCloseVideoModal = useCallback(() => {
     setIsVideoModalOpen(false);
     setSelectedVideoData(null);
-  }, []);
-
-  const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
-      return (
-        translations.find(
-          tr => tr.locale === targetLocale
-        ) || translations[0]
-      );
-    },
-    []
-  );
-
-  const formatDuration = useCallback((seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(2, '0')}:${remainingSeconds
-        .toString()
-        .padStart(2, '0')}`;
-    }
-    return `${minutes}:${remainingSeconds
-      .toString()
-      .padStart(2, '0')}`;
   }, []);
 
   // Função para calcular estatísticas de um curso

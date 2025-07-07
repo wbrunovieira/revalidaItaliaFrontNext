@@ -778,7 +778,7 @@
     "create": "Crea Lezione",
     "list": "Elenco Lezioni"
   },
-  "createLesson": {
+"createLesson": {
   "title": "Nuova Lezione",
   "create": "Crea Lezione",
   "creating": "Creazione...",
@@ -855,7 +855,7 @@
     "description": "La lezione è stata creata con successo."
   }
 },
-    "lessonsList": {
+"lessonsList": {
       "title": "Elenco Lezioni",
       "searchPlaceholder": "Cerca lezioni...",
       "modules": "moduli",
@@ -887,6 +887,56 @@
         "deleteDescription": "Non è stato possibile eliminare la lezione."
       }
     },
+"lessonView": {
+    "title": "Dettagli della Lezione",
+    "close": "Chiudi",
+    "lessonNotFound": "Lezione non trovata",
+    "copySuccess": "Copiato!",
+    "copyDescription": "copiato negli appunti",
+    "copyError": "Errore nella copia",
+    "copyErrorDescription": "Impossibile copiare negli appunti",
+    "fields": {
+      "id": "ID",
+      "moduleId": "ID del Modulo",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "imageUrl": "URL dell'Immagine",
+      "order": "Ordine",
+      "flashcards": "Flashcard",
+      "flashcardsCount": "flashcard",
+      "quizzes": "Quiz",
+      "quizzesCount": "quiz",
+      "comments": "Commenti",
+      "commentsCount": "commenti",
+      "createdAt": "Data di Creazione",
+      "updatedAt": "Ultimo Aggiornamento"
+    },
+    "video": {
+      "title": "Informazioni del Video",
+      "fields": {
+        "id": "ID del Video",
+        "slug": "Slug",
+        "providerVideoId": "ID del Provider",
+        "duration": "Durata",
+        "status": "Stato",
+        "seen": "Visto",
+        "notSeen": "Non Visto"
+      },
+      "translations": {
+        "title": "Traduzioni del Video"
+      }
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "spanish": "Spagnolo",
+      "italian": "Italiano"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento della lezione",
+      "fetchDescription": "Impossibile caricare i dettagli della lezione. Riprova."
+    }
+  },
     "videos": {
       "create": "Crea Video",
       "list": "Elenco Video"

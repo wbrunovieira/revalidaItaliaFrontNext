@@ -840,7 +840,7 @@
     "description": "La lección fue creada con éxito."
   }
 },
-    "lessonsList": {
+"lessonsList": {
       "title": "Lista de Lecciones",
       "searchPlaceholder": "Buscar lecciones...",
       "modules": "módulos",
@@ -872,6 +872,56 @@
         "deleteDescription": "No fue posible eliminar la lección."
       }
     },
+"lessonView": {
+    "title": "Detalles de la Lección",
+    "close": "Cerrar",
+    "lessonNotFound": "Lección no encontrada",
+    "copySuccess": "¡Copiado!",
+    "copyDescription": "copiado al portapapeles",
+    "copyError": "Error al copiar",
+    "copyErrorDescription": "No se pudo copiar al portapapeles",
+    "fields": {
+      "id": "ID",
+      "moduleId": "ID del Módulo",
+      "title": "Título",
+      "description": "Descripción",
+      "imageUrl": "URL de la Imagen",
+      "order": "Orden",
+      "flashcards": "Tarjetas de Estudio",
+      "flashcardsCount": "tarjetas de estudio",
+      "quizzes": "Cuestionarios",
+      "quizzesCount": "cuestionarios",
+      "comments": "Comentarios",
+      "commentsCount": "comentarios",
+      "createdAt": "Fecha de Creación",
+      "updatedAt": "Última Actualización"
+    },
+    "video": {
+      "title": "Información del Video",
+      "fields": {
+        "id": "ID del Video",
+        "slug": "Slug",
+        "providerVideoId": "ID del Proveedor",
+        "duration": "Duración",
+        "status": "Estado",
+        "seen": "Visto",
+        "notSeen": "No Visto"
+      },
+      "translations": {
+        "title": "Traducciones del Video"
+      }
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar lección",
+      "fetchDescription": "No se pudieron cargar los detalles de la lección. Intente nuevamente."
+    }
+  },
     "videos": {
       "create": "Crear Video",
       "list": "Listar Videos"

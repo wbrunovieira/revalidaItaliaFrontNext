@@ -17,6 +17,7 @@ import {
   Clock,
 } from 'lucide-react';
 import Image from 'next/image';
+import LessonViewModal from './LessonViewModal';
 
 interface Translation {
   locale: string;
@@ -68,6 +69,18 @@ export default function LessonsList() {
   const [expandedModules, setExpandedModules] = useState<
     Set<string>
   >(new Set());
+
+  // Estados para o modal de visualização
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<
+    string | null
+  >(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<
+    string | null
+  >(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<
+    string | null
+  >(null);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -197,6 +210,21 @@ export default function LessonsList() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Função para abrir o modal de visualização
+  const handleView = useCallback(
+    (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ): void => {
+      setSelectedCourseId(courseId);
+      setSelectedModuleId(moduleId);
+      setSelectedLessonId(lessonId);
+      setViewModalOpen(true);
+    },
+    []
+  );
 
   const handleDelete = useCallback(
     async (
@@ -645,6 +673,14 @@ export default function LessonsList() {
                                               <div className="flex items-center gap-2">
                                                 <button
                                                   type="button"
+                                                  onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleView(
+                                                      course.id,
+                                                      module.id,
+                                                      lesson.id
+                                                    );
+                                                  }}
                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                   title={t(
                                                     'actions.view'
@@ -741,6 +777,20 @@ export default function LessonsList() {
           </p>
         </div>
       )}
+
+      {/* Modal de Visualização da Lição */}
+      <LessonViewModal
+        courseId={selectedCourseId}
+        moduleId={selectedModuleId}
+        lessonId={selectedLessonId}
+        isOpen={viewModalOpen}
+        onClose={() => {
+          setViewModalOpen(false);
+          setSelectedCourseId(null);
+          setSelectedModuleId(null);
+          setSelectedLessonId(null);
+        }}
+      />
     </div>
   );
 }

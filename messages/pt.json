@@ -848,6 +848,56 @@
       "deleteDescription": "Não foi possível excluir a aula."
     }
   },
+"lessonView": {
+    "title": "Detalhes da Lição",
+    "close": "Fechar",
+    "lessonNotFound": "Lição não encontrada",
+    "copySuccess": "Copiado!",
+    "copyDescription": "copiado para a área de transferência",
+    "copyError": "Erro ao copiar",
+    "copyErrorDescription": "Não foi possível copiar para a área de transferência",
+    "fields": {
+      "id": "ID",
+      "moduleId": "ID do Módulo",
+      "title": "Título",
+      "description": "Descrição",
+      "imageUrl": "URL da Imagem",
+      "order": "Ordem",
+      "flashcards": "Flashcards",
+      "flashcardsCount": "flashcards",
+      "quizzes": "Questionários",
+      "quizzesCount": "questionários",
+      "comments": "Comentários",
+      "commentsCount": "comentários",
+      "createdAt": "Data de Criação",
+      "updatedAt": "Última Atualização"
+    },
+    "video": {
+      "title": "Informações do Vídeo",
+      "fields": {
+        "id": "ID do Vídeo",
+        "slug": "Slug",
+        "providerVideoId": "ID do Provedor",
+        "duration": "Duração",
+        "status": "Status",
+        "seen": "Assistido",
+        "notSeen": "Não Assistido"
+      },
+      "translations": {
+        "title": "Traduções do Vídeo"
+      }
+    },
+    "translations": {
+      "title": "Traduções",
+      "portuguese": "Português",
+      "spanish": "Espanhol",
+      "italian": "Italiano"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar lição",
+      "fetchDescription": "Não foi possível carregar os detalhes da lição. Tente novamente."
+    }
+  },  
   "videos": {
     "create": "Criar Vídeo",
     "list": "Listar Vídeos"

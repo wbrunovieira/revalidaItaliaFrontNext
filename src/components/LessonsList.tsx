@@ -15,6 +15,11 @@ import {
   Package,
   Video,
   Clock,
+  BookOpen,
+  ListOrdered,
+  FileText,
+  MessageSquare,
+  CreditCard,
 } from 'lucide-react';
 import Image from 'next/image';
 import LessonViewModal from './LessonViewModal';
@@ -82,7 +87,19 @@ export default function LessonsList() {
     string | null
   >(null);
 
-  // Função para tratamento centralizado de erros
+  // 1. Função auxiliar para obter tradução por locale
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(
+          tr => tr.locale === targetLocale
+        ) || translations[0]
+      );
+    },
+    []
+  );
+
+  // 2. Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
       console.error(`${context}:`, error);
@@ -95,7 +112,7 @@ export default function LessonsList() {
     []
   );
 
-  // Função para buscar aulas de um módulo específico
+  // 3. Função para buscar aulas de um módulo específico
   const fetchLessonsForModule = useCallback(
     async (
       courseId: string,
@@ -127,7 +144,7 @@ export default function LessonsList() {
     [handleApiError]
   );
 
-  // Função para buscar módulos de um curso específico
+  // 4. Função para buscar módulos de um curso específico
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
@@ -167,7 +184,7 @@ export default function LessonsList() {
     [handleApiError, fetchLessonsForModule]
   );
 
-  // Função principal para buscar todos os dados
+  // 5. Função principal para buscar todos os dados
   const fetchData = useCallback(async () => {
     setLoading(true);
 
@@ -211,29 +228,13 @@ export default function LessonsList() {
     fetchData();
   }, [fetchData]);
 
-  // Função para abrir o modal de visualização
-  const handleView = useCallback(
-    (
-      courseId: string,
-      moduleId: string,
-      lessonId: string
-    ): void => {
-      setSelectedCourseId(courseId);
-      setSelectedModuleId(moduleId);
-      setSelectedLessonId(lessonId);
-      setViewModalOpen(true);
-    },
-    []
-  );
-
-  const handleDelete = useCallback(
+  // 6. Função para deletar lição após confirmação
+  const deleteLesson = useCallback(
     async (
       courseId: string,
       moduleId: string,
       lessonId: string
     ) => {
-      if (!confirm(t('deleteConfirm'))) return;
-
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
@@ -243,6 +244,123 @@ export default function LessonsList() {
         );
 
         if (!response.ok) {
+          const errorData = await response.json();
+
+          // Se for erro 409 (conflito de dependências)
+          if (
+            response.status === 409 &&
+            errorData.dependencyInfo
+          ) {
+            const { summary, dependencies } =
+              errorData.dependencyInfo;
+
+            toast({
+              title: t('error.deleteDependencyTitle'),
+              description: (
+                <div className="space-y-3">
+                  <p className="text-sm">
+                    {t('error.deleteDependencyMessage')}
+                  </p>
+
+                  {/* Resumo das dependências */}
+                  <div className="bg-gray-700/50 p-3 rounded-lg space-y-2">
+                    <p className="text-xs font-semibold text-gray-200">
+                      {t('dependencies.total', {
+                        count:
+                          errorData.dependencyInfo
+                            .totalDependencies,
+                      })}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {summary.videos > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Video size={12} />
+                          <span>
+                            {t('dependencies.videos', {
+                              count: summary.videos,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {summary.documents > 0 && (
+                        <div className="flex items-center gap-1">
+                          <FileText size={12} />
+                          <span>
+                            {t('dependencies.documents', {
+                              count: summary.documents,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {summary.flashcards > 0 && (
+                        <div className="flex items-center gap-1">
+                          <CreditCard size={12} />
+                          <span>
+                            {t('dependencies.flashcards', {
+                              count: summary.flashcards,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {summary.quizzes > 0 && (
+                        <div className="flex items-center gap-1">
+                          <FileText size={12} />
+                          <span>
+                            {t('dependencies.quizzes', {
+                              count: summary.quizzes,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {summary.comments > 0 && (
+                        <div className="flex items-center gap-1">
+                          <MessageSquare size={12} />
+                          <span>
+                            {t('dependencies.comments', {
+                              count: summary.comments,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Lista de dependências */}
+                    <div className="mt-2 space-y-1">
+                      {dependencies
+                        .slice(0, 3)
+                        .map((dep: any, index: number) => (
+                          <div
+                            key={index}
+                            className="text-xs text-gray-300"
+                          >
+                            • {dep.name} (
+                            {t(
+                              `dependencies.type.${dep.type}`
+                            )}
+                            )
+                          </div>
+                        ))}
+                      {dependencies.length > 3 && (
+                        <div className="text-xs text-gray-400">
+                          {t('dependencies.andMore', {
+                            count: dependencies.length - 3,
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-red-300 font-medium">
+                    ⚠️ {t('error.deleteDependencyWarning')}
+                  </p>
+                </div>
+              ),
+              variant: 'destructive',
+            });
+            return;
+          }
+
           throw new Error(
             `Failed to delete lesson: ${response.status}`
           );
@@ -251,6 +369,7 @@ export default function LessonsList() {
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
+          variant: 'default',
         });
 
         await fetchData();
@@ -266,6 +385,143 @@ export default function LessonsList() {
     [t, toast, fetchData, handleApiError]
   );
 
+  // 7. Função para mostrar confirmação personalizada usando toast
+  const handleDelete = useCallback(
+    async (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ) => {
+      // Encontrar o curso, módulo e lição
+      const course = coursesWithLessons.find(
+        c => c.id === courseId
+      );
+      if (!course) return;
+
+      const module = course.modules?.find(
+        m => m.id === moduleId
+      );
+      if (!module) return;
+
+      const lesson = module.lessons?.find(
+        l => l.id === lessonId
+      );
+      if (!lesson) return;
+
+      const courseTranslation = getTranslationByLocale(
+        course.translations,
+        locale
+      );
+      const moduleTranslation = getTranslationByLocale(
+        module.translations,
+        locale
+      );
+      const lessonTranslation = getTranslationByLocale(
+        lesson.translations,
+        locale
+      );
+
+      // Toast de confirmação personalizado
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                lessonName:
+                  lessonTranslation?.title || 'Sem título',
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Play size={14} />
+                  {t('deleteConfirmation.lesson')}:{' '}
+                  {lessonTranslation?.title || 'Sem título'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Package size={14} />
+                  {t('deleteConfirmation.module')}:{' '}
+                  {moduleTranslation?.title || 'Sem título'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen size={14} />
+                  {t('deleteConfirmation.course')}:{' '}
+                  {courseTranslation?.title || 'Sem título'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <ListOrdered size={14} />
+                  {t('deleteConfirmation.order')}:{' '}
+                  {lesson.order}
+                </div>
+                {lesson.videoId && (
+                  <div className="flex items-center gap-2">
+                    <Video size={14} />
+                    {t('deleteConfirmation.hasVideo')}
+                  </div>
+                )}
+                {lessonTranslation?.description && (
+                  <div className="mt-2 p-2 bg-gray-600/30 rounded text-xs">
+                    &ldquo;
+                    {lessonTranslation.description.substring(
+                      0,
+                      100
+                    )}
+                    {lessonTranslation.description.length >
+                    100
+                      ? '...'
+                      : ''}
+                    &rdquo;
+                  </div>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                deleteLesson(courseId, moduleId, lessonId)
+              }
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [
+      toast,
+      deleteLesson,
+      coursesWithLessons,
+      t,
+      locale,
+      getTranslationByLocale,
+    ]
+  );
+
+  // 8. Função para abrir o modal de visualização
+  const handleView = useCallback(
+    (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ): void => {
+      setSelectedCourseId(courseId);
+      setSelectedModuleId(moduleId);
+      setSelectedLessonId(lessonId);
+      setViewModalOpen(true);
+    },
+    []
+  );
+
+  // 9. Função para expandir/contrair curso
   const toggleCourse = useCallback((courseId: string) => {
     setExpandedCourses(prev => {
       const newExpanded = new Set(prev);
@@ -278,6 +534,7 @@ export default function LessonsList() {
     });
   }, []);
 
+  // 10. Função para expandir/contrair módulo
   const toggleModule = useCallback((moduleId: string) => {
     setExpandedModules(prev => {
       const newExpanded = new Set(prev);
@@ -289,17 +546,6 @@ export default function LessonsList() {
       return newExpanded;
     });
   }, []);
-
-  const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
-      return (
-        translations.find(
-          tr => tr.locale === targetLocale
-        ) || translations[0]
-      );
-    },
-    []
-  );
 
   // Filtrar baseado na busca
   const filteredCourses = coursesWithLessons.filter(

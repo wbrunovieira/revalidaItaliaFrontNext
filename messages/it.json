@@ -1052,40 +1052,43 @@
       }
     }
   ,
-    "videosList": {
-      "title": "Elenco Video",
-      "modules":"Moduli",
-      "lessons":"Lezioni",
-      "searchPlaceholder": "Cerca video...",
-      "videos": "video",
-      "noVideos": "Nessun video in questa lezione",
-      "noLessons": "Nessuna lezione in questo modulo",
-      "noModules": "Nessun modulo in questo corso",
-      "noResults": "Nessun video trovato con questo termine.",
-      "noCourses": "Nessun corso registrato ancora.",
-      "deleteConfirm": "Sei sicuro di voler eliminare questo video?",
-      "stats": {
-        "totalCourses": "Totale Corsi",
-        "totalModules": "Totale Moduli",
-        "totalLessons": "Totale Lezioni",
-        "totalVideos": "Totale Video"
-      },
-      "actions": {
-        "view": "Visualizza",
-        "edit": "Modifica",
-        "delete": "Elimina"
-      },
-      "success": {
-        "deleteTitle": "Video eliminato!",
-        "deleteDescription": "Il video è stato eliminato con successo."
-      },
-      "error": {
-        "fetchTitle": "Errore nel caricamento dei video",
-        "fetchDescription": "Non è stato possibile caricare l'elenco dei video.",
-        "deleteTitle": "Errore nell'eliminazione",
-        "deleteDescription": "Non è stato possibile eliminare il video."
-      }
+  "videosList": {
+    "title": "Elenco Video",
+    "modules": "Moduli",
+    "lessons": "Lezioni",
+    "searchPlaceholder": "Cerca video...",
+    "videos": "video",
+    "noVideos": "Nessun video in questa lezione",
+    "noLessons": "Nessuna lezione in questo modulo",
+    "noModules": "Nessun modulo in questo corso",
+    "noResults": "Nessun video trovato con questo termine.",
+    "noCourses": "Nessun corso registrato ancora.",
+    "noTitle": "Senza titolo",
+    "slug": "Slug",
+    "providerId": "ID",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo video?",
+    "stats": {
+      "totalCourses": "Totale Corsi",
+      "totalModules": "Totale Moduli",
+      "totalLessons": "Totale Lezioni",
+      "totalVideos": "Totale Video"
     },
+    "actions": {
+      "view": "Visualizza",
+      "edit": "Modifica",
+      "delete": "Elimina"
+    },
+    "success": {
+      "deleteTitle": "Video eliminato!",
+      "deleteDescription": "Il video è stato eliminato con successo."
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento dei video",
+      "fetchDescription": "Non è stato possibile caricare l'elenco dei video.",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Non è stato possibile eliminare il video."
+    }
+  },
    "userView": {
     "title": "Dettagli Utente",
     "roleAdmin": "Amministratore",

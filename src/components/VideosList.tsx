@@ -1,6 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -60,6 +65,17 @@ interface Course {
   modules?: Module[];
 }
 
+interface CourseStats {
+  moduleCount: number;
+  lessonCount: number;
+  videoCount: number;
+}
+
+interface ModuleStats {
+  lessonCount: number;
+  videoCount: number;
+}
+
 export default function VideosList() {
   const t = useTranslations('Admin.videosList');
   const params = useParams();
@@ -84,7 +100,6 @@ export default function VideosList() {
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
       console.error(`${context}:`, error);
-
       if (error instanceof Error) {
         console.error(`Error message: ${error.message}`);
         console.error(`Stack trace: ${error.stack}`);
@@ -352,9 +367,52 @@ export default function VideosList() {
       .padStart(2, '0')}`;
   }, []);
 
+  // Função para calcular estatísticas de um curso
+  const getCourseStats = useCallback(
+    (course: Course): CourseStats => {
+      const moduleCount = course.modules?.length || 0;
+      const lessonCount =
+        course.modules?.reduce(
+          (sum, module) =>
+            sum + (module.lessons?.length || 0),
+          0
+        ) || 0;
+      const videoCount =
+        course.modules?.reduce(
+          (sum, module) =>
+            sum +
+            (module.lessons?.reduce(
+              (lessonSum, lesson) =>
+                lessonSum + (lesson.videos?.length || 0),
+              0
+            ) || 0),
+          0
+        ) || 0;
+
+      return { moduleCount, lessonCount, videoCount };
+    },
+    []
+  );
+
+  // Função para calcular estatísticas de um módulo
+  const getModuleStats = useCallback(
+    (module: Module): ModuleStats => {
+      const lessonCount = module.lessons?.length || 0;
+      const videoCount =
+        module.lessons?.reduce(
+          (sum, lesson) =>
+            sum + (lesson.videos?.length || 0),
+          0
+        ) || 0;
+
+      return { lessonCount, videoCount };
+    },
+    []
+  );
+
   // Filtrar baseado na busca
-  const filteredCourses = coursesWithVideos.filter(
-    course => {
+  const filteredCourses = useMemo(() => {
+    return coursesWithVideos.filter(course => {
       const courseTranslation = getTranslationByLocale(
         course.translations,
         locale
@@ -418,40 +476,54 @@ export default function VideosList() {
           });
         });
       });
-    }
-  );
+    });
+  }, [
+    coursesWithVideos,
+    searchTerm,
+    locale,
+    getTranslationByLocale,
+  ]);
 
-  // Estatísticas
-  const totalCourses = coursesWithVideos.length;
-  const totalModules = coursesWithVideos.reduce(
-    (sum, course) => sum + (course.modules?.length || 0),
-    0
-  );
-  const totalLessons = coursesWithVideos.reduce(
-    (sum, course) =>
-      sum +
-      (course.modules?.reduce(
-        (moduleSum, module) =>
-          moduleSum + (module.lessons?.length || 0),
-        0
-      ) || 0),
-    0
-  );
-  const totalVideos = coursesWithVideos.reduce(
-    (sum, course) =>
-      sum +
-      (course.modules?.reduce(
-        (moduleSum, module) =>
-          moduleSum +
-          (module.lessons?.reduce(
-            (lessonSum, lesson) =>
-              lessonSum + (lesson.videos?.length || 0),
-            0
-          ) || 0),
-        0
-      ) || 0),
-    0
-  );
+  // Estatísticas gerais
+  const totalStats = useMemo(() => {
+    const totalCourses = coursesWithVideos.length;
+    const totalModules = coursesWithVideos.reduce(
+      (sum, course) => sum + (course.modules?.length || 0),
+      0
+    );
+    const totalLessons = coursesWithVideos.reduce(
+      (sum, course) =>
+        sum +
+        (course.modules?.reduce(
+          (moduleSum, module) =>
+            moduleSum + (module.lessons?.length || 0),
+          0
+        ) || 0),
+      0
+    );
+    const totalVideos = coursesWithVideos.reduce(
+      (sum, course) =>
+        sum +
+        (course.modules?.reduce(
+          (moduleSum, module) =>
+            moduleSum +
+            (module.lessons?.reduce(
+              (lessonSum, lesson) =>
+                lessonSum + (lesson.videos?.length || 0),
+              0
+            ) || 0),
+          0
+        ) || 0),
+      0
+    );
+
+    return {
+      totalCourses,
+      totalModules,
+      totalLessons,
+      totalVideos,
+    };
+  }, [coursesWithVideos]);
 
   if (loading) {
     return (
@@ -499,7 +571,7 @@ export default function VideosList() {
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {totalCourses}
+            {totalStats.totalCourses}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.totalCourses')}
@@ -507,7 +579,7 @@ export default function VideosList() {
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {totalModules}
+            {totalStats.totalModules}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.totalModules')}
@@ -515,7 +587,7 @@ export default function VideosList() {
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {totalLessons}
+            {totalStats.totalLessons}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.totalLessons')}
@@ -523,7 +595,7 @@ export default function VideosList() {
         </div>
         <div className="bg-gray-700/50 rounded-lg p-4 text-center">
           <p className="text-3xl font-bold text-white">
-            {totalVideos}
+            {totalStats.totalVideos}
           </p>
           <p className="text-sm text-gray-400">
             {t('stats.totalVideos')}
@@ -543,7 +615,7 @@ export default function VideosList() {
             const isCourseExpanded = expandedCourses.has(
               course.id
             );
-            const moduleCount = course.modules?.length || 0;
+            const courseStats = getCourseStats(course);
 
             return (
               <div
@@ -578,13 +650,26 @@ export default function VideosList() {
                   <div className="flex-1">
                     <h4 className="text-lg font-semibold text-white">
                       {courseTranslation?.title ||
-                        'Sem título'}
+                        t('noTitle')}
                     </h4>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>Slug: {course.slug}</span>
+                      <span>
+                        {t('slug')}: {course.slug}
+                      </span>
                       <span className="flex items-center gap-1">
                         <Package size={12} />
-                        {moduleCount} {t('modules')}
+                        {courseStats.moduleCount}{' '}
+                        {t('modules')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Play size={12} />
+                        {courseStats.lessonCount}{' '}
+                        {t('lessons')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Video size={12} />
+                        {courseStats.videoCount}{' '}
+                        {t('videos')}
                       </span>
                     </div>
                   </div>
@@ -593,7 +678,7 @@ export default function VideosList() {
                 {/* Módulos do curso */}
                 {isCourseExpanded && (
                   <div className="bg-gray-800/50 p-4">
-                    {moduleCount > 0 ? (
+                    {courseStats.moduleCount > 0 ? (
                       <div className="space-y-3">
                         {course.modules?.map(module => {
                           const moduleTranslation =
@@ -603,8 +688,8 @@ export default function VideosList() {
                             );
                           const isModuleExpanded =
                             expandedModules.has(module.id);
-                          const lessonCount =
-                            module.lessons?.length || 0;
+                          const moduleStats =
+                            getModuleStats(module);
 
                           return (
                             <div
@@ -661,16 +746,26 @@ export default function VideosList() {
                                 <div className="flex-1">
                                   <h5 className="text-white font-medium">
                                     {moduleTranslation?.title ||
-                                      'Sem título'}
+                                      t('noTitle')}
                                   </h5>
                                   <div className="flex items-center gap-4 text-xs text-gray-500">
                                     <span>
-                                      Slug: {module.slug}
+                                      {t('slug')}:{' '}
+                                      {module.slug}
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <Play size={10} />
-                                      {lessonCount}{' '}
+                                      {
+                                        moduleStats.lessonCount
+                                      }{' '}
                                       {t('lessons')}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Video size={10} />
+                                      {
+                                        moduleStats.videoCount
+                                      }{' '}
+                                      {t('videos')}
                                     </span>
                                   </div>
                                 </div>
@@ -679,7 +774,8 @@ export default function VideosList() {
                               {/* Aulas do módulo */}
                               {isModuleExpanded && (
                                 <div className="bg-gray-800/30 p-4">
-                                  {lessonCount > 0 ? (
+                                  {moduleStats.lessonCount >
+                                  0 ? (
                                     <div className="space-y-3 pl-2">
                                       {module.lessons?.map(
                                         lesson => {
@@ -765,7 +861,9 @@ export default function VideosList() {
                                                 <div className="flex-1">
                                                   <h6 className="text-white text-base font-medium">
                                                     {lessonTranslation?.title ||
-                                                      'Sem título'}
+                                                      t(
+                                                        'noTitle'
+                                                      )}
                                                   </h6>
                                                   <div className="flex items-center gap-3 text-sm text-gray-500">
                                                     <span className="flex items-center gap-1.5">
@@ -818,11 +916,17 @@ export default function VideosList() {
                                                               <div className="flex-1 min-w-0">
                                                                 <p className="text-white text-sm font-medium truncate">
                                                                   {videoTranslation?.title ||
-                                                                    'Sem título'}
+                                                                    t(
+                                                                      'noTitle'
+                                                                    )}
                                                                 </p>
                                                                 <div className="flex items-center gap-3 text-xs text-gray-500">
                                                                   <span>
-                                                                    Slug:{' '}
+                                                                    {t(
+                                                                      'slug'
+                                                                    )}
+
+                                                                    :{' '}
                                                                     {
                                                                       video.slug
                                                                     }
@@ -838,7 +942,11 @@ export default function VideosList() {
                                                                     )}
                                                                   </span>
                                                                   <span>
-                                                                    ID:{' '}
+                                                                    {t(
+                                                                      'providerId'
+                                                                    )}
+
+                                                                    :{' '}
                                                                     {
                                                                       video.providerVideoId
                                                                     }

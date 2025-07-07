@@ -1128,40 +1128,43 @@
         "description": "Ocorreu um erro ao criar o vídeo. Tente novamente."
       }
     },
-  "videosList": {
-    "modules":"Módulos",
-    "lessons":"Aulas",
-    "title": "Lista de Vídeos",
-    "searchPlaceholder": "Buscar vídeos...",
-    "videos": "vídeos",
-    "noVideos": "Nenhum vídeo nesta aula",
-    "noLessons": "Nenhuma aula neste módulo",
-    "noModules": "Nenhum módulo neste curso",
-    "noResults": "Nenhum vídeo encontrado com este termo.",
-    "noCourses": "Nenhum curso cadastrado ainda.",
-    "deleteConfirm": "Tem certeza que deseja excluir este vídeo?",
-    "stats": {
-      "totalCourses": "Total de Cursos",
-      "totalModules": "Total de Módulos",
-      "totalLessons": "Total de Aulas",
-      "totalVideos": "Total de Vídeos"
+    "videosList": {
+      "modules": "Módulos",
+      "lessons": "Aulas",
+      "title": "Lista de Vídeos",
+      "searchPlaceholder": "Buscar vídeos...",
+      "videos": "vídeos",
+      "noVideos": "Nenhum vídeo nesta aula",
+      "noLessons": "Nenhuma aula neste módulo",
+      "noModules": "Nenhum módulo neste curso",
+      "noResults": "Nenhum vídeo encontrado com este termo.",
+      "noCourses": "Nenhum curso cadastrado ainda.",
+      "noTitle": "Sem título",
+      "slug": "Slug",
+      "providerId": "ID",
+      "deleteConfirm": "Tem certeza que deseja excluir este vídeo?",
+      "stats": {
+        "totalCourses": "Total de Cursos",
+        "totalModules": "Total de Módulos",
+        "totalLessons": "Total de Aulas",
+        "totalVideos": "Total de Vídeos"
+      },
+      "actions": {
+        "view": "Visualizar",
+        "edit": "Editar",
+        "delete": "Excluir"
+      },
+      "success": {
+        "deleteTitle": "Vídeo excluído!",
+        "deleteDescription": "O vídeo foi excluído com sucesso."
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar vídeos",
+        "fetchDescription": "Não foi possível carregar a lista de vídeos.",
+        "deleteTitle": "Erro ao excluir",
+        "deleteDescription": "Não foi possível excluir o vídeo."
+      }
     },
-    "actions": {
-      "view": "Visualizar",
-      "edit": "Editar",
-      "delete": "Excluir"
-    },
-    "success": {
-      "deleteTitle": "Vídeo excluído!",
-      "deleteDescription": "O vídeo foi excluído com sucesso."
-    },
-    "error": {
-      "fetchTitle": "Erro ao carregar vídeos",
-      "fetchDescription": "Não foi possível carregar a lista de vídeos.",
-      "deleteTitle": "Erro ao excluir",
-      "deleteDescription": "Não foi possível excluir o vídeo."
-    }
-  },
   "userView": {
     "title": "Detalhes do Usuário",
     "roleAdmin": "Administrador",

@@ -1038,8 +1038,8 @@
     },
     "videosList": {
       "title": "Lista de Videos",
-      "modules":"Módulos",
-      "lessons":"Lecciones",
+      "modules": "Módulos",
+      "lessons": "Lecciones",
       "searchPlaceholder": "Buscar videos...",
       "videos": "videos",
       "noVideos": "Ningún video en esta lección",
@@ -1047,6 +1047,9 @@
       "noModules": "Ningún módulo en este curso",
       "noResults": "Ningún video encontrado con este término.",
       "noCourses": "Ningún curso registrado aún.",
+      "noTitle": "Sin título",
+      "slug": "Slug",
+      "providerId": "ID",
       "deleteConfirm": "¿Está seguro que desea eliminar este video?",
       "stats": {
         "totalCourses": "Total de Cursos",
@@ -1069,7 +1072,8 @@
         "deleteTitle": "Error al eliminar",
         "deleteDescription": "No fue posible eliminar el video."
       }
-    },
+    }
+  ,
     "userView": {
       "title": "Detalles del Usuario",
       "roleAdmin": "Administrador",

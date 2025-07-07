@@ -22,6 +22,7 @@ import {
   Clock,
 } from 'lucide-react';
 import Image from 'next/image';
+import VideoViewModal from './VideoViewModal';
 
 interface Translation {
   locale: string;
@@ -95,6 +96,16 @@ export default function VideosList() {
   const [expandedLessons, setExpandedLessons] = useState<
     Set<string>
   >(new Set());
+
+  // Estados para controlar o modal de vídeo
+  const [isVideoModalOpen, setIsVideoModalOpen] =
+    useState(false);
+  const [selectedVideoData, setSelectedVideoData] =
+    useState<{
+      courseId: string;
+      lessonId: string;
+      videoId: string;
+    } | null>(null);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -337,6 +348,23 @@ export default function VideosList() {
       }
       return newExpanded;
     });
+  }, []);
+
+  const handleOpenVideoModal = useCallback(
+    (
+      courseId: string,
+      lessonId: string,
+      videoId: string
+    ) => {
+      setSelectedVideoData({ courseId, lessonId, videoId });
+      setIsVideoModalOpen(true);
+    },
+    []
+  );
+
+  const handleCloseVideoModal = useCallback(() => {
+    setIsVideoModalOpen(false);
+    setSelectedVideoData(null);
   }, []);
 
   const getTranslationByLocale = useCallback(
@@ -958,6 +986,14 @@ export default function VideosList() {
                                                               <div className="flex items-center gap-2">
                                                                 <button
                                                                   type="button"
+                                                                  onClick={e => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenVideoModal(
+                                                                      course.id,
+                                                                      lesson.id,
+                                                                      video.id
+                                                                    );
+                                                                  }}
                                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                                   title={t(
                                                                     'actions.view'
@@ -1076,6 +1112,15 @@ export default function VideosList() {
           </p>
         </div>
       )}
+
+      {/* Modal de Visualização de Vídeo */}
+      <VideoViewModal
+        courseId={selectedVideoData?.courseId || null}
+        lessonId={selectedVideoData?.lessonId || null}
+        videoId={selectedVideoData?.videoId || null}
+        isOpen={isVideoModalOpen}
+        onClose={handleCloseVideoModal}
+      />
     </div>
   );
 }

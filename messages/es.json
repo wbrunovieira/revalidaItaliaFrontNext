@@ -293,6 +293,44 @@
           "deleteTitle": "Error al eliminar",
           "deleteDescription": "No se pudo eliminar el documento"
         }
+      },
+      "documentView": {
+        "title": "Ver Documento",
+        "noTitle": "Sin título",
+        "downloadable": "Disponible para descarga",
+        "notSpecified": "No especificado",
+        "yes": "Sí",
+        "no": "No",
+        "close": "Cerrar",
+        "documentNotFound": "Documento no encontrado",
+        "copySuccess": "¡Copiado!",
+        "copyDescription": "fue copiado al portapapeles",
+        "copyError": "Error al copiar",
+        "copyErrorDescription": "No se pudo copiar al portapapeles",
+        "fields": {
+          "id": "ID",
+          "filename": "Nombre del archivo",
+          "mimeType": "Tipo MIME",
+          "fileSize": "Tamaño del archivo",
+          "downloadCount": "Total de descargas",
+          "downloads": "descargas",
+          "downloadable": "Disponible para descarga",
+          "createdAt": "Creado el",
+          "updatedAt": "Actualizado el",
+          "title": "Título",
+          "description": "Descripción",
+          "url": "URL"
+        },
+        "translations": {
+          "title": "Traducciones",
+          "portuguese": "Portugués",
+          "spanish": "Español",
+          "italian": "Italiano"
+        },
+        "error": {
+          "fetchTitle": "Error al cargar",
+          "fetchDescription": "No se pudieron cargar los detalles del documento"
+        }
       }
     ,
   "tabs": {

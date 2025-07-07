@@ -24,6 +24,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import Image from 'next/image';
+import DocumentViewModal from './DocumentViewModal';
 
 interface Translation {
   locale: string;
@@ -102,9 +103,28 @@ export default function DocumentsList() {
     Set<string>
   >(new Set());
 
+  // Estados para controlar o modal de documento
+  const [isDocumentModalOpen, setIsDocumentModalOpen] =
+    useState(false);
+  const [selectedDocumentData, setSelectedDocumentData] =
+    useState<{
+      lessonId: string;
+      documentId: string;
+    } | null>(null);
+
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
+
+  // Debug: Log dos estados do modal
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('DocumentsList: Modal state changed', {
+        isOpen: isDocumentModalOpen,
+        selectedData: selectedDocumentData,
+      });
+    }
+  }, [isDocumentModalOpen, selectedDocumentData]);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -507,6 +527,41 @@ export default function DocumentsList() {
     });
   }, []);
 
+  const handleOpenDocumentModal = useCallback(
+    (lessonId: string, documentId: string) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+          'DocumentsList: handleOpenDocumentModal called',
+          {
+            lessonId,
+            documentId,
+          }
+        );
+      }
+
+      setSelectedDocumentData({ lessonId, documentId });
+      setIsDocumentModalOpen(true);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('DocumentsList: States updated', {
+          isOpen: true,
+          data: { lessonId, documentId },
+        });
+      }
+    },
+    []
+  );
+
+  const handleCloseDocumentModal = useCallback(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        'DocumentsList: handleCloseDocumentModal called'
+      );
+    }
+    setIsDocumentModalOpen(false);
+    setSelectedDocumentData(null);
+  }, []);
+
   // Função para calcular estatísticas de um curso
   const getCourseStats = useCallback(
     (course: Course): CourseStats => {
@@ -666,6 +721,21 @@ export default function DocumentsList() {
     };
   }, [coursesWithDocuments]);
 
+  // Debug log para o modal (movido para desenvolvimento apenas)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        'Rendering DocumentViewModal with props:',
+        {
+          lessonId: selectedDocumentData?.lessonId || null,
+          documentId:
+            selectedDocumentData?.documentId || null,
+          isOpen: isDocumentModalOpen,
+        }
+      );
+    }
+  }, [selectedDocumentData, isDocumentModalOpen]);
+
   if (loading) {
     return (
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
@@ -744,7 +814,6 @@ export default function DocumentsList() {
         </div>
       </div>
 
-      {/* Lista hierárquica */}
       {filteredCourses.length > 0 ? (
         <div className="space-y-4">
           {filteredCourses.map(course => {
@@ -1100,8 +1169,32 @@ export default function DocumentsList() {
                                                                 <button
                                                                   type="button"
                                                                   onClick={e => {
+                                                                    if (
+                                                                      process
+                                                                        .env
+                                                                        .NODE_ENV ===
+                                                                      'development'
+                                                                    ) {
+                                                                      console.log(
+                                                                        'Eye button clicked!',
+                                                                        {
+                                                                          lessonId:
+                                                                            lesson.id,
+                                                                          documentId:
+                                                                            document.id,
+                                                                          event:
+                                                                            e,
+                                                                        }
+                                                                      );
+                                                                    }
+
                                                                     e.stopPropagation();
-                                                                    // Função view ainda não implementada
+                                                                    e.preventDefault();
+
+                                                                    handleOpenDocumentModal(
+                                                                      lesson.id,
+                                                                      document.id
+                                                                    );
                                                                   }}
                                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                                   title={t(
@@ -1224,6 +1317,16 @@ export default function DocumentsList() {
           </p>
         </div>
       )}
+
+      {/* Modal de Visualização de Documento */}
+      <DocumentViewModal
+        lessonId={selectedDocumentData?.lessonId || null}
+        documentId={
+          selectedDocumentData?.documentId || null
+        }
+        isOpen={isDocumentModalOpen}
+        onClose={handleCloseDocumentModal}
+      />
     </div>
   );
 }

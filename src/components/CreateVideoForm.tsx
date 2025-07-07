@@ -15,6 +15,7 @@ import {
   Globe,
   BookOpen,
   Play,
+  Layers,
 } from 'lucide-react';
 
 interface Translation {
@@ -49,6 +50,7 @@ interface Course {
 
 interface FormData {
   courseId: string;
+  moduleId: string;
   lessonId: string;
   slug: string;
   providerVideoId: string;
@@ -65,10 +67,6 @@ interface CreateVideoPayload {
   translations: Translation[];
 }
 
-interface LessonWithModule extends Lesson {
-  moduleName: string;
-}
-
 export default function CreateVideoForm() {
   const t = useTranslations('Admin.createVideo');
   const params = useParams();
@@ -82,6 +80,7 @@ export default function CreateVideoForm() {
 
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
+    moduleId: '',
     lessonId: '',
     slug: '',
     providerVideoId: '',
@@ -225,6 +224,10 @@ export default function CreateVideoForm() {
       newErrors.courseId = t('errors.courseRequired');
     }
 
+    if (!formData.moduleId) {
+      newErrors.moduleId = t('errors.moduleRequired');
+    }
+
     if (!formData.lessonId) {
       newErrors.lessonId = t('errors.lessonRequired');
     }
@@ -286,6 +289,7 @@ export default function CreateVideoForm() {
   const resetForm = useCallback(() => {
     setFormData({
       courseId: '',
+      moduleId: '',
       lessonId: '',
       slug: '',
       providerVideoId: '',
@@ -357,7 +361,19 @@ export default function CreateVideoForm() {
       setFormData(prev => ({
         ...prev,
         courseId,
+        moduleId: '', // Reset module when course changes
         lessonId: '', // Reset lesson when course changes
+      }));
+    },
+    []
+  );
+
+  const handleModuleChange = useCallback(
+    (moduleId: string) => {
+      setFormData(prev => ({
+        ...prev,
+        moduleId,
+        lessonId: '', // Reset lesson when module changes
       }));
     },
     []
@@ -402,18 +418,13 @@ export default function CreateVideoForm() {
     course => course.id === formData.courseId
   );
 
-  const availableLessons: LessonWithModule[] =
-    selectedCourse?.modules?.flatMap(
-      module =>
-        module.lessons?.map(lesson => ({
-          ...lesson,
-          moduleName:
-            getTranslationByLocale(
-              module.translations,
-              locale
-            )?.title || module.slug,
-        })) || []
-    ) || [];
+  const availableModules = selectedCourse?.modules || [];
+
+  const selectedModule = availableModules.find(
+    module => module.id === formData.moduleId
+  );
+
+  const availableLessons = selectedModule?.lessons || [];
 
   return (
     <form
@@ -426,8 +437,9 @@ export default function CreateVideoForm() {
           {t('title')}
         </h3>
 
-        {/* Seleção de Curso e Aula */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
+        {/* Seleção de Curso, Módulo e Aula */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          {/* Seleção de Curso */}
           <div className="space-y-2">
             <Label className="text-gray-300 flex items-center gap-2">
               <BookOpen size={16} />
@@ -473,6 +485,45 @@ export default function CreateVideoForm() {
             )}
           </div>
 
+          {/* Seleção de Módulo */}
+          <div className="space-y-2">
+            <Label className="text-gray-300 flex items-center gap-2">
+              <Layers size={16} />
+              {t('fields.module')}
+            </Label>
+            <select
+              value={formData.moduleId}
+              onChange={e =>
+                handleModuleChange(e.target.value)
+              }
+              disabled={!formData.courseId}
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white disabled:opacity-50"
+            >
+              <option value="">
+                {t('placeholders.module')}
+              </option>
+              {availableModules.map(module => {
+                const moduleTranslation =
+                  getTranslationByLocale(
+                    module.translations,
+                    locale
+                  );
+                return (
+                  <option key={module.id} value={module.id}>
+                    {moduleTranslation?.title ||
+                      module.slug}
+                  </option>
+                );
+              })}
+            </select>
+            {errors.moduleId && (
+              <p className="text-xs text-red-500">
+                {errors.moduleId}
+              </p>
+            )}
+          </div>
+
+          {/* Seleção de Aula */}
           <div className="space-y-2">
             <Label className="text-gray-300 flex items-center gap-2">
               <Play size={16} />
@@ -483,7 +534,7 @@ export default function CreateVideoForm() {
               onChange={e =>
                 handleLessonChange(e.target.value)
               }
-              disabled={!formData.courseId}
+              disabled={!formData.moduleId}
               className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white disabled:opacity-50"
             >
               <option value="">
@@ -497,7 +548,6 @@ export default function CreateVideoForm() {
                   );
                 return (
                   <option key={lesson.id} value={lesson.id}>
-                    {lesson.moduleName} -{' '}
                     {lessonTranslation?.title ||
                       `Aula ${lesson.order}`}
                   </option>

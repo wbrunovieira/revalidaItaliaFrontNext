@@ -989,6 +989,7 @@
       "creating": "Creando...",
       "fields": {
         "course": "Curso",
+        "module": "Módulo",
         "lesson": "Lección",
         "slug": "Slug (URL)",
         "providerVideoId": "ID del Proveedor de Video",
@@ -997,6 +998,7 @@
       },
       "placeholders": {
         "course": "Seleccione un curso",
+        "module": "Seleccione un módulo",
         "lesson": "Seleccione una lección",
         "slug": "intro-derivadas",
         "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
@@ -1015,6 +1017,7 @@
       },
       "errors": {
         "courseRequired": "Curso es obligatorio",
+        "moduleRequired": "Módulo es obligatorio",
         "lessonRequired": "Lección es obligatoria",
         "slugRequired": "Slug es obligatorio",
         "slugInvalid": "Slug debe contener solo letras minúsculas, números y guiones",

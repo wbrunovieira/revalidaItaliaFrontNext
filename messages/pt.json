@@ -1059,56 +1059,59 @@
     "create": "Criar Vídeo",
     "list": "Listar Vídeos"
   },
-  "createVideo": {
-    "title": "Novo Vídeo",
-    "create": "Criar Vídeo",
-    "creating": "Criando...",
-    "fields": {
-      "course": "Curso",
-      "lesson": "Aula",
-      "slug": "Slug (URL)",
-      "providerVideoId": "ID do Provedor de Vídeo",
-      "title": "Título",
-      "description": "Descrição"
+"createVideo": {
+      "title": "Novo Vídeo",
+      "create": "Criar Vídeo",
+      "creating": "Criando...",
+      "fields": {
+        "course": "Curso",
+        "module": "Módulo",
+        "lesson": "Aula",
+        "slug": "Slug (URL)",
+        "providerVideoId": "ID do Provedor de Vídeo",
+        "title": "Título",
+        "description": "Descrição"
+      },
+      "placeholders": {
+        "course": "Selecione um curso",
+        "module": "Selecione um módulo",
+        "lesson": "Selecione uma aula",
+        "slug": "intro-derivadas",
+        "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
+        "title": "Digite o título do vídeo",
+        "description": "Digite a descrição do vídeo"
+      },
+      "hints": {
+        "slug": "Use apenas letras minúsculas, números e hífens",
+        "providerVideoId": "ID único do vídeo no provedor (ex: YouTube, Vimeo)"
+      },
+      "translations": {
+        "title": "Traduções",
+        "portuguese": "Português",
+        "spanish": "Espanhol",
+        "italian": "Italiano"
+      },
+      "errors": {
+        "courseRequired": "Curso é obrigatório",
+        "moduleRequired": "Módulo é obrigatório",
+        "lessonRequired": "Aula é obrigatória",
+        "slugRequired": "Slug é obrigatório",
+        "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
+        "providerVideoIdRequired": "ID do provedor de vídeo é obrigatório",
+        "titleRequired": "Título é obrigatório",
+        "descriptionRequired": "Descrição é obrigatória",
+        "fetchCoursesTitle": "Erro ao carregar cursos",
+        "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
+      },
+      "success": {
+        "title": "Vídeo criado!",
+        "description": "O vídeo foi criado com sucesso."
+      },
+      "error": {
+        "title": "Erro ao criar vídeo",
+        "description": "Ocorreu um erro ao criar o vídeo. Tente novamente."
+      }
     },
-    "placeholders": {
-      "course": "Selecione um curso",
-      "lesson": "Selecione uma aula",
-      "slug": "intro-derivadas",
-      "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
-      "title": "Digite o título do vídeo",
-      "description": "Digite a descrição do vídeo"
-    },
-    "hints": {
-      "slug": "Use apenas letras minúsculas, números e hífens",
-      "providerVideoId": "ID único do vídeo no provedor (ex: YouTube, Vimeo)"
-    },
-    "translations": {
-      "title": "Traduções",
-      "portuguese": "Português",
-      "spanish": "Espanhol",
-      "italian": "Italiano"
-    },
-    "errors": {
-      "courseRequired": "Curso é obrigatório",
-      "lessonRequired": "Aula é obrigatória",
-      "slugRequired": "Slug é obrigatório",
-      "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
-      "providerVideoIdRequired": "ID do provedor de vídeo é obrigatório",
-      "titleRequired": "Título é obrigatório",
-      "descriptionRequired": "Descrição é obrigatória",
-      "fetchCoursesTitle": "Erro ao carregar cursos",
-      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
-    },
-    "success": {
-      "title": "Vídeo criado!",
-      "description": "O vídeo foi criado com sucesso."
-    },
-    "error": {
-      "title": "Erro ao criar vídeo",
-      "description": "Ocorreu um erro ao criar o vídeo. Tente novamente."
-    }
-  },
   "videosList": {
     "modules":"Módulos",
     "lessons":"Aulas",

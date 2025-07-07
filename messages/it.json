@@ -1004,6 +1004,7 @@
       "creating": "Creazione...",
       "fields": {
         "course": "Corso",
+        "module": "Modulo",
         "lesson": "Lezione",
         "slug": "Slug (URL)",
         "providerVideoId": "ID del Fornitore Video",
@@ -1012,6 +1013,7 @@
       },
       "placeholders": {
         "course": "Seleziona un corso",
+        "module": "Seleziona un modulo",
         "lesson": "Seleziona una lezione",
         "slug": "intro-derivate",
         "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
@@ -1030,6 +1032,7 @@
       },
       "errors": {
         "courseRequired": "Corso è obbligatorio",
+        "moduleRequired": "Modulo è obbligatorio",
         "lessonRequired": "Lezione è obbligatoria",
         "slugRequired": "Slug è obbligatorio",
         "slugInvalid": "Slug deve contenere solo lettere minuscole, numeri e trattini",
@@ -1047,7 +1050,8 @@
         "title": "Errore nella creazione del video",
         "description": "Si è verificato un errore durante la creazione del video. Riprova."
       }
-    },
+    }
+  ,
     "videosList": {
       "title": "Elenco Video",
       "modules":"Moduli",

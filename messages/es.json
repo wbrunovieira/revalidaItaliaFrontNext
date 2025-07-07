@@ -244,6 +244,57 @@
       "description": "El documento fue agregado a la lección."
     }
   },
+  "documentsList": {
+        "title": "Lista de Documentos",
+        "searchPlaceholder": "Buscar documentos, cursos, módulos o clases...",
+        "slug": "Slug",
+        "modules": "módulos",
+        "lessons": "clases",
+        "documents": "documentos",
+        "filename": "Archivo",
+        "downloads": "Descargas",
+        "noTitle": "Sin título",
+        "noModules": "Ningún módulo encontrado",
+        "noLessons": "Ninguna clase encontrada",
+        "noDocuments": "Ningún documento encontrado",
+        "noCourses": "Ningún curso encontrado",
+        "noResults": "Ningún resultado encontrado para tu búsqueda",
+        "stats": {
+          "totalCourses": "Cursos",
+          "totalModules": "Módulos",
+          "totalLessons": "Clases",
+          "totalDocuments": "Documentos"
+        },
+        "actions": {
+          "view": "Ver documento",
+          "edit": "Editar documento",
+          "delete": "Eliminar documento"
+        },
+        "deleteConfirmation": {
+          "title": "Confirmar Eliminación",
+          "message": "¿Estás seguro de que quieres eliminar el documento \"{documentName}\"?",
+          "document": "Documento",
+          "lesson": "Clase",
+          "module": "Módulo",
+          "course": "Curso",
+          "filename": "Nombre del archivo",
+          "fileSize": "Tamaño",
+          "downloads": "Descargas",
+          "warning": "Esta acción no se puede deshacer",
+          "confirm": "Confirmar"
+        },
+        "success": {
+          "deleteTitle": "Documento eliminado",
+          "deleteDescription": "El documento ha sido eliminado exitosamente"
+        },
+        "error": {
+          "fetchTitle": "Error al cargar",
+          "fetchDescription": "No se pudieron cargar los documentos",
+          "deleteTitle": "Error al eliminar",
+          "deleteDescription": "No se pudo eliminar el documento"
+        }
+      }
+    ,
   "tabs": {
     "overview": "Vista General",
     "users": "Usuarios",

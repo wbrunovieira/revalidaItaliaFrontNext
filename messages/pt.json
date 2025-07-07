@@ -245,6 +245,56 @@
       "description": "O documento foi adicionado à aula."
     }
   },
+  "documentsList": {
+        "title": "Lista de Documentos",
+        "searchPlaceholder": "Buscar documentos, cursos, módulos ou aulas...",
+        "slug": "Slug",
+        "modules": "módulos",
+        "lessons": "aulas",
+        "documents": "documentos",
+        "filename": "Arquivo",
+        "downloads": "Downloads",
+        "noTitle": "Sem título",
+        "noModules": "Nenhum módulo encontrado",
+        "noLessons": "Nenhuma aula encontrada",
+        "noDocuments": "Nenhum documento encontrado",
+        "noCourses": "Nenhum curso encontrado",
+        "noResults": "Nenhum resultado encontrado para sua busca",
+        "stats": {
+          "totalCourses": "Cursos",
+          "totalModules": "Módulos", 
+          "totalLessons": "Aulas",
+          "totalDocuments": "Documentos"
+        },
+        "actions": {
+          "view": "Visualizar documento",
+          "edit": "Editar documento",
+          "delete": "Excluir documento"
+        },
+        "deleteConfirmation": {
+          "title": "Confirmar Exclusão",
+          "message": "Tem certeza de que deseja excluir o documento \"{documentName}\"?",
+          "document": "Documento",
+          "lesson": "Aula",
+          "module": "Módulo", 
+          "course": "Curso",
+          "filename": "Nome do arquivo",
+          "fileSize": "Tamanho",
+          "downloads": "Downloads",
+          "warning": "Esta ação não pode ser desfeita",
+          "confirm": "Confirmar"
+        },
+        "success": {
+          "deleteTitle": "Documento excluído",
+          "deleteDescription": "O documento foi excluído com sucesso"
+        },
+        "error": {
+          "fetchTitle": "Erro ao carregar",
+          "fetchDescription": "Não foi possível carregar os documentos",
+          "deleteTitle": "Erro ao excluir",
+          "deleteDescription": "Não foi possível excluir o documento"
+        }
+      },
   "tabs": {
     "overview": "Visão Geral",
     "users": "Usuários",

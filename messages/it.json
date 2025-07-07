@@ -245,6 +245,56 @@
       "description": "Il documento è stato aggiunto alla lezione."
     }
   },
+  "documentsList": {
+    "title": "Elenco Documenti",
+    "searchPlaceholder": "Cerca documenti, corsi, moduli o lezioni...",
+    "slug": "Slug",
+    "modules": "moduli",
+    "lessons": "lezioni",
+    "documents": "documenti",
+    "filename": "File",
+    "downloads": "Download",
+    "noTitle": "Senza titolo",
+    "noModules": "Nessun modulo trovato",
+    "noLessons": "Nessuna lezione trovata",
+    "noDocuments": "Nessun documento trovato",
+    "noCourses": "Nessun corso trovato",
+    "noResults": "Nessun risultato trovato per la tua ricerca",
+    "stats": {
+      "totalCourses": "Corsi",
+      "totalModules": "Moduli",
+      "totalLessons": "Lezioni",
+      "totalDocuments": "Documenti"
+    },
+    "actions": {
+      "view": "Visualizza documento",
+      "edit": "Modifica documento",
+      "delete": "Elimina documento"
+    },
+    "deleteConfirmation": {
+      "title": "Conferma Eliminazione",
+      "message": "Sei sicuro di voler eliminare il documento \"{documentName}\"?",
+      "document": "Documento",
+      "lesson": "Lezione",
+      "module": "Modulo",
+      "course": "Corso",
+      "filename": "Nome del file",
+      "fileSize": "Dimensione",
+      "downloads": "Download",
+      "warning": "Questa azione non può essere annullata",
+      "confirm": "Conferma"
+    },
+    "success": {
+      "deleteTitle": "Documento eliminato",
+      "deleteDescription": "Il documento è stato eliminato con successo"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento",
+      "fetchDescription": "Non è stato possibile caricare i documenti",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Non è stato possibile eliminare il documento"
+    }
+  },
   "tabs": {
     "overview": "Panoramica",
     "users": "Utenti",

@@ -39,6 +39,7 @@ import LessonsList from '@/components/LessonsList';
 import CreateVideoForm from '@/components/CreateVideoForm';
 import VideosList from '@/components/VideosList';
 import CreateDocumentForm from '@/components/CreateDocumentForm';
+import DocumentsList from '@/components/DocumentsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -341,7 +342,7 @@ export default function AdminPage() {
                 <CreateDocumentForm />
               </TabsContent>
               <TabsContent value="list">
-                {/* <DocumentsList /> */}
+                <DocumentsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

@@ -4,18 +4,27 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Video,
-  Link,
   Type,
   FileText,
   Globe,
   BookOpen,
   Play,
   Layers,
+  Check,
+  X,
 } from 'lucide-react';
 
 interface Translation {
@@ -52,7 +61,6 @@ interface FormData {
   courseId: string;
   moduleId: string;
   lessonId: string;
-  slug: string;
   providerVideoId: string;
   translations: {
     pt: Translation;
@@ -61,11 +69,32 @@ interface FormData {
   };
 }
 
+interface FormErrors {
+  courseId?: string;
+  moduleId?: string;
+  lessonId?: string;
+  providerVideoId?: string;
+  title_pt?: string;
+  title_es?: string;
+  title_it?: string;
+  description_pt?: string;
+  description_es?: string;
+  description_it?: string;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+}
+
 interface CreateVideoPayload {
   slug: string;
   providerVideoId: string;
   translations: Translation[];
 }
+
+type Locale = 'pt' | 'es' | 'it';
+type TranslationField = 'title' | 'description';
 
 export default function CreateVideoForm() {
   const t = useTranslations('Admin.createVideo');
@@ -82,7 +111,6 @@ export default function CreateVideoForm() {
     courseId: '',
     moduleId: '',
     lessonId: '',
-    slug: '',
     providerVideoId: '',
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -91,9 +119,156 @@ export default function CreateVideoForm() {
     },
   });
 
-  const [errors, setErrors] = useState<
-    Record<string, string>
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof FormErrors, boolean>>
   >({});
+
+  // Validação de campos de texto
+  const validateTextField = useCallback(
+    (
+      value: string,
+      fieldType: 'title' | 'description'
+    ): ValidationResult => {
+      if (!value.trim()) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Required`),
+        };
+      }
+      if (value.trim().length < 3) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Min`),
+        };
+      }
+
+      const maxLength = fieldType === 'title' ? 100 : 500;
+      if (value.length > maxLength) {
+        return {
+          isValid: false,
+          message: t(`errors.${fieldType}Max`),
+        };
+      }
+
+      return { isValid: true };
+    },
+    [t]
+  );
+
+  // Validação individual de campos
+  const validateField = useCallback(
+    (field: string, value?: string): ValidationResult => {
+      if (field === 'courseId') {
+        if (!formData.courseId) {
+          return {
+            isValid: false,
+            message: t('errors.courseRequired'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      if (field === 'moduleId') {
+        if (!formData.moduleId) {
+          return {
+            isValid: false,
+            message: t('errors.moduleRequired'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      if (field === 'lessonId') {
+        if (!formData.lessonId) {
+          return {
+            isValid: false,
+            message: t('errors.lessonRequired'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      if (field === 'providerVideoId') {
+        const videoId = value || formData.providerVideoId;
+        if (!videoId.trim()) {
+          return {
+            isValid: false,
+            message: t('errors.providerVideoIdRequired'),
+          };
+        }
+        if (videoId.trim().length < 3) {
+          return {
+            isValid: false,
+            message: t('errors.providerVideoIdMin'),
+          };
+        }
+        return { isValid: true };
+      }
+
+      // Validação de campos de tradução
+      const match = field.match(
+        /^(title|description)_(\w+)$/
+      );
+      if (match) {
+        const [, fieldType, locale] = match;
+        const translation =
+          formData.translations[locale as Locale];
+        if (translation) {
+          const fieldValue =
+            translation[fieldType as TranslationField];
+          return validateTextField(
+            fieldValue,
+            fieldType as TranslationField
+          );
+        }
+      }
+
+      return { isValid: true };
+    },
+    [formData, t, validateTextField]
+  );
+
+  // Validação em tempo real
+  const handleFieldValidation = useCallback(
+    (field: string, value?: string) => {
+      if (touched[field as keyof FormErrors]) {
+        let fieldValue = value;
+
+        if (!fieldValue && field.includes('_')) {
+          const match = field.match(
+            /^(title|description)_(\w+)$/
+          );
+          if (match) {
+            const [, fieldType, locale] = match;
+            const translation =
+              formData.translations[locale as Locale];
+            if (translation) {
+              fieldValue =
+                translation[fieldType as TranslationField];
+            }
+          }
+        } else if (!fieldValue) {
+          fieldValue =
+            formData[
+              field as keyof Pick<
+                FormData,
+                'providerVideoId'
+              >
+            ];
+        }
+
+        const validation = validateField(field, fieldValue);
+        setErrors(prev => ({
+          ...prev,
+          [field]: validation.isValid
+            ? undefined
+            : validation.message,
+        }));
+      }
+    },
+    [touched, validateField, formData]
+  );
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -103,9 +278,78 @@ export default function CreateVideoForm() {
       if (error instanceof Error) {
         console.error(`Error message: ${error.message}`);
         console.error(`Stack trace: ${error.stack}`);
+
+        // Tratamento de erro de validação do NestJS
+        if (
+          error.message.includes('500') &&
+          error.message.includes('Internal server error')
+        ) {
+          toast({
+            title: t('error.serverTitle'),
+            description: t('error.serverDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        // Tratamento de erro de vídeo duplicado
+        if (
+          error.message.includes('409') ||
+          error.message.includes('conflict') ||
+          error.message.includes('already exists')
+        ) {
+          toast({
+            title: t('error.conflictTitle'),
+            description: t('error.conflictDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('400') ||
+          error.message.includes('Bad Request')
+        ) {
+          toast({
+            title: t('error.validationTitle'),
+            description: t('error.validationDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('401') ||
+          error.message.includes('Unauthorized')
+        ) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.authDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (
+          error.message.includes('403') ||
+          error.message.includes('Forbidden')
+        ) {
+          toast({
+            title: t('error.permissionTitle'),
+            description: t('error.permissionDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
       }
+
+      toast({
+        title: t('error.title'),
+        description: t('error.description'),
+        variant: 'destructive',
+      });
     },
-    []
+    [toast, t]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -218,51 +462,64 @@ export default function CreateVideoForm() {
   }, [fetchCourses]);
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: FormErrors = {};
+    let isValid = true;
 
+    // Validar curso
     if (!formData.courseId) {
       newErrors.courseId = t('errors.courseRequired');
+      isValid = false;
     }
 
+    // Validar módulo
     if (!formData.moduleId) {
       newErrors.moduleId = t('errors.moduleRequired');
+      isValid = false;
     }
 
+    // Validar aula
     if (!formData.lessonId) {
       newErrors.lessonId = t('errors.lessonRequired');
+      isValid = false;
     }
 
-    if (!formData.slug.trim()) {
-      newErrors.slug = t('errors.slugRequired');
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = t('errors.slugInvalid');
-    }
-
-    if (!formData.providerVideoId.trim()) {
-      newErrors.providerVideoId = t(
-        'errors.providerVideoIdRequired'
-      );
+    // Validar providerVideoId
+    const videoIdValidation = validateField(
+      'providerVideoId'
+    );
+    if (!videoIdValidation.isValid) {
+      newErrors.providerVideoId = videoIdValidation.message;
+      isValid = false;
     }
 
     // Validar traduções
-    (['pt', 'es', 'it'] as const).forEach(locale => {
-      if (!formData.translations[locale].title.trim()) {
-        newErrors[`title_${locale}`] = t(
-          'errors.titleRequired'
-        );
+    const locales: Locale[] = ['pt', 'es', 'it'];
+    locales.forEach(locale => {
+      const titleValidation = validateTextField(
+        formData.translations[locale].title,
+        'title'
+      );
+      if (!titleValidation.isValid) {
+        newErrors[`title_${locale}` as keyof FormErrors] =
+          titleValidation.message;
+        isValid = false;
       }
-      if (
-        !formData.translations[locale].description.trim()
-      ) {
-        newErrors[`description_${locale}`] = t(
-          'errors.descriptionRequired'
-        );
+
+      const descValidation = validateTextField(
+        formData.translations[locale].description,
+        'description'
+      );
+      if (!descValidation.isValid) {
+        newErrors[
+          `description_${locale}` as keyof FormErrors
+        ] = descValidation.message;
+        isValid = false;
       }
     });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, t]);
+    return isValid;
+  }, [formData, t, validateField, validateTextField]);
 
   const createVideo = useCallback(
     async (payload: CreateVideoPayload): Promise<void> => {
@@ -272,14 +529,17 @@ export default function CreateVideoForm() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
+        const responseText = await response.text();
         throw new Error(
-          `Failed to create video: ${response.status}`
+          `Failed to create video: ${response.status} - ${responseText}`
         );
       }
     },
@@ -291,7 +551,6 @@ export default function CreateVideoForm() {
       courseId: '',
       moduleId: '',
       lessonId: '',
-      slug: '',
       providerVideoId: '',
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
@@ -300,20 +559,63 @@ export default function CreateVideoForm() {
       },
     });
     setErrors({});
+    setTouched({});
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // Marcar todos os campos como tocados
+    const allFields = [
+      'courseId',
+      'moduleId',
+      'lessonId',
+      'providerVideoId',
+      'title_pt',
+      'title_es',
+      'title_it',
+      'description_pt',
+      'description_es',
+      'description_it',
+    ];
+
+    const allTouched = allFields.reduce((acc, field) => {
+      acc[field as keyof FormErrors] = true;
+      return acc;
+    }, {} as Record<keyof FormErrors, boolean>);
+
+    setTouched(allTouched);
+
+    if (!validateForm()) {
+      toast({
+        title: t('error.validationTitle'),
+        description: t('error.validationDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
 
     try {
+      // Gerar slug automaticamente a partir do título em português
+      const slug = generateSlug(
+        formData.translations.pt.title
+      );
+
+      // Garantir que as traduções estão no formato correto
+      const translations = Object.values(
+        formData.translations
+      ).filter(
+        translation =>
+          translation.title.trim() &&
+          translation.description.trim()
+      );
+
       const payload: CreateVideoPayload = {
-        slug: formData.slug,
-        providerVideoId: formData.providerVideoId,
-        translations: Object.values(formData.translations),
+        slug,
+        providerVideoId: formData.providerVideoId.trim(),
+        translations,
       };
 
       await createVideo(payload);
@@ -326,11 +628,6 @@ export default function CreateVideoForm() {
       resetForm();
     } catch (error) {
       handleApiError(error, 'Video creation error');
-      toast({
-        title: t('error.title'),
-        description: t('error.description'),
-        variant: 'destructive',
-      });
     } finally {
       setLoading(false);
     }
@@ -338,8 +635,8 @@ export default function CreateVideoForm() {
 
   const updateTranslation = useCallback(
     (
-      locale: 'pt' | 'es' | 'it',
-      field: 'title' | 'description',
+      locale: Locale,
+      field: TranslationField,
       value: string
     ) => {
       setFormData(prev => ({
@@ -352,8 +649,11 @@ export default function CreateVideoForm() {
           },
         },
       }));
+
+      const fieldKey = `${field}_${locale}`;
+      handleFieldValidation(fieldKey, value);
     },
-    []
+    [handleFieldValidation]
   );
 
   const handleCourseChange = useCallback(
@@ -361,11 +661,13 @@ export default function CreateVideoForm() {
       setFormData(prev => ({
         ...prev,
         courseId,
-        moduleId: '', // Reset module when course changes
-        lessonId: '', // Reset lesson when course changes
+        moduleId: '',
+        lessonId: '',
       }));
+      setTouched(prev => ({ ...prev, courseId: true }));
+      handleFieldValidation('courseId', courseId);
     },
-    []
+    [handleFieldValidation]
   );
 
   const handleModuleChange = useCallback(
@@ -373,25 +675,22 @@ export default function CreateVideoForm() {
       setFormData(prev => ({
         ...prev,
         moduleId,
-        lessonId: '', // Reset lesson when module changes
+        lessonId: '',
       }));
+      setTouched(prev => ({ ...prev, moduleId: true }));
+      handleFieldValidation('moduleId', moduleId);
     },
-    []
+    [handleFieldValidation]
   );
 
   const handleLessonChange = useCallback(
     (lessonId: string) => {
       setFormData(prev => ({ ...prev, lessonId }));
+      setTouched(prev => ({ ...prev, lessonId: true }));
+      handleFieldValidation('lessonId', lessonId);
     },
-    []
+    [handleFieldValidation]
   );
-
-  const handleSlugChange = useCallback((value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      slug: value.toLowerCase().replace(/\s/g, '-'),
-    }));
-  }, []);
 
   const handleProviderVideoIdChange = useCallback(
     (value: string) => {
@@ -399,8 +698,47 @@ export default function CreateVideoForm() {
         ...prev,
         providerVideoId: value,
       }));
+      handleFieldValidation('providerVideoId', value);
     },
-    []
+    [handleFieldValidation]
+  );
+
+  const handleInputBlur = useCallback(
+    (field: string) => () => {
+      setTouched(prev => ({ ...prev, [field]: true }));
+      handleFieldValidation(field);
+    },
+    [handleFieldValidation]
+  );
+
+  // Verificar status de validação para cada idioma
+  const getTranslationStatus = useCallback(
+    (
+      locale: Locale
+    ): { hasError: boolean; isValid: boolean } => {
+      const titleError =
+        errors[`title_${locale}` as keyof FormErrors];
+      const descError =
+        errors[`description_${locale}` as keyof FormErrors];
+      const titleTouched =
+        touched[`title_${locale}` as keyof FormErrors];
+      const descTouched =
+        touched[
+          `description_${locale}` as keyof FormErrors
+        ];
+
+      const hasError = !!(titleError || descError);
+      const isValid =
+        !hasError &&
+        !!(titleTouched && descTouched) &&
+        formData.translations[locale].title.trim().length >=
+          3 &&
+        formData.translations[locale].description.trim()
+          .length >= 3;
+
+      return { hasError, isValid };
+    },
+    [errors, touched, formData.translations]
   );
 
   const getTranslationByLocale = useCallback(
@@ -417,13 +755,10 @@ export default function CreateVideoForm() {
   const selectedCourse = courses.find(
     course => course.id === formData.courseId
   );
-
   const availableModules = selectedCourse?.modules || [];
-
   const selectedModule = availableModules.find(
     module => module.id === formData.moduleId
   );
-
   const availableLessons = selectedModule?.lessons || [];
 
   return (
@@ -444,45 +779,56 @@ export default function CreateVideoForm() {
             <Label className="text-gray-300 flex items-center gap-2">
               <BookOpen size={16} />
               {t('fields.course')}
+              <span className="text-red-400">*</span>
             </Label>
             {loadingCourses ? (
               <div className="animate-pulse">
                 <div className="h-10 bg-gray-700 rounded"></div>
               </div>
             ) : (
-              <select
+              <Select
                 value={formData.courseId}
-                onChange={e =>
-                  handleCourseChange(e.target.value)
-                }
-                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
+                onValueChange={handleCourseChange}
               >
-                <option value="">
-                  {t('placeholders.course')}
-                </option>
-                {courses.map(course => {
-                  const courseTranslation =
-                    getTranslationByLocale(
-                      course.translations,
-                      locale
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectValue
+                    placeholder={t('placeholders.course')}
+                  />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  {courses.map(course => {
+                    const courseTranslation =
+                      getTranslationByLocale(
+                        course.translations,
+                        locale
+                      );
+                    return (
+                      <SelectItem
+                        key={course.id}
+                        value={course.id}
+                        className="text-white hover:bg-gray-600"
+                      >
+                        {courseTranslation?.title ||
+                          course.slug}
+                      </SelectItem>
                     );
-                  return (
-                    <option
-                      key={course.id}
-                      value={course.id}
-                    >
-                      {courseTranslation?.title ||
-                        course.slug}
-                    </option>
-                  );
-                })}
-              </select>
+                  })}
+                </SelectContent>
+              </Select>
             )}
-            {errors.courseId && (
+            {errors.courseId && touched.courseId && (
               <p className="text-xs text-red-500">
                 {errors.courseId}
               </p>
             )}
+            {formData.courseId &&
+              !errors.courseId &&
+              touched.courseId && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.courseValid')}
+                </div>
+              )}
           </div>
 
           {/* Seleção de Módulo */}
@@ -490,37 +836,51 @@ export default function CreateVideoForm() {
             <Label className="text-gray-300 flex items-center gap-2">
               <Layers size={16} />
               {t('fields.module')}
+              <span className="text-red-400">*</span>
             </Label>
-            <select
+            <Select
               value={formData.moduleId}
-              onChange={e =>
-                handleModuleChange(e.target.value)
-              }
+              onValueChange={handleModuleChange}
               disabled={!formData.courseId}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white disabled:opacity-50"
             >
-              <option value="">
-                {t('placeholders.module')}
-              </option>
-              {availableModules.map(module => {
-                const moduleTranslation =
-                  getTranslationByLocale(
-                    module.translations,
-                    locale
+              <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
+                <SelectValue
+                  placeholder={t('placeholders.module')}
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 border-gray-600">
+                {availableModules.map(module => {
+                  const moduleTranslation =
+                    getTranslationByLocale(
+                      module.translations,
+                      locale
+                    );
+                  return (
+                    <SelectItem
+                      key={module.id}
+                      value={module.id}
+                      className="text-white hover:bg-gray-600"
+                    >
+                      {moduleTranslation?.title ||
+                        module.slug}
+                    </SelectItem>
                   );
-                return (
-                  <option key={module.id} value={module.id}>
-                    {moduleTranslation?.title ||
-                      module.slug}
-                  </option>
-                );
-              })}
-            </select>
-            {errors.moduleId && (
+                })}
+              </SelectContent>
+            </Select>
+            {errors.moduleId && touched.moduleId && (
               <p className="text-xs text-red-500">
                 {errors.moduleId}
               </p>
             )}
+            {formData.moduleId &&
+              !errors.moduleId &&
+              touched.moduleId && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.moduleValid')}
+                </div>
+              )}
           </div>
 
           {/* Seleção de Aula */}
@@ -528,65 +888,61 @@ export default function CreateVideoForm() {
             <Label className="text-gray-300 flex items-center gap-2">
               <Play size={16} />
               {t('fields.lesson')}
+              <span className="text-red-400">*</span>
             </Label>
-            <select
+            <Select
               value={formData.lessonId}
-              onChange={e =>
-                handleLessonChange(e.target.value)
-              }
+              onValueChange={handleLessonChange}
               disabled={!formData.moduleId}
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white disabled:opacity-50"
             >
-              <option value="">
-                {t('placeholders.lesson')}
-              </option>
-              {availableLessons.map(lesson => {
-                const lessonTranslation =
-                  getTranslationByLocale(
-                    lesson.translations,
-                    locale
+              <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
+                <SelectValue
+                  placeholder={t('placeholders.lesson')}
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 border-gray-600">
+                {availableLessons.map(lesson => {
+                  const lessonTranslation =
+                    getTranslationByLocale(
+                      lesson.translations,
+                      locale
+                    );
+                  return (
+                    <SelectItem
+                      key={lesson.id}
+                      value={lesson.id}
+                      className="text-white hover:bg-gray-600"
+                    >
+                      {lessonTranslation?.title ||
+                        `Aula ${lesson.order}`}
+                    </SelectItem>
                   );
-                return (
-                  <option key={lesson.id} value={lesson.id}>
-                    {lessonTranslation?.title ||
-                      `Aula ${lesson.order}`}
-                  </option>
-                );
-              })}
-            </select>
-            {errors.lessonId && (
+                })}
+              </SelectContent>
+            </Select>
+            {errors.lessonId && touched.lessonId && (
               <p className="text-xs text-red-500">
                 {errors.lessonId}
               </p>
             )}
+            {formData.lessonId &&
+              !errors.lessonId &&
+              touched.lessonId && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.lessonValid')}
+                </div>
+              )}
           </div>
         </div>
 
-        {/* Informações do vídeo */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <Link size={16} />
-              {t('fields.slug')}
-            </Label>
-            <TextField
-              placeholder={t('placeholders.slug')}
-              value={formData.slug}
-              onChange={e =>
-                handleSlugChange(e.target.value)
-              }
-              error={errors.slug}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500">
-              {t('hints.slug')}
-            </p>
-          </div>
-
+        {/* ID do Provedor de Vídeo */}
+        <div className="mb-8">
           <div className="space-y-2">
             <Label className="text-gray-300 flex items-center gap-2">
               <Video size={16} />
               {t('fields.providerVideoId')}
+              <span className="text-red-400">*</span>
             </Label>
             <TextField
               placeholder={t(
@@ -596,12 +952,27 @@ export default function CreateVideoForm() {
               onChange={e =>
                 handleProviderVideoIdChange(e.target.value)
               }
+              onBlur={handleInputBlur('providerVideoId')}
               error={errors.providerVideoId}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
             <p className="text-xs text-gray-500">
               {t('hints.providerVideoId')}
             </p>
+            {errors.providerVideoId &&
+              touched.providerVideoId && (
+                <p className="text-xs text-red-500">
+                  {errors.providerVideoId}
+                </p>
+              )}
+            {formData.providerVideoId &&
+              !errors.providerVideoId &&
+              touched.providerVideoId && (
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <Check size={14} />
+                  {t('validation.providerVideoIdValid')}
+                </div>
+              )}
           </div>
         </div>
 
@@ -615,7 +986,13 @@ export default function CreateVideoForm() {
           {(['pt', 'es', 'it'] as const).map(loc => (
             <div
               key={loc}
-              className="border border-gray-700 rounded-lg p-4"
+              className={`border rounded-lg p-4 transition-colors ${
+                getTranslationStatus(loc).hasError
+                  ? 'border-red-500/50'
+                  : getTranslationStatus(loc).isValid
+                  ? 'border-green-500/50'
+                  : 'border-gray-700'
+              }`}
             >
               <h5 className="text-white font-medium mb-4 flex items-center gap-2">
                 {loc === 'pt'
@@ -632,12 +1009,22 @@ export default function CreateVideoForm() {
                       : 'italian'
                   }`
                 )}
+                {getTranslationStatus(loc).isValid && (
+                  <Check
+                    size={16}
+                    className="text-green-400"
+                  />
+                )}
+                {getTranslationStatus(loc).hasError && (
+                  <X size={16} className="text-red-400" />
+                )}
               </h5>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-gray-300 flex items-center gap-2">
                     <Type size={16} />
                     {t('fields.title')}
+                    <span className="text-red-400">*</span>
                   </Label>
                   <TextField
                     placeholder={t('placeholders.title')}
@@ -649,6 +1036,7 @@ export default function CreateVideoForm() {
                         e.target.value
                       )
                     }
+                    onBlur={handleInputBlur(`title_${loc}`)}
                     error={errors[`title_${loc}`]}
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                   />
@@ -657,6 +1045,7 @@ export default function CreateVideoForm() {
                   <Label className="text-gray-300 flex items-center gap-2">
                     <FileText size={16} />
                     {t('fields.description')}
+                    <span className="text-red-400">*</span>
                   </Label>
                   <TextField
                     placeholder={t(
@@ -672,6 +1061,9 @@ export default function CreateVideoForm() {
                         e.target.value
                       )
                     }
+                    onBlur={handleInputBlur(
+                      `description_${loc}`
+                    )}
                     error={errors[`description_${loc}`]}
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                   />

@@ -1067,7 +1067,6 @@
         "course": "Curso",
         "module": "Módulo",
         "lesson": "Aula",
-        "slug": "Slug (URL)",
         "providerVideoId": "ID do Provedor de Vídeo",
         "title": "Título",
         "description": "Descrição"
@@ -1076,13 +1075,11 @@
         "course": "Selecione um curso",
         "module": "Selecione um módulo",
         "lesson": "Selecione uma aula",
-        "slug": "intro-derivadas",
         "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
         "title": "Digite o título do vídeo",
         "description": "Digite a descrição do vídeo"
       },
       "hints": {
-        "slug": "Use apenas letras minúsculas, números e hífens",
         "providerVideoId": "ID único do vídeo no provedor (ex: YouTube, Vimeo)"
       },
       "translations": {
@@ -1091,17 +1088,36 @@
         "spanish": "Espanhol",
         "italian": "Italiano"
       },
+      "validation": {
+        "courseValid": "Curso válido",
+        "moduleValid": "Módulo válido",
+        "lessonValid": "Aula válida",
+        "providerVideoIdValid": "ID do provedor válido"
+      },
       "errors": {
         "courseRequired": "Curso é obrigatório",
         "moduleRequired": "Módulo é obrigatório",
         "lessonRequired": "Aula é obrigatória",
-        "slugRequired": "Slug é obrigatório",
-        "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
         "providerVideoIdRequired": "ID do provedor de vídeo é obrigatório",
+        "providerVideoIdMin": "ID do provedor deve ter pelo menos 3 caracteres",
         "titleRequired": "Título é obrigatório",
+        "titleMin": "Título deve ter pelo menos 3 caracteres",
+        "titleMax": "Título deve ter no máximo 100 caracteres",
         "descriptionRequired": "Descrição é obrigatória",
+        "descriptionMin": "Descrição deve ter pelo menos 3 caracteres",
+        "descriptionMax": "Descrição deve ter no máximo 500 caracteres",
         "fetchCoursesTitle": "Erro ao carregar cursos",
-        "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
+        "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis",
+        "serverTitle": "Erro do servidor",
+        "serverDescription": "Erro interno do servidor. Tente novamente mais tarde.",
+        "conflictTitle": "Conflito de dados",
+        "conflictDescription": "Já existe um vídeo com essas informações.",
+        "validationTitle": "Dados inválidos",
+        "validationDescription": "Verifique os campos obrigatórios e tente novamente.",
+        "authTitle": "Não autorizado",
+        "authDescription": "Você não tem permissão para realizar esta ação.",
+        "permissionTitle": "Acesso negado",
+        "permissionDescription": "Você não possui as permissões necessárias."
       },
       "success": {
         "title": "Vídeo criado!",

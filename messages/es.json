@@ -159,6 +159,91 @@
   "title": "Panel Administrativo",
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
+  "createDocument": {
+    "title": "Crear Documento",
+    "create": "Crear Documento",
+    "creating": "Creando...",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Lección",
+      "filename": "Nombre del Archivo",
+      "fileSize": "Tamaño del Archivo (MB)",
+      "mimeType": "Tipo de Archivo",
+      "isDownloadable": "Permitir Descarga",
+      "title": "Título",
+      "description": "Descripción",
+      "url": "URL del Documento"
+    },
+    "placeholders": {
+      "course": "Seleccione un curso",
+      "module": "Seleccione un módulo",
+      "lesson": "Seleccione una lección",
+      "filename": "ejemplo-documento.pdf",
+      "fileSize": "2.5",
+      "title": "Ingrese el título del documento",
+      "description": "Ingrese la descripción del documento",
+      "url": "/documents/ejemplo-documento.pdf"
+    },
+    "hints": {
+      "filename": "Nombre del archivo con extensión (ej: material-leccion.pdf)",
+      "fileSize": "Tamaño del archivo en megabytes",
+      "url": "URL relativa o completa del documento",
+      "downloadableYes": "Los usuarios pueden descargar este documento",
+      "downloadableNo": "Solo visualización en línea"
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "validation": {
+      "courseValid": "Curso seleccionado",
+      "moduleValid": "Módulo seleccionado",
+      "lessonValid": "Lección seleccionada",
+      "filenameValid": "Nombre de archivo válido",
+      "fileSizeValid": "Tamaño de archivo válido"
+    },
+    "errors": {
+      "courseRequired": "Por favor, seleccione un curso",
+      "moduleRequired": "Por favor, seleccione un módulo",
+      "lessonRequired": "Por favor, seleccione una lección",
+      "filenameRequired": "El nombre del archivo es obligatorio",
+      "filenameMin": "El nombre del archivo debe tener al menos 3 caracteres",
+      "fileSizeRequired": "El tamaño del archivo es obligatorio",
+      "fileSizeMax": "El tamaño máximo permitido es 100MB",
+      "titleRequired": "El título es obligatorio",
+      "titleMin": "El título debe tener al menos 3 caracteres",
+      "titleMax": "El título debe tener máximo 100 caracteres",
+      "descriptionRequired": "La descripción es obligatoria",
+      "descriptionMin": "La descripción debe tener al menos 3 caracteres",
+      "descriptionMax": "La descripción debe tener máximo 500 caracteres",
+      "urlRequired": "La URL es obligatoria",
+      "urlMax": "La URL debe tener máximo 1000 caracteres",
+      "urlInvalid": "La URL debe comenzar con / o http"
+    },
+    "error": {
+      "title": "Error al crear documento",
+      "description": "Ocurrió un error al crear el documento. Por favor, inténtelo de nuevo.",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Por favor, verifique los campos e inténtelo de nuevo.",
+      "serverTitle": "Error del servidor",
+      "serverDescription": "Ocurrió un error en el servidor. Por favor, inténtelo más tarde.",
+      "conflictTitle": "Documento duplicado",
+      "conflictDescription": "Ya existe un documento con esta información en esta lección.",
+      "authTitle": "No autorizado",
+      "authDescription": "No tiene permiso para realizar esta acción.",
+      "permissionTitle": "Sin permiso",
+      "permissionDescription": "No tiene permiso para crear documentos.",
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No se pudo cargar la lista de cursos. Por favor, recargue la página."
+    },
+    "success": {
+      "title": "¡Documento creado con éxito!",
+      "description": "El documento fue agregado a la lección."
+    }
+  },
   "tabs": {
     "overview": "Vista General",
     "users": "Usuarios",

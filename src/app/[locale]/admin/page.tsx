@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -10,7 +10,6 @@ import {
   UserPlus,
   List,
   BarChart3,
-  Globe,
   Route,
   Package,
   Play,
@@ -26,7 +25,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import AdminHeader from '@/components/AdminHeader';
 import DashboardStats from '@/components/DashboardStats';
 import CreateUserForm from '@/components/CreateUserForm';
 import UsersList from '@/components/UsersList';
@@ -40,6 +38,7 @@ import CreateLessonForm from '@/components/CreateLessonForm';
 import LessonsList from '@/components/LessonsList';
 import CreateVideoForm from '@/components/CreateVideoForm';
 import VideosList from '@/components/VideosList';
+import CreateDocumentForm from '@/components/CreateDocumentForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -338,7 +337,12 @@ export default function AdminPage() {
                   {t('documents.list')}
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="create"></TabsContent>
+              <TabsContent value="create">
+                <CreateDocumentForm />
+              </TabsContent>
+              <TabsContent value="list">
+                {/* <DocumentsList /> */}
+              </TabsContent>
             </Tabs>
           </TabsContent>
         </div>

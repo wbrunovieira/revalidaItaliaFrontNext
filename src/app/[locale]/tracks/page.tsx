@@ -1,4 +1,4 @@
-// src/app/[locale]/tracks/page.tsx (ajustado)
+// src/app/[locale]/tracks/page.tsx
 
 import { cookies } from 'next/headers';
 import Image from 'next/image';

@@ -1,9 +1,40 @@
 {
+  
+    "Profile": {
+      "title": "Meu Perfil",
+      "personalInfo": "Informações Pessoais",
+      "addresses": "Endereços",
+      "name": "Nome",
+      "email": "E-mail",
+      "cpf": "CPF",
+      "phone": "Telefone",
+      "birthDate": "Data de Nascimento",
+      "lastLogin": "Último Acesso",
+      "editProfile": "Editar Perfil",
+      "addAddress": "Adicionar Endereço",
+      "street": "Rua",
+      "number": "Número",
+      "complement": "Complemento",
+      "district": "Bairro",
+      "city": "Cidade",
+      "state": "Estado",
+      "country": "País",
+      "postalCode": "CEP",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "confirmDelete": "Tem certeza que deseja excluir este endereço?",
+      "noAddresses": "Nenhum endereço cadastrado",
+      "back": "Voltar"
+    }
+  ,
   "Nav": {
     "home": "Início",
     "blog": "Suporte",
     "FAQ": "Perguntas Frequentes",
-    "cursos": "Cursos"
+    "cursos": "Cursos",
+    "profile": "Perfil",
+    "viewProfile": "Ver Perfil"
   },
   "meta": {
     "title": "Revalida Italia",

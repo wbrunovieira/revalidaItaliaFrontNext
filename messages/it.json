@@ -1,9 +1,39 @@
 {
+
+  "Profile": {
+  "title": "Il mio profilo",
+  "personalInfo": "Informazioni personali",
+  "addresses": "Indirizzi",
+  "name": "Nome",
+  "email": "E-mail",
+  "cpf": "Codice fiscale",
+  "phone": "Telefono",
+  "birthDate": "Data di nascita",
+  "lastLogin": "Ultimo accesso",
+  "editProfile": "Modifica profilo",
+  "addAddress": "Aggiungi indirizzo",
+  "street": "Via",
+  "number": "Numero",
+  "complement": "Complemento",
+  "district": "Quartiere",
+  "city": "Città",
+  "state": "Stato",
+  "country": "Paese",
+  "postalCode": "CAP",
+  "save": "Salva",
+  "cancel": "Annulla",
+  "delete": "Elimina",
+  "confirmDelete": "Sei sicuro di voler eliminare questo indirizzo?",
+  "noAddresses": "Nessun indirizzo registrato",
+  "back": "Indietro"
+},
   "Nav": {
     "home": "Inizio",
     "blog": "Supporto",
     "FAQ": "Domande Frequenti",
-    "cursos": "Corsi"
+    "cursos": "Corsi",
+    "profile": "Profilo",
+    "viewProfile": "Visualizza profilo"
   },
   "meta": {
     "title": "Revalida Italia",

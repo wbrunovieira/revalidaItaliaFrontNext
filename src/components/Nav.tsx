@@ -3,13 +3,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import MenuToggle from './MenuToggle';
 import Logo from './Logo';
 import SearchInput from './SearchInput';
-import Avatar from './Avatar';
+
 import LanguageButton from './LanguageButton';
 import LogoutButton from './LogoutButton';
 import Notifications from './Notifications';
+
+import Avatar from './Avatar';
 
 interface NavProps {
   collapsed: boolean;
@@ -21,6 +24,8 @@ export default function Nav({
   onToggle,
 }: NavProps) {
   const t = useTranslations('Nav');
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1];
 
   return (
     <nav
@@ -41,9 +46,11 @@ export default function Nav({
 
       <div className="md:flex items-center gap-4">
         <LanguageButton />
-        <LogoutButton />
-        <Avatar />
         <Notifications />
+
+        <Avatar />
+
+        <LogoutButton />
       </div>
     </nav>
   );

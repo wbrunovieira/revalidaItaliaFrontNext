@@ -1,6 +1,6 @@
 {
   
-  "Profile": {
+"Profile": {
     "title": "Perfil",
     "back": "Voltar",
     "personalInfo": "Informações Pessoais",
@@ -14,6 +14,8 @@
     "postalCode": "CEP",
     "noAddresses": "Nenhum endereço cadastrado",
     "addAddress": "Adicionar Endereço",
+    "editAddress": "Editar Endereço",
+    "updateAddress": "Atualizar Endereço",
     "addFirstAddress": "Adicionar Primeiro Endereço",
     "loadingAddresses": "Carregando endereços...",
     "street": "Rua",
@@ -38,7 +40,8 @@
     "postalCodePlaceholder": "Ex: 12345-678",
     "cancel": "Cancelar",
     "saveAddress": "Salvar Endereço",
-    "saving": "Salvando..."
+    "saving": "Salvando...",
+    "updating": "Atualizando..."
   }
   ,
   "Nav": {

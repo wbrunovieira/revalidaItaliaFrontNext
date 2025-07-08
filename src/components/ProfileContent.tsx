@@ -10,6 +10,7 @@ import {
   Phone,
   Mail,
   Hash,
+  Edit,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -55,6 +56,11 @@ export default function ProfileContent({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] =
     useState(false);
+  const [editingAddress, setEditingAddress] =
+    useState<Address | null>(null);
+  const [modalMode, setModalMode] = useState<
+    'add' | 'edit'
+  >('add');
 
   // Formatar datas
   const formatDate = (dateString?: string) => {
@@ -107,6 +113,24 @@ export default function ProfileContent({
     } finally {
       setIsLoadingAddresses(false);
     }
+  };
+
+  const openAddModal = () => {
+    setModalMode('add');
+    setEditingAddress(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (address: Address) => {
+    setModalMode('edit');
+    setEditingAddress(address);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingAddress(null);
+    setModalMode('add');
   };
 
   return (
@@ -253,7 +277,7 @@ export default function ProfileContent({
                 {t('addresses')}
               </h2>
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={openAddModal}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
               >
                 <Plus size={20} />
@@ -273,9 +297,21 @@ export default function ProfileContent({
                 {addresses.map(address => (
                   <div
                     key={address.id}
-                    className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-secondary transition-colors"
+                    className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-secondary transition-colors relative group"
                   >
-                    <div className="space-y-2 text-white">
+                    {/* Edit Button */}
+                    <button
+                      onClick={() => openEditModal(address)}
+                      className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title={t('editAddress')}
+                    >
+                      <Edit
+                        size={16}
+                        className="text-white"
+                      />
+                    </button>
+
+                    <div className="space-y-2 text-white pr-10">
                       <p className="font-medium">
                         {address.street}, {address.number}
                       </p>
@@ -313,7 +349,7 @@ export default function ProfileContent({
                   {t('noAddresses')}
                 </p>
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={openAddModal}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors"
                 >
                   <Plus size={20} />
@@ -328,9 +364,11 @@ export default function ProfileContent({
       {/* Modal */}
       <AddAddressModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         onAddressAdded={handleAddressAdded}
         userId={userData.id}
+        editAddress={editingAddress}
+        mode={modalMode}
       />
     </>
   );

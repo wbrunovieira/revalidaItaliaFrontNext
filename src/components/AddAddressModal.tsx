@@ -1,14 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, MapPin, Save, Loader2 } from 'lucide-react';
+
+interface Address {
+  id: string;
+  street: string;
+  number: string;
+  complement?: string;
+  district?: string;
+  city: string;
+  state?: string;
+  country: string;
+  postalCode: string;
+}
 
 interface AddAddressModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddressAdded: () => void;
   userId: string;
+  editAddress?: Address | null;
+  mode?: 'add' | 'edit';
 }
 
 interface AddressFormData {
@@ -27,6 +41,8 @@ export default function AddAddressModal({
   onClose,
   onAddressAdded,
   userId,
+  editAddress = null,
+  mode = 'add',
 }: AddAddressModalProps) {
   const t = useTranslations('Profile');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +58,33 @@ export default function AddAddressModal({
       postalCode: '',
     }
   );
+
+  // Populate form when editing
+  useEffect(() => {
+    if (mode === 'edit' && editAddress) {
+      setFormData({
+        street: editAddress.street || '',
+        number: editAddress.number || '',
+        complement: editAddress.complement || '',
+        district: editAddress.district || '',
+        city: editAddress.city || '',
+        state: editAddress.state || '',
+        country: editAddress.country || '',
+        postalCode: editAddress.postalCode || '',
+      });
+    } else if (mode === 'add') {
+      setFormData({
+        street: '',
+        number: '',
+        complement: '',
+        district: '',
+        city: '',
+        state: '',
+        country: '',
+        postalCode: '',
+      });
+    }
+  }, [mode, editAddress, isOpen]);
 
   const [errors, setErrors] = useState<
     Partial<AddressFormData>
@@ -101,18 +144,27 @@ export default function AddAddressModal({
         .find(row => row.startsWith('token='))
         ?.split('=')[1];
 
-      const response = await fetch(`${apiUrl}/addresses`, {
-        method: 'POST',
+      const url =
+        mode === 'edit' && editAddress
+          ? `${apiUrl}/addresses/${editAddress.id}`
+          : `${apiUrl}/addresses`;
+
+      const method = mode === 'edit' ? 'PATCH' : 'POST';
+
+      const body =
+        mode === 'edit'
+          ? formData // For PATCH, don't include userId
+          : { userId, ...formData }; // For POST, include userId
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           ...(token && {
             Authorization: `Bearer ${token}`,
           }),
         },
-        body: JSON.stringify({
-          userId,
-          ...formData,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -136,7 +188,12 @@ export default function AddAddressModal({
       onAddressAdded();
       onClose();
     } catch (error) {
-      console.error('Error creating address:', error);
+      console.error(
+        `Error ${
+          mode === 'edit' ? 'updating' : 'creating'
+        } address:`,
+        error
+      );
       // You might want to show an error message to the user here
     } finally {
       setIsLoading(false);
@@ -170,7 +227,9 @@ export default function AddAddressModal({
           <div className="flex items-center gap-3">
             <MapPin size={24} className="text-secondary" />
             <h2 className="text-xl font-bold">
-              {t('addAddress')}
+              {mode === 'edit'
+                ? t('editAddress')
+                : t('addAddress')}
             </h2>
           </div>
           <button
@@ -189,7 +248,7 @@ export default function AddAddressModal({
         >
           {/* Street */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-primary mb-1">
               {t('street')}{' '}
               <span className="text-red-500">*</span>
             </label>
@@ -199,7 +258,7 @@ export default function AddAddressModal({
               onChange={e =>
                 handleInputChange('street', e.target.value)
               }
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+              className={`w-full text-primary px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
                 errors.street
                   ? 'border-red-500'
                   : 'border-gray-300'
@@ -226,7 +285,7 @@ export default function AddAddressModal({
               onChange={e =>
                 handleInputChange('number', e.target.value)
               }
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+              className={`w-full text-primary px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
                 errors.number
                   ? 'border-red-500'
                   : 'border-gray-300'
@@ -255,7 +314,7 @@ export default function AddAddressModal({
                   e.target.value
                 )
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 text-primary border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder={t('complementPlaceholder')}
               disabled={isLoading}
             />
@@ -275,7 +334,7 @@ export default function AddAddressModal({
                   e.target.value
                 )
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border text-primary border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder={t('districtPlaceholder')}
               disabled={isLoading}
             />
@@ -294,7 +353,7 @@ export default function AddAddressModal({
                 onChange={e =>
                   handleInputChange('city', e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+                className={`w-full text-primary px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
                   errors.city
                     ? 'border-red-500'
                     : 'border-gray-300'
@@ -319,7 +378,7 @@ export default function AddAddressModal({
                 onChange={e =>
                   handleInputChange('state', e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full text-primary px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder={t('statePlaceholder')}
                 disabled={isLoading}
               />
@@ -342,7 +401,7 @@ export default function AddAddressModal({
                     e.target.value
                   )
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+                className={`w-full text-primary px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
                   errors.country
                     ? 'border-red-500'
                     : 'border-gray-300'
@@ -371,7 +430,7 @@ export default function AddAddressModal({
                     e.target.value
                   )
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
+                className={`w-full text-primary px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
                   errors.postalCode
                     ? 'border-red-500'
                     : 'border-gray-300'
@@ -410,7 +469,13 @@ export default function AddAddressModal({
               ) : (
                 <Save size={16} />
               )}
-              {isLoading ? t('saving') : t('saveAddress')}
+              {isLoading
+                ? mode === 'edit'
+                  ? t('updating')
+                  : t('saving')
+                : mode === 'edit'
+                ? t('updateAddress')
+                : t('saveAddress')}
             </button>
           </div>
         </form>

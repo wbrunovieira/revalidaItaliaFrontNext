@@ -1,6 +1,6 @@
 {
   
-"Profile": {
+  "Profile": {
     "title": "Perfil",
     "back": "Voltar",
     "personalInfo": "Informações Pessoais",
@@ -15,7 +15,12 @@
     "noAddresses": "Nenhum endereço cadastrado",
     "addAddress": "Adicionar Endereço",
     "editAddress": "Editar Endereço",
+    "deleteAddress": "Excluir Endereço",
     "updateAddress": "Atualizar Endereço",
+    "confirmDeleteAddress": "Confirmar Exclusão",
+    "deleteAddressWarning": "Tem certeza que deseja excluir o endereço {{street}}, {{number}}? Esta ação não pode ser desfeita.",
+    "confirmDelete": "Confirmar",
+    "deleting": "Excluindo...",
     "addFirstAddress": "Adicionar Primeiro Endereço",
     "loadingAddresses": "Carregando endereços...",
     "street": "Rua",
@@ -41,7 +46,8 @@
     "cancel": "Cancelar",
     "saveAddress": "Salvar Endereço",
     "saving": "Salvando...",
-    "updating": "Atualizando..."
+    "updating": "Atualizando...",
+    "deleteAddressWarning": "Tem certeza que deseja excluir o endereço {street}, {number}? Esta ação não pode ser desfeita."
   }
   ,
   "Nav": {

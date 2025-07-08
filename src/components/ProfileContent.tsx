@@ -11,6 +11,9 @@ import {
   Mail,
   Hash,
   Edit,
+  Trash2,
+  X,
+  Check,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -61,6 +64,13 @@ export default function ProfileContent({
   const [modalMode, setModalMode] = useState<
     'add' | 'edit'
   >('add');
+  const [deletingAddressId, setDeletingAddressId] =
+    useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteToast, setShowDeleteToast] =
+    useState(false);
+  const [pendingDeleteAddress, setPendingDeleteAddress] =
+    useState<Address | null>(null);
 
   // Formatar datas
   const formatDate = (dateString?: string) => {
@@ -131,6 +141,70 @@ export default function ProfileContent({
     setIsModalOpen(false);
     setEditingAddress(null);
     setModalMode('add');
+  };
+
+  const showDeleteConfirmation = (address: Address) => {
+    setPendingDeleteAddress(address);
+    setShowDeleteToast(true);
+  };
+
+  const hideDeleteConfirmation = () => {
+    setShowDeleteToast(false);
+    setPendingDeleteAddress(null);
+  };
+
+  const confirmDeleteAddress = async () => {
+    if (!pendingDeleteAddress) return;
+
+    setIsDeleting(true);
+    setDeletingAddressId(pendingDeleteAddress.id);
+
+    try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:3333';
+
+      // Get token from cookies
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      const response = await fetch(
+        `${apiUrl}/addresses/${pendingDeleteAddress.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && {
+              Authorization: `Bearer ${token}`,
+            }),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error! status: ${response.status}`
+        );
+      }
+
+      // Remove address from local state
+      setAddresses(prev =>
+        prev.filter(
+          addr => addr.id !== pendingDeleteAddress.id
+        )
+      );
+
+      // Hide confirmation toast
+      hideDeleteConfirmation();
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      // You might want to show an error toast here
+    } finally {
+      setIsDeleting(false);
+      setDeletingAddressId(null);
+    }
   };
 
   return (
@@ -299,19 +373,48 @@ export default function ProfileContent({
                     key={address.id}
                     className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-secondary transition-colors relative group"
                   >
-                    {/* Edit Button */}
-                    <button
-                      onClick={() => openEditModal(address)}
-                      className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                      title={t('editAddress')}
-                    >
-                      <Edit
-                        size={16}
-                        className="text-white"
-                      />
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                      <button
+                        onClick={() =>
+                          openEditModal(address)
+                        }
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                        title={t('editAddress')}
+                        disabled={
+                          isDeleting &&
+                          deletingAddressId === address.id
+                        }
+                      >
+                        <Edit
+                          size={16}
+                          className="text-white"
+                        />
+                      </button>
+                      <button
+                        onClick={() =>
+                          showDeleteConfirmation(address)
+                        }
+                        className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/30 transition-colors"
+                        title={t('deleteAddress')}
+                        disabled={
+                          isDeleting &&
+                          deletingAddressId === address.id
+                        }
+                      >
+                        {isDeleting &&
+                        deletingAddressId === address.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                        ) : (
+                          <Trash2
+                            size={16}
+                            className="text-red-400"
+                          />
+                        )}
+                      </button>
+                    </div>
 
-                    <div className="space-y-2 text-white pr-10">
+                    <div className="space-y-2 text-white pr-20">
                       <p className="font-medium">
                         {address.street}, {address.number}
                       </p>
@@ -360,6 +463,59 @@ export default function ProfileContent({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Toast */}
+      {showDeleteToast && pendingDeleteAddress && (
+        <div className="fixed bottom-6 right-6 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-red-100 rounded-full">
+              <Trash2 size={20} className="text-red-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">
+                {t('confirmDeleteAddress')}
+              </h4>
+              <p className="text-sm text-gray-600 mb-3">
+                {t('deleteAddressWarning', {
+                  street: pendingDeleteAddress.street,
+                  number: pendingDeleteAddress.number,
+                })}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={confirmDeleteAddress}
+                  disabled={isDeleting}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isDeleting ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                  ) : (
+                    <Check size={14} />
+                  )}
+                  {isDeleting
+                    ? t('deleting')
+                    : t('confirmDelete')}
+                </button>
+                <button
+                  onClick={hideDeleteConfirmation}
+                  disabled={isDeleting}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                >
+                  <X size={14} />
+                  {t('cancel')}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={hideDeleteConfirmation}
+              disabled={isDeleting}
+              className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+            >
+              <X size={16} className="text-gray-400" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       <AddAddressModal

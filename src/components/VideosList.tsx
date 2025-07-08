@@ -212,12 +212,12 @@ export default function VideosList() {
 
         // Buscar aulas e vídeos para cada módulo
         const modulesWithData = await Promise.all(
-          modules.map(async module => {
+          modules.map(async moduleItem => {
             const lessons = await fetchLessonsForModule(
               courseId,
-              module.id
+              moduleItem.id
             );
-            return { ...module, lessons };
+            return { ...moduleItem, lessons };
           })
         );
 
@@ -374,10 +374,10 @@ export default function VideosList() {
         .find(l => l.id === lessonId);
       if (!lesson) return;
 
-      const module = course.modules?.find(m =>
+      const moduleItem = course.modules?.find(m =>
         m.lessons?.some(l => l.id === lessonId)
       );
-      if (!module) return;
+      if (!moduleItem) return;
 
       const video = lesson.videos?.find(
         v => v.id === videoId
@@ -389,7 +389,7 @@ export default function VideosList() {
         locale
       );
       const moduleTranslation = getTranslationByLocale(
-        module.translations,
+        moduleItem.translations,
         locale
       );
       const lessonTranslation = getTranslationByLocale(
@@ -857,26 +857,30 @@ export default function VideosList() {
                   <div className="bg-gray-800/50 p-4">
                     {courseStats.moduleCount > 0 ? (
                       <div className="space-y-3">
-                        {course.modules?.map(module => {
+                        {course.modules?.map(moduleItem => {
                           const moduleTranslation =
                             getTranslationByLocale(
-                              module.translations,
+                              moduleItem.translations,
                               locale
                             );
                           const isModuleExpanded =
-                            expandedModules.has(module.id);
+                            expandedModules.has(
+                              moduleItem.id
+                            );
                           const moduleStats =
-                            getModuleStats(module);
+                            getModuleStats(moduleItem);
 
                           return (
                             <div
-                              key={module.id}
+                              key={moduleItem.id}
                               className="border border-gray-600 rounded-lg overflow-hidden"
                             >
                               {/* Cabeçalho do módulo */}
                               <div
                                 onClick={() =>
-                                  toggleModule(module.id)
+                                  toggleModule(
+                                    moduleItem.id
+                                  )
                                 }
                                 className="flex items-center gap-4 p-3 bg-gray-700/30 hover:bg-gray-700/50 transition-colors cursor-pointer"
                               >
@@ -896,13 +900,15 @@ export default function VideosList() {
                                 </button>
 
                                 <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
-                                  {module.order}
+                                  {moduleItem.order}
                                 </div>
 
-                                {module.imageUrl ? (
+                                {moduleItem.imageUrl ? (
                                   <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
                                     <Image
-                                      src={module.imageUrl}
+                                      src={
+                                        moduleItem.imageUrl
+                                      }
                                       alt={
                                         moduleTranslation?.title ||
                                         ''
@@ -928,7 +934,7 @@ export default function VideosList() {
                                   <div className="flex items-center gap-4 text-xs text-gray-500">
                                     <span>
                                       {t('slug')}:{' '}
-                                      {module.slug}
+                                      {moduleItem.slug}
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <Play size={10} />
@@ -954,8 +960,10 @@ export default function VideosList() {
                                   {moduleStats.lessonCount >
                                   0 ? (
                                     <div className="space-y-3 pl-2">
-                                      {module.lessons?.map(
-                                        lesson => {
+                                      {moduleItem.lessons?.map(
+                                        (
+                                          lesson: Lesson
+                                        ) => {
                                           const lessonTranslation =
                                             getTranslationByLocale(
                                               lesson.translations,

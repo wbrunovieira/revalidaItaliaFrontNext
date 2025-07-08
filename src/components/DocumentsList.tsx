@@ -221,12 +221,12 @@ export default function DocumentsList() {
 
         // Buscar aulas e documentos para cada módulo
         const modulesWithData = await Promise.all(
-          modules.map(async module => {
+          modules.map(async moduleItem => {
             const lessons = await fetchLessonsForModule(
               courseId,
-              module.id
+              moduleItem.id
             );
-            return { ...module, lessons };
+            return { ...moduleItem, lessons };
           })
         );
 
@@ -362,12 +362,12 @@ export default function DocumentsList() {
       );
       if (!course) return;
 
-      const module = course.modules?.find(m =>
+      const moduleItem = course.modules?.find(m =>
         m.lessons?.some(l => l.id === lessonId)
       );
-      if (!module) return;
+      if (!moduleItem) return;
 
-      const lesson = module.lessons?.find(
+      const lesson = moduleItem.lessons?.find(
         l => l.id === lessonId
       );
       if (!lesson) return;
@@ -382,7 +382,7 @@ export default function DocumentsList() {
         locale
       );
       const moduleTranslation = getTranslationByLocale(
-        module.translations,
+        moduleItem.translations,
         locale
       );
       const lessonTranslation = getTranslationByLocale(

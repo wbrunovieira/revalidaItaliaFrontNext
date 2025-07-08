@@ -202,12 +202,12 @@ export default function LessonsList() {
 
         // Buscar aulas para cada módulo
         const modulesWithLessons = await Promise.all(
-          modules.map(async module => {
+          modules.map(async moduleItem => {
             const lessons = await fetchLessonsForModule(
               courseId,
-              module.id
+              moduleItem.id
             );
-            return { ...module, lessons };
+            return { ...moduleItem, lessons };
           })
         );
 
@@ -223,7 +223,7 @@ export default function LessonsList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule]
+    [handleApiError, fetchLessonsForModule, apiUrl]
   );
 
   // 5. Função principal para buscar todos os dados
@@ -264,7 +264,13 @@ export default function LessonsList() {
     } finally {
       setLoading(false);
     }
-  }, [toast, t, handleApiError, fetchModulesForCourse]);
+  }, [
+    toast,
+    t,
+    handleApiError,
+    fetchModulesForCourse,
+    apiUrl,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -369,9 +375,14 @@ export default function LessonsList() {
 
                     {/* Lista de dependências */}
                     <div className="mt-2 space-y-1">
-                      {dependencies
-                        .slice(0, 3)
-                        .map((dep: any, index: number) => (
+                      {dependencies.slice(0, 3).map(
+                        (
+                          dep: {
+                            name: string;
+                            type: string;
+                          },
+                          index: number
+                        ) => (
                           <div
                             key={index}
                             className="text-xs text-gray-300"
@@ -382,7 +393,8 @@ export default function LessonsList() {
                             )}
                             )
                           </div>
-                        ))}
+                        )
+                      )}
                       {dependencies.length > 3 && (
                         <div className="text-xs text-gray-400">
                           {t('dependencies.andMore', {
@@ -424,7 +436,7 @@ export default function LessonsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError]
+    [t, toast, fetchData, handleApiError, apiUrl]
   );
 
   // 7. Função para mostrar confirmação personalizada usando toast
@@ -440,12 +452,12 @@ export default function LessonsList() {
       );
       if (!course) return;
 
-      const module = course.modules?.find(
+      const moduleItem = course.modules?.find(
         m => m.id === moduleId
       );
-      if (!module) return;
+      if (!moduleItem) return;
 
-      const lesson = module.lessons?.find(
+      const lesson = moduleItem.lessons?.find(
         l => l.id === lessonId
       );
       if (!lesson) return;
@@ -455,7 +467,7 @@ export default function LessonsList() {
         locale
       );
       const moduleTranslation = getTranslationByLocale(
-        module.translations,
+        moduleItem.translations,
         locale
       );
       const lessonTranslation = getTranslationByLocale(

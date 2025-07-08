@@ -9,8 +9,6 @@ import {
   X,
   BookOpen,
   Image as ImageIcon,
-  Type,
-  FileText,
   Globe,
   Save,
   Loader2,
@@ -131,7 +129,12 @@ export default function LessonEditModal({
     children,
     className,
     ...props
-  }: any) => {
+  }: {
+    value: string;
+    children: React.ReactNode;
+    className?: string;
+    [key: string]: unknown;
+  }) => {
     // ✅ Verificação rigorosa antes de renderizar
     if (value === undefined || value === null) {
       console.error(
@@ -457,7 +460,15 @@ export default function LessonEditModal({
       );
 
       // Preparar dados para envio
-      const requestData: any = {
+      const requestData: {
+        imageUrl: string;
+        order: number;
+        translations: Translation[];
+        videoId?: string;
+        flashcardIds?: string[];
+        quizIds?: string[];
+        commentIds?: string[];
+      } = {
         imageUrl: formData.imageUrl.trim(),
         order: formData.order,
         translations,
@@ -691,23 +702,6 @@ export default function LessonEditModal({
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
-
-  const updateTranslation = (
-    locale: 'pt' | 'es' | 'it',
-    field: 'title' | 'description',
-    value: string
-  ): void => {
-    setFormData({
-      ...formData,
-      translations: {
-        ...formData.translations,
-        [locale]: {
-          ...formData.translations[locale],
-          [field]: value,
-        },
-      },
-    });
-  };
 
   if (!isOpen || !lesson) return null;
 

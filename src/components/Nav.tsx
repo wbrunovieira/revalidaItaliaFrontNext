@@ -3,7 +3,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+
 import MenuToggle from './MenuToggle';
 import Logo from './Logo';
 import SearchInput from './SearchInput';
@@ -24,8 +24,6 @@ export default function Nav({
   onToggle,
 }: NavProps) {
   const t = useTranslations('Nav');
-  const pathname = usePathname();
-  const locale = pathname.split('/')[1];
 
   return (
     <nav

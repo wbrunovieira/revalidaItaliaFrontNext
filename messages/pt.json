@@ -136,7 +136,9 @@
     "support": "Suporte",
     "faq": "Perguntas Frequentes",
     "expand": "Expandir menu",
-    "collapse": "Recolher menu"
+    "collapse": "Recolher menu",
+    "profile": "Profile" 
+
   },
   "Lesson": {
     "breadcrumb": {

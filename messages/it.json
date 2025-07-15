@@ -393,7 +393,8 @@
     "modules": "Moduli",
     "lessons": "Lezioni",
      "videos": "Video",
-    "documents": "Documenti"
+    "documents": "Documenti",
+    "assessments": "Valutazioni"
   },
   "users": {
     "create": "Crea Utente",
@@ -402,6 +403,10 @@
   "documents": {
     "create": "Crea Documento",
     "list": "Elenco Documenti"
+  },
+  "assessments": {
+    "create": "Crea Valutazione",
+    "list": "Elenco Valutazioni"
   },
   "dashboard": {
     "title": "Statistiche Generali",

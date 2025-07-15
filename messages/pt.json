@@ -396,7 +396,8 @@
     "modules": "Módulos",
     "lessons": "Aulas",
     "videos": "Vídeos",
-     "documents": "Documentos"
+     "documents": "Documentos",
+    "assessments": "Avaliações"
   },
   
   "users": {
@@ -494,6 +495,10 @@
 "documents": {
   "create": "Criar Documento",
   "list": "Listar Documentos"
+},
+"assessments": {
+  "create": "Criar Avaliação",
+  "list": "Listar Avaliações"
 },
 
   "courses": {

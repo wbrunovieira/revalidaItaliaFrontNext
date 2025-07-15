@@ -409,6 +409,87 @@
     "create": "Crea Valutazione",
     "list": "Elenco Valutazioni"
   },
+  "createAssessment": {
+    "title": "Crea Valutazione",
+    "titleForm": "Dati della Valutazione",
+    "startDescription": "Crea quiz, simulazioni e prove aperte per valutare la conoscenza degli studenti.",
+    "startButton": "Inizia Creazione",
+    "startSubtext": "Clicca qui per iniziare",
+    "selectType": "Seleziona il tipo di valutazione che vuoi creare:",
+    "backToTypeSelection": "Torna alla selezione del tipo",
+    "create": "Crea Valutazione",
+    "creating": "Creando...",
+    "loadingLessons": "Caricamento lezioni...",
+    "types": {
+      "quiz": {
+        "title": "Quiz",
+        "description": "Domande associate a una lezione specifica con correzione automatica"
+      },
+      "simulado": {
+        "title": "Simulazione",
+        "description": "Valutazione con limite di tempo e argomenti multipli"
+      },
+      "provaaberta": {
+        "title": "Prova Aperta",
+        "description": "Valutazione dissertativa con correzione manuale"
+      }
+    },
+    "fields": {
+      "title": "Titolo",
+      "description": "Descrizione",
+      "lesson": "Lezione",
+      "optional": "opzionale",
+      "lessonHelp": "Collega questa valutazione a una lezione specifica o lascia vuoto per uso generale",
+      "passingScore": "Punteggio Minimo (%)",
+      "quizPosition": "Posizione del Quiz",
+      "timeLimit": "Limite di Tempo (minuti)"
+    },
+    "placeholders": {
+      "title": "Inserisci il titolo della valutazione",
+      "description": "Descrivi gli obiettivi e il contenuto della valutazione (opzionale)",
+      "lesson": "Seleziona una lezione (opzionale)",
+      "noLesson": "Nessuna lezione (uso generale)",
+      "passingScore": "70",
+      "timeLimit": "60"
+    },
+    "quizPositions": {
+      "beforeLesson": "Prima della Lezione",
+      "afterLesson": "Dopo la Lezione"
+    },
+    "randomization": {
+      "title": "Opzioni di Casualizzazione",
+      "questions": "Mescola domande",
+      "options": "Mescola opzioni"
+    },
+    "errors": {
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMin": "Il titolo deve avere almeno 3 caratteri",
+      "titleMax": "Il titolo deve avere al massimo 200 caratteri",
+      "descriptionRequired": "La descrizione è obbligatoria",
+      "descriptionMin": "La descrizione deve avere almeno 10 caratteri",
+      "descriptionMax": "La descrizione deve avere al massimo 1000 caratteri",
+      "typeRequired": "Il tipo di valutazione è obbligatorio",
+      "typeInvalid": "Tipo di valutazione non valido",
+      "lessonRequired": "La lezione è obbligatoria",
+      "passingScoreNumber": "Il punteggio minimo deve essere un numero",
+      "passingScoreRange": "Il punteggio minimo deve essere tra 0 e 100",
+      "timeLimitNumber": "Il limite di tempo deve essere un numero",
+      "timeLimitMin": "Il limite di tempo deve essere almeno 1 minuto",
+      "timeLimitMax": "Il limite di tempo deve essere al massimo 600 minuti",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Correggi gli errori nel modulo prima di continuare",
+      "loadLessonsTitle": "Errore nel caricamento delle lezioni",
+      "loadLessonsDescription": "Impossibile caricare l'elenco delle lezioni"
+    },
+    "success": {
+      "title": "Valutazione creata!",
+      "description": "La valutazione è stata creata con successo"
+    },
+    "error": {
+      "title": "Errore nella creazione della valutazione",
+      "description": "Impossibile creare la valutazione. Riprova."
+    }
+  },
   "flashcards": {
     "create": "Crea Flashcard",
     "list": "Elenco Flashcard"

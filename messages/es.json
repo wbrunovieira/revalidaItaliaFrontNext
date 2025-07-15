@@ -408,6 +408,87 @@
     "create": "Crear Evaluación",
     "list": "Lista de Evaluaciones"
   },
+  "createAssessment": {
+    "title": "Crear Evaluación",
+    "titleForm": "Datos de la Evaluación",
+    "startDescription": "Crea cuestionarios, simulacros y pruebas abiertas para evaluar el conocimiento de los estudiantes.",
+    "startButton": "Iniciar Creación",
+    "startSubtext": "Haz clic aquí para empezar",
+    "selectType": "Selecciona el tipo de evaluación que quieres crear:",
+    "backToTypeSelection": "Volver a la selección de tipo",
+    "create": "Crear Evaluación",
+    "creating": "Creando...",
+    "loadingLessons": "Cargando lecciones...",
+    "types": {
+      "quiz": {
+        "title": "Quiz",
+        "description": "Preguntas asociadas a una lección específica con corrección automática"
+      },
+      "simulado": {
+        "title": "Simulacro",
+        "description": "Evaluación con límite de tiempo y argumentos múltiples"
+      },
+      "provaaberta": {
+        "title": "Prueba Abierta",
+        "description": "Evaluación dissertativa con corrección manual"
+      }
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "lesson": "Lección",
+      "optional": "opcional",
+      "lessonHelp": "Vincula esta evaluación a una lección específica o deja en blanco para uso general",
+      "passingScore": "Puntuación Mínima (%)",
+      "quizPosition": "Posición del Quiz",
+      "timeLimit": "Límite de Tiempo (minutos)"
+    },
+    "placeholders": {
+      "title": "Ingresa el título de la evaluación",
+      "description": "Describe los objetivos y contenido de la evaluación (opcional)",
+      "lesson": "Selecciona una lección (opcional)",
+      "noLesson": "Ninguna lección (uso general)",
+      "passingScore": "70",
+      "timeLimit": "60"
+    },
+    "quizPositions": {
+      "beforeLesson": "Antes de la Lección",
+      "afterLesson": "Después de la Lección"
+    },
+    "randomization": {
+      "title": "Opciones de Aleatorización",
+      "questions": "Mezclar preguntas",
+      "options": "Mezclar opciones"
+    },
+    "errors": {
+      "titleRequired": "El título es obligatorio",
+      "titleMin": "El título debe tener al menos 3 caracteres",
+      "titleMax": "El título debe tener como máximo 200 caracteres",
+      "descriptionRequired": "La descripción es obligatoria",
+      "descriptionMin": "La descripción debe tener al menos 10 caracteres",
+      "descriptionMax": "La descripción debe tener como máximo 1000 caracteres",
+      "typeRequired": "El tipo de evaluación es obligatorio",
+      "typeInvalid": "Tipo de evaluación inválido",
+      "lessonRequired": "La lección es obligatoria",
+      "passingScoreNumber": "La puntuación mínima debe ser un número",
+      "passingScoreRange": "La puntuación mínima debe estar entre 0 y 100",
+      "timeLimitNumber": "El límite de tiempo debe ser un número",
+      "timeLimitMin": "El límite de tiempo debe ser al menos 1 minuto",
+      "timeLimitMax": "El límite de tiempo debe ser como máximo 600 minutos",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Corrige los errores en el formulario antes de continuar",
+      "loadLessonsTitle": "Error al cargar lecciones",
+      "loadLessonsDescription": "No se pudo cargar la lista de lecciones"
+    },
+    "success": {
+      "title": "¡Evaluación creada!",
+      "description": "La evaluación se creó con éxito"
+    },
+    "error": {
+      "title": "Error al crear evaluación",
+      "description": "No se pudo crear la evaluación. Inténtalo de nuevo."
+    }
+  },
   "flashcards": {
     "create": "Crear Flashcard",
     "list": "Lista de Flashcards"

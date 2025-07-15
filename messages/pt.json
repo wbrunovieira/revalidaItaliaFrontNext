@@ -501,6 +501,87 @@
   "create": "Criar Avaliação",
   "list": "Listar Avaliações"
 },
+"createAssessment": {
+  "title": "Criar Avaliação",
+  "titleForm": "Dados da Avaliação",
+  "startDescription": "Crie quizzes, simulados e provas abertas para avaliar o conhecimento dos alunos.",
+  "startButton": "Iniciar Criação",
+  "startSubtext": "Clique aqui para começar",
+  "selectType": "Selecione o tipo de avaliação que deseja criar:",
+  "backToTypeSelection": "Voltar à seleção de tipo",
+  "create": "Criar Avaliação",
+  "creating": "Criando...",
+  "loadingLessons": "Carregando aulas...",
+  "types": {
+    "quiz": {
+      "title": "Quiz",
+      "description": "Questões associadas a uma aula específica com correção automática"
+    },
+    "simulado": {
+      "title": "Simulado",
+      "description": "Avaliação com tempo limite e múltiplos argumentos"
+    },
+    "provaaberta": {
+      "title": "Prova Aberta",
+      "description": "Avaliação dissertativa com correção manual"
+    }
+  },
+  "fields": {
+    "title": "Título",
+    "description": "Descrição",
+    "lesson": "Aula",
+    "optional": "opcional",
+    "lessonHelp": "Vincule esta avaliação a uma aula específica ou deixe em branco para uso geral",
+    "passingScore": "Nota Mínima (%)",
+    "quizPosition": "Posição do Quiz",
+    "timeLimit": "Tempo Limite (minutos)"
+  },
+  "placeholders": {
+    "title": "Digite o título da avaliação",
+    "description": "Descreva os objetivos e conteúdo da avaliação (opcional)",
+    "lesson": "Selecione uma aula (opcional)",
+    "noLesson": "Nenhuma aula (uso geral)",
+    "passingScore": "70",
+    "timeLimit": "60"
+  },
+  "quizPositions": {
+    "beforeLesson": "Antes da Aula",
+    "afterLesson": "Após a Aula"
+  },
+  "randomization": {
+    "title": "Opções de Aleatorização",
+    "questions": "Embaralhar questões",
+    "options": "Embaralhar alternativas"
+  },
+  "errors": {
+    "titleRequired": "Título é obrigatório",
+    "titleMin": "Título deve ter pelo menos 3 caracteres",
+    "titleMax": "Título deve ter no máximo 200 caracteres",
+    "descriptionRequired": "Descrição é obrigatória",
+    "descriptionMin": "Descrição deve ter pelo menos 10 caracteres",
+    "descriptionMax": "Descrição deve ter no máximo 1000 caracteres",
+    "typeRequired": "Tipo de avaliação é obrigatório",
+    "typeInvalid": "Tipo de avaliação inválido",
+    "lessonRequired": "Aula é obrigatória",
+    "passingScoreNumber": "Nota mínima deve ser um número",
+    "passingScoreRange": "Nota mínima deve estar entre 0 e 100",
+    "timeLimitNumber": "Tempo limite deve ser um número",
+    "timeLimitMin": "Tempo limite deve ser pelo menos 1 minuto",
+    "timeLimitMax": "Tempo limite deve ser no máximo 600 minutos",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Corrija os erros no formulário antes de continuar",
+    "loadLessonsTitle": "Erro ao carregar aulas",
+    "loadLessonsDescription": "Não foi possível carregar a lista de aulas"
+  },
+  "success": {
+    "title": "Avaliação criada!",
+    "description": "A avaliação foi criada com sucesso"
+  },
+  "error": {
+    "title": "Erro ao criar avaliação",
+    "description": "Não foi possível criar a avaliação. Tente novamente."
+  }
+},
 "flashcards": {
   "create": "Criar Flashcard",
   "list": "Listar Flashcards"

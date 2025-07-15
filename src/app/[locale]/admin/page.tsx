@@ -43,10 +43,12 @@ import CreateVideoForm from '@/components/CreateVideoForm';
 import VideosList from '@/components/VideosList';
 import CreateDocumentForm from '@/components/CreateDocumentForm';
 import DocumentsList from '@/components/DocumentsList';
+import CreateAssessmentForm from '@/components/CreateAssessmentForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
   const [activeTab, setActiveTab] = useState('overview');
+  const [showCreateAssessmentModal, setShowCreateAssessmentModal] = useState(false);
 
   return (
     <div>
@@ -393,8 +395,34 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
-                <div className="p-4">
-                  <p>{t('comingSoon')}</p>
+                <div className="p-6 space-y-4">
+                  <div className="text-center space-y-3">
+                    <h3 className="text-xl font-semibold text-white">
+                      {t('assessments.create')}
+                    </h3>
+                    <p className="text-gray-400 max-w-md mx-auto">
+                      {t('createAssessment.startDescription')}
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowCreateAssessmentModal(true)}
+                      className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary px-8 py-4 rounded-lg font-semibold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                    >
+                      <div className="p-2 bg-primary/20 rounded-full">
+                        <ClipboardList size={20} />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold text-lg">
+                          {t('createAssessment.startButton')}
+                        </div>
+                        <div className="text-sm opacity-90">
+                          {t('createAssessment.startSubtext')}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </TabsContent>
               <TabsContent value="list">
@@ -437,6 +465,16 @@ export default function AdminPage() {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Assessment Creation Modal */}
+      <CreateAssessmentForm
+        isOpen={showCreateAssessmentModal}
+        onClose={() => setShowCreateAssessmentModal(false)}
+        onAssessmentCreated={() => {
+          // Refresh assessment list if needed
+          console.log('Assessment created');
+        }}
+      />
     </div>
   );
 }

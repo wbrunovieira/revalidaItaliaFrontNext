@@ -393,7 +393,8 @@
     "lessons": "Lecciones",
      "videos": "Videos",
       "documents": "Documentos",
-    "assessments": "Evaluaciones"
+    "assessments": "Evaluaciones",
+    "flashcards": "Flashcards"
   },
   "users": {
     "create": "Crear Usuario",
@@ -406,6 +407,10 @@
   "assessments": {
     "create": "Crear Evaluación",
     "list": "Lista de Evaluaciones"
+  },
+  "flashcards": {
+    "create": "Crear Flashcard",
+    "list": "Lista de Flashcards"
   },
   "dashboard": {
     "title": "Estadísticas Generales",
@@ -1121,7 +1126,7 @@
       "description": "Descripción",
       "imageUrl": "URL de la Imagen",
       "order": "Orden",
-      "flashcards": "Tarjetas de Estudio",
+      "flashcards": "Flashcards",
       "flashcardsCount": "tarjetas de estudio",
       "quizzes": "Cuestionarios",
       "quizzesCount": "cuestionarios",

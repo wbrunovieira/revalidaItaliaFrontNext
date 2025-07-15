@@ -16,6 +16,7 @@ import {
   Play,
   Video,
   ClipboardList,
+  Layers,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -162,6 +163,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.assessments')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="flashcards"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Layers
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.flashcards')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
@@ -377,6 +390,37 @@ export default function AdminPage() {
                 >
                   <List className="mr-2" size={16} />
                   {t('assessments.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <div className="p-4">
+                  <p>{t('comingSoon')}</p>
+                </div>
+              </TabsContent>
+              <TabsContent value="list">
+                <div className="p-4">
+                  <p>{t('comingSoon')}</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          <TabsContent value="flashcards">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <Layers className="mr-2" size={16} />
+                  {t('flashcards.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('flashcards.list')}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">

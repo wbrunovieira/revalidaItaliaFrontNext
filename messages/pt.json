@@ -397,7 +397,8 @@
     "lessons": "Aulas",
     "videos": "Vídeos",
      "documents": "Documentos",
-    "assessments": "Avaliações"
+    "assessments": "Avaliações",
+    "flashcards": "Flashcards"
   },
   
   "users": {
@@ -499,6 +500,10 @@
 "assessments": {
   "create": "Criar Avaliação",
   "list": "Listar Avaliações"
+},
+"flashcards": {
+  "create": "Criar Flashcard",
+  "list": "Listar Flashcards"
 },
 
   "courses": {

@@ -394,6 +394,7 @@
      "videos": "Videos",
       "documents": "Documentos",
     "assessments": "Evaluaciones",
+    "arguments": "Argumentos",
     "flashcards": "Flashcards"
   },
   "users": {
@@ -407,6 +408,12 @@
   "assessments": {
     "create": "Crear Evaluación",
     "list": "Lista de Evaluaciones"
+  },
+  "arguments": {
+    "create": "Crear Argumento",
+    "list": "Lista de Argumentos",
+    "createTitle": "Crear Nuevo Argumento",
+    "createButton": "Crear Argumento"
   },
   "createAssessment": {
     "title": "Crear Evaluación",
@@ -1898,6 +1905,46 @@
   "error": {
     "loadTitle": "Error al cargar",
     "loadDescription": "No fue posible cargar los detalles de la evaluación"
+  }
+},
+"argumentsList": {
+  "title": "Lista de Argumentos",
+  "description": "Gestiona los argumentos de las preguntas",
+  "loading": "Cargando...",
+  "noArguments": "No se encontraron argumentos",
+  "showing": "Mostrando {count} de {total} argumentos",
+  "comingSoon": "Próximamente",
+  "viewFeature": "La visualización de argumentos estará disponible próximamente",
+  "editFeature": "La edición de argumentos estará disponible próximamente",
+  "deleteFeature": "La eliminación de argumentos estará disponible próximamente",
+  "columns": {
+    "title": "Título",
+    "assessment": "Evaluación",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "actions": "Acciones"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulado",
+    "prova_aberta": "Prueba Abierta"
+  },
+  "actions": {
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "pagination": {
+    "pageOf": "Página {current} de {total}",
+    "perPage": "Por página",
+    "first": "Primera",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "last": "Última"
+  },
+  "error": {
+    "fetchTitle": "Error al cargar argumentos",
+    "fetchDescription": "No fue posible cargar la lista de argumentos"
   }
 }
 }

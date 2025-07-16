@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Layers,
   HelpCircle,
+  Plus,
 } from 'lucide-react';
 
 import {
@@ -49,6 +50,7 @@ import CreateAssessmentForm from '@/components/CreateAssessmentForm';
 import CreateArgumentForm from '@/components/CreateArgumentForm';
 import CreateQuestionForm from '@/components/CreateQuestionForm';
 import AssessmentsList from '@/components/AssessmentsList';
+import ArgumentsList from '@/components/ArgumentsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -181,6 +183,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.assessments')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="arguments"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <List
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.arguments')}
             </TabsTrigger>
 
             <TabsTrigger
@@ -527,6 +541,59 @@ export default function AdminPage() {
               </TabsContent>
               <TabsContent value="list">
                 <AssessmentsList />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          <TabsContent value="arguments">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List
+                    className="mr-2"
+                    size={16}
+                  />
+                  {t('arguments.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List
+                    className="mr-2"
+                    size={16}
+                  />
+                  {t('arguments.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold">
+                    {t('arguments.createTitle')}
+                  </h3>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowCreateArgumentModal(true)}
+                      className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    >
+                      <Plus size={20} />
+                      {t('arguments.createButton')}
+                    </button>
+                  </div>
+                  <CreateArgumentForm
+                    isOpen={showCreateArgumentModal}
+                    onClose={() => setShowCreateArgumentModal(false)}
+                    onArgumentCreated={() => {
+                      setActiveTab('arguments');
+                    }}
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="list">
+                <ArgumentsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

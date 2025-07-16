@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -11,11 +11,9 @@ import {
   Hash,
   Trophy,
   Shuffle,
-  Eye,
   Calendar,
   Clock,
   BookOpen,
-  CircleDot,
   CheckCircle,
   XCircle,
 } from 'lucide-react';
@@ -63,13 +61,7 @@ export default function ViewAssessmentModal({
   const [loading, setLoading] = useState(false);
   const [assessment, setAssessment] = useState<Assessment | null>(null);
 
-  useEffect(() => {
-    if (isOpen && assessmentId) {
-      loadAssessment();
-    }
-  }, [isOpen, assessmentId]);
-
-  const loadAssessment = async () => {
+  const loadAssessment = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -98,7 +90,13 @@ export default function ViewAssessmentModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [assessmentId, t, toast, onClose]);
+
+  useEffect(() => {
+    if (isOpen && assessmentId) {
+      loadAssessment();
+    }
+  }, [isOpen, assessmentId, loadAssessment]);
 
   // Get icon for assessment type
   const getAssessmentIcon = (type: string) => {

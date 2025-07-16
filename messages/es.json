@@ -212,6 +212,12 @@
   "comingSoon": "Próximamente...",
 
   "questionsList": {
+    "totalQuestions": "Total de preguntas",
+    "withAnswers": "Con respuestas",
+    "passingScore": "Puntuación de aprobación",
+    "options": "Opciones",
+    "explanation": "Explicación",
+    "hasAnswer": "Con respuesta",
     "title": "Lista de Preguntas",
     "description": "Visualiza y gestiona las preguntas de las evaluaciones",
     "selectAssessment": "Seleccionar Evaluación",

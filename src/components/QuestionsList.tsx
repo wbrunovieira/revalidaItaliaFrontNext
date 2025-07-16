@@ -13,11 +13,6 @@ import {
   ClipboardList,
   Calendar,
   Clock,
-  ChevronLeft,
-  ChevronRight as ChevronRightIcon,
-  ChevronsLeft,
-  ChevronsRight,
-  List,
 } from 'lucide-react';
 import {
   Select,
@@ -35,26 +30,66 @@ interface Assessment {
   slug: string;
 }
 
-interface Question {
+interface QuestionOption {
   id: string;
   text: string;
-  type: string;
-  options: Array<{
-    id: string;
-    text: string;
-  }>;
   createdAt: string;
   updatedAt: string;
 }
 
-interface PaginationInfo {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+interface AnswerTranslation {
+  locale: string;
+  explanation: string;
 }
+
+interface Question {
+  id: string;
+  text: string;
+  type: 'MULTIPLE_CHOICE' | 'OPEN';
+  argumentId?: string;
+  options: QuestionOption[];
+  answer?: {
+    id: string;
+    correctOptionId?: string;
+    explanation: string;
+    translations: AnswerTranslation[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AssessmentDetailed {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON';
+  passingScore?: number;
+  timeLimitInMinutes?: number;
+  randomizeQuestions?: boolean;
+  randomizeOptions?: boolean;
+  lessonId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Argument {
+  id: string;
+  title: string;
+  lessonId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DetailedResponse {
+  assessment: AssessmentDetailed;
+  arguments: Argument[];
+  questions: Question[];
+  totalQuestions: number;
+  totalQuestionsWithAnswers: number;
+}
+
 
 export default function QuestionsList() {
   const t = useTranslations('Admin.questionsList');
@@ -62,18 +97,10 @@ export default function QuestionsList() {
   
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>('');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [detailedData, setDetailedData] = useState<DetailedResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrevious: false,
-  });
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -106,19 +133,14 @@ export default function QuestionsList() {
     }
   }, [t, toast]);
 
-  // Load questions for selected assessment
-  const loadQuestions = useCallback(async () => {
+  // Load detailed questions for selected assessment
+  const loadDetailedQuestions = useCallback(async () => {
     if (!selectedAssessmentId) return;
 
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-      });
-      
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments/${selectedAssessmentId}/questions?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/assessments/${selectedAssessmentId}/questions/detailed`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -127,16 +149,13 @@ export default function QuestionsList() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to load questions');
+        throw new Error('Failed to load detailed questions');
       }
 
-      const data = await response.json();
-      setQuestions(data.questions || []);
-      if (data.pagination) {
-        setPagination(data.pagination);
-      }
+      const data: DetailedResponse = await response.json();
+      setDetailedData(data);
     } catch (error) {
-      console.error('Error loading questions:', error);
+      console.error('Error loading detailed questions:', error);
       toast({
         title: t('error.fetchQuestionsTitle'),
         description: t('error.fetchQuestionsDescription'),
@@ -145,35 +164,25 @@ export default function QuestionsList() {
     } finally {
       setLoading(false);
     }
-  }, [selectedAssessmentId, pagination.page, pagination.limit, t, toast]);
+  }, [selectedAssessmentId, t, toast]);
 
   // Load assessments when component mounts
   useEffect(() => {
     loadAssessments();
   }, [loadAssessments]);
 
-  // Load questions when assessment is selected or pagination changes
+  // Load detailed questions when assessment is selected
   useEffect(() => {
     if (selectedAssessmentId) {
-      loadQuestions();
+      loadDetailedQuestions();
     }
-  }, [loadQuestions, selectedAssessmentId]);
+  }, [loadDetailedQuestions, selectedAssessmentId]);
 
   // Handle assessment selection
   const handleAssessmentChange = (assessmentId: string) => {
     setSelectedAssessmentId(assessmentId);
-    setQuestions([]);
+    setDetailedData(null);
     setExpandedQuestions(new Set());
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
-
-  // Handle pagination
-  const handlePageChange = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  };
-
-  const handleLimitChange = (newLimit: string) => {
-    setPagination(prev => ({ ...prev, limit: parseInt(newLimit), page: 1 }));
   };
 
   // Handle question expand/collapse
@@ -266,11 +275,34 @@ export default function QuestionsList() {
       </div>
 
       {/* Questions List */}
-      {selectedAssessmentId && (
+      {selectedAssessmentId && detailedData && (
         <>
+          {/* Assessment Info */}
+          <div className="bg-gray-800 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-white">{detailedData.assessment.title}</h3>
+                <p className="text-gray-400 text-sm">
+                  {t('totalQuestions')}: {detailedData.totalQuestions} | 
+                  {t('withAnswers')}: {detailedData.totalQuestionsWithAnswers}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getQuestionTypeBadge(detailedData.assessment.type)}`}>
+                  {t(`assessmentTypes.${detailedData.assessment.type.toLowerCase()}`)}
+                </span>
+                {detailedData.assessment.passingScore && (
+                  <span className="text-gray-400 text-sm">
+                    {t('passingScore')}: {detailedData.assessment.passingScore}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Results Count */}
           <div className="text-gray-400">
-            {t('showing', { count: questions.length, total: pagination.total })}
+            {t('showing', { count: detailedData.questions.length, total: detailedData.totalQuestions })}
           </div>
 
           {/* Questions Table */}
@@ -306,14 +338,14 @@ export default function QuestionsList() {
                         </div>
                       </td>
                     </tr>
-                  ) : questions.length === 0 ? (
+                  ) : detailedData.questions.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
                         {t('noQuestions')}
                       </td>
                     </tr>
                   ) : (
-                    questions.map((question) => (
+                    detailedData.questions.map((question) => (
                       <tr key={question.id} className="hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="space-y-2">
@@ -332,27 +364,53 @@ export default function QuestionsList() {
                               <div className="text-white font-medium">{question.text}</div>
                             </div>
                             
-                            {expandedQuestions.has(question.id) && question.options.length > 0 && (
-                              <div className="ml-10 p-3 bg-gray-900/50 rounded text-gray-300 text-sm">
-                                <div className="font-medium text-gray-200 mb-2">Opções:</div>
-                                <ul className="space-y-1">
-                                  {question.options.map((option, index) => (
-                                    <li key={option.id} className="flex items-start gap-2">
-                                      <span className="text-gray-400 font-mono text-xs mt-1">
-                                        {String.fromCharCode(65 + index)})
-                                      </span>
-                                      <span>{option.text}</span>
-                                    </li>
-                                  ))}
-                                </ul>
+                            {expandedQuestions.has(question.id) && (
+                              <div className="ml-10 space-y-3">
+                                {/* Options */}
+                                {question.options.length > 0 && (
+                                  <div className="p-3 bg-gray-900/50 rounded text-gray-300 text-sm">
+                                    <div className="font-medium text-gray-200 mb-2">{t('options')}:</div>
+                                    <ul className="space-y-1">
+                                      {question.options.map((option, index) => (
+                                        <li key={option.id} className="flex items-start gap-2">
+                                          <span className={`text-xs mt-1 font-mono px-2 py-1 rounded ${
+                                            question.answer?.correctOptionId === option.id
+                                              ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                              : 'text-gray-400'
+                                          }`}>
+                                            {String.fromCharCode(65 + index)}
+                                          </span>
+                                          <span className={question.answer?.correctOptionId === option.id ? 'text-green-300 font-medium' : ''}>
+                                            {option.text}
+                                          </span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                
+                                {/* Answer and Explanation */}
+                                {question.answer && (
+                                  <div className="p-3 bg-blue-900/20 rounded text-blue-200 text-sm border border-blue-500/30">
+                                    <div className="font-medium text-blue-100 mb-2">{t('explanation')}:</div>
+                                    <p>{question.answer.explanation}</p>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getQuestionTypeBadge(question.type)}`}>
-                            {t(`questionTypes.${question.type.toLowerCase()}`)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getQuestionTypeBadge(question.type)}`}>
+                              {t(`questionTypes.${question.type.toLowerCase()}`)}
+                            </span>
+                            {question.answer && (
+                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium border bg-green-500/20 text-green-300 border-green-500/30">
+                                {t('hasAnswer')}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-gray-300 text-sm">
                           <div className="flex items-center gap-2">
@@ -414,98 +472,6 @@ export default function QuestionsList() {
             </div>
           </div>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-800/50 rounded-lg">
-              {/* Page Info */}
-              <div className="text-sm text-gray-400">
-                {t('pagination.pageOf', { current: pagination.page, total: pagination.totalPages })}
-              </div>
-
-              {/* Controls */}
-              <div className="flex items-center gap-4">
-                {/* Limit Selector */}
-                <div className="flex items-center gap-2">
-                  <Label className="text-gray-400 text-sm">{t('pagination.perPage')}</Label>
-                  <Select
-                    value={pagination.limit.toString()}
-                    onValueChange={handleLimitChange}
-                  >
-                    <SelectTrigger className="w-20 bg-gray-700 border-gray-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-700 border-gray-600">
-                      <SelectItem value="5" className="text-white hover:bg-gray-600">5</SelectItem>
-                      <SelectItem value="10" className="text-white hover:bg-gray-600">10</SelectItem>
-                      <SelectItem value="20" className="text-white hover:bg-gray-600">20</SelectItem>
-                      <SelectItem value="50" className="text-white hover:bg-gray-600">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Page Navigation */}
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handlePageChange(1)}
-                    disabled={!pagination.hasPrevious}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t('pagination.first')}
-                  >
-                    <ChevronsLeft size={16} />
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={!pagination.hasPrevious}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t('pagination.previous')}
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  
-                  {/* Page Numbers */}
-                  <div className="flex items-center gap-1 px-2">
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                      const pageNum = i + 1;
-                      const isActive = pageNum === pagination.page;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-8 h-8 rounded-lg transition-colors ${
-                            isActive
-                              ? 'bg-secondary text-primary font-semibold'
-                              : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                    {pagination.totalPages > 5 && (
-                      <span className="text-gray-500 px-2">...</span>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={!pagination.hasNext}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t('pagination.next')}
-                  >
-                    <ChevronRightIcon size={16} />
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(pagination.totalPages)}
-                    disabled={!pagination.hasNext}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t('pagination.last')}
-                  >
-                    <ChevronsRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>

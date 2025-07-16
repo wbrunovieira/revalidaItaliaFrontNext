@@ -170,6 +170,14 @@
     "previousLesson": "Lección anterior",
     "nextLesson": "Siguiente lección",
     "allLessons": "Todas las lecciones",
+    "assessments": "Evaluaciones",
+    "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulado",
+      "prova_aberta": "Prueba Abierta"
+    },
+    "passingScore": "Puntuación de aprobación",
+    "startAssessment": "Iniciar",
     "completed": "Completada",
     "current": "Actual",
     "locked": "Bloqueada"

@@ -15,6 +15,8 @@ import {
   Clock,
   BookOpen,
   User,
+  ClipboardList,
+  ExternalLink,
 } from 'lucide-react';
 
 interface Translation {
@@ -62,6 +64,34 @@ interface Lesson {
 
 interface LessonsResponse {
   lessons: Lesson[];
+}
+
+interface Assessment {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON';
+  passingScore?: number;
+  timeLimitInMinutes?: number;
+  randomizeQuestions?: boolean;
+  randomizeOptions?: boolean;
+  lessonId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AssessmentsResponse {
+  assessments: Assessment[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
 }
 
 interface PandaVideoResponse {
@@ -144,10 +174,16 @@ export default async function LessonPage({
       )
     : null;
 
-  const allLessons: LessonsResponse = await fetch(
-    `${API_URL}/courses/${course.id}/modules/${moduleFound.id}/lessons`,
-    { cache: 'no-store' }
-  ).then(r => (r.ok ? r.json() : Promise.reject()));
+  const [allLessons, assessmentsData]: [LessonsResponse, AssessmentsResponse] = await Promise.all([
+    fetch(
+      `${API_URL}/courses/${course.id}/modules/${moduleFound.id}/lessons`,
+      { cache: 'no-store' }
+    ).then(r => (r.ok ? r.json() : Promise.reject())),
+    fetch(
+      `${API_URL}/assessments?lessonId=${lessonId}`,
+      { cache: 'no-store' }
+    ).then(r => (r.ok ? r.json() : { assessments: [], pagination: {} }))
+  ]);
 
   const sorted = allLessons.lessons.sort(
     (a, b) =>
@@ -158,6 +194,8 @@ export default async function LessonPage({
   const prev = idx > 0 ? sorted[idx - 1] : null;
   const next =
     idx < sorted.length - 1 ? sorted[idx + 1] : null;
+
+  const assessments = assessmentsData.assessments || [];
 
   const ct =
     course.translations.find(t => t.locale === locale) ||
@@ -304,6 +342,66 @@ export default async function LessonPage({
                 </Link>
               )}
             </div>
+
+            {/* Assessments section */}
+            {assessments.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                  <ClipboardList size={18} />
+                  {tLesson('assessments')}
+                </h4>
+                <div className="space-y-3">
+                  {assessments.map((assessment) => (
+                    <div
+                      key={assessment.id}
+                      className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-secondary/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h5 className="font-medium text-white">
+                          {assessment.title}
+                        </h5>
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          assessment.type === 'QUIZ'
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            : assessment.type === 'SIMULADO'
+                            ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                            : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        }`}>
+                          {tLesson(`assessmentTypes.${assessment.type.toLowerCase()}`)}
+                        </span>
+                      </div>
+                      
+                      {assessment.description && (
+                        <p className="text-gray-400 text-sm mb-3">
+                          {assessment.description}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          {assessment.timeLimitInMinutes && (
+                            <span className="flex items-center gap-1">
+                              <Clock size={12} />
+                              {assessment.timeLimitInMinutes} min
+                            </span>
+                          )}
+                          {assessment.passingScore && (
+                            <span>
+                              {tLesson('passingScore')}: {assessment.passingScore}%
+                            </span>
+                          )}
+                        </div>
+                        
+                        <button className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium">
+                          {tLesson('startAssessment')}
+                          <ExternalLink size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* All lessons list */}
             <div className="mt-8">

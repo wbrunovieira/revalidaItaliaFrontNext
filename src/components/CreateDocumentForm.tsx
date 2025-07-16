@@ -291,6 +291,13 @@ export default function CreateDocumentForm() {
             message: t('errors.filenameMin'),
           };
         }
+        // Check for invalid characters like comma in extension
+        if (filename.includes(',')) {
+          return {
+            isValid: false,
+            message: 'Invalid filename format. Use dots (.) before file extensions, not commas (,).',
+          };
+        }
         return { isValid: true };
       }
 
@@ -749,8 +756,11 @@ export default function CreateDocumentForm() {
           translation.url.trim()
       );
 
+      // Ensure proper file extension format
+      const cleanFilename = formData.filename.trim().replace(/,(\w+)$/, '.$1');
+      
       const payload: CreateDocumentPayload = {
-        filename: formData.filename.trim(),
+        filename: cleanFilename,
         fileSize: formData.fileSize,
         mimeType: formData.mimeType,
         isDownloadable: formData.isDownloadable,

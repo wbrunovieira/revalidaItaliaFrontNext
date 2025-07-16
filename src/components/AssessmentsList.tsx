@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import ViewAssessmentModal from '@/components/ViewAssessmentModal';
 
 type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
 type QuizPosition = 'BEFORE_LESSON' | 'AFTER_LESSON' | null;
@@ -122,6 +123,10 @@ export default function AssessmentsList() {
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [loadingModules, setLoadingModules] = useState(false);
   const [loadingLessons, setLoadingLessons] = useState(false);
+  
+  // View modal state
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -323,6 +328,18 @@ export default function AssessmentsList() {
     setModules([]);
     setLessons([]);
     setShowLessonFilter(false);
+  };
+
+  // Open view modal
+  const handleViewAssessment = (assessmentId: string) => {
+    setSelectedAssessmentId(assessmentId);
+    setViewModalOpen(true);
+  };
+
+  // Close view modal
+  const handleCloseViewModal = () => {
+    setViewModalOpen(false);
+    setSelectedAssessmentId(null);
   };
 
   // Get icon for assessment type
@@ -646,13 +663,7 @@ export default function AssessmentsList() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => {
-                            // TODO: Implement view modal
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('viewFeature'),
-                            });
-                          }}
+                          onClick={() => handleViewAssessment(assessment.id)}
                           className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('actions.view')}
                         >
@@ -785,6 +796,15 @@ export default function AssessmentsList() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* View Assessment Modal */}
+      {selectedAssessmentId && (
+        <ViewAssessmentModal
+          assessmentId={selectedAssessmentId}
+          isOpen={viewModalOpen}
+          onClose={handleCloseViewModal}
+        />
       )}
     </div>
   );

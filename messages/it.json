@@ -1881,6 +1881,38 @@
     "loadLessonsTitle": "Errore nel caricamento delle lezioni",
     "loadLessonsDescription": "Non è stato possibile caricare l'elenco delle lezioni"
   }
+},
+"viewAssessment": {
+  "title": "Dettagli della Valutazione",
+  "close": "Chiudi",
+  "noData": "Nessun dato disponibile",
+  "loading": "Caricamento...",
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulazione",
+    "prova_aberta": "Prova Aperta"
+  },
+  "position": {
+    "before_lesson": "Prima della Lezione",
+    "after_lesson": "Dopo la Lezione"
+  },
+  "fields": {
+    "description": "Descrizione",
+    "slug": "Slug",
+    "passingScore": "Voto Minimo",
+    "randomization": "Casualizzazione",
+    "randomizeQuestions": "Casualizza domande",
+    "randomizeOptions": "Casualizza opzioni",
+    "lesson": "Lezione",
+    "module": "Modulo",
+    "course": "Corso",
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il"
+  },
+  "error": {
+    "loadTitle": "Errore nel caricamento",
+    "loadDescription": "Non è stato possibile caricare i dettagli della valutazione"
+  }
 }
 }
 }

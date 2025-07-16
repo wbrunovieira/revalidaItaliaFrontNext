@@ -2085,6 +2085,38 @@
     "loadLessonsTitle": "Erro ao carregar aulas",
     "loadLessonsDescription": "Não foi possível carregar a lista de aulas"
   }
+},
+"viewAssessment": {
+  "title": "Detalhes da Avaliação",
+  "close": "Fechar",
+  "noData": "Nenhum dado disponível",
+  "loading": "Carregando...",
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulado",
+    "prova_aberta": "Prova Aberta"
+  },
+  "position": {
+    "before_lesson": "Antes da Aula",
+    "after_lesson": "Após a Aula"
+  },
+  "fields": {
+    "description": "Descrição",
+    "slug": "Slug",
+    "passingScore": "Nota Mínima",
+    "randomization": "Randomização",
+    "randomizeQuestions": "Randomizar perguntas",
+    "randomizeOptions": "Randomizar opções",
+    "lesson": "Aula",
+    "module": "Módulo",
+    "course": "Curso",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em"
+  },
+  "error": {
+    "loadTitle": "Erro ao carregar",
+    "loadDescription": "Não foi possível carregar os detalhes da avaliação"
+  }
 }
 }
 

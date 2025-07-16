@@ -19,6 +19,7 @@ import {
   Layers,
   HelpCircle,
 } from 'lucide-react';
+
 import {
   ScrollArea,
   ScrollBar,
@@ -52,9 +53,18 @@ import AssessmentsList from '@/components/AssessmentsList';
 export default function AdminPage() {
   const t = useTranslations('Admin');
   const [activeTab, setActiveTab] = useState('overview');
-  const [showCreateAssessmentModal, setShowCreateAssessmentModal] = useState(false);
-  const [showCreateArgumentModal, setShowCreateArgumentModal] = useState(false);
-  const [showCreateQuestionModal, setShowCreateQuestionModal] = useState(false);
+  const [
+    showCreateAssessmentModal,
+    setShowCreateAssessmentModal,
+  ] = useState(false);
+  const [
+    showCreateArgumentModal,
+    setShowCreateArgumentModal,
+  ] = useState(false);
+  const [
+    showCreateQuestionModal,
+    setShowCreateQuestionModal,
+  ] = useState(false);
 
   return (
     <div>
@@ -389,7 +399,10 @@ export default function AdminPage() {
                   value="create"
                   className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
                 >
-                  <ClipboardList className="mr-2" size={16} />
+                  <ClipboardList
+                    className="mr-2"
+                    size={16}
+                  />
                   {t('assessments.create')}
                 </TabsTrigger>
                 <TabsTrigger
@@ -407,30 +420,45 @@ export default function AdminPage() {
                       {t('assessments.create')}
                     </h3>
                     <p className="text-gray-400 max-w-2xl mx-auto">
-                      {t('createAssessment.startDescription')}
+                      {t(
+                        'createAssessment.startDescription'
+                      )}
                     </p>
                   </div>
-                  
+
                   <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
                     {/* Create Assessment Button */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                       <div className="text-center space-y-4">
                         <div className="p-3 bg-blue-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                          <ClipboardList size={24} className="text-blue-400" />
+                          <ClipboardList
+                            size={24}
+                            className="text-blue-400"
+                          />
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold text-white mb-2">
-                            {t('createAssessment.cardTitle')}
+                            {t(
+                              'createAssessment.cardTitle'
+                            )}
                           </h4>
                           <p className="text-gray-400 text-sm mb-4">
-                            {t('createAssessment.cardDescription')}
+                            {t(
+                              'createAssessment.cardDescription'
+                            )}
                           </p>
                         </div>
                         <button
-                          onClick={() => setShowCreateAssessmentModal(true)}
+                          onClick={() =>
+                            setShowCreateAssessmentModal(
+                              true
+                            )
+                          }
                           className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
-                          {t('createAssessment.startButton')}
+                          {t(
+                            'createAssessment.startButton'
+                          )}
                         </button>
                       </div>
                     </div>
@@ -439,18 +467,25 @@ export default function AdminPage() {
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                       <div className="text-center space-y-4">
                         <div className="p-3 bg-green-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                          <List size={24} className="text-green-400" />
+                          <List
+                            size={24}
+                            className="text-green-400"
+                          />
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold text-white mb-2">
                             {t('createArgument.cardTitle')}
                           </h4>
                           <p className="text-gray-400 text-sm mb-4">
-                            {t('createArgument.cardDescription')}
+                            {t(
+                              'createArgument.cardDescription'
+                            )}
                           </p>
                         </div>
                         <button
-                          onClick={() => setShowCreateArgumentModal(true)}
+                          onClick={() =>
+                            setShowCreateArgumentModal(true)
+                          }
                           className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
                           {t('createArgument.startButton')}
@@ -462,18 +497,25 @@ export default function AdminPage() {
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                       <div className="text-center space-y-4">
                         <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                          <HelpCircle size={24} className="text-purple-400" />
+                          <HelpCircle
+                            size={24}
+                            className="text-purple-400"
+                          />
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold text-white mb-2">
                             {t('createQuestion.cardTitle')}
                           </h4>
                           <p className="text-gray-400 text-sm mb-4">
-                            {t('createQuestion.cardDescription')}
+                            {t(
+                              'createQuestion.cardDescription'
+                            )}
                           </p>
                         </div>
                         <button
-                          onClick={() => setShowCreateQuestionModal(true)}
+                          onClick={() =>
+                            setShowCreateQuestionModal(true)
+                          }
                           className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
                           {t('createQuestion.startButton')}

@@ -178,6 +178,8 @@
     },
     "passingScore": "Puntuación de aprobación",
     "startAssessment": "Iniciar",
+    "documents": "Documentos",
+    "openDocument": "Abrir",
     "completed": "Completada",
     "current": "Actual",
     "locked": "Bloqueada"

@@ -7,6 +7,7 @@ import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import PandaVideoPlayer from '@/components/PandaVideoPlayer';
+import DocumentsSection from '@/components/DocumentsSection';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -94,6 +95,25 @@ interface AssessmentsResponse {
   };
 }
 
+interface DocumentTranslation {
+  locale: string;
+  title: string;
+  description: string;
+  url: string;
+}
+
+interface Document {
+  id: string;
+  filename: string;
+  fileSize: number;
+  mimeType: string;
+  isDownloadable: boolean;
+  lessonId: string;
+  translations: DocumentTranslation[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface PandaVideoResponse {
   video_external_id: string;
   video_player: string;
@@ -125,6 +145,7 @@ async function fetchPandaVideoData(
     length: data.length,
   };
 }
+
 
 export default async function LessonPage({
   params,
@@ -174,7 +195,7 @@ export default async function LessonPage({
       )
     : null;
 
-  const [allLessons, assessmentsData]: [LessonsResponse, AssessmentsResponse] = await Promise.all([
+  const [allLessons, assessmentsData, documentsData]: [LessonsResponse, AssessmentsResponse, Document[]] = await Promise.all([
     fetch(
       `${API_URL}/courses/${course.id}/modules/${moduleFound.id}/lessons`,
       { cache: 'no-store' }
@@ -182,7 +203,11 @@ export default async function LessonPage({
     fetch(
       `${API_URL}/assessments?lessonId=${lessonId}`,
       { cache: 'no-store' }
-    ).then(r => (r.ok ? r.json() : { assessments: [], pagination: {} }))
+    ).then(r => (r.ok ? r.json() : { assessments: [], pagination: {} })),
+    fetch(
+      `${API_URL}/lessons/${lessonId}/documents`,
+      { cache: 'no-store' }
+    ).then(r => (r.ok ? r.json() : []))
   ]);
 
   const sorted = allLessons.lessons.sort(
@@ -196,6 +221,7 @@ export default async function LessonPage({
     idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
   const assessments = assessmentsData.assessments || [];
+  const documents = documentsData || [];
 
   const ct =
     course.translations.find(t => t.locale === locale) ||
@@ -362,6 +388,9 @@ export default async function LessonPage({
                 </Link>
               )}
             </div>
+
+            {/* Documents section */}
+            <DocumentsSection documents={documents} locale={locale} />
 
             {/* Assessments section */}
             {assessments.length > 0 && (

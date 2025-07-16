@@ -182,6 +182,8 @@
     },
     "passingScore": "Nota de aprovação",
     "startAssessment": "Iniciar",
+    "documents": "Documentos",
+    "openDocument": "Abrir",
     "completed": "Concluída",
     "current": "Atual",
     "locked": "Bloqueada"

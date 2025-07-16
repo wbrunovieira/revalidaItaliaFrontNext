@@ -1388,8 +1388,15 @@
   }
 },
 "lessonView": {
+  
     "title": "Detalhes da Lição",
     "close": "Fechar",
+    "quiz":"Quiz",
+    "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulado",
+      "prova_aberta": "Prova Aberta"
+    },
     "lessonNotFound": "Lição não encontrada",
     "copySuccess": "Copiado!",
     "copyDescription": "copiado para a área de transferência",
@@ -1404,8 +1411,8 @@
       "order": "Ordem",
       "flashcards": "Flashcards",
       "flashcardsCount": "flashcards",
-      "quizzes": "Questionários",
-      "quizzesCount": "questionários",
+      "assessments": "Avaliações",
+      "assessmentsCount": "avaliações",
       "comments": "Comentários",
       "commentsCount": "comentários",
       "createdAt": "Data de Criação",
@@ -1436,6 +1443,7 @@
       "fetchTitle": "Erro ao carregar lição",
       "fetchDescription": "Não foi possível carregar os detalhes da lição. Tente novamente."
     }
+
   },
 "lessonEdit": {
       "title": "Editar Aula",

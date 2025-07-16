@@ -1381,6 +1381,11 @@
 "lessonView": {
     "title": "Detalles de la Lección",
     "close": "Cerrar",
+    "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulado",
+      "prova_aberta": "Prueba Abierta"
+    },
     "lessonNotFound": "Lección no encontrada",
     "copySuccess": "¡Copiado!",
     "copyDescription": "copiado al portapapeles",
@@ -1395,8 +1400,8 @@
       "order": "Orden",
       "flashcards": "Flashcards",
       "flashcardsCount": "tarjetas de estudio",
-      "quizzes": "Cuestionarios",
-      "quizzesCount": "cuestionarios",
+      "assessments": "Evaluaciones",
+      "assessmentsCount": "evaluaciones",
       "comments": "Comentarios",
       "commentsCount": "comentarios",
       "createdAt": "Fecha de Creación",

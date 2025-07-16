@@ -41,12 +41,19 @@ interface VideoData {
   updatedAt: string;
 }
 
+interface Assessment {
+  id: string;
+  slug: string;
+  title: string;
+  type: string;
+  quizPosition?: string;
+}
+
 interface LessonViewData {
   id: string;
   moduleId: string;
   order: number;
   flashcardIds: string[];
-  quizIds: string[];
   commentIds: string[];
   imageUrl: string;
   translations: Translation[];
@@ -78,6 +85,9 @@ export default function LessonViewModal({
   const [lesson, setLesson] =
     useState<LessonViewData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [quizCount, setQuizCount] = useState<number>(0);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loadingQuizzes, setLoadingQuizzes] = useState(false);
 
   // Buscar detalhes da lição
   const fetchLessonDetails =
@@ -112,10 +122,37 @@ export default function LessonViewModal({
       }
     }, [courseId, moduleId, lessonId, t, toast]);
 
+  // Buscar quizzes da lição
+  const fetchLessonQuizzes = useCallback(async (): Promise<void> => {
+    if (!lessonId) return;
+
+    setLoadingQuizzes(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/assessments?type=QUIZ&lessonId=${lessonId}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar quizzes');
+      }
+
+      const data = await response.json();
+      setQuizCount(data.pagination.total || 0);
+      setAssessments(data.assessments || []);
+    } catch (error) {
+      console.error('Erro ao carregar quizzes:', error);
+      // Não mostrar toast de erro para quizzes, pois é opcional
+      setQuizCount(0);
+    } finally {
+      setLoadingQuizzes(false);
+    }
+  }, [lessonId]);
+
   // Buscar dados quando abrir o modal
   useEffect(() => {
     if (isOpen && courseId && moduleId && lessonId) {
       fetchLessonDetails();
+      fetchLessonQuizzes();
     }
   }, [
     isOpen,
@@ -123,6 +160,7 @@ export default function LessonViewModal({
     moduleId,
     lessonId,
     fetchLessonDetails,
+    fetchLessonQuizzes,
   ]);
 
   // Fechar modal com ESC
@@ -373,7 +411,7 @@ export default function LessonViewModal({
                   </span>
                 </div>
 
-                {/* Quizzes */}
+                {/* Avaliações */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <FileText
@@ -381,14 +419,39 @@ export default function LessonViewModal({
                       className="text-gray-400"
                     />
                     <span className="text-sm font-medium text-gray-300">
-                      {t('fields.quizzes')}
+                      {t('fields.assessments')}
                     </span>
                   </div>
                   <span className="text-sm text-white font-medium">
-                    {lesson.quizIds.length}{' '}
-                    {t('fields.quizzesCount')}
+                    {loadingQuizzes ? (
+                      <span className="text-gray-400">...</span>
+                    ) : (
+                      <>
+                        {quizCount} {t('fields.assessmentsCount')}
+                      </>
+                    )}
                   </span>
                 </div>
+
+                {/* Assessment Names */}
+                {assessments.length > 0 && (
+                  <div className="ml-10 mt-2 space-y-1">
+                    {assessments.map((assessment) => (
+                      <div
+                        key={assessment.id}
+                        className="flex items-center gap-2 text-xs"
+                      >
+                        <span className="text-gray-500">•</span>
+                        <span className="text-gray-300">
+                          {assessment.title}
+                        </span>
+                        <span className="text-gray-500">
+                          ({t(`assessmentTypes.${assessment.type.toLowerCase()}`)})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Comments */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">

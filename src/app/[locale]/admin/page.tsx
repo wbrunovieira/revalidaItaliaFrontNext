@@ -51,6 +51,7 @@ import CreateQuestionForm from '@/components/CreateQuestionForm';
 import AssessmentsList from '@/components/AssessmentsList';
 import ArgumentsList from '@/components/ArgumentsList';
 import CreateArgumentPage from '@/components/CreateArgumentPage';
+import QuestionsList from '@/components/QuestionsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -408,7 +409,7 @@ export default function AdminPage() {
 
           <TabsContent value="assessments">
             <Tabs defaultValue="create" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+              <TabsList className="grid w-full max-w-md grid-cols-3 bg-gray-700">
                 <TabsTrigger
                   value="create"
                   className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
@@ -425,6 +426,13 @@ export default function AdminPage() {
                 >
                   <List className="mr-2" size={16} />
                   {t('assessments.list')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="questions"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <HelpCircle className="mr-2" size={16} />
+                  {t('assessments.questions')}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
@@ -541,6 +549,9 @@ export default function AdminPage() {
               </TabsContent>
               <TabsContent value="list">
                 <AssessmentsList />
+              </TabsContent>
+              <TabsContent value="questions">
+                <QuestionsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

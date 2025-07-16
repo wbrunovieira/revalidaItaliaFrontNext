@@ -215,6 +215,57 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
 
+  "questionsList": {
+    "title": "Lista de Questões",
+    "description": "Visualize e gerencie as questões das avaliações",
+    "selectAssessment": "Selecionar Avaliação",
+    "selectAssessmentPlaceholder": "Escolha uma avaliação para listar as questões",
+    "loadingAssessments": "Carregando avaliações...",
+    "showing": "Exibindo {count} de {total} questões",
+    "loading": "Carregando...",
+    "noQuestions": "Nenhuma questão encontrada para esta avaliação",
+    "columns": {
+      "title": "Texto",
+      "type": "Tipo",
+      "createdAt": "Data de Criação",
+      "updatedAt": "Última Atualização",
+      "actions": "Ações"
+    },
+    "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulado",
+      "prova_aberta": "Prova Aberta"
+    },
+    "questionTypes": {
+      "multiple_choice": "Múltipla Escolha",
+      "true_false": "Verdadeiro/Falso",
+      "essay": "Dissertativa"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "comingSoon": "Em breve",
+    "viewFeature": "Visualização de questões estará disponível em breve",
+    "editFeature": "Edição de questões estará disponível em breve",
+    "deleteFeature": "Exclusão de questões estará disponível em breve",
+    "pagination": {
+      "pageOf": "Página {current} de {total}",
+      "perPage": "Por página:",
+      "first": "Primeira",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "last": "Última"
+    },
+    "error": {
+      "fetchAssessmentsTitle": "Erro ao carregar avaliações",
+      "fetchAssessmentsDescription": "Não foi possível carregar a lista de avaliações",
+      "fetchQuestionsTitle": "Erro ao carregar questões",
+      "fetchQuestionsDescription": "Não foi possível carregar as questões da avaliação"
+    }
+  },
+
   "createDocument": {
     "title": "Criar Documento",
     "create": "Criar Documento",
@@ -500,7 +551,8 @@
 },
 "assessments": {
   "create": "Criar Avaliação",
-  "list": "Listar Avaliações"
+  "list": "Listar Avaliações",
+  "questions": "Listar Questões"
 },
 "arguments": {
   "create": "Criar Argumento",

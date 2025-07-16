@@ -212,6 +212,57 @@
   "title": "Pannello Amministrativo",
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
+
+  "questionsList": {
+    "title": "Elenco Domande",
+    "description": "Visualizza e gestisci le domande delle valutazioni",
+    "selectAssessment": "Seleziona Valutazione",
+    "selectAssessmentPlaceholder": "Scegli una valutazione per elencare le domande",
+    "loadingAssessments": "Caricamento valutazioni...",
+    "showing": "Mostrando {count} di {total} domande",
+    "loading": "Caricamento...",
+    "noQuestions": "Nessuna domanda trovata per questa valutazione",
+    "columns": {
+      "title": "Testo",
+      "type": "Tipo",
+      "createdAt": "Data di Creazione",
+      "updatedAt": "Ultimo Aggiornamento",
+      "actions": "Azioni"
+    },
+    "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulato",
+      "prova_aberta": "Prova Aperta"
+    },
+    "questionTypes": {
+      "multiple_choice": "Scelta Multipla",
+      "true_false": "Vero/Falso",
+      "essay": "Dissertativa"
+    },
+    "actions": {
+      "view": "Visualizza",
+      "edit": "Modifica",
+      "delete": "Elimina"
+    },
+    "comingSoon": "Prossimamente",
+    "viewFeature": "Visualizzazione domande sarà disponibile presto",
+    "editFeature": "Modifica domande sarà disponibile presto",
+    "deleteFeature": "Eliminazione domande sarà disponibile presto",
+    "pagination": {
+      "pageOf": "Pagina {current} di {total}",
+      "perPage": "Per pagina:",
+      "first": "Prima",
+      "previous": "Precedente",
+      "next": "Successiva",
+      "last": "Ultima"
+    },
+    "error": {
+      "fetchAssessmentsTitle": "Errore caricamento valutazioni",
+      "fetchAssessmentsDescription": "Non è stato possibile caricare la lista delle valutazioni",
+      "fetchQuestionsTitle": "Errore caricamento domande",
+      "fetchQuestionsDescription": "Non è stato possibile caricare le domande della valutazione"
+    }
+  },
   "createDocument": {
     "title": "Crea Documento",
     "create": "Crea Documento",
@@ -408,7 +459,8 @@
   },
   "assessments": {
     "create": "Crea Valutazione",
-    "list": "Elenco Valutazioni"
+    "list": "Elenco Valutazioni",
+    "questions": "Elenco Domande"
   },
   "arguments": {
     "create": "Crea Argomento",

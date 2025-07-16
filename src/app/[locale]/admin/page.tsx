@@ -17,6 +17,7 @@ import {
   Video,
   ClipboardList,
   Layers,
+  HelpCircle,
 } from 'lucide-react';
 import {
   ScrollArea,
@@ -45,12 +46,14 @@ import CreateDocumentForm from '@/components/CreateDocumentForm';
 import DocumentsList from '@/components/DocumentsList';
 import CreateAssessmentForm from '@/components/CreateAssessmentForm';
 import CreateArgumentForm from '@/components/CreateArgumentForm';
+import CreateQuestionForm from '@/components/CreateQuestionForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateAssessmentModal, setShowCreateAssessmentModal] = useState(false);
   const [showCreateArgumentModal, setShowCreateArgumentModal] = useState(false);
+  const [showCreateQuestionModal, setShowCreateQuestionModal] = useState(false);
 
   return (
     <div>
@@ -407,7 +410,7 @@ export default function AdminPage() {
                     </p>
                   </div>
                   
-                  <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+                  <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
                     {/* Create Assessment Button */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                       <div className="text-center space-y-4">
@@ -450,6 +453,29 @@ export default function AdminPage() {
                           className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
                           {t('createArgument.startButton')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Create Question Button */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <HelpCircle size={24} className="text-purple-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-2">
+                            {t('createQuestion.cardTitle')}
+                          </h4>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('createQuestion.cardDescription')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreateQuestionModal(true)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                          {t('createQuestion.startButton')}
                         </button>
                       </div>
                     </div>
@@ -514,6 +540,16 @@ export default function AdminPage() {
         onArgumentCreated={() => {
           // Refresh argument list if needed
           console.log('Argument created');
+        }}
+      />
+
+      {/* Question Creation Modal */}
+      <CreateQuestionForm
+        isOpen={showCreateQuestionModal}
+        onClose={() => setShowCreateQuestionModal(false)}
+        onQuestionCreated={() => {
+          // Refresh question list if needed
+          console.log('Question created');
         }}
       />
     </div>

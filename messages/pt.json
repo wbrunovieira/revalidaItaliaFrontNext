@@ -625,6 +625,84 @@
     "description": "Não foi possível criar o argumento. Tente novamente."
   }
 },
+"createQuestion": {
+  "title": "Criar Questão",
+  "cardTitle": "Nova Questão",
+  "cardDescription": "Crie questões de múltipla escolha ou dissertativas para as avaliações",
+  "startButton": "Iniciar Criação",
+  "create": "Criar Questão",
+  "creating": "Criando...",
+  "loadingAssessments": "Carregando avaliações...",
+  "loadingArguments": "Carregando argumentos...",
+  "infoCard": {
+    "title": "Sobre Questões",
+    "description": "As questões podem ser de múltipla escolha com alternativas ou dissertativas para respostas abertas. Cada questão deve estar vinculada a uma avaliação."
+  },
+  "fields": {
+    "text": "Texto da Questão",
+    "textHelp": "Escreva a pergunta de forma clara e objetiva (10-1000 caracteres)",
+    "type": "Tipo de Questão",
+    "typeAutoSelected": "O tipo de questão é definido automaticamente pela avaliação selecionada.",
+    "assessment": "Avaliação",
+    "selectAssessmentFirst": "Selecione primeiro uma avaliação para habilitar os outros campos.",
+    "argument": "Argumento",
+    "optional": "opcional",
+    "argumentHelp": "Vincule esta questão a um argumento específico ou deixe em branco",
+    "options": "Opções de Resposta",
+    "selectCorrectOption": "Selecione qual é a resposta correta clicando no círculo ao lado da opção",
+    "explanation": "Explicação da Resposta Correta",
+    "explanationHelp": "Forneça uma explicação detalhada sobre por que esta é a resposta correta. Isso ajudará os alunos a entender o conceito."
+  },
+  "correctOption": "Resposta Correta",
+  "addOption": "Adicionar Opção",
+  "languages": {
+    "pt": "Português",
+    "it": "Italiano",
+    "es": "Espanhol"
+  },
+  "placeholders": {
+    "text": "Digite o texto da questão...",
+    "type": "Selecione o tipo de questão",
+    "assessment": "Selecione uma avaliação",
+    "argument": "Selecione um argumento (opcional)",
+    "noArgument": "Nenhum argumento",
+    "option": "Opção {letter}",
+    "optionText": "Digite o texto da opção...",
+    "explanationPt": "Explique por que esta é a resposta correta...",
+    "explanationIt": "Spiega perché questa è la risposta corretta...",
+    "explanationEs": "Explica por qué esta es la respuesta correcta..."
+  },
+  "types": {
+    "multipleChoice": "Múltipla Escolha",
+    "open": "Dissertativa"
+  },
+  "errors": {
+    "textRequired": "O texto da questão é obrigatório",
+    "textMin": "O texto deve ter pelo menos 10 caracteres",
+    "textMax": "O texto deve ter no máximo 1000 caracteres",
+    "typeRequired": "O tipo de questão é obrigatório",
+    "typeInvalid": "Tipo de questão inválido",
+    "assessmentRequired": "A avaliação é obrigatória",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Corrija os erros no formulário antes de continuar",
+    "loadAssessmentsTitle": "Erro ao carregar avaliações",
+    "loadAssessmentsDescription": "Não foi possível carregar a lista de avaliações",
+    "optionRequired": "Esta opção precisa ter um texto",
+    "noCorrectOption": "Nenhuma opção correta selecionada",
+    "selectCorrectOption": "Por favor, marque qual é a opção correta",
+    "explanationRequired": "A explicação é obrigatória"
+  },
+  "success": {
+    "title": "Questão criada!",
+    "description": "A questão foi criada com sucesso"
+  },
+  "error": {
+    "title": "Erro ao criar questão",
+    "description": "Não foi possível criar a questão. Tente novamente.",
+    "duplicateTitle": "Questão duplicada",
+    "duplicateDescription": "Já existe uma questão similar nesta avaliação"
+  }
+},
 "flashcards": {
   "create": "Criar Flashcard",
   "list": "Listar Flashcards"

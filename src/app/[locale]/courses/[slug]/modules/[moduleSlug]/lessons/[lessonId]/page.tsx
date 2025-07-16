@@ -441,10 +441,13 @@ export default async function LessonPage({
                           )}
                         </div>
                         
-                        <button className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium">
+                        <Link
+                          href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}/assessments/${assessment.id}`}
+                          className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium"
+                        >
                           {tLesson('startAssessment')}
                           <ExternalLink size={14} />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   ))}

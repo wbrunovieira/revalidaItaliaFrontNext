@@ -123,15 +123,7 @@ export default function CreateQuestionForm({
     Partial<Record<keyof FormData, boolean>>
   >({});
 
-  // Load assessments and arguments when component mounts
-  useEffect(() => {
-    if (isOpen) {
-      loadAssessments();
-      loadArguments();
-    }
-  }, [isOpen]);
-
-  const loadAssessments = async () => {
+  const loadAssessments = useCallback(async () => {
     setLoadingAssessments(true);
     try {
       const response = await fetch(
@@ -159,9 +151,9 @@ export default function CreateQuestionForm({
     } finally {
       setLoadingAssessments(false);
     }
-  };
+  }, [t, toast]);
 
-  const loadArguments = async () => {
+  const loadArguments = useCallback(async () => {
     setLoadingArguments(true);
     try {
       const response = await fetch(
@@ -185,7 +177,15 @@ export default function CreateQuestionForm({
     } finally {
       setLoadingArguments(false);
     }
-  };
+  }, []);
+
+  // Load assessments and arguments when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      loadAssessments();
+      loadArguments();
+    }
+  }, [isOpen, loadAssessments, loadArguments]);
 
   const validateField = useCallback(
     (field: keyof FormData, value: string): ValidationResult => {
@@ -318,7 +318,7 @@ export default function CreateQuestionForm({
 
     setErrors(newErrors);
     return isValid;
-  }, [formData, validateField]);
+  }, [formData, validateField, t, toast]);
 
   const handleFieldValidation = useCallback(
     (field: keyof FormData, value: string) => {
@@ -364,7 +364,10 @@ export default function CreateQuestionForm({
   const handleInputBlur = useCallback(
     (field: keyof FormData) => () => {
       setTouched(prev => ({ ...prev, [field]: true }));
-      handleFieldValidation(field, formData[field]);
+      // Only call handleFieldValidation for string fields
+      if (typeof formData[field] === 'string') {
+        handleFieldValidation(field, formData[field] as string);
+      }
     },
     [formData, handleFieldValidation]
   );
@@ -613,11 +616,12 @@ export default function CreateQuestionForm({
       resetForm();
       onQuestionCreated();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating question:', error);
       
       // Check for duplicate question error
-      if (error.message?.includes('DUPLICATE_QUESTION') || error.message?.includes('409')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('DUPLICATE_QUESTION') || errorMessage.includes('409')) {
         toast({
           title: t('error.duplicateTitle'),
           description: t('error.duplicateDescription'),

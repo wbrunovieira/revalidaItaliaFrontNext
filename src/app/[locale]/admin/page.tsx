@@ -47,6 +47,7 @@ import DocumentsList from '@/components/DocumentsList';
 import CreateAssessmentForm from '@/components/CreateAssessmentForm';
 import CreateArgumentForm from '@/components/CreateArgumentForm';
 import CreateQuestionForm from '@/components/CreateQuestionForm';
+import AssessmentsList from '@/components/AssessmentsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -483,9 +484,7 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
               <TabsContent value="list">
-                <div className="p-4">
-                  <p>{t('comingSoon')}</p>
-                </div>
+                <AssessmentsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

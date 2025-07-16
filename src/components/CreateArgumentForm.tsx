@@ -72,14 +72,7 @@ export default function CreateArgumentForm({
     Partial<Record<keyof FormData, boolean>>
   >({});
 
-  // Load assessments when component mounts
-  useEffect(() => {
-    if (isOpen) {
-      loadAssessments();
-    }
-  }, [isOpen]);
-
-  const loadAssessments = async () => {
+  const loadAssessments = useCallback(async () => {
     setLoadingAssessments(true);
     try {
       const response = await fetch(
@@ -107,7 +100,14 @@ export default function CreateArgumentForm({
     } finally {
       setLoadingAssessments(false);
     }
-  };
+  }, [t, toast]);
+
+  // Load assessments when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      loadAssessments();
+    }
+  }, [isOpen, loadAssessments]);
 
   const validateField = useCallback(
     (field: keyof FormData, value: string): ValidationResult => {

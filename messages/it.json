@@ -1819,6 +1819,68 @@
   "save": "Salva",
   "saving": "Salvataggio...",
   "cancel": "Annulla"
+},
+"assessmentsList": {
+  "title": "Elenco Valutazioni",
+  "loading": "Caricamento...",
+  "noAssessments": "Nessuna valutazione trovata",
+  "showing": "Mostrando {count} di {total} valutazioni",
+  "comingSoon": "Prossimamente",
+  "viewFeature": "La visualizzazione delle valutazioni sarà disponibile prossimamente",
+  "editFeature": "La modifica delle valutazioni sarà disponibile prossimamente",
+  "deleteFeature": "L'eliminazione delle valutazioni sarà disponibile prossimamente",
+  "columns": {
+    "title": "Titolo",
+    "type": "Tipo",
+    "passingScore": "Voto Minimo",
+    "lesson": "Lezione",
+    "createdAt": "Creato il",
+    "actions": "Azioni"
+  },
+  "filters": {
+    "type": "Tipo",
+    "allTypes": "Tutti i tipi",
+    "byLesson": "Filtra per Lezione",
+    "clear": "Cancella filtri",
+    "lessonFilter": "Filtra per Lezione",
+    "course": "Corso",
+    "module": "Modulo",
+    "lesson": "Lezione",
+    "selectCourse": "Seleziona un corso",
+    "selectModule": "Seleziona un modulo",
+    "selectLesson": "Seleziona una lezione",
+    "selectCourseFirst": "Seleziona prima un corso",
+    "selectModuleFirst": "Seleziona prima un modulo"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulazione",
+    "prova_aberta": "Prova Aperta",
+    "provaAberta": "Prova Aperta"
+  },
+  "actions": {
+    "view": "Visualizza",
+    "edit": "Modifica",
+    "delete": "Elimina"
+  },
+  "pagination": {
+    "pageOf": "Pagina {current} di {total}",
+    "perPage": "Per pagina",
+    "first": "Prima",
+    "previous": "Precedente",
+    "next": "Successiva",
+    "last": "Ultima"
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento delle valutazioni",
+    "fetchDescription": "Non è stato possibile caricare l'elenco delle valutazioni",
+    "loadCoursesTitle": "Errore nel caricamento dei corsi",
+    "loadCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi",
+    "loadModulesTitle": "Errore nel caricamento dei moduli",
+    "loadModulesDescription": "Non è stato possibile caricare l'elenco dei moduli",
+    "loadLessonsTitle": "Errore nel caricamento delle lezioni",
+    "loadLessonsDescription": "Non è stato possibile caricare l'elenco delle lezioni"
+  }
 }
 }
 }

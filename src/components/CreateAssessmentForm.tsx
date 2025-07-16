@@ -79,7 +79,12 @@ interface Lesson {
   order: number;
   imageUrl?: string;
   videoId?: string;
-  videoData?: any;
+  videoData?: {
+    id: string;
+    slug: string;
+    durationInSeconds: number;
+    translations: Translation[];
+  };
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -136,14 +141,7 @@ export default function CreateAssessmentForm({
     Partial<Record<keyof FormData, boolean>>
   >({});
 
-  // Load lessons when component mounts
-  useEffect(() => {
-    if (isOpen) {
-      loadLessons();
-    }
-  }, [isOpen]);
-
-  const loadLessons = async () => {
+  const loadLessons = useCallback(async () => {
     setLoadingLessons(true);
     try {
       // First, fetch all courses
@@ -182,10 +180,10 @@ export default function CreateAssessmentForm({
           const modules: Module[] = await modulesResponse.json();
 
           // For each module, fetch lessons
-          for (const module of modules) {
+          for (const moduleItem of modules) {
             try {
               const lessonsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${module.id}/lessons`,
+                `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${moduleItem.id}/lessons`,
                 {
                   headers: {
                     'Content-Type': 'application/json',
@@ -204,12 +202,12 @@ export default function CreateAssessmentForm({
               const lessonsWithContext = lessons.map((lesson: Lesson) => ({
                 ...lesson,
                 courseName: course.translations.find(t => t.locale === 'pt')?.title || course.translations[0]?.title || 'Unknown Course',
-                moduleName: module.translations.find(t => t.locale === 'pt')?.title || module.translations[0]?.title || 'Unknown Module',
+                moduleName: moduleItem.translations.find(t => t.locale === 'pt')?.title || moduleItem.translations[0]?.title || 'Unknown Module',
               }));
 
               allLessons.push(...lessonsWithContext);
             } catch (error) {
-              console.error(`Error loading lessons for module ${module.id}:`, error);
+              console.error(`Error loading lessons for module ${moduleItem.id}:`, error);
             }
           }
         } catch (error) {
@@ -228,7 +226,14 @@ export default function CreateAssessmentForm({
     } finally {
       setLoadingLessons(false);
     }
-  };
+  }, [t, toast]);
+
+  // Load lessons when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      loadLessons();
+    }
+  }, [isOpen, loadLessons]);
 
   const validateField = useCallback(
     (field: keyof FormData, value: string | number | boolean): ValidationResult => {

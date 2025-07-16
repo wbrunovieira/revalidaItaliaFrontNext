@@ -1805,6 +1805,68 @@
   "save": "Guardar",
   "saving": "Guardando...",
   "cancel": "Cancelar"
+},
+"assessmentsList": {
+  "title": "Lista de Evaluaciones",
+  "loading": "Cargando...",
+  "noAssessments": "No se encontraron evaluaciones",
+  "showing": "Mostrando {count} de {total} evaluaciones",
+  "comingSoon": "Próximamente",
+  "viewFeature": "La visualización de evaluaciones estará disponible próximamente",
+  "editFeature": "La edición de evaluaciones estará disponible próximamente",
+  "deleteFeature": "La eliminación de evaluaciones estará disponible próximamente",
+  "columns": {
+    "title": "Título",
+    "type": "Tipo",
+    "passingScore": "Nota Mínima",
+    "lesson": "Lección",
+    "createdAt": "Creado el",
+    "actions": "Acciones"
+  },
+  "filters": {
+    "type": "Tipo",
+    "allTypes": "Todos los tipos",
+    "byLesson": "Filtrar por Lección",
+    "clear": "Limpiar filtros",
+    "lessonFilter": "Filtrar por Lección",
+    "course": "Curso",
+    "module": "Módulo",
+    "lesson": "Lección",
+    "selectCourse": "Selecciona un curso",
+    "selectModule": "Selecciona un módulo",
+    "selectLesson": "Selecciona una lección",
+    "selectCourseFirst": "Selecciona primero un curso",
+    "selectModuleFirst": "Selecciona primero un módulo"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulado",
+    "prova_aberta": "Prueba Abierta",
+    "provaAberta": "Prueba Abierta"
+  },
+  "actions": {
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "pagination": {
+    "pageOf": "Página {current} de {total}",
+    "perPage": "Por página",
+    "first": "Primera",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "last": "Última"
+  },
+  "error": {
+    "fetchTitle": "Error al cargar evaluaciones",
+    "fetchDescription": "No fue posible cargar la lista de evaluaciones",
+    "loadCoursesTitle": "Error al cargar cursos",
+    "loadCoursesDescription": "No fue posible cargar la lista de cursos",
+    "loadModulesTitle": "Error al cargar módulos",
+    "loadModulesDescription": "No fue posible cargar la lista de módulos",
+    "loadLessonsTitle": "Error al cargar lecciones",
+    "loadLessonsDescription": "No fue posible cargar la lista de lecciones"
+  }
 }
 }
 }

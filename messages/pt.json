@@ -2023,6 +2023,68 @@
   "save": "Salvar",
   "saving": "Salvando...",
   "cancel": "Cancelar"
+},
+"assessmentsList": {
+  "title": "Lista de Avaliações",
+  "loading": "Carregando...",
+  "noAssessments": "Nenhuma avaliação encontrada",
+  "showing": "Mostrando {count} de {total} avaliações",
+  "comingSoon": "Em breve",
+  "viewFeature": "A visualização de avaliações estará disponível em breve",
+  "editFeature": "A edição de avaliações estará disponível em breve",
+  "deleteFeature": "A exclusão de avaliações estará disponível em breve",
+  "columns": {
+    "title": "Título",
+    "type": "Tipo",
+    "passingScore": "Nota Mínima",
+    "lesson": "Aula",
+    "createdAt": "Criado em",
+    "actions": "Ações"
+  },
+  "filters": {
+    "type": "Tipo",
+    "allTypes": "Todos os tipos",
+    "byLesson": "Filtrar por Aula",
+    "clear": "Limpar filtros",
+    "lessonFilter": "Filtrar por Aula",
+    "course": "Curso",
+    "module": "Módulo",
+    "lesson": "Aula",
+    "selectCourse": "Selecione um curso",
+    "selectModule": "Selecione um módulo",
+    "selectLesson": "Selecione uma aula",
+    "selectCourseFirst": "Selecione um curso primeiro",
+    "selectModuleFirst": "Selecione um módulo primeiro"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulado",
+    "prova_aberta": "Prova Aberta",
+    "provaAberta": "Prova Aberta"
+  },
+  "actions": {
+    "view": "Visualizar",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "pagination": {
+    "pageOf": "Página {current} de {total}",
+    "perPage": "Por página",
+    "first": "Primeira",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "last": "Última"
+  },
+  "error": {
+    "fetchTitle": "Erro ao carregar avaliações",
+    "fetchDescription": "Não foi possível carregar a lista de avaliações",
+    "loadCoursesTitle": "Erro ao carregar cursos",
+    "loadCoursesDescription": "Não foi possível carregar a lista de cursos",
+    "loadModulesTitle": "Erro ao carregar módulos",
+    "loadModulesDescription": "Não foi possível carregar a lista de módulos",
+    "loadLessonsTitle": "Erro ao carregar aulas",
+    "loadLessonsDescription": "Não foi possível carregar a lista de aulas"
+  }
 }
 }
 

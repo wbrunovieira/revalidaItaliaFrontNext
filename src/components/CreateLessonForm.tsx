@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
+import { generateSlug } from '@/lib/slug';
 import {
   Select,
   SelectContent,
@@ -95,6 +96,7 @@ interface ValidationResult {
 }
 
 interface CreateLessonPayload {
+  slug: string;
   imageUrl: string;
   videoId?: string;
   order: number;
@@ -811,6 +813,7 @@ export default function CreateLessonForm() {
       }
 
       const payload: CreateLessonPayload = {
+        slug: generateSlug(formData.translations.pt.title),
         order: formData.order,
         imageUrl: formData.imageUrl.trim(),
         translations: translations,

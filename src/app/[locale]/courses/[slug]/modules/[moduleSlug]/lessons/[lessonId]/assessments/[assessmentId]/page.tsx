@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import QuizPage from '@/components/QuizPage';
+import SimuladoPage from '@/components/SimuladoPage';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -41,6 +42,8 @@ interface Question {
   text: string;
   type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION';
   options: Option[];
+  argumentId?: string;
+  argumentName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -194,7 +197,73 @@ export default async function AssessmentPage({
     );
   }
 
-  // For SIMULADO and PROVA_ABERTA, show coming soon message
+  if (assessment.type === 'SIMULADO') {
+    return (
+      <NavSidebar>
+        <div className="flex-1 flex flex-col bg-primary min-h-screen">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-800">
+            <div className="flex items-center justify-between mb-4">
+              <Link
+                href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
+                className="inline-flex items-center gap-2 text-white hover:text-secondary"
+              >
+                <ArrowLeft size={20} /> {tLesson('back')}
+              </Link>
+
+              <div className="flex items-center gap-4 text-sm text-gray-300">
+                <div className="flex items-center gap-2">
+                  <ClipboardList size={16} />
+                  <span>
+                    {questions.length}{' '}
+                    {tAssessment('questions')}
+                  </span>
+                </div>
+                {assessment.timeLimitInMinutes && (
+                  <div className="flex items-center gap-2 text-orange-400">
+                    <Clock size={16} />
+                    <span>
+                      {assessment.timeLimitInMinutes} min
+                    </span>
+                  </div>
+                )}
+                {assessment.passingScore && (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={16} />
+                    <span>
+                      {assessment.passingScore}%{' '}
+                      {tAssessment('passingScore')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-white">
+                {assessment.title}
+              </h1>
+              {assessment.description && (
+                <p className="text-gray-300">
+                  {assessment.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Simulado Component */}
+          <SimuladoPage
+            assessment={assessment}
+            questions={questions}
+            locale={locale}
+            backUrl={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
+          />
+        </div>
+      </NavSidebar>
+    );
+  }
+
+  // For PROVA_ABERTA, show coming soon message
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
@@ -217,9 +286,7 @@ export default async function AssessmentPage({
               {assessment.title}
             </h1>
             <p className="text-gray-400 max-w-md">
-              {assessment.type === 'SIMULADO'
-                ? tAssessment('simuladoComingSoon')
-                : tAssessment('openQuestionComingSoon')}
+              {tAssessment('openQuestionComingSoon')}
             </p>
           </div>
         </div>

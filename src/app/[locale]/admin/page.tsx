@@ -18,7 +18,6 @@ import {
   ClipboardList,
   Layers,
   HelpCircle,
-  Plus,
 } from 'lucide-react';
 
 import {
@@ -51,6 +50,7 @@ import CreateArgumentForm from '@/components/CreateArgumentForm';
 import CreateQuestionForm from '@/components/CreateQuestionForm';
 import AssessmentsList from '@/components/AssessmentsList';
 import ArgumentsList from '@/components/ArgumentsList';
+import CreateArgumentPage from '@/components/CreateArgumentPage';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -570,27 +570,7 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold">
-                    {t('arguments.createTitle')}
-                  </h3>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setShowCreateArgumentModal(true)}
-                      className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                    >
-                      <Plus size={20} />
-                      {t('arguments.createButton')}
-                    </button>
-                  </div>
-                  <CreateArgumentForm
-                    isOpen={showCreateArgumentModal}
-                    onClose={() => setShowCreateArgumentModal(false)}
-                    onArgumentCreated={() => {
-                      setActiveTab('arguments');
-                    }}
-                  />
-                </div>
+                <CreateArgumentPage />
               </TabsContent>
               <TabsContent value="list">
                 <ArgumentsList />

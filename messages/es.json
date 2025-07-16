@@ -1434,31 +1434,40 @@
     }
   },
   "lessonEdit": {
+     "loadingVideos": "",
     "title": "Editar Lección",
-    "fields": {
-      "imageUrl": "URL de la Imagen",
-      "order": "Orden",
-      "title": "Título",
-      "description": "Descripción",
-      "videoId": "ID del Video",
-      "flashcardIds": "IDs de Flashcards",
-      "quizIds": "IDs de Cuestionarios",
-      "commentIds": "IDs de Comentarios"
-    },
+ "fields": {
+  "imageUrl": "URL de la imagen",
+  "order": "Orden",
+  "title": "Título",
+  "description": "Descripción",
+  "video": "Vídeo",
+  "noVideosAvailable": "No hay vídeos disponibles",
+  "noVideo": "No hay vídeo disponible",
+  "flashcardIds": "ID de Flashcards",
+  "assessments": "Evaluaciones",
+  "commentIds": "ID de comentarios"
+},
+"assessmentTypes": {
+  "quiz": "Quiz",
+  "simulado": "Simulado",
+  "prova_aberta": "Prueba abierta"
+},
     "placeholders": {
       "imageUrl": "https://ejemplo.com/imagen.jpg",
       "order": "1",
       "title": "Ingrese el título de la lección",
       "description": "Ingrese una breve descripción",
-      "videoId": "video-123",
+      "selectVideo": "video",
       "flashcardIds": "flashcard-1, flashcard-2",
-      "quizIds": "quiz-1, quiz-2",
+      "selectAssessment": "Seleziona una Valitazione per collegarla a questa lezione.",
       "commentIds": "comment-1, comment-2"
     },
     "hints": {
       "order": "Orden de visualización de la lección en el módulo",
       "videoId": "ID del video asociado a esta lección (opcional)",
-      "multipleIds": "Separe múltiples IDs con comas"
+      "multipleIds": "Separe múltiples IDs con comas",
+      "videoSelection": "Vídeo asociado a esta lección (opcional)"
     },
     "translations": {
       "title": "Traducciones",

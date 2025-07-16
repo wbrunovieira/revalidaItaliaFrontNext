@@ -61,7 +61,6 @@ interface Lesson {
   order: number;
   videoId?: string;
   flashcardIds: string[];
-  quizIds: string[];
   commentIds: string[];
   imageUrl?: string;
   translations: Translation[];
@@ -70,13 +69,20 @@ interface Lesson {
   updatedAt: string;
 }
 
+interface Assessment {
+  id: string;
+  slug: string;
+  title: string;
+  type: string;
+  lessonId?: string;
+}
+
 interface LessonEditData {
   id: string;
   moduleId: string;
   order: number;
   videoId?: string;
   flashcardIds: string[];
-  quizIds: string[];
   commentIds: string[];
   imageUrl: string;
   translations: Translation[];
@@ -103,8 +109,8 @@ interface FormData {
   order: number;
   videoId: string;
   flashcardIds: string;
-  quizIds: string;
   commentIds: string;
+  selectedAssessmentId: string;
   translations: FormTranslations;
 }
 
@@ -190,8 +196,8 @@ export default function LessonEditModal({
       order: 1, // ✅ Sempre começar com 1
       videoId: 'no-video', // ✅ Valor padrão seguro
       flashcardIds: '',
-      quizIds: '',
       commentIds: '',
+      selectedAssessmentId: '',
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
@@ -217,6 +223,14 @@ export default function LessonEditModal({
     AvailableVideo[]
   >([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
+
+  // Estados para gerenciar assessments
+  const [availableAssessments, setAvailableAssessments] =
+    useState<Assessment[]>([]);
+  const [linkedAssessments, setLinkedAssessments] =
+    useState<Assessment[]>([]);
+  const [loadingAssessments, setLoadingAssessments] =
+    useState(false);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -335,6 +349,82 @@ export default function LessonEditModal({
       }
     },
     [toast, apiUrl]
+  );
+
+  // Função para buscar assessments disponíveis
+  const fetchAvailableAssessments =
+    useCallback(async () => {
+      setLoadingAssessments(true);
+      try {
+        const response = await fetch(
+          `${apiUrl}/assessments`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch assessments: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+        setAvailableAssessments(data.assessments || []);
+        console.log(
+          'Assessments disponíveis:',
+          data.assessments
+        );
+      } catch (error) {
+        console.error('Error fetching assessments:', error);
+        setAvailableAssessments([]);
+        toast({
+          title: 'Erro ao carregar avaliações',
+          description:
+            'Não foi possível carregar as avaliações disponíveis.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoadingAssessments(false);
+      }
+    }, [toast, apiUrl]);
+
+  // Função para buscar assessments vinculados à lição
+  const fetchLinkedAssessments = useCallback(
+    async (lessonId: string) => {
+      try {
+        const response = await fetch(
+          `${apiUrl}/assessments?lessonId=${lessonId}`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch linked assessments: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+        setLinkedAssessments(data.assessments || []);
+        console.log(
+          'Assessments vinculados:',
+          data.assessments
+        );
+      } catch (error) {
+        console.error(
+          'Error fetching linked assessments:',
+          error
+        );
+        setLinkedAssessments([]);
+      }
+    },
+    [apiUrl]
   );
 
   // Função para gerar lista de ordens disponíveis
@@ -490,11 +580,6 @@ export default function LessonEditModal({
         requestData.flashcardIds = flashcardIds;
       }
 
-      const quizIds = stringToArray(formData.quizIds);
-      if (quizIds.length > 0) {
-        requestData.quizIds = quizIds;
-      }
-
       const commentIds = stringToArray(formData.commentIds);
       if (commentIds.length > 0) {
         requestData.commentIds = commentIds;
@@ -603,6 +688,67 @@ export default function LessonEditModal({
     setFormData(prev => ({ ...prev, videoId }));
   }, []);
 
+  // Handler para mudança de assessment
+  const handleAssessmentChange = useCallback(
+    async (assessmentId: string) => {
+      if (!assessmentId || assessmentId === 'none') {
+        setFormData(prev => ({
+          ...prev,
+          selectedAssessmentId: '',
+        }));
+        return;
+      }
+
+      // Update assessment's lessonId
+      if (lesson) {
+        try {
+          const response = await fetch(
+            `${apiUrl}/assessments/${assessmentId}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                lessonId: lesson.id,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to update assessment');
+          }
+
+          setFormData(prev => ({
+            ...prev,
+            selectedAssessmentId: assessmentId,
+          }));
+
+          // Refresh linked assessments
+          await fetchLinkedAssessments(lesson.id);
+
+          toast({
+            title: 'Avaliação vinculada',
+            description:
+              'Avaliação foi vinculada à aula com sucesso.',
+          });
+        } catch (error) {
+          console.error(
+            'Error updating assessment:',
+            error
+          );
+          toast({
+            title: 'Erro ao vincular avaliação',
+            description:
+              'Não foi possível vincular a avaliação à aula.',
+            variant: 'destructive',
+          });
+        }
+      }
+    },
+    [lesson, apiUrl, fetchLinkedAssessments, toast]
+  );
+
   // Atualizar formulário quando lesson mudar
   useEffect(() => {
     if (lesson && isOpen && courseId && moduleId) {
@@ -664,8 +810,8 @@ export default function LessonEditModal({
         flashcardIds: arrayToString(
           lesson.flashcardIds || []
         ),
-        quizIds: arrayToString(lesson.quizIds || []),
         commentIds: arrayToString(lesson.commentIds || []),
+        selectedAssessmentId: '',
         translations: translationsObj,
       });
 
@@ -673,9 +819,11 @@ export default function LessonEditModal({
       setOriginalOrder(processedOrder);
       setErrors({});
 
-      // Buscar lições existentes do módulo e vídeos disponíveis
+      // Buscar lições existentes do módulo, vídeos disponíveis e assessments
       fetchExistingLessons(courseId, moduleId);
       fetchAvailableVideos(courseId, lesson.id);
+      fetchAvailableAssessments();
+      fetchLinkedAssessments(lesson.id);
     }
   }, [
     lesson,
@@ -684,6 +832,8 @@ export default function LessonEditModal({
     moduleId,
     fetchExistingLessons,
     fetchAvailableVideos,
+    fetchAvailableAssessments,
+    fetchLinkedAssessments,
   ]);
 
   // Fechar modal com ESC
@@ -963,13 +1113,15 @@ export default function LessonEditModal({
                         >
                           <div className="flex items-center gap-2">
                             <span>🚫</span>
-                            <span>{t('noVideo')}</span>
+                            <span>
+                              {t('fields.noVideo')}
+                            </span>
                           </div>
                         </SafeSelectItem>
 
                         {availableVideos.length === 0 ? (
                           <div className="px-2 py-4 text-center text-gray-400 text-sm">
-                            {t('noVideosAvailable')}
+                            {t('fields.noVideosAvailable')}
                           </div>
                         ) : (
                           availableVideos.map(video => {
@@ -1051,30 +1203,109 @@ export default function LessonEditModal({
                   </p>
                 </div>
 
-                {/* Quiz IDs */}
-                <div>
+                {/* Assessments */}
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     <ClipboardList
                       size={16}
                       className="inline mr-2"
                     />
-                    {t('fields.quizIds')}
+                    {t('fields.assessments')}
                   </label>
-                  <input
-                    type="text"
-                    value={formData.quizIds}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        quizIds: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
-                    placeholder={t('placeholders.quizIds')}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t('hints.multipleIds')}
-                  </p>
+                  {loadingAssessments ? (
+                    <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                      <Loader2
+                        size={16}
+                        className="animate-spin inline mr-2"
+                      />
+                      {t('loadingAssessments')}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {linkedAssessments.length > 0 && (
+                        <div className="p-3 bg-gray-700/50 rounded-lg">
+                          <p className="text-sm text-white mb-2 font-bold ">
+                            {t('linkedAssessments')}:
+                          </p>
+                          <div className="space-y-1">
+                            {linkedAssessments.map(
+                              assessment => (
+                                <div
+                                  key={assessment.id}
+                                  className="flex items-center justify-between text-xs"
+                                >
+                                  <span className="text-gray-200">
+                                    {assessment.title}
+                                  </span>
+                                  <span className="text-gray-400">
+                                    (
+                                    {t(
+                                      `assessmentTypes.${assessment.type.toLowerCase()}`
+                                    )}
+                                    )
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <Select
+                        value={
+                          formData.selectedAssessmentId
+                        }
+                        onValueChange={
+                          handleAssessmentChange
+                        }
+                        disabled={loadingAssessments}
+                      >
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                          <SelectValue
+                            placeholder={t(
+                              'placeholders.selectAssessment'
+                            )}
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                          <SafeSelectItem
+                            value="none"
+                            className="text-gray-400 hover:bg-gray-600"
+                          >
+                            {t('noAssessment')}
+                          </SafeSelectItem>
+                          {availableAssessments
+                            .filter(
+                              assessment =>
+                                !assessment.lessonId
+                            )
+                            .map(assessment => (
+                              <SafeSelectItem
+                                key={assessment.id}
+                                value={assessment.id}
+                                className="text-white hover:bg-gray-600"
+                              >
+                                <div className="flex items-center justify-between w-full">
+                                  <span>
+                                    {assessment.title}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    (
+                                    {t(
+                                      `assessmentTypes.${assessment.type.toLowerCase()}`
+                                    )}
+                                    )
+                                  </span>
+                                </div>
+                              </SafeSelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('hints.assessmentSelection')}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Comment IDs */}
@@ -1136,7 +1367,10 @@ export default function LessonEditModal({
             <button
               onClick={handleSubmit}
               disabled={
-                loading || loadingOrders || loadingVideos
+                loading ||
+                loadingOrders ||
+                loadingVideos ||
+                loadingAssessments
               }
               className="px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >

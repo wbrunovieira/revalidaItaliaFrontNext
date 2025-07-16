@@ -1455,8 +1455,10 @@
         "video": "Vídeo",
         "videoId": "ID do Vídeo",
         "flashcardIds": "IDs dos Flashcards",
-        "quizIds": "IDs dos Questionários",
-        "commentIds": "IDs dos Comentários"
+        "assessments": "Avaliações",
+        "commentIds": "IDs dos Comentários",
+         "noVideo": "Sem vídeo",
+      "noVideosAvailable": "Nenhum vídeo disponível"
       },
       "placeholders": {
         "imageUrl": "https://exemplo.com/imagem.jpg",
@@ -1466,15 +1468,24 @@
         "selectVideo": "Selecione um vídeo...",
         "videoId": "video-123",
         "flashcardIds": "flashcard-1, flashcard-2",
-        "quizIds": "quiz-1, quiz-2",
+        "selectAssessment": "Selecione uma avaliação...",
         "commentIds": "comment-1, comment-2"
       },
+        "assessmentTypes": {
+      "quiz": "Quiz",
+      "simulado": "Simulado",
+      "prova_aberta": "Prova aberta"
+    },
       "hints": {
         "order": "Ordem de exibição da aula no módulo",
         "videoId": "ID do vídeo associado a esta aula (opcional)",
         "videoSelection": "Selecione um vídeo da lista ou deixe em branco",
-        "multipleIds": "Separe múltiplos IDs com vírgulas"
+        "multipleIds": "Separe múltiplos IDs com vírgulas",
+        "assessmentSelection": "Selecione uma avaliação para vincular a esta aula"
       },
+      "loadingAssessments": "Carregando avaliações...",
+      "linkedAssessments": "Avaliações vinculadas",
+      "noAssessment": "Nenhuma avaliação",
       "translations": {
         "title": "Traduções",
         "portuguese": "Português",

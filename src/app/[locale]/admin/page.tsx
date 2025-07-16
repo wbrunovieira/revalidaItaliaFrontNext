@@ -44,11 +44,13 @@ import VideosList from '@/components/VideosList';
 import CreateDocumentForm from '@/components/CreateDocumentForm';
 import DocumentsList from '@/components/DocumentsList';
 import CreateAssessmentForm from '@/components/CreateAssessmentForm';
+import CreateArgumentForm from '@/components/CreateArgumentForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateAssessmentModal, setShowCreateAssessmentModal] = useState(false);
+  const [showCreateArgumentModal, setShowCreateArgumentModal] = useState(false);
 
   return (
     <div>
@@ -395,33 +397,62 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-6">
                   <div className="text-center space-y-3">
                     <h3 className="text-xl font-semibold text-white">
                       {t('assessments.create')}
                     </h3>
-                    <p className="text-gray-400 max-w-md mx-auto">
+                    <p className="text-gray-400 max-w-2xl mx-auto">
                       {t('createAssessment.startDescription')}
                     </p>
                   </div>
                   
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setShowCreateAssessmentModal(true)}
-                      className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary px-8 py-4 rounded-lg font-semibold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                    >
-                      <div className="p-2 bg-primary/20 rounded-full">
-                        <ClipboardList size={20} />
-                      </div>
-                      <div className="text-left">
-                        <div className="font-bold text-lg">
+                  <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+                    {/* Create Assessment Button */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-blue-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <ClipboardList size={24} className="text-blue-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-2">
+                            {t('createAssessment.cardTitle')}
+                          </h4>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('createAssessment.cardDescription')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreateAssessmentModal(true)}
+                          className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
                           {t('createAssessment.startButton')}
-                        </div>
-                        <div className="text-sm opacity-90">
-                          {t('createAssessment.startSubtext')}
-                        </div>
+                        </button>
                       </div>
-                    </button>
+                    </div>
+
+                    {/* Create Argument Button */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-green-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <List size={24} className="text-green-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-2">
+                            {t('createArgument.cardTitle')}
+                          </h4>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('createArgument.cardDescription')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreateArgumentModal(true)}
+                          className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                          {t('createArgument.startButton')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </TabsContent>
@@ -473,6 +504,16 @@ export default function AdminPage() {
         onAssessmentCreated={() => {
           // Refresh assessment list if needed
           console.log('Assessment created');
+        }}
+      />
+
+      {/* Argument Creation Modal */}
+      <CreateArgumentForm
+        isOpen={showCreateArgumentModal}
+        onClose={() => setShowCreateArgumentModal(false)}
+        onArgumentCreated={() => {
+          // Refresh argument list if needed
+          console.log('Argument created');
         }}
       />
     </div>

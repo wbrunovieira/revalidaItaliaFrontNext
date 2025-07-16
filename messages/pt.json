@@ -507,6 +507,8 @@
   "startDescription": "Crie quizzes, simulados e provas abertas para avaliar o conhecimento dos alunos.",
   "startButton": "Iniciar Criação",
   "startSubtext": "Clique aqui para começar",
+  "cardTitle": "Nova Avaliação",
+  "cardDescription": "Crie quizzes, simulados e provas abertas para avaliar o conhecimento dos alunos",
   "selectType": "Selecione o tipo de avaliação que deseja criar:",
   "backToTypeSelection": "Voltar à seleção de tipo",
   "create": "Criar Avaliação",
@@ -580,6 +582,47 @@
   "error": {
     "title": "Erro ao criar avaliação",
     "description": "Não foi possível criar a avaliação. Tente novamente."
+  }
+},
+"createArgument": {
+  "title": "Criar Argumento",
+  "cardTitle": "Novo Argumento",
+  "cardDescription": "Crie argumentos para avaliações dissertativas e discussões",
+  "startButton": "Iniciar Criação",
+  "create": "Criar Argumento",
+  "creating": "Criando...",
+  "loadingAssessments": "Carregando avaliações...",
+  "infoCard": {
+    "title": "Sobre Argumentos",
+    "description": "Argumentos são tópicos ou questões que podem ser vinculados a avaliações ou usados de forma independente para discussões e análises."
+  },
+  "fields": {
+    "title": "Título",
+    "assessment": "Avaliação",
+    "optional": "opcional",
+    "assessmentHelp": "Vincule este argumento a uma avaliação específica ou deixe em branco para uso geral"
+  },
+  "placeholders": {
+    "title": "Digite o título do argumento",
+    "assessment": "Selecione uma avaliação (opcional)",
+    "noAssessment": "Nenhuma avaliação (uso geral)"
+  },
+  "errors": {
+    "titleRequired": "Título é obrigatório",
+    "titleMin": "Título deve ter pelo menos 3 caracteres",
+    "titleMax": "Título deve ter no máximo 100 caracteres",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Corrija os erros no formulário antes de continuar",
+    "loadAssessmentsTitle": "Erro ao carregar avaliações",
+    "loadAssessmentsDescription": "Não foi possível carregar a lista de avaliações"
+  },
+  "success": {
+    "title": "Argumento criado!",
+    "description": "O argumento foi criado com sucesso"
+  },
+  "error": {
+    "title": "Erro ao criar argumento",
+    "description": "Não foi possível criar o argumento. Tente novamente."
   }
 },
 "flashcards": {

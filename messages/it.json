@@ -415,6 +415,8 @@
     "startDescription": "Crea quiz, simulazioni e prove aperte per valutare la conoscenza degli studenti.",
     "startButton": "Inizia Creazione",
     "startSubtext": "Clicca qui per iniziare",
+    "cardTitle": "Nuova Valutazione",
+    "cardDescription": "Crea quiz, simulazioni e prove aperte per valutare la conoscenza degli studenti",
     "selectType": "Seleziona il tipo di valutazione che vuoi creare:",
     "backToTypeSelection": "Torna alla selezione del tipo",
     "create": "Crea Valutazione",
@@ -488,6 +490,47 @@
     "error": {
       "title": "Errore nella creazione della valutazione",
       "description": "Impossibile creare la valutazione. Riprova."
+    }
+  },
+  "createArgument": {
+    "title": "Crea Argomento",
+    "cardTitle": "Nuovo Argomento",
+    "cardDescription": "Crea argomenti per valutazioni dissertative e discussioni",
+    "startButton": "Inizia Creazione",
+    "create": "Crea Argomento",
+    "creating": "Creando...",
+    "loadingAssessments": "Caricamento valutazioni...",
+    "infoCard": {
+      "title": "Informazioni sugli Argomenti",
+      "description": "Gli argomenti sono temi o questioni che possono essere collegati a valutazioni o utilizzati indipendentemente per discussioni e analisi."
+    },
+    "fields": {
+      "title": "Titolo",
+      "assessment": "Valutazione",
+      "optional": "opzionale",
+      "assessmentHelp": "Collega questo argomento a una valutazione specifica o lascia vuoto per uso generale"
+    },
+    "placeholders": {
+      "title": "Inserisci il titolo dell'argomento",
+      "assessment": "Seleziona una valutazione (opzionale)",
+      "noAssessment": "Nessuna valutazione (uso generale)"
+    },
+    "errors": {
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMin": "Il titolo deve avere almeno 3 caratteri",
+      "titleMax": "Il titolo deve avere al massimo 100 caratteri",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Correggi gli errori nel modulo prima di continuare",
+      "loadAssessmentsTitle": "Errore nel caricamento delle valutazioni",
+      "loadAssessmentsDescription": "Non è stato possibile caricare l'elenco delle valutazioni"
+    },
+    "success": {
+      "title": "Argomento creato!",
+      "description": "L'argomento è stato creato con successo"
+    },
+    "error": {
+      "title": "Errore nella creazione dell'argomento",
+      "description": "Non è stato possibile creare l'argomento. Riprova."
     }
   },
   "flashcards": {

@@ -414,6 +414,8 @@
     "startDescription": "Crea cuestionarios, simulacros y pruebas abiertas para evaluar el conocimiento de los estudiantes.",
     "startButton": "Iniciar Creación",
     "startSubtext": "Haz clic aquí para empezar",
+    "cardTitle": "Nueva Evaluación",
+    "cardDescription": "Crea cuestionarios, simulacros y pruebas abiertas para evaluar el conocimiento de los estudiantes",
     "selectType": "Selecciona el tipo de evaluación que quieres crear:",
     "backToTypeSelection": "Volver a la selección de tipo",
     "create": "Crear Evaluación",
@@ -487,6 +489,47 @@
     "error": {
       "title": "Error al crear evaluación",
       "description": "No se pudo crear la evaluación. Inténtalo de nuevo."
+    }
+  },
+  "createArgument": {
+    "title": "Crear Argumento",
+    "cardTitle": "Nuevo Argumento",
+    "cardDescription": "Crea argumentos para evaluaciones disertativas y discusiones",
+    "startButton": "Iniciar Creación",
+    "create": "Crear Argumento",
+    "creating": "Creando...",
+    "loadingAssessments": "Cargando evaluaciones...",
+    "infoCard": {
+      "title": "Acerca de los Argumentos",
+      "description": "Los argumentos son temas o cuestiones que pueden vincularse a evaluaciones o utilizarse independientemente para discusiones y análisis."
+    },
+    "fields": {
+      "title": "Título",
+      "assessment": "Evaluación",
+      "optional": "opcional",
+      "assessmentHelp": "Vincula este argumento a una evaluación específica o deja en blanco para uso general"
+    },
+    "placeholders": {
+      "title": "Ingresa el título del argumento",
+      "assessment": "Selecciona una evaluación (opcional)",
+      "noAssessment": "Ninguna evaluación (uso general)"
+    },
+    "errors": {
+      "titleRequired": "El título es obligatorio",
+      "titleMin": "El título debe tener al menos 3 caracteres",
+      "titleMax": "El título debe tener como máximo 100 caracteres",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Corrige los errores en el formulario antes de continuar",
+      "loadAssessmentsTitle": "Error al cargar evaluaciones",
+      "loadAssessmentsDescription": "No se pudo cargar la lista de evaluaciones"
+    },
+    "success": {
+      "title": "¡Argumento creado!",
+      "description": "El argumento se creó exitosamente"
+    },
+    "error": {
+      "title": "Error al crear argumento",
+      "description": "No se pudo crear el argumento. Inténtalo de nuevo."
     }
   },
   "flashcards": {

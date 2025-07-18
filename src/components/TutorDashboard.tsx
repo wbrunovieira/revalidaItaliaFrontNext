@@ -808,7 +808,10 @@ export default function TutorDashboard({
               <div className="space-y-2">
                 {Object.entries(
                   quizAttempts.reduce(
-                    (acc: any, attempt: any) => {
+                    (
+                      acc: Record<string, any[]>,
+                      attempt: any
+                    ) => {
                       const key =
                         attempt.assessment?.title ||
                         'Quiz sem título';
@@ -816,75 +819,70 @@ export default function TutorDashboard({
                       acc[key].push(attempt);
                       return acc;
                     },
-                    {}
+                    {} as Record<string, any[]>
                   )
-                ).map(
-                  ([quizTitle, attempts]: [
-                    string,
-                    any[]
-                  ]) => {
-                    // Para Quiz/Simulado, usar os dados de results
-                    const totalCorrect = attempts.reduce(
-                      (sum, att) =>
-                        sum +
-                        (att.results?.correctAnswers || 0),
-                      0
-                    );
-                    const totalQuestions = attempts.reduce(
-                      (sum, att) =>
-                        sum +
-                        (att.results?.totalQuestions || 0),
-                      0
-                    );
-                    const totalIncorrect =
-                      totalQuestions - totalCorrect;
+                ).map(([quizTitle, attempts]) => {
+                  // Para Quiz/Simulado, usar os dados de results
+                  const totalCorrect = attempts.reduce(
+                    (sum, att) =>
+                      sum +
+                      (att.results?.correctAnswers || 0),
+                    0
+                  );
+                  const totalQuestions = attempts.reduce(
+                    (sum, att) =>
+                      sum +
+                      (att.results?.totalQuestions || 0),
+                    0
+                  );
+                  const totalIncorrect =
+                    totalQuestions - totalCorrect;
 
-                    return (
-                      <div
-                        key={quizTitle}
-                        className="bg-gray-700 rounded-lg p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium text-white">
-                            {quizTitle}
-                          </h3>
-                          <span className="text-sm text-gray-400">
-                            {attempts.length} tentativas
-                          </span>
-                        </div>
-                        <div className="mt-2 flex items-center gap-4 text-xs">
-                          <span className="text-green-400">
-                            ✓ {totalCorrect} corretas
-                          </span>
-                          <span className="text-red-400">
-                            ✗ {totalIncorrect} erradas
-                          </span>
-                          {totalQuestions > 0 && (
-                            <span className="text-gray-400">
-                              (
-                              {Math.round(
-                                (totalCorrect /
-                                  totalQuestions) *
-                                  100
-                              )}
-                              % acerto)
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1 text-xs text-gray-400">
-                          Alunos:{' '}
-                          {[
-                            ...new Set(
-                              attempts.map(
-                                a => a.student?.name
-                              )
-                            ),
-                          ].join(', ')}
-                        </div>
+                  return (
+                    <div
+                      key={quizTitle}
+                      className="bg-gray-700 rounded-lg p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium text-white">
+                          {quizTitle}
+                        </h3>
+                        <span className="text-sm text-gray-400">
+                          {attempts.length} tentativas
+                        </span>
                       </div>
-                    );
-                  }
-                )}
+                      <div className="mt-2 flex items-center gap-4 text-xs">
+                        <span className="text-green-400">
+                          ✓ {totalCorrect} corretas
+                        </span>
+                        <span className="text-red-400">
+                          ✗ {totalIncorrect} erradas
+                        </span>
+                        {totalQuestions > 0 && (
+                          <span className="text-gray-400">
+                            (
+                            {Math.round(
+                              (totalCorrect /
+                                totalQuestions) *
+                                100
+                            )}
+                            % acerto)
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-gray-400">
+                        Alunos:{' '}
+                        {[
+                          ...new Set(
+                            attempts.map(
+                              a => a.student?.name
+                            )
+                          ),
+                        ].join(', ')}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -972,7 +970,10 @@ export default function TutorDashboard({
               <div className="space-y-2">
                 {Object.entries(
                   simuladoAttempts.reduce(
-                    (acc: any, attempt: any) => {
+                    (
+                      acc: Record<string, any[]>,
+                      attempt: any
+                    ) => {
                       const key =
                         attempt.assessment?.title ||
                         'Simulado sem título';
@@ -980,75 +981,70 @@ export default function TutorDashboard({
                       acc[key].push(attempt);
                       return acc;
                     },
-                    {}
+                    {} as Record<string, any[]>
                   )
-                ).map(
-                  ([simuladoTitle, attempts]: [
-                    string,
-                    any[]
-                  ]) => {
-                    // Para Quiz/Simulado, usar os dados de results
-                    const totalCorrect = attempts.reduce(
-                      (sum, att) =>
-                        sum +
-                        (att.results?.correctAnswers || 0),
-                      0
-                    );
-                    const totalQuestions = attempts.reduce(
-                      (sum, att) =>
-                        sum +
-                        (att.results?.totalQuestions || 0),
-                      0
-                    );
-                    const totalIncorrect =
-                      totalQuestions - totalCorrect;
+                ).map(([simuladoTitle, attempts]) => {
+                  //   Para Quiz/Simulado, usar os dados de results
+                  const totalCorrect = attempts.reduce(
+                    (sum, att) =>
+                      sum +
+                      (att.results?.correctAnswers || 0),
+                    0
+                  );
+                  const totalQuestions = attempts.reduce(
+                    (sum, att) =>
+                      sum +
+                      (att.results?.totalQuestions || 0),
+                    0
+                  );
+                  const totalIncorrect =
+                    totalQuestions - totalCorrect;
 
-                    return (
-                      <div
-                        key={simuladoTitle}
-                        className="bg-gray-700 rounded-lg p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium text-white">
-                            {simuladoTitle}
-                          </h3>
-                          <span className="text-sm text-gray-400">
-                            {attempts.length} tentativas
-                          </span>
-                        </div>
-                        <div className="mt-2 flex items-center gap-4 text-xs">
-                          <span className="text-green-400">
-                            ✓ {totalCorrect} corretas
-                          </span>
-                          <span className="text-red-400">
-                            ✗ {totalIncorrect} erradas
-                          </span>
-                          {totalQuestions > 0 && (
-                            <span className="text-gray-400">
-                              (
-                              {Math.round(
-                                (totalCorrect /
-                                  totalQuestions) *
-                                  100
-                              )}
-                              % acerto)
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1 text-xs text-gray-400">
-                          Alunos:{' '}
-                          {[
-                            ...new Set(
-                              attempts.map(
-                                a => a.student?.name
-                              )
-                            ),
-                          ].join(', ')}
-                        </div>
+                  return (
+                    <div
+                      key={simuladoTitle}
+                      className="bg-gray-700 rounded-lg p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium text-white">
+                          {simuladoTitle}
+                        </h3>
+                        <span className="text-sm text-gray-400">
+                          {attempts.length} tentativas
+                        </span>
                       </div>
-                    );
-                  }
-                )}
+                      <div className="mt-2 flex items-center gap-4 text-xs">
+                        <span className="text-green-400">
+                          ✓ {totalCorrect} corretas
+                        </span>
+                        <span className="text-red-400">
+                          ✗ {totalIncorrect} erradas
+                        </span>
+                        {totalQuestions > 0 && (
+                          <span className="text-gray-400">
+                            (
+                            {Math.round(
+                              (totalCorrect /
+                                totalQuestions) *
+                                100
+                            )}
+                            % acerto)
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-gray-400">
+                        Alunos:{' '}
+                        {[
+                          ...new Set(
+                            attempts.map(
+                              a => a.student?.name
+                            )
+                          ),
+                        ].join(', ')}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

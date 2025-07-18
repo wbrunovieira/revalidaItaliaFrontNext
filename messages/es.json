@@ -45,7 +45,34 @@
     "cancel": "Cancelar",
     "saveAddress": "Guardar Dirección",
     "saving": "Guardando...",
-    "updating": "Actualizando..."
+    "updating": "Actualizando...",
+    "assessments": {
+      "title": "Mis Evaluaciones Abiertas",
+      "noAssessments": "No se encontraron evaluaciones abiertas",
+      "noAssessmentsDesc": "Tus evaluaciones abiertas aparecerán aquí cuando comiences a responderlas.",
+      "loading": "Cargando evaluaciones...",
+      "refresh": "Actualizar",
+      "questions": "Preguntas",
+      "pending": "Pendientes",
+      "reviewed": "Revisadas",
+      "score": "Nota",
+      "submitted": "Enviada",
+      "graded": "Finalizada",
+      "status": {
+        "inProgress": "En progreso",
+        "submitted": "Esperando revisión",
+        "submittedComplete": "Revisión completa",
+        "grading": "Siendo revisada",
+        "graded": "Finalizada"
+      },
+      "actions": {
+        "continue": "Continuar prueba",
+        "waitReview": "Esperar revisión",
+        "viewResult": "Ver resultado",
+        "retake": "Repetir Prueba",
+        "viewDetails": "Ver detalles"
+      }
+    }
   },
   "Nav": {
     "home": "Inicio",
@@ -2070,6 +2097,63 @@
   "error": {
     "fetchTitle": "Error al cargar argumentos",
     "fetchDescription": "No fue posible cargar la lista de argumentos"
+  }
+},
+"Tutor": {
+  "back": "Volver",
+  "dashboard": {
+    "title": "Área del Tutor",
+    "subtitle": "Revisa exámenes de ensayo y proporciona retroalimentación a los estudiantes"
+  },
+  "stats": {
+    "pending": "Esperando revisión",
+    "inProgress": "En revisión",
+    "completed": "Revisadas",
+    "total": "Total de exámenes"
+  },
+  "filters": {
+    "all": "Todas",
+    "pending": "Esperando revisión",
+    "inProgress": "En revisión",
+    "completed": "Revisadas"
+  },
+  "status": {
+    "submitted": "Esperando revisión",
+    "grading": "En revisión",
+    "graded": "Revisada"
+  },
+  "review": {
+    "title": "Revisión de Examen",
+    "subtitle": "Evalúa las respuestas y proporciona retroalimentación detallada",
+    "correct": "Correcta",
+    "incorrect": "Incorrecta",
+    "reviewLater": "Revisar después",
+    "comment": "Comentario del Tutor",
+    "commentPlaceholder": "Añade un comentario para el estudiante...",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "finalize": "Finalizar Revisión",
+    "finalizing": "Finalizando...",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "medium": "Media prioridad",
+    "low": "Baja prioridad"
+  },
+  "messages": {
+    "noAttempts": "No se encontraron intentos",
+    "noAttemptsSubtitle": "No hay exámenes pendientes de revisión en este momento",
+    "attemptNotFound": "Intento no encontrado",
+    "attemptNotFoundSubtitle": "El intento que buscas no fue encontrado",
+    "loadingAttempts": "Cargando intentos pendientes...",
+    "loadingAttempt": "Cargando datos del intento...",
+    "reviewSaved": "Revisión guardada con éxito",
+    "reviewFinalized": "Revisión finalizada con éxito",
+    "errorSaving": "Error al guardar revisión",
+    "errorFinalizing": "Error al finalizar revisión",
+    "errorLoading": "Error al cargar datos"
   }
 }
 }

@@ -39,7 +39,7 @@ interface Option {
 interface Question {
   id: string;
   text: string;
-  type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION';
+  type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION' | 'OPEN';
   options: Option[];
   argumentId?: string;
   argumentName?: string;

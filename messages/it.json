@@ -46,7 +46,34 @@
     "cancel": "Annulla",
     "saveAddress": "Salva Indirizzo",
     "saving": "Salvando...",
-    "updating": "Aggiornando..."
+    "updating": "Aggiornando...",
+    "assessments": {
+      "title": "Le Mie Valutazioni Aperte",
+      "noAssessments": "Nessuna valutazione aperta trovata",
+      "noAssessmentsDesc": "Le tue valutazioni aperte appariranno qui quando inizierai a rispondere.",
+      "loading": "Caricamento valutazioni...",
+      "refresh": "Aggiorna",
+      "questions": "Domande",
+      "pending": "In attesa",
+      "reviewed": "Riviste",
+      "score": "Voto",
+      "submitted": "Inviata",
+      "graded": "Finalizzata",
+      "status": {
+        "inProgress": "In corso",
+        "submitted": "In attesa di revisione",
+        "submittedComplete": "Revisione completa",
+        "grading": "In revisione",
+        "graded": "Finalizzata"
+      },
+      "actions": {
+        "continue": "Continua prova",
+        "waitReview": "Aspetta revisione",
+        "viewResult": "Vedi risultato",
+        "retake": "Ripeti Prova",
+        "viewDetails": "Vedi dettagli"
+      }
+    }
   },
   "Nav": {
     "home": "Inizio",
@@ -2088,6 +2115,63 @@
   "error": {
     "fetchTitle": "Errore nel caricamento degli argomenti",
     "fetchDescription": "Non è stato possibile caricare l'elenco degli argomenti"
+  }
+},
+"Tutor": {
+  "back": "Indietro",
+  "dashboard": {
+    "title": "Area Tutor",
+    "subtitle": "Rivedi prove dissertative e fornisci feedback agli studenti"
+  },
+  "stats": {
+    "pending": "In attesa di revisione",
+    "inProgress": "In revisione",
+    "completed": "Revisionate",
+    "total": "Totale prove"
+  },
+  "filters": {
+    "all": "Tutte",
+    "pending": "In attesa di revisione",
+    "inProgress": "In revisione",
+    "completed": "Revisionate"
+  },
+  "status": {
+    "submitted": "In attesa di revisione",
+    "grading": "In revisione",
+    "graded": "Revisionata"
+  },
+  "review": {
+    "title": "Revisione Prova",
+    "subtitle": "Valuta le risposte e fornisci feedback dettagliato",
+    "correct": "Corretta",
+    "incorrect": "Scorretta",
+    "reviewLater": "Rivedere dopo",
+    "comment": "Commento del Tutor",
+    "commentPlaceholder": "Aggiungi un commento per lo studente...",
+    "save": "Salva",
+    "saving": "Salvando...",
+    "finalize": "Finalizza Revisione",
+    "finalizing": "Finalizzando...",
+    "previous": "Precedente",
+    "next": "Successiva"
+  },
+  "priority": {
+    "high": "Alta priorità",
+    "medium": "Media priorità",
+    "low": "Bassa priorità"
+  },
+  "messages": {
+    "noAttempts": "Nessun tentativo trovato",
+    "noAttemptsSubtitle": "Non ci sono prove in attesa di revisione al momento",
+    "attemptNotFound": "Tentativo non trovato",
+    "attemptNotFoundSubtitle": "Il tentativo che stai cercando non è stato trovato",
+    "loadingAttempts": "Caricamento tentativi in sospeso...",
+    "loadingAttempt": "Caricamento dati del tentativo...",
+    "reviewSaved": "Revisione salvata con successo",
+    "reviewFinalized": "Revisione finalizzata con successo",
+    "errorSaving": "Errore nel salvare la revisione",
+    "errorFinalizing": "Errore nel finalizzare la revisione",
+    "errorLoading": "Errore nel caricamento dati"
   }
 }
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
+import StudentAssessmentStatus from '@/components/StudentAssessmentStatus';
 import {
   MapPin,
   Plus,
@@ -209,15 +210,19 @@ export default function ProfileContent({
 
   return (
     <>
-      <div className="px-6 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Informações Pessoais */}
-        <div className="lg:col-span-1">
-          <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                {t('personalInfo')}
-              </h2>
-            </div>
+      <div className="px-6 pb-8 space-y-8">
+        {/* Avaliações Abertas */}
+        <StudentAssessmentStatus userId={userData.id} locale={locale} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Informações Pessoais */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">
+                  {t('personalInfo')}
+                </h2>
+              </div>
 
             {/* Avatar */}
             <div className="flex justify-center mb-6">
@@ -460,6 +465,7 @@ export default function ProfileContent({
                 </button>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+//src/app/[locale]/couses/[slug]/modules/[modulesSlug]/lessons/[lessonId]/assessments/[assessmentId]/page
 export const dynamic = 'force-dynamic';
 
 import { cookies } from 'next/headers';
@@ -41,7 +42,7 @@ interface Option {
 interface Question {
   id: string;
   text: string;
-  type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION';
+  type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION' | 'OPEN';
   options: Option[];
   argumentId?: string;
   argumentName?: string;
@@ -97,18 +98,25 @@ export default async function AssessmentPage({
     }
   );
 
-  console.log('Assessment response status:', assessmentResponse.status);
-  
+  console.log(
+    'Assessment response status:',
+    assessmentResponse.status
+  );
+
   if (!assessmentResponse.ok) {
     console.error('Failed to fetch assessment');
     return notFound();
   }
 
   const assessmentData = await assessmentResponse.json();
-  const assessment: Assessment = assessmentData.assessment || assessmentData;
+  const assessment: Assessment =
+    assessmentData.assessment || assessmentData;
 
   // Fetch questions for this assessment
-  console.log('Fetching questions for assessment:', assessmentId);
+  console.log(
+    'Fetching questions for assessment:',
+    assessmentId
+  );
   const questionsResponse = await fetch(
     `${API_URL}/assessments/${assessmentId}/questions`,
     {
@@ -119,11 +127,15 @@ export default async function AssessmentPage({
     }
   );
 
-  console.log('Questions response status:', questionsResponse.status);
-  
-  const questionsData: QuestionsResponse = questionsResponse.ok 
-    ? await questionsResponse.json() 
-    : { questions: [] };
+  console.log(
+    'Questions response status:',
+    questionsResponse.status
+  );
+
+  const questionsData: QuestionsResponse =
+    questionsResponse.ok
+      ? await questionsResponse.json()
+      : { questions: [] };
 
   const questions = questionsData.questions || [];
 

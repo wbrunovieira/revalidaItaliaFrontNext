@@ -1,5 +1,15 @@
 {
-  
+  "Tutor": {
+    "back": "Voltar",
+    "dashboard": {
+      "title": "Painel do Tutor",
+      "subtitle": "Gerencie as avaliações pendentes de revisão"
+    },
+    "review": {
+      "title": "Revisar Avaliação",
+      "subtitle": "Revise as respostas do aluno questão por questão"
+    }
+  },
   "Profile": {
     "title": "Perfil",
     "back": "Voltar",
@@ -47,7 +57,34 @@
     "saveAddress": "Salvar Endereço",
     "saving": "Salvando...",
     "updating": "Atualizando...",
-    "deleteAddressWarning": "Tem certeza que deseja excluir o endereço {street}, {number}? Esta ação não pode ser desfeita."
+    "deleteAddressWarning": "Tem certeza que deseja excluir o endereço {street}, {number}? Esta ação não pode ser desfeita.",
+    "assessments": {
+      "title": "Minhas Avaliações Abertas",
+      "noAssessments": "Nenhuma avaliação aberta encontrada",
+      "noAssessmentsDesc": "Suas avaliações abertas aparecerão aqui quando você começar a respondê-las.",
+      "loading": "Carregando avaliações...",
+      "refresh": "Atualizar",
+      "questions": "Questões",
+      "pending": "Pendentes",
+      "approved": "Aprovadas",
+      "score": "Nota",
+      "submitted": "Enviada",
+      "graded": "Finalizada",
+      "status": {
+        "inProgress": "Em andamento",
+        "submitted": "Aguardando revisão",
+        "submittedComplete": "Revisão completa",
+        "grading": "Sendo revisada",
+        "graded": "Finalizada"
+      },
+      "actions": {
+        "continue": "Continuar prova",
+        "waitReview": "Aguardar revisão",
+        "viewResult": "Ver resultado",
+        "retake": "Refazer Prova",
+        "viewDetails": "Ver detalhes"
+      }
+    }
   }
   ,
   "Nav": {
@@ -611,7 +648,8 @@
 "assessments": {
   "create": "Criar Avaliação",
   "list": "Listar Avaliações",
-  "questions": "Listar Questões"
+  "questions": "Listar Questões",
+  "approved": "Aprovadas"
 },
 "arguments": {
   "create": "Criar Argumento",
@@ -2293,6 +2331,63 @@
   "error": {
     "fetchTitle": "Erro ao carregar argumentos",
     "fetchDescription": "Não foi possível carregar a lista de argumentos"
+  }
+},
+"Tutor": {
+  "back": "Voltar",
+  "dashboard": {
+    "title": "Área do Tutor",
+    "subtitle": "Revise provas dissertativas e forneça feedback aos alunos"
+  },
+  "stats": {
+    "pending": "Aguardando revisão",
+    "inProgress": "Em revisão",
+    "completed": "Revisadas",
+    "total": "Total de provas"
+  },
+  "filters": {
+    "all": "Todas",
+    "pending": "Aguardando revisão",
+    "inProgress": "Em revisão", 
+    "completed": "Revisadas"
+  },
+  "status": {
+    "submitted": "Aguardando revisão",
+    "grading": "Em revisão",
+    "graded": "Revisada"
+  },
+  "review": {
+    "title": "Revisão de Prova",
+    "subtitle": "Avalie as respostas e forneça feedback detalhado",
+    "correct": "Correta",
+    "incorrect": "Incorreta",
+    "reviewLater": "Revisar depois",
+    "comment": "Comentário do Tutor",
+    "commentPlaceholder": "Adicione um comentário para o aluno...",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "finalize": "Finalizar Revisão",
+    "finalizing": "Finalizando...",
+    "previous": "Anterior",
+    "next": "Próxima"
+  },
+  "priority": {
+    "high": "Alta prioridade",
+    "medium": "Média prioridade",
+    "low": "Baixa prioridade"
+  },
+  "messages": {
+    "noAttempts": "Nenhuma tentativa encontrada",
+    "noAttemptsSubtitle": "Não há provas pendentes de revisão no momento",
+    "attemptNotFound": "Tentativa não encontrada",
+    "attemptNotFoundSubtitle": "A tentativa que você está procurando não foi encontrada",
+    "loadingAttempts": "Carregando tentativas pendentes...",
+    "loadingAttempt": "Carregando dados da tentativa...",
+    "reviewSaved": "Revisão salva com sucesso",
+    "reviewFinalized": "Revisão finalizada com sucesso",
+    "errorSaving": "Erro ao salvar revisão",
+    "errorFinalizing": "Erro ao finalizar revisão",
+    "errorLoading": "Erro ao carregar dados"
   }
 }
 }

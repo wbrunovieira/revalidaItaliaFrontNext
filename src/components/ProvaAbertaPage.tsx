@@ -37,16 +37,21 @@ interface Assessment {
 interface Question {
   id: string;
   text: string;
-  type: 'OPEN_QUESTION';
+  type: 'MULTIPLE_CHOICE' | 'OPEN_QUESTION' | 'OPEN';
   argumentId?: string;
   argumentName?: string;
-  options: never[];
+  options: Option[];
+}
+
+interface Option {
+  id: string;
+  text: string;
 }
 
 interface DetailedAnswer {
   questionId: string;
   questionText: string;
-  questionType: 'OPEN_QUESTION';
+  questionType: 'OPEN_QUESTION' | 'OPEN';
   textAnswer?: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
@@ -116,6 +121,9 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
   const router = useRouter();
   const { toast } = useToast();
 
+  // Filter only open questions for this component
+  const openQuestions = questions.filter(q => q.type === 'OPEN_QUESTION' || q.type === 'OPEN');
+
   const [phase, setPhase] = useState<ProvaAbertaPhase>('start');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
@@ -128,7 +136,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
   // Agrupar questões por argumento
-  const argumentGroups: ArgumentGroup[] = questions.reduce((groups: ArgumentGroup[], question) => {
+  const argumentGroups: ArgumentGroup[] = openQuestions.reduce((groups: ArgumentGroup[], question) => {
     const argumentId = question.argumentId || 'no-argument';
     const argumentName = question.argumentName || 'Sem argumento';
     
@@ -357,12 +365,12 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
     if (!attempt) return;
 
     // Verificar se todas as questões foram respondidas
-    const unansweredQuestions = questions.filter(q => !answers.has(q.id) && !textAnswers.get(q.id)?.trim());
+    const unansweredQuestions = openQuestions.filter(q => !answers.has(q.id) && !textAnswers.get(q.id)?.trim());
     
     if (unansweredQuestions.length > 0) {
       toast({
         title: 'Questões não respondidas',
-        description: `Você precisa responder todas as ${questions.length} questões antes de enviar.`,
+        description: `Você precisa responder todas as ${openQuestions.length} questões antes de enviar.`,
         variant: 'destructive',
       });
       return;
@@ -461,11 +469,20 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
     }
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = openQuestions[currentQuestionIndex];
   const currentAnswer = currentQuestion ? answers.get(currentQuestion.id) : null;
   const currentTextAnswer = currentQuestion ? textAnswers.get(currentQuestion.id) || '' : '';
-  const answeredCount = answers.size + Array.from(textAnswers.values()).filter(text => text.trim()).length;
-  const progressPercentage = (answeredCount / questions.length) * 100;
+  // Contar questões que têm resposta (salva no servidor OU no estado local)
+  const answeredCount = openQuestions.filter(question => {
+    const hasSavedAnswer = answers.has(question.id);
+    const hasLocalAnswer = textAnswers.get(question.id)?.trim();
+    const isAnswered = hasSavedAnswer || hasLocalAnswer;
+    console.log(`Question ${question.id}: saved=${hasSavedAnswer}, local=${!!hasLocalAnswer}, answered=${isAnswered}`);
+    return isAnswered;
+  }).length;
+  
+  console.log(`Total questions: ${openQuestions.length}, Answered: ${answeredCount}, Should show button: ${answeredCount === openQuestions.length}`);
+  const progressPercentage = (answeredCount / openQuestions.length) * 100;
 
   // Encontrar o grupo atual da questão
   const currentArgumentGroup = argumentGroups.find(group => 
@@ -482,7 +499,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
                 Instruções da Prova Aberta
               </h2>
               <div className="space-y-2 text-sm text-gray-300">
-                <p>• {questions.length} questões dissertativas</p>
+                <p>• {openQuestions.length} questões dissertativas</p>
                 {assessment.passingScore && (
                   <p>• Nota mínima: {assessment.passingScore}%</p>
                 )}
@@ -511,7 +528,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
             
             <button
               onClick={startExam}
-              disabled={loading || questions.length === 0}
+              disabled={loading || openQuestions.length === 0}
               className="w-full flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors font-medium disabled:opacity-50"
             >
               {loading ? (
@@ -538,9 +555,14 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         {/* Header com Status e Progress */}
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-300">
-              Questão {currentQuestionIndex + 1} de {questions.length}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-300">
+                Questão {currentQuestionIndex + 1} de {openQuestions.length}
+              </span>
+              <span className="text-xs text-gray-400">
+                {answeredCount} de {openQuestions.length} questões respondidas
+              </span>
+            </div>
             
             {/* Status da Prova */}
             {attempt && (
@@ -637,31 +659,45 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-300">
-                {answeredCount}/{questions.length} respondidas
+                {answeredCount}/{openQuestions.length} respondidas
               </span>
               
-              <button
-                onClick={handleSubmitExam}
-                disabled={submitting || answeredCount === 0 || attempt?.status === 'SUBMITTED'}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Send size={16} />
-                    {attempt?.status === 'SUBMITTED' ? 'Enviada' : 'Enviar Prova'}
-                  </>
-                )}
-              </button>
+              {answeredCount === openQuestions.length ? (
+                <button
+                  onClick={handleSubmitExam}
+                  disabled={submitting || attempt?.status === 'SUBMITTED'}
+                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      {attempt?.status === 'SUBMITTED' ? 'Enviada' : 'Enviar Prova'}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2 text-yellow-400">
+                    <AlertCircle size={16} />
+                    <span className="text-sm">
+                      Responda todas as questões para finalizar
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Suas respostas são salvas automaticamente
+                  </div>
+                </div>
+              )}
             </div>
 
             <button
-              onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-              disabled={currentQuestionIndex === questions.length - 1}
+              onClick={() => setCurrentQuestionIndex(Math.min(openQuestions.length - 1, currentQuestionIndex + 1))}
+              disabled={currentQuestionIndex === openQuestions.length - 1}
               className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Próxima
@@ -698,7 +734,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div className="p-4 bg-gray-800/50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-400">{questions.length}</p>
+                <p className="text-2xl font-bold text-blue-400">{openQuestions.length}</p>
                 <p className="text-gray-400 text-sm">Questões Respondidas</p>
               </div>
               <div className="p-4 bg-gray-800/50 rounded-lg">
@@ -714,7 +750,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
               Suas Respostas
             </h3>
             
-            {questions.map((question, index) => {
+            {openQuestions.map((question, index) => {
               const answer = answers.get(question.id);
               const textAnswer = textAnswers.get(question.id);
               const finalAnswer = answer?.textAnswer || textAnswer || '';

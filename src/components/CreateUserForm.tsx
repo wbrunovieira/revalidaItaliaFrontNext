@@ -96,78 +96,6 @@ export default function CreateUserForm() {
     formData.confirmPassword &&
     formData.password === formData.confirmPassword;
 
-  // Validação de CPF CORRIGIDA
-  const validateCPF = useCallback(
-    (cpf: string): boolean => {
-      const cleanCPF = cpf.replace(/\D/g, '');
-
-      // Log para debug
-      console.log('🔍 Validando CPF:', cpf);
-      console.log('📄 CPF limpo:', cleanCPF);
-
-      if (cleanCPF.length !== 11) {
-        console.log('❌ CPF deve ter 11 dígitos');
-        return false;
-      }
-
-      if (/^(\d)\1{10}$/.test(cleanCPF)) {
-        console.log('❌ CPF com todos os dígitos iguais');
-        return false;
-      }
-
-      // Validação do PRIMEIRO dígito verificador
-      let sum = 0;
-      for (let i = 0; i < 9; i++) {
-        sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
-      }
-      let remainder = sum % 11;
-      const digit1 = remainder < 2 ? 0 : 11 - remainder;
-
-      console.log(
-        '🔢 Primeiro dígito - Soma:',
-        sum,
-        'Resto:',
-        remainder,
-        'Dígito calculado:',
-        digit1,
-        'Dígito do CPF:',
-        parseInt(cleanCPF.charAt(9))
-      );
-
-      if (parseInt(cleanCPF.charAt(9)) !== digit1) {
-        console.log(
-          '❌ Primeiro dígito verificador inválido'
-        );
-        return false;
-      }
-
-      // Validação do SEGUNDO dígito verificador
-      sum = 0;
-      for (let i = 0; i < 10; i++) {
-        sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
-      }
-      remainder = sum % 11;
-      const digit2 = remainder < 2 ? 0 : 11 - remainder;
-
-      console.log(
-        '🔢 Segundo dígito - Soma:',
-        sum,
-        'Resto:',
-        remainder,
-        'Dígito calculado:',
-        digit2,
-        'Dígito do CPF:',
-        parseInt(cleanCPF.charAt(10))
-      );
-
-      const isValid =
-        parseInt(cleanCPF.charAt(10)) === digit2;
-      console.log('✅ CPF válido:', isValid);
-
-      return isValid;
-    },
-    []
-  );
 
   // Análise de força da senha
   const analyzePasswordStrength = useCallback(
@@ -301,12 +229,7 @@ export default function CreateUserForm() {
               message: t('errors.cpfRequired'),
             };
           }
-          if (!validateCPF(value)) {
-            return {
-              isValid: false,
-              message: t('errors.cpfInvalid'),
-            };
-          }
+          // Aceita qualquer documento - sem validação específica
           return { isValid: true };
 
         case 'role':
@@ -333,7 +256,6 @@ export default function CreateUserForm() {
     [
       formData.password,
       t,
-      validateCPF,
       analyzePasswordStrength,
     ]
   );
@@ -448,13 +370,28 @@ export default function CreateUserForm() {
 
   const createUser = useCallback(
     async (payload: CreateUserPayload): Promise<void> => {
+      // Obter token de múltiplas fontes
+      const token =
+        document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1] ||
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('accessToken');
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/students`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(payload),
         }
       );
@@ -531,16 +468,6 @@ export default function CreateUserForm() {
     }
   };
 
-  const formatCPF = useCallback((value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    const match = cleaned.match(
-      /^(\d{3})(\d{3})(\d{3})(\d{2})$/
-    );
-    if (match) {
-      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
-    }
-    return value;
-  }, []);
 
   const handleInputChange = useCallback(
     (field: keyof FormData) => (value: string) => {
@@ -560,13 +487,10 @@ export default function CreateUserForm() {
 
   const handleCpfChange = useCallback(
     (value: string) => {
-      const formatted = formatCPF(value);
-      if (formatted.length <= 14) {
-        setFormData(prev => ({ ...prev, cpf: formatted }));
-        handleFieldValidation('cpf', formatted);
-      }
+      setFormData(prev => ({ ...prev, cpf: value }));
+      handleFieldValidation('cpf', value);
     },
-    [formatCPF, handleFieldValidation]
+    [handleFieldValidation]
   );
 
   // Validação em tempo real das senhas
@@ -674,19 +598,19 @@ export default function CreateUserForm() {
             )}
           </div>
 
-          {/* CPF */}
+          {/* Documento */}
           <div className="space-y-2">
             <Label
               htmlFor="cpf"
               className="text-gray-300 flex items-center gap-2"
             >
               <CreditCard size={16} />
-              {t('fields.cpf')}
+              {t('fields.document')}
               <span className="text-red-400">*</span>
             </Label>
             <TextField
               id="cpf"
-              placeholder={t('placeholders.cpf')}
+              placeholder={t('placeholders.document')}
               value={formData.cpf}
               onChange={e =>
                 handleCpfChange(e.target.value)
@@ -695,10 +619,13 @@ export default function CreateUserForm() {
               error={errors.cpf}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
+            <p className="text-xs text-gray-400 mt-1">
+              {t('helpers.documentTypes')}
+            </p>
             {formData.cpf && !errors.cpf && (
               <div className="flex items-center gap-1 text-green-400 text-sm">
                 <Check size={14} />
-                {t('validation.cpfValid')}
+                {t('validation.documentValid')}
               </div>
             )}
           </div>

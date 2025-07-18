@@ -9,6 +9,7 @@
     "name": "Nombre",
     "email": "Correo Electrónico",
     "cpf": "Documento de Identidad",
+    "document": "Documento",
     "phone": "Teléfono",
     "birthDate": "Fecha de Nacimiento",
     "birthDatePlaceholder": "Seleccionar fecha",
@@ -855,7 +856,8 @@
     "password": "Contraseña",
     "confirmPassword": "Confirmar Contraseña",
     "role": "Función",
-    "cpf": "CPF"
+    "cpf": "CPF",
+    "document": "Documento"
   },
   "placeholders": {
     "name": "Ingrese el nombre completo",
@@ -863,7 +865,8 @@
     "password": "Mínimo 8 caracteres",
     "confirmPassword": "Ingrese la contraseña nuevamente",
     "role": "Seleccione una función",
-    "cpf": "000.000.000-00"
+    "cpf": "000.000.000-00",
+    "document": "Ingrese su documento"
   },
   "roles": {
     "student": "Estudiante",
@@ -883,15 +886,19 @@
     "passwordWeak": "Contraseña muy débil. Use mayúsculas, minúsculas, números y símbolos",
     "confirmPasswordRequired": "La confirmación de contraseña es obligatoria",
     "passwordMismatch": "Las contraseñas no coinciden",
-    "cpfRequired": "El CPF es obligatorio",
-    "cpfInvalid": "CPF inválido",
+    "cpfRequired": "El documento es obligatorio",
+    "cpfInvalid": "Documento inválido",
     "roleRequired": "La función es obligatoria",
     "roleInvalid": "Función inválida"
   },
   "validation": {
     "nameValid": "Nombre válido",
     "emailValid": "Correo válido",
-    "cpfValid": "CPF válido"
+    "cpfValid": "CPF válido",
+    "documentValid": "Documento válido"
+  },
+  "helpers": {
+    "documentTypes": "Puede ser CPF, RG, Pasaporte o documento del país de residencia"
   },
   "passwordStrength": {
     "label": "Fuerza de contraseña",
@@ -983,6 +990,7 @@
       "id": "ID del Usuario",
       "email": "Correo Electrónico",
       "cpf": "CPF",
+      "document": "Documento",
       "createdAt": "Fecha de Creación",
       "updatedAt": "Última Actualización"
     },
@@ -1807,12 +1815,14 @@
     "name": "Nombre Completo",
     "email": "Correo Electrónico",
     "cpf": "CPF",
+    "document": "Documento",
     "role": "Rol"
   },
   "placeholders": {
     "name": "Ingresa el nombre completo",
     "email": "usuario@ejemplo.com",
-    "cpf": "000.000.000-00"
+    "cpf": "000.000.000-00",
+    "document": "Ingrese su documento"
   },
   "roles": {
     "student": "Estudiante",
@@ -1827,15 +1837,19 @@
     "emailRequired": "El correo electrónico es obligatorio",
     "emailInvalid": "Correo electrónico inválido",
     "emailMax": "Correo electrónico demasiado largo",
-    "cpfRequired": "El CPF es obligatorio",
-    "cpfInvalid": "CPF inválido",
+    "cpfRequired": "El documento es obligatorio",
+    "cpfInvalid": "Documento inválido",
     "roleRequired": "El rol es obligatorio",
     "roleInvalid": "Rol inválido"
   },
   "validation": {
     "nameValid": "Nombre válido",
     "emailValid": "Correo válido",
-    "cpfValid": "CPF válido"
+    "cpfValid": "CPF válido",
+    "documentValid": "Documento válido"
+  },
+  "helpers": {
+    "documentTypes": "Puede ser CPF, RG, Pasaporte o documento del país de residencia"
   },
   "success": {
     "title": "¡Usuario actualizado!",

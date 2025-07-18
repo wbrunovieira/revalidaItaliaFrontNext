@@ -87,78 +87,6 @@ export default function UserEditModal({
     return null;
   };
 
-  // Validação de CPF CORRIGIDA (igual ao CreateUserForm)
-  const validateCPF = useCallback(
-    (cpf: string): boolean => {
-      const cleanCPF = cpf.replace(/\D/g, '');
-
-      // Log para debug
-      console.log('🔍 Validando CPF:', cpf);
-      console.log('📄 CPF limpo:', cleanCPF);
-
-      if (cleanCPF.length !== 11) {
-        console.log('❌ CPF deve ter 11 dígitos');
-        return false;
-      }
-
-      if (/^(\d)\1{10}$/.test(cleanCPF)) {
-        console.log('❌ CPF com todos os dígitos iguais');
-        return false;
-      }
-
-      // Validação do PRIMEIRO dígito verificador
-      let sum = 0;
-      for (let i = 0; i < 9; i++) {
-        sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
-      }
-      let remainder = sum % 11;
-      const digit1 = remainder < 2 ? 0 : 11 - remainder;
-
-      console.log(
-        '🔢 Primeiro dígito - Soma:',
-        sum,
-        'Resto:',
-        remainder,
-        'Dígito calculado:',
-        digit1,
-        'Dígito do CPF:',
-        parseInt(cleanCPF.charAt(9))
-      );
-
-      if (parseInt(cleanCPF.charAt(9)) !== digit1) {
-        console.log(
-          '❌ Primeiro dígito verificador inválido'
-        );
-        return false;
-      }
-
-      // Validação do SEGUNDO dígito verificador
-      sum = 0;
-      for (let i = 0; i < 10; i++) {
-        sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
-      }
-      remainder = sum % 11;
-      const digit2 = remainder < 2 ? 0 : 11 - remainder;
-
-      console.log(
-        '🔢 Segundo dígito - Soma:',
-        sum,
-        'Resto:',
-        remainder,
-        'Dígito calculado:',
-        digit2,
-        'Dígito do CPF:',
-        parseInt(cleanCPF.charAt(10))
-      );
-
-      const isValid =
-        parseInt(cleanCPF.charAt(10)) === digit2;
-      console.log('✅ CPF válido:', isValid);
-
-      return isValid;
-    },
-    []
-  );
 
   // Validação individual de campos
   const validateField = useCallback(
@@ -223,12 +151,7 @@ export default function UserEditModal({
               message: t('errors.cpfRequired'),
             };
           }
-          if (!validateCPF(value)) {
-            return {
-              isValid: false,
-              message: t('errors.cpfInvalid'),
-            };
-          }
+          // Aceita qualquer documento - sem validação específica
           return { isValid: true };
 
         case 'role':
@@ -252,7 +175,7 @@ export default function UserEditModal({
           return { isValid: true };
       }
     },
-    [t, validateCPF]
+    [t]
   );
 
   // Validação em tempo real
@@ -271,17 +194,6 @@ export default function UserEditModal({
     [touched, validateField]
   );
 
-  // Formatação de CPF
-  const formatCPF = useCallback((value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    const match = cleaned.match(
-      /^(\d{3})(\d{3})(\d{3})(\d{2})$/
-    );
-    if (match) {
-      return `${match[1]}.${match[2]}.${match[3]}-${match[4]}`;
-    }
-    return value;
-  }, []);
 
   // Função para obter ícone do papel
   const getRoleIcon = (
@@ -360,16 +272,13 @@ export default function UserEditModal({
     [formData, handleFieldValidation]
   );
 
-  // Manipular mudança de CPF com formatação
+  // Manipular mudança de documento
   const handleCpfChange = useCallback(
     (value: string) => {
-      const formatted = formatCPF(value);
-      if (formatted.length <= 14) {
-        setFormData(prev => ({ ...prev, cpf: formatted }));
-        handleFieldValidation('cpf', formatted);
-      }
+      setFormData(prev => ({ ...prev, cpf: value }));
+      handleFieldValidation('cpf', value);
     },
-    [formatCPF, handleFieldValidation]
+    [handleFieldValidation]
   );
 
   // Função para tratamento centralizado de erros (similar ao CreateUserForm)
@@ -684,7 +593,7 @@ export default function UserEditModal({
                   size={16}
                   className="inline mr-2"
                 />
-                {t('fields.cpf')}
+                {t('fields.document')}
                 <span className="text-red-400 ml-1">*</span>
               </label>
               <input
@@ -699,9 +608,11 @@ export default function UserEditModal({
                     ? 'border-red-500'
                     : 'border-gray-600'
                 }`}
-                placeholder={t('placeholders.cpf')}
-                maxLength={14}
+                placeholder={t('placeholders.document')}
               />
+              <p className="text-xs text-gray-400 mt-1">
+                {t('helpers.documentTypes')}
+              </p>
               {errors.cpf && (
                 <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
                   <AlertCircle size={14} />
@@ -713,7 +624,7 @@ export default function UserEditModal({
                 touched.cpf && (
                   <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
                     <Check size={14} />
-                    {t('validation.cpfValid')}
+                    {t('validation.documentValid')}
                   </div>
                 )}
             </div>

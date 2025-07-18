@@ -20,6 +20,7 @@
     "name": "Nome",
     "email": "E-mail",
     "cpf": "CPF",
+    "document": "Documento",
     "phone": "Telefone",
     "birthDate": "Data de Nascimento",
     "birthDatePlaceholder": "Selecione a data",
@@ -649,7 +650,8 @@
     "password": "Senha",
     "confirmPassword": "Confirmar Senha",
     "role": "Função",
-    "cpf": "CPF"
+    "cpf": "CPF",
+    "document": "Documento"
   },
   "placeholders": {
     "name": "Digite o nome completo",
@@ -657,7 +659,8 @@
     "password": "Mínimo 8 caracteres",
     "confirmPassword": "Digite a senha novamente",
     "role": "Selecione uma função",
-    "cpf": "000.000.000-00"
+    "cpf": "000.000.000-00",
+    "document": "Digite seu documento"
   },
   "roles": {
     "student": "Aluno",
@@ -677,15 +680,19 @@
     "passwordWeak": "Senha muito fraca. Use maiúsculas, minúsculas, números e símbolos",
     "confirmPasswordRequired": "Confirmação de senha é obrigatória",
     "passwordMismatch": "As senhas não coincidem",
-    "cpfRequired": "CPF é obrigatório",
-    "cpfInvalid": "CPF inválido",
+    "cpfRequired": "Documento é obrigatório",
+    "cpfInvalid": "Documento inválido",
     "roleRequired": "Função é obrigatória",
     "roleInvalid": "Função inválida"
   },
   "validation": {
     "nameValid": "Nome válido",
     "emailValid": "E-mail válido",
-    "cpfValid": "CPF válido"
+    "cpfValid": "CPF válido",
+    "documentValid": "Documento válido"
+  },
+  "helpers": {
+    "documentTypes": "Pode ser CPF, RG, Passaporte ou documento do país de residência"
   },
   "passwordStrength": {
     "label": "Força da senha",
@@ -1913,6 +1920,7 @@
       "id": "ID do Usuário",
       "email": "E-mail",
       "cpf": "CPF",
+      "document": "Documento",
       "createdAt": "Data de Criação",
       "updatedAt": "Última Atualização"
     },
@@ -2002,12 +2010,14 @@
     "name": "Nome Completo",
     "email": "E-mail",
     "cpf": "CPF",
+    "document": "Documento",
     "role": "Função"
   },
   "placeholders": {
     "name": "Digite o nome completo",
     "email": "usuario@exemplo.com",
-    "cpf": "000.000.000-00"
+    "cpf": "000.000.000-00",
+    "document": "Digite seu documento"
   },
   "roles": {
     "student": "Estudante",
@@ -2022,15 +2032,19 @@
     "emailRequired": "E-mail é obrigatório",
     "emailInvalid": "E-mail inválido",
     "emailMax": "E-mail muito longo",
-    "cpfRequired": "CPF é obrigatório",
-    "cpfInvalid": "CPF inválido",
+    "cpfRequired": "Documento é obrigatório",
+    "cpfInvalid": "Documento inválido",
     "roleRequired": "Função é obrigatória",
     "roleInvalid": "Função inválida"
   },
   "validation": {
     "nameValid": "Nome válido",
     "emailValid": "E-mail válido",
-    "cpfValid": "CPF válido"
+    "cpfValid": "CPF válido",
+    "documentValid": "Documento válido"
+  },
+  "helpers": {
+    "documentTypes": "Pode ser CPF, RG, Passaporte ou documento do país de residência"
   },
   "success": {
     "title": "Usuário atualizado!",
@@ -2059,6 +2073,7 @@
       "id": "ID do Usuário",
       "email": "E-mail",
       "cpf": "CPF",
+      "document": "Documento",
       "createdAt": "Data de Criação",
       "updatedAt": "Última Atualização"
     },

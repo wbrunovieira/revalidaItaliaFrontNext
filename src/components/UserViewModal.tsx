@@ -395,7 +395,7 @@ export default function UserViewModal({
                       </div>
                       <div>
                         <p className="text-sm text-gray-400">
-                          {t('fields.cpf')}
+                          {t('fields.document')}
                         </p>
                         <p className="text-white font-mono">
                           {user.cpf}
@@ -404,11 +404,11 @@ export default function UserViewModal({
                     </div>
                     <button
                       onClick={() =>
-                        copyToClipboard(user.cpf, 'CPF')
+                        copyToClipboard(user.cpf, 'document')
                       }
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
                     >
-                      {copiedField === 'CPF' ? (
+                      {copiedField === 'document' ? (
                         <Check
                           size={16}
                           className="text-green-400"

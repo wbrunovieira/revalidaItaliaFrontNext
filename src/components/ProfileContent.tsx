@@ -344,7 +344,7 @@ export default function ProfileContent({
                         />
                         <div>
                           <p className="text-sm text-gray-400">
-                            {t('cpf')}
+                            {t('document')}
                           </p>
                           <p className="font-medium">
                             {userData.cpf}

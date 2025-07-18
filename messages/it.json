@@ -2,6 +2,8 @@
 
 "Profile": {
     "title": "Profilo",
+    "welcomeBack": "Bentornato",
+    "manageYourProfile": "Gestisci il tuo profilo",
     "back": "Indietro",
     "personalInfo": "Informazioni Personali",
     "addresses": "Indirizzi",

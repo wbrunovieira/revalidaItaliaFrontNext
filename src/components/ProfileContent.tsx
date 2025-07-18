@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
 import StudentAssessmentStatus from '@/components/StudentAssessmentStatus';
 import EditProfileForm from '@/components/EditProfileForm';
+import { ModernDivider, SimpleDivider } from '@/components/ui/modern-divider';
 import {
   MapPin,
   Plus,
@@ -233,14 +234,21 @@ export default function ProfileContent({
 
   return (
     <>
-      <div className="px-6 pb-8 space-y-8">
+      <div className="space-y-8">
         {/* Avaliações Abertas */}
-        <StudentAssessmentStatus userId={userData.id} locale={locale} />
+        <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl p-6 backdrop-blur-sm">
+          <StudentAssessmentStatus userId={userData.id} locale={locale} />
+        </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Linha divisória moderna */}
+        <div className="px-6">
+          <ModernDivider variant="center" glowColor="secondary" />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-6">
           {/* Informações Pessoais */}
           <div className="lg:col-span-1">
-            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm relative">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm relative border border-white/10 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">
                   {t('personalInfo')}
@@ -275,7 +283,8 @@ export default function ProfileContent({
                 <>
                   {/* Avatar */}
                   <div className="flex justify-center mb-6">
-                    <div className="relative">
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary to-secondary/50 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                       <Image
                         src={
                           userData.profileImageUrl ||
@@ -284,89 +293,86 @@ export default function ProfileContent({
                         alt={userData.name}
                         width={120}
                         height={120}
-                        className="rounded-full border-4 border-secondary object-cover"
+                        className="relative rounded-full border-4 border-secondary object-cover bg-primary"
                       />
                     </div>
                   </div>
 
                   {/* Informações */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-white">
-                      <User
-                        size={20}
-                        className="text-secondary"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('name')}
-                        </p>
-                        <p className="font-medium">
-                          {userData.name}
-                        </p>
+                  <div className="space-y-1">
+                    <div className="py-3">
+                      <div className="flex items-center gap-3 text-white">
+                        <User
+                          size={20}
+                          className="text-secondary"
+                        />
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('name')}
+                          </p>
+                          <p className="font-medium">
+                            {userData.name}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <SimpleDivider />
 
-                    <div className="flex items-center gap-3 text-white">
-                      <Mail
-                        size={20}
-                        className="text-secondary"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('email')}
-                        </p>
-                        <p className="font-medium">
-                          {userData.email}
-                        </p>
+                    <div className="py-3">
+                      <div className="flex items-center gap-3 text-white">
+                        <Mail
+                          size={20}
+                          className="text-secondary"
+                        />
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('email')}
+                          </p>
+                          <p className="font-medium">
+                            {userData.email}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <SimpleDivider />
 
-                    <div className="flex items-center gap-3 text-white">
-                      <Hash
-                        size={20}
-                        className="text-secondary"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('cpf')}
-                        </p>
-                        <p className="font-medium">
-                          {userData.cpf}
-                        </p>
+                    <div className="py-3">
+                      <div className="flex items-center gap-3 text-white">
+                        <Hash
+                          size={20}
+                          className="text-secondary"
+                        />
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('cpf')}
+                          </p>
+                          <p className="font-medium">
+                            {userData.cpf}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <SimpleDivider />
 
-                    <div className="flex items-center gap-3 text-white">
-                      <Phone
-                        size={20}
-                        className="text-secondary"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('phone')}
-                        </p>
-                        <p className="font-medium">
-                          {userData.phone || '-'}
-                        </p>
+                    <div className="py-3">
+                      <div className="flex items-center gap-3 text-white">
+                        <Phone
+                          size={20}
+                          className="text-secondary"
+                        />
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('phone')}
+                          </p>
+                          <p className="font-medium">
+                            {userData.phone || '-'}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <SimpleDivider />
 
-                    <div className="flex items-center gap-3 text-white">
-                      <Calendar
-                        size={20}
-                        className="text-secondary"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-400">
-                          {t('birthDate')}
-                        </p>
-                        <p className="font-medium">
-                          {userData.birthDate ? formatDate(userData.birthDate) : '-'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {userData.lastLogin && (
+                    <div className="py-3">
                       <div className="flex items-center gap-3 text-white">
                         <Calendar
                           size={20}
@@ -374,13 +380,35 @@ export default function ProfileContent({
                         />
                         <div>
                           <p className="text-sm text-gray-400">
-                            {t('lastLogin')}
+                            {t('birthDate')}
                           </p>
                           <p className="font-medium">
-                            {formatDate(userData.lastLogin)}
+                            {userData.birthDate ? formatDate(userData.birthDate) : '-'}
                           </p>
                         </div>
                       </div>
+                    </div>
+
+                    {userData.lastLogin && (
+                      <>
+                        <div className="border-t border-white/5"></div>
+                        <div className="py-3">
+                          <div className="flex items-center gap-3 text-white">
+                            <Calendar
+                              size={20}
+                              className="text-secondary"
+                            />
+                            <div>
+                              <p className="text-sm text-gray-400">
+                                {t('lastLogin')}
+                              </p>
+                              <p className="font-medium">
+                                {formatDate(userData.lastLogin)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </>
@@ -390,7 +418,7 @@ export default function ProfileContent({
 
           {/* Endereços */}
           <div className="lg:col-span-2">
-            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                   <MapPin
@@ -420,7 +448,7 @@ export default function ProfileContent({
                   {addresses.map(address => (
                     <div
                       key={address.id}
-                      className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-secondary transition-colors relative group"
+                      className="bg-gradient-to-br from-white/5 to-transparent rounded-lg p-4 border border-white/10 hover:border-secondary hover:shadow-lg transition-all relative group"
                     >
                       {/* Action Buttons */}
                       <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -513,6 +541,9 @@ export default function ProfileContent({
           </div>
         </div>
       </div>
+      
+      {/* Elemento decorativo de fundo */}
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
       {/* Delete Confirmation Toast */}
       {showDeleteToast && pendingDeleteAddress && (

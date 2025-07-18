@@ -12,6 +12,8 @@
   },
   "Profile": {
     "title": "Perfil",
+    "welcomeBack": "Bem-vindo de volta",
+    "manageYourProfile": "Gerencie seu perfil",
     "back": "Voltar",
     "personalInfo": "Informações Pessoais",
     "addresses": "Endereços",

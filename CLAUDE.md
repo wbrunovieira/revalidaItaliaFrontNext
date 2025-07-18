@@ -80,6 +80,37 @@ When creating new components:
 3. Use TypeScript interfaces for props
 4. Include proper error handling for API calls
 
+### Modern Divider Component
+Reusable divider component with multiple variants:
+
+```typescript
+import { ModernDivider, SimpleDivider } from '@/components/ui/modern-divider';
+
+// Center glow variant (default)
+<ModernDivider variant="center" />
+
+// Start glow variant (left-aligned)
+<ModernDivider variant="start" glowColor="secondary" />
+
+// End glow variant (right-aligned)
+<ModernDivider variant="end" glowColor="primary" />
+
+// Fade variant (subtle gradient)
+<ModernDivider variant="fade" thickness="medium" />
+
+// Pulse variant (animated)
+<ModernDivider variant="pulse" glowColor="accent" />
+
+// Simple divider (no effects)
+<SimpleDivider spacing="sm" />
+```
+
+Props:
+- `variant`: 'center' | 'start' | 'end' | 'fade' | 'pulse'
+- `glowColor`: 'primary' | 'secondary' | 'accent'
+- `thickness`: 'thin' | 'medium' | 'thick'
+- `spacing`: 'sm' | 'md' | 'lg'
+
 ### Environment Variables
 Required for development:
 - `NEXT_PUBLIC_API_URL` - Backend API endpoint

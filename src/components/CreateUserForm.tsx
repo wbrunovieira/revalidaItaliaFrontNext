@@ -919,7 +919,7 @@ export default function CreateUserForm() {
                   )
                 }
                 onBlur={handleInputBlur('confirmPassword')}
-                error={errors.confirmPassword}
+                error={formData.password && formData.confirmPassword ? undefined : errors.confirmPassword}
                 className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
               <button
@@ -955,7 +955,7 @@ export default function CreateUserForm() {
             {formData.password &&
               formData.confirmPassword && (
                 <div
-                  className={`mt-1 text-sm flex items-center gap-2 ${
+                  className={`text-sm flex items-center gap-2 ${
                     passwordsMatch
                       ? 'text-green-400'
                       : 'text-red-400'

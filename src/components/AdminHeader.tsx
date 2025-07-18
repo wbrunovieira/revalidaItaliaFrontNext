@@ -1,3 +1,4 @@
+// /src/components/AdminHeader.tsx
 'use client';
 
 import { useState, useEffect } from 'react';

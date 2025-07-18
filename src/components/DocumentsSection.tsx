@@ -1,3 +1,4 @@
+// /src/components/DocumentsSection.tsx
 'use client';
 
 import { useTranslations } from 'next-intl';

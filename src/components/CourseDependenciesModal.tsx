@@ -1,3 +1,4 @@
+// /src/components/CourseDependenciesModal.tsx
 'use client';
 
 import { useTranslations } from 'next-intl';

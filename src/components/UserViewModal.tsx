@@ -1,3 +1,4 @@
+// /src/components/UserViewModal.tsx
 'use client';
 
 // CORREÇÃO: Adicionado 'useCallback' para memoizar funções.

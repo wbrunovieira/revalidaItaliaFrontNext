@@ -1,3 +1,4 @@
+// /src/components/CourseEditModal.tsx
 'use client';
 
 import { useState, useEffect } from 'react';

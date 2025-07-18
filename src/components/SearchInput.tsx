@@ -1,4 +1,4 @@
-// src/components/SearchInput.tsx
+// /src/components/SearchInput.tsx
 'use client';
 
 import { useState, ChangeEvent } from 'react';

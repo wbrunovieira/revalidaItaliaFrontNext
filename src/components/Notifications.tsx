@@ -1,4 +1,4 @@
-// src/components/Avatar.tsx
+// /src/components/Notifications.tsx
 'use client';
 
 import Image from 'next/image';

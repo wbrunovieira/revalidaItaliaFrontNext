@@ -1,3 +1,4 @@
+// /src/components/LoginHeader.tsx
 // src/components/LoginHeader.tsx
 import React from 'react';
 import { useTranslations } from 'next-intl';

@@ -1,5 +1,4 @@
-// src/app/[locale]/admin/components/CreateCourseForm.tsx
-
+// /src/components/CreateCourseForm.tsx
 'use client';
 
 import { useState, useCallback } from 'react';

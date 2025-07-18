@@ -1,4 +1,4 @@
-// src/components/PandaVideoPlayer.tsx
+// /src/components/PandaVideoPlayer.tsx
 
 'use client';
 import { useEffect, useRef, useState } from 'react';

@@ -1,3 +1,4 @@
+// /src/components/VideoViewModal.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

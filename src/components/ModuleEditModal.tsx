@@ -1,4 +1,4 @@
-// src/components/ModuleEditModal.tsx
+// /src/components/ModuleEditModal.tsx
 
 'use client';
 

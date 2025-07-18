@@ -1,3 +1,4 @@
+// /src/components/DashboardStats.tsx
 // src/app/[locale]/admin/components/DashboardStats.tsx
 
 'use client';

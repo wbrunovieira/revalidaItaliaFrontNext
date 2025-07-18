@@ -784,7 +784,7 @@ export default function CreateUserForm() {
                 onClick={() =>
                   setShowPassword(!showPassword)
                 }
-                className="absolute inset-y-0 right-3 flex items-center"
+                className="absolute right-0 top-1/2 -translate-y-1/2 transform pr-3"
                 aria-label={
                   showPassword
                     ? 'Hide password'
@@ -929,7 +929,7 @@ export default function CreateUserForm() {
                     !showConfirmPassword
                   )
                 }
-                className="absolute inset-y-0 right-3 flex items-center"
+                className="absolute right-0 top-1/2 -translate-y-1/2 transform pr-3"
                 aria-label={
                   showConfirmPassword
                     ? 'Hide password'

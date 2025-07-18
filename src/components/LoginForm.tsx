@@ -146,7 +146,8 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-3 top-9 flex items-center"
+          className="absolute right-0 top-1/2 -translate-y-1/2 transform pr-3"
+          style={{ marginTop: '0.75rem' }}
           aria-label={
             showPassword ? 'Hide password' : 'Show password'
           }

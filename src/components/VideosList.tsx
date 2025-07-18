@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import VideoViewModal from './VideoViewModal';
+import EditVideoModal from './EditVideoModal';
 
 interface Translation {
   locale: string;
@@ -109,6 +110,14 @@ export default function VideosList() {
       lessonId: string;
       videoId: string;
     } | null>(null);
+
+  // Estados para controlar o modal de edição
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editVideoData, setEditVideoData] = useState<{
+    courseId: string;
+    lessonId: string;
+    videoId: string;
+  } | null>(null);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -544,6 +553,29 @@ export default function VideosList() {
     setIsVideoModalOpen(false);
     setSelectedVideoData(null);
   }, []);
+
+  // Funções para controlar o modal de edição
+  const handleOpenEditModal = useCallback(
+    (
+      courseId: string,
+      lessonId: string,
+      videoId: string
+    ) => {
+      setEditVideoData({ courseId, lessonId, videoId });
+      setIsEditModalOpen(true);
+    },
+    []
+  );
+
+  const handleCloseEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditVideoData(null);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    // Recarregar dados após edição
+    fetchData();
+  }, [fetchData]);
 
   // Função para calcular estatísticas de um curso
   const getCourseStats = useCallback(
@@ -1165,6 +1197,14 @@ export default function VideosList() {
                                                                 </button>
                                                                 <button
                                                                   type="button"
+                                                                  onClick={e => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenEditModal(
+                                                                      course.id,
+                                                                      lesson.id,
+                                                                      video.id
+                                                                    );
+                                                                  }}
                                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                                   title={t(
                                                                     'actions.edit'
@@ -1278,6 +1318,16 @@ export default function VideosList() {
         videoId={selectedVideoData?.videoId || null}
         isOpen={isVideoModalOpen}
         onClose={handleCloseVideoModal}
+      />
+
+      {/* Modal de Edição de Vídeo */}
+      <EditVideoModal
+        courseId={editVideoData?.courseId || null}
+        lessonId={editVideoData?.lessonId || null}
+        videoId={editVideoData?.videoId || null}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
       />
     </div>
   );

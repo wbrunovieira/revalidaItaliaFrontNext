@@ -2018,6 +2018,75 @@
   "saving": "Salvataggio...",
   "cancel": "Annulla"
 },
+"videoEdit": {
+  "title": "Modifica Video",
+  "loading": "Caricamento video...",
+  "fields": {
+    "slug": "Slug",
+    "providerVideoId": "ID del Fornitore Video",
+    "duration": "Durata (secondi)",
+    "imageUrl": "URL dell'Immagine",
+    "title": "Titolo",
+    "description": "Descrizione"
+  },
+  "placeholders": {
+    "slug": "video-esempio",
+    "providerVideoId": "5cbf2ba5-49e0-4319-8dd4-8944808fab5a",
+    "duration": "120",
+    "imageUrl": "https://esempio.com/immagine.jpg",
+    "title": "Inserisci il titolo del video",
+    "description": "Inserisci la descrizione del video"
+  },
+  "hints": {
+    "slug": "Identificatore unico del video (generato automaticamente)",
+    "providerVideoId": "ID unico del video nel fornitore (es: YouTube, Vimeo)",
+    "providerVideoIdReadOnly": "Questo campo non può essere modificato. Usa il pulsante per copiare l'ID.",
+    "duration": "Durata del video in secondi (massimo 24 ore)",
+    "durationReadOnly": "Questo campo non può essere modificato. Usa il pulsante per copiare il valore.",
+    "imageUrl": "URL dell'immagine di copertina del video (opzionale)"
+  },
+  "translations": {
+    "title": "Traduzioni",
+    "portuguese": "Portoghese",
+    "spanish": "Spagnolo",
+    "italian": "Italiano"
+  },
+  "errors": {
+    "slugRequired": "Slug è obbligatorio",
+    "slugMin": "Slug deve avere almeno 3 caratteri",
+    "providerVideoIdRequired": "ID del fornitore è obbligatorio",
+    "providerVideoIdMin": "ID del fornitore deve avere almeno 3 caratteri",
+    "durationRequired": "Durata è obbligatoria",
+    "durationMax": "Durata non può superare 24 ore",
+    "titleRequired": "Titolo è obbligatorio",
+    "titleMin": "Titolo deve avere almeno 3 caratteri",
+    "descriptionRequired": "Descrizione è obbligatoria",
+    "descriptionMin": "Descrizione deve avere almeno 3 caratteri",
+    "unauthorized": "Non autorizzato - accedi nuovamente",
+    "notFound": "Video non trovato",
+    "conflict": "Esiste già un video con questo slug",
+    "updateFailed": "Errore nell'aggiornamento del video",
+    "fetchTitle": "Errore nel caricamento del video",
+    "fetchDescription": "Non è stato possibile caricare i dati del video"
+  },
+  "success": {
+    "title": "Video aggiornato!",
+    "description": "Le informazioni del video sono state aggiornate con successo."
+  },
+  "error": {
+    "title": "Errore nell'aggiornamento",
+    "description": "Non è stato possibile aggiornare le informazioni del video."
+  },
+  "save": "Salva",
+  "saving": "Salvataggio...",
+  "cancel": "Annulla",
+  "copyToClipboard": "Copia negli appunti",
+  "copied": "Copiato!",
+  "copiedDescription": "Contenuto copiato negli appunti",
+  "copyError": "Errore nella copia",
+  "copyErrorDescription": "Non è stato possibile copiare il contenuto",
+  "seconds": "secondi"
+},
 "assessmentsList": {
   "title": "Elenco Valutazioni",
   "loading": "Caricamento...",

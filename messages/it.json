@@ -139,6 +139,22 @@
     "passwordSpecial": "La password deve contenere almeno un carattere speciale",
     "loginFailed": "Utente o password non validi"
   },
+  "ForgotPassword": {
+    "title": "Hai dimenticato la password?",
+    "subtitle": "Non preoccuparti, ti aiuteremo",
+    "instructions": "Inserisci la tua email registrata e ti invieremo le istruzioni per reimpostare la password.",
+    "email": "Email",
+    "emailPlaceholder": "tua@email.com",
+    "button": "Invia istruzioni",
+    "sending": "Invio in corso...",
+    "backToLogin": "Torna al login",
+    "emailRequired": "Email è obbligatoria",
+    "emailInvalid": "Formato email non valido",
+    "forgotPasswordFailed": "Errore nell'elaborazione della richiesta. Riprova.",
+    "successTitle": "Email inviata!",
+    "successMessage": "Abbiamo inviato le istruzioni a {email}",
+    "checkSpam": "Se non trovi l'email, controlla la cartella spam."
+  },
   "Dashboard": {
     "title": "Area Studente",
     "trails": "Tracce",

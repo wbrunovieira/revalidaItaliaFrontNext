@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import TextField from './TextField';
 import Button from './Button';
-
+import Link from 'next/link';
 import Image from 'next/image';
 
 export default function LoginForm() {
@@ -191,12 +191,12 @@ export default function LoginForm() {
       )}
 
       <div className="text-right">
-        <div
-          // href={`/${locale}/forgot-password`}
+        <Link
+          href={`/${locale}/forgot-password`}
           className="text-sm text-secondary hover:underline"
         >
           {t('forgotPassword')}
-        </div>
+        </Link>
       </div>
 
       <Button

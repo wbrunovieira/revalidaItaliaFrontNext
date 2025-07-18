@@ -138,6 +138,22 @@
     "passwordSpecial": "La contraseña debe contener al menos un carácter especial",
     "loginFailed": "Usuario o contraseña inválidos"
   },
+  "ForgotPassword": {
+    "title": "¿Olvidaste tu contraseña?",
+    "subtitle": "No te preocupes, te ayudaremos",
+    "instructions": "Ingresa tu correo electrónico registrado y te enviaremos instrucciones para restablecer tu contraseña.",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "button": "Enviar instrucciones",
+    "sending": "Enviando...",
+    "backToLogin": "Volver al inicio de sesión",
+    "emailRequired": "Correo electrónico es obligatorio",
+    "emailInvalid": "Formato de correo electrónico inválido",
+    "forgotPasswordFailed": "Error al procesar la solicitud. Intenta nuevamente.",
+    "successTitle": "¡Correo enviado!",
+    "successMessage": "Enviamos instrucciones a {email}",
+    "checkSpam": "Si no encuentras el correo, verifica tu carpeta de spam."
+  },
   "Dashboard": {
     "title": "Área del Estudiante",
     "trails": "Rutas",

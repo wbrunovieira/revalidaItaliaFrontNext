@@ -151,6 +151,22 @@
     "passwordSpecial": "A senha precisa conter pelo menos um caractere especial",
     "loginFailed": "Usuário ou senha inválidos"
   },
+  "ForgotPassword": {
+    "title": "Esqueceu sua senha?",
+    "subtitle": "Não se preocupe, vamos ajudá-lo",
+    "instructions": "Digite seu e-mail cadastrado e enviaremos instruções para redefinir sua senha.",
+    "email": "E-mail",
+    "emailPlaceholder": "seu@email.com",
+    "button": "Enviar instruções",
+    "sending": "Enviando...",
+    "backToLogin": "Voltar para o login",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "Formato de e-mail inválido",
+    "forgotPasswordFailed": "Erro ao processar solicitação. Tente novamente.",
+    "successTitle": "E-mail enviado!",
+    "successMessage": "Enviamos instruções para {email}",
+    "checkSpam": "Se não encontrar o e-mail, verifique sua pasta de spam."
+  },
   "Dashboard": {
     "title": "Área do Aluno",
     "trails": "Trilhas",

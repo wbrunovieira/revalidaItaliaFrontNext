@@ -1,3 +1,4 @@
+// src/app/[locale]/profile/page.tsx
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';

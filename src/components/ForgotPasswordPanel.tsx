@@ -17,12 +17,12 @@ export default function ForgotPasswordPanel() {
         p-6 overflow-y-auto
       "
     >
-      <div className="w-full max-w-sm space-y-4 my-auto">
+      <div className="w-full max-w-sm space-y-4 my-auto animate-slideUp">
         <ForgotPasswordHeader />
-        <hr className="border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto" />
+        <hr className="border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto animate-fadeIn" style={{ animationDelay: '0.2s' }} />
         <ForgotPasswordForm />
-        <hr className="border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto" />
-        <div className="flex justify-center pt-2 pb-4">
+        <hr className="border-t-2 border-[var(--color-secondary)] w-48 lg:w-96 mx-auto animate-fadeIn" style={{ animationDelay: '0.4s' }} />
+        <div className="flex justify-center pt-2 pb-4 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
           <Logo />
         </div>
       </div>

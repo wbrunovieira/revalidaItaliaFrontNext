@@ -8,8 +8,8 @@ export default function ForgotPasswordHeader() {
   const t = useTranslations('ForgotPassword');
 
   return (
-    <div className="text-center space-y-4">
-      <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary/10 rounded-full mb-4">
+    <div className="text-center space-y-4 animate-fadeIn">
+      <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary/10 rounded-full mb-4 animate-pulse">
         <svg 
           className="w-10 h-10 text-secondary"
           fill="none" 

@@ -76,9 +76,9 @@ export default function ForgotPasswordForm() {
   if (isSuccess) {
     return (
       <div className="space-y-6 text-center animate-fadeIn">
-        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-6">
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-6 animate-fadeIn">
           <svg 
-            className="w-16 h-16 text-green-500 mx-auto mb-4"
+            className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce"
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"

@@ -441,7 +441,7 @@ export default function CreateTrackForm() {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
-      const response = await fetch(`${apiUrl}/courses`);
+      const response = await fetch(`${apiUrl}/api/v1/courses`);
 
       if (!response.ok) {
         throw new Error(
@@ -544,7 +544,7 @@ export default function CreateTrackForm() {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
-      const url = `${apiUrl}/tracks`;
+      const url = `${apiUrl}/api/v1/tracks`;
 
       console.log('🌐 API URL:', url);
       console.log('📦 Payload:', payload);

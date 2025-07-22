@@ -113,16 +113,32 @@ export default function UsersList() {
               : 'Failed to fetch users'
           );
         }
-        const data: UsersResponse = await response.json();
-        setUsers(data.users);
-        setCurrentPage(data.pagination.page);
-        setTotalPages(
-          data.pagination.totalPages ||
-            Math.ceil(data.users.length / pageSize)
-        );
-        setTotalUsers(
-          data.pagination.total || data.users.length
-        );
+        const data = await response.json();
+        
+        // Verificar se a resposta é um array direto ou um objeto com users/pagination
+        if (Array.isArray(data)) {
+          setUsers(data);
+          setCurrentPage(page);
+          setTotalPages(1); // Se retornou array, assumir uma página
+          setTotalUsers(data.length);
+        } else if (data.users && data.pagination) {
+          setUsers(data.users);
+          setCurrentPage(data.pagination.page);
+          setTotalPages(
+            data.pagination.totalPages ||
+              Math.ceil(data.users.length / pageSize)
+          );
+          setTotalUsers(
+            data.pagination.total || data.users.length
+          );
+        } else {
+          // Caso a estrutura seja diferente
+          console.error('Unexpected API response structure:', data);
+          setUsers([]);
+          setCurrentPage(1);
+          setTotalPages(1);
+          setTotalUsers(0);
+        }
       } catch (error) {
         console.error(error);
         toast({
@@ -400,7 +416,7 @@ export default function UsersList() {
     fetchUsers,
   ]);
 
-  const filteredUsers = !isApiSearchActive
+  const filteredUsers = !isApiSearchActive && users
     ? users.filter(
         user =>
           user.name
@@ -414,7 +430,7 @@ export default function UsersList() {
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
       )
-    : users;
+    : users || [];
 
   // Contadores de usuários por papel
   const userCounts = {

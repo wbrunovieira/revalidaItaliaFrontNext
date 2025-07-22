@@ -74,7 +74,7 @@ export default async function ModulePage({
 
   // Buscar cursos e módulo
   const coursesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
     { cache: 'no-store' }
   );
   if (!coursesRes.ok)
@@ -84,7 +84,7 @@ export default async function ModulePage({
     courses.find(c => c.slug === slug) ?? notFound();
 
   const modulesRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseFound.id}/modules`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules`,
     { cache: 'no-store' }
   );
   if (!modulesRes.ok)
@@ -95,7 +95,7 @@ export default async function ModulePage({
     notFound();
 
   const lessonsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseFound.id}/modules/${moduleData.id}/lessons`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons`,
     { cache: 'no-store' }
   );
   if (!lessonsRes.ok)

@@ -60,7 +60,7 @@ export default async function TrackPage({
 
   // Buscar detalhes da trilha (inclui courseIds)
   const resTrack = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/tracks/${track.id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${track.id}`,
     { cache: 'no-store' }
   );
   if (!resTrack.ok)

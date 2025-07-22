@@ -138,7 +138,7 @@ export default function TrackEditModal({
     setLoadingCourses(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
       );
 
       if (!response.ok) {
@@ -203,7 +203,7 @@ export default function TrackEditModal({
     try {
       console.log('Testando conexão com API...');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks`,
         {
           method: 'GET',
           headers: {
@@ -219,7 +219,7 @@ export default function TrackEditModal({
 
       if (track) {
         const response2 = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${track.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${track.id}`,
           {
             method: 'GET',
             headers: {

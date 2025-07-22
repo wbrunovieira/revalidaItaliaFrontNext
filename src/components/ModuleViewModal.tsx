@@ -65,7 +65,7 @@ export default function ModuleViewModal({
       setLoading(true);
       try {
         const moduleResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}`
         );
 
         if (!moduleResponse.ok) {

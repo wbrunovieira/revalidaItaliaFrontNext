@@ -76,7 +76,7 @@ export default function AdminHeader() {
         };
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/students/${payload.sub}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${payload.sub}`,
           { headers }
         );
 

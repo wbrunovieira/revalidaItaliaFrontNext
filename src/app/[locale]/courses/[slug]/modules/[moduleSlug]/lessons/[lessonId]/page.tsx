@@ -171,21 +171,21 @@ export default async function LessonPage({
   if (!token) redirect(`/${locale}/login`);
 
   const courses: Course[] = await fetch(
-    `${API_URL}/courses`,
+    `${API_URL}/api/v1/courses`,
     { cache: 'no-store' }
   ).then(r => (r.ok ? r.json() : Promise.reject()));
   const course =
     courses.find(c => c.slug === slug) ?? notFound();
 
   const modules: ModuleData[] = await fetch(
-    `${API_URL}/courses/${course.id}/modules`,
+    `${API_URL}/api/v1/courses/${course.id}/modules`,
     { cache: 'no-store' }
   ).then(r => (r.ok ? r.json() : Promise.reject()));
   const moduleFound =
     modules.find(m => m.slug === moduleSlug) ?? notFound();
 
   const lesson: Lesson = await fetch(
-    `${API_URL}/courses/${course.id}/modules/${moduleFound.id}/lessons/${lessonId}`,
+    `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons/${lessonId}`,
     { cache: 'no-store' }
   ).then(r => (r.ok ? r.json() : notFound()));
 
@@ -197,7 +197,7 @@ export default async function LessonPage({
 
   const [allLessons, assessmentsData, documentsData]: [LessonsResponse, AssessmentsResponse, Document[]] = await Promise.all([
     fetch(
-      `${API_URL}/courses/${course.id}/modules/${moduleFound.id}/lessons`,
+      `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons`,
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : Promise.reject())),
     fetch(

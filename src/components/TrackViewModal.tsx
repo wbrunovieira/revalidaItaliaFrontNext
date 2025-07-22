@@ -80,7 +80,7 @@ export default function TrackViewModal({
       try {
         // Buscar trilha com detalhes completos
         const trackResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/tracks/${trackId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${trackId}`
         );
 
         if (!trackResponse.ok) {
@@ -95,7 +95,7 @@ export default function TrackViewModal({
         ): Promise<Course[]> {
           const requests = ids.map(id =>
             fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${id}`
             ).then(res => {
               if (!res.ok)
                 throw new Error(

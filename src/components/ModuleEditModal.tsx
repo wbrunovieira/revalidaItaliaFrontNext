@@ -144,7 +144,7 @@ export default function ModuleEditModal({
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -246,7 +246,7 @@ export default function ModuleEditModal({
     try {
       console.log('Testando conexão com API...');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
         {
           method: 'GET',
           headers: {
@@ -262,7 +262,7 @@ export default function ModuleEditModal({
 
       if (module) {
         const response2 = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${module.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${module.id}`,
           {
             method: 'GET',
             headers: {
@@ -306,7 +306,7 @@ export default function ModuleEditModal({
       );
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${module.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${module.id}`,
         {
           method: 'PATCH',
           headers,

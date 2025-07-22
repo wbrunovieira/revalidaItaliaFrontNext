@@ -343,6 +343,19 @@
   "courses": "cursos",
   "popular": "Popular"
 },
+"Tracks": {
+  "title": "Rutas de Aprendizaje",
+  "description": "Explora nuestras rutas de aprendizaje cuidadosamente organizadas para guiar tu viaje educativo.",
+  "back": "Volver",
+  "trackCount": "{count} rutas disponibles",
+  "noTracks": "No hay rutas disponibles en este momento",
+  "totalTracks": "Rutas",
+  "totalCourses": "Total de Cursos",
+  "totalHours": "Horas de Contenido",
+  "courses": "cursos",
+  "popular": "Popular",
+  "startTrack": "Iniciar ruta"
+},
 "Courses": {
   "title": "Catálogo de Cursos",
   "description": "Descubre nuestra colección completa de cursos diseñados para acelerar tu aprendizaje y desarrollo profesional.",

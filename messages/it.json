@@ -344,6 +344,19 @@
   "courses": "corsi",
   "popular": "Popolare"
 },
+"Tracks": {
+  "title": "Percorsi di Apprendimento",
+  "description": "Esplora i nostri percorsi di apprendimento accuratamente organizzati per guidare il tuo viaggio educativo.",
+  "back": "Indietro",
+  "trackCount": "{count} percorsi disponibili",
+  "noTracks": "Nessun percorso disponibile al momento",
+  "totalTracks": "Percorsi",
+  "totalCourses": "Totale Corsi",
+  "totalHours": "Ore di Contenuto",
+  "courses": "corsi",
+  "popular": "Popolare",
+  "startTrack": "Inizia percorso"
+},
 
 "Courses": {
   "title": "Catalogo dei Corsi",

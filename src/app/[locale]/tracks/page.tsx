@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
-import Card from '@/components/Card';
+import TrackCard from '@/components/TrackCard';
 import {
   ArrowLeft,
   BookOpen,
@@ -62,15 +62,29 @@ export default async function TracksPage({
 
   const tracks: Track[] = await resTracks.json();
 
-  // Enriquecer trilhas com contagem de cursos
-  const enrichedTracks = tracks.map(track => {
-    const courseCount = track.courseIds?.length || 0;
-    const estimatedHours = courseCount * 2; // Estimativa de 2 horas por curso
+  // Buscar cursos para cada trilha
+  const resCourses = await fetch(`${apiUrl}/api/v1/courses`, {
+    cache: 'no-store',
+  });
 
+  if (!resCourses.ok) {
+    throw new Error('Failed to fetch courses');
+  }
+
+  const allCourses = await resCourses.json();
+
+  // Enriquecer trilhas com dados dos cursos
+  const enrichedTracks = tracks.map(track => {
+    const courseIds = track.courseIds || [];
+    const courses = allCourses.filter((course: any) => 
+      courseIds.includes(course.id)
+    );
+    
     return {
       ...track,
-      courseCount,
-      estimatedHours,
+      courses,
+      courseCount: courses.length,
+      estimatedHours: courses.length * 8, // 8 horas por curso
     };
   });
 
@@ -177,54 +191,15 @@ export default async function TracksPage({
         {/* Grid de Trilhas */}
         <div className="px-6 pb-8">
           {enrichedTracks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enrichedTracks.map(track => {
-                const list = track.translations ?? [];
-                const translation = list.find(
-                  tr => tr.locale === locale
-                ) ??
-                  list[0] ?? { title: '', description: '' };
-
-                return (
-                  <div
-                    key={track.id}
-                    className="group relative transform hover:scale-105 transition-all duration-300"
-                  >
-                    <Card
-                      name={translation.title}
-                      imageUrl={track.imageUrl}
-                      href={`/${locale}/tracks/${track.slug}`}
-                    />
-
-                    {/* Informações adicionais */}
-                    <div className="mt-3 px-2 space-y-2">
-                      {translation.description && (
-                        <p className="text-sm text-gray-400 line-clamp-2">
-                          {translation.description}
-                        </p>
-                      )}
-
-                      <div className="flex gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <BookOpen size={14} />
-                          {track.courseCount} {t('courses')}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {track.estimatedHours}h
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Badge de destaque */}
-                    {track.courseCount > 5 && (
-                      <div className="absolute top-2 right-2 bg-secondary text-white text-xs px-2 py-1 rounded-full">
-                        {t('popular')}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {enrichedTracks.map((track, index) => (
+                <TrackCard
+                  key={track.id}
+                  track={track}
+                  locale={locale}
+                  index={index}
+                />
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">

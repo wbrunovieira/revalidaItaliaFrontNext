@@ -169,7 +169,7 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
         {tLesson('documents')}
       </h4>
       <div className="space-y-2">
-        {documents.map((document) => {
+        {documents.map((document, index) => {
           const docTranslation = 
             document.translations.find(t => t.locale === locale) ||
             document.translations[0];
@@ -178,76 +178,38 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
             <div
               key={document.id}
               className="group relative"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              {/* Compact view - Always visible */}
               <div
-                className="flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-all duration-300 cursor-pointer hover:bg-primary/50"
+                className="relative flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 transition-all duration-300 cursor-pointer overflow-hidden
+                  hover:bg-primary/60 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-x-1"
                 onClick={() => window.open(docTranslation?.url, '_blank')}
               >
-                <div className="flex-shrink-0">
+                {/* Animated background gradient on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/10 to-secondary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                
+                {/* Icon with rotation animation */}
+                <div className="relative flex-shrink-0 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
                   {getFileIcon(document.mimeType, document.filename)}
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <h5 className="font-medium text-white group-hover:text-secondary transition-colors truncate">
+                {/* Title with underline animation */}
+                <div className="relative flex-1 min-w-0">
+                  <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300 truncate">
                     {docTranslation?.title || document.filename}
                   </h5>
+                  <div className="absolute bottom-0 left-0 h-0.5 bg-secondary w-0 group-hover:w-full transition-all duration-300 ease-out" />
                 </div>
                 
-                <ExternalLink size={16} className="text-gray-400 group-hover:text-secondary flex-shrink-0 transition-colors duration-300" />
-              </div>
-              
-              {/* Expanded view - Shows on hover */}
-              <div className="absolute left-0 right-0 top-0 z-10 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-500 ease-out transform origin-top">
-                <div
-                  className="p-4 bg-primary-dark/95 backdrop-blur-sm rounded-lg border border-secondary/50 shadow-2xl cursor-pointer"
-                  onClick={() => window.open(docTranslation?.url, '_blank')}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 p-3 bg-primary/60 rounded-lg">
-                      {getFileIcon(document.mimeType, document.filename)}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h5 className="font-medium text-white">
-                            {docTranslation?.title || document.filename}
-                          </h5>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {document.filename}
-                          </p>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span>{formatFileSize(document.fileSize)}</span>
-                          {document.isDownloadable && (
-                            <Download size={14} />
-                          )}
-                        </div>
-                      </div>
-                      
-                      {docTranslation?.description && (
-                        <p className="text-sm text-gray-400 mb-3">
-                          {docTranslation.description}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 capitalize">
-                          {document.mimeType ? 
-                            document.mimeType.split('/')[1]?.replace('vnd.', '').replace('application/', '') : 
-                            document.filename.split('.').pop()?.toUpperCase()
-                          }
-                        </span>
-                        
-                        <button className="flex items-center gap-1 px-3 py-1.5 text-xs bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors font-medium">
-                          <ExternalLink size={12} />
-                          {tLesson('openDocument')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                {/* Arrow icon with slide animation */}
+                <div className="relative flex items-center gap-2">
+                  <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {tLesson('openDocument')}
+                  </span>
+                  <ExternalLink 
+                    size={16} 
+                    className="text-gray-400 group-hover:text-secondary transform transition-all duration-300 group-hover:translate-x-1" 
+                  />
                 </div>
               </div>
             </div>

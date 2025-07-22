@@ -107,6 +107,11 @@ git push origin main
 ❌ git commit -m "feat: add a new badge that shows when user completes all modules in a course successfully"
 ```
 
+### IMPORTANTE: Sempre use mensagens resumidas
+- NÃO ofereça alternativas mais detalhadas
+- SEMPRE siga o formato conciso
+- Máximo 72 caracteres na primeira linha
+
 ### 3. Use IMPERATIVO
 ```bash
 ✅ git commit -m "feat: add loading state" (NÃO "added" ou "adding")

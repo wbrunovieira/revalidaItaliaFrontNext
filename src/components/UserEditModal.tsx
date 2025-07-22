@@ -417,7 +417,7 @@ export default function UserEditModal({
 
     try {
       const payload = {
-        fullName: formData.fullName.trim(),
+        name: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         nationalId: formData.nationalId.trim(),
         role: formData.role,

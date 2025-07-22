@@ -293,6 +293,10 @@
     "previousLesson": "Aula anterior",
     "nextLesson": "Próxima aula",
     "allLessons": "Todas as aulas",
+    "course": "Curso",
+    "module": "Módulo",
+    "moduleLessons": "Aulas do Módulo",
+    "lessons": "aulas",
     "assessments": "Avaliações",
     "assessmentTypes": {
       "quiz": "Quiz",

@@ -279,6 +279,10 @@
     "previousLesson": "Lección anterior",
     "nextLesson": "Siguiente lección",
     "allLessons": "Todas las lecciones",
+    "course": "Curso",
+    "module": "Módulo",
+    "moduleLessons": "Lecciones del Módulo",
+    "lessons": "lecciones",
     "assessments": "Evaluaciones",
     "assessmentTypes": {
       "quiz": "Quiz",

@@ -241,40 +241,46 @@ export default async function LessonPage({
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
-        {/* Breadcrumb header */}
-        <div className="p-6 border-b border-gray-800">
-          <div className="flex items-center gap-2 text-sm text-gray-300 mb-4">
-            <Link
-              href={`/${locale}`}
-              className="hover:text-secondary"
-            >
-              {tLesson('breadcrumb.dashboard')}
-            </Link>
-            <ChevronRight size={16} />
-            <Link
-              href={`/${locale}/courses/${slug}`}
-              className="hover:text-secondary"
-            >
-              {ct.title}
-            </Link>
-            <ChevronRight size={16} />
+        {/* Breadcrumb header melhorado */}
+        <div className="bg-primary-dark border-b border-secondary/20">
+          <div className="p-6">
+            <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+              <Link
+                href={`/${locale}`}
+                className="hover:text-white transition-colors flex items-center gap-1"
+              >
+                <div className="w-4 h-4 rounded bg-secondary/30 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+                </div>
+                {tLesson('breadcrumb.dashboard')}
+              </Link>
+              <ChevronRight size={12} className="text-secondary/40" />
+              <Link
+                href={`/${locale}/courses/${slug}`}
+                className="hover:text-white transition-colors"
+              >
+                {ct.title}
+              </Link>
+              <ChevronRight size={12} className="text-secondary/40" />
+              <Link
+                href={`/${locale}/courses/${slug}/modules/${moduleSlug}`}
+                className="hover:text-white transition-colors"
+              >
+                {mt.title}
+              </Link>
+              <ChevronRight size={12} className="text-secondary/40" />
+              <span className="text-white font-medium">
+                {lt.title}
+              </span>
+            </div>
             <Link
               href={`/${locale}/courses/${slug}/modules/${moduleSlug}`}
-              className="hover:text-secondary"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
             >
-              {mt.title}
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> 
+              <span className="text-sm">{tLesson('back')}</span>
             </Link>
-            <ChevronRight size={16} />
-            <span className="text-secondary">
-              {lt.title}
-            </span>
           </div>
-          <Link
-            href={`/${locale}/courses/${slug}/modules/${moduleSlug}`}
-            className="inline-flex items-center gap-2 text-white hover:text-secondary"
-          >
-            <ArrowLeft size={20} /> {tLesson('back')}
-          </Link>
         </div>
 
         {/* Main content */}
@@ -303,14 +309,14 @@ export default async function LessonPage({
           )}
 
           {/* Sidebar */}
-          <aside className={`bg-gray-900 p-6 overflow-y-auto ${
+          <aside className={`bg-primary-dark p-6 overflow-y-auto ${
             lesson.video?.providerVideoId || pandaData?.video_external_id
               ? 'lg:w-96'
               : 'flex-1'
           }`}>
             {/* Show no video message if there's no video and sidebar is full width */}
             {!(lesson.video?.providerVideoId || pandaData?.video_external_id) && (
-              <div className="mb-8 p-6 bg-gray-800 rounded-lg border border-gray-700 text-center">
+              <div className="mb-8 p-6 bg-primary/50 rounded-lg border border-secondary/30 text-center">
                 <div className="text-gray-400 mb-2">
                   <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -322,71 +328,97 @@ export default async function LessonPage({
               </div>
             )}
             
-            <div className="mb-8">
-              <div className="inline-flex items-center bg-secondary text-primary px-3 py-1 rounded-full text-sm font-semibold mb-4">
-                {tLesson('lessonNumber', {
-                  number: idx + 1,
-                })}
-              </div>
-              <h1 className="text-2xl font-bold text-white mb-4">
-                {lt.title}
-              </h1>
-              <p className="text-gray-300 mb-6 leading-relaxed">
-                {lt.description}
-              </p>
-
-              <div className="space-y-3 text-sm text-gray-400">
-                {(lesson.video?.durationInSeconds ||
-                  pandaData?.length) && (
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} />
-                    {Math.ceil(
-                      (lesson.video?.durationInSeconds ??
-                        pandaData?.length ??
-                        0) / 60
-                    )}{' '}
-                    {tLesson('minutes')}
+            {/* Hierarquia do curso */}
+            <div className="mb-6">
+              <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User size={14} className="text-primary" />
                   </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <BookOpen size={16} /> {mt.title}
+                  <div>
+                    <p className="text-xs text-gray-500">{tLesson('course')}</p>
+                    <p className="text-white font-medium">{ct.title}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <User size={16} /> {ct.title}
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                    <BookOpen size={14} className="text-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">{tLesson('module')}</p>
+                    <p className="text-white font-medium">{mt.title}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Prev / Next */}
-            <div className="border-t border-gray-800 pt-6 space-y-3">
-              {prev && (
-                <Link
-                  href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${prev.id}`}
-                  className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  <ChevronLeft size={20} />
-                  {tLesson('previousLesson')}:{' '}
-                  {
-                    prev.translations.find(
-                      t => t.locale === locale
-                    )?.title
-                  }
-                </Link>
-              )}
-              {next && (
-                <Link
-                  href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${next.id}`}
-                  className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  {tLesson('nextLesson')}:{' '}
-                  {
-                    next.translations.find(
-                      t => t.locale === locale
-                    )?.title
-                  }
-                  <ChevronRight size={20} />
-                </Link>
-              )}
+            {/* Informações da Aula */}
+            <div className="mb-6">
+              {/* Cabeçalho com badge e título */}
+              <div className="mb-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="inline-flex items-center bg-accent-light text-white px-3 py-1 rounded-full text-xs font-bold">
+                    {tLesson('lessonNumber', {
+                      number: idx + 1,
+                    })}
+                  </div>
+                  {(lesson.video?.durationInSeconds || pandaData?.length) && (
+                    <div className="flex items-center gap-1 text-gray-400 text-sm">
+                      <Clock size={14} />
+                      <span>
+                        {Math.ceil(
+                          (lesson.video?.durationInSeconds ?? pandaData?.length ?? 0) / 60
+                        )}{' '}
+                        {tLesson('minutes')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <h1 className="text-xl font-bold text-white mb-2">
+                  {lt.title}
+                </h1>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {lt.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Navegação Anterior/Próxima */}
+            <div className="border-t border-secondary/20 pt-4 mb-6">
+              <div className="grid grid-cols-2 gap-3">
+                {prev ? (
+                  <Link
+                    href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${prev.id}`}
+                    className="group flex flex-col p-3 bg-primary/40 rounded-lg hover:bg-primary/60 transition-all duration-300 border border-secondary/30 hover:border-secondary/50"
+                  >
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                      <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                      {tLesson('previousLesson')}
+                    </div>
+                    <p className="text-sm text-white font-medium truncate">
+                      {prev.translations.find(t => t.locale === locale)?.title}
+                    </p>
+                  </Link>
+                ) : (
+                  <div></div>
+                )}
+                {next ? (
+                  <Link
+                    href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${next.id}`}
+                    className="group flex flex-col p-3 bg-primary/40 rounded-lg hover:bg-primary/60 transition-all duration-300 border border-secondary/30 hover:border-secondary/50"
+                  >
+                    <div className="flex items-center justify-end gap-2 text-xs text-gray-500 mb-1">
+                      {tLesson('nextLesson')}
+                      <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <p className="text-sm text-white font-medium truncate text-right">
+                      {next.translations.find(t => t.locale === locale)?.title}
+                    </p>
+                  </Link>
+                ) : (
+                  <div></div>
+                )}
+              </div>
             </div>
 
             {/* Documents section */}
@@ -403,7 +435,7 @@ export default async function LessonPage({
                   {assessments.map((assessment) => (
                     <div
                       key={assessment.id}
-                      className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-secondary/50 transition-colors"
+                      className="p-4 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h5 className="font-medium text-white">
@@ -455,32 +487,56 @@ export default async function LessonPage({
               </div>
             )}
 
-            {/* All lessons list */}
-            <div className="mt-8">
-              <h4 className="text-md font-semibold text-white mb-3">
-                {tLesson('allLessons')}
-              </h4>
-              <ul className="space-y-2 max-h-96 overflow-y-auto">
-                {sorted.map((l, i) => (
-                  <li key={l.id}>
-                    <Link
-                      href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${l.id}`}
-                      className={`block p-2 rounded text-sm transition-colors ${
-                        l.id === lessonId
-                          ? 'bg-secondary text-primary font-semibold'
-                          : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                      }`}
-                    >
-                      {i + 1}.{' '}
-                      {
-                        l.translations.find(
-                          t => t.locale === locale
-                        )?.title
-                      }
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {/* Lista de Aulas do Módulo */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-white">
+                  {tLesson('moduleLessons')}
+                </h4>
+                <span className="text-xs text-gray-500">
+                  {sorted.length} {tLesson('lessons')}
+                </span>
+              </div>
+              <div className="bg-primary/20 rounded-lg p-2 max-h-80 overflow-y-auto border border-secondary/20">
+                <ul className="space-y-1">
+                  {sorted.map((l, i) => {
+                    const isCurrentLesson = l.id === lessonId;
+                    const lessonTranslation = l.translations.find(t => t.locale === locale);
+                    return (
+                      <li key={l.id}>
+                        <Link
+                          href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${l.id}`}
+                          className={`
+                            group flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200
+                            ${
+                              isCurrentLesson
+                                ? 'bg-accent-light text-white shadow-sm'
+                                : 'text-gray-400 hover:bg-primary/40 hover:text-white'
+                            }
+                          `}
+                        >
+                          <div className={`
+                            w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                            ${
+                              isCurrentLesson
+                                ? 'bg-white/20'
+                                : 'bg-primary/50 group-hover:bg-secondary/30'
+                            }
+                          `}>
+                            {i + 1}
+                          </div>
+                          <span className="flex-1 truncate">
+                            {lessonTranslation?.title}
+                          </span>
+                          {isCurrentLesson && (
+                            <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           </aside>
         </div>

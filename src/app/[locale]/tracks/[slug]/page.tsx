@@ -48,7 +48,7 @@ export default async function TrackPage({
 
   // Buscar todas as trilhas
   const resTracks = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/tracks`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks`,
     { cache: 'no-store' }
   );
   if (!resTracks.ok)

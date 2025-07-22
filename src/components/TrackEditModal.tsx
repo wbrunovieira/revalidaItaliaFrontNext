@@ -263,7 +263,7 @@ export default function TrackEditModal({
       );
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/tracks/${track.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${track.id}`,
         {
           method: 'PUT',
           headers,

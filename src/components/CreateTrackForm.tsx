@@ -449,8 +449,43 @@ export default function CreateTrackForm() {
         );
       }
 
-      const data: Course[] = await response.json();
-      setCourses(data);
+      const data = await response.json();
+      console.log('Courses API Response:', data);
+      
+      // Handle different response formats
+      let coursesData: Course[] = [];
+      
+      if (Array.isArray(data)) {
+        // If it's already an array
+        coursesData = data.map(course => ({
+          id: course.id,
+          slug: course.slug,
+          imageUrl: course.imageUrl,
+          translations: course.translations || [
+            {
+              locale: 'pt',
+              title: course.title || '',
+              description: course.description || ''
+            }
+          ]
+        }));
+      } else if (data.courses) {
+        // If courses are nested in an object
+        coursesData = data.courses.map((course: any) => ({
+          id: course.id,
+          slug: course.slug,
+          imageUrl: course.imageUrl,
+          translations: course.translations || [
+            {
+              locale: 'pt',
+              title: course.title || '',
+              description: course.description || ''
+            }
+          ]
+        }));
+      }
+      
+      setCourses(coursesData);
     } catch (error) {
       handleApiError(error, 'Courses fetch error');
       toast({
@@ -471,13 +506,6 @@ export default function CreateTrackForm() {
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
-
-    // Validar slug
-    const slugValidation = validateSlug(formData.slug);
-    if (!slugValidation.isValid) {
-      newErrors.slug = slugValidation.message;
-      isValid = false;
-    }
 
     // Validar imageUrl
     if (!formData.imageUrl.trim()) {
@@ -607,7 +635,6 @@ export default function CreateTrackForm() {
 
     // Marcar todos os campos como tocados
     const allFields = [
-      'slug',
       'imageUrl',
       'courseIds',
       'title_pt',
@@ -677,8 +704,11 @@ export default function CreateTrackForm() {
         });
       }
 
+      // Gerar slug automaticamente baseado no título em português
+      const generatedSlug = generateSlug(formData.translations.pt.title);
+      
       const payload = {
-        slug: formData.slug.trim(),
+        slug: generatedSlug,
         imageUrl: formData.imageUrl.trim(),
         courseIds: formData.courseIds,
         translations: translations,
@@ -708,14 +738,7 @@ export default function CreateTrackForm() {
 
   // Handlers para mudança de valores
   const handleInputChange = useCallback(
-    (field: 'slug' | 'imageUrl') => (value: string) => {
-      if (field === 'slug') {
-        // Formatar slug automaticamente usando a função do lib
-        value = formatSlugInput(value);
-        // Se o usuário editar manualmente, marca como não gerado automaticamente
-        setSlugGenerated(false);
-      }
-
+    (field: 'imageUrl') => (value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
       handleFieldValidation(field, value);
     },
@@ -736,16 +759,26 @@ export default function CreateTrackForm() {
       field: TranslationField,
       value: string
     ) => {
-      setFormData(prev => ({
-        ...prev,
-        translations: {
-          ...prev.translations,
-          [locale]: {
-            ...prev.translations[locale],
-            [field]: value,
+      setFormData(prev => {
+        const newFormData = {
+          ...prev,
+          translations: {
+            ...prev.translations,
+            [locale]: {
+              ...prev.translations[locale],
+              [field]: value,
+            },
           },
-        },
-      }));
+        };
+        
+        // Gerar slug automaticamente quando o título em português mudar
+        if (locale === 'pt' && field === 'title' && value.trim()) {
+          newFormData.slug = generateSlug(value);
+          setSlugGenerated(true);
+        }
+        
+        return newFormData;
+      });
 
       const fieldKey = `${field}_${locale}`;
       handleFieldValidation(fieldKey, value);
@@ -1192,58 +1225,6 @@ export default function CreateTrackForm() {
 
         {/* Slug (URL) */}
         <div className="mb-8">
-          <div className="space-y-2">
-            <Label
-              htmlFor="slug"
-              className="text-gray-300 flex items-center gap-2"
-            >
-              <Link size={16} />
-              {t('fields.slug')}
-              <span className="text-red-400">*</span>
-            </Label>
-            <div className="flex gap-2">
-              <TextField
-                id="slug"
-                placeholder={t('placeholders.slug')}
-                value={formData.slug}
-                onChange={e =>
-                  handleInputChange('slug')(e.target.value)
-                }
-                onBlur={handleInputBlur('slug')}
-                error={errors.slug}
-                className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              />
-              <Button
-                type="button"
-                onClick={handleGenerateSlug}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 flex items-center gap-2"
-                disabled={
-                  !formData.translations.pt.title.trim()
-                }
-              >
-                <Wand2 size={18} />
-                {t('generateSlug')}
-              </Button>
-            </div>
-            <p className="text-xs text-gray-500">
-              {t('hints.slug')}
-            </p>
-            {slugGenerated && formData.slug && (
-              <div className="flex items-center gap-1 text-blue-400 text-sm">
-                <Wand2 size={14} />
-                {t('validation.slugGenerated')}
-              </div>
-            )}
-            {formData.slug &&
-              !errors.slug &&
-              touched.slug &&
-              !slugGenerated && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.slugValid')}
-                </div>
-              )}
-          </div>
         </div>
 
         <div className="mt-6 flex justify-end">

@@ -1173,7 +1173,7 @@
         "imageValid": "URL de imagen válida",
         "slugValid": "Slug válido",
         "slugGenerated": "Slug generado automáticamente",
-        "coursesValid": "{{count}} cursos seleccionados"
+        "coursesValid": "{count, plural, =0 {Ningún curso seleccionado} =1 {1 curso seleccionado} other {# cursos seleccionados}}"
       },
       "errors": {
         "slugRequired": "El slug es obligatorio",

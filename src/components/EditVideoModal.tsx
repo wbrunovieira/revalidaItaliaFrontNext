@@ -167,7 +167,7 @@ export default function EditVideoModal({
     setLoadingVideo(true);
     try {
       const response = await fetch(
-        `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`
+        `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`
       );
 
       if (!response.ok) {
@@ -276,7 +276,7 @@ export default function EditVideoModal({
       };
 
       const response = await fetch(
-        `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
+        `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
         {
           method: 'PUT',
           headers,

@@ -143,7 +143,7 @@ export default function VideosList() {
     ): Promise<VideoItem[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos`
+          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos`
         );
 
         if (!response.ok) {
@@ -170,7 +170,7 @@ export default function VideosList() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -211,7 +211,7 @@ export default function VideosList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {

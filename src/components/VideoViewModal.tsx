@@ -75,7 +75,7 @@ export default function VideoViewModal({
       setLoading(true);
       try {
         const videoResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`
         );
 
         if (!videoResponse.ok) {

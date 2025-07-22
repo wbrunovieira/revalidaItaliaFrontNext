@@ -361,7 +361,7 @@ export default function CreateVideoForm() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -386,7 +386,7 @@ export default function CreateVideoForm() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -525,7 +525,7 @@ export default function CreateVideoForm() {
   const createVideo = useCallback(
     async (payload: CreateVideoPayload): Promise<void> => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${formData.courseId}/lessons/${formData.lessonId}/videos`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${formData.courseId}/lessons/${formData.lessonId}/videos`,
         {
           method: 'POST',
           headers: {

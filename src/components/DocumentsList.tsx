@@ -252,7 +252,7 @@ export default function DocumentsList() {
 
     try {
       const coursesResponse = await fetch(
-        `${apiUrl}/courses`
+        `${apiUrl}/api/v1/courses`
       );
 
       if (!coursesResponse.ok) {

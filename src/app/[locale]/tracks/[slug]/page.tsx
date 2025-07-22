@@ -69,7 +69,7 @@ export default async function TrackPage({
 
   // Buscar todos os cursos e filtrar pelos IDs da trilha
   const resCourses = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
     { cache: 'no-store' }
   );
   if (!resCourses.ok)

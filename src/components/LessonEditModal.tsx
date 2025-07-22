@@ -20,6 +20,8 @@ import {
   MessageSquare,
   Clock,
   Play,
+  Type,
+  FileText,
 } from 'lucide-react';
 import {
   Select,
@@ -273,7 +275,7 @@ export default function LessonEditModal({
       setLoadingOrders(true);
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -312,7 +314,7 @@ export default function LessonEditModal({
       setLoadingVideos(true);
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos`,
+          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos`,
           {
             headers: {
               Accept: 'application/json',
@@ -358,7 +360,7 @@ export default function LessonEditModal({
       setLoadingAssessments(true);
       try {
         const response = await fetch(
-          `${apiUrl}/assessments`,
+          `${apiUrl}/api/v1/assessments`,
           {
             headers: {
               Accept: 'application/json',
@@ -397,7 +399,7 @@ export default function LessonEditModal({
     async (lessonId: string) => {
       try {
         const response = await fetch(
-          `${apiUrl}/assessments?lessonId=${lessonId}`,
+          `${apiUrl}/api/v1/assessments?lessonId=${lessonId}`,
           {
             headers: {
               Accept: 'application/json',
@@ -484,6 +486,24 @@ export default function LessonEditModal({
     return `${minutes}:${remainingSeconds
       .toString()
       .padStart(2, '0')}`;
+  };
+
+  // Função para atualizar traduções
+  const updateTranslation = (
+    locale: 'pt' | 'es' | 'it',
+    field: 'title' | 'description',
+    value: string
+  ): void => {
+    setFormData({
+      ...formData,
+      translations: {
+        ...formData.translations,
+        [locale]: {
+          ...formData.translations[locale],
+          [field]: value,
+        },
+      },
+    });
   };
 
   // Validar formulário
@@ -587,7 +607,7 @@ export default function LessonEditModal({
       }
 
       const response = await fetch(
-        `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons/${lesson.id}`,
+        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lesson.id}`,
         {
           method: 'PUT',
           headers,
@@ -704,7 +724,7 @@ export default function LessonEditModal({
       if (lesson) {
         try {
           const response = await fetch(
-            `${apiUrl}/assessments/${assessmentId}`,
+            `${apiUrl}/api/v1/assessments/${assessmentId}`,
             {
               method: 'PUT',
               headers: {
@@ -1338,18 +1358,236 @@ export default function LessonEditModal({
                 </div>
               </div>
 
-              {/* Traduções - TEMPORARIAMENTE DESABILITADO PARA DEBUG */}
+              {/* Traduções */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <Globe size={20} />
                   {t('translations.title')}
                 </h3>
 
-                <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
-                  <span>
-                    Traduções temporariamente desabilitadas
-                    para debug
-                  </span>
+                {/* Português */}
+                <div className="border border-gray-700 rounded-lg p-4">
+                  <h4 className="text-white font-medium mb-4 flex items-center gap-2">
+                    🇧🇷 {t('translations.portuguese')}
+                  </h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <Type
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.title')}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.translations.pt.title}
+                        onChange={e =>
+                          updateTranslation(
+                            'pt',
+                            'title',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.title_pt
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t('placeholders.title')}
+                      />
+                      {errors.title_pt && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.title_pt}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <FileText
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.description')}
+                      </label>
+                      <input
+                        type="text"
+                        value={
+                          formData.translations.pt.description
+                        }
+                        onChange={e =>
+                          updateTranslation(
+                            'pt',
+                            'description',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.description_pt
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t(
+                          'placeholders.description'
+                        )}
+                      />
+                      {errors.description_pt && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.description_pt}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Espanhol */}
+                <div className="border border-gray-700 rounded-lg p-4">
+                  <h4 className="text-white font-medium mb-4 flex items-center gap-2">
+                    🇪🇸 {t('translations.spanish')}
+                  </h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <Type
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.title')}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.translations.es.title}
+                        onChange={e =>
+                          updateTranslation(
+                            'es',
+                            'title',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.title_es
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t('placeholders.title')}
+                      />
+                      {errors.title_es && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.title_es}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <FileText
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.description')}
+                      </label>
+                      <input
+                        type="text"
+                        value={
+                          formData.translations.es.description
+                        }
+                        onChange={e =>
+                          updateTranslation(
+                            'es',
+                            'description',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.description_es
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t(
+                          'placeholders.description'
+                        )}
+                      />
+                      {errors.description_es && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.description_es}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Italiano */}
+                <div className="border border-gray-700 rounded-lg p-4">
+                  <h4 className="text-white font-medium mb-4 flex items-center gap-2">
+                    🇮🇹 {t('translations.italian')}
+                  </h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <Type
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.title')}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.translations.it.title}
+                        onChange={e =>
+                          updateTranslation(
+                            'it',
+                            'title',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.title_it
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t('placeholders.title')}
+                      />
+                      {errors.title_it && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.title_it}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">
+                        <FileText
+                          size={14}
+                          className="inline mr-1"
+                        />
+                        {t('fields.description')}
+                      </label>
+                      <input
+                        type="text"
+                        value={
+                          formData.translations.it.description
+                        }
+                        onChange={e =>
+                          updateTranslation(
+                            'it',
+                            'description',
+                            e.target.value
+                          )
+                        }
+                        className={`w-full px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.description_it
+                            ? 'border-red-500'
+                            : 'border-gray-600'
+                        }`}
+                        placeholder={t(
+                          'placeholders.description'
+                        )}
+                      />
+                      {errors.description_it && (
+                        <p className="text-red-400 text-xs mt-1">
+                          {errors.description_it}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

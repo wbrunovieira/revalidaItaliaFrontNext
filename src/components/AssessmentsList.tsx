@@ -181,7 +181,7 @@ export default function AssessmentsList() {
     setLoadingCourses(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
         {
           headers: {
             'Content-Type': 'application/json',

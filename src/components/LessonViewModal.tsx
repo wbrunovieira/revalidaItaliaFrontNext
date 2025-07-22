@@ -98,7 +98,7 @@ export default function LessonViewModal({
       setLoading(true);
       try {
         const lessonResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
         );
 
         if (!lessonResponse.ok) {
@@ -130,7 +130,7 @@ export default function LessonViewModal({
     setLoadingQuizzes(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments?type=QUIZ&lessonId=${lessonId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?type=QUIZ&lessonId=${lessonId}`
       );
 
       if (!response.ok) {

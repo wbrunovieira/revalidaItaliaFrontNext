@@ -420,7 +420,7 @@ export default function CreateLessonForm() {
       setLoadingOrders(true);
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -467,7 +467,7 @@ export default function CreateLessonForm() {
     async (courseId: string): Promise<ModuleItem[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -491,7 +491,7 @@ export default function CreateLessonForm() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
       );
 
       if (!response.ok) {
@@ -532,7 +532,7 @@ export default function CreateLessonForm() {
     ): Promise<VideoItem[]> => {
       try {
         const lessonsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!lessonsResponse.ok) {
@@ -546,7 +546,7 @@ export default function CreateLessonForm() {
         }
 
         const videoResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${lessons[0].id}/videos`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/lessons/${lessons[0].id}/videos`
         );
 
         if (!videoResponse.ok) {
@@ -719,7 +719,7 @@ export default function CreateLessonForm() {
   const createLesson = useCallback(
     async (payload: CreateLessonPayload): Promise<void> => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${formData.courseId}/modules/${formData.moduleId}/lessons`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${formData.courseId}/modules/${formData.moduleId}/lessons`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -147,7 +147,7 @@ export default function CreateAssessmentForm({
     try {
       // First, fetch all courses
       const coursesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
         {
           headers: {
             'Content-Type': 'application/json',

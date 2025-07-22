@@ -424,7 +424,7 @@ export default function CreateVideoForm() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
       );
 
       if (!response.ok) {

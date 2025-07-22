@@ -168,7 +168,7 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
         <FileText size={18} />
         {tLesson('documents')}
       </h4>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {documents.map((document) => {
           const docTranslation = 
             document.translations.find(t => t.locale === locale) ||
@@ -177,51 +177,76 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
           return (
             <div
               key={document.id}
-              className="group p-4 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-all duration-200 cursor-pointer hover:bg-primary/60"
-              onClick={() => window.open(docTranslation?.url, '_blank')}
+              className="group relative"
             >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 p-3 bg-primary/40 rounded-lg group-hover:bg-primary/60 transition-colors">
+              {/* Compact view - Always visible */}
+              <div
+                className="flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-all duration-300 cursor-pointer hover:bg-primary/50"
+                onClick={() => window.open(docTranslation?.url, '_blank')}
+              >
+                <div className="flex-shrink-0">
                   {getFileIcon(document.mimeType, document.filename)}
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-white group-hover:text-secondary transition-colors">
-                        {docTranslation?.title || document.filename}
-                      </h5>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {document.filename}
-                      </p>
+                  <h5 className="font-medium text-white group-hover:text-secondary transition-colors truncate">
+                    {docTranslation?.title || document.filename}
+                  </h5>
+                </div>
+                
+                <ExternalLink size={16} className="text-gray-400 group-hover:text-secondary flex-shrink-0 transition-colors duration-300" />
+              </div>
+              
+              {/* Expanded view - Shows on hover */}
+              <div className="absolute left-0 right-0 top-0 z-10 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-500 ease-out transform origin-top">
+                <div
+                  className="p-4 bg-primary-dark/95 backdrop-blur-sm rounded-lg border border-secondary/50 shadow-2xl cursor-pointer"
+                  onClick={() => window.open(docTranslation?.url, '_blank')}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 p-3 bg-primary/60 rounded-lg">
+                      {getFileIcon(document.mimeType, document.filename)}
                     </div>
                     
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span>{formatFileSize(document.fileSize)}</span>
-                      {document.isDownloadable && (
-                        <Download size={14} className="text-gray-400" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h5 className="font-medium text-white">
+                            {docTranslation?.title || document.filename}
+                          </h5>
+                          <p className="text-sm text-gray-400 mt-1">
+                            {document.filename}
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span>{formatFileSize(document.fileSize)}</span>
+                          {document.isDownloadable && (
+                            <Download size={14} />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {docTranslation?.description && (
+                        <p className="text-sm text-gray-400 mb-3">
+                          {docTranslation.description}
+                        </p>
                       )}
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 capitalize">
+                          {document.mimeType ? 
+                            document.mimeType.split('/')[1]?.replace('vnd.', '').replace('application/', '') : 
+                            document.filename.split('.').pop()?.toUpperCase()
+                          }
+                        </span>
+                        
+                        <button className="flex items-center gap-1 px-3 py-1.5 text-xs bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors font-medium">
+                          <ExternalLink size={12} />
+                          {tLesson('openDocument')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {docTranslation?.description && (
-                    <p className="text-sm text-gray-400 mb-3 line-clamp-2">
-                      {docTranslation.description}
-                    </p>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 capitalize">
-                      {document.mimeType ? 
-                        document.mimeType.split('/')[1]?.replace('vnd.', '').replace('application/', '') : 
-                        document.filename.split('.').pop()?.toUpperCase()
-                      }
-                    </span>
-                    
-                    <button className="flex items-center gap-1 px-2 py-1 text-xs bg-secondary/10 text-secondary rounded-lg hover:bg-secondary/20 transition-colors">
-                      <ExternalLink size={12} />
-                      {tLesson('openDocument')}
-                    </button>
                   </div>
                 </div>
               </div>

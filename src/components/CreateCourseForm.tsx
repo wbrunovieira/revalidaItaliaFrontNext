@@ -4,20 +4,18 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { generateSlug, formatSlugInput } from '@/lib/slug';
+import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
 import {
   BookOpen,
-  Link,
   Image as ImageIcon,
   Type,
   FileText,
   Globe,
   Check,
   X,
-  Wand2,
 } from 'lucide-react';
 
 interface Translation {
@@ -27,7 +25,6 @@ interface Translation {
 }
 
 interface FormData {
-  slug: string;
   imageUrl: string;
   translations: {
     pt: Translation;
@@ -37,7 +34,6 @@ interface FormData {
 }
 
 interface FormErrors {
-  slug?: string;
   imageUrl?: string;
   title_pt?: string;
   title_es?: string;
@@ -68,10 +64,8 @@ export default function CreateCourseForm() {
   const t = useTranslations('Admin.createCourse');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [slugGenerated, setSlugGenerated] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
-    slug: '',
     imageUrl: '',
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -265,7 +259,6 @@ export default function CreateCourseForm() {
     [
       formData.translations,
       t,
-      validateSlug,
       validateUrl,
       validateTextField,
     ]
@@ -321,13 +314,6 @@ export default function CreateCourseForm() {
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
-
-    // Validar slug
-    const slugValidation = validateSlug(formData.slug);
-    if (!slugValidation.isValid) {
-      newErrors.slug = slugValidation.message;
-      isValid = false;
-    }
 
     // Validar imageUrl
     if (!formData.imageUrl.trim()) {
@@ -473,7 +459,7 @@ export default function CreateCourseForm() {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
-      const url = `${apiUrl}/courses`;
+      const url = `${apiUrl}/api/v1/courses`;
 
       console.log('🌐 API URL:', url);
       console.log('📦 Payload:', payload);
@@ -517,7 +503,6 @@ export default function CreateCourseForm() {
   // Reset do formulário
   const resetForm = useCallback(() => {
     setFormData({
-      slug: '',
       imageUrl: '',
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
@@ -527,7 +512,6 @@ export default function CreateCourseForm() {
     });
     setErrors({});
     setTouched({});
-    setSlugGenerated(false);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -535,7 +519,6 @@ export default function CreateCourseForm() {
 
     // Marcar todos os campos como tocados
     const allFields = [
-      'slug',
       'imageUrl',
       'title_pt',
       'title_es',
@@ -604,8 +587,11 @@ export default function CreateCourseForm() {
         });
       }
 
+      // Gerar slug automaticamente baseado no título em português
+      const generatedSlug = generateSlug(formData.translations.pt.title);
+
       const payload = {
-        slug: formData.slug.trim(),
+        slug: generatedSlug,
         imageUrl: formData.imageUrl.trim(),
         translations: translations,
       };
@@ -633,18 +619,11 @@ export default function CreateCourseForm() {
     }
   };
 
-  // Handlers para mudança de valores
+  // Handler para mudança de imageUrl
   const handleInputChange = useCallback(
-    (field: 'slug' | 'imageUrl') => (value: string) => {
-      if (field === 'slug') {
-        // Formatar slug automaticamente usando a função do lib
-        value = formatSlugInput(value);
-        // Se o usuário editar manualmente, marca como não gerado automaticamente
-        setSlugGenerated(false);
-      }
-
-      setFormData(prev => ({ ...prev, [field]: value }));
-      handleFieldValidation(field, value);
+    (value: string) => {
+      setFormData(prev => ({ ...prev, imageUrl: value }));
+      handleFieldValidation('imageUrl', value);
     },
     [handleFieldValidation]
   );
@@ -737,9 +716,7 @@ export default function CreateCourseForm() {
               placeholder={t('placeholders.imageUrl')}
               value={formData.imageUrl}
               onChange={e =>
-                handleInputChange('imageUrl')(
-                  e.target.value
-                )
+                handleInputChange(e.target.value)
               }
               onBlur={handleInputBlur('imageUrl')}
               error={errors.imageUrl}
@@ -977,62 +954,6 @@ export default function CreateCourseForm() {
                 />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Slug (URL) */}
-        <div className="mb-8">
-          <div className="space-y-2">
-            <Label
-              htmlFor="slug"
-              className="text-gray-300 flex items-center gap-2"
-            >
-              <Link size={16} />
-              {t('fields.slug')}
-              <span className="text-red-400">*</span>
-            </Label>
-            <div className="flex gap-2">
-              <TextField
-                id="slug"
-                placeholder={t('placeholders.slug')}
-                value={formData.slug}
-                onChange={e =>
-                  handleInputChange('slug')(e.target.value)
-                }
-                onBlur={handleInputBlur('slug')}
-                error={errors.slug}
-                className="flex-1 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              />
-              <Button
-                type="button"
-                onClick={handleGenerateSlug}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 flex items-center gap-2"
-                disabled={
-                  !formData.translations.pt.title.trim()
-                }
-              >
-                <Wand2 size={18} />
-                {t('generateSlug')}
-              </Button>
-            </div>
-            <p className="text-xs text-gray-500">
-              {t('hints.slug')}
-            </p>
-            {slugGenerated && formData.slug && (
-              <div className="flex items-center gap-1 text-blue-400 text-sm">
-                <Wand2 size={14} />
-                {t('validation.slugGenerated')}
-              </div>
-            )}
-            {formData.slug &&
-              !errors.slug &&
-              touched.slug &&
-              !slugGenerated && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.slugValid')}
-                </div>
-              )}
           </div>
         </div>
 

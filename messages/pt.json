@@ -660,7 +660,7 @@
     "confirmPassword": "Digite a senha novamente",
     "role": "Selecione uma função",
     "cpf": "000.000.000-00",
-    "document": "Digite seu documento"
+    "document": "Ex: 12345678901, AA1234567, RSSMRA85M01H501Z"
   },
   "roles": {
     "student": "Aluno",
@@ -682,6 +682,9 @@
     "passwordMismatch": "As senhas não coincidem",
     "cpfRequired": "Documento é obrigatório",
     "cpfInvalid": "Documento inválido",
+    "documentMin": "Documento deve ter pelo menos 5 caracteres",
+    "documentMax": "Documento deve ter no máximo 20 caracteres",
+    "documentInvalid": "Documento deve conter apenas letras, números e hífens",
     "roleRequired": "Função é obrigatória",
     "roleInvalid": "Função inválida"
   },

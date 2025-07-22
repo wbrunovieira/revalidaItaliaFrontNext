@@ -51,7 +51,7 @@ export default async function IndexPage({
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
 
-  const resTracks = await fetch(`${apiUrl}/tracks`, {
+  const resTracks = await fetch(`${apiUrl}/api/v1/tracks`, {
     cache: 'no-store',
   });
   if (!resTracks.ok) {
@@ -59,7 +59,7 @@ export default async function IndexPage({
   }
   const tracks: Track[] = await resTracks.json();
 
-  const resCourses = await fetch(`${apiUrl}/courses`, {
+  const resCourses = await fetch(`${apiUrl}/api/v1/courses`, {
     cache: 'no-store',
   });
   if (!resCourses.ok) {

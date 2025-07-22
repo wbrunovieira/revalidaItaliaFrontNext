@@ -135,7 +135,7 @@ export default function CourseEditModal({
       );
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}`,
         {
           method: 'PUT',
           headers,

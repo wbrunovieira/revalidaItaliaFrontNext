@@ -26,7 +26,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  cpf: string;
+  nationalId: string;
   role: 'admin' | 'student' | 'tutor';
   createdAt: string;
   updatedAt: string;
@@ -36,7 +36,7 @@ interface UserEditData {
   id: string;
   name: string;
   email: string;
-  cpf: string;
+  nationalId: string;
   role: 'admin' | 'student' | 'tutor';
 }
 
@@ -102,7 +102,7 @@ export default function UsersList() {
           headers['Authorization'] = `Bearer ${token}`;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/students?page=${page}&pageSize=${pageSize}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users?page=${page}&pageSize=${pageSize}`,
           { headers }
         );
 
@@ -170,7 +170,7 @@ export default function UsersList() {
         } else if (
           /^\d+$/.test(cleanQuery.replace(/\D/g, ''))
         ) {
-          searchParams = `cpf=${encodeURIComponent(
+          searchParams = `nationalId=${encodeURIComponent(
             cleanQuery.replace(/\D/g, '')
           )}`;
         } else {
@@ -180,7 +180,7 @@ export default function UsersList() {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/students/search?${searchParams}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/search?${searchParams}`,
           { headers }
         );
         if (!response.ok) {
@@ -231,7 +231,7 @@ export default function UsersList() {
       id: user.id,
       name: user.name,
       email: user.email,
-      cpf: user.cpf,
+      nationalId: user.nationalId,
       role: user.role,
     });
     setIsEditModalOpen(true);
@@ -270,7 +270,7 @@ export default function UsersList() {
           headers['Authorization'] = `Bearer ${token}`;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
           { method: 'DELETE', headers }
         );
         if (!response.ok) {
@@ -326,7 +326,7 @@ export default function UsersList() {
                 </div>
                 <div>
                   🆔 {t('deleteConfirmation.cpf')}:{' '}
-                  {user.cpf}
+                  {user.nationalId}
                 </div>
                 <div>
                   👤 {t('deleteConfirmation.role')}:{' '}
@@ -409,7 +409,7 @@ export default function UsersList() {
           user.email
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          user.cpf.includes(searchTerm) ||
+          user.nationalId.includes(searchTerm) ||
           user.role
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
@@ -613,7 +613,7 @@ export default function UsersList() {
                     </span>
                     <span className="flex items-center gap-1">
                       <CreditCard size={12} />
-                      {user.cpf}
+                      {user.nationalId}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">

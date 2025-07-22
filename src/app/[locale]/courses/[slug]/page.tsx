@@ -52,7 +52,7 @@ export default async function CoursePage({
 
   // Buscar curso e módulos
   const resCourses = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
     { cache: 'no-store' }
   );
   if (!resCourses.ok)
@@ -62,7 +62,7 @@ export default async function CoursePage({
     allCourses.find(c => c.slug === slug) ?? notFound();
 
   const resModules = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseFound.id}/modules`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules`,
     { cache: 'no-store' }
   );
   if (!resModules.ok)

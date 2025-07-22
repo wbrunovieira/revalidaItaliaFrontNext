@@ -866,7 +866,7 @@
     "confirmPassword": "Ingrese la contraseña nuevamente",
     "role": "Seleccione una función",
     "cpf": "000.000.000-00",
-    "document": "Ingrese su documento"
+    "document": "Ej: 12345678901, AA1234567, RSSMRA85M01H501Z"
   },
   "roles": {
     "student": "Estudiante",
@@ -888,6 +888,9 @@
     "passwordMismatch": "Las contraseñas no coinciden",
     "cpfRequired": "El documento es obligatorio",
     "cpfInvalid": "Documento inválido",
+    "documentMin": "El documento debe tener al menos 5 caracteres",
+    "documentMax": "El documento debe tener máximo 20 caracteres",
+    "documentInvalid": "El documento debe contener solo letras, números y guiones",
     "roleRequired": "La función es obligatoria",
     "roleInvalid": "Función inválida"
   },

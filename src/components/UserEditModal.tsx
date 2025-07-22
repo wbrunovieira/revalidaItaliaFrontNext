@@ -23,7 +23,7 @@ interface UserEditData {
   id: string;
   name: string;
   email: string;
-  cpf: string;
+  nationalId: string;
   role: 'admin' | 'student' | 'tutor';
 }
 
@@ -39,7 +39,7 @@ type UserRole = 'admin' | 'student' | 'tutor';
 interface FormData {
   name: string;
   email: string;
-  cpf: string;
+  nationalId: string;
   role: UserRole;
 }
 
@@ -67,7 +67,7 @@ export default function UserEditModal({
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    cpf: '',
+    nationalId: '',
     role: 'student',
   });
 
@@ -273,9 +273,9 @@ export default function UserEditModal({
   );
 
   // Manipular mudança de documento
-  const handleCpfChange = useCallback(
+  const handleNationalIdChange = useCallback(
     (value: string) => {
-      setFormData(prev => ({ ...prev, cpf: value }));
+      setFormData(prev => ({ ...prev, nationalId: value }));
       handleFieldValidation('cpf', value);
     },
     [handleFieldValidation]
@@ -372,7 +372,7 @@ export default function UserEditModal({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/students/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
         {
           method: 'PATCH',
           headers,
@@ -419,7 +419,7 @@ export default function UserEditModal({
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        cpf: formData.cpf.replace(/\D/g, ''),
+        nationalId: formData.nationalId.trim(),
         role: formData.role,
       };
 
@@ -431,12 +431,12 @@ export default function UserEditModal({
         variant: 'success',
       });
 
-      // Chamar callback com dados atualizados incluindo CPF formatado
+      // Chamar callback com dados atualizados incluindo documento formatado
       const updatedUser: UserEditData = {
         id: user.id,
         name: payload.name,
         email: payload.email,
-        cpf: formData.cpf, // Mantém formatação
+        nationalId: formData.nationalId, // Mantém formatação
         role: payload.role,
       };
 
@@ -455,7 +455,7 @@ export default function UserEditModal({
       setFormData({
         name: user.name,
         email: user.email,
-        cpf: user.cpf,
+        nationalId: user.nationalId,
         role: user.role,
       });
       setErrors({});
@@ -586,7 +586,7 @@ export default function UserEditModal({
                 )}
             </div>
 
-            {/* CPF */}
+            {/* Documento */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 <CreditCard
@@ -598,13 +598,13 @@ export default function UserEditModal({
               </label>
               <input
                 type="text"
-                value={formData.cpf}
+                value={formData.nationalId}
                 onChange={e =>
-                  handleCpfChange(e.target.value)
+                  handleNationalIdChange(e.target.value)
                 }
-                onBlur={handleInputBlur('cpf')}
+                onBlur={handleInputBlur('nationalId')}
                 className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
-                  errors.cpf
+                  errors.nationalId
                     ? 'border-red-500'
                     : 'border-gray-600'
                 }`}
@@ -613,10 +613,10 @@ export default function UserEditModal({
               <p className="text-xs text-gray-400 mt-1">
                 {t('helpers.documentTypes')}
               </p>
-              {errors.cpf && (
+              {errors.nationalId && (
                 <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
                   <AlertCircle size={14} />
-                  {errors.cpf}
+                  {errors.nationalId}
                 </div>
               )}
               {formData.cpf &&

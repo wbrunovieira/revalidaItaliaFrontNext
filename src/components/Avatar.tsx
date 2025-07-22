@@ -68,12 +68,12 @@ export default function Avatar() {
 
         console.log('Fetching user data for ID:', userId);
 
-        // Usar a rota GET /students/:id que existe no controller
+        // Usar a rota GET /users/:id que existe no controller
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL ||
             'http://localhost:3333'
-          }/students/${userId}`,
+          }/api/v1/users/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -34,7 +34,7 @@ interface FormData {
   password: string;
   confirmPassword: string;
   role: UserRole;
-  cpf: string;
+  nationalId: string;
 }
 
 interface FormErrors {
@@ -43,7 +43,7 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
   role?: string;
-  cpf?: string;
+  nationalId?: string;
 }
 
 interface ValidationResult {
@@ -56,7 +56,7 @@ interface CreateUserPayload {
   email: string;
   password: string;
   role: UserRole;
-  cpf: string;
+  nationalId: string;
 }
 
 interface PasswordStrength {
@@ -82,7 +82,7 @@ export default function CreateUserForm() {
     password: '',
     confirmPassword: '',
     role: 'student',
-    cpf: '',
+    nationalId: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -222,14 +222,41 @@ export default function CreateUserForm() {
           }
           return { isValid: true };
 
-        case 'cpf':
-          if (!value.trim()) {
+        case 'nationalId':
+          const trimmed = value.trim();
+          
+          // Validação 1: Campo obrigatório
+          if (!trimmed) {
             return {
               isValid: false,
               message: t('errors.cpfRequired'),
             };
           }
-          // Aceita qualquer documento - sem validação específica
+          
+          // Validação 2: Mínimo 5 caracteres
+          if (trimmed.length < 5) {
+            return {
+              isValid: false,
+              message: t('errors.documentMin'),
+            };
+          }
+          
+          // Validação 3: Máximo 20 caracteres
+          if (trimmed.length > 20) {
+            return {
+              isValid: false,
+              message: t('errors.documentMax'),
+            };
+          }
+          
+          // Validação 4: Apenas letras, números e hífens
+          if (!/^[A-Za-z0-9-]+$/.test(trimmed)) {
+            return {
+              isValid: false,
+              message: t('errors.documentInvalid'),
+            };
+          }
+          
           return { isValid: true };
 
         case 'role':
@@ -388,7 +415,7 @@ export default function CreateUserForm() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/students`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`,
         {
           method: 'POST',
           headers,
@@ -413,7 +440,7 @@ export default function CreateUserForm() {
       password: '',
       confirmPassword: '',
       role: 'student',
-      cpf: '',
+      nationalId: '',
     });
     setErrors({});
     setTouched({});
@@ -449,7 +476,7 @@ export default function CreateUserForm() {
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         role: formData.role,
-        cpf: formData.cpf.replace(/\D/g, ''),
+        nationalId: formData.nationalId.trim(),
       };
 
       await createUser(payload);
@@ -485,10 +512,10 @@ export default function CreateUserForm() {
     [formData, handleFieldValidation]
   );
 
-  const handleCpfChange = useCallback(
+  const handleNationalIdChange = useCallback(
     (value: string) => {
-      setFormData(prev => ({ ...prev, cpf: value }));
-      handleFieldValidation('cpf', value);
+      setFormData(prev => ({ ...prev, nationalId: value }));
+      handleFieldValidation('nationalId', value);
     },
     [handleFieldValidation]
   );
@@ -601,7 +628,7 @@ export default function CreateUserForm() {
           {/* Documento */}
           <div className="space-y-2">
             <Label
-              htmlFor="cpf"
+              htmlFor="nationalId"
               className="text-gray-300 flex items-center gap-2"
             >
               <CreditCard size={16} />
@@ -609,20 +636,21 @@ export default function CreateUserForm() {
               <span className="text-red-400">*</span>
             </Label>
             <TextField
-              id="cpf"
+              id="nationalId"
               placeholder={t('placeholders.document')}
-              value={formData.cpf}
+              value={formData.nationalId}
               onChange={e =>
-                handleCpfChange(e.target.value)
+                handleNationalIdChange(e.target.value)
               }
-              onBlur={handleInputBlur('cpf')}
-              error={errors.cpf}
+              onBlur={handleInputBlur('nationalId')}
+              error={errors.nationalId}
+              maxLength={20}
               className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
             />
             <p className="text-xs text-gray-400 mt-1">
               {t('helpers.documentTypes')}
             </p>
-            {formData.cpf && !errors.cpf && (
+            {formData.nationalId && !errors.nationalId && (
               <div className="flex items-center gap-1 text-green-400 text-sm">
                 <Check size={14} />
                 {t('validation.documentValid')}

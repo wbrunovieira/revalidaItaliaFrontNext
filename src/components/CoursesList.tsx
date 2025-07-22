@@ -147,7 +147,7 @@ export default function CoursesList() {
         headers['Authorization'] = `Bearer ${token}`;
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
         { headers }
       );
 
@@ -182,7 +182,7 @@ export default function CoursesList() {
           headers['Authorization'] = `Bearer ${token}`;
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}`,
           { method: 'DELETE', headers }
         );
         let data: unknown = null;

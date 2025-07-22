@@ -58,7 +58,7 @@ export default async function CoursesPage({
     'http://localhost:3333';
 
   // Buscar todos os cursos
-  const resCourses = await fetch(`${apiUrl}/courses`, {
+  const resCourses = await fetch(`${apiUrl}/api/v1/courses`, {
     cache: 'no-store',
   });
 

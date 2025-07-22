@@ -25,7 +25,7 @@ interface UserDetails {
   id: string;
   name: string;
   email: string;
-  cpf: string;
+  nationalId: string;
   role: 'admin' | 'student';
   createdAt: string;
   updatedAt: string;
@@ -155,7 +155,7 @@ export default function UserViewModal({
           headers['Authorization'] = `Bearer ${token}`;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/students/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
           { headers }
         );
 
@@ -398,13 +398,13 @@ export default function UserViewModal({
                           {t('fields.document')}
                         </p>
                         <p className="text-white font-mono">
-                          {user.cpf}
+                          {user.nationalId}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() =>
-                        copyToClipboard(user.cpf, 'document')
+                        copyToClipboard(user.nationalId, 'document')
                       }
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
                     >

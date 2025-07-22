@@ -134,7 +134,7 @@ export default function EditProfileForm({
         return;
       }
 
-      const response = await fetch(`${apiUrl}/profile`, {
+      const response = await fetch(`${apiUrl}/api/v1/profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

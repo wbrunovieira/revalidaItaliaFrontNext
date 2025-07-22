@@ -118,7 +118,7 @@ export default function TracksList() {
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
       const tracksResponse = await fetch(
-        `${apiUrl}/tracks`
+        `${apiUrl}/api/v1/tracks`
       );
 
       if (!tracksResponse.ok) {
@@ -180,7 +180,7 @@ export default function TracksList() {
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
         const response = await fetch(
-          `${apiUrl}/tracks/${trackId}`,
+          `${apiUrl}/api/v1/tracks/${trackId}`,
           {
             method: 'DELETE',
           }
@@ -301,7 +301,7 @@ export default function TracksList() {
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
         const response = await fetch(
-          `${apiUrl}/tracks/${trackId}`
+          `${apiUrl}/api/v1/tracks/${trackId}`
         );
 
         if (!response.ok) {

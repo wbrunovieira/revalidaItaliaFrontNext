@@ -79,7 +79,7 @@ export default function CourseViewModal({
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${id}`,
           { headers }
         );
 

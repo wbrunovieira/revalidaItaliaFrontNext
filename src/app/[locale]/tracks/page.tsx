@@ -52,7 +52,7 @@ export default async function TracksPage({
     'http://localhost:3333';
 
   // Buscar todas as trilhas
-  const resTracks = await fetch(`${apiUrl}/tracks`, {
+  const resTracks = await fetch(`${apiUrl}/api/v1/tracks`, {
     cache: 'no-store',
   });
 

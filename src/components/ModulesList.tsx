@@ -100,7 +100,7 @@ export default function ModulesList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -125,7 +125,7 @@ export default function ModulesList() {
 
     try {
       const coursesResponse = await fetch(
-        `${apiUrl}/courses`
+        `${apiUrl}/api/v1/courses`
       );
 
       if (!coursesResponse.ok) {
@@ -185,7 +185,7 @@ export default function ModulesList() {
     async (courseId: string, moduleId: string) => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules/${moduleId}`,
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}`,
           {
             method: 'DELETE',
           }
@@ -332,7 +332,7 @@ export default function ModulesList() {
       try {
         // Buscar detalhes completos do módulo
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules/${moduleId}`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}`
         );
 
         if (!response.ok) {

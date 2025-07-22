@@ -22,7 +22,7 @@
   /* — Cores básicas */
   --foreground: #171717;
 
-  /* — Cores semânticas (mapeando para os tokens) */
+  /* — Cores semânticas (mapeando para os tokens) */ 
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);

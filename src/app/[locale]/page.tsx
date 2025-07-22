@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
-import Card from '@/components/Card';
+import TrackCard from '@/components/TrackCard';
+import CourseCard from '@/components/CourseCard';
 import { BookOpen } from 'lucide-react';
 
 interface Translation {
@@ -18,6 +19,7 @@ interface Track {
   id: string;
   slug: string;
   imageUrl: string;
+  courses?: any[];
   translations?: Translation[];
 }
 
@@ -67,6 +69,19 @@ export default async function IndexPage({
   }
   const courses: Course[] = await resCourses.json();
 
+  // Enriquecer trilhas com dados dos cursos
+  const enrichedTracks = tracks.map(track => {
+    const courseIds = (track as any).courseIds || [];
+    const trackCourses = courses.filter((course: any) => 
+      courseIds.includes(course.id)
+    );
+    
+    return {
+      ...track,
+      courses: trackCourses,
+    };
+  });
+
   if (!token) {
     redirect(`/${locale}/login`);
   }
@@ -94,25 +109,18 @@ export default async function IndexPage({
           </h3>
         </div>
         <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 w-full max-w-6xl cursor-pointer">
-          {tracks.map(track => {
-            const list = track.translations ?? [];
-            const translation = list.find(
-              tr => tr.locale === locale
-            ) ??
-              list[0] ?? { title: '', description: '' };
-            return (
-              <Card
-                key={track.id}
-                name={translation.title}
-                imageUrl={track.imageUrl}
-                href={`/${locale}/tracks/${track.slug}`}
-              />
-            );
-          })}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+          {enrichedTracks.map((track, index) => (
+            <TrackCard
+              key={track.id}
+              track={track}
+              locale={locale}
+              index={index}
+            />
+          ))}
         </div>
 
-        <div className="flex gap-8 items-center mt-12">
+        <div className="flex gap-8 items-center mt-16">
           <BookOpen
             size={48}
             className="self-end text-white"
@@ -122,22 +130,15 @@ export default async function IndexPage({
           </h3>
         </div>
         <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 w-full max-w-6xl cursor-pointer">
-          {courses.map(course => {
-            const list = course.translations ?? [];
-            const translation = list.find(
-              tr => tr.locale === locale
-            ) ??
-              list[0] ?? { title: '', description: '' };
-            return (
-              <Card
-                key={course.id}
-                name={translation.title}
-                imageUrl={course.imageUrl}
-                href={`/${locale}/courses/${course.slug}`}
-              />
-            );
-          })}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl mb-12">
+          {courses.map((course, index) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              locale={locale}
+              index={index}
+            />
+          ))}
         </div>
       </div>
     </NavSidebar>

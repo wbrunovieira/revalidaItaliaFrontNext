@@ -1,9 +1,10 @@
 // src/components/CourseCard.tsx
 "use client";
 
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Layers, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface Translation {
   locale: string;
@@ -15,6 +16,7 @@ interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  modules?: any[];
   translations?: Translation[];
 }
 
@@ -27,6 +29,7 @@ interface CourseCardProps {
 export default function CourseCard({ course, locale, index }: CourseCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const t = useTranslations('Courses');
 
   const list = course.translations ?? [];
   const translation = list.find(tr => tr.locale === locale) ?? 
@@ -35,6 +38,10 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
   // Mock progress data - remover quando vier da API
   const mockProgress = [15, 45, 72, 28, 89, 5][index % 6];
   const isStarted = mockProgress > 0;
+
+  // Dados do curso
+  const modulesCount = course.modules?.length || Math.floor(Math.random() * 8) + 3; // Mock para demonstração
+  const estimatedHours = modulesCount * 2; // Estimativa de 2 horas por módulo
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
@@ -74,10 +81,11 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
     >
       <div 
         ref={cardRef}
-        className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 course-card"
+        className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 course-card border-l-[10px] hover:border-l-[12px]"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
+          borderLeftColor: 'var(--secondary)',
           backgroundImage: `
             radial-gradient(circle at 20% 20%, rgba(12, 53, 89, 0.08) 1.5px, transparent 1.5px),
             radial-gradient(circle at 80% 80%, rgba(56, 135, 166, 0.08) 1.5px, transparent 1.5px),
@@ -124,6 +132,11 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
               backgroundSize: '20px 20px'
             }}
           ></div>
+
+          {/* Ícone de curso no canto */}
+          <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+            <BookOpen size={20} className="text-primary" />
+          </div>
         </div>
 
         {/* Conteúdo do card */}
@@ -163,33 +176,48 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
             </div>
           )}
 
-          {/* Progresso e ícone */}
-          <div className="flex items-center justify-between relative z-10">
-            {isStarted ? (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-700 group-hover:animate-pulse"
-                    style={{ width: `${mockProgress}%` }}
-                  >
-                    <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
-                  </div>
+          {/* Estatísticas e progresso */}
+          <div className="space-y-3 relative z-10">
+            {/* Estatísticas sempre visíveis */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-primary transition-colors duration-300">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                  <Layers size={14} className="text-primary" />
                 </div>
-                <span className="text-primary font-medium text-xs group-hover:scale-110 transition-transform duration-300">
-                  {mockProgress}%
-                </span>
+                <span className="font-medium">{modulesCount} {t('modules')}</span>
               </div>
-            ) : (
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-primary/10 group-hover:text-primary transition-all duration-300">
-                Iniciar curso
-              </span>
-            )}
-            
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-              <BookOpen 
-                size={16} 
-                className="text-primary group-hover:scale-110 transition-transform duration-300" 
-              />
+              
+              <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-secondary transition-colors duration-300">
+                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                  <Clock size={14} className="text-secondary" />
+                </div>
+                <span className="font-medium">{estimatedHours}h</span>
+              </div>
+            </div>
+
+            {/* Progresso e botão */}
+            <div className="flex items-center justify-between">
+              {isStarted ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-700 group-hover:animate-pulse"
+                      style={{ width: `${mockProgress}%` }}
+                    >
+                      <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+                    </div>
+                  </div>
+                  <span className="text-primary font-medium text-xs group-hover:scale-110 transition-transform duration-300">
+                    {mockProgress}%
+                  </span>
+                </div>
+              ) : (
+                <div></div>
+              )}
+              
+              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full group-hover:bg-secondary/10 group-hover:text-secondary transition-all duration-300 font-semibold">
+                {t('startCourse')}
+              </div>
             </div>
           </div>
         </div>

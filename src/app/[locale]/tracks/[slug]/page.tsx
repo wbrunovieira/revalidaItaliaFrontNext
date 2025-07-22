@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
-import Card from '@/components/Card';
+import CourseCard from '@/components/CourseCard';
 import { ArrowLeft, BookOpen, Clock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +27,7 @@ interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  modules?: any[];
   translations: Translation[];
 }
 
@@ -106,7 +107,7 @@ export default async function TrackPage({
         {/* Cabeçalho da Trilhas */}
         <div className="px-6 pb-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden">
+            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden border-l-[10px] border-accent shadow-xl">
               <Image
                 src={track.imageUrl}
                 alt={tr.title}
@@ -152,25 +153,15 @@ export default async function TrackPage({
           <hr className="border-t-2 border-secondary w-32 mb-8" />
 
           {trackCourses.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {trackCourses.map(course => {
-                const ct = course.translations.find(
-                  tr => tr.locale === locale
-                ) ||
-                  course.translations[0] || {
-                    title: '',
-                    description: '',
-                  };
-                return (
-                  <div key={course.id} className="relative">
-                    <Card
-                      name={ct.title}
-                      imageUrl={course.imageUrl}
-                      href={`/${locale}/courses/${course.slug}`}
-                    />
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {trackCourses.map((course, index) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  locale={locale}
+                  index={index}
+                />
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">

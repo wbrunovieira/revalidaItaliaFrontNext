@@ -5,12 +5,15 @@ import Image from 'next/image';
 import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
+import LessonCard from '@/components/LessonCard';
 import {
   ArrowLeft,
   Clock,
   ChevronRight,
+  ChevronLeft,
   PlayCircle,
   Video,
+  CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -34,8 +37,11 @@ interface ModuleData {
 }
 interface Lesson {
   id: string;
+  slug: string;
   moduleId: string;
   order: number;
+  imageUrl?: string | null;
+  videoId?: string;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -158,7 +164,7 @@ export default async function ModulePage({
         {/* Detalhes do módulo */}
         <div className="px-6 pb-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden shadow-xl">
+            <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden shadow-xl border-l-[10px] border-neutral">
               <Image
                 src={
                   moduleData.imageUrl ||
@@ -213,83 +219,19 @@ export default async function ModulePage({
           <hr className="border-t-2 border-secondary w-32 mb-8" />
 
           {sortedLessons.length > 0 ? (
-            <div className="space-y-4 max-w-4xl">
-              {sortedLessons.map((lesson, index) => {
-                const lt =
-                  lesson.translations.find(
-                    tr => tr.locale === locale
-                  ) ?? lesson.translations[0];
-                const isCompleted = false; // Você pode implementar lógica de progresso aqui
-
-                return (
-                  <Link
-                    key={lesson.id}
-                    href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lesson.id}`}
-                    className="block relative bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition-all duration-300 cursor-pointer group overflow-hidden"
-                  >
-                    {/* Indicador de hover lateral */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top" />
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="relative">
-                          <div
-                            className={`
-                            w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
-                            ${
-                              isCompleted
-                                ? 'bg-green-500 text-white'
-                                : 'bg-secondary/20 text-secondary border-2 border-secondary group-hover:bg-secondary group-hover:text-primary'
-                            }
-                          `}
-                          >
-                            {index + 1}
-                          </div>
-                          {/* Anel pulsante no hover */}
-                          {!isCompleted && (
-                            <div className="absolute inset-0 rounded-full bg-secondary animate-ping opacity-0 group-hover:opacity-30" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-white group-hover:text-secondary transition-colors flex items-center gap-2">
-                            {lt.title}
-                            <span className="text-xs bg-secondary/20 text-secondary px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                              {tModule('clickToWatch')}
-                            </span>
-                          </h3>
-                          <p className="text-gray-400 text-sm mt-1">
-                            {lt.description}
-                          </p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} /> ~15 min
-                            </span>
-                            <span>
-                              {tModule('lessonOrder', {
-                                order: lesson.order,
-                                total: totalLessons,
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="relative">
-                        {/* Ícone de play grande */}
-                        <div className="text-gray-400 group-hover:text-secondary transition-all duration-300 group-hover:scale-110">
-                          <PlayCircle size={40} />
-                        </div>
-                        {/* Efeito de pulse no ícone */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-secondary/20 animate-ping opacity-0 group-hover:opacity-100" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Overlay gradient no hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {sortedLessons.map((lesson, index) => (
+                <LessonCard
+                  key={lesson.id}
+                  lesson={lesson}
+                  courseSlug={slug}
+                  moduleSlug={moduleSlug}
+                  locale={locale}
+                  index={index}
+                  totalLessons={totalLessons}
+                  isCompleted={false}
+                />
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -320,7 +262,7 @@ export default async function ModulePage({
                   {tModule('startModuleDescription')}
                 </p>
                 <Link
-                  href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${sortedLessons[0].id}`}
+                  href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${sortedLessons[0].slug || sortedLessons[0].id}`}
                   className="group relative bg-secondary text-primary px-8 py-4 rounded-lg font-semibold inline-flex items-center gap-3 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 overflow-hidden"
                 >
                   {/* Efeito de overlay */}
@@ -348,38 +290,96 @@ export default async function ModulePage({
             <h3 className="text-lg font-bold text-white mb-4">
               {tModule('moduleNavigation')}
             </h3>
-            <div className="flex justify-between items-center">
-              {moduleData.order > 1 && (
-                <Link
-                  href="#"
-                  className="text-left group hover:scale-105 transition-transform"
-                >
-                  <p className="text-sm text-gray-400 mb-1 group-hover:text-gray-300">
-                    {tModule('previousModule')}
-                  </p>
-                  <p className="text-white font-semibold group-hover:text-secondary transition-colors">
-                    {tModule('moduleNumber', {
-                      number: moduleData.order - 1,
-                    })}
-                  </p>
-                </Link>
-              )}
-              <div className="flex-1" />
-              {moduleData.order < moduleFound.length && (
-                <Link
-                  href="#"
-                  className="text-right group hover:scale-105 transition-transform"
-                >
-                  <p className="text-sm text-gray-400 mb-1 group-hover:text-gray-300">
-                    {tModule('nextModule')}
-                  </p>
-                  <p className="text-white font-semibold group-hover:text-secondary transition-colors">
-                    {tModule('moduleNumber', {
-                      number: moduleData.order + 1,
-                    })}
-                  </p>
-                </Link>
-              )}
+            {/* Timeline Visual */}
+            <div className="space-y-6">
+              {/* Timeline */}
+              <div className="relative">
+                <div className="flex items-center justify-between relative">
+                  {/* Linha conectora de fundo */}
+                  <div className="absolute top-6 left-0 right-0 h-[2px] bg-gray-700"></div>
+                  
+                  {/* Módulos */}
+                  {moduleFound.map((mod, idx) => {
+                    const modTrans = mod.translations.find(t => t.locale === locale) || mod.translations[0];
+                    const isCompleted = idx < moduleData.order - 1; // Módulos anteriores completos
+                    const isCurrent = mod.id === moduleData.id;
+                    
+                    return (
+                      <div key={mod.id} className="relative z-10 flex flex-col items-center">
+                        {/* Indicador "Você está aqui" */}
+                        {isCurrent && (
+                          <div className="absolute -top-8 whitespace-nowrap">
+                            <div className="bg-secondary text-primary text-xs px-2 py-1 rounded-full font-semibold animate-pulse">
+                              ↓ {tModule('youAreHere')}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Link do módulo */}
+                        <Link
+                          href={`/${locale}/courses/${slug}/modules/${mod.slug}`}
+                          className="group transition-all duration-300"
+                        >
+                          {/* Círculo do módulo */}
+                          <div className={`
+                            w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm
+                            transition-all duration-300 border-2
+                            ${isCompleted 
+                              ? 'bg-green-500 border-green-500 text-white' 
+                              : isCurrent
+                              ? 'bg-secondary border-secondary text-primary animate-pulse'
+                              : 'bg-gray-700 border-gray-600 text-gray-400 hover:bg-gray-600 hover:border-gray-500'
+                            }
+                            group-hover:scale-110 group-hover:shadow-lg
+                          `}>
+                            {mod.order}
+                          </div>
+                          
+                          {/* Título do módulo */}
+                          <div className={`
+                            mt-2 text-center max-w-[100px]
+                            ${isCurrent ? 'text-white font-semibold' : 'text-gray-400'}
+                            group-hover:text-white
+                          `}>
+                            <p className="text-xs truncate">{modTrans.title}</p>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Linha de progresso */}
+                <div 
+                  className="absolute top-6 left-0 h-[2px] bg-green-500 transition-all duration-500"
+                  style={{ 
+                    width: `${((moduleData.order - 1) / (moduleFound.length - 1)) * 100}%` 
+                  }}
+                ></div>
+              </div>
+              
+              {/* Navegação rápida anterior/próximo */}
+              <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                {moduleData.order > 1 ? (
+                  <Link
+                    href={`/${locale}/courses/${slug}/modules/${moduleFound[moduleData.order - 2].slug}`}
+                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+                  >
+                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-sm">{tModule('previousModule')}</span>
+                  </Link>
+                ) : null}
+                
+                {moduleData.order < moduleFound.length ? (
+                  <Link
+                    href={`/${locale}/courses/${slug}/modules/${moduleFound[moduleData.order].slug}`}
+                    className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+                  >
+                    <span className="text-sm">{tModule('nextModule')}</span>
+                    <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

@@ -212,12 +212,14 @@
     "startCourse": "Inizia questo corso",
     "startCourseDescription": "Inizia il tuo percorso di apprendimento con il primo modulo di questo corso.",
     "startFirstModule": "Inizia Primo Modulo",
+    "startModule": "Inizia modulo",
     "notFound": {
       "title": "Corso non trovato",
       "description": "Il corso che stai cercando non esiste o è stato rimosso."
     },
       "progress": "Progresso del Corso",
-  "modulesCompleted": "moduli completati"
+  "modulesCompleted": "moduli completati",
+  "lessons": "lezioni"
   },
   "Module": {
     "back": "Torna al Corso",
@@ -228,6 +230,7 @@
     "noLessons": "Nessuna lezione trovata per questo modulo.",
     "lessonOrder": "Lezione {order} di {total}",
     "moduleNavigation": "Navigazione Modulo",
+    "youAreHere": "Sei qui",
     "previousModule": "Modulo Precedente",
     "nextModule": "Prossimo Modulo",
     "startModule": "Inizia Modulo",
@@ -241,9 +244,11 @@
       "description": "Il modulo che stai cercando non esiste o è stato rimosso."
     },
     "videoLessons": "video-lezioni",
-    "videoLessonsInModule": "Video-lezioni del Modulo",
+    "videoLessonsInModule": "Lezioni del Modulo",
     "clickToWatch": "Clicca per guardare",
-    "watchFirstVideo": "Guarda il Primo Video"
+    "watchFirstVideo": "Guarda la Prima Lezione",
+    "startLesson": "Inizia lezione",
+    "reviewLesson": "Rivedi lezione"
   },
   "SearchInput": {
     "placeholder": "Cerca corso",
@@ -376,7 +381,8 @@
     "beginner": "Principiante",
     "intermediate": "Intermedio",
     "advanced": "Avanzato"
-  }
+  },
+  "startCourse": "Inizia corso"
 },
 "Admin": {
   "title": "Pannello Amministrativo",

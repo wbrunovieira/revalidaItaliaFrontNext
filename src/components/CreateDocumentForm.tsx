@@ -470,7 +470,7 @@ export default function CreateDocumentForm() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -495,7 +495,7 @@ export default function CreateDocumentForm() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -651,7 +651,7 @@ export default function CreateDocumentForm() {
       payload: CreateDocumentPayload
     ): Promise<void> => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/lessons/${formData.lessonId}/documents`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${formData.lessonId}/documents`,
         {
           method: 'POST',
           headers: {

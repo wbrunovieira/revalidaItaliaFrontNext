@@ -40,6 +40,10 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
   const estimatedHours = coursesCount * 8; // Estimativa de horas
   const isPopular = coursesCount > 5;
 
+  // Mock progress data - remover quando vier da API
+  const mockProgress = [10, 35, 65, 25, 75, 0][index % 6];
+  const isStarted = mockProgress > 0;
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
 
@@ -78,7 +82,7 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
     >
       <div 
         ref={cardRef}
-        className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 track-card"
+        className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 track-card border-l-[10px] border-accent hover:border-l-[12px]"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
@@ -91,10 +95,19 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
           backgroundPosition: '0 0, 12px 12px, 5px 5px'
         }}
       >
-        {/* Barra superior decorativa */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/30 via-secondary/30 to-accent/30 group-hover:from-accent via-secondary group-hover:to-accent transition-all duration-500">
-          <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
-        </div>
+        {/* Linha de progresso real com pulse */}
+        {isStarted ? (
+          <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-accent to-secondary transition-all duration-1000 ease-out group-hover:animate-pulse"
+              style={{ width: `${mockProgress}%` }}
+            >
+              <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/30 via-secondary/30 to-accent/30"></div>
+        )}
         
         {/* Badge Popular */}
         {isPopular && (
@@ -173,8 +186,9 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
             </div>
           )}
 
-          {/* Estatísticas da trilha */}
-          <div className="flex items-center justify-between relative z-10">
+          {/* Estatísticas e progresso */}
+          <div className="space-y-3 relative z-10">
+            {/* Estatísticas sempre visíveis */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-secondary transition-colors duration-300">
                 <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
@@ -190,9 +204,30 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                 <span className="font-medium">{estimatedHours}h</span>
               </div>
             </div>
-            
-            <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full group-hover:bg-accent/10 group-hover:text-accent transition-all duration-300 font-semibold">
-              {t('startTrack')}
+
+            {/* Progresso e botão */}
+            <div className="flex items-center justify-between">
+              {isStarted ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-700 group-hover:animate-pulse"
+                      style={{ width: `${mockProgress}%` }}
+                    >
+                      <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+                    </div>
+                  </div>
+                  <span className="text-accent font-medium text-xs group-hover:scale-110 transition-transform duration-300">
+                    {mockProgress}%
+                  </span>
+                </div>
+              ) : (
+                <div></div>
+              )}
+              
+              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full group-hover:bg-accent/10 group-hover:text-accent transition-all duration-300 font-semibold">
+                {t('startTrack')}
+              </div>
             </div>
           </div>
         </div>

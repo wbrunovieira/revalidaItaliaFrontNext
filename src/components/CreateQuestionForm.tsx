@@ -128,7 +128,7 @@ export default function CreateQuestionForm({
     setLoadingAssessments(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -460,7 +460,7 @@ export default function CreateQuestionForm({
 
     const questionResponse = await createWithRetry(async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/questions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/questions`,
         {
           method: 'POST',
           headers: {
@@ -487,7 +487,7 @@ export default function CreateQuestionForm({
       const optionPromises = formData.options.map((option, index) =>
         createWithRetry(async () => {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/questions/${questionId}/options`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/questions/${questionId}/options`,
             {
               method: 'POST',
               headers: {

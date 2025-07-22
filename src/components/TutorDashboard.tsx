@@ -91,7 +91,7 @@ export default function TutorDashboard({
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
 
-      const response = await fetch(`${apiUrl}/attempts`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export default function TutorDashboard({
         openAssessmentAttempts.map(async (attempt: any) => {
           try {
             const resultsResponse = await fetch(
-              `${apiUrl}/attempts/${attempt.id}/results`,
+              `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
               {
                 method: 'GET',
                 headers: {
@@ -261,7 +261,7 @@ export default function TutorDashboard({
         quizAttempts.map(async (attempt: any) => {
           try {
             const resultsResponse = await fetch(
-              `${apiUrl}/attempts/${attempt.id}/results`,
+              `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
               {
                 method: 'GET',
                 headers: {
@@ -297,7 +297,7 @@ export default function TutorDashboard({
         simuladoAttempts.map(async (attempt: any) => {
           try {
             const resultsResponse = await fetch(
-              `${apiUrl}/attempts/${attempt.id}/results`,
+              `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
               {
                 method: 'GET',
                 headers: {

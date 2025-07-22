@@ -108,7 +108,7 @@ export default function QuestionsList() {
     setLoadingAssessments(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export default function QuestionsList() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments/${selectedAssessmentId}/questions/detailed`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${selectedAssessmentId}/questions/detailed`,
         {
           headers: {
             'Content-Type': 'application/json',

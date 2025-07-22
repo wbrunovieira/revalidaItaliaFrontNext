@@ -124,7 +124,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
 
-      const response = await fetch(`${apiUrl}/attempts/${attemptId}/results`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts/${attemptId}/results`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -259,10 +259,10 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
         teacherComment: teacherComment.trim() || undefined,
       };
       
-      console.log('Review URL:', `${apiUrl}/attempts/answers/${answer.id}/review`);
+      console.log('Review URL:', `${apiUrl}/api/v1/attempts/answers/${answer.id}/review`);
       console.log('Review payload:', reviewPayload);
 
-      const response = await fetch(`${apiUrl}/attempts/answers/${answer.id}/review`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts/answers/${answer.id}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

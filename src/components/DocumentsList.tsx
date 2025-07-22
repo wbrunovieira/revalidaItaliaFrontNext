@@ -144,7 +144,7 @@ export default function DocumentsList() {
     async (lessonId: string): Promise<DocumentItem[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/lessons/${lessonId}/documents`
+          `${apiUrl}/api/v1/lessons/${lessonId}/documents`
         );
 
         if (!response.ok) {
@@ -171,7 +171,7 @@ export default function DocumentsList() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -211,7 +211,7 @@ export default function DocumentsList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -321,7 +321,7 @@ export default function DocumentsList() {
     async (lessonId: string, documentId: string) => {
       try {
         const response = await fetch(
-          `${apiUrl}/lessons/${lessonId}/documents/${documentId}`,
+          `${apiUrl}/api/v1/lessons/${lessonId}/documents/${documentId}`,
           {
             method: 'DELETE',
           }

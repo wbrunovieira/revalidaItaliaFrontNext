@@ -181,7 +181,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
       
-      const resultsResponse = await fetch(`${apiUrl}/attempts/${attemptId}/results`, {
+      const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attemptId}/results`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         throw new Error('User ID not found in token');
       }
 
-      const response = await fetch(`${apiUrl}/attempts/start`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -315,7 +315,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
 
-      const response = await fetch(`${apiUrl}/attempts/${attempt.id}/answers`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/answers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -396,7 +396,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         await Promise.all(pendingSaves);
       }
 
-      const submitResponse = await fetch(`${apiUrl}/attempts/${attempt.id}/submit`, {
+      const submitResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -77,7 +77,7 @@ export default function CreateArgumentForm({
     setLoadingAssessments(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',

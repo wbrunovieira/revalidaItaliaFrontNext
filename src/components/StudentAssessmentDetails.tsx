@@ -100,7 +100,7 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
         ?.split('=')[1];
 
       // Use the correct endpoint to fetch attempt results with tutor feedback
-      const resultsResponse = await fetch(`${apiUrl}/attempts/${attemptId}/results`, {
+      const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attemptId}/results`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -311,11 +311,11 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
       };
       
       console.log('Sending answer request:', {
-        url: `${apiUrl}/attempts/${attemptId}/answers`,
+        url: `${apiUrl}/api/v1/attempts/${attemptId}/answers`,
         body: requestBody
       });
       
-      const response = await fetch(`${apiUrl}/attempts/${attemptId}/answers`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts/${attemptId}/answers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

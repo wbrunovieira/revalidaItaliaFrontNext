@@ -44,14 +44,26 @@ interface DocumentsSectionProps {
 
 // Function to get file icon based on MIME type or filename
 function getFileIcon(mimeType: string, filename: string): JSX.Element {
-  const iconProps = { size: 20, className: 'text-secondary' };
+  // Check if it's a PDF file
+  const isPDF = (mimeType === 'application/pdf') || 
+                (filename && filename.toLowerCase().endsWith('.pdf'));
+  
+  if (isPDF) {
+    return (
+      <img 
+        src="/icons/pdf.svg" 
+        alt="PDF" 
+        className="w-8 h-8"
+      />
+    );
+  }
+  
+  const iconProps = { size: 24, className: 'text-secondary' };
   
   // If mimeType is empty, determine from filename extension
   if (!mimeType && filename) {
     const extension = filename.split('.').pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf':
-        return <FileText {...iconProps} className="text-red-400" />;
       case 'doc':
       case 'docx':
         return <FileText {...iconProps} className="text-blue-400" />;
@@ -93,10 +105,6 @@ function getFileIcon(mimeType: string, filename: string): JSX.Element {
   }
   
   // Handle MIME types
-  if (mimeType === 'application/pdf') {
-    return <FileText {...iconProps} className="text-red-400" />;
-  }
-  
   if (mimeType.includes('word') || mimeType.includes('document')) {
     return <FileText {...iconProps} className="text-blue-400" />;
   }
@@ -134,6 +142,12 @@ function getFileIcon(mimeType: string, filename: string): JSX.Element {
 
 // Function to format file size
 function formatFileSize(bytes: number): string {
+  // If fileSize is in MB (e.g., 5 for 5MB), convert to bytes
+  if (bytes > 0 && bytes < 1000) {
+    // Assume the value is in MB if it's a small number
+    bytes = bytes * 1024 * 1024;
+  }
+  
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -163,11 +177,11 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
           return (
             <div
               key={document.id}
-              className="group p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-secondary/50 transition-all duration-200 cursor-pointer hover:bg-gray-700/50"
+              className="group p-4 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-all duration-200 cursor-pointer hover:bg-primary/60"
               onClick={() => window.open(docTranslation?.url, '_blank')}
             >
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 p-2 bg-gray-700 rounded-lg group-hover:bg-gray-600 transition-colors">
+                <div className="flex-shrink-0 p-3 bg-primary/40 rounded-lg group-hover:bg-primary/60 transition-colors">
                   {getFileIcon(document.mimeType, document.filename)}
                 </div>
                 

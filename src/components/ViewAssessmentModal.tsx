@@ -66,7 +66,7 @@ export default function ViewAssessmentModal({
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments/${assessmentId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${assessmentId}`,
         {
           headers: {
             'Content-Type': 'application/json',

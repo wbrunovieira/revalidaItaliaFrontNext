@@ -147,7 +147,7 @@ export default function AssessmentsList() {
       }
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/assessments?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -216,7 +216,7 @@ export default function AssessmentsList() {
     
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ export default function AssessmentsList() {
     
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/modules/${moduleId}/lessons`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`,
         {
           headers: {
             'Content-Type': 'application/json',

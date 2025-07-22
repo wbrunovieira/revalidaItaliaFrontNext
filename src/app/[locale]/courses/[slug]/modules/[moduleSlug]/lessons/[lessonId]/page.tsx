@@ -201,11 +201,11 @@ export default async function LessonPage({
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : Promise.reject())),
     fetch(
-      `${API_URL}/assessments?lessonId=${lessonId}`,
+      `${API_URL}/api/v1/assessments?lessonId=${lessonId}`,
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : { assessments: [], pagination: {} })),
     fetch(
-      `${API_URL}/lessons/${lessonId}/documents`,
+      `${API_URL}/api/v1/lessons/${lessonId}/documents`,
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : []))
   ]);

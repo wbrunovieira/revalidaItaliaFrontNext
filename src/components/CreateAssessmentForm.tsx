@@ -166,7 +166,7 @@ export default function CreateAssessmentForm({
       for (const course of courses) {
         try {
           const modulesResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules`,
             {
               headers: {
                 'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export default function CreateAssessmentForm({
           for (const moduleItem of modules) {
             try {
               const lessonsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/modules/${moduleItem.id}/lessons`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules/${moduleItem.id}/lessons`,
                 {
                   headers: {
                     'Content-Type': 'application/json',
@@ -461,7 +461,7 @@ export default function CreateAssessmentForm({
     console.log('Assessment payload:', payload);
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/assessments`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
       {
         method: 'POST',
         headers: {

@@ -76,7 +76,7 @@ export default function DocumentViewModal({
       setLoading(true);
       try {
         const documentResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/lessons/${lessonId}/documents/${documentId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`
         );
 
         if (!documentResponse.ok) {

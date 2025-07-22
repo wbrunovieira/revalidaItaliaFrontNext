@@ -335,7 +335,7 @@ export default function VideosList() {
     ) => {
       try {
         const response = await fetch(
-          `${apiUrl}/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
+          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos/${videoId}`,
           {
             method: 'DELETE',
           }

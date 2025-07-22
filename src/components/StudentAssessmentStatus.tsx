@@ -63,7 +63,7 @@ export default function StudentAssessmentStatus({ userId, locale }: StudentAsses
         ?.split('=')[1];
 
       // Usar o endpoint que existe e filtrar para o usuário atual
-      const response = await fetch(`${apiUrl}/attempts`, {
+      const response = await fetch(`${apiUrl}/api/v1/attempts`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function StudentAssessmentStatus({ userId, locale }: StudentAsses
       const attemptsWithDetails = await Promise.all(
         userOpenAttempts.map(async (attempt: any) => {
           try {
-            const resultsResponse = await fetch(`${apiUrl}/attempts/${attempt.id}/results`, {
+            const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/results`, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',

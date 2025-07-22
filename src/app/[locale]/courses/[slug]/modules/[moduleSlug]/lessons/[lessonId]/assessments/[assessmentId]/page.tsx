@@ -89,7 +89,7 @@ export default async function AssessmentPage({
   // Fetch assessment details
   console.log('Fetching assessment:', assessmentId);
   const assessmentResponse = await fetch(
-    `${API_URL}/assessments/${assessmentId}`,
+    `${API_URL}/api/v1/assessments/${assessmentId}`,
     {
       cache: 'no-store',
       headers: {
@@ -118,7 +118,7 @@ export default async function AssessmentPage({
     assessmentId
   );
   const questionsResponse = await fetch(
-    `${API_URL}/assessments/${assessmentId}/questions`,
+    `${API_URL}/api/v1/assessments/${assessmentId}/questions`,
     {
       cache: 'no-store',
       headers: {

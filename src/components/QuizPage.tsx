@@ -223,7 +223,7 @@ export default function QuizPage({
         ?.split('=')[1];
 
       const resultsResponse = await fetch(
-        `${apiUrl}/attempts/${attemptId}/results`,
+        `${apiUrl}/api/v1/attempts/${attemptId}/results`,
         {
           method: 'GET',
           headers: {
@@ -316,7 +316,7 @@ export default function QuizPage({
       console.log('Starting quiz with:', { userId, assessmentId: assessment.id });
 
       const response = await fetch(
-        `${apiUrl}/attempts/start`,
+        `${apiUrl}/api/v1/attempts/start`,
         {
           method: 'POST',
           headers: {
@@ -399,7 +399,7 @@ export default function QuizPage({
         ?.split('=')[1];
 
       const response = await fetch(
-        `${apiUrl}/attempts/${attempt.id}/answers`,
+        `${apiUrl}/api/v1/attempts/${attempt.id}/answers`,
         {
           method: 'POST',
           headers: {
@@ -461,7 +461,7 @@ export default function QuizPage({
 
       // PASSO 4: Finalizar o Quiz
       const submitResponse = await fetch(
-        `${apiUrl}/attempts/${attempt.id}/submit`,
+        `${apiUrl}/api/v1/attempts/${attempt.id}/submit`,
         {
           method: 'POST',
           headers: {

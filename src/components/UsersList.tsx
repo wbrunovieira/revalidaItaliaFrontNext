@@ -195,8 +195,20 @@ export default function UsersList() {
           );
         }
 
-        const data: UsersResponse = await response.json();
-        setUsers(data.users);
+        const data = await response.json();
+        console.log('API Search Response:', data);
+        
+        // Handle both possible response structures
+        if (data.items) {
+          setUsers(data.items);
+        } else if (data.users) {
+          setUsers(data.users);
+        } else if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          console.error('Unexpected API response structure:', data);
+          setUsers([]);
+        }
       } catch (error) {
         console.error(error);
         toast({
@@ -407,14 +419,14 @@ export default function UsersList() {
   const filteredUsers = !isApiSearchActive && users
     ? users.filter(
         user =>
-          user.fullName
+          (user.fullName || '')
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          user.email
+          (user.email || '')
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          user.nationalId.includes(searchTerm) ||
-          user.role
+          (user.nationalId || '').includes(searchTerm) ||
+          (user.role || '')
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
       )
@@ -582,9 +594,9 @@ export default function UsersList() {
       {filteredUsers.length > 0 ? (
         <>
           <div className="space-y-4 mb-6">
-            {filteredUsers.map(user => (
+            {filteredUsers.map((user, index) => (
               <div
-                key={user.identityId}
+                key={user.identityId || `user-${index}`}
                 className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
@@ -593,7 +605,7 @@ export default function UsersList() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-lg font-semibold text-white">
-                      {user.fullName}
+                      {user.fullName || user.name || 'Unnamed User'}
                     </h4>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
@@ -621,7 +633,7 @@ export default function UsersList() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                    <span>ID: {user.identityId.slice(0, 8)}…</span>
+                    <span>ID: {user.identityId ? user.identityId.slice(0, 8) + '…' : '-'}</span>
                     <span>
                       Criado:{' '}
                       {new Date(

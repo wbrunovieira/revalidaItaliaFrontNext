@@ -20,8 +20,8 @@ import {
 
 // Tipos atualizados com suporte a tutor
 interface UserEditData {
-  id: string;
-  name: string;
+  identityId: string;
+  fullName: string;
   email: string;
   nationalId: string;
   role: 'admin' | 'student' | 'tutor';
@@ -37,16 +37,16 @@ interface UserEditModalProps {
 type UserRole = 'admin' | 'student' | 'tutor';
 
 interface FormData {
-  name: string;
+  fullName: string;
   email: string;
   nationalId: string;
   role: UserRole;
 }
 
 interface FormErrors {
-  name?: string;
+  fullName?: string;
   email?: string;
-  cpf?: string;
+  nationalId?: string;
   role?: string;
 }
 
@@ -65,7 +65,7 @@ export default function UserEditModal({
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
-    name: '',
+    fullName: '',
     email: '',
     nationalId: '',
     role: 'student',
@@ -95,7 +95,7 @@ export default function UserEditModal({
       value: string
     ): ValidationResult => {
       switch (field) {
-        case 'name':
+        case 'fullName':
           if (!value.trim()) {
             return {
               isValid: false,
@@ -417,13 +417,13 @@ export default function UserEditModal({
 
     try {
       const payload = {
-        name: formData.name.trim(),
+        fullName: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         nationalId: formData.nationalId.trim(),
         role: formData.role,
       };
 
-      await updateUser(user.id, payload);
+      await updateUser(user.identityId, payload);
 
       toast({
         title: t('success.title'),
@@ -433,7 +433,7 @@ export default function UserEditModal({
 
       // Chamar callback com dados atualizados incluindo documento formatado
       const updatedUser: UserEditData = {
-        id: user.id,
+        identityId: user.identityId,
         name: payload.name,
         email: payload.email,
         nationalId: formData.nationalId, // Mantém formatação
@@ -453,7 +453,7 @@ export default function UserEditModal({
   useEffect(() => {
     if (user && isOpen) {
       setFormData({
-        name: user.name,
+        fullName: user.fullName,
         email: user.email,
         nationalId: user.nationalId,
         role: user.role,
@@ -521,26 +521,26 @@ export default function UserEditModal({
               </label>
               <input
                 type="text"
-                value={formData.name}
+                value={formData.fullName}
                 onChange={e =>
-                  handleInputChange('name')(e.target.value)
+                  handleInputChange('fullName')(e.target.value)
                 }
-                onBlur={handleInputBlur('name')}
+                onBlur={handleInputBlur('fullName')}
                 className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary transition-colors ${
-                  errors.name
+                  errors.fullName
                     ? 'border-red-500'
                     : 'border-gray-600'
                 }`}
                 placeholder={t('placeholders.name')}
               />
-              {errors.name && (
+              {errors.fullName && (
                 <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
                   <AlertCircle size={14} />
-                  {errors.name}
+                  {errors.fullName}
                 </div>
               )}
-              {formData.name &&
-                !errors.name &&
+              {formData.fullName &&
+                !errors.fullName &&
                 touched.name && (
                   <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
                     <Check size={14} />

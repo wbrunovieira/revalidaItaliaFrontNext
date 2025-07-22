@@ -23,31 +23,38 @@ import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
 
 interface User {
-  id: string;
-  name: string;
+  identityId: string;
+  fullName: string;
   email: string;
   nationalId: string;
   role: 'admin' | 'student' | 'tutor';
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  // Campos adicionais opcionais
+  bio?: string | null;
+  emailVerified?: boolean;
+  lastLogin?: string | null;
+  phone?: string | null;
+  profession?: string | null;
+  profileImageUrl?: string | null;
+  specialization?: string | null;
+  isActive?: boolean;
 }
 
 interface UserEditData {
-  id: string;
-  name: string;
+  identityId: string;
+  fullName: string;
   email: string;
   nationalId: string;
   role: 'admin' | 'student' | 'tutor';
 }
 
 interface UsersResponse {
-  users: User[];
-  pagination: {
-    page: number;
-    pageSize: number;
-    total?: number;
-    totalPages?: number;
-  };
+  items: User[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 // Função utilitária movida para fora para evitar recriação
@@ -113,32 +120,13 @@ export default function UsersList() {
               : 'Failed to fetch users'
           );
         }
-        const data = await response.json();
+        const data: UsersResponse = await response.json();
         
-        // Verificar se a resposta é um array direto ou um objeto com users/pagination
-        if (Array.isArray(data)) {
-          setUsers(data);
-          setCurrentPage(page);
-          setTotalPages(1); // Se retornou array, assumir uma página
-          setTotalUsers(data.length);
-        } else if (data.users && data.pagination) {
-          setUsers(data.users);
-          setCurrentPage(data.pagination.page);
-          setTotalPages(
-            data.pagination.totalPages ||
-              Math.ceil(data.users.length / pageSize)
-          );
-          setTotalUsers(
-            data.pagination.total || data.users.length
-          );
-        } else {
-          // Caso a estrutura seja diferente
-          console.error('Unexpected API response structure:', data);
-          setUsers([]);
-          setCurrentPage(1);
-          setTotalPages(1);
-          setTotalUsers(0);
-        }
+        // A API retorna { items, page, limit, total, totalPages }
+        setUsers(data.items || []);
+        setCurrentPage(data.page || 1);
+        setTotalPages(data.totalPages || 1);
+        setTotalUsers(data.total || 0);
       } catch (error) {
         console.error(error);
         toast({
@@ -244,8 +232,8 @@ export default function UsersList() {
 
   const handleEditUser = useCallback((user: User) => {
     setEditingUser({
-      id: user.id,
-      name: user.name,
+      identityId: user.identityId,
+      fullName: user.fullName,
       email: user.email,
       nationalId: user.nationalId,
       role: user.role,
@@ -262,7 +250,7 @@ export default function UsersList() {
     (updatedUser: UserEditData) => {
       setUsers(prev =>
         prev.map(user =>
-          user.id === updatedUser.id
+          user.identityId === updatedUser.identityId
             ? { ...user, ...updatedUser }
             : user
         )
@@ -321,7 +309,7 @@ export default function UsersList() {
   // Função para mostrar confirmação personalizada usando toast
   const handleDelete = useCallback(
     async (userId: string, userName: string) => {
-      const user = users.find(u => u.id === userId);
+      const user = users.find(u => u.identityId === userId);
       if (!user) return;
 
       // Toast de confirmação personalizado
@@ -419,7 +407,7 @@ export default function UsersList() {
   const filteredUsers = !isApiSearchActive && users
     ? users.filter(
         user =>
-          user.name
+          user.fullName
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
           user.email
@@ -596,7 +584,7 @@ export default function UsersList() {
           <div className="space-y-4 mb-6">
             {filteredUsers.map(user => (
               <div
-                key={user.id}
+                key={user.identityId}
                 className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
@@ -605,7 +593,7 @@ export default function UsersList() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-lg font-semibold text-white">
-                      {user.name}
+                      {user.fullName}
                     </h4>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
@@ -633,7 +621,7 @@ export default function UsersList() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                    <span>ID: {user.id.slice(0, 8)}…</span>
+                    <span>ID: {user.identityId.slice(0, 8)}…</span>
                     <span>
                       Criado:{' '}
                       {new Date(
@@ -644,7 +632,7 @@ export default function UsersList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleViewUser(user.id)}
+                    onClick={() => handleViewUser(user.identityId)}
                     title={t('actions.view')}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
@@ -659,7 +647,7 @@ export default function UsersList() {
                   </button>
                   <button
                     onClick={() =>
-                      handleDelete(user.id, user.name)
+                      handleDelete(user.identityId, user.fullName)
                     }
                     title={t('actions.delete')}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"

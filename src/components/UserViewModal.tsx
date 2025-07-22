@@ -1,7 +1,7 @@
 // /src/components/UserViewModal.tsx
 'use client';
 
-// CORREÇÃO: Adicionado 'useCallback' para memoizar funções.
+
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
@@ -15,34 +15,26 @@ import {
   Clock,
   Copy,
   Check,
-  MapPin,
-  Home,
-  Building,
 } from 'lucide-react';
 
 // Interfaces permanecem as mesmas
 interface UserDetails {
-  id: string;
-  name: string;
+  identityId: string;
+  fullName: string;
   email: string;
   nationalId: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'tutor';
   createdAt: string;
-  updatedAt: string;
-}
-
-interface Address {
-  id: string;
-  street: string;
-  number: string;
-  complement: string;
-  district: string;
-  city: string;
-  state: string;
-  country: string;
-  postalCode: string;
-  createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  // Campos adicionais
+  bio?: string | null;
+  emailVerified?: boolean;
+  lastLogin?: string | null;
+  phone?: string | null;
+  profession?: string | null;
+  profileImageUrl?: string | null;
+  specialization?: string | null;
+  isActive?: boolean;
 }
 
 interface UserViewModalProps {
@@ -83,61 +75,11 @@ export default function UserViewModal({
   const [user, setUser] = useState<UserDetails | null>(
     null
   );
-  const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingAddresses, setLoadingAddresses] =
-    useState(false);
   const [copiedField, setCopiedField] = useState<
     string | null
   >(null);
 
-  // CORREÇÃO: Função envolvida com useCallback para estabilizar sua referência.
-  const fetchUserAddresses = useCallback(
-    async (userId: string) => {
-      setLoadingAddresses(true);
-      try {
-        const token =
-          getCookie('token') ||
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-        };
-        if (token)
-          headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userId}`,
-          { headers }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            response.status === 401
-              ? 'Acesso negado - É necessário fazer login como administrador'
-              : 'Failed to fetch user addresses'
-          );
-        }
-
-        const addressesData: Address[] =
-          await response.json();
-        setAddresses(addressesData);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: t('error.fetchAddressesTitle'),
-          description:
-            error instanceof Error
-              ? error.message
-              : t('error.fetchAddressesDescription'),
-          variant: 'destructive',
-        });
-      } finally {
-        setLoadingAddresses(false);
-      }
-    },
-    [t, toast]
-  );
 
   // CORREÇÃO: Função envolvida com useCallback para estabilizar sua referência.
   const fetchUserDetails = useCallback(
@@ -168,7 +110,27 @@ export default function UserViewModal({
         }
 
         const data = await response.json();
-        setUser(data.user);
+        // Mapear os campos do backend para a interface do frontend
+        if (data.user) {
+          setUser({
+            identityId: data.user.id,
+            fullName: data.user.name,
+            email: data.user.email,
+            nationalId: data.user.nationalId,
+            role: data.user.role,
+            createdAt: data.user.createdAt,
+            updatedAt: data.user.updatedAt,
+            // Campos opcionais - adicionar quando disponíveis no backend
+            bio: data.user.bio,
+            emailVerified: data.user.emailVerified,
+            lastLogin: data.user.lastLogin,
+            phone: data.user.phone,
+            profession: data.user.profession,
+            profileImageUrl: data.user.profileImageUrl,
+            specialization: data.user.specialization,
+            isActive: data.user.isActive,
+          });
+        }
       } catch (error) {
         console.error(error);
         toast({
@@ -217,16 +179,14 @@ export default function UserViewModal({
   useEffect(() => {
     if (isOpen && userId) {
       fetchUserDetails(userId);
-      fetchUserAddresses(userId);
+      // Removido fetchUserAddresses - não necessário no contexto de admin
     } else {
       setUser(null);
-      setAddresses([]);
     }
   }, [
     isOpen,
     userId,
     fetchUserDetails,
-    fetchUserAddresses,
   ]);
 
   useEffect(() => {
@@ -298,7 +258,7 @@ export default function UserViewModal({
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white">
-                    {user.name}
+                    {user.fullName}
                   </h3>
                   <span
                     className={`inline-flex items-center px-3 py-1 text-sm rounded-full ${
@@ -328,13 +288,13 @@ export default function UserViewModal({
                           {t('fields.id')}
                         </p>
                         <p className="text-white font-mono text-sm">
-                          {user.id}
+                          {user.identityId}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() =>
-                        copyToClipboard(user.id, 'ID')
+                        copyToClipboard(user.identityId, 'ID')
                       }
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
                     >
@@ -438,176 +398,91 @@ export default function UserViewModal({
                   </div>
                 </div>
                 <div className="bg-gray-700/50 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                      <Clock
-                        size={20}
-                        className="text-secondary"
-                      />
+                  {user.updatedAt && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                        <Clock
+                          size={20}
+                          className="text-secondary"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">
+                          {t('fields.updatedAt')}
+                        </p>
+                        <p className="text-white">
+                          {formatDate(user.updatedAt)}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-400">
-                        {t('fields.updatedAt')}
-                      </p>
-                      <p className="text-white">
-                        {formatDate(user.updatedAt)}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 border-b border-gray-700 pb-3">
-                  <MapPin
-                    size={24}
-                    className="text-secondary"
-                  />
-                  <h4 className="text-xl font-bold text-white">
-                    {t('addresses.title')}
-                  </h4>
-                </div>
-                {loadingAddresses ? (
-                  <div className="animate-pulse space-y-3">
-                    {[1, 2].map(i => (
-                      <div
-                        key={i}
-                        className="h-32 bg-gray-700 rounded-lg"
-                      ></div>
-                    ))}
-                  </div>
-                ) : addresses.length > 0 ? (
-                  <div className="space-y-4">
-                    {addresses.map((address, index) => (
-                      <div
-                        key={address.id}
-                        className="bg-gray-700/50 rounded-lg p-4 space-y-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <h5 className="text-lg font-semibold text-white flex items-center gap-2">
-                            <Home
-                              size={18}
-                              className="text-secondary"
-                            />
-                            {t('addresses.address')}{' '}
-                            {index + 1}
-                          </h5>
-                          <button
-                            onClick={() =>
-                              copyToClipboard(
-                                `${address.street}, ${
-                                  address.number
-                                }${
-                                  address.complement
-                                    ? ', ' +
-                                      address.complement
-                                    : ''
-                                }, ${address.district}, ${
-                                  address.city
-                                } - ${address.state}, ${
-                                  address.country
-                                }, ${address.postalCode}`,
-                                `Endereço ${index + 1}`
-                              )
-                            }
-                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
-                          >
-                            {copiedField ===
-                            `Endereço ${index + 1}` ? (
-                              <Check
-                                size={16}
-                                className="text-green-400"
-                              />
-                            ) : (
-                              <Copy size={16} />
-                            )}
-                          </button>
+                
+                {/* Campos adicionais */}
+                {(user.phone || user.profession || user.specialization || user.bio) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {user.phone && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                          <Mail size={20} className="text-secondary" />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.street')}
-                            </p>
-                            <p className="text-white">
-                              {address.street}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.number')}
-                            </p>
-                            <p className="text-white">
-                              {address.number}
-                            </p>
-                          </div>
-                          {address.complement && (
-                            <div>
-                              <p className="text-gray-400">
-                                {t('addresses.complement')}
-                              </p>
-                              <p className="text-white">
-                                {address.complement}
-                              </p>
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.district')}
-                            </p>
-                            <p className="text-white">
-                              {address.district}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.city')}
-                            </p>
-                            <p className="text-white">
-                              {address.city}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.state')}
-                            </p>
-                            <p className="text-white">
-                              {address.state}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.country')}
-                            </p>
-                            <p className="text-white">
-                              {address.country}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-400">
-                              {t('addresses.postalCode')}
-                            </p>
-                            <p className="text-white font-mono">
-                              {address.postalCode}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-gray-600 text-xs text-gray-500">
-                          <p>
-                            {t('addresses.createdAt')}:{' '}
-                            {formatDate(address.createdAt)}
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('fields.phone')}
                           </p>
+                          <p className="text-white">{user.phone}</p>
                         </div>
                       </div>
-                    ))}
+                    )}
+                    
+                    {user.profession && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                          <User size={20} className="text-secondary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('fields.profession')}
+                          </p>
+                          <p className="text-white">{user.profession}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {user.specialization && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                          <Shield size={20} className="text-secondary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('fields.specialization')}
+                          </p>
+                          <p className="text-white">{user.specialization}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {user.lastLogin && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                          <Clock size={20} className="text-secondary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">
+                            {t('fields.lastLogin')}
+                          </p>
+                          <p className="text-white">{formatDate(user.lastLogin)}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Building
-                      size={48}
-                      className="text-gray-500 mx-auto mb-3"
-                    />
-                    <p className="text-gray-400">
-                      {t('addresses.noAddresses')}
-                    </p>
+                )}
+                
+                {user.bio && (
+                  <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
+                    <p className="text-sm text-gray-400 mb-2">{t('fields.bio')}</p>
+                    <p className="text-white">{user.bio}</p>
                   </div>
                 )}
               </div>

@@ -124,7 +124,7 @@ export default function ProfileContent({
         ?.split('=')[1];
 
       const response = await fetch(
-        `${apiUrl}/addresses?userId=${userData.id}`,
+        `${apiUrl}/api/v1/addresses?userId=${userData.id}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ export default function ProfileContent({
         ?.split('=')[1];
 
       const response = await fetch(
-        `${apiUrl}/addresses/${pendingDeleteAddress.id}`,
+        `${apiUrl}/api/v1/addresses/${pendingDeleteAddress.id}`,
         {
           method: 'DELETE',
           headers: {

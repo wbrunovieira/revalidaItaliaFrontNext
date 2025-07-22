@@ -147,8 +147,8 @@ export default function AddAddressModal({
 
       const url =
         mode === 'edit' && editAddress
-          ? `${apiUrl}/addresses/${editAddress.id}`
-          : `${apiUrl}/addresses`;
+          ? `${apiUrl}/api/v1/addresses/${editAddress.id}`
+          : `${apiUrl}/api/v1/addresses`;
 
       const method = mode === 'edit' ? 'PATCH' : 'POST';
 

@@ -391,7 +391,7 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
             <XCircle size={48} className="mx-auto mb-4 text-red-400" />
             <p className="text-gray-300">Avaliação não encontrada</p>
             <button
-              onClick={() => router.push(`/${locale}/assessments`)}
+              onClick={() => router.push(`/${locale}/assessments/open-exams`)}
               className="mt-4 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90"
             >
               Voltar para Avaliações
@@ -413,7 +413,7 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push(`/${locale}/assessments`)}
+              onClick={() => router.push(`/${locale}/assessments/open-exams`)}
               className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
             >
               <ChevronLeft size={20} />

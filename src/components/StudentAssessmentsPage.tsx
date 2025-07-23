@@ -318,7 +318,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
   }, {} as Record<string, { name: string; attempts: StudentAttempt[] }>);
 
   const handleViewDetails = (attemptId: string) => {
-    router.push(`/${locale}/assessments/${attemptId}`);
+    router.push(`/${locale}/assessments/open-exams/${attemptId}`);
   };
 
   const handleRetakeAssessment = (assessmentId: string) => {

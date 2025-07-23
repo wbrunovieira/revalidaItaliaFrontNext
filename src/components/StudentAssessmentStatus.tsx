@@ -318,7 +318,7 @@ export default function StudentAssessmentStatus({ userId, locale }: StudentAsses
         </h2>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => window.location.href = `/${locale}/assessments`}
+            onClick={() => window.location.href = `/${locale}/assessments/open-exams`}
             className="inline-flex items-center gap-2 px-3 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
           >
             <Eye size={16} />
@@ -415,14 +415,14 @@ export default function StudentAssessmentStatus({ userId, locale }: StudentAsses
                   )}
                   {attempt.pendingReview > 0 && attempt.reviewedQuestions > 0 && (
                     <button
-                      onClick={() => window.location.href = `/${locale}/assessments/${attempt.id}`}
+                      onClick={() => window.location.href = `/${locale}/assessments/open-exams/${attempt.id}`}
                       className="px-3 py-1 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors animate-pulse"
                     >
                       Responder Pendentes
                     </button>
                   )}
                   <button
-                    onClick={() => window.location.href = `/${locale}/assessments/${attempt.id}`}
+                    onClick={() => window.location.href = `/${locale}/assessments/open-exams/${attempt.id}`}
                     className="px-3 py-1 bg-secondary text-primary text-sm rounded-lg hover:bg-secondary/90 transition-colors"
                   >
                     Ver Detalhes

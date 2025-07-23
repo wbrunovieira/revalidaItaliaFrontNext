@@ -102,9 +102,9 @@ export default function LessonVideoPlayer({
       onComplete={handleComplete}
       onPlay={handlePlay}
       onPause={handlePause}
-      saveProgress={true}
+      saveProgress={false} // Disable Panda's own progress saving to avoid conflicts
       smartAutoplay={true}
-      startTime={progress?.currentTime || 0} // Resume from last position
+      startTime={0} // Don't use our saved progress for now - let Panda handle it
     />
   );
 }

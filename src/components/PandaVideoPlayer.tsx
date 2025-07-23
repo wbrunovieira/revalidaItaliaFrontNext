@@ -138,23 +138,46 @@ export default function PandaVideoPlayer({
 
       case 'panda_timeupdate':
         if (event.currentTime !== undefined) {
-          // Use stored duration if event doesn't have it
-          const duration = event.duration || videoDuration || 1; // Prevent division by zero
-          const newProgress: VideoProgress = {
-            currentTime: event.currentTime,
-            duration: duration,
-            percentage: duration > 0 ? (event.currentTime / duration) * 100 : 0
-          };
-          setProgress(newProgress);
-          onProgress?.(newProgress);
+          // Always prioritize stored duration if we have it
+          let effectiveDuration = videoDuration;
           
-          // Debug log to see what we're getting
-          console.log('[PandaVideoPlayer] 📊 Progress update:', {
-            currentTime: event.currentTime,
-            duration: duration,
-            percentage: newProgress.percentage.toFixed(2) + '%',
-            eventHasDuration: !!event.duration
-          });
+          // If we don't have a stored duration, try to get it from the event
+          // but ONLY if it's a reasonable value (video files are usually > 10 seconds)
+          if (effectiveDuration <= 10 && event.duration && event.duration > 10) {
+            effectiveDuration = event.duration;
+            setVideoDuration(event.duration); // Store for future use
+          }
+          
+          // Only proceed if we have a valid duration (must be > 10 seconds)
+          if (effectiveDuration > 10) {
+            const newProgress: VideoProgress = {
+              currentTime: event.currentTime,
+              duration: effectiveDuration,
+              percentage: Math.min((event.currentTime / effectiveDuration) * 100, 100) // Cap at 100%
+            };
+            setProgress(newProgress);
+            onProgress?.(newProgress);
+            
+            // Only log every 5 seconds to reduce noise
+            if (Math.floor(event.currentTime) % 5 === 0) {
+              console.log('[PandaVideoPlayer] 📊 Progress update:', {
+                currentTime: event.currentTime,
+                duration: effectiveDuration,
+                percentage: newProgress.percentage.toFixed(2) + '%',
+                eventHasDuration: !!event.duration
+              });
+            }
+          } else {
+            // No valid duration yet - don't calculate percentage or call onProgress
+            // This prevents the 408994% issue when duration is 1
+            if (Math.floor(event.currentTime) % 10 === 0) {
+              console.log('[PandaVideoPlayer] ⚠️ Skipping progress update - invalid duration:', {
+                videoDuration,
+                eventDuration: event.duration,
+                currentTime: event.currentTime
+              });
+            }
+          }
         }
         break;
 
@@ -185,10 +208,26 @@ export default function PandaVideoPlayer({
           const duration = (event as any).playerData.duration;
           setVideoDuration(duration);
           console.log('[PandaVideoPlayer] 📏 Duration from allData:', duration);
+          
+          // If we have progress with incorrect duration, recalculate
+          if (progress.currentTime > 0 && progress.duration !== duration) {
+            const correctedProgress: VideoProgress = {
+              currentTime: progress.currentTime,
+              duration: duration,
+              percentage: (progress.currentTime / duration) * 100
+            };
+            setProgress(correctedProgress);
+            onProgress?.(correctedProgress);
+            console.log('[PandaVideoPlayer] 🔧 Corrected progress with new duration:', {
+              currentTime: correctedProgress.currentTime,
+              duration: correctedProgress.duration,
+              percentage: correctedProgress.percentage.toFixed(2) + '%'
+            });
+          }
         }
         break;
     }
-  }, [onPlay, onPause, onProgress, onComplete, onError]);
+  }, [onPlay, onPause, onProgress, onComplete, onError, progress]);
 
   // Cleanup on unmount
   useEffect(() => {

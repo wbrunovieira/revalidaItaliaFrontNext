@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { VideoProgress } from '@/types/panda-player';
 
 const STORAGE_PREFIX = 'revalida_video_progress_';
-const DEBOUNCE_DELAY = 3000; // 3 seconds
+const DEBOUNCE_DELAY = 5000; // 5 seconds
 const LOG_PREFIX = '[useVideoProgress]';
 
 interface UseVideoProgressReturn {
@@ -101,8 +101,8 @@ export function useVideoProgress(lessonId: string): UseVideoProgressReturn {
       console.log(`${LOG_PREFIX} ⏱️ Debounce timer fired, saving progress...`);
       saveProgress(newProgress);
       
-      // Check if video is effectively completed (90% or more)
-      if (newProgress.percentage >= 90 && (!progress || progress.percentage < 90)) {
+      // Check if video is effectively completed (95% or more)
+      if (newProgress.percentage >= 95 && (!progress || progress.percentage < 95)) {
         console.log(`${LOG_PREFIX} 🎉 Video completed! (${newProgress.percentage.toFixed(2)}% watched)`);
       }
     }, DEBOUNCE_DELAY);

@@ -28,6 +28,7 @@ export default function RootLayout({
     <html
       lang="pt"
       className={`${plusJakarta.variable} ${spectral.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <Script

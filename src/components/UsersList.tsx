@@ -121,7 +121,7 @@ export default function UsersList() {
           );
         }
         const data: UsersResponse = await response.json();
-        
+
         // A API retorna { items, page, limit, total, totalPages }
         setUsers(data.items || []);
         setCurrentPage(data.page || 1);
@@ -197,7 +197,7 @@ export default function UsersList() {
 
         const data = await response.json();
         console.log('API Search Response:', data);
-        
+
         // Handle both possible response structures
         if (data.items) {
           setUsers(data.items);
@@ -206,7 +206,10 @@ export default function UsersList() {
         } else if (Array.isArray(data)) {
           setUsers(data);
         } else {
-          console.error('Unexpected API response structure:', data);
+          console.error(
+            'Unexpected API response structure:',
+            data
+          );
           setUsers([]);
         }
       } catch (error) {
@@ -416,21 +419,22 @@ export default function UsersList() {
     fetchUsers,
   ]);
 
-  const filteredUsers = !isApiSearchActive && users
-    ? users.filter(
-        user =>
-          (user.fullName || '')
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          (user.email || '')
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          (user.nationalId || '').includes(searchTerm) ||
-          (user.role || '')
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      )
-    : users || [];
+  const filteredUsers =
+    !isApiSearchActive && users
+      ? users.filter(
+          user =>
+            (user.fullName || '')
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            (user.email || '')
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            (user.nationalId || '').includes(searchTerm) ||
+            (user.role || '')
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
+        )
+      : users || [];
 
   // Contadores de usuários por papel
   const userCounts = {
@@ -605,7 +609,9 @@ export default function UsersList() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-lg font-semibold text-white">
-                      {user.fullName || user.name || 'Unnamed User'}
+                      {user.fullName ||
+                        user.name ||
+                        'Unnamed User'}
                     </h4>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
@@ -633,7 +639,12 @@ export default function UsersList() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                    <span>ID: {user.identityId ? user.identityId.slice(0, 8) + '…' : '-'}</span>
+                    <span>
+                      ID:{' '}
+                      {user.identityId
+                        ? user.identityId.slice(0, 8) + '…'
+                        : '-'}
+                    </span>
                     <span>
                       Criado:{' '}
                       {new Date(
@@ -644,7 +655,9 @@ export default function UsersList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleViewUser(user.identityId)}
+                    onClick={() =>
+                      handleViewUser(user.identityId)
+                    }
                     title={t('actions.view')}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                   >
@@ -659,7 +672,10 @@ export default function UsersList() {
                   </button>
                   <button
                     onClick={() =>
-                      handleDelete(user.identityId, user.fullName)
+                      handleDelete(
+                        user.identityId,
+                        user.fullName
+                      )
                     }
                     title={t('actions.delete')}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"

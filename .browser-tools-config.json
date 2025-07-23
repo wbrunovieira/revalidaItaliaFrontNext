@@ -1,0 +1,11 @@
+{
+  "captureConsole": true,
+  "captureNetwork": true,
+  "captureErrors": true,
+  "port": 3025,
+  "logLevel": "debug",
+  "filters": {
+    "console": ["error", "warn", "log"],
+    "network": ["fetch", "xhr"]
+  }
+}

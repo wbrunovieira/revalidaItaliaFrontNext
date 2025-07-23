@@ -29,6 +29,7 @@ export default function Nav({
     <nav
       aria-label={t('home')}
       className="fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-4 bg-primary shadow-2xl z-20"
+      suppressHydrationWarning
     >
       <div className="flex items-center gap-4">
         <MenuToggle

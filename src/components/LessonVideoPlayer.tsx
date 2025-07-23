@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PandaVideoPlayer from './PandaVideoPlayer';
+import ContinueWatchingBanner from './ContinueWatchingBanner';
 import { VideoProgress } from '@/types/panda-player';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
 
@@ -35,6 +36,10 @@ export default function LessonVideoPlayer({
     courseId,
     moduleId
   );
+  
+  // State for managing start time
+  const [startTime, setStartTime] = useState<number>(0);
+  const [showBanner, setShowBanner] = useState<boolean>(true);
 
   // Log when component mounts
   useEffect(() => {
@@ -95,25 +100,52 @@ export default function LessonVideoPlayer({
     });
   }, [lessonId, progress]);
 
+  const handleResume = useCallback(() => {
+    console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', progress?.currentTime);
+    setStartTime(progress?.currentTime || 0);
+    setShowBanner(false);
+  }, [progress]);
+
+  const handleRestart = useCallback(() => {
+    console.log('[LessonVideoPlayer] 🔄 Restarting from beginning');
+    setStartTime(0);
+    setShowBanner(false);
+    // Clear the saved progress
+    clearProgress();
+  }, [clearProgress]);
+
   // Log loading state
   if (isLoading) {
     console.log('[LessonVideoPlayer] ⏳ Loading saved progress...');
   }
 
   return (
-    <PandaVideoPlayer
-      videoId={videoId}
-      playerUrl={playerUrl}
-      title={title}
-      thumbnailUrl={thumbnailUrl}
-      lessonId={lessonId}
-      onProgress={handleProgress}
-      onComplete={handleComplete}
-      onPlay={handlePlay}
-      onPause={handlePause}
-      saveProgress={false} // Disable Panda's own progress saving to avoid conflicts
-      smartAutoplay={true}
-      startTime={0} // Don't use our saved progress for now - let Panda handle it
-    />
+    <div className="relative w-full h-full">
+      {/* Continue Watching Banner */}
+      {showBanner && !isLoading && (
+        <ContinueWatchingBanner
+          progress={progress}
+          onResume={handleResume}
+          onRestart={handleRestart}
+          autoResumeDelay={5}
+        />
+      )}
+      
+      {/* Video Player */}
+      <PandaVideoPlayer
+        videoId={videoId}
+        playerUrl={playerUrl}
+        title={title}
+        thumbnailUrl={thumbnailUrl}
+        lessonId={lessonId}
+        onProgress={handleProgress}
+        onComplete={handleComplete}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        saveProgress={true} // Enable Panda's saveProgress for dual tracking
+        smartAutoplay={true}
+        startTime={startTime} // Use our managed start time
+      />
+    </div>
   );
 }

@@ -347,6 +347,17 @@
     "current": "Atual",
     "locked": "Bloqueada"
   },
+  "Video": {
+    "continueWatching": {
+      "title": "Continuar assistindo",
+      "watchedProgress": "Você assistiu {percentage}% deste vídeo",
+      "resumeFrom": "Retomar do {time}",
+      "resumeButton": "Continuar",
+      "restartButton": "Recomeçar",
+      "autoResumeIn": "Retomando automaticamente em {seconds}s",
+      "autoResumeCancel": "Cancelar"
+    }
+  },
   "Assessment": {
     "questions": "questões",
     "passingScore": "nota mínima",

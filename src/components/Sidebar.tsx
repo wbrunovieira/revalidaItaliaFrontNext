@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronDown,
   Layers,
+  ClipboardList,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { JSX, useState, useEffect } from 'react';
@@ -202,6 +203,12 @@ export default function Sidebar({
       icon: <BookOpen size={24} />,
       href: `/${locale}/courses`,
       matchPaths: [`/${locale}/courses`],
+    },
+    {
+      label: t('assessments'),
+      icon: <ClipboardList size={24} />,
+      href: `/${locale}/assessments`,
+      matchPaths: [`/${locale}/assessments`],
     },
     {
       label: t('faq'),

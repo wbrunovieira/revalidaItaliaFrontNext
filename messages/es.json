@@ -110,6 +110,43 @@
       }
     }
   },
+  "Assessments": {
+    "title": "Mis Evaluaciones",
+    "subtitle": "Sigue tu progreso en todas las evaluaciones",
+    "loading": "Cargando evaluaciones...",
+    "search": "Buscar evaluaciones...",
+    "noAssessments": "No se encontraron evaluaciones",
+    "questions": "preguntas",
+    "attempts": "Intentos realizados",
+    "stats": {
+      "total": "Total",
+      "completed": "Completadas",
+      "inProgress": "En Progreso",
+      "notStarted": "No Iniciadas",
+      "averageScore": "Promedio General"
+    },
+    "filter": {
+      "all": "Todas las Evaluaciones",
+      "quiz": "Solo Quiz",
+      "simulado": "Solo Simulacros",
+      "provaAberta": "Solo Pruebas Abiertas"
+    },
+    "types": {
+      "quiz": "Quiz",
+      "simulado": "Simulacro",
+      "prova_aberta": "Prueba Abierta"
+    },
+    "status": {
+      "notStarted": "No Iniciada",
+      "not_started": "No Iniciada",
+      "in_progress": "En Progreso",
+      "completed": "Completada",
+      "under_review": "En Revisión",
+      "reviewed": "Revisada"
+    },
+    "linkedToLesson": "Vinculada a una lección",
+    "startAssessment": "Iniciar Evaluación"
+  },
   "Nav": {
     "home": "Inicio",
     "blog": "Soporte",
@@ -261,11 +298,12 @@
     "home": "Inicio",
     "courses": "Cursos",
     "trails": "Rutas",
+    "assessments": "Evaluaciones",
     "support": "Soporte",
     "faq": "Preguntas Frecuentes",
     "expand": "Expandir menú",
     "collapse": "Cerrar menú",
-     "profile": "Perfil"
+    "profile": "Perfil"
   },
   "Lesson": {
     "breadcrumb": {

@@ -591,14 +591,26 @@ export default function CreateDocumentForm() {
     async (
       payload: CreateDocumentPayload
     ): Promise<void> => {
+      // Get token from cookies
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${formData.lessonId}/documents`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
+          headers,
           credentials: 'include',
           body: JSON.stringify(payload),
         }
@@ -687,20 +699,47 @@ export default function CreateDocumentForm() {
       // Garantir que as traduções estão no formato correto
       const translations = Object.values(
         formData.translations
-      ).filter(
+      ).map(translation => ({
+        locale: translation.locale,
+        title: translation.title.trim(),
+        description: translation.description.trim(),
+        url: translation.url.trim()
+      })).filter(
         translation =>
-          translation.title.trim() &&
-          translation.description.trim() &&
-          translation.url.trim()
+          translation.title &&
+          translation.description &&
+          translation.url
       );
 
-      // Ensure proper file extension format
-      const cleanFilename = formData.filename.trim().replace(/,(\w+)$/, '.$1');
+      // Verificar se temos todas as 3 traduções
+      if (translations.length !== 3) {
+        console.error('Missing translations:', {
+          expected: 3,
+          got: translations.length,
+          translations
+        });
+        toast({
+          title: t('error.validationTitle'),
+          description: 'All translations are required',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Ensure proper file extension format and add extension if missing
+      let cleanFilename = formData.filename.trim().replace(/,(\w+)$/, '.$1');
+      
+      // Add .pdf extension if no extension is present
+      if (!cleanFilename.includes('.')) {
+        cleanFilename += '.pdf';
+      }
       
       const payload: CreateDocumentPayload = {
         filename: cleanFilename,
         translations,
       };
+
+      console.log('Sending document payload:', JSON.stringify(payload, null, 2));
 
       await createDocument(payload);
 

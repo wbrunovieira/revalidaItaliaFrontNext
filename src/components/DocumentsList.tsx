@@ -37,11 +37,6 @@ interface Translation {
 interface DocumentItem {
   id: string;
   filename: string;
-  fileSize: number;
-  fileSizeInMB: number;
-  mimeType: string;
-  isDownloadable: boolean;
-  downloadCount: number;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -113,9 +108,6 @@ export default function DocumentsList() {
       documentId: string;
     } | null>(null);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:3333';
 
   // Debug: Log dos estados do modal
   useEffect(() => {
@@ -144,7 +136,7 @@ export default function DocumentsList() {
     async (lessonId: string): Promise<DocumentItem[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/lessons/${lessonId}/documents`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents`
         );
 
         if (!response.ok) {
@@ -160,7 +152,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, apiUrl]
+    [handleApiError]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -171,7 +163,7 @@ export default function DocumentsList() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
         );
 
         if (!response.ok) {
@@ -203,7 +195,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, fetchDocumentsForLesson, apiUrl]
+    [handleApiError, fetchDocumentsForLesson]
   );
 
   // Função para buscar módulos de um curso específico
@@ -211,7 +203,7 @@ export default function DocumentsList() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
         );
 
         if (!response.ok) {
@@ -243,7 +235,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule, apiUrl]
+    [handleApiError, fetchLessonsForModule]
   );
 
   // Função principal para buscar todos os dados
@@ -252,7 +244,7 @@ export default function DocumentsList() {
 
     try {
       const coursesResponse = await fetch(
-        `${apiUrl}/api/v1/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
       );
 
       if (!coursesResponse.ok) {
@@ -289,7 +281,6 @@ export default function DocumentsList() {
     t,
     handleApiError,
     fetchModulesForCourse,
-    apiUrl,
   ]);
 
   useEffect(() => {
@@ -308,20 +299,13 @@ export default function DocumentsList() {
     []
   );
 
-  // Função para formatar tamanho de arquivo
-  const formatFileSize = useCallback((sizeInMB: number) => {
-    if (sizeInMB < 1) {
-      return `${(sizeInMB * 1024).toFixed(0)} KB`;
-    }
-    return `${sizeInMB.toFixed(1)} MB`;
-  }, []);
 
   // Função para deletar documento após confirmação
   const deleteDocument = useCallback(
     async (lessonId: string, documentId: string) => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/lessons/${lessonId}/documents/${documentId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
           {
             method: 'DELETE',
           }
@@ -349,7 +333,7 @@ export default function DocumentsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError, apiUrl]
+    [t, toast, fetchData, handleApiError]
   );
 
   // Função para mostrar confirmação personalizada usando toast
@@ -435,16 +419,6 @@ export default function DocumentsList() {
                   {t('deleteConfirmation.filename')}:{' '}
                   {document.filename}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Download size={14} />
-                  {t('deleteConfirmation.fileSize')}:{' '}
-                  {formatFileSize(document.fileSizeInMB)}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} />
-                  {t('deleteConfirmation.downloads')}:{' '}
-                  {document.downloadCount}
-                </div>
                 {documentTranslation?.description && (
                   <div className="mt-2 p-2 bg-gray-600/30 rounded text-xs">
                     &ldquo;
@@ -488,7 +462,6 @@ export default function DocumentsList() {
       t,
       locale,
       getTranslationByLocale,
-      formatFileSize,
     ]
   );
 
@@ -1140,26 +1113,6 @@ export default function DocumentsList() {
                                                                     :{' '}
                                                                     {
                                                                       document.filename
-                                                                    }
-                                                                  </span>
-                                                                  <span className="flex items-center gap-1">
-                                                                    <Download
-                                                                      size={
-                                                                        10
-                                                                      }
-                                                                    />
-                                                                    {formatFileSize(
-                                                                      document.fileSizeInMB
-                                                                    )}
-                                                                  </span>
-                                                                  <span>
-                                                                    {t(
-                                                                      'downloads'
-                                                                    )}
-
-                                                                    :{' '}
-                                                                    {
-                                                                      document.downloadCount
                                                                     }
                                                                   </span>
                                                                 </div>

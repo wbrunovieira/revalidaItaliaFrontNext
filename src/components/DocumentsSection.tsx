@@ -28,10 +28,6 @@ interface DocumentTranslation {
 interface Document {
   id: string;
   filename: string;
-  fileSize: number;
-  mimeType: string;
-  isDownloadable: boolean;
-  lessonId: string;
   translations: DocumentTranslation[];
   createdAt: string;
   updatedAt: string;
@@ -42,11 +38,10 @@ interface DocumentsSectionProps {
   locale: string;
 }
 
-// Function to get file icon based on MIME type or filename
-function getFileIcon(mimeType: string, filename: string): JSX.Element {
+// Function to get file icon based on filename
+function getFileIcon(filename: string): JSX.Element {
   // Check if it's a PDF file
-  const isPDF = (mimeType === 'application/pdf') || 
-                (filename && filename.toLowerCase().endsWith('.pdf'));
+  const isPDF = filename && filename.toLowerCase().endsWith('.pdf');
   
   if (isPDF) {
     return (
@@ -60,8 +55,8 @@ function getFileIcon(mimeType: string, filename: string): JSX.Element {
   
   const iconProps = { size: 24, className: 'text-secondary' };
   
-  // If mimeType is empty, determine from filename extension
-  if (!mimeType && filename) {
+  // Determine icon from filename extension
+  if (filename) {
     const extension = filename.split('.').pop()?.toLowerCase();
     switch (extension) {
       case 'doc':
@@ -104,56 +99,9 @@ function getFileIcon(mimeType: string, filename: string): JSX.Element {
     }
   }
   
-  // Handle MIME types
-  if (mimeType.includes('word') || mimeType.includes('document')) {
-    return <FileText {...iconProps} className="text-blue-400" />;
-  }
-  
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) {
-    return <FileSpreadsheet {...iconProps} className="text-green-400" />;
-  }
-  
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) {
-    return <Presentation {...iconProps} className="text-orange-400" />;
-  }
-  
-  if (mimeType.startsWith('image/')) {
-    return <FileImage {...iconProps} className="text-purple-400" />;
-  }
-  
-  if (mimeType.startsWith('video/')) {
-    return <FileVideo {...iconProps} className="text-pink-400" />;
-  }
-  
-  if (mimeType.startsWith('audio/')) {
-    return <FileAudio {...iconProps} className="text-yellow-400" />;
-  }
-  
-  if (mimeType === 'application/zip' || mimeType.includes('compressed')) {
-    return <Archive {...iconProps} className="text-gray-400" />;
-  }
-  
-  if (mimeType === 'text/plain') {
-    return <FileText {...iconProps} className="text-gray-300" />;
-  }
-  
   return <File {...iconProps} className="text-gray-400" />;
 }
 
-// Function to format file size
-function formatFileSize(bytes: number): string {
-  // If fileSize is in MB (e.g., 5 for 5MB), convert to bytes
-  if (bytes > 0 && bytes < 1000) {
-    // Assume the value is in MB if it's a small number
-    bytes = bytes * 1024 * 1024;
-  }
-  
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
 
 export default function DocumentsSection({ documents, locale }: DocumentsSectionProps) {
   const tLesson = useTranslations('Lesson');
@@ -190,7 +138,7 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
                 
                 {/* Icon with rotation animation */}
                 <div className="relative flex-shrink-0 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-                  {getFileIcon(document.mimeType, document.filename)}
+                  {getFileIcon(document.filename)}
                 </div>
                 
                 {/* Title with underline animation */}

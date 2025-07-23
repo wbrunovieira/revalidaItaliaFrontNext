@@ -105,10 +105,6 @@ interface DocumentTranslation {
 interface Document {
   id: string;
   filename: string;
-  fileSize: number;
-  mimeType: string;
-  isDownloadable: boolean;
-  lessonId: string;
   translations: DocumentTranslation[];
   createdAt: string;
   updatedAt: string;

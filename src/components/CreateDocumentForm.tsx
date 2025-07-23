@@ -25,7 +25,6 @@ import {
   Check,
   X,
   File,
-  Download,
   Link,
 } from 'lucide-react';
 
@@ -77,9 +76,6 @@ interface FormData {
   moduleId: string;
   lessonId: string;
   filename: string;
-  fileSize: number;
-  mimeType: string;
-  isDownloadable: boolean;
   translations: {
     pt: Translation;
     es: Translation;
@@ -92,8 +88,6 @@ interface FormErrors {
   moduleId?: string;
   lessonId?: string;
   filename?: string;
-  fileSize?: string;
-  mimeType?: string;
   title_pt?: string;
   title_es?: string;
   title_it?: string;
@@ -112,38 +106,12 @@ interface ValidationResult {
 
 interface CreateDocumentPayload {
   filename: string;
-  fileSize: number;
-  mimeType: string;
-  isDownloadable: boolean;
   translations: Translation[];
 }
 
 type Locale = 'pt' | 'es' | 'it';
 type TranslationField = 'title' | 'description' | 'url';
 
-const MIME_TYPES = [
-  { value: 'application/pdf', label: 'PDF' },
-  { value: 'application/msword', label: 'DOC' },
-  {
-    value:
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    label: 'DOCX',
-  },
-  { value: 'application/vnd.ms-excel', label: 'XLS' },
-  {
-    value:
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    label: 'XLSX',
-  },
-  { value: 'application/vnd.ms-powerpoint', label: 'PPT' },
-  {
-    value:
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    label: 'PPTX',
-  },
-  { value: 'text/plain', label: 'TXT' },
-  { value: 'application/zip', label: 'ZIP' },
-];
 
 export default function CreateDocumentForm() {
   const t = useTranslations('Admin.createDocument');
@@ -161,9 +129,6 @@ export default function CreateDocumentForm() {
     moduleId: '',
     lessonId: '',
     filename: '',
-    fileSize: 0,
-    mimeType: 'application/pdf',
-    isDownloadable: true,
     translations: {
       pt: {
         locale: 'pt',
@@ -302,24 +267,6 @@ export default function CreateDocumentForm() {
         return { isValid: true };
       }
 
-      if (field === 'fileSize') {
-        const fileSize =
-          (value as number) ?? formData.fileSize;
-        if (fileSize <= 0) {
-          return {
-            isValid: false,
-            message: t('errors.fileSizeRequired'),
-          };
-        }
-        // Max 100MB
-        if (fileSize > 104857600) {
-          return {
-            isValid: false,
-            message: t('errors.fileSizeMax'),
-          };
-        }
-        return { isValid: true };
-      }
 
       // Validação de campos de tradução
       const match = field.match(
@@ -600,12 +547,6 @@ export default function CreateDocumentForm() {
       isValid = false;
     }
 
-    // Validar fileSize
-    const fileSizeValidation = validateField('fileSize');
-    if (!fileSizeValidation.isValid) {
-      newErrors.fileSize = fileSizeValidation.message;
-      isValid = false;
-    }
 
     // Validar traduções
     const locales: Locale[] = ['pt', 'es', 'it'];
@@ -679,9 +620,6 @@ export default function CreateDocumentForm() {
       moduleId: '',
       lessonId: '',
       filename: '',
-      fileSize: 0,
-      mimeType: 'application/pdf',
-      isDownloadable: true,
       translations: {
         pt: {
           locale: 'pt',
@@ -716,7 +654,6 @@ export default function CreateDocumentForm() {
       'moduleId',
       'lessonId',
       'filename',
-      'fileSize',
       'title_pt',
       'title_es',
       'title_it',
@@ -762,9 +699,6 @@ export default function CreateDocumentForm() {
       
       const payload: CreateDocumentPayload = {
         filename: cleanFilename,
-        fileSize: formData.fileSize,
-        mimeType: formData.mimeType,
-        isDownloadable: formData.isDownloadable,
         translations,
       };
 
@@ -853,38 +787,6 @@ export default function CreateDocumentForm() {
     [handleFieldValidation]
   );
 
-  const handleFileSizeChange = useCallback(
-    (value: string) => {
-      const numValue = parseFloat(value) || 0;
-      const sizeInBytes = numValue * 1024 * 1024; // Convert MB to bytes
-      setFormData(prev => ({
-        ...prev,
-        fileSize: sizeInBytes,
-      }));
-      handleFieldValidation('fileSize', sizeInBytes);
-    },
-    [handleFieldValidation]
-  );
-
-  const handleMimeTypeChange = useCallback(
-    (value: string) => {
-      setFormData(prev => ({
-        ...prev,
-        mimeType: value,
-      }));
-    },
-    []
-  );
-
-  const handleIsDownloadableChange = useCallback(
-    (checked: boolean) => {
-      setFormData(prev => ({
-        ...prev,
-        isDownloadable: checked,
-      }));
-    },
-    []
-  );
 
   const handleInputBlur = useCallback(
     (field: string) => () => {
@@ -1136,7 +1038,7 @@ export default function CreateDocumentForm() {
         </div>
 
         {/* Informações do Documento */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
+        <div className="mb-8">
           <div className="space-y-2">
             <Label className="text-gray-300 flex items-center gap-2">
               <File size={16} />
@@ -1169,112 +1071,6 @@ export default function CreateDocumentForm() {
                   {t('validation.filenameValid')}
                 </div>
               )}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <File size={16} />
-              {t('fields.fileSize')}
-              <span className="text-red-400">*</span>
-            </Label>
-            <TextField
-              type="number"
-              step="0.01"
-              placeholder={t('placeholders.fileSize')}
-              value={
-                formData.fileSize
-                  ? (
-                      formData.fileSize /
-                      (1024 * 1024)
-                    ).toFixed(2)
-                  : ''
-              }
-              onChange={e =>
-                handleFileSizeChange(e.target.value)
-              }
-              onBlur={handleInputBlur('fileSize')}
-              error={errors.fileSize}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500">
-              {t('hints.fileSize')}
-            </p>
-            {errors.fileSize && touched.fileSize && (
-              <p className="text-xs text-red-500">
-                {errors.fileSize}
-              </p>
-            )}
-            {formData.fileSize > 0 &&
-              !errors.fileSize &&
-              touched.fileSize && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.fileSizeValid')}
-                </div>
-              )}
-          </div>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <File size={16} />
-              {t('fields.mimeType')}
-            </Label>
-            <Select
-              value={formData.mimeType}
-              onValueChange={handleMimeTypeChange}
-            >
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                {MIME_TYPES.map(type => (
-                  <SelectItem
-                    key={type.value}
-                    value={type.value}
-                    className="text-white hover:bg-gray-600"
-                  >
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <Download size={16} />
-              {t('fields.isDownloadable')}
-            </Label>
-            <div className="flex items-center space-x-2 mt-2">
-              <button
-                type="button"
-                onClick={() =>
-                  handleIsDownloadableChange(
-                    !formData.isDownloadable
-                  )
-                }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  formData.isDownloadable
-                    ? 'bg-secondary'
-                    : 'bg-gray-600'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    formData.isDownloadable
-                      ? 'translate-x-6'
-                      : 'translate-x-1'
-                  }`}
-                />
-              </button>
-              <span className="text-sm text-gray-400">
-                {formData.isDownloadable
-                  ? t('hints.downloadableYes')
-                  : t('hints.downloadableNo')}
-              </span>
-            </div>
           </div>
         </div>
 

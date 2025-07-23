@@ -13,10 +13,6 @@ import {
   Globe,
   Hash,
   Copy,
-  Download,
-  ExternalLink,
-  HardDrive,
-  Eye,
 } from 'lucide-react';
 
 interface Translation {
@@ -29,11 +25,6 @@ interface Translation {
 interface DocumentViewData {
   id: string;
   filename: string;
-  fileSize: number;
-  fileSizeInMB: number;
-  mimeType: string;
-  isDownloadable: boolean;
-  downloadCount: number;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -170,13 +161,6 @@ export default function DocumentViewModal({
     );
   };
 
-  // Formatar tamanho de arquivo
-  const formatFileSize = (sizeInMB: number): string => {
-    if (sizeInMB < 1) {
-      return `${(sizeInMB * 1024).toFixed(0)} KB`;
-    }
-    return `${sizeInMB.toFixed(1)} MB`;
-  };
 
   // Obter extensão do arquivo
   const getFileExtension = (filename: string): string => {
@@ -250,17 +234,6 @@ export default function DocumentViewModal({
                       locale
                     )?.title || t('noTitle')}
                   </p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {formatFileSize(
-                      documentData.fileSizeInMB
-                    )}
-                  </p>
-                  {documentData.isDownloadable && (
-                    <div className="flex items-center justify-center gap-1 mt-2 text-green-400 text-xs">
-                      <Download size={12} />
-                      {t('downloadable')}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -324,101 +297,6 @@ export default function DocumentViewModal({
                   </div>
                 </div>
 
-                {/* Tipo MIME */}
-                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <ExternalLink
-                      size={16}
-                      className="text-gray-400"
-                    />
-                    <span className="text-sm font-medium text-gray-300">
-                      {t('fields.mimeType')}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm text-white font-mono">
-                      {documentData.mimeType ||
-                        t('notSpecified')}
-                    </code>
-                    {documentData.mimeType && (
-                      <button
-                        onClick={() =>
-                          copyToClipboard(
-                            documentData.mimeType,
-                            'MIME Type'
-                          )
-                        }
-                        className="p-1 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Tamanho do Arquivo */}
-                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <HardDrive
-                      size={16}
-                      className="text-gray-400"
-                    />
-                    <span className="text-sm font-medium text-gray-300">
-                      {t('fields.fileSize')}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm text-white font-medium">
-                      {formatFileSize(
-                        documentData.fileSizeInMB
-                      )}
-                    </span>
-                    <div className="text-xs text-gray-400">
-                      ({documentData.fileSize} bytes)
-                    </div>
-                  </div>
-                </div>
-
-                {/* Downloads */}
-                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Download
-                      size={16}
-                      className="text-gray-400"
-                    />
-                    <span className="text-sm font-medium text-gray-300">
-                      {t('fields.downloadCount')}
-                    </span>
-                  </div>
-                  <span className="text-sm text-white font-medium">
-                    {documentData.downloadCount}{' '}
-                    {t('fields.downloads')}
-                  </span>
-                </div>
-
-                {/* Status de Download */}
-                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Eye
-                      size={16}
-                      className="text-gray-400"
-                    />
-                    <span className="text-sm font-medium text-gray-300">
-                      {t('fields.downloadable')}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      documentData.isDownloadable
-                        ? 'text-green-400'
-                        : 'text-red-400'
-                    }`}
-                  >
-                    {documentData.isDownloadable
-                      ? t('yes')
-                      : t('no')}
-                  </span>
-                </div>
 
                 {/* Data de Criação */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">

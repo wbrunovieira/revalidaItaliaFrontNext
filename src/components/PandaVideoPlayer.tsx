@@ -42,6 +42,7 @@ export default function PandaVideoPlayer({
     duration: 0,
     percentage: 0
   });
+  const [videoDuration, setVideoDuration] = useState<number>(0);
 
   const playerService = PandaPlayerService.getInstance();
   const pullzone = process.env.NEXT_PUBLIC_PANDA_VIDEO_PULLZONE;
@@ -136,14 +137,24 @@ export default function PandaVideoPlayer({
         break;
 
       case 'panda_timeupdate':
-        if (event.currentTime !== undefined && event.duration !== undefined) {
+        if (event.currentTime !== undefined) {
+          // Use stored duration if event doesn't have it
+          const duration = event.duration || videoDuration || 1; // Prevent division by zero
           const newProgress: VideoProgress = {
             currentTime: event.currentTime,
-            duration: event.duration,
-            percentage: (event.currentTime / event.duration) * 100
+            duration: duration,
+            percentage: duration > 0 ? (event.currentTime / duration) * 100 : 0
           };
           setProgress(newProgress);
           onProgress?.(newProgress);
+          
+          // Debug log to see what we're getting
+          console.log('[PandaVideoPlayer] 📊 Progress update:', {
+            currentTime: event.currentTime,
+            duration: duration,
+            percentage: newProgress.percentage.toFixed(2) + '%',
+            eventHasDuration: !!event.duration
+          });
         }
         break;
 
@@ -161,6 +172,20 @@ export default function PandaVideoPlayer({
       case 'panda_loadeddata':
       case 'panda_canplay':
         console.log('Video loaded and ready to play');
+        // Try to capture duration from these events
+        if (event.duration && event.duration > 0) {
+          setVideoDuration(event.duration);
+          console.log('[PandaVideoPlayer] 📏 Video duration captured:', event.duration);
+        }
+        break;
+        
+      case 'panda_allData':
+        // Try to extract duration from allData event
+        if ((event as any).playerData?.duration) {
+          const duration = (event as any).playerData.duration;
+          setVideoDuration(duration);
+          console.log('[PandaVideoPlayer] 📏 Duration from allData:', duration);
+        }
         break;
     }
   }, [onPlay, onPause, onProgress, onComplete, onError]);

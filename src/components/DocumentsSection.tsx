@@ -123,10 +123,15 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
 
   return (
     <div className="mt-8">
-      <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
-        <FileText size={18} />
-        {tLesson('documents')}
-      </h4>
+      <div className="mb-4">
+        <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+          <div className="p-2 bg-secondary/20 rounded-lg">
+            <FileText size={20} className="text-secondary" />
+          </div>
+          {tLesson('documents')}
+        </h4>
+        <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
+      </div>
       <div className="space-y-2">
         {documents.map((document, index) => {
           const docTranslation = 

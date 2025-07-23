@@ -142,7 +142,6 @@ async function fetchPandaVideoData(
   };
 }
 
-
 export default async function LessonPage({
   params,
 }: {
@@ -191,7 +190,11 @@ export default async function LessonPage({
       )
     : null;
 
-  const [allLessons, assessmentsData, documentsData]: [LessonsResponse, AssessmentsResponse, Document[]] = await Promise.all([
+  const [allLessons, assessmentsData, documentsData]: [
+    LessonsResponse,
+    AssessmentsResponse,
+    Document[]
+  ] = await Promise.all([
     fetch(
       `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons`,
       { cache: 'no-store' }
@@ -199,11 +202,13 @@ export default async function LessonPage({
     fetch(
       `${API_URL}/api/v1/assessments?lessonId=${lessonId}`,
       { cache: 'no-store' }
-    ).then(r => (r.ok ? r.json() : { assessments: [], pagination: {} })),
+    ).then(r =>
+      r.ok ? r.json() : { assessments: [], pagination: {} }
+    ),
     fetch(
       `${API_URL}/api/v1/lessons/${lessonId}/documents`,
       { cache: 'no-store' }
-    ).then(r => (r.ok ? r.json() : []))
+    ).then(r => (r.ok ? r.json() : [])),
   ]);
 
   const sorted = allLessons.lessons.sort(
@@ -250,21 +255,30 @@ export default async function LessonPage({
                 </div>
                 {tLesson('breadcrumb.dashboard')}
               </Link>
-              <ChevronRight size={12} className="text-secondary/40" />
+              <ChevronRight
+                size={12}
+                className="text-secondary/40"
+              />
               <Link
                 href={`/${locale}/courses/${slug}`}
                 className="hover:text-white transition-colors"
               >
                 {ct.title}
               </Link>
-              <ChevronRight size={12} className="text-secondary/40" />
+              <ChevronRight
+                size={12}
+                className="text-secondary/40"
+              />
               <Link
                 href={`/${locale}/courses/${slug}/modules/${moduleSlug}`}
                 className="hover:text-white transition-colors"
               >
                 {mt.title}
               </Link>
-              <ChevronRight size={12} className="text-secondary/40" />
+              <ChevronRight
+                size={12}
+                className="text-secondary/40"
+              />
               <span className="text-white font-medium">
                 {lt.title}
               </span>
@@ -273,8 +287,13 @@ export default async function LessonPage({
               href={`/${locale}/courses/${slug}/modules/${moduleSlug}`}
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
             >
-              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> 
-              <span className="text-sm">{tLesson('back')}</span>
+              <ArrowLeft
+                size={18}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
+              <span className="text-sm">
+                {tLesson('back')}
+              </span>
             </Link>
           </div>
         </div>
@@ -282,7 +301,8 @@ export default async function LessonPage({
         {/* Main content */}
         <div className="flex-1 lg:flex">
           {/* Video player - Only show if lesson has video */}
-          {(lesson.video?.providerVideoId || pandaData?.video_external_id) && (
+          {(lesson.video?.providerVideoId ||
+            pandaData?.video_external_id) && (
             <div className="flex-1 bg-black lg:ml-4">
               <PandaVideoPlayer
                 videoId={
@@ -305,17 +325,33 @@ export default async function LessonPage({
           )}
 
           {/* Sidebar */}
-          <aside className={`bg-primary-dark p-6 overflow-y-auto ${
-            lesson.video?.providerVideoId || pandaData?.video_external_id
-              ? 'lg:w-96'
-              : 'flex-1'
-          }`}>
+          <aside
+            className={`bg-primary-dark p-6 overflow-y-auto ${
+              lesson.video?.providerVideoId ||
+              pandaData?.video_external_id
+                ? 'lg:w-96'
+                : 'flex-1'
+            }`}
+          >
             {/* Show no video message if there's no video and sidebar is full width */}
-            {!(lesson.video?.providerVideoId || pandaData?.video_external_id) && (
+            {!(
+              lesson.video?.providerVideoId ||
+              pandaData?.video_external_id
+            ) && (
               <div className="mb-8 p-6 bg-primary/50 rounded-lg border border-secondary/30 text-center">
                 <div className="text-gray-400 mb-2">
-                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <svg
+                    className="w-16 h-16 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <p className="text-gray-300 text-lg font-medium">
@@ -323,26 +359,40 @@ export default async function LessonPage({
                 </p>
               </div>
             )}
-            
+
             {/* Hierarquia do curso */}
             <div className="mb-6">
               <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <User size={14} className="text-primary" />
+                    <User
+                      size={14}
+                      className="text-primary"
+                    />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">{tLesson('course')}</p>
-                    <p className="text-white font-medium">{ct.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {tLesson('course')}
+                    </p>
+                    <p className="text-white font-medium">
+                      {ct.title}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                    <BookOpen size={14} className="text-secondary" />
+                    <BookOpen
+                      size={14}
+                      className="text-secondary"
+                    />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">{tLesson('module')}</p>
-                    <p className="text-white font-medium">{mt.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {tLesson('module')}
+                    </p>
+                    <p className="text-white font-medium">
+                      {mt.title}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -358,12 +408,16 @@ export default async function LessonPage({
                       number: idx + 1,
                     })}
                   </div>
-                  {(lesson.video?.durationInSeconds || pandaData?.length) && (
+                  {(lesson.video?.durationInSeconds ||
+                    pandaData?.length) && (
                     <div className="flex items-center gap-1 text-gray-400 text-sm">
                       <Clock size={14} />
                       <span>
                         {Math.ceil(
-                          (lesson.video?.durationInSeconds ?? pandaData?.length ?? 0) / 60
+                          (lesson.video
+                            ?.durationInSeconds ??
+                            pandaData?.length ??
+                            0) / 60
                         )}{' '}
                         {tLesson('minutes')}
                       </span>
@@ -388,11 +442,18 @@ export default async function LessonPage({
                     className="group flex flex-col p-3 bg-primary/40 rounded-lg hover:bg-primary/60 transition-all duration-300 border border-secondary/30 hover:border-secondary/50"
                   >
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                      <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                      <ChevronLeft
+                        size={14}
+                        className="group-hover:-translate-x-1 transition-transform"
+                      />
                       {tLesson('previousLesson')}
                     </div>
                     <p className="text-sm text-white font-medium truncate">
-                      {prev.translations.find(t => t.locale === locale)?.title}
+                      {
+                        prev.translations.find(
+                          t => t.locale === locale
+                        )?.title
+                      }
                     </p>
                   </Link>
                 ) : (
@@ -405,10 +466,17 @@ export default async function LessonPage({
                   >
                     <div className="flex items-center justify-end gap-2 text-xs text-gray-500 mb-1">
                       {tLesson('nextLesson')}
-                      <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight
+                        size={14}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
                     </div>
                     <p className="text-sm text-white font-medium truncate text-right">
-                      {next.translations.find(t => t.locale === locale)?.title}
+                      {
+                        next.translations.find(
+                          t => t.locale === locale
+                        )?.title
+                      }
                     </p>
                   </Link>
                 ) : (
@@ -418,64 +486,113 @@ export default async function LessonPage({
             </div>
 
             {/* Documents section */}
-            <DocumentsSection documents={documents} locale={locale} />
+            <DocumentsSection
+              documents={documents}
+              locale={locale}
+            />
 
             {/* Assessments section */}
             {assessments.length > 0 && (
               <div className="mt-8">
-                <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
-                  <ClipboardList size={18} />
-                  {tLesson('assessments')}
-                </h4>
-                <div className="space-y-3">
-                  {assessments.map((assessment) => (
+                <div className="mb-4">
+                  <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                    <div className="p-2 bg-secondary/20 rounded-lg">
+                      <ClipboardList size={20} className="text-secondary" />
+                    </div>
+                    {tLesson('assessments')}
+                  </h4>
+                  <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
+                </div>
+                <div className="space-y-3 overflow-visible">
+                  {assessments.map(assessment => (
                     <div
                       key={assessment.id}
-                      className="p-4 bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-colors"
+                      className="group relative bg-primary/40 rounded-lg border border-secondary/30 hover:border-secondary/50 transition-all duration-300 overflow-visible hover:shadow-lg hover:shadow-secondary/20"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <h5 className="font-medium text-white">
-                          {assessment.title}
-                        </h5>
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          assessment.type === 'QUIZ'
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            : assessment.type === 'SIMULADO'
-                            ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                            : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        }`}>
-                          {tLesson(`assessmentTypes.${assessment.type.toLowerCase()}`)}
-                        </span>
-                      </div>
-                      
-                      {assessment.description && (
-                        <p className="text-gray-400 text-sm mb-3">
-                          {assessment.description}
-                        </p>
+                      {/* Assessment icon positioned in top-left corner - appears on hover */}
+                      {assessment.type === 'QUIZ' && (
+                        <img
+                          src="/icons/quiz.svg"
+                          alt="Quiz"
+                          className="absolute -top-2 -left-5 w-10 h-10 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                        />
                       )}
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                          {assessment.timeLimitInMinutes && (
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} />
-                              {assessment.timeLimitInMinutes} min
-                            </span>
-                          )}
-                          {assessment.passingScore && (
-                            <span>
-                              {tLesson('passingScore')}: {assessment.passingScore}%
-                            </span>
-                          )}
+                      {assessment.type === 'SIMULADO' && (
+                        <img
+                          src="/icons/rating.svg"
+                          alt="Simulado"
+                          className="absolute -top-2 -left-5 w-10 h-10 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                        />
+                      )}
+                      {assessment.type ===
+                        'PROVA_ABERTA' && (
+                        <img
+                          src="/icons/examination.svg"
+                          alt="Prova Aberta"
+                          className="absolute -top-1 -left-3 w-7 h-7 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                        />
+                      )}
+
+                      {/* Collapsed state - only title and type */}
+                      <div className="p-4 transition-all duration-300 group-hover:pb-2">
+                        <div className="flex items-center justify-between">
+                          <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300">
+                            {assessment.title}
+                          </h5>
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full font-medium transition-all duration-300 ${
+                              assessment.type === 'QUIZ'
+                                ? 'bg-primary text-accent-light border border-blue-500/30'
+                                : assessment.type ===
+                                  'SIMULADO'
+                                ? 'bg-secondary/20 text-accent-light border border-secondary/30'
+                                : 'bg-accent text-primary border border-primary/40'
+                            }`}
+                          >
+                            {tLesson(
+                              `assessmentTypes.${assessment.type.toLowerCase()}`
+                            )}
+                          </span>
                         </div>
-                        
-                        <Link
-                          href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}/assessments/${assessment.id}`}
-                          className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium"
-                        >
-                          {tLesson('startAssessment')}
-                          <ExternalLink size={14} />
-                        </Link>
+                      </div>
+
+                      {/* Expanded content on hover */}
+                      <div className="max-h-0 opacity-0 group-hover:max-h-96 group-hover:opacity-100 transition-all duration-300 ease-out overflow-hidden">
+                        <div className="px-4 pb-4">
+                          {assessment.description && (
+                            <p className="text-gray-400 text-sm mb-3 pt-2">
+                              {assessment.description}
+                            </p>
+                          )}
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-xs text-gray-400">
+                              {assessment.timeLimitInMinutes && (
+                                <span className="flex items-center gap-1">
+                                  <Clock size={12} />
+                                  {
+                                    assessment.timeLimitInMinutes
+                                  }{' '}
+                                  min
+                                </span>
+                              )}
+                              {assessment.passingScore && (
+                                <span>
+                                  {tLesson('passingScore')}:{' '}
+                                  {assessment.passingScore}%
+                                </span>
+                              )}
+                            </div>
+
+                            <Link
+                              href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}/assessments/${assessment.id}`}
+                              className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium transform scale-0 group-hover:scale-100 transition-transform duration-300"
+                            >
+                              {tLesson('startAssessment')}
+                              <ExternalLink size={14} />
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -485,19 +602,29 @@ export default async function LessonPage({
 
             {/* Lista de Aulas do Módulo */}
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-white">
-                  {tLesson('moduleLessons')}
-                </h4>
-                <span className="text-xs text-gray-500">
-                  {sorted.length} {tLesson('lessons')}
-                </span>
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <div className="p-2 bg-secondary/20 rounded-lg">
+                      <BookOpen size={20} className="text-secondary" />
+                    </div>
+                    {tLesson('moduleLessons')}
+                  </h4>
+                  <span className="text-xs text-gray-500">
+                    {sorted.length} {tLesson('lessons')}
+                  </span>
+                </div>
+                <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
               </div>
               <div className="bg-primary/20 rounded-lg p-2 max-h-80 overflow-y-auto border border-secondary/20">
                 <ul className="space-y-1">
                   {sorted.map((l, i) => {
-                    const isCurrentLesson = l.id === lessonId;
-                    const lessonTranslation = l.translations.find(t => t.locale === locale);
+                    const isCurrentLesson =
+                      l.id === lessonId;
+                    const lessonTranslation =
+                      l.translations.find(
+                        t => t.locale === locale
+                      );
                     return (
                       <li key={l.id}>
                         <Link
@@ -511,14 +638,16 @@ export default async function LessonPage({
                             }
                           `}
                         >
-                          <div className={`
+                          <div
+                            className={`
                             w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                             ${
                               isCurrentLesson
                                 ? 'bg-white/20'
                                 : 'bg-primary/50 group-hover:bg-secondary/30'
                             }
-                          `}>
+                          `}
+                          >
                             {i + 1}
                           </div>
                           <span className="flex-1 truncate">

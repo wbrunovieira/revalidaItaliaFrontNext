@@ -5,6 +5,11 @@ import PandaVideoPlayer from './PandaVideoPlayer';
 import { VideoProgress } from '@/types/panda-player';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
 
+// Load heartbeat test utility in development
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  import('@/utils/heartbeat-test');
+}
+
 interface LessonVideoPlayerProps {
   videoId: string;
   title?: string;
@@ -24,8 +29,12 @@ export default function LessonVideoPlayer({
   courseId,
   moduleId,
 }: LessonVideoPlayerProps) {
-  // Initialize video progress hook
-  const { progress, updateProgress, clearProgress, isLoading } = useVideoProgress(lessonId);
+  // Initialize video progress hook with course and module context
+  const { progress, updateProgress, clearProgress, isLoading } = useVideoProgress(
+    lessonId,
+    courseId,
+    moduleId
+  );
 
   // Log when component mounts
   useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { VideoProgress } from '@/types/panda-player';
+import { getHeartbeatService } from '@/services/video-progress-heartbeat';
 
 const STORAGE_PREFIX = 'revalida_video_progress_';
 const DEBOUNCE_DELAY = 5000; // 5 seconds
@@ -14,11 +15,16 @@ interface UseVideoProgressReturn {
   isLoading: boolean;
 }
 
-export function useVideoProgress(lessonId: string): UseVideoProgressReturn {
+export function useVideoProgress(
+  lessonId: string,
+  courseId?: string,
+  moduleId?: string
+): UseVideoProgressReturn {
   const [progress, setProgress] = useState<VideoProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedProgressRef = useRef<string>('');
+  const heartbeatService = useRef(getHeartbeatService());
 
   // Storage key for this specific lesson
   const storageKey = `${STORAGE_PREFIX}${lessonId}`;
@@ -101,12 +107,16 @@ export function useVideoProgress(lessonId: string): UseVideoProgressReturn {
       console.log(`${LOG_PREFIX} ⏱️ Debounce timer fired, saving progress...`);
       saveProgress(newProgress);
       
+      // Send to heartbeat service for backend sync
+      console.log(`${LOG_PREFIX} 💓 Sending to heartbeat service`);
+      heartbeatService.current.enqueue(lessonId, newProgress, courseId, moduleId);
+      
       // Check if video is effectively completed (95% or more)
       if (newProgress.percentage >= 95 && (!progress || progress.percentage < 95)) {
         console.log(`${LOG_PREFIX} 🎉 Video completed! (${newProgress.percentage.toFixed(2)}% watched)`);
       }
     }, DEBOUNCE_DELAY);
-  }, [lessonId, saveProgress, progress]);
+  }, [lessonId, courseId, moduleId, saveProgress, progress]);
 
   // Clear progress for this lesson
   const clearProgress = useCallback(() => {
@@ -139,6 +149,9 @@ export function useVideoProgress(lessonId: string): UseVideoProgressReturn {
         
         if (progress) {
           saveProgress(progress);
+          // Also flush heartbeat queue
+          console.log(`${LOG_PREFIX} 💓 Forcing heartbeat flush before unmount`);
+          heartbeatService.current.flush();
         }
       }
     };

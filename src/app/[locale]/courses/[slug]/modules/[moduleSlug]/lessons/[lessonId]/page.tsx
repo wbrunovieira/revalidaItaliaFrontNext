@@ -6,8 +6,9 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
-import PandaVideoPlayer from '@/components/PandaVideoPlayer';
+import LessonVideoPlayer from '@/components/LessonVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
+import HeartbeatStatus from '@/components/HeartbeatStatus';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -303,8 +304,11 @@ export default async function LessonPage({
           {/* Video player - Only show if lesson has video */}
           {(lesson.video?.providerVideoId ||
             pandaData?.video_external_id) && (
-            <div className="flex-1 bg-black lg:ml-4">
-              <PandaVideoPlayer
+            <div
+              className="flex-1 bg-primary lg:ml-4"
+              style={{ minHeight: '480px' }}
+            >
+              <LessonVideoPlayer
                 videoId={
                   pandaData?.video_external_id ??
                   lesson.video?.providerVideoId ??
@@ -320,6 +324,9 @@ export default async function LessonPage({
                   lesson.video?.imageUrl ??
                   pandaData?.thumbnail
                 }
+                lessonId={lessonId}
+                courseId={course.id}
+                moduleId={moduleFound.id}
               />
             </div>
           )}
@@ -497,7 +504,10 @@ export default async function LessonPage({
                 <div className="mb-4">
                   <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
                     <div className="p-2 bg-secondary/20 rounded-lg">
-                      <ClipboardList size={20} className="text-secondary" />
+                      <ClipboardList
+                        size={20}
+                        className="text-secondary"
+                      />
                     </div>
                     {tLesson('assessments')}
                   </h4>
@@ -606,7 +616,10 @@ export default async function LessonPage({
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-lg font-bold text-white flex items-center gap-2">
                     <div className="p-2 bg-secondary/20 rounded-lg">
-                      <BookOpen size={20} className="text-secondary" />
+                      <BookOpen
+                        size={20}
+                        className="text-secondary"
+                      />
                     </div>
                     {tLesson('moduleLessons')}
                   </h4>
@@ -665,6 +678,9 @@ export default async function LessonPage({
             </div>
           </aside>
         </div>
+        
+        {/* Heartbeat Status Indicator (Development Only) */}
+        <HeartbeatStatus />
       </div>
     </NavSidebar>
   );

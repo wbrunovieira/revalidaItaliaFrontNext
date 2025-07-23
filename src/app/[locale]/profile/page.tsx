@@ -85,9 +85,9 @@ export default async function ProfilePage({
 
   console.log('Fetching user data for ID:', userId);
 
-  // Buscar dados do usuário atual usando GET /students/:id
+  // Buscar dados do usuário atual usando GET /users/:id
   const resUser = await fetch(
-    `${apiUrl}/students/${userId}`,
+    `${apiUrl}/api/v1/users/${userId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

@@ -15,7 +15,7 @@ interface Translation {
 interface Lesson {
   id: string;
   slug: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   order: number;
   videoId?: string;
   translations?: Translation[];

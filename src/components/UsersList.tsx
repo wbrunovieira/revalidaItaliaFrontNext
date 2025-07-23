@@ -609,9 +609,7 @@ export default function UsersList() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-lg font-semibold text-white">
-                      {user.fullName ||
-                        user.name ||
-                        'Unnamed User'}
+                      {user.fullName || 'Unnamed User'}
                     </h4>
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(

@@ -283,7 +283,7 @@ export default async function LessonPage({
         <div className="flex-1 lg:flex">
           {/* Video player - Only show if lesson has video */}
           {(lesson.video?.providerVideoId || pandaData?.video_external_id) && (
-            <div className="flex-1 bg-black">
+            <div className="flex-1 bg-black lg:ml-4">
               <PandaVideoPlayer
                 videoId={
                   pandaData?.video_external_id ??

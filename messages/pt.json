@@ -476,7 +476,8 @@
       "isDownloadable": "Permitir Download",
       "title": "Título",
       "description": "Descrição",
-      "url": "URL do Documento"
+      "url": "URL do Documento",
+      "document": "Documento"
     },
     "placeholders": {
       "course": "Selecione um curso",
@@ -540,7 +541,16 @@
       "permissionTitle": "Sem permissão",
       "permissionDescription": "Você não tem permissão para criar documentos.",
       "fetchCoursesTitle": "Erro ao carregar cursos",
-      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos. Por favor, recarregue a página."
+      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos. Por favor, recarregue a página.",
+      "invalidFileType": "Tipo de arquivo inválido. Use PDF, Word, Excel ou CSV.",
+      "fileTooLarge": "Arquivo muito grande. O tamanho máximo é 10MB.",
+      "uploadFailed": "Falha ao fazer upload do arquivo. Tente novamente.",
+      "documentRequired": "Por favor, selecione um documento para upload"
+    },
+    "upload": {
+      "clickToSelect": "Clique para selecionar arquivo",
+      "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (máx. 10MB)",
+      "success": "Arquivo carregado com sucesso"
     },
     "success": {
       "title": "Documento criado com sucesso!",

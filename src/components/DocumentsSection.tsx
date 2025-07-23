@@ -40,10 +40,10 @@ interface DocumentsSectionProps {
 
 // Function to get file icon based on filename
 function getFileIcon(filename: string): JSX.Element {
-  // Check if it's a PDF file
-  const isPDF = filename && filename.toLowerCase().endsWith('.pdf');
+  const extension = filename?.split('.').pop()?.toLowerCase();
   
-  if (isPDF) {
+  // Check if it's a PDF file
+  if (extension === 'pdf') {
     return (
       <img 
         src="/icons/pdf.svg" 
@@ -53,53 +53,64 @@ function getFileIcon(filename: string): JSX.Element {
     );
   }
   
-  const iconProps = { size: 24, className: 'text-secondary' };
-  
-  // Determine icon from filename extension
-  if (filename) {
-    const extension = filename.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'doc':
-      case 'docx':
-        return <FileText {...iconProps} className="text-blue-400" />;
-      case 'xls':
-      case 'xlsx':
-        return <FileSpreadsheet {...iconProps} className="text-green-400" />;
-      case 'ppt':
-      case 'pptx':
-        return <Presentation {...iconProps} className="text-orange-400" />;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-      case 'bmp':
-      case 'webp':
-        return <FileImage {...iconProps} className="text-purple-400" />;
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-      case 'wmv':
-      case 'mkv':
-        return <FileVideo {...iconProps} className="text-pink-400" />;
-      case 'mp3':
-      case 'wav':
-      case 'flac':
-      case 'aac':
-        return <FileAudio {...iconProps} className="text-yellow-400" />;
-      case 'zip':
-      case 'rar':
-      case '7z':
-      case 'tar':
-      case 'gz':
-        return <Archive {...iconProps} className="text-gray-400" />;
-      case 'txt':
-        return <FileText {...iconProps} className="text-gray-300" />;
-      default:
-        return <File {...iconProps} className="text-gray-400" />;
-    }
+  // Check if it's a Word file
+  if (extension === 'doc' || extension === 'docx') {
+    return (
+      <img 
+        src="/icons/word.svg" 
+        alt="Word" 
+        className="w-8 h-8"
+      />
+    );
   }
   
-  return <File {...iconProps} className="text-gray-400" />;
+  // Check if it's an Excel file
+  if (extension === 'xls' || extension === 'xlsx' || extension === 'csv') {
+    return (
+      <img 
+        src="/icons/excel.svg" 
+        alt="Excel" 
+        className="w-8 h-8"
+      />
+    );
+  }
+  
+  // Default icon for other file types
+  const iconProps = { size: 24, className: 'text-secondary' };
+  
+  switch (extension) {
+    case 'ppt':
+    case 'pptx':
+      return <Presentation {...iconProps} className="text-orange-400" />;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'bmp':
+    case 'webp':
+      return <FileImage {...iconProps} className="text-purple-400" />;
+    case 'mp4':
+    case 'avi':
+    case 'mov':
+    case 'wmv':
+    case 'mkv':
+      return <FileVideo {...iconProps} className="text-pink-400" />;
+    case 'mp3':
+    case 'wav':
+    case 'flac':
+    case 'aac':
+      return <FileAudio {...iconProps} className="text-yellow-400" />;
+    case 'zip':
+    case 'rar':
+    case '7z':
+    case 'tar':
+    case 'gz':
+      return <Archive {...iconProps} className="text-gray-400" />;
+    case 'txt':
+      return <FileText {...iconProps} className="text-gray-300" />;
+    default:
+      return <File {...iconProps} className="text-gray-400" />;
+  }
 }
 
 
@@ -130,7 +141,7 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
             >
               <div
                 className="relative flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 transition-all duration-300 cursor-pointer overflow-hidden
-                  hover:bg-primary/60 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-x-1"
+                  hover:bg-primary/60 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-x-1 hover:py-4"
                 onClick={() => window.open(docTranslation?.url, '_blank')}
               >
                 {/* Animated background gradient on hover */}
@@ -141,11 +152,15 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
                   {getFileIcon(document.filename)}
                 </div>
                 
-                {/* Title with underline animation */}
+                {/* Title with underline animation and description */}
                 <div className="relative flex-1 min-w-0">
                   <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300 truncate">
                     {docTranslation?.title || document.filename}
                   </h5>
+                  {/* Description that appears on hover */}
+                  <p className="text-xs text-gray-400 mt-0.5 truncate max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 transition-all duration-300 ease-out">
+                    {docTranslation?.description}
+                  </p>
                   <div className="absolute bottom-0 left-0 h-0.5 bg-secondary w-0 group-hover:w-full transition-all duration-300 ease-out" />
                 </div>
                 

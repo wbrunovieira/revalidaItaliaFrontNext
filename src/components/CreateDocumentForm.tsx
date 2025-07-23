@@ -24,7 +24,8 @@ import {
   Layers,
   Check,
   X,
-  File,
+  Upload,
+  Trash2,
   Link,
 } from 'lucide-react';
 
@@ -71,11 +72,20 @@ interface Course {
   modules?: Module[];
 }
 
+interface UploadedFile {
+  file: File;
+  url: string;
+}
+
 interface FormData {
   courseId: string;
   moduleId: string;
   lessonId: string;
-  filename: string;
+  uploadedFiles: {
+    pt?: UploadedFile;
+    es?: UploadedFile;
+    it?: UploadedFile;
+  };
   translations: {
     pt: Translation;
     es: Translation;
@@ -87,16 +97,15 @@ interface FormErrors {
   courseId?: string;
   moduleId?: string;
   lessonId?: string;
-  filename?: string;
+  upload_pt?: string;
+  upload_es?: string;
+  upload_it?: string;
   title_pt?: string;
   title_es?: string;
   title_it?: string;
   description_pt?: string;
   description_es?: string;
   description_it?: string;
-  url_pt?: string;
-  url_es?: string;
-  url_it?: string;
 }
 
 interface ValidationResult {
@@ -128,7 +137,7 @@ export default function CreateDocumentForm() {
     courseId: '',
     moduleId: '',
     lessonId: '',
-    filename: '',
+    uploadedFiles: {},
     translations: {
       pt: {
         locale: 'pt',
@@ -242,30 +251,6 @@ export default function CreateDocumentForm() {
         return { isValid: true };
       }
 
-      if (field === 'filename') {
-        const filename =
-          (value as string) || formData.filename;
-        if (!filename.trim()) {
-          return {
-            isValid: false,
-            message: t('errors.filenameRequired'),
-          };
-        }
-        if (filename.trim().length < 3) {
-          return {
-            isValid: false,
-            message: t('errors.filenameMin'),
-          };
-        }
-        // Check for invalid characters like comma in extension
-        if (filename.includes(',')) {
-          return {
-            isValid: false,
-            message: 'Invalid filename format. Use dots (.) before file extensions, not commas (,).',
-          };
-        }
-        return { isValid: true };
-      }
 
 
       // Validação de campos de tradução
@@ -310,11 +295,6 @@ export default function CreateDocumentForm() {
                 translation[fieldType as TranslationField];
             }
           }
-        } else if (!fieldValue && field !== 'fileSize') {
-          fieldValue =
-            formData[
-              field as keyof Pick<FormData, 'filename'>
-            ];
         }
 
         const validation = validateField(field, fieldValue);
@@ -540,12 +520,6 @@ export default function CreateDocumentForm() {
       isValid = false;
     }
 
-    // Validar filename
-    const filenameValidation = validateField('filename');
-    if (!filenameValidation.isValid) {
-      newErrors.filename = filenameValidation.message;
-      isValid = false;
-    }
 
 
     // Validar traduções
@@ -631,7 +605,6 @@ export default function CreateDocumentForm() {
       courseId: '',
       moduleId: '',
       lessonId: '',
-      filename: '',
       translations: {
         pt: {
           locale: 'pt',
@@ -665,7 +638,6 @@ export default function CreateDocumentForm() {
       'courseId',
       'moduleId',
       'lessonId',
-      'filename',
       'title_pt',
       'title_es',
       'title_it',
@@ -726,16 +698,13 @@ export default function CreateDocumentForm() {
         return;
       }
 
-      // Ensure proper file extension format and add extension if missing
-      let cleanFilename = formData.filename.trim().replace(/,(\w+)$/, '.$1');
-      
-      // Add .pdf extension if no extension is present
-      if (!cleanFilename.includes('.')) {
-        cleanFilename += '.pdf';
-      }
-      
+      // Extract filename from Portuguese translation URL
+      const ptTranslation = formData.translations.pt;
+      const urlParts = ptTranslation.url.split('/');
+      const filename = urlParts[urlParts.length - 1] || 'document.pdf';
+
       const payload: CreateDocumentPayload = {
-        filename: cleanFilename,
+        filename,
         translations,
       };
 
@@ -815,16 +784,6 @@ export default function CreateDocumentForm() {
     [handleFieldValidation]
   );
 
-  const handleFilenameChange = useCallback(
-    (value: string) => {
-      setFormData(prev => ({
-        ...prev,
-        filename: value,
-      }));
-      handleFieldValidation('filename', value);
-    },
-    [handleFieldValidation]
-  );
 
 
   const handleInputBlur = useCallback(
@@ -834,6 +793,131 @@ export default function CreateDocumentForm() {
     },
     [handleFieldValidation]
   );
+
+  // Função para converter nome do arquivo em título
+  const fileNameToTitle = useCallback((fileName: string): string => {
+    // Remove extensão
+    const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+    // Substitui underscores e hífens por espaços
+    const withSpaces = nameWithoutExt.replace(/[_-]/g, ' ');
+    // Capitaliza primeira letra de cada palavra
+    return withSpaces
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }, []);
+
+  // Função para gerar nome único para arquivo
+  const generateUniqueFileName = useCallback((originalName: string): string => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop();
+    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+    // Sanitiza o nome removendo caracteres especiais
+    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
+    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
+  }, []);
+
+  // Função para fazer upload do arquivo
+  const handleFileUpload = useCallback(
+    async (file: File, locale: Locale) => {
+      if (!file) return;
+
+      // Validar tipo de arquivo
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          [`upload_${locale}`]: t('errors.invalidFileType'),
+        }));
+        return;
+      }
+
+      // Validar tamanho do arquivo (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        setErrors(prev => ({
+          ...prev,
+          [`upload_${locale}`]: t('errors.fileTooLarge'),
+        }));
+        return;
+      }
+
+      try {
+        // Gerar nome único
+        const uniqueFileName = generateUniqueFileName(file.name);
+        
+        // Criar URL local para preview
+        const localUrl = URL.createObjectURL(file);
+        
+        // Salvar arquivo no estado
+        setFormData(prev => ({
+          ...prev,
+          uploadedFiles: {
+            ...prev.uploadedFiles,
+            [locale]: {
+              file,
+              url: `/uploads/documents/${locale}/${uniqueFileName}`,
+            },
+          },
+          translations: {
+            ...prev.translations,
+            [locale]: {
+              ...prev.translations[locale],
+              title: prev.translations[locale].title || fileNameToTitle(file.name),
+              url: `/uploads/documents/${locale}/${uniqueFileName}`,
+            },
+          },
+        }));
+
+        // Limpar erro
+        setErrors(prev => ({
+          ...prev,
+          [`upload_${locale}`]: undefined,
+        }));
+
+        toast({
+          title: t('upload.success'),
+          description: file.name,
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+        setErrors(prev => ({
+          ...prev,
+          [`upload_${locale}`]: t('errors.uploadFailed'),
+        }));
+      }
+    },
+    [t, toast, generateUniqueFileName, fileNameToTitle]
+  );
+
+  // Função para remover arquivo
+  const handleFileRemove = useCallback((locale: Locale) => {
+    setFormData(prev => {
+      const newUploadedFiles = { ...prev.uploadedFiles };
+      delete newUploadedFiles[locale];
+      
+      return {
+        ...prev,
+        uploadedFiles: newUploadedFiles,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            url: '',
+          },
+        },
+      };
+    });
+  }, []);
 
   // Verificar status de validação para cada idioma
   const getTranslationStatus = useCallback(
@@ -1076,42 +1160,6 @@ export default function CreateDocumentForm() {
           </div>
         </div>
 
-        {/* Informações do Documento */}
-        <div className="mb-8">
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <File size={16} />
-              {t('fields.filename')}
-              <span className="text-red-400">*</span>
-            </Label>
-            <TextField
-              placeholder={t('placeholders.filename')}
-              value={formData.filename}
-              onChange={e =>
-                handleFilenameChange(e.target.value)
-              }
-              onBlur={handleInputBlur('filename')}
-              error={errors.filename}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500">
-              {t('hints.filename')}
-            </p>
-            {errors.filename && touched.filename && (
-              <p className="text-xs text-red-500">
-                {errors.filename}
-              </p>
-            )}
-            {formData.filename &&
-              !errors.filename &&
-              touched.filename && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.filenameValid')}
-                </div>
-              )}
-          </div>
-        </div>
 
         {/* Traduções */}
         <div className="space-y-6">
@@ -1157,20 +1205,78 @@ export default function CreateDocumentForm() {
                 )}
               </h5>
               <div className="grid gap-4">
+                {/* Upload Section */}
+                <div className="space-y-2">
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <Upload size={16} />
+                    {t('fields.document')}
+                    <span className="text-red-400">*</span>
+                  </Label>
+                  {formData.uploadedFiles && formData.uploadedFiles[loc] ? (
+                    <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg border border-gray-600">
+                      <div className="flex items-center gap-3">
+                        <FileText className="text-secondary" size={20} />
+                        <div>
+                          <p className="text-white text-sm font-medium">
+                            {formData.uploadedFiles[loc].file.name}
+                          </p>
+                          <p className="text-gray-400 text-xs">
+                            {(formData.uploadedFiles[loc].file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFileRemove(loc)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id={`file-upload-${loc}`}
+                        className="sr-only"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleFileUpload(file, loc);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor={`file-upload-${loc}`}
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+                      >
+                        <Upload size={32} className="text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-300">{t('upload.clickToSelect')}</p>
+                        <p className="text-xs text-gray-500 mt-1">{t('upload.supportedFormats')}</p>
+                      </label>
+                    </div>
+                  )}
+                  {errors[`upload_${loc}` as keyof FormErrors] && (
+                    <p className="text-xs text-red-500">
+                      {errors[`upload_${loc}` as keyof FormErrors]}
+                    </p>
+                  )}
+                </div>
+
+                {/* Title and Description */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="text-gray-300 flex items-center gap-2">
                       <Type size={16} />
                       {t('fields.title')}
-                      <span className="text-red-400">
-                        *
-                      </span>
+                      <span className="text-red-400">*</span>
                     </Label>
                     <TextField
                       placeholder={t('placeholders.title')}
-                      value={
-                        formData.translations[loc].title
-                      }
+                      value={formData.translations[loc].title}
                       onChange={e =>
                         updateTranslation(
                           loc,
@@ -1178,9 +1284,7 @@ export default function CreateDocumentForm() {
                           e.target.value
                         )
                       }
-                      onBlur={handleInputBlur(
-                        `title_${loc}`
-                      )}
+                      onBlur={handleInputBlur(`title_${loc}`)}
                       error={errors[`title_${loc}`]}
                       className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     />
@@ -1189,18 +1293,11 @@ export default function CreateDocumentForm() {
                     <Label className="text-gray-300 flex items-center gap-2">
                       <FileText size={16} />
                       {t('fields.description')}
-                      <span className="text-red-400">
-                        *
-                      </span>
+                      <span className="text-red-400">*</span>
                     </Label>
                     <TextField
-                      placeholder={t(
-                        'placeholders.description'
-                      )}
-                      value={
-                        formData.translations[loc]
-                          .description
-                      }
+                      placeholder={t('placeholders.description')}
+                      value={formData.translations[loc].description}
                       onChange={e =>
                         updateTranslation(
                           loc,
@@ -1208,37 +1305,11 @@ export default function CreateDocumentForm() {
                           e.target.value
                         )
                       }
-                      onBlur={handleInputBlur(
-                        `description_${loc}`
-                      )}
+                      onBlur={handleInputBlur(`description_${loc}`)}
                       error={errors[`description_${loc}`]}
                       className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-gray-300 flex items-center gap-2">
-                    <Link size={16} />
-                    {t('fields.url')}
-                    <span className="text-red-400">*</span>
-                  </Label>
-                  <TextField
-                    placeholder={t('placeholders.url')}
-                    value={formData.translations[loc].url}
-                    onChange={e =>
-                      updateTranslation(
-                        loc,
-                        'url',
-                        e.target.value
-                      )
-                    }
-                    onBlur={handleInputBlur(`url_${loc}`)}
-                    error={errors[`url_${loc}`]}
-                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  />
-                  <p className="text-xs text-gray-500">
-                    {t('hints.url')}
-                  </p>
                 </div>
               </div>
             </div>

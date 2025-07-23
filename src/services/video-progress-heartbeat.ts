@@ -9,6 +9,13 @@ interface ProgressUpdate {
   progress: VideoProgress;
   timestamp: number;
   attempts: number;
+  // Additional context for new API
+  lessonTitle?: string;
+  courseTitle?: string;
+  courseSlug?: string;
+  moduleTitle?: string;
+  moduleSlug?: string;
+  lessonImageUrl?: string;
 }
 
 interface HeartbeatConfig {
@@ -32,6 +39,7 @@ export class VideoProgressHeartbeat {
   private readonly MAX_RETRY_ATTEMPTS: number;
   private readonly BATCH_SIZE: number;
   private readonly API_ENDPOINT: string;
+  private readonly NEW_API_ENDPOINT = '/api/v1/users/me/lesson-progress';
   private readonly CACHE_KEY = 'revalida_heartbeat_queue';
   
   constructor(config?: HeartbeatConfig) {
@@ -192,6 +200,66 @@ export class VideoProgressHeartbeat {
     }
   }
   
+  // Enqueue update with full context for new API
+  public enqueueWithContext(
+    lessonId: string, 
+    progress: VideoProgress,
+    context: {
+      courseId?: string;
+      moduleId?: string;
+      lessonTitle?: string;
+      courseTitle?: string;
+      courseSlug?: string;
+      moduleTitle?: string;
+      moduleSlug?: string;
+      lessonImageUrl?: string;
+    }
+  ): void {
+    if (!lessonId || !progress) {
+      console.warn(`${LOG_PREFIX} ⚠️ Invalid update - missing required fields`);
+      return;
+    }
+    
+    const existing = this.updateQueue.get(lessonId);
+    
+    // Only enqueue if progress changed significantly (> 1%)
+    if (existing && Math.abs(existing.progress.percentage - progress.percentage) < 1) {
+      console.log(`${LOG_PREFIX} ⏭️ Skipping update (change < 1%):`, {
+        lessonId,
+        oldPercentage: existing.progress.percentage.toFixed(2) + '%',
+        newPercentage: progress.percentage.toFixed(2) + '%'
+      });
+      return;
+    }
+    
+    const update: ProgressUpdate = {
+      lessonId,
+      ...context,
+      progress,
+      timestamp: Date.now(),
+      attempts: existing?.attempts || 0
+    };
+    
+    this.updateQueue.set(lessonId, update);
+    
+    console.log(`${LOG_PREFIX} 📝 Enqueued update with context:`, {
+      lessonId,
+      lessonTitle: context.lessonTitle,
+      courseTitle: context.courseTitle,
+      percentage: progress.percentage.toFixed(2) + '%',
+      queueSize: this.updateQueue.size
+    });
+    
+    // Save to cache after each update
+    this.saveQueueToCache();
+    
+    // Trigger immediate flush if queue is getting large
+    if (this.updateQueue.size >= this.BATCH_SIZE) {
+      console.log(`${LOG_PREFIX} 📦 Queue size reached batch limit - triggering flush`);
+      this.flush();
+    }
+  }
+  
   // Flush all pending updates to backend
   public async flush(): Promise<void> {
     if (!this.isOnline) {
@@ -246,41 +314,64 @@ export class VideoProgressHeartbeat {
       throw new Error('No auth token available');
     }
     
-    const payload = {
-      updates: updates.map(u => ({
-        lessonId: u.lessonId,
-        courseId: u.courseId,
-        moduleId: u.moduleId,
-        currentTime: u.progress.currentTime,
-        duration: u.progress.duration,
-        percentage: u.progress.percentage,
-        completedAt: u.progress.percentage >= 95 ? u.timestamp : null,
-        timestamp: u.timestamp
-      }))
-    };
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
     
-    console.log(`${LOG_PREFIX} 📤 Sending to backend:`, {
-      endpoint: this.API_ENDPOINT,
-      updateCount: updates.length,
-      payload
-    });
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${this.API_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
+    // Process updates one by one for the new API
+    // (in the future, this could be optimized to batch updates)
+    for (const update of updates) {
+      // Check if we have full context for new API
+      if (update.lessonTitle && update.courseTitle && update.courseSlug && update.moduleSlug) {
+        // Use new API with full context
+        const payload = {
+          lessonId: update.lessonId,
+          lessonTitle: update.lessonTitle,
+          courseId: update.courseId || '',
+          courseTitle: update.courseTitle,
+          courseSlug: update.courseSlug,
+          moduleId: update.moduleId || '',
+          moduleTitle: update.moduleTitle || '',
+          moduleSlug: update.moduleSlug,
+          lessonImageUrl: update.lessonImageUrl && update.lessonImageUrl.startsWith('/') 
+            ? update.lessonImageUrl 
+            : update.lessonImageUrl || '',
+          videoProgress: {
+            currentTime: update.progress.currentTime,
+            duration: update.progress.duration,
+            percentage: update.progress.percentage
+          }
+        };
+        
+        console.log(`${LOG_PREFIX} 📤 Sending to new API:`, {
+          endpoint: this.NEW_API_ENDPOINT,
+          lessonTitle: payload.lessonTitle,
+          percentage: payload.videoProgress.percentage.toFixed(2) + '%'
+        });
+        
+        const response = await fetch(`${apiUrl}${this.NEW_API_ENDPOINT}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API error: ${response.status} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log(`${LOG_PREFIX} 📥 Backend response:`, result);
+      } else {
+        // Fallback to old API format if we don't have full context
+        console.log(`${LOG_PREFIX} ⚠️ Missing context for new API, skipping:`, {
+          lessonId: update.lessonId,
+          hasTitle: !!update.lessonTitle,
+          hasCourseTitle: !!update.courseTitle
+        });
+      }
     }
-    
-    const result = await response.json();
-    console.log(`${LOG_PREFIX} 📥 Backend response:`, result);
   }
   
   // Handle flush errors with retry logic

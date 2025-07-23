@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import TrackCard from '@/components/TrackCard';
 import CourseCard from '@/components/CourseCard';
+import ContinueLearning from '@/components/ContinueLearning';
 import { BookOpen } from 'lucide-react';
 
 interface Translation {
@@ -94,6 +95,11 @@ export default async function IndexPage({
             {t('title')}
           </h1>
           <hr className="mt-4 border-t-2 border-secondary w-48 lg:w-96" />
+        </div>
+
+        {/* Continue Learning Section */}
+        <div className="w-full max-w-6xl mt-8">
+          <ContinueLearning />
         </div>
 
         <div className="flex gap-8 items-center mt-8">

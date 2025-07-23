@@ -327,6 +327,21 @@ export default async function LessonPage({
                 lessonId={lessonId}
                 courseId={course.id}
                 moduleId={moduleFound.id}
+                // Additional context for Continue Learning
+                lessonTitle={lt.title}
+                courseTitle={ct.title}
+                courseSlug={slug}
+                moduleTitle={mt.title}
+                moduleSlug={moduleSlug}
+                lessonImageUrl={(() => {
+                  const imageUrl = lesson.imageUrl || pandaData?.thumbnail || '';
+                  console.log('[LessonPage] Image URL:', { 
+                    lessonImageUrl: lesson.imageUrl, 
+                    pandaThumbnail: pandaData?.thumbnail,
+                    final: imageUrl 
+                  });
+                  return imageUrl;
+                })()}
               />
             </div>
           )}

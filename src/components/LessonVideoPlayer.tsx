@@ -19,6 +19,13 @@ interface LessonVideoPlayerProps {
   lessonId: string;
   courseId?: string;
   moduleId?: string;
+  // Additional context for Continue Learning
+  lessonTitle?: string;
+  courseTitle?: string;
+  courseSlug?: string;
+  moduleTitle?: string;
+  moduleSlug?: string;
+  lessonImageUrl?: string;
 }
 
 export default function LessonVideoPlayer({
@@ -29,6 +36,12 @@ export default function LessonVideoPlayer({
   lessonId,
   courseId,
   moduleId,
+  lessonTitle,
+  courseTitle,
+  courseSlug,
+  moduleTitle,
+  moduleSlug,
+  lessonImageUrl,
 }: LessonVideoPlayerProps) {
   // Initialize video progress hook with course and module context
   const { progress, updateProgress, clearProgress, isLoading } = useVideoProgress(
@@ -65,10 +78,28 @@ export default function LessonVideoPlayer({
     // Update progress using the hook
     updateProgress(newProgress);
 
-    // Future implementation:
-    // - Send to backend API endpoint when online
-    // - Track engagement metrics
-  }, [lessonId, courseId, moduleId, updateProgress]);
+    // Send to heartbeat service with full context for new API
+    const heartbeatService = (window as any).videoProgressHeartbeat;
+    if (heartbeatService && heartbeatService.enqueueWithContext) {
+      const imageUrl = lessonImageUrl || thumbnailUrl || '';
+      console.log('[LessonVideoPlayer] Sending image URL to heartbeat:', imageUrl);
+      
+      heartbeatService.enqueueWithContext(
+        lessonId,
+        newProgress,
+        {
+          courseId,
+          moduleId,
+          lessonTitle: lessonTitle || title,
+          courseTitle,
+          courseSlug,
+          moduleTitle,
+          moduleSlug,
+          lessonImageUrl: imageUrl
+        }
+      );
+    }
+  }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 
   const handleComplete = useCallback(async () => {
     console.log('[LessonVideoPlayer] ✅ Video completed:', {

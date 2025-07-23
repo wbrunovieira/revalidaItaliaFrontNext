@@ -111,6 +111,11 @@ export function useVideoProgress(
       console.log(`${LOG_PREFIX} 💓 Sending to heartbeat service`);
       heartbeatService.current.enqueue(lessonId, newProgress, courseId, moduleId);
       
+      // Also make it available globally for components that need it
+      if (typeof window !== 'undefined') {
+        (window as any).videoProgressHeartbeat = heartbeatService.current;
+      }
+      
       // Check if video is effectively completed (95% or more)
       if (newProgress.percentage >= 95 && (!progress || progress.percentage < 95)) {
         console.log(`${LOG_PREFIX} 🎉 Video completed! (${newProgress.percentage.toFixed(2)}% watched)`);

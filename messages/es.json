@@ -220,7 +220,16 @@
   "Dashboard": {
     "title": "Área del Estudiante",
     "trails": "Rutas",
-    "courses": "Cursos"
+    "courses": "Cursos",
+    "continueWatching": {
+      "title": "Continúa Donde lo Dejaste",
+      "continueButton": "Continuar Viendo",
+      "timeRemaining": "Faltan {time}",
+      "completed": "completado",
+      "minutesAgo": "hace {minutes} minutos",
+      "hoursAgo": "hace {hours} horas",
+      "daysAgo": "hace {days} días"
+    }
   },
   "Track": {
     "back": "Volver",

@@ -381,6 +381,18 @@ export class PandaPlayerService {
               
               setTimeout(checkPlayerReady, 1000);
               
+              // Wrap destroy method to handle errors
+              const originalDestroy = player.destroy;
+              player.destroy = () => {
+                try {
+                  if (originalDestroy && typeof originalDestroy === 'function') {
+                    originalDestroy.call(player);
+                  }
+                } catch (error) {
+                  console.warn('Error destroying PandaPlayer:', error);
+                }
+              };
+              
               resolve(player);
             } catch (initError) {
               console.error('Failed to initialize PandaPlayer:', initError);
@@ -516,9 +528,15 @@ export class PandaPlayerService {
         eventCallbacks.push(callback);
       },
       destroy: () => {
-        window.removeEventListener('message', messageHandler);
-        eventCallbacks = [];
-        iframe.remove();
+        try {
+          window.removeEventListener('message', messageHandler);
+          eventCallbacks = [];
+          if (iframe && iframe.parentNode) {
+            iframe.remove();
+          }
+        } catch (error) {
+          console.warn('Error destroying enhanced iframe player:', error);
+        }
       }
     };
   }
@@ -572,7 +590,15 @@ export class PandaPlayerService {
       toggleFullscreen: () => {},
       setSpeed: () => {},
       onEvent: () => {},
-      destroy: () => iframe.remove()
+      destroy: () => {
+        try {
+          if (iframe && iframe.parentNode) {
+            iframe.remove();
+          }
+        } catch (error) {
+          console.warn('Error destroying basic iframe player:', error);
+        }
+      }
     };
   }
 

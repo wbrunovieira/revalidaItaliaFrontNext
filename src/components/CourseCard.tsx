@@ -40,7 +40,7 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
   const isStarted = mockProgress > 0;
 
   // Dados do curso
-  const modulesCount = course.modules?.length || Math.floor(Math.random() * 8) + 3; // Mock para demonstração
+  const modulesCount = course.modules?.length || (3 + (index % 8)); // Mock determinístico baseado no index
   const estimatedHours = modulesCount * 2; // Estimativa de 2 horas por módulo
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

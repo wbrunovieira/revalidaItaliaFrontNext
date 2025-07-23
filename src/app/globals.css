@@ -248,3 +248,9 @@ body {
 .course-card:hover {
   transform-origin: center;
 }
+
+/* Continue Learning Component */
+.shadow-glow {
+  box-shadow: 0 0 10px rgba(120, 190, 217, 0.5),
+              0 0 20px rgba(120, 190, 217, 0.3);
+}

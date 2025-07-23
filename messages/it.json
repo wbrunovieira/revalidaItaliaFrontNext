@@ -221,7 +221,16 @@
   "Dashboard": {
     "title": "Area Studente",
     "trails": "Tracce",
-    "courses": "Corsi"
+    "courses": "Corsi",
+    "continueWatching": {
+      "title": "Continua da Dove Hai Lasciato",
+      "continueButton": "Continua a Guardare",
+      "timeRemaining": "Mancano {time}",
+      "completed": "completato",
+      "minutesAgo": "{minutes} minuti fa",
+      "hoursAgo": "{hours} ore fa",
+      "daysAgo": "{days} giorni fa"
+    }
   },
   "Track": {
     "back": "Indietro",

@@ -335,7 +335,11 @@ export default function PandaVideoPlayer({
   useEffect(() => {
     return () => {
       if (playerRef.current) {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch (error) {
+          console.warn('[PandaVideoPlayer] Error destroying player:', error);
+        }
         playerRef.current = null;
       }
     };

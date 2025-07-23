@@ -232,7 +232,16 @@
   "Dashboard": {
     "title": "Área do Aluno",
     "trails": "Trilhas",
-    "courses": "Cursos"
+    "courses": "Cursos",
+    "continueWatching": {
+      "title": "Continue de Onde Parou",
+      "continueButton": "Continuar Assistindo",
+      "timeRemaining": "Faltam {time}",
+      "completed": "concluído",
+      "minutesAgo": "há {minutes} minutos",
+      "hoursAgo": "há {hours} horas",
+      "daysAgo": "há {days} dias"
+    }
   },
   "Track": {
     "back": "Voltar",

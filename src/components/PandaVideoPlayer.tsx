@@ -13,8 +13,6 @@ import {
   Loader2,
   ExternalLink,
   AlertCircle,
-  Play,
-  Pause,
 } from 'lucide-react';
 import { PandaPlayerService } from '@/services/panda-player-service';
 import {
@@ -29,7 +27,6 @@ export default function PandaVideoPlayer({
   title,
   thumbnailUrl,
   playerUrl,
-  lessonId,
   onProgress,
   onReady,
   onError,
@@ -46,10 +43,10 @@ export default function PandaVideoPlayer({
   const playerRef = useRef<PandaPlayerInstance | null>(
     null
   );
+  const handlePlayerEventRef = useRef<((event: PandaPlayerEvent) => void) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fallback, setFallback] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState<VideoProgress>({
     currentTime: 0,
     duration: 0,
@@ -139,7 +136,7 @@ export default function PandaVideoPlayer({
 
         // Set up event listeners
         player.onEvent((event: PandaPlayerEvent) => {
-          handlePlayerEvent(event);
+          handlePlayerEventRef.current?.(event);
         });
       } else {
         throw new Error('Failed to create player instance');
@@ -160,6 +157,7 @@ export default function PandaVideoPlayer({
     startTime,
     onReady,
     onError,
+    playerService,
   ]);
 
   // Handle player events
@@ -173,12 +171,10 @@ export default function PandaVideoPlayer({
 
       switch (event.message) {
         case 'panda_play':
-          setIsPlaying(true);
           onPlay?.();
           break;
 
         case 'panda_pause':
-          setIsPlaying(false);
           onPause?.();
           break;
 
@@ -282,9 +278,9 @@ export default function PandaVideoPlayer({
 
         case 'panda_allData':
           // Try to extract duration from allData event
-          if ((event as any).playerData?.duration) {
-            const duration = (event as any).playerData
-              .duration;
+          const eventWithData = event as PandaPlayerEvent & { playerData?: { duration?: number } };
+          if (eventWithData.playerData?.duration) {
+            const duration = eventWithData.playerData.duration;
             setVideoDuration(duration);
             console.log(
               '[PandaVideoPlayer] 📏 Duration from allData:',
@@ -328,8 +324,12 @@ export default function PandaVideoPlayer({
       onComplete,
       onError,
       progress,
+      videoDuration,
     ]
   );
+
+  // Assign the ref
+  handlePlayerEventRef.current = handlePlayerEvent;
 
   // Cleanup on unmount
   useEffect(() => {
@@ -410,10 +410,11 @@ export default function PandaVideoPlayer({
           </div>
           {thumbnailUrl && (
             <div className="mt-4 relative w-full max-w-md h-48 mx-auto opacity-50 rounded overflow-hidden">
-              <img
+              <Image
                 src={thumbnailUrl}
                 alt="Video thumbnail"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           )}

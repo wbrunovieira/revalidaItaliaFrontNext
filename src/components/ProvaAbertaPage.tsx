@@ -2,18 +2,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Play,
   CheckCircle,
-  XCircle,
   ArrowLeft,
-  Flag,
   AlertCircle,
-  Trophy,
-  RotateCcw,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -117,8 +111,7 @@ interface ArgumentGroup {
   questions: Question[];
 }
 
-export default function ProvaAbertaPage({ assessment, questions, locale, backUrl }: ProvaAbertaPageProps) {
-  const t = useTranslations('Assessment');
+export default function ProvaAbertaPage({ assessment, questions, backUrl }: ProvaAbertaPageProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -172,53 +165,8 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
     return () => {
       autoSaveTimeouts.forEach(timeout => clearTimeout(timeout));
     };
-  }, []);
+  }, [autoSaveTimeouts]);
 
-  const fetchDetailedResults = async (attemptId: string) => {
-    try {
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-      
-      const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attemptId}/results`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
-        },
-        credentials: 'include',
-      });
-
-      if (!resultsResponse.ok) {
-        const errorData = await resultsResponse.json();
-        console.error('Results endpoint failed:', errorData);
-        
-        switch (errorData.error) {
-          case 'ATTEMPT_NOT_FOUND':
-            throw new Error('Tentativa não encontrada');
-          case 'ATTEMPT_NOT_FINALIZED':
-            throw new Error('Tentativa ainda não foi finalizada');
-          case 'INSUFFICIENT_PERMISSIONS':
-            throw new Error('Usuário não tem permissão para ver esta tentativa');
-          default:
-            throw new Error(errorData.message || `Results endpoint failed: ${resultsResponse.status}`);
-        }
-      }
-
-      const resultsData = await resultsResponse.json();
-      
-      setAttempt(prev => prev ? ({
-        ...prev,
-        detailedResults: resultsData
-      }) : null);
-
-      return resultsData;
-    } catch (error) {
-      console.error('❌ Failed to fetch detailed results:', error);
-      throw error;
-    }
-  };
 
   const startExam = async () => {
     setLoading(true);
@@ -235,7 +183,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
       let payload;
       try {
         payload = JSON.parse(atob(token.split('.')[1]));
-      } catch (e) {
+      } catch {
         throw new Error('Token de autenticação inválido');
       }
       
@@ -267,7 +215,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
-        } catch (e) {
+        } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }
         
@@ -414,7 +362,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         throw new Error(`Falha ao enviar prova: ${submitResponse.status} - ${errorText}`);
       }
 
-      const submitData = await submitResponse.json();
+      await submitResponse.json();
       
       setAttempt(prev => prev ? ({
         ...prev,

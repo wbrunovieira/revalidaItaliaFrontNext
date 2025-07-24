@@ -21,7 +21,15 @@ interface Track {
   id: string;
   slug: string;
   imageUrl: string;
-  courses?: any[];
+  courses?: Course[];
+  translations?: Translation[];
+}
+
+interface EnrichedTrack {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  courses?: { id: string; title: string; }[];
   translations?: Translation[];
 }
 
@@ -120,7 +128,6 @@ export default function DashboardClient({
     data: tracks,
     loading: tracksLoading,
     error: tracksError,
-    refetch: refetchTracks
   } = useApi<Track[]>('/api/v1/tracks', {
     fallbackData: initialTracks.length > 0 ? initialTracks : fallbackTracks,
     showToastOnError: false
@@ -130,22 +137,25 @@ export default function DashboardClient({
     data: courses,
     loading: coursesLoading,
     error: coursesError,
-    refetch: refetchCourses
   } = useApi<Course[]>('/api/v1/courses', {
     fallbackData: initialCourses.length > 0 ? initialCourses : fallbackCourses,
     showToastOnError: false
   });
 
   // Enrich tracks with course data
-  const enrichedTracks = tracks?.map(track => {
-    const courseIds = (track as any).courseIds || [];
-    const trackCourses = courses?.filter((course: any) => 
+  const enrichedTracks: EnrichedTrack[] = tracks?.map(track => {
+    const trackWithIds = track as Track & { courseIds?: string[] };
+    const courseIds = trackWithIds.courseIds || [];
+    const trackCourses = courses?.filter((course) => 
       courseIds.includes(course.id)
     ) || [];
     
     return {
       ...track,
-      courses: trackCourses,
+      courses: trackCourses.map(course => ({
+        id: course.id,
+        title: course.translations?.[0]?.title || course.slug || ''
+      })),
     };
   }) || [];
 

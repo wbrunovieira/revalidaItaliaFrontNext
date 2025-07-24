@@ -5,13 +5,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { generateSlug, formatSlugInput } from '@/lib/slug';
+import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
 import {
   Route,
-  Link,
   Image as ImageIcon,
   Type,
   FileText,
@@ -19,7 +18,6 @@ import {
   BookOpen,
   Check,
   X,
-  Wand2,
 } from 'lucide-react';
 
 interface Translation {
@@ -86,7 +84,7 @@ export default function CreateTrackForm() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
-  const [slugGenerated, setSlugGenerated] = useState(false);
+  const [, setSlugGenerated] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     slug: '',
@@ -169,42 +167,6 @@ export default function CreateTrackForm() {
     [t]
   );
 
-  // Função para gerar slug automaticamente
-  const handleGenerateSlug = useCallback(() => {
-    const ptTitle = formData.translations.pt.title.trim();
-
-    if (!ptTitle) {
-      toast({
-        title: t('error.slugGenerationTitle'),
-        description: t('error.slugGenerationDescription'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const generatedSlug = generateSlug(ptTitle);
-    setFormData(prev => ({ ...prev, slug: generatedSlug }));
-    setSlugGenerated(true);
-
-    // Marca o campo como touched e valida
-    setTouched(prev => ({ ...prev, slug: true }));
-
-    // Valida o slug gerado
-    const validation = validateSlug(generatedSlug);
-    if (validation.isValid) {
-      setErrors(prev => ({ ...prev, slug: undefined }));
-      toast({
-        title: t('success.slugGenerated'),
-        description: generatedSlug,
-        variant: 'success',
-      });
-    }
-  }, [
-    formData.translations.pt.title,
-    t,
-    toast,
-    validateSlug,
-  ]);
 
   // Validação de campos de texto
   const validateTextField = useCallback(
@@ -461,27 +423,15 @@ export default function CreateTrackForm() {
           id: course.id,
           slug: course.slug,
           imageUrl: course.imageUrl,
-          translations: course.translations || [
-            {
-              locale: 'pt',
-              title: course.title || '',
-              description: course.description || ''
-            }
-          ]
+          translations: course.translations || []
         }));
       } else if (data.courses) {
         // If courses are nested in an object
-        coursesData = data.courses.map((course: any) => ({
+        coursesData = data.courses.map((course: Course) => ({
           id: course.id,
           slug: course.slug,
           imageUrl: course.imageUrl,
-          translations: course.translations || [
-            {
-              locale: 'pt',
-              title: course.title || '',
-              description: course.description || ''
-            }
-          ]
+          translations: course.translations || []
         }));
       }
       
@@ -552,7 +502,6 @@ export default function CreateTrackForm() {
   }, [
     formData,
     t,
-    validateSlug,
     validateUrl,
     validateTextField,
   ]);

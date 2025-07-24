@@ -100,87 +100,6 @@ export default function CreateCourseForm() {
     []
   );
 
-  // Validação de slug
-  const validateSlug = useCallback(
-    (slug: string): ValidationResult => {
-      if (!slug.trim()) {
-        return {
-          isValid: false,
-          message: t('errors.slugRequired'),
-        };
-      }
-      if (slug.trim().length < 3) {
-        return {
-          isValid: false,
-          message: t('errors.slugMin'),
-        };
-      }
-      if (slug.length > 50) {
-        return {
-          isValid: false,
-          message: t('errors.slugMax'),
-        };
-      }
-      if (!/^[a-z0-9-]+$/.test(slug)) {
-        return {
-          isValid: false,
-          message: t('errors.slugInvalid'),
-        };
-      }
-      if (slug.startsWith('-') || slug.endsWith('-')) {
-        return {
-          isValid: false,
-          message: t('errors.slugFormat'),
-        };
-      }
-      if (slug.includes('--')) {
-        return {
-          isValid: false,
-          message: t('errors.slugDoubleHyphen'),
-        };
-      }
-      return { isValid: true };
-    },
-    [t]
-  );
-
-  // Função para gerar slug automaticamente
-  const handleGenerateSlug = useCallback(() => {
-    const ptTitle = formData.translations.pt.title.trim();
-
-    if (!ptTitle) {
-      toast({
-        title: t('error.slugGenerationTitle'),
-        description: t('error.slugGenerationDescription'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const generatedSlug = generateSlug(ptTitle);
-    setFormData(prev => ({ ...prev, slug: generatedSlug }));
-    setSlugGenerated(true);
-
-    // Marca o campo como touched e valida
-    setTouched(prev => ({ ...prev, slug: true }));
-
-    // Valida o slug gerado
-    const validation = validateSlug(generatedSlug);
-    if (validation.isValid) {
-      setErrors(prev => ({ ...prev, slug: undefined }));
-      toast({
-        title: t('success.slugGenerated'),
-        description: generatedSlug,
-        variant: 'success',
-      });
-    }
-  }, [
-    formData.translations.pt.title,
-    t,
-    toast,
-    validateSlug,
-  ]);
-
   // Validação de campos de texto
   const validateTextField = useCallback(
     (
@@ -216,10 +135,6 @@ export default function CreateCourseForm() {
   // Validação individual de campos
   const validateField = useCallback(
     (field: string, value: string): ValidationResult => {
-      if (field === 'slug') {
-        return validateSlug(value);
-      }
-
       if (field === 'imageUrl') {
         if (!value.trim()) {
           return {
@@ -285,14 +200,10 @@ export default function CreateCourseForm() {
             }
           }
         } else if (!fieldValue) {
-          // Para campos diretos como slug e imageUrl
-          fieldValue =
-            formData[
-              field as keyof Pick<
-                FormData,
-                'slug' | 'imageUrl'
-              >
-            ];
+          // Para campos diretos como imageUrl
+          if (field === 'imageUrl') {
+            fieldValue = formData.imageUrl;
+          }
         }
 
         const validation = validateField(
@@ -351,13 +262,7 @@ export default function CreateCourseForm() {
 
     setErrors(newErrors);
     return isValid;
-  }, [
-    formData,
-    t,
-    validateSlug,
-    validateUrl,
-    validateTextField,
-  ]);
+  }, [formData, t, validateUrl, validateTextField]);
 
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
@@ -366,6 +271,7 @@ export default function CreateCourseForm() {
 
       if (error instanceof Error) {
         console.error(`Error message: ${error.message}`);
+
         console.error(`Stack trace: ${error.stack}`);
 
         // Tratamento de erro de validação do NestJS
@@ -588,7 +494,9 @@ export default function CreateCourseForm() {
       }
 
       // Gerar slug automaticamente baseado no título em português
-      const generatedSlug = generateSlug(formData.translations.pt.title);
+      const generatedSlug = generateSlug(
+        formData.translations.pt.title
+      );
 
       const payload = {
         slug: generatedSlug,

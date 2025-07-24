@@ -1,19 +1,14 @@
 // /src/components/TutorDashboard.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Clock,
   User,
   FileText,
-  MessageSquare,
   CheckCircle,
-  AlertCircle,
   Eye,
-  Calendar,
   BookOpen,
   GraduationCap,
   ChevronRight,
@@ -46,7 +41,37 @@ interface PendingAttempt {
   pendingReview: number;
   reviewedQuestions: number;
   rejectedQuestions?: number;
-  answers?: any[];
+  answers?: Answer[];
+}
+
+interface Answer {
+  id: string;
+  questionId: string;
+  isCorrect?: boolean | null;
+  teacherComment?: string;
+}
+
+interface TutorAttempt {
+  id: string;
+  student: Student;
+  assessment: {
+    id: string;
+    title: string;
+    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+  };
+  status: 'SUBMITTED' | 'GRADING' | 'GRADED';
+  submittedAt: string;
+  totalOpenQuestions?: number;
+  pendingAnswers?: number;
+  results?: {
+    totalQuestions: number;
+    correctAnswers: number;
+    reviewedQuestions: number;
+    percentage?: number;
+  };
+  grade?: number;
+  createdAt?: string;
+  answers?: Answer[];
 }
 
 interface TutorDashboardProps {
@@ -56,18 +81,17 @@ interface TutorDashboardProps {
 export default function TutorDashboard({
   locale,
 }: TutorDashboardProps) {
-  const t = useTranslations('Tutor');
   const router = useRouter();
   const { toast } = useToast();
 
   const [attempts, setAttempts] = useState<
     PendingAttempt[]
   >([]);
-  const [quizAttempts, setQuizAttempts] = useState<any[]>(
+  const [quizAttempts, setQuizAttempts] = useState<TutorAttempt[]>(
     []
   );
   const [simuladoAttempts, setSimuladoAttempts] = useState<
-    any[]
+    TutorAttempt[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<
@@ -80,11 +104,7 @@ export default function TutorDashboard({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
-  useEffect(() => {
-    fetchPendingAttempts();
-  }, []);
-
-  const fetchPendingAttempts = async () => {
+  const fetchPendingAttempts = useCallback(async () => {
     try {
       const token = document.cookie
         .split(';')
@@ -115,15 +135,15 @@ export default function TutorDashboard({
       // Separar por tipo de avaliação
       const allAttempts = data.attempts || [];
       const openAssessmentAttempts = allAttempts.filter(
-        (attempt: any) =>
+        (attempt: TutorAttempt) =>
           attempt.assessment?.type === 'PROVA_ABERTA'
       );
       const quizAttempts = allAttempts.filter(
-        (attempt: any) =>
+        (attempt: TutorAttempt) =>
           attempt.assessment?.type === 'QUIZ'
       );
       const simuladoAttempts = allAttempts.filter(
-        (attempt: any) =>
+        (attempt: TutorAttempt) =>
           attempt.assessment?.type === 'SIMULADO'
       );
 
@@ -142,7 +162,7 @@ export default function TutorDashboard({
 
       // Para cada tentativa, buscar os detalhes reais usando o endpoint /results
       const attemptsWithDetails = await Promise.all(
-        openAssessmentAttempts.map(async (attempt: any) => {
+        openAssessmentAttempts.map(async (attempt: TutorAttempt) => {
           try {
             const resultsResponse = await fetch(
               `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
@@ -180,7 +200,7 @@ export default function TutorDashboard({
 
       // Mapear os dados da API para o formato esperado pelo componente
       const mappedAttempts = attemptsWithDetails.map(
-        (attempt: any) => {
+        (attempt: TutorAttempt) => {
           // Use results data if available, otherwise fall back to attempt data
           const totalQuestions =
             attempt.results?.totalQuestions ||
@@ -202,15 +222,15 @@ export default function TutorDashboard({
             // - reviewedQuestions: questões aprovadas (isCorrect === true)
 
             pendingReview = attempt.answers.filter(
-              (answer: any) => answer.isCorrect === null
+              (answer: Answer) => answer.isCorrect === null
             ).length;
 
             rejectedQuestions = attempt.answers.filter(
-              (answer: any) => answer.isCorrect === false
+              (answer: Answer) => answer.isCorrect === false
             ).length;
 
             reviewedQuestions = attempt.answers.filter(
-              (answer: any) => answer.isCorrect === true
+              (answer: Answer) => answer.isCorrect === true
             ).length;
           } else {
             // Fallback to original logic if no answers data
@@ -233,14 +253,14 @@ export default function TutorDashboard({
           return {
             id: attempt.id,
             student: {
-              id: attempt.student?.id,
-              name: attempt.student?.name,
-              email: attempt.student?.email,
+              id: attempt.student?.id || '',
+              name: attempt.student?.name || '',
+              email: attempt.student?.email || '',
             },
             assessment: {
-              id: attempt.assessment?.id,
-              title: attempt.assessment?.title,
-              type: attempt.assessment?.type,
+              id: attempt.assessment?.id || '',
+              title: attempt.assessment?.title || '',
+              type: 'PROVA_ABERTA' as const,
             },
             status: attempt.status,
             submittedAt: attempt.submittedAt,
@@ -258,7 +278,7 @@ export default function TutorDashboard({
 
       // Processar Quiz e Simulado attempts com detalhes
       const quizAttemptsWithDetails = await Promise.all(
-        quizAttempts.map(async (attempt: any) => {
+        quizAttempts.map(async (attempt: TutorAttempt) => {
           try {
             const resultsResponse = await fetch(
               `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
@@ -294,7 +314,7 @@ export default function TutorDashboard({
       );
 
       const simuladoAttemptsWithDetails = await Promise.all(
-        simuladoAttempts.map(async (attempt: any) => {
+        simuladoAttempts.map(async (attempt: TutorAttempt) => {
           try {
             const resultsResponse = await fetch(
               `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
@@ -346,7 +366,7 @@ export default function TutorDashboard({
           answers: att.answers?.length || 0,
           errors:
             att.answers?.filter(
-              (a: any) => a.isCorrect === false
+              (a: Answer) => a.isCorrect === false
             ).length || 0,
         }))
       );
@@ -388,7 +408,11 @@ export default function TutorDashboard({
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl, toast]);
+
+  useEffect(() => {
+    fetchPendingAttempts();
+  }, [fetchPendingAttempts]);
 
   const getStatusColor = (
     status: string,
@@ -560,7 +584,7 @@ export default function TutorDashboard({
               <select
                 value={filter}
                 onChange={e =>
-                  setFilter(e.target.value as any)
+                  setFilter(e.target.value as 'all' | 'pending' | 'completed')
                 }
                 className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
               >
@@ -750,7 +774,7 @@ export default function TutorDashboard({
                       [
                         ...new Set(
                           quizAttempts.map(
-                            (a: any) => a.assessment?.id
+                            (a: TutorAttempt) => a.assessment?.id
                           )
                         ),
                       ].length
@@ -766,7 +790,7 @@ export default function TutorDashboard({
                       [
                         ...new Set(
                           quizAttempts.map(
-                            (a: any) => a.student?.id
+                            (a: TutorAttempt) => a.student?.id
                           )
                         ),
                       ].length
@@ -779,7 +803,7 @@ export default function TutorDashboard({
                 <div className="p-4 bg-gray-700 rounded-lg">
                   <p className="text-2xl font-bold text-red-400">
                     {quizAttempts.reduce(
-                      (total: number, attempt: any) => {
+                      (total: number, attempt: TutorAttempt) => {
                         // Para Quiz/Simulado, usar os dados de results
                         if (attempt.results) {
                           const totalQuestions =
@@ -809,8 +833,8 @@ export default function TutorDashboard({
                 {Object.entries(
                   quizAttempts.reduce(
                     (
-                      acc: Record<string, any[]>,
-                      attempt: any
+                      acc: Record<string, TutorAttempt[]>,
+                      attempt: TutorAttempt
                     ) => {
                       const key =
                         attempt.assessment?.title ||
@@ -819,7 +843,7 @@ export default function TutorDashboard({
                       acc[key].push(attempt);
                       return acc;
                     },
-                    {} as Record<string, any[]>
+                    {} as Record<string, TutorAttempt[]>
                   )
                 ).map(([quizTitle, attempts]) => {
                   // Para Quiz/Simulado, usar os dados de results
@@ -912,7 +936,7 @@ export default function TutorDashboard({
                       [
                         ...new Set(
                           simuladoAttempts.map(
-                            (a: any) => a.assessment?.id
+                            (a: TutorAttempt) => a.assessment?.id
                           )
                         ),
                       ].length
@@ -928,7 +952,7 @@ export default function TutorDashboard({
                       [
                         ...new Set(
                           simuladoAttempts.map(
-                            (a: any) => a.student?.id
+                            (a: TutorAttempt) => a.student?.id
                           )
                         ),
                       ].length
@@ -941,7 +965,7 @@ export default function TutorDashboard({
                 <div className="p-4 bg-gray-700 rounded-lg">
                   <p className="text-2xl font-bold text-red-400">
                     {simuladoAttempts.reduce(
-                      (total: number, attempt: any) => {
+                      (total: number, attempt: TutorAttempt) => {
                         // Para Quiz/Simulado, usar os dados de results
                         if (attempt.results) {
                           const totalQuestions =
@@ -971,8 +995,8 @@ export default function TutorDashboard({
                 {Object.entries(
                   simuladoAttempts.reduce(
                     (
-                      acc: Record<string, any[]>,
-                      attempt: any
+                      acc: Record<string, TutorAttempt[]>,
+                      attempt: TutorAttempt
                     ) => {
                       const key =
                         attempt.assessment?.title ||
@@ -981,7 +1005,7 @@ export default function TutorDashboard({
                       acc[key].push(attempt);
                       return acc;
                     },
-                    {} as Record<string, any[]>
+                    {} as Record<string, TutorAttempt[]>
                   )
                 ).map(([simuladoTitle, attempts]) => {
                   //   Para Quiz/Simulado, usar os dados de results
@@ -1146,12 +1170,6 @@ export default function TutorDashboard({
                       const priority = getPriorityLevel(
                         attempt.submittedAt
                       );
-                      const priorityColor =
-                        priority === 'high'
-                          ? 'border-red-500'
-                          : priority === 'medium'
-                          ? 'border-yellow-500'
-                          : 'border-gray-600';
 
                       return (
                         <div
@@ -1284,8 +1302,6 @@ export default function TutorDashboard({
                                     const totalRejected =
                                       attempt.rejectedQuestions ||
                                       0;
-                                    const totalPending =
-                                      attempt.pendingReview;
 
                                     if (
                                       questionIndex <

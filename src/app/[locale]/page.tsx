@@ -15,7 +15,7 @@ interface Track {
   id: string;
   slug: string;
   imageUrl: string;
-  courses?: any[];
+  courses?: Course[];
   translations?: Translation[];
 }
 

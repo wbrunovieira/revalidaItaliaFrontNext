@@ -1,7 +1,7 @@
 // /src/components/QuizPage.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -10,7 +10,6 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
-  ArrowRight,
   Flag,
   AlertCircle,
   Trophy,
@@ -137,7 +136,6 @@ type QuizPhase = 'start' | 'quiz' | 'results';
 export default function QuizPage({
   assessment,
   questions,
-  locale,
   backUrl,
 }: QuizPageProps) {
   const t = useTranslations('Assessment');
@@ -303,7 +301,7 @@ export default function QuizPage({
       let payload;
       try {
         payload = JSON.parse(atob(token.split('.')[1]));
-      } catch (e) {
+      } catch {
         throw new Error('Token de autenticação inválido');
       }
       
@@ -340,7 +338,7 @@ export default function QuizPage({
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
-        } catch (e) {
+        } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }
         
@@ -348,7 +346,7 @@ export default function QuizPage({
       }
 
       const data = await response.json();
-      const { attempt, isNew, answeredQuestions } = data;
+      const { attempt, isNew } = data;
 
       // Salvar a tentativa no state
       setAttempt(attempt);
@@ -875,15 +873,6 @@ export default function QuizPage({
                     answer.selectedOptionId ===
                     answer.correctOptionId;
 
-                  // Função para extrair o ID da string "Option UUID"
-                  const extractOptionId = (
-                    optionText: string
-                  ) => {
-                    const match = optionText?.match(
-                      /^Option ([a-f0-9-]{36})$/i
-                    );
-                    return match ? match[1] : null;
-                  };
 
                   // Obter os textos reais das opções
                   let displaySelectedText =

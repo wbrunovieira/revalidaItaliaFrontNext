@@ -22,7 +22,7 @@ export default function HeartbeatStatus() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heartbeatService]);
 
   const getAgeInSeconds = (timestamp: number | null) => {
     if (!timestamp) return 'N/A';

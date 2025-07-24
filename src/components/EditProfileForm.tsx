@@ -77,11 +77,17 @@ export default function EditProfileForm({
 
   type ProfileFormData = z.infer<typeof profileSchema>;
 
+  interface UpdateData {
+    name?: string;
+    phone?: string;
+    birthDate?: string;
+    profileImageUrl?: string;
+  }
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -105,7 +111,7 @@ export default function EditProfileForm({
         ?.split('=')[1];
 
       // Preparar dados para envio (apenas campos alterados)
-      const updateData: any = {};
+      const updateData: UpdateData = {};
       
       if (data.name !== userData.name)
         updateData.name = data.name;

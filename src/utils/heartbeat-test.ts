@@ -79,6 +79,6 @@ export function runHeartbeatTest() {
 
 // Export for console usage in development
 if (typeof window !== 'undefined') {
-  (window as any).testHeartbeat = runHeartbeatTest;
+  (window as Window & { testHeartbeat?: typeof runHeartbeatTest }).testHeartbeat = runHeartbeatTest;
   console.log('💡 Run window.testHeartbeat() in console to test the heartbeat service');
 }

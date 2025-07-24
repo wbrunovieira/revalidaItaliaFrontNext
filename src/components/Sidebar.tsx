@@ -15,7 +15,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { JSX, useState, useEffect } from 'react';
+import { JSX, useState, useEffect, useCallback } from 'react';
 
 interface Module {
   id: string;
@@ -70,9 +70,7 @@ export default function Sidebar({
   const [expandedCourse, setExpandedCourse] =
     useState(false);
     
-  const [trackCourses, setTrackCourses] = useState<Course[]>([]);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-  const [expandedTrack, setExpandedTrack] = useState(false);
 
   // Extract course slug from pathname
   const courseSlugMatch = pathname.match(
@@ -88,29 +86,25 @@ export default function Sidebar({
   const trackSlug = trackSlugMatch ? trackSlugMatch[1] : null;
   const isInTrackPage = !!trackSlug;
 
-  // Fetch course and modules when in a course page
-  useEffect(() => {
-    if (courseSlug) {
-      fetchCourseAndModules(courseSlug);
-    } else {
-      setModules([]);
-      setCurrentCourse(null);
-      setExpandedCourse(false);
+  const fetchTrackAndCourses = useCallback(async (slug: string) => {
+    try {
+      // Fetch track details
+      const trackResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`
+      );
+      if (trackResponse.ok) {
+        const tracks = await trackResponse.json();
+        const track = tracks.find((t: Track) => t.slug === slug);
+        if (track) {
+          setCurrentTrack(track);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching track data:', error);
     }
-  }, [courseSlug]);
-  
-  // Fetch track and courses when in a track page
-  useEffect(() => {
-    if (trackSlug) {
-      fetchTrackAndCourses(trackSlug);
-    } else {
-      setTrackCourses([]);
-      setCurrentTrack(null);
-      setExpandedTrack(false);
-    }
-  }, [trackSlug]);
+  }, []);
 
-  const fetchCourseAndModules = async (slug: string) => {
+  const fetchCourseAndModules = useCallback(async (slug: string) => {
     try {
       // Fetch course details
       const courseResponse = await fetch(
@@ -143,35 +137,27 @@ export default function Sidebar({
     } catch (error) {
       console.error('Error fetching course data:', error);
     }
-  };
-  
-  const fetchTrackAndCourses = async (slug: string) => {
-    try {
-      // Fetch track details
-      const trackResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`
-      );
-      if (trackResponse.ok) {
-        const tracks = await trackResponse.json();
-        const track = tracks.find((t: Track) => t.slug === slug);
-        if (track) {
-          setCurrentTrack(track);
-          setExpandedTrack(true);
-          
-          // Fetch courses for this track
-          const coursesResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${track.id}/courses`
-          );
-          if (coursesResponse.ok) {
-            const coursesData = await coursesResponse.json();
-            setTrackCourses(coursesData);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching track data:', error);
+  }, []);
+
+  // Fetch course and modules when in a course page
+  useEffect(() => {
+    if (courseSlug) {
+      fetchCourseAndModules(courseSlug);
+    } else {
+      setModules([]);
+      setCurrentCourse(null);
+      setExpandedCourse(false);
     }
-  };
+  }, [courseSlug, fetchCourseAndModules]);
+  
+  // Fetch track and courses when in a track page
+  useEffect(() => {
+    if (trackSlug) {
+      fetchTrackAndCourses(trackSlug);
+    } else {
+      setCurrentTrack(null);
+    }
+  }, [trackSlug, fetchTrackAndCourses]);
 
   const navItems: {
     label: string;

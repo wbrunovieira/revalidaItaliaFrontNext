@@ -5,6 +5,7 @@ import { Route, BookOpen, Clock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -16,7 +17,7 @@ interface Track {
   id: string;
   slug: string;
   imageUrl: string;
-  courses?: any[];
+  courses?: { id: string; title: string; }[];
   translations?: Translation[];
 }
 
@@ -121,11 +122,12 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
         
         {/* Container da imagem com parallax */}
         <div className="relative overflow-hidden aspect-video">
-          <img
+          <Image
             ref={imageRef}
             src={track.imageUrl}
             alt={translation.title}
-            className="w-full h-full object-cover transition-all duration-700 will-change-transform"
+            fill
+            className="object-cover transition-all duration-700 will-change-transform"
           />
           
           {/* Overlay gradient */}

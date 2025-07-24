@@ -26,7 +26,6 @@ import {
   X,
   Upload,
   Trash2,
-  Link,
 } from 'lucide-react';
 
 interface Translation {
@@ -218,8 +217,7 @@ export default function CreateDocumentForm() {
   // Validação individual de campos
   const validateField = useCallback(
     (
-      field: string,
-      value?: string | number
+      field: string
     ): ValidationResult => {
       if (field === 'courseId') {
         if (!formData.courseId) {
@@ -297,7 +295,7 @@ export default function CreateDocumentForm() {
           }
         }
 
-        const validation = validateField(field, fieldValue);
+        const validation = validateField(field);
         setErrors(prev => ({
           ...prev,
           [field]: validation.isValid
@@ -559,7 +557,7 @@ export default function CreateDocumentForm() {
 
     setErrors(newErrors);
     return isValid;
-  }, [formData, t, validateField, validateTextField]);
+  }, [formData, t, validateTextField]);
 
   const createDocument = useCallback(
     async (
@@ -605,6 +603,7 @@ export default function CreateDocumentForm() {
       courseId: '',
       moduleId: '',
       lessonId: '',
+      uploadedFiles: {},
       translations: {
         pt: {
           locale: 'pt',
@@ -854,9 +853,6 @@ export default function CreateDocumentForm() {
       try {
         // Gerar nome único
         const uniqueFileName = generateUniqueFileName(file.name);
-        
-        // Criar URL local para preview
-        const localUrl = URL.createObjectURL(file);
         
         // Salvar arquivo no estado
         setFormData(prev => ({
@@ -1227,8 +1223,7 @@ export default function CreateDocumentForm() {
                       </div>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
+                        size="small"
                         onClick={() => handleFileRemove(loc)}
                         className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
                       >

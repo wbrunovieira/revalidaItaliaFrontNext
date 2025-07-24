@@ -31,9 +31,9 @@ export function detectBrowserFeatures(): BrowserFeatures {
     hasIntersectionObserver: 'IntersectionObserver' in window,
     hasFullscreen: !!(
       document.fullscreenEnabled ||
-      (document as any).webkitFullscreenEnabled ||
-      (document as any).mozFullScreenEnabled ||
-      (document as any).msFullscreenEnabled
+      (document as Document & { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled ||
+      (document as Document & { mozFullScreenEnabled?: boolean }).mozFullScreenEnabled ||
+      (document as Document & { msFullscreenEnabled?: boolean }).msFullscreenEnabled
     ),
     canAutoplay: true, // Will be tested asynchronously
     supportsHLS: supportsHLS(),
@@ -57,7 +57,7 @@ function supportsWebGL(): boolean {
       window.WebGLRenderingContext &&
       (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
     );
-  } catch (e) {
+  } catch {
     return false;
   }
 }

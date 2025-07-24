@@ -678,3 +678,79 @@ Lembre-se sempre:
 - **Respeite o código existente** - entenda antes de mudar
 - **Pense no próximo desenvolvedor** - que pode ser você
   mesmo no futuro
+
+### 15. Considerações Críticas para Build e TypeScript
+
+#### IMPORTANTE - Evitar Erros Comuns de Build:
+
+1. **Variáveis e Imports Não Usados**
+   - SEMPRE remova imports não utilizados
+   - SEMPRE remova variáveis declaradas mas não usadas
+   - Verifique se `useTranslations` está sendo usado quando importado
+   - Use `_` para prefixar variáveis que precisam existir mas não são usadas
+
+2. **Tipagem Estrita - NUNCA use 'any'**
+   - SEMPRE defina tipos específicos para todas as variáveis
+   - Crie interfaces ou types quando necessário
+   - Para objetos complexos de API, defina interfaces completas
+   - Use `unknown` ao invés de `any` quando o tipo é realmente desconhecido
+   - Para event handlers: `(e: React.ChangeEvent<HTMLSelectElement>)` etc
+
+3. **useCallback e Dependências**
+   - SEMPRE analise se uma função precisa ser wrapped em useCallback
+   - SEMPRE inclua TODAS as dependências no array de dependências
+   - Funções que são passadas como props devem usar useCallback
+   - Cuidado com a ordem: declare funções com useCallback ANTES de usá-las
+
+4. **useEffect e Dependências**
+   - SEMPRE inclua todas as variáveis usadas dentro do useEffect
+   - Se uma função é chamada dentro do useEffect, ela deve estar nas dependências
+   - Use useCallback para funções que são dependências de useEffect
+
+5. **Ordem de Declaração**
+   - Declare hooks e funções ANTES de usá-los
+   - useCallback deve vir ANTES do useEffect que o usa
+   - Evite referências circulares
+
+6. **Validação de Build**
+   - SEMPRE execute `npm run build` antes de finalizar
+   - Corrija TODOS os erros de TypeScript e ESLint
+   - Não ignore warnings - eles podem se tornar erros
+
+#### Exemplos de Correções Comuns:
+
+```typescript
+// ❌ ERRADO
+const [filter, setFilter] = useState('all');
+onChange={(e) => setFilter(e.target.value as any)}
+
+// ✅ CORRETO
+const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+onChange={(e) => setFilter(e.target.value as 'all' | 'pending' | 'completed')}
+```
+
+```typescript
+// ❌ ERRADO
+useEffect(() => {
+  fetchData();
+}, []);
+
+// ✅ CORRETO
+const fetchData = useCallback(async () => {
+  // implementation
+}, [apiUrl, otherDeps]);
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]);
+```
+
+```typescript
+// ❌ ERRADO
+import { useTranslations } from 'next-intl';
+// mas não usa 't' no componente
+
+// ✅ CORRETO
+// Remova o import se não for usar
+// OU adicione: const t = useTranslations('PageName');
+```

@@ -2,16 +2,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import {
   FileText,
-  Download,
   File,
-  Image,
   Archive,
-  Video,
-  Music,
   ExternalLink,
-  FileSpreadsheet,
   Presentation,
   FileImage,
   FileVideo,
@@ -39,15 +35,17 @@ interface DocumentsSectionProps {
 }
 
 // Function to get file icon based on filename
-function getFileIcon(filename: string): JSX.Element {
+function getFileIcon(filename: string): React.ReactElement {
   const extension = filename?.split('.').pop()?.toLowerCase();
   
   // Check if it's a PDF file
   if (extension === 'pdf') {
     return (
-      <img 
+      <Image 
         src="/icons/pdf.svg" 
         alt="PDF" 
+        width={32}
+        height={32}
         className="w-8 h-8"
       />
     );
@@ -56,9 +54,11 @@ function getFileIcon(filename: string): JSX.Element {
   // Check if it's a Word file
   if (extension === 'doc' || extension === 'docx') {
     return (
-      <img 
+      <Image 
         src="/icons/word.svg" 
         alt="Word" 
+        width={32}
+        height={32}
         className="w-8 h-8"
       />
     );
@@ -67,49 +67,49 @@ function getFileIcon(filename: string): JSX.Element {
   // Check if it's an Excel file
   if (extension === 'xls' || extension === 'xlsx' || extension === 'csv') {
     return (
-      <img 
+      <Image 
         src="/icons/excel.svg" 
         alt="Excel" 
+        width={32}
+        height={32}
         className="w-8 h-8"
       />
     );
   }
   
   // Default icon for other file types
-  const iconProps = { size: 24, className: 'text-secondary' };
-  
   switch (extension) {
     case 'ppt':
     case 'pptx':
-      return <Presentation {...iconProps} className="text-orange-400" />;
+      return <Presentation size={24} className="text-orange-400" />;
     case 'jpg':
     case 'jpeg':
     case 'png':
     case 'gif':
     case 'bmp':
     case 'webp':
-      return <FileImage {...iconProps} className="text-purple-400" />;
+      return <FileImage size={24} className="text-purple-400" />;
     case 'mp4':
     case 'avi':
     case 'mov':
     case 'wmv':
     case 'mkv':
-      return <FileVideo {...iconProps} className="text-pink-400" />;
+      return <FileVideo size={24} className="text-pink-400" />;
     case 'mp3':
     case 'wav':
     case 'flac':
     case 'aac':
-      return <FileAudio {...iconProps} className="text-yellow-400" />;
+      return <FileAudio size={24} className="text-yellow-400" />;
     case 'zip':
     case 'rar':
     case '7z':
     case 'tar':
     case 'gz':
-      return <Archive {...iconProps} className="text-gray-400" />;
+      return <Archive size={24} className="text-gray-400" />;
     case 'txt':
-      return <FileText {...iconProps} className="text-gray-300" />;
+      return <FileText size={24} className="text-gray-300" />;
     default:
-      return <File {...iconProps} className="text-gray-400" />;
+      return <File size={24} className="text-gray-400" />;
   }
 }
 

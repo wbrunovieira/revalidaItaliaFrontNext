@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   PlayCircle,
   Video,
-  CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 

@@ -5,6 +5,7 @@ import { Layers, Clock, PlayCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -12,12 +13,21 @@ interface Translation {
   description: string;
 }
 
+interface Lesson {
+  id: string;
+  slug: string;
+  imageUrl?: string | null;
+  order: number;
+  videoId?: string;
+  translations?: Translation[];
+}
+
 interface Module {
   id: string;
   slug: string;
   imageUrl: string | null;
   order: number;
-  lessons?: any[];
+  lessons?: Lesson[];
   translations?: Translation[];
 }
 
@@ -148,11 +158,12 @@ export default function ModuleCard({
           
           {/* Container da imagem com parallax */}
           <div className="relative overflow-hidden h-32">
-            <img
+            <Image
               ref={imageRef}
               src={module.imageUrl || '/placeholder-module.jpg'}
               alt={translation.title}
-              className="w-full h-full object-cover transition-all duration-700 will-change-transform"
+              fill
+              className="object-cover transition-all duration-700 will-change-transform"
             />
             
             {/* Overlay gradient */}

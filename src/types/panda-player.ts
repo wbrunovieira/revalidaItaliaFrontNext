@@ -2,7 +2,7 @@
 
 export interface PandaPlayerOptions {
   onReady?: () => void;
-  onError?: (error: any) => void;
+  onError?: (error: Error | unknown) => void;
   video_id?: string;
   library_id?: string;
   defaultStyle?: boolean;
@@ -60,7 +60,11 @@ export type PandaEventType =
   | 'panda_exitfullscreen'
   | 'panda_loaded'
   | 'panda_loadeddata'
-  | 'panda_allData';
+  | 'panda_allData'
+  | 'play'
+  | 'pause'
+  | 'ready'
+  | 'error';
 
 export interface VideoProgress {
   currentTime: number;
@@ -111,7 +115,7 @@ export interface PandaVideoPlayerProps {
   lessonId?: string;
   onProgress?: (progress: VideoProgress) => void;
   onReady?: () => void;
-  onError?: (error: any) => void;
+  onError?: (error: Error | unknown) => void;
   onComplete?: () => void;
   onPlay?: () => void;
   onPause?: () => void;

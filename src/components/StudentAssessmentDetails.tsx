@@ -1,27 +1,18 @@
 // /src/components/StudentAssessmentDetails.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
-  FileText,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
-  MessageSquare,
   Eye,
-  Calendar,
-  User,
-  RefreshCw,
   ChevronLeft,
-  ChevronRight,
-  Download,
   Edit,
   Send,
-  BookOpen,
-  Target,
 } from 'lucide-react';
 
 interface Question {
@@ -75,7 +66,7 @@ interface StudentAssessmentDetailsProps {
   locale: string;
 }
 
-export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentAssessmentDetailsProps) {
+export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmentDetailsProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -88,11 +79,7 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
-  useEffect(() => {
-    fetchAttemptDetails();
-  }, [attemptId]);
-
-  const fetchAttemptDetails = async () => {
+  const fetchAttemptDetails = useCallback(async () => {
     try {
       const token = document.cookie
         .split(';')
@@ -130,8 +117,8 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
       if (resultsData.answers && resultsData.answers.length > 0) {
         // Create questions from answers data
         questions = resultsData.answers
-          .filter((ans: any) => ans.questionType === 'OPEN' || ans.questionType === 'OPEN_QUESTION')
-          .map((ans: any, index: number) => ({
+          .filter((ans: Answer & { questionType?: string; questionText?: string }) => ans.questionType === 'OPEN' || ans.questionType === 'OPEN_QUESTION')
+          .map((ans: Answer & { questionType?: string; questionText?: string }, index: number) => ({
             id: ans.questionId,
             text: ans.questionText || `Questão ${index + 1}`,
             type: 'OPEN' as const,
@@ -154,8 +141,30 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
       if (resultsData.answers && resultsData.answers.length > 0) {
         // We have real answers with tutor feedback from the results endpoint
         answers = resultsData.answers
-          .filter((ans: any) => ans.questionType === 'OPEN' || ans.questionType === 'OPEN_QUESTION')
-          .map((ans: any) => {
+          .filter((ans: Answer & { 
+            questionType?: string;
+            textAnswer?: string;
+            answer?: string;
+            teacherComment?: string;
+            score?: number;
+            submittedAt?: string;
+            answeredAt?: string;
+            reviewedAt?: string;
+            isCorrect?: boolean | null;
+            reviewerId?: string;
+          }) => ans.questionType === 'OPEN' || ans.questionType === 'OPEN_QUESTION')
+          .map((ans: Answer & { 
+            questionType?: string; 
+            isCorrect?: boolean | null; 
+            reviewerId?: string;
+            textAnswer?: string;
+            answer?: string;
+            teacherComment?: string;
+            score?: number;
+            submittedAt?: string;
+            answeredAt?: string;
+            reviewedAt?: string;
+          }) => {
             console.log('Processing answer:', ans);
             
             // Determine status based on isCorrect field
@@ -256,7 +265,11 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
     } finally {
       setLoading(false);
     }
-  };
+  }, [attemptId, toast, apiUrl]);
+
+  useEffect(() => {
+    fetchAttemptDetails();
+  }, [fetchAttemptDetails]);
 
   const getQuestionStatus = (questionId: string) => {
     const answer = attempt?.answers.find(a => a.questionId === questionId);
@@ -355,20 +368,6 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString(
-      locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'it-IT',
-      {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }
-    );
-  };
 
   if (loading) {
     return (
@@ -401,10 +400,6 @@ export function StudentAssessmentDetails({ attemptId, userId, locale }: StudentA
       </div>
     );
   }
-
-  const currentQuestion = attempt.assessment.questions[selectedQuestionIndex];
-  const currentAnswer = attempt.answers.find(a => a.questionId === currentQuestion?.id);
-  const questionStatus = currentQuestion ? getQuestionStatus(currentQuestion.id) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-6">

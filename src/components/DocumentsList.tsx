@@ -21,8 +21,6 @@ import {
   Package,
   Play,
   BookOpen,
-  Download,
-  Calendar,
 } from 'lucide-react';
 import Image from 'next/image';
 import DocumentViewModal from './DocumentViewModal';

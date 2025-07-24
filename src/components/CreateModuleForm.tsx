@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { generateSlug, formatSlugInput } from '@/lib/slug';
+import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/select';
 import {
   Package,
-  Link,
   Image as ImageIcon,
   Type,
   FileText,
@@ -27,7 +26,6 @@ import {
   Hash,
   Check,
   X,
-  Wand2,
 } from 'lucide-react';
 
 interface Translation {
@@ -101,7 +99,7 @@ export default function CreateModuleForm() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
-  const [slugGenerated, setSlugGenerated] = useState(false);
+  const [, setSlugGenerated] = useState(false);
   const [existingOrders, setExistingOrders] = useState<
     number[]
   >([]);

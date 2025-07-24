@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import { ModernDivider } from '@/components/ui/modern-divider';
 
-import { ArrowLeft, User, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ProfileContent from '@/components/ProfileContent';

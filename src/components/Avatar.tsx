@@ -96,10 +96,11 @@ export default function Avatar() {
             response.status
           );
         }
-      } catch (error: any) {
+      } catch (error) {
         // Only log network errors, not aborts
-        if (error.name !== 'AbortError') {
-          console.warn('Avatar: Failed to fetch user data (using fallback):', error.message);
+        const err = error as Error;
+        if (err.name !== 'AbortError') {
+          console.warn('Avatar: Failed to fetch user data (using fallback):', err.message);
         }
       }
     };

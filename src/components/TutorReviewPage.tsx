@@ -1,30 +1,17 @@
 // /src/components/TutorReviewPage.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
   User,
-  FileText,
-  MessageSquare,
   CheckCircle,
-  XCircle,
-  Clock,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Save,
   Send,
-  Calendar,
-  BookOpen,
-  GraduationCap,
-  Edit,
-  Eye,
   ThumbsUp,
   ThumbsDown,
-  Star,
   Trophy,
 } from 'lucide-react';
 
@@ -80,9 +67,23 @@ interface TutorReviewPageProps {
   backUrl: string;
 }
 
-export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorReviewPageProps) {
-  const t = useTranslations('Tutor');
-  const router = useRouter();
+interface AttemptAnswer {
+  id: string;
+  questionId: string;
+  questionText?: string;
+  questionType?: string;
+  textAnswer?: string;
+  answer?: string;
+  isCorrect?: boolean | null;
+  teacherComment?: string;
+  reviewerId?: string;
+  status: 'SUBMITTED' | 'GRADING' | 'GRADED';
+  submittedAt?: string;
+  answeredAt?: string;
+  originalData?: unknown;
+}
+
+export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   const { toast } = useToast();
 
   const [attemptData, setAttemptData] = useState<AttemptData | null>(null);
@@ -101,23 +102,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
-  useEffect(() => {
-    fetchAttemptData();
-  }, [attemptId]);
-
-  useEffect(() => {
-    if (attemptData && attemptData.questions.length > 0) {
-      const currentQuestion = attemptData.questions[currentQuestionIndex];
-      const currentAnswer = attemptData.answers.find(a => a.questionId === currentQuestion.id);
-      
-      setCurrentReview({
-        isCorrect: currentAnswer?.isCorrect ?? null,
-        teacherComment: currentAnswer?.teacherComment || '',
-      });
-    }
-  }, [currentQuestionIndex, attemptData]);
-
-  const fetchAttemptData = async () => {
+  const fetchAttemptData = useCallback(async () => {
     try {
       const token = document.cookie
         .split(';')
@@ -159,21 +144,16 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
         status: data.attempt?.status || 'SUBMITTED',
         submittedAt: data.attempt?.submittedAt || new Date().toISOString(),
         questions: (data.answers || [])
-          .filter((answer: any) => answer.questionType === 'OPEN')
-          .map((answer: any) => ({
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
+          .map((answer: AttemptAnswer) => ({
             id: answer.questionId,
             text: answer.questionText,
             type: 'OPEN_QUESTION',
           })),
         answers: (data.answers || [])
-          .filter((answer: any) => answer.questionType === 'OPEN' || answer.questionType === 'OPEN_QUESTION')
-          .map((answer: any) => {
-            console.log('Raw answer object:', JSON.stringify(answer, null, 2));
-            // Usar o campo id retornado pela API
-            const answerId = answer.id;
-            console.log('Found answerId:', answerId);
-            return {
-              id: answerId,
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
+          .map((answer: AttemptAnswer) => ({
+              id: answer.id,
               questionId: answer.questionId,
               textAnswer: answer.textAnswer || answer.answer,
               isCorrect: answer.isCorrect,
@@ -183,8 +163,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
               answeredAt: answer.submittedAt || answer.answeredAt,
               // Guardar dados originais para debug
               originalData: answer,
-            };
-          }),
+          })),
         totalQuestions: data.results?.totalQuestions || 0,
         reviewedQuestions: data.results?.reviewedQuestions || 0,
         pendingReview: data.results?.pendingReview || 0,
@@ -206,7 +185,24 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
     } finally {
       setLoading(false);
     }
-  };
+  }, [attemptId, toast, apiUrl]);
+
+  useEffect(() => {
+    fetchAttemptData();
+  }, [fetchAttemptData]);
+
+  useEffect(() => {
+    if (attemptData && attemptData.questions.length > 0) {
+      const currentQuestion = attemptData.questions[currentQuestionIndex];
+      const currentAnswer = attemptData.answers.find(a => a.questionId === currentQuestion.id);
+      
+      setCurrentReview({
+        isCorrect: currentAnswer?.isCorrect ?? null,
+        teacherComment: currentAnswer?.teacherComment || '',
+      });
+    }
+  }, [currentQuestionIndex, attemptData]);
+
 
   const saveReview = async (questionId: string, isCorrect: boolean | null, teacherComment: string) => {
     if (!attemptData) return;
@@ -243,7 +239,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
       try {
         const payload = JSON.parse(atob(token?.split('.')[1] || ''));
         userId = payload.sub || payload.id;
-      } catch (e) {
+      } catch {
         throw new Error('Token inválido');
       }
 
@@ -280,7 +276,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
         try {
           errorData = JSON.parse(errorText);
           console.error('Parsed error data:', errorData);
-        } catch (e) {
+        } catch {
           console.error('Could not parse error response as JSON');
         }
         throw new Error(`Falha ao salvar revisão: ${response.status} - ${errorText}`);
@@ -669,7 +665,7 @@ export default function TutorReviewPage({ attemptId, locale, backUrl }: TutorRev
                   )}
                   {currentReview.isCorrect === null && (
                     <p className="text-sm text-yellow-400 mt-1">
-                      Selecione "Correta" ou "Incorreta" antes de enviar a revisão.
+                      Selecione &quot;Correta&quot; ou &quot;Incorreta&quot; antes de enviar a revisão.
                     </p>
                   )}
                 </div>

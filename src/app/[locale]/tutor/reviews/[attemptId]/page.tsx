@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { cookies } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import TutorReviewPage from '@/components/TutorReviewPage';

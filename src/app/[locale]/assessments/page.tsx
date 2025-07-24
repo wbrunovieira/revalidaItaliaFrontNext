@@ -1,17 +1,15 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import { 
   FileText, 
   ClipboardList, 
-  Brain, 
   Clock, 
   CheckCircle,
-  AlertCircle,
-  BarChart3,
   Filter,
   Search,
   Play,
@@ -61,13 +59,49 @@ export default function AssessmentsPage({ params }: PageProps) {
   const [filteredAssessments, setFilteredAssessments] = useState<Assessment[]>([]);
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [stats, setStats] = useState({
     total: 0,
     quiz: 0,
     simulado: 0,
     provaAberta: 0
   });
+
+  const calculateStats = useCallback((assessments: Assessment[]) => {
+    const quiz = assessments.filter(a => a.type === 'QUIZ').length;
+    const simulado = assessments.filter(a => a.type === 'SIMULADO').length;
+    const provaAberta = assessments.filter(a => a.type === 'PROVA_ABERTA').length;
+
+    setStats({
+      total: assessments.length,
+      quiz,
+      simulado,
+      provaAberta
+    });
+  }, []);
+
+  const fetchAssessments = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?page=1&limit=100`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setAssessments(data.assessments || []);
+        setFilteredAssessments(data.assessments || []);
+        setPagination(data.pagination);
+        calculateStats(data.assessments || []);
+      }
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+    }
+  }, [calculateStats]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -92,43 +126,7 @@ export default function AssessmentsPage({ params }: PageProps) {
     };
 
     checkAuth();
-  }, [locale, router]);
-
-  const fetchAssessments = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?page=1&limit=100`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setAssessments(data.assessments || []);
-        setFilteredAssessments(data.assessments || []);
-        setPagination(data.pagination);
-        calculateStats(data.assessments || []);
-      }
-    } catch (error) {
-      console.error('Error fetching assessments:', error);
-    }
-  };
-
-  const calculateStats = (assessments: Assessment[]) => {
-    const quiz = assessments.filter(a => a.type === 'QUIZ').length;
-    const simulado = assessments.filter(a => a.type === 'SIMULADO').length;
-    const provaAberta = assessments.filter(a => a.type === 'PROVA_ABERTA').length;
-
-    setStats({
-      total: assessments.length,
-      quiz,
-      simulado,
-      provaAberta
-    });
-  };
+  }, [locale, router, fetchAssessments]);
 
   useEffect(() => {
     let filtered = assessments;
@@ -150,11 +148,11 @@ export default function AssessmentsPage({ params }: PageProps) {
   const getAssessmentIcon = (type: string) => {
     switch (type) {
       case 'QUIZ':
-        return <img src="/icons/quiz.svg" alt="Quiz" className="w-6 h-6" />;
+        return <Image src="/icons/quiz.svg" alt="Quiz" width={24} height={24} className="w-6 h-6" />;
       case 'SIMULADO':
-        return <img src="/icons/rating.svg" alt="Simulado" className="w-6 h-6" />;
+        return <Image src="/icons/rating.svg" alt="Simulado" width={24} height={24} className="w-6 h-6" />;
       case 'PROVA_ABERTA':
-        return <img src="/icons/examination.svg" alt="Prova Aberta" className="w-6 h-6" />;
+        return <Image src="/icons/examination.svg" alt="Prova Aberta" width={24} height={24} className="w-6 h-6" />;
       default:
         return <ClipboardList size={24} />;
     }
@@ -230,7 +228,7 @@ export default function AssessmentsPage({ params }: PageProps) {
                   <p className="text-gray-400 text-sm">{t('types.quiz')}</p>
                   <p className="text-2xl font-bold text-white">{stats.quiz}</p>
                 </div>
-                <img src="/icons/quiz.svg" alt="Quiz" className="w-6 h-6" />
+                <Image src="/icons/quiz.svg" alt="Quiz" width={24} height={24} className="w-6 h-6" />
               </div>
             </div>
 
@@ -240,7 +238,7 @@ export default function AssessmentsPage({ params }: PageProps) {
                   <p className="text-gray-400 text-sm">{t('types.simulado')}</p>
                   <p className="text-2xl font-bold text-white">{stats.simulado}</p>
                 </div>
-                <img src="/icons/rating.svg" alt="Simulado" className="w-6 h-6" />
+                <Image src="/icons/rating.svg" alt="Simulado" width={24} height={24} className="w-6 h-6" />
               </div>
             </div>
 
@@ -250,7 +248,7 @@ export default function AssessmentsPage({ params }: PageProps) {
                   <p className="text-gray-400 text-sm">{t('types.prova_aberta')}</p>
                   <p className="text-2xl font-bold text-white">{stats.provaAberta}</p>
                 </div>
-                <img src="/icons/examination.svg" alt="Prova Aberta" className="w-6 h-6" />
+                <Image src="/icons/examination.svg" alt="Prova Aberta" width={24} height={24} className="w-6 h-6" />
               </div>
             </div>
           </div>

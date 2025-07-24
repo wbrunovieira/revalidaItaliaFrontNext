@@ -1,16 +1,12 @@
 // /src/components/StudentAssessmentsPage.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
   FileText,
-  Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  MessageSquare,
   Eye,
   Calendar,
   User,
@@ -20,8 +16,6 @@ import {
   Search,
   BookOpen,
   GraduationCap,
-  Target,
-  BarChart,
   TrendingUp,
   List,
   Grid,
@@ -47,6 +41,40 @@ interface Answer {
   score?: number;
   answeredAt: string;
   reviewedAt?: string;
+}
+
+interface AttemptAnswer {
+  id: string;
+  questionId: string;
+  isCorrect?: boolean | null;
+  teacherComment?: string;
+}
+
+interface AttemptDetails {
+  id: string;
+  student?: { id: string; name: string; email: string };
+  assessment?: { 
+    id: string; 
+    title: string; 
+    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+    moduleId?: string;
+    moduleName?: string;
+    lessonId?: string;
+    lessonName?: string;
+  };
+  results?: {
+    totalQuestions: number;
+    correctAnswers: number;
+    reviewedQuestions: number;
+    scorePercentage?: number;
+    passed?: boolean;
+  };
+  totalOpenQuestions?: number;
+  pendingAnswers?: number;
+  answers: AttemptAnswer[];
+  status: 'SUBMITTED' | 'GRADING' | 'GRADED';
+  submittedAt?: string;
+  gradedAt?: string;
 }
 
 interface StudentAttempt {
@@ -77,7 +105,6 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
   const [attempts, setAttempts] = useState<StudentAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedAttempt, setSelectedAttempt] = useState<StudentAttempt | null>(null);
   
   // Filtros
   const [filter, setFilter] = useState<'all' | 'pending-student' | 'pending-tutor' | 'approved' | 'completed'>('all');
@@ -87,7 +114,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
-  const fetchAttempts = async (showRefreshing = false) => {
+  const fetchAttempts = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) setRefreshing(true);
     try {
       const token = document.cookie
@@ -113,7 +140,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       console.log('StudentAssessmentsPage - User ID:', userId);
       
       // Filtrar apenas PROVA_ABERTA e tentativas do usuário atual
-      const userOpenAttempts = (data.attempts || []).filter((attempt: any) => 
+      const userOpenAttempts = (data.attempts || []).filter((attempt: AttemptDetails) => 
         attempt.student?.id === userId && attempt.assessment?.type === 'PROVA_ABERTA'
       );
       
@@ -121,7 +148,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       
       // Para cada tentativa, buscar os detalhes reais usando o endpoint /results
       const attemptsWithDetails = await Promise.all(
-        userOpenAttempts.map(async (attempt: any) => {
+        userOpenAttempts.map(async (attempt: AttemptDetails) => {
           try {
             const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/results`, {
               method: 'GET',
@@ -148,7 +175,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       );
       
       // Mapear e enriquecer os dados
-      const mappedAttempts = attemptsWithDetails.map((attempt: any) => {
+      const mappedAttempts = attemptsWithDetails.map((attempt: AttemptDetails) => {
         const totalQuestions = attempt.results?.totalQuestions || attempt.totalOpenQuestions || 0;
         
         // Count rejected questions that need new answers from student
@@ -159,11 +186,11 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           // Para o aluno:
           // - pendingReview = questões rejeitadas que precisam ser respondidas novamente
           // - reviewedQuestions = questões aprovadas pelo professor
-          pendingReview = attempt.answers.filter((answer: any) => 
+          pendingReview = attempt.answers.filter((answer: AttemptAnswer) => 
             answer.isCorrect === false
           ).length;
           
-          reviewedQuestions = attempt.answers.filter((answer: any) => 
+          reviewedQuestions = attempt.answers.filter((answer: AttemptAnswer) => 
             answer.isCorrect === true
           ).length;
         } else {
@@ -194,7 +221,6 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           correctAnswers: reviewedQuestions, // Use reviewed questions as correct answers
           scorePercentage: attempt.results?.scorePercentage || ((reviewedQuestions / totalQuestions) * 100),
           passed: attempt.results?.passed || (reviewedQuestions / totalQuestions >= 0.7),
-          answers: attempt.answers || [],
         };
       });
 
@@ -203,7 +229,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
         const key = `${userId}-${attempt.assessment.id}`;
         const existing = acc[key];
         
-        if (!existing || new Date(attempt.submittedAt) > new Date(existing.submittedAt)) {
+        if (!existing || (attempt.submittedAt && existing.submittedAt && new Date(attempt.submittedAt) > new Date(existing.submittedAt))) {
           acc[key] = attempt;
         }
         
@@ -222,11 +248,11 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       setLoading(false);
       if (showRefreshing) setRefreshing(false);
     }
-  };
+  }, [apiUrl, toast, userId]);
 
   useEffect(() => {
     fetchAttempts();
-  }, [userId]);
+  }, [userId, fetchAttempts]);
 
   const getStatusInfo = (attempt: StudentAttempt) => {
     if (attempt.status === 'SUBMITTED' && attempt.reviewedQuestions > 0 && attempt.pendingReview > 0) {
@@ -321,10 +347,6 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
     router.push(`/${locale}/assessments/open-exams/${attemptId}`);
   };
 
-  const handleRetakeAssessment = (assessmentId: string) => {
-    // TODO: Implementar navegação para refazer a prova
-    console.log('Retake assessment:', assessmentId);
-  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -453,7 +475,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
                 <Filter size={20} className="text-gray-400" />
                 <select
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
+                  onChange={(e) => setFilter(e.target.value as 'all' | 'pending-student' | 'pending-tutor' | 'approved' | 'completed')}
                   className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
                 >
                   <option value="all">Todas</option>
@@ -468,7 +490,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
                 <BookOpen size={20} className="text-gray-400" />
                 <select
                   value={groupBy}
-                  onChange={(e) => setGroupBy(e.target.value as any)}
+                  onChange={(e) => setGroupBy(e.target.value as 'assessment' | 'module' | 'status')}
                   className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
                 >
                   <option value="assessment">Por Avaliação</option>

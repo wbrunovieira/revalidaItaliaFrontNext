@@ -5,6 +5,7 @@ import { BookOpen, Layers, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -12,11 +13,17 @@ interface Translation {
   description: string;
 }
 
+interface Module {
+  id: string;
+  title: string;
+  description?: string;
+}
+
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
-  modules?: any[];
+  modules?: Module[];
   translations?: Translation[];
 }
 
@@ -111,11 +118,12 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
         
         {/* Container da imagem com parallax */}
         <div className="relative overflow-hidden aspect-video">
-          <img
+          <Image
             ref={imageRef}
             src={course.imageUrl}
             alt={translation.title}
-            className="w-full h-full object-cover transition-all duration-700 will-change-transform"
+            fill
+            className="object-cover transition-all duration-700 will-change-transform"
           />
           
           {/* Overlay gradient */}

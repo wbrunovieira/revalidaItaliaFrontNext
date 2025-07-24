@@ -79,15 +79,15 @@ export default function LessonVideoPlayer({
     updateProgress(newProgress);
 
     // Send to heartbeat service with full context for new API
-    const heartbeatService = (window as any).videoProgressHeartbeat;
+    const heartbeatService = (window as Window & { videoProgressHeartbeat?: { enqueueWithContext: (data: unknown) => void } }).videoProgressHeartbeat;
     if (heartbeatService && heartbeatService.enqueueWithContext) {
       const imageUrl = lessonImageUrl || thumbnailUrl || '';
       console.log('[LessonVideoPlayer] Sending image URL to heartbeat:', imageUrl);
       
-      heartbeatService.enqueueWithContext(
+      heartbeatService.enqueueWithContext({
         lessonId,
-        newProgress,
-        {
+        progress: newProgress,
+        context: {
           courseId,
           moduleId,
           lessonTitle: lessonTitle || title,
@@ -97,7 +97,7 @@ export default function LessonVideoPlayer({
           moduleSlug,
           lessonImageUrl: imageUrl
         }
-      );
+      });
     }
   }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 

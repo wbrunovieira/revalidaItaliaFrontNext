@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import LessonVideoPlayer from '@/components/LessonVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
@@ -536,24 +537,30 @@ export default async function LessonPage({
                     >
                       {/* Assessment icon positioned in top-left corner - appears on hover */}
                       {assessment.type === 'QUIZ' && (
-                        <img
+                        <Image
                           src="/icons/quiz.svg"
                           alt="Quiz"
+                          width={40}
+                          height={40}
                           className="absolute -top-2 -left-5 w-10 h-10 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
                         />
                       )}
                       {assessment.type === 'SIMULADO' && (
-                        <img
+                        <Image
                           src="/icons/rating.svg"
                           alt="Simulado"
+                          width={40}
+                          height={40}
                           className="absolute -top-2 -left-5 w-10 h-10 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
                         />
                       )}
                       {assessment.type ===
                         'PROVA_ABERTA' && (
-                        <img
+                        <Image
                           src="/icons/examination.svg"
                           alt="Prova Aberta"
+                          width={28}
+                          height={28}
                           className="absolute -top-1 -left-3 w-7 h-7 z-10 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
                         />
                       )}

@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { generateSlug } from '@/lib/slug';
 import {
@@ -74,8 +73,6 @@ export default function EditVideoModal({
   onSave,
 }: EditVideoModalProps) {
   const t = useTranslations('Admin.videoEdit');
-  const params = useParams();
-  const locale = params.locale as string;
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
@@ -93,7 +90,6 @@ export default function EditVideoModal({
   const [loading, setLoading] = useState(false);
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [videoData, setVideoData] = useState<VideoData | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
@@ -115,15 +111,6 @@ export default function EditVideoModal({
     return tokenFromCookie || tokenFromLocal || tokenFromSession;
   };
 
-  // Função para obter tradução por locale
-  const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
-      return (
-        translations.find(tr => tr.locale === targetLocale) || translations[0]
-      );
-    },
-    []
-  );
 
   // Função para formatar duração
   const formatDuration = (seconds: number): string => {
@@ -175,7 +162,6 @@ export default function EditVideoModal({
       }
 
       const video: VideoData = await response.json();
-      setVideoData(video);
 
       // Preparar traduções
       const translationsObj: FormTranslations = {

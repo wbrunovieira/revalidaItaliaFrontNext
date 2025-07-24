@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WifiOff, AlertTriangle, RefreshCw, Wifi } from 'lucide-react';
+import { WifiOff, Wifi } from 'lucide-react';
 
 interface NetworkStatus {
   isOnline: boolean;

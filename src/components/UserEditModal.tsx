@@ -144,11 +144,11 @@ export default function UserEditModal({
           }
           return { isValid: true };
 
-        case 'cpf':
+        case 'nationalId':
           if (!value.trim()) {
             return {
               isValid: false,
-              message: t('errors.cpfRequired'),
+              message: t('errors.nationalIdRequired'),
             };
           }
           // Aceita qualquer documento - sem validação específica
@@ -276,7 +276,7 @@ export default function UserEditModal({
   const handleNationalIdChange = useCallback(
     (value: string) => {
       setFormData(prev => ({ ...prev, nationalId: value }));
-      handleFieldValidation('cpf', value);
+      handleFieldValidation('nationalId', value);
     },
     [handleFieldValidation]
   );
@@ -417,7 +417,7 @@ export default function UserEditModal({
 
     try {
       const payload = {
-        name: formData.fullName.trim(),
+        fullName: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         nationalId: formData.nationalId.trim(),
         role: formData.role,
@@ -434,7 +434,7 @@ export default function UserEditModal({
       // Chamar callback com dados atualizados incluindo documento formatado
       const updatedUser: UserEditData = {
         identityId: user.identityId,
-        name: payload.name,
+        fullName: payload.fullName,
         email: payload.email,
         nationalId: formData.nationalId, // Mantém formatação
         role: payload.role,
@@ -541,7 +541,7 @@ export default function UserEditModal({
               )}
               {formData.fullName &&
                 !errors.fullName &&
-                touched.name && (
+                touched.fullName && (
                   <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
                     <Check size={14} />
                     {t('validation.nameValid')}
@@ -619,9 +619,9 @@ export default function UserEditModal({
                   {errors.nationalId}
                 </div>
               )}
-              {formData.cpf &&
-                !errors.cpf &&
-                touched.cpf && (
+              {formData.nationalId &&
+                !errors.nationalId &&
+                touched.nationalId && (
                   <div className="flex items-center gap-2 text-green-400 text-sm mt-1">
                     <Check size={14} />
                     {t('validation.documentValid')}

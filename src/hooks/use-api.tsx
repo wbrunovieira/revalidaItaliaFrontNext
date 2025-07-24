@@ -16,15 +16,16 @@ export interface ApiState<T> {
   refetch: () => Promise<void>;
 }
 
-const determineErrorType = (error: any): ApiError => {
-  if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+const determineErrorType = (error: unknown): ApiError => {
+  const err = error as Error;
+  if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
     return {
       type: 'network',
       message: 'Servidor indisponível. Verifique sua conexão.',
       retryable: true
     };
   }
-  if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+  if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
     return {
       type: 'auth',
       message: 'Sessão expirada. Faça login novamente.',
@@ -100,7 +101,7 @@ export function useApi<T>(
       const result = await response.json();
       setData(result);
       setError(null); // Clear any previous errors on success
-    } catch (err: any) {
+    } catch (err) {
       const apiError = determineErrorType(err);
       setError(apiError);
 

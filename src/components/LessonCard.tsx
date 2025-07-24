@@ -5,6 +5,7 @@ import { PlayCircle, Clock, FileText, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -136,11 +137,12 @@ export default function LessonCard({
           {/* Container da imagem com parallax */}
           <div className="relative overflow-hidden h-24">
             {lesson.imageUrl ? (
-              <img
+              <Image
                 ref={imageRef}
                 src={lesson.imageUrl}
                 alt={translation.title}
-                className="w-full h-full object-cover transition-all duration-700 will-change-transform"
+                fill
+                className="object-cover transition-all duration-700 will-change-transform"
               />
             ) : (
               <div 

@@ -20,6 +20,12 @@ interface Translation {
   description: string;
 }
 
+interface Course {
+  id: string;
+  title: string;
+  slug?: string;
+}
+
 interface Track {
   id: string;
   slug: string;
@@ -76,7 +82,7 @@ export default async function TracksPage({
   // Enriquecer trilhas com dados dos cursos
   const enrichedTracks = tracks.map(track => {
     const courseIds = track.courseIds || [];
-    const courses = allCourses.filter((course: any) => 
+    const courses = allCourses.filter((course: Course) => 
       courseIds.includes(course.id)
     );
     

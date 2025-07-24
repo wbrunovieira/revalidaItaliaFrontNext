@@ -23,11 +23,17 @@ interface Track {
   translations: Translation[];
 }
 
+interface Module {
+  id: string;
+  title: string;
+  description?: string;
+}
+
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
-  modules?: any[];
+  modules?: Module[];
   translations: Translation[];
 }
 

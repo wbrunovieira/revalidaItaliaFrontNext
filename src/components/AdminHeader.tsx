@@ -1,7 +1,7 @@
 // /src/components/AdminHeader.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Shield,
@@ -50,15 +50,16 @@ export default function AdminHeader() {
     return null;
   };
 
-  const determineErrorType = (error: any): ConnectionError => {
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+  const determineErrorType = (error: unknown): ConnectionError => {
+    const err = error as Error;
+    if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
       return {
         type: 'network',
         message: 'Servidor indisponível. Verifique sua conexão.',
         retryable: true
       };
     }
-    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+    if (err.message.includes('401') || err.message.includes('Unauthorized')) {
       return {
         type: 'auth',
         message: 'Sessão expirada. Faça login novamente.',
@@ -72,7 +73,7 @@ export default function AdminHeader() {
     };
   };
 
-  const fetchUserInfo = async (isRetry = false) => {
+  const fetchUserInfo = useCallback(async (isRetry = false) => {
     if (isRetry) {
       setIsRetrying(true);
     }
@@ -149,7 +150,7 @@ export default function AdminHeader() {
           retryable: true
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao buscar informações do usuário:', error);
       const errorInfo = determineErrorType(error);
       setConnectionError(errorInfo);
@@ -165,7 +166,7 @@ export default function AdminHeader() {
       setLoadingUser(false);
       setIsRetrying(false);
     }
-  };
+  }, [retryCount]);
 
   const handleManualRetry = () => {
     setLoadingUser(true);
@@ -175,7 +176,7 @@ export default function AdminHeader() {
 
   useEffect(() => {
     fetchUserInfo();
-  }, []);
+  }, [fetchUserInfo]);
 
   return (
     <header className="relative z-10 bg-gradient-to-r from-primary-dark/80 via-primary/60 to-primary-dark/80 backdrop-blur-md shadow-2xl shadow-primary/20 rounded-2xl border border-primary/20 mb-8">

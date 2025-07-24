@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { VideoProgress } from '@/types/panda-player';
 import { X, Play, RotateCcw, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -36,6 +36,12 @@ export default function ContinueWatchingBanner({
     }
   }, [progress]);
 
+  const handleResume = useCallback(() => {
+    console.log('[ContinueWatchingBanner] ▶️ User chose to resume');
+    setIsVisible(false);
+    onResume();
+  }, [onResume]);
+
   useEffect(() => {
     if (!isVisible || isPaused) return;
 
@@ -51,13 +57,7 @@ export default function ContinueWatchingBanner({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isVisible, isPaused]);
-
-  const handleResume = () => {
-    console.log('[ContinueWatchingBanner] ▶️ User chose to resume');
-    setIsVisible(false);
-    onResume();
-  };
+  }, [isVisible, isPaused, handleResume]);
 
   const handleRestart = () => {
     console.log('[ContinueWatchingBanner] 🔄 User chose to restart');

@@ -10,14 +10,12 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
-  ArrowRight,
   Flag,
   AlertCircle,
   Trophy,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Timer,
 } from 'lucide-react';
 
@@ -144,7 +142,7 @@ interface ArgumentGroup {
   questions: Question[];
 }
 
-export default function SimuladoPage({ assessment, questions, locale, backUrl }: SimuladoPageProps) {
+export default function SimuladoPage({ assessment, questions, backUrl }: SimuladoPageProps) {
   const t = useTranslations('Assessment');
   const router = useRouter();
   const { toast } = useToast();
@@ -242,19 +240,19 @@ export default function SimuladoPage({ assessment, questions, locale, backUrl }:
   };
 
   // Limpar timer
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-  };
+  }, [timerInterval]);
 
   // Cleanup do timer quando o componente for desmontado
   useEffect(() => {
     return () => {
       clearTimer();
     };
-  }, []);
+  }, [clearTimer]);
 
   const fetchDetailedResults = async (attemptId: string) => {
     try {
@@ -321,7 +319,7 @@ export default function SimuladoPage({ assessment, questions, locale, backUrl }:
       let payload;
       try {
         payload = JSON.parse(atob(token.split('.')[1]));
-      } catch (e) {
+      } catch {
         throw new Error('Token de autenticação inválido');
       }
       
@@ -353,7 +351,7 @@ export default function SimuladoPage({ assessment, questions, locale, backUrl }:
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
-        } catch (e) {
+        } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }
         
@@ -361,7 +359,7 @@ export default function SimuladoPage({ assessment, questions, locale, backUrl }:
       }
 
       const data = await response.json();
-      const { attempt, isNew, answeredQuestions } = data;
+      const { attempt, isNew } = data;
       
       setAttempt(attempt);
       

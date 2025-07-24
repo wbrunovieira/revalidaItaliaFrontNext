@@ -14,7 +14,6 @@ import Image from 'next/image';
 
 export default function ResetPasswordForm() {
   const t = useTranslations('ResetPassword');
-  const API = process.env.NEXT_PUBLIC_API_URL!;
   const router = useRouter();
   const { locale } = (useParams() as { locale?: string }) ?? 'pt';
   const searchParams = useSearchParams();
@@ -64,7 +63,7 @@ export default function ResetPasswordForm() {
     setFocus('password');
   }, [token, setFocus, t]);
 
-  const onSubmit = async (data: ResetPasswordData) => {
+  const onSubmit = async () => {
     if (!token) {
       setFormError(t('invalidToken'));
       return;

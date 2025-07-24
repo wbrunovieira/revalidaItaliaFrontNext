@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,8 +13,6 @@ import Link from 'next/link';
 
 export default function ForgotPasswordForm() {
   const t = useTranslations('ForgotPassword');
-  const API = process.env.NEXT_PUBLIC_API_URL!;
-  const router = useRouter();
   const { locale } = (useParams() as { locale?: string }) ?? 'pt';
 
   const [formError, setFormError] = useState<string | null>(null);

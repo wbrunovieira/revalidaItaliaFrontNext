@@ -221,6 +221,12 @@
     "title": "Área del Estudiante",
     "trails": "Rutas",
     "courses": "Cursos",
+    "offlineMode": "Modo Offline",
+    "offlineModeDescription": "Usando datos guardados localmente. La conexión se restablecerá automáticamente.",
+    "reconnecting": "Reconectando al servidor...",
+    "errorLoadingData": "Error al cargar datos",
+    "serverUnavailable": "Servidor No Disponible",
+    "serverUnavailableDescription": "Servidor no disponible • Algunas funcionalidades pueden no funcionar",
     "continueWatching": {
       "title": "Continúa Donde lo Dejaste",
       "continueButton": "Continuar Viendo",

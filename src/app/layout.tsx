@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import ConnectionStatus from '@/components/ConnectionStatus';
 
 import {
   Plus_Jakarta_Sans,
@@ -38,7 +39,8 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         {children}
-
+        
+        <ConnectionStatus />
         <Toaster />
       </body>
     </html>

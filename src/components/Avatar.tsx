@@ -69,6 +69,9 @@ export default function Avatar() {
         console.log('Fetching user data for ID:', userId);
 
         // Usar a rota GET /users/:id que existe no controller
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL ||
@@ -78,8 +81,11 @@ export default function Avatar() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            signal: controller.signal,
           }
         );
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const data = await response.json();
@@ -90,8 +96,11 @@ export default function Avatar() {
             response.status
           );
         }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
+      } catch (error: any) {
+        // Only log network errors, not aborts
+        if (error.name !== 'AbortError') {
+          console.warn('Avatar: Failed to fetch user data (using fallback):', error.message);
+        }
       }
     };
 

@@ -233,6 +233,12 @@
     "title": "Área do Aluno",
     "trails": "Trilhas",
     "courses": "Cursos",
+    "offlineMode": "Modo Offline",
+    "offlineModeDescription": "Usando dados salvos localmente. A conexão será restaurada automaticamente.",
+    "reconnecting": "Reconectando ao servidor...",
+    "errorLoadingData": "Erro ao carregar dados",
+    "serverUnavailable": "Servidor Indisponível",
+    "serverUnavailableDescription": "Servidor indisponível • Algumas funcionalidades podem não funcionar",
     "continueWatching": {
       "title": "Continue de Onde Parou",
       "continueButton": "Continuar Assistindo",

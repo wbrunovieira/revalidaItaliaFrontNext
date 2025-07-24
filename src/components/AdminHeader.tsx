@@ -8,6 +8,9 @@ import {
   User,
   Activity,
   ChevronDown,
+  AlertTriangle,
+  RefreshCw,
+  WifiOff,
 } from 'lucide-react';
 
 import LanguageButton from '@/components/LanguageButton';
@@ -22,12 +25,21 @@ interface UserInfo {
   role: 'admin' | 'student';
 }
 
+interface ConnectionError {
+  type: 'network' | 'auth' | 'server';
+  message: string;
+  retryable: boolean;
+}
+
 export default function AdminHeader() {
   const t = useTranslations('Admin');
   const [userInfo, setUserInfo] = useState<UserInfo | null>(
     null
   );
   const [loadingUser, setLoadingUser] = useState(true);
+  const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const getCookie = (name: string): string | null => {
     if (typeof document === 'undefined') return null;
@@ -38,62 +50,130 @@ export default function AdminHeader() {
     return null;
   };
 
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const tokenFromCookie = getCookie('token');
-        const tokenFromStorage =
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
-        const token = tokenFromCookie || tokenFromStorage;
-
-        if (!token) {
-          setLoadingUser(false);
-          return;
-        }
-
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url
-          .replace(/-/g, '+')
-          .replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-          atob(base64)
-            .split('')
-            .map(
-              c =>
-                '%' +
-                ('00' + c.charCodeAt(0).toString(16)).slice(
-                  -2
-                )
-            )
-            .join('')
-        );
-        const payload = JSON.parse(jsonPayload);
-
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${payload.sub}`,
-          { headers }
-        );
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUserInfo(userData.user);
-        }
-      } catch (error) {
-        console.error(
-          'Erro ao buscar informações do usuário:',
-          error
-        );
-      } finally {
-        setLoadingUser(false);
-      }
+  const determineErrorType = (error: any): ConnectionError => {
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      return {
+        type: 'network',
+        message: 'Servidor indisponível. Verifique sua conexão.',
+        retryable: true
+      };
+    }
+    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+      return {
+        type: 'auth',
+        message: 'Sessão expirada. Faça login novamente.',
+        retryable: false
+      };
+    }
+    return {
+      type: 'server',
+      message: 'Erro interno do servidor.',
+      retryable: true
     };
+  };
 
+  const fetchUserInfo = async (isRetry = false) => {
+    if (isRetry) {
+      setIsRetrying(true);
+    }
+
+    try {
+      setConnectionError(null);
+      
+      const tokenFromCookie = getCookie('token');
+      const tokenFromStorage =
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('accessToken');
+      const token = tokenFromCookie || tokenFromStorage;
+
+      if (!token) {
+        setConnectionError({
+          type: 'auth',
+          message: 'Token de autenticação não encontrado.',
+          retryable: false
+        });
+        setLoadingUser(false);
+        return;
+      }
+
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(
+            c =>
+              '%' +
+              ('00' + c.charCodeAt(0).toString(16)).slice(
+                -2
+              )
+          )
+          .join('')
+      );
+      const payload = JSON.parse(jsonPayload);
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${payload.sub}`,
+        { 
+          headers,
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUserInfo(userData.user);
+        setRetryCount(0);
+      } else if (response.status === 401) {
+        setConnectionError({
+          type: 'auth',
+          message: 'Sessão expirada. Faça login novamente.',
+          retryable: false
+        });
+      } else {
+        setConnectionError({
+          type: 'server',
+          message: `Erro do servidor (${response.status}).`,
+          retryable: true
+        });
+      }
+    } catch (error: any) {
+      console.error('Erro ao buscar informações do usuário:', error);
+      const errorInfo = determineErrorType(error);
+      setConnectionError(errorInfo);
+      
+      // Auto-retry para erros de rede (máximo 3 tentativas)
+      if (errorInfo.retryable && retryCount < 3 && !isRetry) {
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchUserInfo(true);
+        }, 2000 * (retryCount + 1)); // Backoff exponencial
+      }
+    } finally {
+      setLoadingUser(false);
+      setIsRetrying(false);
+    }
+  };
+
+  const handleManualRetry = () => {
+    setLoadingUser(true);
+    setRetryCount(0);
+    fetchUserInfo(true);
+  };
+
+  useEffect(() => {
     fetchUserInfo();
   }, []);
 
@@ -136,7 +216,7 @@ export default function AdminHeader() {
           {/* Column 3 - User Info & Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-3 sm:gap-4">
             {/* User Profile */}
-            {!loadingUser && userInfo && (
+            {!loadingUser && userInfo && !connectionError && (
               <div className="group relative">
                 <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-800/60 to-gray-900/60 rounded-xl border border-gray-700/50 backdrop-blur-sm hover:from-gray-700/60 hover:to-gray-800/60 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-xl">
                   <div className="relative">
@@ -177,6 +257,59 @@ export default function AdminHeader() {
                     className="text-gray-400 hidden sm:block"
                   />
                 </div>
+              </div>
+            )}
+
+            {/* Connection Error State */}
+            {!loadingUser && connectionError && (
+              <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-red-900/60 to-red-800/60 rounded-xl border border-red-700/50 backdrop-blur-sm shadow-lg">
+                <div className="relative">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 ring-2 ring-red-500/20 shadow-md">
+                    {connectionError.type === 'network' ? (
+                      <WifiOff size={18} className="text-white" />
+                    ) : (
+                      <AlertTriangle size={18} className="text-white" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-800 flex items-center justify-center shadow-sm animate-pulse">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+
+                <div className="hidden sm:block text-right flex-1">
+                  <p className="text-white text-sm font-medium leading-tight">
+                    Erro de Conexão
+                  </p>
+                  <p className="text-red-300 text-xs mt-1 max-w-48 truncate">
+                    {connectionError.message}
+                  </p>
+                </div>
+
+                {connectionError.retryable && (
+                  <button
+                    onClick={handleManualRetry}
+                    disabled={isRetrying}
+                    className="flex items-center gap-1 px-2 py-1 bg-red-600/80 hover:bg-red-500/80 rounded-lg text-white text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <RefreshCw 
+                      size={12} 
+                      className={isRetrying ? "animate-spin" : ""} 
+                    />
+                    <span className="hidden sm:inline">
+                      {isRetrying ? 'Tentando...' : 'Tentar'}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Retry Status */}
+            {retryCount > 0 && isRetrying && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-900/60 to-yellow-800/60 rounded-lg border border-yellow-700/50 backdrop-blur-sm">
+                <RefreshCw size={14} className="text-yellow-300 animate-spin" />
+                <p className="text-yellow-200 text-xs">
+                  Tentativa {retryCount}/3
+                </p>
               </div>
             )}
             {/* Loading State */}

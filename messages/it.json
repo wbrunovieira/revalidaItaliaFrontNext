@@ -513,6 +513,25 @@
       "createDescription": "La flashcard è stata creata con successo"
     }
   },
+  
+  "createFlashcardTag": {
+    "title": "Crea Tag Flashcard",
+    "name": "Nome del Tag",
+    "namePlaceholder": "es: Vocabolario Base",
+    "create": "Crea Tag",
+    "creating": "Creazione...",
+    "errors": {
+      "nameRequired": "Il nome è obbligatorio",
+      "nameTooShort": "Il nome deve avere almeno 3 caratteri",
+      "nameTooLong": "Il nome non può superare i 200 caratteri",
+      "createTitle": "Errore nella creazione del tag",
+      "createDescription": "Impossibile creare il tag"
+    },
+    "success": {
+      "createTitle": "Tag creato",
+      "createDescription": "Il tag è stato creato con successo"
+    }
+  },
 
   "questionsList": {
     "totalQuestions": "Totale domande",

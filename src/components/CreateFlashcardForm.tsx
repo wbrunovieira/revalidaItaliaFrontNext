@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { generateSlug } from '@/lib/slug';
 import {
   CreditCard,
   Type,
@@ -23,8 +24,6 @@ import {
   X,
   Upload,
   RotateCcw,
-  Hash,
-  Package,
 } from 'lucide-react';
 
 interface FormData {
@@ -34,8 +33,6 @@ interface FormData {
   answerContent: string;
   argumentId: string;
   tagIds: string[];
-  slug: string;
-  importBatchId: string;
 }
 
 interface FormErrors {
@@ -43,8 +40,6 @@ interface FormErrors {
   answerContent?: string;
   argumentId?: string;
   tagIds?: string;
-  slug?: string;
-  importBatchId?: string;
   [key: string]: string | undefined;
 }
 
@@ -108,8 +103,6 @@ export default function CreateFlashcardForm({
     answerContent: '',
     argumentId: '',
     tagIds: [],
-    slug: '',
-    importBatchId: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -235,35 +228,6 @@ export default function CreateFlashcardForm({
           return {
             isValid: false,
             message: t('errors.argumentRequired'),
-          };
-        }
-        break;
-      case 'slug':
-        if (value && typeof value === 'string') {
-          const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-          if (!slugRegex.test(value)) {
-            return {
-              isValid: false,
-              message: t('errors.invalidSlug'),
-            };
-          }
-          if (value.length > 100) {
-            return {
-              isValid: false,
-              message: t('errors.slugTooLong'),
-            };
-          }
-        }
-        break;
-      case 'importBatchId':
-        if (
-          value &&
-          typeof value === 'string' &&
-          value.length > 100
-        ) {
-          return {
-            isValid: false,
-            message: t('errors.importBatchIdTooLong'),
           };
         }
         break;
@@ -403,8 +367,6 @@ export default function CreateFlashcardForm({
       'questionContent',
       'answerContent',
       'argumentId',
-      'slug',
-      'importBatchId',
     ];
 
     fieldsToValidate.forEach(field => {
@@ -443,6 +405,13 @@ export default function CreateFlashcardForm({
         .find(row => row.startsWith('token='))
         ?.split('=')[1];
 
+      // Gerar slug automaticamente a partir da pergunta
+      const slug = generateSlug(
+        formData.questionType === 'TEXT' 
+          ? formData.questionContent 
+          : `flashcard-${Date.now()}`
+      );
+
       const payload = {
         question: {
           type: formData.questionType,
@@ -453,12 +422,9 @@ export default function CreateFlashcardForm({
           content: formData.answerContent,
         },
         argumentId: formData.argumentId,
+        slug,
         ...(formData.tagIds.length > 0 && {
           tagIds: formData.tagIds,
-        }),
-        ...(formData.slug && { slug: formData.slug }),
-        ...(formData.importBatchId && {
-          importBatchId: formData.importBatchId,
         }),
       };
 
@@ -513,8 +479,6 @@ export default function CreateFlashcardForm({
       answerContent: '',
       argumentId: '',
       tagIds: [],
-      slug: '',
-      importBatchId: '',
     });
     setQuestionImageFile(null);
     setAnswerImageFile(null);
@@ -523,26 +487,22 @@ export default function CreateFlashcardForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-gray-800 rounded-xl shadow-xl">
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-secondary/20 rounded-lg">
-              <CreditCard
-                className="text-secondary"
-                size={24}
-              />
-            </div>
-            <h2 className="text-xl font-bold text-white">
-              {t('title')}
-            </h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-4xl space-y-6"
+    >
+      <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-secondary/20 rounded-lg">
+            <CreditCard
+              className="text-secondary"
+              size={24}
+            />
           </div>
+          <h2 className="text-xl font-bold text-white">
+            {t('title')}
+          </h2>
         </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 space-y-6"
-        >
           {/* Question Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -912,47 +872,6 @@ export default function CreateFlashcardForm({
             </Select>
           </div>
 
-          {/* Slug */}
-          <div>
-            <TextField
-              label={t('slug')}
-              value={formData.slug}
-              onChange={(
-                e: React.ChangeEvent<HTMLInputElement>
-              ) =>
-                handleFieldChange('slug', e.target.value)
-              }
-              onBlur={() => handleBlur('slug')}
-              placeholder={t('slugPlaceholder')}
-              error={errors.slug}
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              {t('slugHelperText')}
-            </p>
-          </div>
-
-          {/* Import Batch ID */}
-          <div>
-            <TextField
-              label={t('importBatchId')}
-              value={formData.importBatchId}
-              onChange={(
-                e: React.ChangeEvent<HTMLInputElement>
-              ) =>
-                handleFieldChange(
-                  'importBatchId',
-                  e.target.value
-                )
-              }
-              onBlur={() => handleBlur('importBatchId')}
-              placeholder={t('importBatchIdPlaceholder')}
-              error={errors.importBatchId}
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              {t('importBatchIdHelperText')}
-            </p>
-          </div>
-
           {/* Actions */}
 
           <div className="flex gap-3 pt-4">
@@ -986,8 +905,7 @@ export default function CreateFlashcardForm({
               )}
             </button>
           </div>
-        </form>
       </div>
-    </div>
+    </form>
   );
 }

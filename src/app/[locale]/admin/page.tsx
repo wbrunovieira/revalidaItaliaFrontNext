@@ -53,6 +53,7 @@ import ArgumentsList from '@/components/ArgumentsList';
 import CreateArgumentPage from '@/components/CreateArgumentPage';
 import QuestionsList from '@/components/QuestionsList';
 import CreateFlashcardForm from '@/components/CreateFlashcardForm';
+import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -609,7 +610,10 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
-                <CreateFlashcardForm />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <CreateFlashcardForm />
+                  <CreateFlashcardTagForm />
+                </div>
               </TabsContent>
               <TabsContent value="list">
                 <div className="p-4">

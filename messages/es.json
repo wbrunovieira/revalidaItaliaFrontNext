@@ -511,6 +511,25 @@
       "createDescription": "El flashcard se ha creado con éxito"
     }
   },
+  
+  "createFlashcardTag": {
+    "title": "Crear Etiqueta de Flashcard",
+    "name": "Nombre de la Etiqueta",
+    "namePlaceholder": "ej: Vocabulario Básico",
+    "create": "Crear Etiqueta",
+    "creating": "Creando...",
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "nameTooShort": "El nombre debe tener al menos 3 caracteres",
+      "nameTooLong": "El nombre no puede exceder 200 caracteres",
+      "createTitle": "Error al crear etiqueta",
+      "createDescription": "No se pudo crear la etiqueta"
+    },
+    "success": {
+      "createTitle": "Etiqueta creada",
+      "createDescription": "La etiqueta se ha creado con éxito"
+    }
+  },
 
   "questionsList": {
     "totalQuestions": "Total de preguntas",

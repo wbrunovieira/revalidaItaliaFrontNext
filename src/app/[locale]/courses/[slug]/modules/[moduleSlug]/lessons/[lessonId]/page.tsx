@@ -9,7 +9,6 @@ import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import LessonVideoPlayer from '@/components/LessonVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
-import HeartbeatStatus from '@/components/HeartbeatStatus';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -702,7 +701,6 @@ export default async function LessonPage({
         </div>
         
         {/* Heartbeat Status Indicator (Development Only) */}
-        <HeartbeatStatus />
       </div>
     </NavSidebar>
   );

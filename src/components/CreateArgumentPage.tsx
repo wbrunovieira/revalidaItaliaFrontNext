@@ -186,7 +186,7 @@ export default function CreateArgumentPage() {
     console.log('Argument payload:', payload);
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/arguments`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments`,
       {
         method: 'POST',
         headers: {

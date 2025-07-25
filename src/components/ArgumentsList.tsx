@@ -72,7 +72,7 @@ export default function ArgumentsList() {
       });
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/arguments?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',

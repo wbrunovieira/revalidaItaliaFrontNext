@@ -227,6 +227,8 @@
     "errorLoadingData": "Error al cargar datos",
     "serverUnavailable": "Servidor No Disponible",
     "serverUnavailableDescription": "Servidor no disponible • Algunas funcionalidades pueden no funcionar",
+    "checkingConnection": "Verificando conexión...",
+    "retryingConnection": "Intentando reconectar...",
     "continueWatching": {
       "title": "Continúa Donde lo Dejaste",
       "continueButton": "Continuar Viendo",

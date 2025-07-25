@@ -228,6 +228,8 @@
     "errorLoadingData": "Errore nel caricamento dei dati",
     "serverUnavailable": "Server Non Disponibile",
     "serverUnavailableDescription": "Server non disponibile • Alcune funzionalità potrebbero non funzionare",
+    "checkingConnection": "Verifica connessione...",
+    "retryingConnection": "Tentativo di riconnessione...",
     "continueWatching": {
       "title": "Continua da Dove Hai Lasciato",
       "continueButton": "Continua a Guardare",

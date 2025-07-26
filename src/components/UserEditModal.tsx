@@ -355,8 +355,8 @@ export default function UserEditModal({
   const updateUser = useCallback(
     async (
       userId: string,
-      payload: Omit<FormData, 'role'> & { role: UserRole }
-    ): Promise<void> => {
+      payload: { name: string; email: string; nationalId: string; role: UserRole }
+    ): Promise<any> => {
       const tokenFromCookie = getCookie('token');
       const tokenFromStorage =
         localStorage.getItem('accessToken') ||
@@ -386,6 +386,9 @@ export default function UserEditModal({
           `Failed to update user: ${response.status} - ${errorText}`
         );
       }
+
+      const responseData = await response.json();
+      return responseData;
     },
     []
   );
@@ -417,13 +420,25 @@ export default function UserEditModal({
 
     try {
       const payload = {
-        fullName: formData.fullName.trim(),
+        name: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         nationalId: formData.nationalId.trim(),
         role: formData.role,
       };
 
-      await updateUser(user.identityId, payload);
+      const updatedUserData = await updateUser(user.identityId, payload);
+
+      // Atualizar o usuário no componente pai com os dados retornados pela API
+      // Se a API retornar dados, use-os; caso contrário, use o payload enviado
+      const userToSave: UserEditData = {
+        ...user,
+        fullName: updatedUserData?.name || updatedUserData?.fullName || payload.name,
+        email: updatedUserData?.email || payload.email,
+        nationalId: updatedUserData?.nationalId || payload.nationalId,
+        role: updatedUserData?.role || payload.role,
+      };
+      
+      onSave(userToSave);
 
       toast({
         title: t('success.title'),
@@ -432,15 +447,15 @@ export default function UserEditModal({
       });
 
       // Chamar callback com dados atualizados incluindo documento formatado
-      const updatedUser: UserEditData = {
+      const updatedUserWithDoc: UserEditData = {
         identityId: user.identityId,
-        fullName: payload.fullName,
+        fullName: formData.fullName,
         email: payload.email,
         nationalId: formData.nationalId, // Mantém formatação
         role: payload.role,
       };
 
-      onSave(updatedUser);
+      onSave(updatedUserWithDoc);
       onClose();
     } catch (error) {
       handleApiError(error, 'User update error');

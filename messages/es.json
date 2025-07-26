@@ -1648,6 +1648,7 @@
     "course": "Curso",
     "module": "Módulo",
     "imageUrl": "URL de la Imagen",
+    "lessonImage": "Imagen de la Lección",
     "video": "Video",
     "title": "Título",
     "description": "Descripción",
@@ -1679,6 +1680,7 @@
     "moduleValid": "Módulo válido",
     "orderValid": "Orden válido",
     "imageValid": "URL válida",
+    "imageReady": "Imagen lista",
     "selectModuleFirst": "Seleccione un módulo primero",
     "loadingOrders": "Cargando órdenes disponibles...",
     "noAvailableOrders": "Ningún orden disponible",
@@ -1709,7 +1711,17 @@
     "conflictTitle": "Lección duplicada",
     "conflictDescription": "Ya existe una lección con esta información",
     "noModulesTitle": "Este curso no tiene módulos",
-    "noModulesDescription": "Es necesario crear al menos un módulo para este curso antes de añadir lecciones. Por favor, crea un módulo primero y luego regresa para crear la lección."
+    "noModulesDescription": "Es necesario crear al menos un módulo para este curso antes de añadir lecciones. Por favor, crea un módulo primero y luego regresa para crear la lección.",
+    "invalidImageType": "Tipo de archivo inválido. Use solo imágenes (JPG, PNG, GIF, WebP)",
+    "imageTooLarge": "Archivo demasiado grande. Tamaño máximo: 5MB",
+    "uploadFailed": "Error al cargar la imagen. Intente nuevamente"
+  },
+  "upload": {
+    "clickToSelect": "Haga clic para seleccionar una imagen",
+    "uploading": "Cargando...",
+    "supportedFormats": "Formatos soportados",
+    "savedAs": "Guardado como",
+    "success": "Imagen cargada con éxito"
   },
   "success": {
     "title": "¡Lección creada!",

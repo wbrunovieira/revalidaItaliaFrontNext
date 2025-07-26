@@ -285,6 +285,11 @@ export default function LessonsList() {
       lessonId: string
     ) => {
       try {
+        // Primeiro, buscar os dados da lição para obter a URL da imagem
+        const course = coursesWithLessons.find(c => c.id === courseId);
+        const module = course?.modules?.find(m => m.id === moduleId);
+        const lesson = module?.lessons?.find(l => l.id === lessonId);
+        
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
           {
@@ -421,6 +426,25 @@ export default function LessonsList() {
           );
         }
 
+        // Se a lição foi deletada com sucesso e tem uma imagem, tentar deletar a imagem
+        if (lesson?.imageUrl && lesson.imageUrl.startsWith('/uploads/')) {
+          try {
+            // Extrair o path relativo da imagem
+            const imagePath = lesson.imageUrl.replace('/uploads/', '');
+            
+            const deleteImageResponse = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
+              method: 'DELETE',
+            });
+            
+            if (!deleteImageResponse.ok) {
+              console.error('Failed to delete lesson image:', imagePath);
+            }
+          } catch (imageError) {
+            console.error('Error deleting lesson image:', imageError);
+            // Não falhar a operação toda se a imagem não puder ser deletada
+          }
+        }
+
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
@@ -437,7 +461,7 @@ export default function LessonsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError, apiUrl]
+    [t, toast, fetchData, handleApiError, apiUrl, coursesWithLessons]
   );
 
   // 7. Função para mostrar confirmação personalizada usando toast

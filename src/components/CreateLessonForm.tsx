@@ -29,7 +29,9 @@ import {
   Check,
   X,
   AlertCircle,
+  Upload,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Translation {
   locale: string;
@@ -142,6 +144,8 @@ export default function CreateLessonForm() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof FormErrors, boolean>>
   >({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedImageName, setSavedImageName] = useState<string | null>(null);
 
   // Validação de URL
   const validateUrl = useCallback(
@@ -196,6 +200,84 @@ export default function CreateLessonForm() {
     },
     [t]
   );
+
+  // Função para fazer upload da imagem
+  const handleImageUpload = useCallback(async (file: File) => {
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  }, []);
+
+  // Handler para o input de arquivo
+  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: t('errors.invalidImageType'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validar tamanho (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: t('errors.imageTooLarge'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const result = await handleImageUpload(file);
+      
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: result.url
+      }));
+      
+      setSavedImageName(result.savedAs);
+      
+      // Marcar como tocado e validar
+      setTouched(prev => ({ ...prev, imageUrl: true }));
+      setErrors(prev => ({ ...prev, imageUrl: undefined }));
+      
+      toast({
+        title: t('upload.success'),
+        variant: 'success',
+      });
+    } catch (error) {
+      toast({
+        title: t('errors.uploadFailed'),
+        variant: 'destructive',
+      });
+    }
+  }, [handleImageUpload, t, toast]);
 
   // Validação individual de campos
   const validateField = useCallback(
@@ -701,6 +783,7 @@ export default function CreateLessonForm() {
     }));
     setErrors({});
     setTouched({});
+    setSavedImageName(null);
 
     // Recarrega as aulas para atualizar a lista de ordens
     if (formData.courseId && formData.moduleId) {
@@ -1222,38 +1305,76 @@ export default function CreateLessonForm() {
 
           <div className="space-y-2">
             <Label className="text-gray-300 flex items-center gap-2">
-              <ImageIcon size={16} /> {t('fields.imageUrl')}
+              <ImageIcon size={16} /> {t('fields.lessonImage')}
               <span className="text-red-400">*</span>
             </Label>
-            <TextField
-              placeholder={t('placeholders.imageUrl')}
-              value={formData.imageUrl}
-              onChange={e =>
-                handleInputChange('imageUrl')(
-                  e.target.value
-                )
-              }
-              onBlur={handleInputBlur('imageUrl')}
-              error={errors.imageUrl}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
+            
+            {/* Preview da imagem se houver */}
+            {formData.imageUrl && (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700 mb-2">
+                <Image
+                  src={formData.imageUrl}
+                  alt="Lesson preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+            
+            {/* Botão de upload */}
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                id="lesson-image-upload"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+                disabled={uploadingImage}
+              />
+              <label
+                htmlFor="lesson-image-upload"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+                  uploadingImage
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-secondary hover:bg-secondary-dark text-white'
+                }`}
+              >
+                {uploadingImage ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    {t('upload.uploading')}
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    {t('upload.clickToSelect')}
+                  </>
+                )}
+              </label>
+              
+              {savedImageName && (
+                <span className="text-sm text-gray-400">
+                  {t('upload.savedAs')}: {savedImageName}
+                </span>
+              )}
+            </div>
+            
             <p className="text-xs text-gray-500">
-              {t('hints.imageUrl')}
+              {t('upload.supportedFormats')}: JPG, PNG, GIF, WebP (max 5MB)
             </p>
+            
             {errors.imageUrl && touched.imageUrl && (
               <p className="text-xs text-red-500">
                 {errors.imageUrl}
               </p>
             )}
-            {formData.imageUrl &&
-              formData.imageUrl.trim() &&
-              !errors.imageUrl &&
-              touched.imageUrl && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.imageValid')}
-                </div>
-              )}
+            
+            {formData.imageUrl && !errors.imageUrl && (
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <Check size={14} />
+                {t('validation.imageReady')}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

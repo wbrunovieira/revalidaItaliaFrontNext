@@ -174,6 +174,9 @@ export default function CoursesList() {
     async (courseId: string) => {
       setDeletingId(courseId);
       try {
+        // Primeiro, buscar os dados do curso para obter a URL da imagem
+        const course = courses.find(c => c.id === courseId);
+        
         const token = getAuthToken();
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
@@ -191,6 +194,25 @@ export default function CoursesList() {
         } catch {}
 
         if (!res.ok) throw { status: res.status, data };
+
+        // Se o curso foi deletado com sucesso e tem uma imagem, tentar deletar a imagem
+        if (course?.imageUrl && course.imageUrl.startsWith('/uploads/')) {
+          try {
+            // Extrair o path relativo da imagem
+            const imagePath = course.imageUrl.replace('/uploads/', '');
+            
+            const deleteImageResponse = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
+              method: 'DELETE',
+            });
+            
+            if (!deleteImageResponse.ok) {
+              console.error('Failed to delete course image:', imagePath);
+            }
+          } catch (imageError) {
+            console.error('Error deleting course image:', imageError);
+            // Não falhar a operação toda se a imagem não puder ser deletada
+          }
+        }
 
         toast({
           title: t('success.deleteTitle'),

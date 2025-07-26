@@ -1293,6 +1293,7 @@
     "fields": {
       "slug": "Slug (URL)",
       "imageUrl": "URL dell'Immagine",
+      "trackImage": "Immagine del Percorso",
       "title": "Titolo",
       "description": "Descrizione"
     },
@@ -1318,9 +1319,16 @@
     },
     "validation": {
       "imageValid": "URL immagine valido",
+      "imageReady": "Immagine pronta per il caricamento",
       "slugValid": "Slug valido",
       "slugGenerated": "Slug generato automaticamente",
       "coursesValid": "{count, plural, =0 {Nessun corso selezionato} =1 {1 corso selezionato} other {# corsi selezionati}}"
+    },
+    "upload": {
+      "clickToSelect": "Clicca per selezionare un'immagine",
+      "supportedFormats": "Formati supportati",
+      "savedAs": "Salvato come",
+      "success": "Immagine caricata con successo"
     },
     "errors": {
       "slugRequired": "Lo slug è obbligatorio",
@@ -1332,6 +1340,9 @@
       "imageRequired": "L'URL dell'immagine è obbligatorio",
       "imageInvalid": "L'URL dell'immagine deve essere valido (iniziare con / o http:// o https://)",
       "coursesRequired": "Seleziona almeno un corso",
+      "invalidImageType": "Tipo di file non valido. Usa solo immagini (JPG, PNG, GIF, WebP)",
+      "imageTooLarge": "File troppo grande. Dimensione massima: 5MB",
+      "uploadFailed": "Caricamento dell'immagine fallito. Riprova",
       "titleRequired": "Il titolo è obbligatorio",
       "titleMin": "Il titolo deve avere almeno 3 caratteri",
       "titleMax": "Il titolo deve avere al massimo 100 caratteri",

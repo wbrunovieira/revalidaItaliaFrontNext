@@ -1270,6 +1270,7 @@
     "fields": {
       "slug": "Slug (URL)",
       "imageUrl": "URL da Imagem",
+      "trackImage": "Imagem da Trilha",
       "title": "Título",
       "description": "Descrição"
     },
@@ -1295,9 +1296,16 @@
     },
     "validation": {
       "imageValid": "URL da imagem válida",
+      "imageReady": "Imagem pronta para upload",
       "slugValid": "Slug válido",
       "slugGenerated": "Slug gerado automaticamente",
       "coursesValid": "{count, plural, =0 {Nenhum curso selecionado} =1 {1 curso selecionado} other {# cursos selecionados}}"
+    },
+    "upload": {
+      "clickToSelect": "Clique para selecionar uma imagem",
+      "supportedFormats": "Formatos suportados",
+      "savedAs": "Salvo como",
+      "success": "Imagem carregada com sucesso"
     },
     "errors": {
       "slugRequired": "O slug é obrigatório",
@@ -1309,6 +1317,9 @@
       "imageRequired": "A URL da imagem é obrigatória",
       "imageInvalid": "A URL da imagem deve ser válida (começar com / ou http:// ou https://)",
       "coursesRequired": "Selecione pelo menos um curso",
+      "invalidImageType": "Tipo de arquivo inválido. Use apenas imagens (JPG, PNG, GIF, WebP)",
+      "imageTooLarge": "Arquivo muito grande. Tamanho máximo: 5MB",
+      "uploadFailed": "Falha ao carregar a imagem. Tente novamente",
       "titleRequired": "O título é obrigatório",
       "titleMin": "O título deve ter no mínimo 3 caracteres",
       "titleMax": "O título deve ter no máximo 100 caracteres",
@@ -1339,7 +1350,6 @@
       "permissionTitle": "Sem permissão",
       "permissionDescription": "Você não tem permissão para criar trilhas."
     }
-  
   },
   "tracksList": {
     "title": "Lista de Trilhas",

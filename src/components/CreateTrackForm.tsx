@@ -18,6 +18,7 @@ import {
   BookOpen,
   Check,
   X,
+  Upload,
 } from 'lucide-react';
 
 interface Translation {
@@ -36,6 +37,7 @@ interface Course {
 interface FormData {
   slug: string;
   imageUrl: string;
+  imageFile?: File;
   courseIds: string[];
   translations: {
     pt: Translation;
@@ -89,6 +91,7 @@ export default function CreateTrackForm() {
   const [formData, setFormData] = useState<FormData>({
     slug: '',
     imageUrl: '',
+    imageFile: undefined,
     courseIds: [],
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -101,6 +104,88 @@ export default function CreateTrackForm() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof FormErrors, boolean>>
   >({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Gerar nome único para arquivo
+  const generateUniqueFileName = useCallback((filename: string): string => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = filename.split('.').pop() || 'jpg';
+    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
+    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
+  }, []);
+
+  // Função para fazer upload da imagem
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      if (!file) return;
+
+      // Validar tipo de arquivo
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.invalidImageType'),
+        }));
+        return;
+      }
+
+      // Validar tamanho do arquivo (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.imageTooLarge'),
+        }));
+        return;
+      }
+
+      try {
+        setUploadingImage(true);
+        
+        // Salvar arquivo no estado para upload posterior
+        setFormData(prev => ({
+          ...prev,
+          imageFile: file,
+          imageUrl: 'pending-upload', // Será substituído após upload real
+        }));
+
+        // Limpar erro
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: undefined,
+        }));
+
+        toast({
+          title: t('upload.success'),
+          description: file.name,
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.uploadFailed'),
+        }));
+      } finally {
+        setUploadingImage(false);
+      }
+    },
+    [t, toast, generateUniqueFileName]
+  );
+
+  // Função para remover imagem
+  const handleImageRemove = useCallback(() => {
+    setFormData(prev => ({
+      ...prev,
+      imageFile: undefined,
+      imageUrl: '',
+    }));
+    setErrors(prev => ({
+      ...prev,
+      imageUrl: undefined,
+    }));
+  }, []);
 
   // Validação de URL
   const validateUrl = useCallback(
@@ -208,16 +293,10 @@ export default function CreateTrackForm() {
       }
 
       if (field === 'imageUrl') {
-        if (!value.trim()) {
+        if (!value.trim() && !formData.imageFile) {
           return {
             isValid: false,
             message: t('errors.imageRequired'),
-          };
-        }
-        if (!validateUrl(value)) {
-          return {
-            isValid: false,
-            message: t('errors.imageInvalid'),
           };
         }
         return { isValid: true };
@@ -457,12 +536,9 @@ export default function CreateTrackForm() {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    // Validar imageUrl
-    if (!formData.imageUrl.trim()) {
+    // Validar imagem
+    if (!formData.imageUrl.trim() && !formData.imageFile) {
       newErrors.imageUrl = t('errors.imageRequired');
-      isValid = false;
-    } else if (!validateUrl(formData.imageUrl)) {
-      newErrors.imageUrl = t('errors.imageInvalid');
       isValid = false;
     }
 
@@ -567,6 +643,7 @@ export default function CreateTrackForm() {
     setFormData({
       slug: '',
       imageUrl: '',
+      imageFile: undefined,
       courseIds: [],
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
@@ -578,6 +655,37 @@ export default function CreateTrackForm() {
     setTouched({});
     setSlugGenerated(false);
   }, []);
+
+  // Função para fazer upload real da imagem
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', 'image');
+      formData.append('folder', 'tracks');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      const result = await response.json();
+      return result.url;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: t('errors.uploadFailed'),
+        description: error instanceof Error ? error.message : t('errors.uploadFailed'),
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -613,6 +721,17 @@ export default function CreateTrackForm() {
     setLoading(true);
 
     try {
+      let finalImageUrl = formData.imageUrl;
+
+      // Se houver arquivo de imagem, fazer upload primeiro
+      if (formData.imageFile) {
+        const uploadedUrl = await uploadImageFile(formData.imageFile);
+        if (!uploadedUrl) {
+          setLoading(false);
+          return;
+        }
+        finalImageUrl = uploadedUrl;
+      }
       // Garantir que as traduções estão no formato correto
       const translations = [];
 
@@ -658,7 +777,7 @@ export default function CreateTrackForm() {
       
       const payload = {
         slug: generatedSlug,
-        imageUrl: formData.imageUrl.trim(),
+        imageUrl: finalImageUrl.trim(),
         courseIds: formData.courseIds,
         translations: translations,
       };
@@ -684,15 +803,6 @@ export default function CreateTrackForm() {
       setLoading(false);
     }
   };
-
-  // Handlers para mudança de valores
-  const handleInputChange = useCallback(
-    (field: 'imageUrl') => (value: string) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
-      handleFieldValidation(field, value);
-    },
-    [handleFieldValidation]
-  );
 
   const handleInputBlur = useCallback(
     (field: string) => () => {
@@ -807,38 +917,86 @@ export default function CreateTrackForm() {
           {t('title')}
         </h3>
 
-        {/* URL da Imagem */}
+        {/* Upload da Imagem */}
         <div className="mb-8">
           <div className="space-y-2">
             <Label
-              htmlFor="imageUrl"
+              htmlFor="imageUpload"
               className="text-gray-300 flex items-center gap-2"
             >
               <ImageIcon size={16} />
-              {t('fields.imageUrl')}
+              {t('fields.trackImage')}
               <span className="text-red-400">*</span>
             </Label>
-            <TextField
-              id="imageUrl"
-              placeholder={t('placeholders.imageUrl')}
-              value={formData.imageUrl}
-              onChange={e =>
-                handleInputChange('imageUrl')(
-                  e.target.value
-                )
-              }
-              onBlur={handleInputBlur('imageUrl')}
-              error={errors.imageUrl}
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-            />
-            {formData.imageUrl &&
-              !errors.imageUrl &&
-              touched.imageUrl && (
-                <div className="flex items-center gap-1 text-green-400 text-sm">
-                  <Check size={14} />
-                  {t('validation.imageValid')}
+            
+            {formData.imageFile ? (
+              <div className="relative bg-gray-700 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ImageIcon className="text-secondary" size={24} />
+                    <div>
+                      <p className="text-sm font-medium text-white">
+                        {formData.imageFile.name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {(formData.imageFile.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleImageRemove}
+                    className="p-1 hover:bg-gray-600 rounded transition-colors"
+                  >
+                    <X size={20} className="text-gray-400 hover:text-red-400" />
+                  </button>
                 </div>
-              )}
+                {formData.imageUrl && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {t('upload.savedAs')}: {formData.imageUrl}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <input
+                  type="file"
+                  id="imageUpload"
+                  className="sr-only"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageUpload(file);
+                    }
+                  }}
+                  disabled={uploadingImage}
+                />
+                <label
+                  htmlFor="imageUpload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+                >
+                  <Upload size={32} className="text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-300">{t('upload.clickToSelect')}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('upload.supportedFormats')}: JPG, PNG, GIF, WebP (Max 5MB)
+                  </p>
+                </label>
+              </div>
+            )}
+            
+            {errors.imageUrl && (
+              <p className="text-xs text-red-500">
+                {errors.imageUrl}
+              </p>
+            )}
+            
+            {formData.imageFile && !errors.imageUrl && (
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <Check size={14} />
+                {t('validation.imageReady')}
+              </div>
+            )}
           </div>
         </div>
 

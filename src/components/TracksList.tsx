@@ -176,6 +176,9 @@ export default function TracksList() {
   const deleteTrack = useCallback(
     async (trackId: string) => {
       try {
+        // Primeiro, buscar os dados da trilha para obter a URL da imagem
+        const track = tracks.find(t => t.id === trackId);
+        
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
@@ -190,6 +193,25 @@ export default function TracksList() {
           throw new Error(
             `Failed to delete track: ${response.status}`
           );
+        }
+
+        // Se a trilha foi deletada com sucesso e tem uma imagem, tentar deletar a imagem
+        if (track?.imageUrl && track.imageUrl.startsWith('/uploads/')) {
+          try {
+            // Extrair o path relativo da imagem
+            const imagePath = track.imageUrl.replace('/uploads/', '');
+            
+            const deleteImageResponse = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
+              method: 'DELETE',
+            });
+            
+            if (!deleteImageResponse.ok) {
+              console.error('Failed to delete track image:', imagePath);
+            }
+          } catch (imageError) {
+            console.error('Error deleting track image:', imageError);
+            // Não falhar a operação toda se a imagem não puder ser deletada
+          }
         }
 
         toast({
@@ -208,7 +230,7 @@ export default function TracksList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError]
+    [t, toast, fetchData, handleApiError, tracks]
   );
 
   // Função para mostrar confirmação personalizada usando toast

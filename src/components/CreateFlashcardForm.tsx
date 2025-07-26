@@ -4,7 +4,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import TextField from '@/components/TextField';
+import NextImage from 'next/image';
 import {
   Select,
   SelectContent,
@@ -18,7 +18,7 @@ import { generateSlug } from '@/lib/slug';
 import {
   CreditCard,
   Type,
-  Image,
+  Image as ImageIcon,
   Tag,
   Check,
   X,
@@ -542,7 +542,7 @@ export default function CreateFlashcardForm({
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
-                <Image className="inline mr-2" size={16} />
+                <ImageIcon className="inline mr-2" size={16} />
                 {t('imageType')}
               </button>
             </div>
@@ -616,9 +616,11 @@ export default function CreateFlashcardForm({
                   </div>
                 ) : (
                   <div className="mt-1 relative bg-gray-700 rounded-lg p-4">
-                    <img
+                    <NextImage
                       src={questionImageFile.url}
-                      alt="Question"
+                      alt={t('questionImage')}
+                      width={400}
+                      height={128}
                       className="w-full h-32 object-contain rounded"
                     />
                     <button
@@ -675,7 +677,7 @@ export default function CreateFlashcardForm({
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
-                <Image className="inline mr-2" size={16} />
+                <ImageIcon className="inline mr-2" size={16} />
                 {t('imageType')}
               </button>
             </div>
@@ -747,9 +749,11 @@ export default function CreateFlashcardForm({
                   </div>
                 ) : (
                   <div className="mt-1 relative bg-gray-700 rounded-lg p-4">
-                    <img
+                    <NextImage
                       src={answerImageFile.url}
-                      alt="Answer"
+                      alt={t('answerImage')}
+                      width={400}
+                      height={128}
                       className="w-full h-32 object-contain rounded"
                     />
                     <button

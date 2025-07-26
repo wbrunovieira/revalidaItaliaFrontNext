@@ -1413,6 +1413,7 @@
     "course": "Curso",
     "slug": "Slug (URL)",
     "imageUrl": "URL da Imagem",
+    "moduleImage": "Imagem do Módulo",
     "order": "Ordem",
     "title": "Título",
     "description": "Descrição"
@@ -1441,6 +1442,7 @@
     "slugValid": "Slug válido",
     "slugGenerated": "Slug gerado automaticamente",
     "imageValid": "URL válida",
+    "imageReady": "Imagem pronta",
     "orderValid": "Ordem válida",
     "loadingOrders": "Carregando ordens existentes...",
     "selectCourseFirst": "Selecione um curso primeiro",
@@ -1468,6 +1470,9 @@
     "descriptionMax": "Descrição não pode ter mais de 500 caracteres",
     "fetchCoursesTitle": "Erro ao carregar cursos",
     "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis",
+    "invalidImageType": "Tipo de arquivo inválido. Use apenas imagens (JPG, PNG, GIF, WebP)",
+    "imageTooLarge": "Arquivo muito grande. Tamanho máximo: 5MB",
+    "uploadFailed": "Falha ao carregar a imagem. Tente novamente",
     "validationTitle": "Erro de validação",
     "validationDescription": "Por favor, corrija os erros no formulário",
     "serverTitle": "Erro no servidor",
@@ -1483,6 +1488,12 @@
     "title": "Módulo criado!",
     "description": "O módulo foi criado com sucesso.",
     "slugGenerated": "Slug gerado automaticamente"
+  },
+  "upload": {
+    "clickToSelect": "Clique para selecionar uma imagem",
+    "supportedFormats": "Formatos suportados",
+    "savedAs": "Salvo como",
+    "success": "Imagem carregada com sucesso"
   },
   "error": {
     "title": "Erro ao criar módulo",

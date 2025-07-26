@@ -184,6 +184,10 @@ export default function ModulesList() {
   const deleteModule = useCallback(
     async (courseId: string, moduleId: string) => {
       try {
+        // Primeiro, buscar os dados do módulo para obter a URL da imagem
+        const course = coursesWithModules.find(c => c.id === courseId);
+        const module = course?.modules?.find(m => m.id === moduleId);
+        
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}`,
           {
@@ -195,6 +199,25 @@ export default function ModulesList() {
           throw new Error(
             `Failed to delete module: ${response.status}`
           );
+        }
+
+        // Se o módulo foi deletado com sucesso e tem uma imagem, tentar deletar a imagem
+        if (module?.imageUrl && module.imageUrl.startsWith('/uploads/')) {
+          try {
+            // Extrair o path relativo da imagem
+            const imagePath = module.imageUrl.replace('/uploads/', '');
+            
+            const deleteImageResponse = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
+              method: 'DELETE',
+            });
+            
+            if (!deleteImageResponse.ok) {
+              console.error('Failed to delete module image:', imagePath);
+            }
+          } catch (imageError) {
+            console.error('Error deleting module image:', imageError);
+            // Não falhar a operação toda se a imagem não puder ser deletada
+          }
         }
 
         toast({
@@ -213,7 +236,7 @@ export default function ModulesList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError, apiUrl]
+    [t, toast, fetchData, handleApiError, apiUrl, coursesWithModules]
   );
 
   // Função para mostrar confirmação personalizada usando toast

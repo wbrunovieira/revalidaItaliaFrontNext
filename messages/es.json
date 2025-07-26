@@ -1472,6 +1472,7 @@
     "course": "Curso",
     "slug": "Slug (URL)",
     "imageUrl": "URL de la Imagen",
+    "moduleImage": "Imagen del Módulo",
     "order": "Orden",
     "title": "Título",
     "description": "Descripción"
@@ -1500,6 +1501,7 @@
     "slugValid": "Slug válido",
     "slugGenerated": "Slug generado automáticamente",
     "imageValid": "URL válida",
+    "imageReady": "Imagen lista",
     "orderValid": "Orden válida",
     "loadingOrders": "Cargando órdenes existentes...",
     "selectCourseFirst": "Seleccione un curso primero",
@@ -1542,6 +1544,12 @@
     "title": "¡Módulo creado!",
     "description": "El módulo fue creado con éxito.",
     "slugGenerated": "Slug generado automáticamente"
+  },
+  "upload": {
+    "clickToSelect": "Haga clic para seleccionar una imagen",
+    "supportedFormats": "Formatos soportados",
+    "savedAs": "Guardado como",
+    "success": "Imagen cargada con éxito"
   },
   "error": {
     "title": "Error al crear módulo",

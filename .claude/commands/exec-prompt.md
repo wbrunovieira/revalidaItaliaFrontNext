@@ -754,3 +754,175 @@ import { useTranslations } from 'next-intl';
 // Remova o import se não for usar
 // OU adicione: const t = useTranslations('PageName');
 ```
+
+### 16. Gestão de Imports e Uso de Componentes do Next.js
+
+#### CRÍTICO - Sempre Verificar Conflitos de Nomes:
+
+1. **Next.js Image Component**
+   - SEMPRE importe como `import Image from 'next/image'` ou `import NextImage from 'next/image'`
+   - NUNCA use elementos `<img>` HTML nativos em projetos Next.js
+   - Se houver conflito com ícones Lucide, renomeie o ícone: `import { Image as ImageIcon } from 'lucide-react'`
+   - Sempre forneça width, height e alt para o componente Image
+
+2. **Verificação de Imports Antes de Usar**
+   - Analise TODOS os imports no início do arquivo
+   - Identifique possíveis conflitos de nomes
+   - Use aliases quando necessário para evitar conflitos
+   - Remova imports não utilizados imediatamente
+
+3. **Ordem de Imports Recomendada**
+   ```typescript
+   // 1. React e hooks
+   import { useState, useEffect, useCallback } from 'react';
+   
+   // 2. Next.js específicos
+   import Image from 'next/image';
+   import Link from 'next/link';
+   import { useRouter } from 'next/navigation';
+   
+   // 3. Bibliotecas externas
+   import { useTranslations } from 'next-intl';
+   import { zodResolver } from '@hookform/resolvers/zod';
+   
+   // 4. Componentes UI
+   import { Button } from '@/components/ui/button';
+   import { Input } from '@/components/ui/input';
+   
+   // 5. Ícones (com aliases se necessário)
+   import { 
+     User as UserIcon,
+     Image as ImageIcon,
+     Settings 
+   } from 'lucide-react';
+   
+   // 6. Utilitários e tipos locais
+   import { cn } from '@/lib/utils';
+   import type { UserProfile } from '@/types';
+   ```
+
+4. **Padrões para Evitar Erros de Build**
+   - Antes de adicionar um import, verifique se não está duplicando
+   - Use CTRL+F para buscar imports similares no arquivo
+   - Prefira imports nomeados sobre imports default quando possível
+   - Sempre execute `npm run build` após mudanças significativas em imports
+
+5. **Componentes Next.js Obrigatórios**
+   - `Image` ao invés de `<img>` - para otimização automática
+   - `Link` ao invés de `<a>` - para navegação SPA
+   - `Script` ao invés de `<script>` - para carregamento otimizado
+   - Componentes de fonte do `next/font` para fontes customizadas
+
+#### Exemplos de Correções de Import:
+
+```typescript
+// ❌ ERRADO - Conflito de nomes
+import { Image } from 'lucide-react';
+import Image from 'next/image'; // Erro: identifier already declared
+
+// ✅ CORRETO - Com aliases
+import { Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+```
+
+```typescript
+// ❌ ERRADO - Usando img nativo
+<img src="/logo.png" alt="Logo" />
+
+// ✅ CORRETO - Usando Next.js Image
+<Image 
+  src="/logo.png" 
+  alt="Logo"
+  width={200}
+  height={50}
+  priority // para imagens above the fold
+/>
+```
+
+```typescript
+// ❌ ERRADO - Import não usado
+import TextField from '@/components/TextField';
+// componente nunca é utilizado no arquivo
+
+// ✅ CORRETO - Remover import não utilizado
+// Simplesmente delete a linha de import
+```
+
+### 17. Checklist de Verificação de Código
+
+#### Antes de Finalizar QUALQUER Tarefa, Verifique:
+
+1. **Verificação de Imports (SEMPRE FAZER)**
+   ```bash
+   # Busque por imports não utilizados
+   grep -r "import.*from" src/ | grep -E "(TextField|Input|Button|Image|Icon)"
+   ```
+   - [ ] Todos os imports estão sendo usados?
+   - [ ] Há conflitos de nomes entre imports?
+   - [ ] Image do Next.js está importado corretamente?
+   - [ ] Ícones Lucide com nomes conflitantes têm aliases?
+
+2. **Verificação de Elementos HTML Nativos**
+   ```bash
+   # Busque por tags HTML que devem ser componentes Next.js
+   grep -r "<img\|<a\s\|<script" src/
+   ```
+   - [ ] Substituir todos `<img>` por `<Image>` do Next.js
+   - [ ] Substituir todos `<a>` por `<Link>` do Next.js
+   - [ ] Adicionar width, height e alt em todas as imagens
+
+3. **Verificação de TypeScript**
+   - [ ] Nenhum uso de `any` (use tipos específicos ou `unknown`)
+   - [ ] Todas as props têm interfaces/types definidos
+   - [ ] Event handlers têm tipos corretos (ex: `React.ChangeEvent<HTMLInputElement>`)
+   - [ ] Estados têm tipos genéricos quando necessário
+
+4. **Verificação de Hooks**
+   - [ ] useCallback em funções passadas como props
+   - [ ] Dependências corretas em useEffect e useCallback
+   - [ ] Ordem correta: hooks declarados antes do uso
+
+5. **Verificação de Código Limpo**
+   - [ ] Sem console.log ou debugger
+   - [ ] Sem código comentado desnecessário
+   - [ ] Sem imports duplicados
+   - [ ] Nomenclatura consistente com o projeto
+
+#### Script de Verificação Rápida:
+
+```bash
+# Crie um alias para verificação rápida
+alias check-code="echo '🔍 Verificando imports não utilizados...' && \
+  grep -r 'import.*from' src/ | wc -l && \
+  echo '🔍 Verificando elementos HTML nativos...' && \
+  grep -r '<img\|<a\s' src/ | wc -l && \
+  echo '✅ Verificação concluída!'"
+```
+
+#### Erros Mais Comuns e Como Evitar:
+
+1. **"'X' is defined but never used"**
+   - Solução: Remova o import ou use o componente/variável
+
+2. **"Image elements must have an alt prop"**
+   - Solução: Adicione alt="" (decorativo) ou alt="descrição" (informativo)
+
+3. **"Using `<img>` could result in slower LCP"**
+   - Solução: Use `import Image from 'next/image'`
+
+4. **"An interface declaring no members is equivalent to its supertype"**
+   - Solução: Use type alias ao invés de interface vazia
+
+5. **"React Hook useCallback has missing dependencies"**
+   - Solução: Adicione todas as dependências no array
+
+#### Workflow de Desenvolvimento Seguro:
+
+1. Escreva o código seguindo as convenções
+2. Execute as verificações do checklist acima
+3. Corrija TODOS os problemas identificados
+4. Teste a funcionalidade manualmente
+5. Revise o código uma última vez
+6. Só então considere a tarefa completa
+
+**LEMBRE-SE**: Código com erros de lint ou TypeScript NUNCA deve ser considerado como tarefa concluída!

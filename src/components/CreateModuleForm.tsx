@@ -9,6 +9,7 @@ import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
 import {
   Select,
   SelectContent,
@@ -125,6 +126,7 @@ export default function CreateModuleForm() {
     Partial<Record<keyof FormErrors, boolean>>
   >({});
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedImageName, setSavedImageName] = useState<string | null>(null);
 
   // Validação de URL
   // Gerar nome único para arquivo
@@ -165,34 +167,71 @@ export default function CreateModuleForm() {
       try {
         setUploadingImage(true);
         
-        // Salvar arquivo no estado para upload posterior
+        // Fazer upload imediato
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('category', 'image');
+        formData.append('folder', 'modules');
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const result = await response.json();
+        
+        // Salvar URL e nome do arquivo
         setFormData(prev => ({
           ...prev,
           imageFile: file,
-          imageUrl: 'pending-upload', // Será substituído após upload real
+          imageUrl: result.url,
         }));
-
-        // Limpar erro
+        
+        setSavedImageName(result.savedAs || file.name);
+        
+        // Limpar erros
         setErrors(prev => ({
           ...prev,
           imageUrl: undefined,
         }));
-
+        
         toast({
           title: t('upload.success'),
-          description: file.name,
+          variant: 'success',
         });
       } catch (error) {
         console.error('Upload error:', error);
+        const errorMessage = error instanceof Error ? error.message : t('errors.uploadFailed');
+        
+        // Definir erro no estado
         setErrors(prev => ({
           ...prev,
-          imageUrl: t('errors.uploadFailed'),
+          imageUrl: errorMessage,
+        }));
+        
+        // Mostrar toast de erro
+        toast({
+          title: t('errors.uploadFailed'),
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        
+        // Limpar o arquivo do estado já que o upload falhou
+        setFormData(prev => ({
+          ...prev,
+          imageFile: undefined,
+          imageUrl: '',
         }));
       } finally {
         setUploadingImage(false);
       }
     },
-    [t, toast, generateUniqueFileName]
+    [t, toast]
   );
 
   // Função para remover imagem
@@ -206,6 +245,7 @@ export default function CreateModuleForm() {
       ...prev,
       imageUrl: undefined,
     }));
+    setSavedImageName(null);
   }, []);
 
   const validateUrl = useCallback(
@@ -693,6 +733,7 @@ export default function CreateModuleForm() {
     setErrors({});
     setTouched({});
     setSlugGenerated(false);
+    setSavedImageName(null);
 
     // Recarrega os módulos para atualizar a lista de ordens
     if (formData.courseId) {
@@ -704,36 +745,6 @@ export default function CreateModuleForm() {
     fetchExistingModules,
   ]);
 
-  // Função para fazer upload real da imagem
-  const uploadImageFile = async (file: File): Promise<string | null> => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('category', 'image');
-      formData.append('folder', 'modules');
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
-      }
-
-      const result = await response.json();
-      return result.url;
-    } catch (error) {
-      console.error('Image upload error:', error);
-      toast({
-        title: t('errors.uploadFailed'),
-        description: error instanceof Error ? error.message : t('errors.uploadFailed'),
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -770,17 +781,8 @@ export default function CreateModuleForm() {
     setLoading(true);
 
     try {
-      let finalImageUrl = formData.imageUrl;
-
-      // Se houver arquivo de imagem, fazer upload primeiro
-      if (formData.imageFile) {
-        const uploadedUrl = await uploadImageFile(formData.imageFile);
-        if (!uploadedUrl) {
-          setLoading(false);
-          return;
-        }
-        finalImageUrl = uploadedUrl;
-      }
+      // A imagem já foi carregada no handleImageUpload
+      const finalImageUrl = formData.imageUrl;
       
       // Garantir que as traduções estão no formato correto
       const translations = [];
@@ -1072,35 +1074,43 @@ export default function CreateModuleForm() {
               <span className="text-red-400">*</span>
             </Label>
             
-            {formData.imageFile ? (
+            {/* Preview da imagem se houver */}
+            {formData.imageUrl && (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700 mb-4">
+                <Image
+                  src={formData.imageUrl}
+                  alt="Module preview"
+                  fill
+                  className="object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleImageRemove}
+                  className="absolute top-2 right-2 p-2 bg-gray-900/80 hover:bg-gray-900 rounded-lg transition-colors"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              </div>
+            )}
+            
+            {/* Botão de upload ou informações do arquivo */}
+            {formData.imageFile && !formData.imageUrl ? (
               <div className="relative bg-gray-700 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <ImageIcon className="text-secondary" size={24} />
+                    <Upload className="text-secondary animate-pulse" size={24} />
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {formData.imageFile.name}
+                        {t('upload.uploading')}...
                       </p>
                       <p className="text-xs text-gray-400">
-                        {(formData.imageFile.size / 1024).toFixed(2)} KB
+                        {formData.imageFile.name} ({(formData.imageFile.size / 1024).toFixed(2)} KB)
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleImageRemove}
-                    className="p-1 hover:bg-gray-600 rounded transition-colors"
-                  >
-                    <X size={20} className="text-gray-400 hover:text-red-400" />
-                  </button>
                 </div>
-                {formData.imageUrl && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    {t('upload.savedAs')}: {formData.imageUrl}
-                  </p>
-                )}
               </div>
-            ) : (
+            ) : !formData.imageUrl ? (
               <div className="relative">
                 <input
                   type="file"
@@ -1126,16 +1136,25 @@ export default function CreateModuleForm() {
                   </p>
                 </label>
               </div>
+            ) : null}
+            
+            {/* Informações do arquivo salvo */}
+            {formData.imageUrl && savedImageName && (
+              <div className="mt-2 p-2 bg-gray-700/50 rounded">
+                <p className="text-xs text-gray-400">
+                  {t('upload.savedAs')}: {savedImageName}
+                </p>
+              </div>
             )}
             
             {errors.imageUrl && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-red-500 mt-2">
                 {errors.imageUrl}
               </p>
             )}
             
-            {formData.imageFile && !errors.imageUrl && (
-              <div className="flex items-center gap-1 text-green-400 text-sm">
+            {formData.imageUrl && !errors.imageUrl && (
+              <div className="flex items-center gap-1 text-green-400 text-sm mt-2">
                 <Check size={14} />
                 {t('validation.imageReady')}
               </div>

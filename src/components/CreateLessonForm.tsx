@@ -207,6 +207,8 @@ export default function CreateLessonForm() {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('category', 'image');
+      formData.append('folder', 'lessons');
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -261,7 +263,7 @@ export default function CreateLessonForm() {
         imageUrl: result.url
       }));
       
-      setSavedImageName(result.savedAs);
+      setSavedImageName(result.filename || file.name);
       
       // Marcar como tocado e validar
       setTouched(prev => ({ ...prev, imageUrl: true }));
@@ -272,10 +274,27 @@ export default function CreateLessonForm() {
         variant: 'success',
       });
     } catch (error) {
+      console.error('Upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : t('errors.uploadFailed');
+      
+      // Set error state
+      setErrors(prev => ({
+        ...prev,
+        imageUrl: errorMessage,
+      }));
+      
+      // Show toast with error details
       toast({
         title: t('errors.uploadFailed'),
+        description: errorMessage,
         variant: 'destructive',
       });
+      
+      // Clear the file from state since upload failed
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: '',
+      }));
     }
   }, [handleImageUpload, t, toast]);
 

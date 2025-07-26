@@ -123,7 +123,13 @@ export default function UsersList() {
         const data: UsersResponse = await response.json();
 
         // A API retorna { items, page, limit, total, totalPages }
-        setUsers(data.items || []);
+        // Map name to fullName for consistency
+        const mappedUsers = (data.items || []).map((user: any) => ({
+          ...user,
+          identityId: user.id || user.identityId,
+          fullName: user.fullName || user.name || 'Unnamed User'
+        }));
+        setUsers(mappedUsers);
         setCurrentPage(data.page || 1);
         setTotalPages(data.totalPages || 1);
         setTotalUsers(data.total || 0);
@@ -198,20 +204,36 @@ export default function UsersList() {
         const data = await response.json();
         console.log('API Search Response:', data);
 
-        // Handle both possible response structures
+        // Handle both possible response structures and map name to fullName
+        let mappedUsers: User[] = [];
+        
         if (data.items) {
-          setUsers(data.items);
+          mappedUsers = data.items.map((user: any) => ({
+            ...user,
+            identityId: user.id || user.identityId,
+            fullName: user.fullName || user.name || 'Unnamed User'
+          }));
         } else if (data.users) {
-          setUsers(data.users);
+          mappedUsers = data.users.map((user: any) => ({
+            ...user,
+            identityId: user.id || user.identityId,
+            fullName: user.fullName || user.name || 'Unnamed User'
+          }));
         } else if (Array.isArray(data)) {
-          setUsers(data);
+          mappedUsers = data.map((user: any) => ({
+            ...user,
+            identityId: user.id || user.identityId,
+            fullName: user.fullName || user.name || 'Unnamed User'
+          }));
         } else {
           console.error(
             'Unexpected API response structure:',
             data
           );
-          setUsers([]);
+          mappedUsers = [];
         }
+        
+        setUsers(mappedUsers);
       } catch (error) {
         console.error(error);
         toast({

@@ -2482,6 +2482,7 @@
   "fields": {
     "slug": "Slug (URL)",
     "imageUrl": "URL da Imagem",
+    "trackImage": "Imagem da Trilha",
     "title": "Título",
     "description": "Descrição"
   },
@@ -2513,7 +2514,10 @@
     "titleRequired": "Título é obrigatório",
     "descriptionRequired": "Descrição é obrigatória",
     "fetchCoursesTitle": "Erro ao carregar cursos",
-    "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis"
+    "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis",
+    "invalidImageType": "Tipo de arquivo inválido. Use JPG, PNG, GIF ou WebP",
+    "imageTooLarge": "Arquivo muito grande. O tamanho máximo é 5MB",
+    "uploadFailed": "Erro ao fazer upload da imagem"
   },
   "success": {
     "title": "Trilha atualizada!",
@@ -2525,7 +2529,22 @@
   },
   "save": "Salvar",
   "saving": "Salvando...",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "image": {
+    "current": "Imagem Atual",
+    "original": "Imagem Original",
+    "new": "Nova Imagem"
+  },
+  "upload": {
+    "success": "Imagem carregada com sucesso",
+    "uploading": "Enviando imagem",
+    "clickToSelect": "Clique para selecionar uma imagem",
+    "supportedFormats": "Formatos suportados",
+    "savedAs": "Salvo como"
+  },
+  "validation": {
+    "newImageReady": "Nova imagem pronta para ser salva"
+  }
 },
 "videoEdit": {
   "title": "Editar Vídeo",

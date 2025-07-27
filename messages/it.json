@@ -2265,6 +2265,7 @@
   "fields": {
     "slug": "Slug (URL)",
     "imageUrl": "URL dell'Immagine",
+    "trackImage": "Immagine del Percorso",
     "title": "Titolo",
     "description": "Descrizione"
   },
@@ -2296,7 +2297,10 @@
     "titleRequired": "Titolo è obbligatorio",
     "descriptionRequired": "Descrizione è obbligatoria",
     "fetchCoursesTitle": "Errore nel caricamento dei corsi",
-    "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili"
+    "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili",
+    "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
+    "imageTooLarge": "File troppo grande. La dimensione massima è 5MB",
+    "uploadFailed": "Errore nel caricamento dell'immagine"
   },
   "success": {
     "title": "Percorso aggiornato!",
@@ -2308,7 +2312,22 @@
   },
   "save": "Salva",
   "saving": "Salvataggio...",
-  "cancel": "Annulla"
+  "cancel": "Annulla",
+  "image": {
+    "current": "Immagine Attuale",
+    "original": "Immagine Originale",
+    "new": "Nuova Immagine"
+  },
+  "upload": {
+    "success": "Immagine caricata con successo",
+    "uploading": "Invio immagine",
+    "clickToSelect": "Clicca per selezionare un'immagine",
+    "supportedFormats": "Formati supportati",
+    "savedAs": "Salvato come"
+  },
+  "validation": {
+    "newImageReady": "Nuova immagine pronta per essere salvata"
+  }
 },
 "videoEdit": {
   "title": "Modifica Video",

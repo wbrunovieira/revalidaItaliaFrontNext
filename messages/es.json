@@ -2247,6 +2247,7 @@
   "fields": {
     "slug": "Slug (URL)",
     "imageUrl": "URL de la Imagen",
+    "trackImage": "Imagen de la Ruta",
     "title": "Título",
     "description": "Descripción"
   },
@@ -2278,7 +2279,10 @@
     "titleRequired": "Título es obligatorio",
     "descriptionRequired": "Descripción es obligatoria",
     "fetchCoursesTitle": "Error al cargar cursos",
-    "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles"
+    "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles",
+    "invalidImageType": "Tipo de archivo inválido. Use JPG, PNG, GIF o WebP",
+    "imageTooLarge": "Archivo demasiado grande. El tamaño máximo es 5MB",
+    "uploadFailed": "Error al cargar la imagen"
   },
   "success": {
     "title": "¡Ruta actualizada!",
@@ -2290,7 +2294,22 @@
   },
   "save": "Guardar",
   "saving": "Guardando...",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "image": {
+    "current": "Imagen Actual",
+    "original": "Imagen Original",
+    "new": "Nueva Imagen"
+  },
+  "upload": {
+    "success": "Imagen cargada con éxito",
+    "uploading": "Enviando imagen",
+    "clickToSelect": "Haga clic para seleccionar una imagen",
+    "supportedFormats": "Formatos soportados",
+    "savedAs": "Guardado como"
+  },
+  "validation": {
+    "newImageReady": "Nueva imagen lista para guardar"
+  }
 },
 "videoEdit": {
   "title": "Editar Vídeo",

@@ -1,9 +1,10 @@
 // /src/components/CourseEditModal.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   X,
   BookOpen,
@@ -14,6 +15,9 @@ import {
   Globe,
   Save,
   Loader2,
+  Upload,
+  Check,
+  ArrowRight,
 } from 'lucide-react';
 
 interface Translation {
@@ -48,6 +52,8 @@ export default function CourseEditModal({
   const [formData, setFormData] = useState({
     slug: '',
     imageUrl: '',
+    newImageUrl: '',
+    newImageFile: undefined as File | undefined,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
@@ -55,6 +61,8 @@ export default function CourseEditModal({
     },
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedImageName, setSavedImageName] = useState<string | null>(null);
   const [errors, setErrors] = useState<
     Record<string, string>
   >({});
@@ -77,6 +85,116 @@ export default function CourseEditModal({
     );
   };
 
+  // Extract filename from URL
+  const extractFilenameFromUrl = useCallback((url: string): string | null => {
+    try {
+      const urlParts = url.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      // If it looks like a filename (has extension), return it
+      if (filename && filename.includes('.')) {
+        return filename;
+      }
+    } catch (error) {
+      console.error('Error extracting filename:', error);
+    }
+    return null;
+  }, []);
+
+  // Delete image from storage
+  const deleteImage = useCallback(async (imageUrl: string) => {
+    try {
+      // Extract path from URL - assuming URL structure includes /images/courses/filename
+      const urlParts = imageUrl.split('/');
+      const imagesIndex = urlParts.findIndex(part => part === 'images');
+      if (imagesIndex === -1) {
+        console.error('Could not extract path from URL');
+        return false;
+      }
+      
+      const path = urlParts.slice(imagesIndex).join('/');
+      
+      const response = await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      return false;
+    }
+  }, []);
+
+  // Handle image selection (preview only, no upload)
+  const handleImageSelection = useCallback(
+    (file: File) => {
+      if (!file) return;
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.invalidImageType'),
+        }));
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.imageTooLarge'),
+        }));
+        return;
+      }
+
+      // Create a local URL for preview
+      const localUrl = URL.createObjectURL(file);
+      
+      // Save file and preview URL
+      setFormData(prev => ({
+        ...prev,
+        newImageFile: file,
+        newImageUrl: localUrl,
+      }));
+      
+      setSavedImageName(file.name);
+      
+      // Clear image error
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.imageUrl;
+        return newErrors;
+      });
+    },
+    [t]
+  );
+
+  // Remove new image selection
+  const handleImageRemove = useCallback(() => {
+    // Revoke the object URL to free memory
+    if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(formData.newImageUrl);
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      newImageFile: undefined,
+      newImageUrl: '',
+    }));
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.imageUrl;
+      return newErrors;
+    });
+    setSavedImageName(null);
+  }, [formData.newImageUrl]);
+
   // Validar formulário
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -87,7 +205,8 @@ export default function CourseEditModal({
       newErrors.slug = t('errors.slugInvalid');
     }
 
-    if (!formData.imageUrl.trim()) {
+    // Image is required (either original or new)
+    if (!formData.imageUrl.trim() && !formData.newImageUrl.trim()) {
       newErrors.imageUrl = t('errors.imageRequired');
     }
 
@@ -120,6 +239,32 @@ export default function CourseEditModal({
 
     setLoading(true);
     try {
+      let finalImageUrl = formData.imageUrl;
+
+      // Se há uma nova imagem selecionada, fazer upload primeiro
+      if (formData.newImageFile) {
+        setUploadingImage(true);
+        
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', formData.newImageFile);
+        uploadFormData.append('category', 'image');
+        uploadFormData.append('folder', 'courses');
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        finalImageUrl = uploadResult.url;
+        setUploadingImage(false);
+      }
+
       const token = getAuthToken();
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -141,7 +286,7 @@ export default function CourseEditModal({
           headers,
           body: JSON.stringify({
             slug: formData.slug.trim(),
-            imageUrl: formData.imageUrl.trim(),
+            imageUrl: finalImageUrl.trim(),
             translations,
           }),
         }
@@ -160,6 +305,12 @@ export default function CourseEditModal({
           );
         }
         throw new Error('Erro ao atualizar curso');
+      }
+
+      // Se havia uma nova imagem e a atualização foi bem-sucedida,
+      // deletar a imagem antiga
+      if (formData.newImageFile && formData.imageUrl && finalImageUrl !== formData.imageUrl) {
+        await deleteImage(formData.imageUrl);
       }
 
       toast({
@@ -181,12 +332,27 @@ export default function CourseEditModal({
       });
     } finally {
       setLoading(false);
+      setUploadingImage(false);
     }
   };
+
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.newImageUrl);
+      }
+    };
+  }, []);
 
   // Atualizar formulário quando course mudar
   useEffect(() => {
     if (course && isOpen) {
+      // Clean up any existing blob URLs
+      if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.newImageUrl);
+      }
+
       const translationsObj = {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
@@ -211,9 +377,12 @@ export default function CourseEditModal({
       setFormData({
         slug: course.slug,
         imageUrl: course.imageUrl,
+        newImageUrl: '',
+        newImageFile: undefined,
         translations: translationsObj,
       });
       setErrors({});
+      setSavedImageName(null);
     }
   }, [course, isOpen]);
 
@@ -322,37 +491,110 @@ export default function CourseEditModal({
                 </p>
               </div>
 
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <ImageIcon
-                    size={16}
-                    className="inline mr-2"
-                  />
-                  {t('fields.imageUrl')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.imageUrl}
-                  onChange={e =>
-                    setFormData({
-                      ...formData,
-                      imageUrl: e.target.value,
-                    })
-                  }
-                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
-                    errors.imageUrl
-                      ? 'border-red-500'
-                      : 'border-gray-600'
-                  }`}
-                  placeholder={t('placeholders.imageUrl')}
-                />
-                {errors.imageUrl && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.imageUrl}
+              {/* Placeholder para manter grid 2 colunas */}
+              <div></div>
+            </div>
+
+            {/* Seção de Upload de Imagem */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-300">
+                <ImageIcon size={16} className="inline mr-2" />
+                {t('fields.courseImage')}
+              </label>
+              
+              {/* Preview container */}
+              <div className={`grid gap-4 ${formData.newImageUrl && formData.newImageUrl.trim() !== '' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {/* Imagem Original */}
+                <div>
+                  <p className="text-xs text-gray-400 mb-2">
+                    {formData.newImageUrl ? t('image.original') : t('image.current')}
                   </p>
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700">
+                    {formData.imageUrl ? (
+                      <Image
+                        src={formData.imageUrl}
+                        alt="Current course image"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <ImageIcon size={48} className="text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nova Imagem (se houver) */}
+                {formData.newImageUrl && formData.newImageUrl.trim() !== '' && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                      {t('image.new')}
+                      <ArrowRight size={12} className="text-green-400" />
+                    </p>
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700 ring-2 ring-green-500/50">
+                      <Image
+                        src={formData.newImageUrl}
+                        alt="New course image"
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleImageRemove}
+                        className="absolute top-2 right-2 p-2 bg-gray-900/80 hover:bg-gray-900 rounded-lg transition-colors"
+                      >
+                        <X size={20} className="text-white" />
+                      </button>
+                    </div>
+                    <div className="mt-2 p-2 bg-gray-700/50 rounded">
+                      <p className="text-xs text-gray-400">
+                        {savedImageName} ({formData.newImageFile ? (formData.newImageFile.size / 1024 / 1024).toFixed(2) : 0} MB)
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
+
+              {/* Botão de Upload ou Status */}
+              {!formData.newImageUrl ? (
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="imageUpload"
+                    className="sr-only"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleImageSelection(file);
+                      }
+                    }}
+                    key={formData.newImageUrl ? 'has-image' : 'no-image'}
+                  />
+                  <label
+                    htmlFor="imageUpload"
+                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+                  >
+                    <Upload size={24} className="text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-300">{t('upload.clickToSelect')}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('upload.supportedFormats')}: JPG, PNG, GIF, WebP (Max 5MB)
+                    </p>
+                  </label>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-green-400 text-sm">
+                  <Check size={16} />
+                  {t('validation.newImageReady')}
+                </div>
+              )}
+
+              {errors.imageUrl && (
+                <p className="text-xs text-red-500">
+                  {errors.imageUrl}
+                </p>
+              )}
             </div>
 
             {/* Traduções */}
@@ -602,15 +844,15 @@ export default function CourseEditModal({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || uploadingImage}
             className="px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {loading ? (
+            {loading || uploadingImage ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <Save size={18} />
             )}
-            {loading ? t('saving') : t('save')}
+            {uploadingImage ? t('upload.uploading') : loading ? t('saving') : t('save')}
           </button>
         </div>
       </div>

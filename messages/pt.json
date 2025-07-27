@@ -2387,6 +2387,7 @@
   "fields": {
     "slug": "Slug (URL)",
     "imageUrl": "URL da Imagem",
+    "courseImage": "Imagem do Curso",
     "title": "Título",
     "description": "Descrição"
   },
@@ -2410,7 +2411,10 @@
     "slugInvalid": "Slug deve conter apenas letras minúsculas, números e hífens",
     "imageRequired": "URL da imagem é obrigatória",
     "titleRequired": "Título é obrigatório",
-    "descriptionRequired": "Descrição é obrigatória"
+    "descriptionRequired": "Descrição é obrigatória",
+    "invalidImageType": "Tipo de arquivo inválido. Use JPG, PNG, GIF ou WebP",
+    "imageTooLarge": "Arquivo muito grande. O tamanho máximo é 5MB",
+    "uploadFailed": "Erro ao fazer upload da imagem"
   },
   "success": {
     "title": "Curso atualizado!",
@@ -2422,7 +2426,22 @@
   },
   "save": "Salvar",
   "saving": "Salvando...",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "image": {
+    "current": "Imagem Atual",
+    "original": "Imagem Original",
+    "new": "Nova Imagem"
+  },
+  "upload": {
+    "success": "Imagem carregada com sucesso",
+    "uploading": "Enviando imagem",
+    "clickToSelect": "Clique para selecionar uma imagem",
+    "supportedFormats": "Formatos suportados",
+    "savedAs": "Salvo como"
+  },
+  "validation": {
+    "newImageReady": "Nova imagem pronta para ser salva"
+  }
 },
 
 "trackView": {

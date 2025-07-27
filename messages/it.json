@@ -1605,12 +1605,26 @@
 },
 "moduleEdit": {
   "title": "Modifica Modulo",
+  "moduleImage": "Immagine del Modulo",
   "fields": {
     "slug": "URL del Modulo",
     "imageUrl": "URL dell'Immagine",
     "order": "Ordine",
     "title": "Titolo",
     "description": "Descrizione"
+  },
+  "image": {
+    "current": "Immagine Attuale",
+    "original": "Immagine Originale",
+    "new": "Nuova Immagine"
+  },
+  "upload": {
+    "success": "Immagine caricata con successo",
+    "uploading": "Caricamento immagine",
+    "clickToSelect": "Clicca per selezionare un'immagine",
+    "supportedFormats": "Formati supportati",
+    "savedAs": "Salvato come",
+    "change": "Cambia immagine"
   },
   "placeholders": {
     "slug": "modulo-introduzione",
@@ -1632,10 +1646,14 @@
   "errors": {
     "slugRequired": "L'URL è obbligatorio",
     "slugInvalid": "L'URL deve contenere solo lettere minuscole, numeri e trattini",
-    "imageRequired": "L'URL dell'immagine è obbligatorio",
+    "imageRequired": "L'immagine è obbligatoria",
     "orderRequired": "L'ordine deve essere maggiore di 0",
     "titleRequired": "Il titolo è obbligatorio",
-    "descriptionRequired": "La descrizione è obbligatoria"
+    "descriptionRequired": "La descrizione è obbligatoria",
+    "invalidImageType": "Tipo di file non valido. Usa JPEG, PNG, GIF o WebP",
+    "imageTooLarge": "File troppo grande. Massimo: 5MB",
+    "uploadTitle": "Errore nel caricamento dell'immagine",
+    "uploadDescription": "Impossibile caricare l'immagine. Riprova."
   },
   "success": {
     "title": "Successo!",

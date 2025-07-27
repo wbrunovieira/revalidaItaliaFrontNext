@@ -1605,6 +1605,70 @@
         "deleteDescription": "No fue posible eliminar el módulo."
       }
     },
+"moduleEdit": {
+      "title": "Editar Módulo",
+      "moduleImage": "Imagen del Módulo",
+      "fields": {
+        "slug": "URL del Módulo",
+        "imageUrl": "URL de la Imagen",
+        "order": "Orden",
+        "title": "Título",
+        "description": "Descripción"
+      },
+      "image": {
+        "current": "Imagen Actual",
+        "original": "Imagen Original",
+        "new": "Nueva Imagen"
+      },
+      "upload": {
+        "success": "Imagen cargada con éxito",
+        "uploading": "Subiendo imagen",
+        "clickToSelect": "Haz clic para seleccionar una imagen",
+        "supportedFormats": "Formatos soportados",
+        "savedAs": "Guardado como",
+        "change": "Cambiar imagen"
+      },
+      "placeholders": {
+        "slug": "modulo-introduccion",
+        "imageUrl": "https://ejemplo.com/imagen.jpg",
+        "order": "1",
+        "title": "Ingresa el título del módulo",
+        "description": "Ingresa una breve descripción"
+      },
+      "hints": {
+        "slug": "Solo letras minúsculas, números y guiones",
+        "order": "Orden de visualización del módulo en el curso"
+      },
+      "translations": {
+        "title": "Traducciones",
+        "portuguese": "Portugués",
+        "spanish": "Español",
+        "italian": "Italiano"
+      },
+      "errors": {
+        "slugRequired": "URL es obligatoria",
+        "slugInvalid": "URL debe contener solo letras minúsculas, números y guiones",
+        "imageRequired": "Imagen es obligatoria",
+        "orderRequired": "Orden debe ser mayor que 0",
+        "titleRequired": "Título es obligatorio",
+        "descriptionRequired": "Descripción es obligatoria",
+        "invalidImageType": "Tipo de archivo inválido. Usa JPEG, PNG, GIF o WebP",
+        "imageTooLarge": "Archivo demasiado grande. Máximo: 5MB",
+        "uploadTitle": "Error al subir imagen",
+        "uploadDescription": "No se pudo subir la imagen. Intenta nuevamente."
+      },
+      "success": {
+        "title": "¡Éxito!",
+        "description": "Módulo actualizado con éxito"
+      },
+      "error": {
+        "title": "Error",
+        "description": "Error al actualizar módulo"
+      },
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando..."
+    },
 "moduleView": {
       "title": "Detalles del Módulo",
       "close": "Cerrar",

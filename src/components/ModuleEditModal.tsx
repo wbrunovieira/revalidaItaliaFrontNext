@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   X,
   BookOpen,
@@ -16,6 +17,8 @@ import {
   Save,
   Loader2,
   Hash,
+  Upload,
+  ArrowRight,
 } from 'lucide-react';
 import {
   Select,
@@ -64,6 +67,8 @@ interface FormTranslations {
 interface FormData {
   slug: string;
   imageUrl: string;
+  newImageUrl: string;
+  newImageFile: File | undefined;
   order: number;
   translations: FormTranslations;
 }
@@ -85,6 +90,8 @@ export default function ModuleEditModal({
   const [formData, setFormData] = useState<FormData>({
     slug: '',
     imageUrl: '',
+    newImageUrl: '',
+    newImageFile: undefined,
     order: 1,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -94,6 +101,8 @@ export default function ModuleEditModal({
   });
 
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedImageName, setSavedImageName] = useState<string | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Novos estados para gerenciar orders
@@ -134,6 +143,116 @@ export default function ModuleEditModal({
       tokenFromCookie || tokenFromLocal || tokenFromSession
     );
   };
+
+  // Extract filename from URL
+  const extractFilenameFromUrl = useCallback((url: string): string | null => {
+    try {
+      const urlParts = url.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      // If it looks like a filename (has extension), return it
+      if (filename && filename.includes('.')) {
+        return filename;
+      }
+    } catch (error) {
+      console.error('Error extracting filename:', error);
+    }
+    return null;
+  }, []);
+
+  // Delete image from storage
+  const deleteImage = useCallback(async (imageUrl: string) => {
+    try {
+      // Extract path from URL - assuming URL structure includes /images/modules/filename
+      const urlParts = imageUrl.split('/');
+      const imagesIndex = urlParts.findIndex(part => part === 'images');
+      if (imagesIndex === -1) {
+        console.error('Could not extract path from URL');
+        return false;
+      }
+      
+      const path = urlParts.slice(imagesIndex).join('/');
+      
+      const response = await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      return false;
+    }
+  }, []);
+
+  // Handle image selection (preview only, no upload)
+  const handleImageSelection = useCallback(
+    (file: File) => {
+      if (!file) return;
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.invalidImageType'),
+        }));
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setErrors(prev => ({
+          ...prev,
+          imageUrl: t('errors.imageTooLarge'),
+        }));
+        return;
+      }
+
+      // Create a local URL for preview
+      const localUrl = URL.createObjectURL(file);
+      
+      // Save file and preview URL
+      setFormData(prev => ({
+        ...prev,
+        newImageFile: file,
+        newImageUrl: localUrl,
+      }));
+      
+      setSavedImageName(file.name);
+      
+      // Clear image error
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.imageUrl;
+        return newErrors;
+      });
+    },
+    [t]
+  );
+
+  // Remove new image selection
+  const handleImageRemove = useCallback(() => {
+    // Revoke the object URL to free memory
+    if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(formData.newImageUrl);
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      newImageFile: undefined,
+      newImageUrl: '',
+    }));
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.imageUrl;
+      return newErrors;
+    });
+    setSavedImageName(null);
+  }, [formData.newImageUrl]);
 
   // Função para buscar módulos existentes do curso
   const fetchExistingModules = useCallback(
@@ -205,7 +324,8 @@ export default function ModuleEditModal({
       newErrors.slug = t('errors.slugInvalid');
     }
 
-    if (!formData.imageUrl.trim()) {
+    // Image is required (either original or new)
+    if (!formData.imageUrl.trim() && !formData.newImageUrl.trim()) {
       newErrors.imageUrl = t('errors.imageRequired');
     }
 
@@ -281,6 +401,37 @@ export default function ModuleEditModal({
     }
   };
 
+  // Generate unique filename
+  const generateUniqueFileName = (originalName: string): string => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop() || 'jpg';
+    const cleanName = originalName.split('.')[0].replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    return `${cleanName}-${timestamp}-${randomString}.${extension}`;
+  };
+
+  // Upload image to server
+  const uploadImage = async (file: File): Promise<string> => {
+    const uniqueFileName = generateUniqueFileName(file.name);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', 'image');
+    formData.append('folder', 'modules');
+    formData.append('filename', uniqueFileName);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
   // Submeter formulário
   const handleSubmit = async (
     e: React.FormEvent
@@ -290,7 +441,41 @@ export default function ModuleEditModal({
     if (!validateForm() || !module) return;
 
     setLoading(true);
+    let newUploadedUrl: string | null = null;
+    
     try {
+      let finalImageUrl = formData.imageUrl;
+      
+      // If there's a new image to upload
+      if (formData.newImageFile) {
+        setUploadingImage(true);
+        toast({
+          title: t('upload.uploading'),
+          description: formData.newImageFile.name,
+        });
+        
+        try {
+          // Upload the new image
+          newUploadedUrl = await uploadImage(formData.newImageFile);
+          finalImageUrl = newUploadedUrl;
+          
+          toast({
+            title: t('upload.success'),
+            description: extractFilenameFromUrl(newUploadedUrl) || '',
+          });
+        } catch (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          toast({
+            title: t('error.uploadTitle'),
+            description: t('error.uploadDescription'),
+            variant: 'destructive',
+          });
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+      
       const token = getAuthToken();
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -312,7 +497,7 @@ export default function ModuleEditModal({
           headers,
           body: JSON.stringify({
             slug: formData.slug.trim(),
-            imageUrl: formData.imageUrl.trim(),
+            imageUrl: finalImageUrl.trim(),
             order: formData.order,
             translations,
           }),
@@ -332,6 +517,14 @@ export default function ModuleEditModal({
           );
         }
         throw new Error('Erro ao atualizar módulo');
+      }
+
+      // If update was successful and we uploaded a new image, delete the old one
+      if (newUploadedUrl && formData.imageUrl && formData.imageUrl !== newUploadedUrl) {
+        // Delete old image in background (don't wait for it)
+        deleteImage(formData.imageUrl).catch(error => {
+          console.error('Error deleting old image:', error);
+        });
       }
 
       toast({
@@ -407,6 +600,8 @@ export default function ModuleEditModal({
       setFormData({
         slug: module.slug,
         imageUrl: module.imageUrl || '',
+        newImageUrl: '',
+        newImageFile: undefined,
         order: module.order || 1,
         translations: translationsObj,
       });
@@ -419,6 +614,15 @@ export default function ModuleEditModal({
       fetchExistingModules(courseId);
     }
   }, [module, isOpen, courseId, fetchExistingModules]);
+
+  // Cleanup blob URLs when modal closes
+  useEffect(() => {
+    return () => {
+      if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.newImageUrl);
+      }
+    };
+  }, [formData.newImageUrl]);
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -596,31 +800,128 @@ export default function ModuleEditModal({
                   )}
               </div>
 
-              {/* Image URL */}
+              {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <ImageIcon
                     size={16}
                     className="inline mr-2"
                   />
-                  {t('fields.imageUrl')}
+                  {t('moduleImage')}
                 </label>
-                <input
-                  type="text"
-                  value={formData.imageUrl}
-                  onChange={e =>
-                    setFormData({
-                      ...formData,
-                      imageUrl: e.target.value,
-                    })
-                  }
-                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
-                    errors.imageUrl
-                      ? 'border-red-500'
-                      : 'border-gray-600'
-                  }`}
-                  placeholder={t('placeholders.imageUrl')}
-                />
+                
+                {/* Upload area if no image or new image */}
+                {!formData.imageUrl && !formData.newImageUrl ? (
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageSelection(file);
+                      }}
+                      className="hidden"
+                      id="module-image-upload"
+                    />
+                    <label
+                      htmlFor="module-image-upload"
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600 transition-colors ${
+                        errors.imageUrl
+                          ? 'border-red-500'
+                          : 'border-gray-600'
+                      }`}
+                    >
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-400">
+                        {t('upload.clickToSelect')}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('upload.supportedFormats')}: JPEG, PNG, GIF, WebP
+                      </p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Original image preview */}
+                    {formData.imageUrl && !formData.newImageUrl && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2">{t('image.current')}</p>
+                        <div className="relative group">
+                          <Image
+                            src={formData.imageUrl}
+                            alt="Current module image"
+                            width={200}
+                            height={112}
+                            className="rounded-lg object-cover w-full h-28"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageSelection(file);
+                              }}
+                              className="hidden"
+                              id="module-image-change"
+                            />
+                            <label
+                              htmlFor="module-image-change"
+                              className="px-3 py-1 bg-white text-black text-sm rounded cursor-pointer hover:bg-gray-200"
+                            >
+                              {t('upload.change')}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Dual preview when new image selected */}
+                    {formData.imageUrl && formData.newImageUrl && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs text-gray-400 mb-2">{t('image.original')}</p>
+                          <Image
+                            src={formData.imageUrl}
+                            alt="Original module image"
+                            width={200}
+                            height={112}
+                            className="rounded-lg object-cover w-full h-20"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-green-400 mb-2 flex items-center gap-1">
+                            <ArrowRight size={12} />
+                            {t('image.new')}
+                          </p>
+                          <div className="relative group">
+                            <Image
+                              src={formData.newImageUrl}
+                              alt="New module image"
+                              width={200}
+                              height={112}
+                              className="rounded-lg object-cover w-full h-20 ring-2 ring-green-400"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleImageRemove}
+                              className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {savedImageName && (
+                      <p className="text-xs text-gray-500">
+                        {t('upload.savedAs')}: {savedImageName}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 {errors.imageUrl && (
                   <p className="text-red-400 text-sm mt-1">
                     {errors.imageUrl}

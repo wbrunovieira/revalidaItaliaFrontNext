@@ -55,6 +55,7 @@ import QuestionsList from '@/components/QuestionsList';
 import CreateFlashcardForm from '@/components/CreateFlashcardForm';
 import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
 import FlashcardsList from '@/components/FlashcardsList';
+import FlashcardTagsList from '@/components/FlashcardTagsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -617,7 +618,19 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
               <TabsContent value="list">
-                <FlashcardsList />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Flashcards List - 2/3 */}
+                  <div className="lg:col-span-2">
+                    <FlashcardsList />
+                  </div>
+                  
+                  {/* Tags List - 1/3 */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                      <FlashcardTagsList />
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
           </TabsContent>

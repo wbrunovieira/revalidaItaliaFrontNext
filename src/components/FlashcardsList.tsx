@@ -446,11 +446,11 @@ export default function FlashcardsList() {
           </div>
 
           {/* Flashcards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {flashcards.map(flashcard => (
               <div
                 key={flashcard.id}
-                className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-secondary/50 transition-all relative"
+                className="bg-gray-800 rounded-lg p-3 border border-gray-700 hover:border-secondary/50 transition-all relative"
               >
                 {/* Action Buttons */}
                 <div className="absolute top-2 right-2 flex items-center gap-1">
@@ -459,25 +459,25 @@ export default function FlashcardsList() {
                       // TODO: Implement edit
                       console.log('Edit flashcard:', flashcard.id);
                     }}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
                     title={t('actions.edit')}
                   >
-                    <Edit2 size={16} />
+                    <Edit2 size={14} />
                   </button>
                   <button
                     onClick={() => {
                       // TODO: Implement delete
                       console.log('Delete flashcard:', flashcard.id);
                     }}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
                     title={t('actions.delete')}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
 
                 {/* Question */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                     {flashcard.questionType === 'TEXT' ? (
                       <Type size={16} />
@@ -492,7 +492,7 @@ export default function FlashcardsList() {
                         {flashcard.questionText}
                       </p>
                     ) : (
-                      <div className="relative h-20 bg-gray-700 rounded overflow-hidden">
+                      <div className="relative h-16 bg-gray-700 rounded overflow-hidden">
                         <img
                           src={
                             flashcard.questionImageUrl || ''
@@ -506,7 +506,7 @@ export default function FlashcardsList() {
                 </div>
 
                 {/* Answer */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                     {flashcard.answerType === 'TEXT' ? (
                       <Type size={16} />
@@ -521,7 +521,7 @@ export default function FlashcardsList() {
                         {flashcard.answerText}
                       </p>
                     ) : (
-                      <div className="relative h-20 bg-gray-700 rounded overflow-hidden">
+                      <div className="relative h-16 bg-gray-700 rounded overflow-hidden">
                         <img
                           src={
                             flashcard.answerImageUrl || ''

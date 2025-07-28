@@ -459,6 +459,23 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "flashcardTagsList": {
+    "title": "Lista dei Tag delle Flashcard",
+    "description": "Gestisci i tag delle tue flashcard",
+    "searchPlaceholder": "Cerca tag...",
+    "loading": "Caricamento tag...",
+    "noTags": "Nessun tag trovato",
+    "totalTags": "Totale: {count} tag",
+    "actions": {
+      "edit": "Modifica",
+      "delete": "Elimina"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento dei tag",
+      "fetchDescription": "Impossibile caricare i tag"
+    }
+  },
+  
   "flashcardsList": {
     "title": "Elenco Flashcard",
     "description": "Gestisci tutte le flashcard del sistema",

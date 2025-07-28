@@ -457,6 +457,23 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "flashcardTagsList": {
+    "title": "Lista de Etiquetas de Flashcards",
+    "description": "Gestiona las etiquetas de tus flashcards",
+    "searchPlaceholder": "Buscar etiquetas...",
+    "loading": "Cargando etiquetas...",
+    "noTags": "No se encontraron etiquetas",
+    "totalTags": "Total: {count} etiquetas",
+    "actions": {
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar etiquetas",
+      "fetchDescription": "No se pudieron cargar las etiquetas"
+    }
+  },
+  
   "flashcardsList": {
     "title": "Lista de Flashcards",
     "description": "Gestiona todas las flashcards del sistema",

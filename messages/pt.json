@@ -1857,6 +1857,7 @@
   },
 "lessonEdit": {
       "title": "Editar Aula",
+      "lessonImage": "Imagem da Aula",
       "fields": {
         "imageUrl": "URL da Imagem",
         "order": "Ordem",
@@ -1869,6 +1870,19 @@
         "commentIds": "IDs dos Comentários",
          "noVideo": "Sem vídeo",
       "noVideosAvailable": "Nenhum vídeo disponível"
+      },
+      "image": {
+        "current": "Imagem Atual",
+        "original": "Imagem Original",
+        "new": "Nova Imagem"
+      },
+      "upload": {
+        "success": "Imagem carregada com sucesso",
+        "uploading": "Enviando imagem",
+        "clickToSelect": "Clique para selecionar uma imagem",
+        "supportedFormats": "Formatos suportados",
+        "savedAs": "Salvo como",
+        "change": "Trocar imagem"
       },
       "placeholders": {
         "imageUrl": "https://exemplo.com/imagem.jpg",
@@ -1903,14 +1917,18 @@
         "italian": "Italiano"
       },
       "errors": {
-        "imageRequired": "URL da imagem é obrigatória",
+        "imageRequired": "Imagem é obrigatória",
         "orderRequired": "Ordem deve ser maior que 0",
         "orderMax": "Ordem não pode ser maior que 999",
         "orderExists": "Esta ordem já está sendo usada por outra aula",
         "titleRequired": "Título é obrigatório",
         "descriptionRequired": "Descrição é obrigatória",
         "editLoadTitle": "Erro ao carregar aula",
-        "editLoadDescription": "Não foi possível carregar os dados da aula para edição"
+        "editLoadDescription": "Não foi possível carregar os dados da aula para edição",
+        "invalidImageType": "Tipo de arquivo inválido. Use JPEG, PNG, GIF ou WebP",
+        "imageTooLarge": "Arquivo muito grande. Máximo: 5MB",
+        "uploadTitle": "Erro ao enviar imagem",
+        "uploadDescription": "Não foi possível enviar a imagem. Tente novamente."
       },
       "success": {
         "title": "Sucesso!",

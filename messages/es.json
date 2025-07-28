@@ -1882,6 +1882,7 @@
   "lessonEdit": {
      "loadingVideos": "",
     "title": "Editar Lección",
+    "lessonImage": "Imagen de la Lección",
  "fields": {
   "imageUrl": "URL de la imagen",
   "order": "Orden",
@@ -1894,6 +1895,19 @@
   "assessments": "Evaluaciones",
   "commentIds": "ID de comentarios"
 },
+  "image": {
+    "current": "Imagen Actual",
+    "original": "Imagen Original",
+    "new": "Nueva Imagen"
+  },
+  "upload": {
+    "success": "Imagen cargada con éxito",
+    "uploading": "Subiendo imagen",
+    "clickToSelect": "Haz clic para seleccionar una imagen",
+    "supportedFormats": "Formatos soportados",
+    "savedAs": "Guardado como",
+    "change": "Cambiar imagen"
+  },
 "assessmentTypes": {
   "quiz": "Quiz",
   "simulado": "Simulado",
@@ -1922,12 +1936,16 @@
       "italian": "Italiano"
     },
     "errors": {
-      "imageRequired": "URL de la imagen es obligatoria",
+      "imageRequired": "Imagen es obligatoria",
       "orderRequired": "El orden debe ser mayor que 0",
       "orderMax": "El orden no puede ser mayor que 999",
       "orderExists": "Este orden ya está siendo usado por otra lección",
       "titleRequired": "El título es obligatorio",
-      "descriptionRequired": "La descripción es obligatoria"
+      "descriptionRequired": "La descripción es obligatoria",
+      "invalidImageType": "Tipo de archivo inválido. Usa JPEG, PNG, GIF o WebP",
+      "imageTooLarge": "Archivo demasiado grande. Máximo: 5MB",
+      "uploadTitle": "Error al subir imagen",
+      "uploadDescription": "No se pudo subir la imagen. Intenta nuevamente."
     },
     "success": {
       "title": "¡Éxito!",
@@ -1941,6 +1959,9 @@
     "noOrdersAvailable": "Ningún orden disponible",
     "current": "actual",
     "occupiedOrders": "Órdenes ocupados",
+    "loadingAssessments": "Cargando evaluaciones...",
+    "linkedAssessments": "Evaluaciones vinculadas",
+    "noAssessment": "Ninguna evaluación",
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "Guardando..."

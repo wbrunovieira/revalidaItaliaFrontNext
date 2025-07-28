@@ -1850,7 +1850,7 @@
 "lessonEdit": {
    "loadingVideos": "",
     "title": "Modifica Lezione",
-
+    "lessonImage": "Immagine della Lezione",
 
     "fields": {
       "imageUrl": "URL dell'Immagine",
@@ -1864,6 +1864,19 @@
       "flashcardIds": "ID delle Flashcard",
       "assessments": "Valutazioni",
       "commentIds": "ID dei Commenti"
+    },
+    "image": {
+      "current": "Immagine Attuale",
+      "original": "Immagine Originale",
+      "new": "Nuova Immagine"
+    },
+    "upload": {
+      "success": "Immagine caricata con successo",
+      "uploading": "Caricamento immagine",
+      "clickToSelect": "Clicca per selezionare un'immagine",
+      "supportedFormats": "Formati supportati",
+      "savedAs": "Salvato come",
+      "change": "Cambia immagine"
     },
        "assessmentTypes": {
       "quiz": "Quiz",
@@ -1894,12 +1907,16 @@
       "italian": "Italiano"
     },
     "errors": {
-      "imageRequired": "URL dell'immagine è obbligatoria",
+      "imageRequired": "L'immagine è obbligatoria",
       "orderRequired": "L'ordine deve essere maggiore di 0",
       "orderMax": "L'ordine non può essere maggiore di 999",
       "orderExists": "Questo ordine è già utilizzato da un'altra lezione",
       "titleRequired": "Il titolo è obbligatorio",
-      "descriptionRequired": "La descrizione è obbligatoria"
+      "descriptionRequired": "La descrizione è obbligatoria",
+      "invalidImageType": "Tipo di file non valido. Usa JPEG, PNG, GIF o WebP",
+      "imageTooLarge": "File troppo grande. Massimo: 5MB",
+      "uploadTitle": "Errore nel caricamento dell'immagine",
+      "uploadDescription": "Impossibile caricare l'immagine. Riprova."
     },
     "success": {
       "title": "Successo!",
@@ -1913,6 +1930,9 @@
     "noOrdersAvailable": "Nessun ordine disponibile",
     "current": "attuale",
     "occupiedOrders": "Ordini occupati",
+    "loadingAssessments": "Caricamento valutazioni...",
+    "linkedAssessments": "Valutazioni collegate",
+    "noAssessment": "Nessuna valutazione",
     "cancel": "Annulla",
     "save": "Salva",
     "saving": "Salvataggio..."

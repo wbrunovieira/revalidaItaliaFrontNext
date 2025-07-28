@@ -243,21 +243,43 @@ export default function CreateFlashcardForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: t('errors.uploadFailedTitle'),
+        description: t('errors.invalidImageType'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: t('errors.uploadFailedTitle'),
+        description: t('errors.imageTooLarge'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setUploadingQuestionImage(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('category', 'image');
+      formData.append('folder', 'flashcards');
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
 
       const data = await response.json();
@@ -268,11 +290,18 @@ export default function CreateFlashcardForm({
 
       setQuestionImageFile(uploadedFile);
       handleFieldChange('questionContent', data.url);
+      
+      toast({
+        title: t('success.uploadTitle'),
+        description: t('success.uploadDescription'),
+        variant: 'success',
+      });
     } catch (error) {
       console.error('Error uploading image:', error);
+      const errorMessage = error instanceof Error ? error.message : t('errors.uploadFailedDescription');
       toast({
         title: t('errors.uploadFailedTitle'),
-        description: t('errors.uploadFailedDescription'),
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -286,21 +315,43 @@ export default function CreateFlashcardForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: t('errors.uploadFailedTitle'),
+        description: t('errors.invalidImageType'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: t('errors.uploadFailedTitle'),
+        description: t('errors.imageTooLarge'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setUploadingAnswerImage(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('category', 'image');
+      formData.append('folder', 'flashcards');
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
 
       const data = await response.json();
@@ -311,11 +362,18 @@ export default function CreateFlashcardForm({
 
       setAnswerImageFile(uploadedFile);
       handleFieldChange('answerContent', data.url);
+      
+      toast({
+        title: t('success.uploadTitle'),
+        description: t('success.uploadDescription'),
+        variant: 'success',
+      });
     } catch (error) {
       console.error('Error uploading image:', error);
+      const errorMessage = error instanceof Error ? error.message : t('errors.uploadFailedDescription');
       toast({
         title: t('errors.uploadFailedTitle'),
-        description: t('errors.uploadFailedDescription'),
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -400,6 +458,8 @@ export default function CreateFlashcardForm({
         }),
       };
 
+      console.log('📤 Sending flashcard payload:', JSON.stringify(payload, null, 2));
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards`,
         {
@@ -414,6 +474,7 @@ export default function CreateFlashcardForm({
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Backend error response:', errorData);
         throw new Error(
           errorData.message || 'Failed to create flashcard'
         );

@@ -646,12 +646,16 @@
       "loadTagsDescription": "Impossibile caricare la lista dei tag",
       "uploadFailedTitle": "Errore nel caricamento",
       "uploadFailedDescription": "Impossibile caricare l'immagine",
+      "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
+      "imageTooLarge": "File troppo grande. La dimensione massima è 5MB",
       "createTitle": "Errore nella creazione della flashcard",
       "createDescription": "Impossibile creare la flashcard"
     },
     "success": {
       "createTitle": "Flashcard creata",
-      "createDescription": "La flashcard è stata creata con successo"
+      "createDescription": "La flashcard è stata creata con successo",
+      "uploadTitle": "Immagine caricata",
+      "uploadDescription": "L'immagine è stata caricata con successo"
     }
   },
   

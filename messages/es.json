@@ -2623,6 +2623,36 @@
     "deleting": "Eliminando..."
   }
 },
+"argumentView": {
+  "title": "Detalles del Argumento",
+  "close": "Cerrar",
+  "loading": "Cargando...",
+  "noData": "No se encontraron datos",
+  "copyToClipboard": "Copiar al portapapeles",
+  "copySuccess": "¡Copiado!",
+  "copyDescription": "{field} copiado al portapapeles",
+  "copyError": "Error al copiar",
+  "copyErrorDescription": "No se pudo copiar al portapapeles",
+  "fields": {
+    "id": "ID",
+    "title": "Título",
+    "assessment": "Evaluación",
+    "assessmentId": "ID de Evaluación",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulado",
+    "prova_aberta": "Prueba Abierta"
+  },
+  "error": {
+    "fetchTitle": "Error al cargar argumento",
+    "fetchDescription": "No fue posible cargar los detalles del argumento",
+    "notFound": "Argumento no encontrado",
+    "invalidId": "ID inválido"
+  }
+},
 "Tutor": {
   "back": "Volver",
   "dashboard": {

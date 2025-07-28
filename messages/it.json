@@ -2594,6 +2594,36 @@
     "deleting": "Eliminazione..."
   }
 },
+"argumentView": {
+  "title": "Dettagli dell'Argomento",
+  "close": "Chiudi",
+  "loading": "Caricamento...",
+  "noData": "Nessun dato trovato",
+  "copyToClipboard": "Copia negli appunti",
+  "copySuccess": "Copiato!",
+  "copyDescription": "{field} copiato negli appunti",
+  "copyError": "Errore nella copia",
+  "copyErrorDescription": "Impossibile copiare negli appunti",
+  "fields": {
+    "id": "ID",
+    "title": "Titolo",
+    "assessment": "Valutazione",
+    "assessmentId": "ID Valutazione",
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il"
+  },
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulazione",
+    "prova_aberta": "Prova Aperta"
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento dell'argomento",
+    "fetchDescription": "Impossibile caricare i dettagli dell'argomento",
+    "notFound": "Argomento non trovato",
+    "invalidId": "ID non valido"
+  }
+},
 "Tutor": {
   "back": "Indietro",
   "dashboard": {

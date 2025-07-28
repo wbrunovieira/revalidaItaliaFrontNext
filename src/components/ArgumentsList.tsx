@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import ArgumentViewModal from './ArgumentViewModal';
 
 interface Argument {
   id: string;
@@ -54,6 +55,8 @@ export default function ArgumentsList() {
   const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedArgumentId, setSelectedArgumentId] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -296,6 +299,18 @@ export default function ArgumentsList() {
     [argumentsList, deletingId, deleteArgument, t, toast]
   );
 
+  // Handle view argument
+  const handleView = useCallback((argumentId: string) => {
+    setSelectedArgumentId(argumentId);
+    setViewModalOpen(true);
+  }, []);
+
+  // Handle close view modal
+  const handleCloseViewModal = useCallback(() => {
+    setViewModalOpen(false);
+    setSelectedArgumentId(null);
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -384,12 +399,7 @@ export default function ArgumentsList() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => {
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('viewFeature'),
-                            });
-                          }}
+                          onClick={() => handleView(argument.id)}
                           className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('actions.view')}
                         >
@@ -521,6 +531,13 @@ export default function ArgumentsList() {
           </div>
         </div>
       )}
+
+      {/* View Modal */}
+      <ArgumentViewModal
+        argumentId={selectedArgumentId}
+        isOpen={viewModalOpen}
+        onClose={handleCloseViewModal}
+      />
     </div>
   );
 }

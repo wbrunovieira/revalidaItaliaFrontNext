@@ -15,7 +15,6 @@ import {
   Globe,
   Clock,
   Hash,
-  Image as ImageIcon,
   Copy,
   Check,
 } from 'lucide-react';
@@ -29,7 +28,6 @@ interface Translation {
 interface VideoData {
   id: string;
   slug: string;
-  imageUrl?: string;
   providerVideoId: string;
   durationInSeconds: number;
   translations: Translation[];
@@ -54,7 +52,6 @@ interface FormTranslations {
 
 interface FormData {
   slug: string;
-  imageUrl: string;
   providerVideoId: string;
   durationInSeconds: number;
   translations: FormTranslations;
@@ -77,7 +74,6 @@ export default function EditVideoModal({
 
   const [formData, setFormData] = useState<FormData>({
     slug: '',
-    imageUrl: '',
     providerVideoId: '',
     durationInSeconds: 0,
     translations: {
@@ -183,7 +179,6 @@ export default function EditVideoModal({
 
       setFormData({
         slug: video.slug || '',
-        imageUrl: video.imageUrl || '',
         providerVideoId: video.providerVideoId || '',
         durationInSeconds: video.durationInSeconds || 0,
         translations: translationsObj,
@@ -257,7 +252,6 @@ export default function EditVideoModal({
       // Preparar dados para envio - removendo campos somente leitura
       const requestData = {
         slug: formData.slug.trim(),
-        imageUrl: formData.imageUrl.trim() || undefined,
         translations,
       };
 
@@ -466,21 +460,6 @@ export default function EditVideoModal({
                   </p>
                 </div>
 
-                {/* Image URL */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <ImageIcon size={16} className="inline mr-2" />
-                    {t('fields.imageUrl')}
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
-                    placeholder={t('placeholders.imageUrl')}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">{t('hints.imageUrl')}</p>
-                </div>
               </div>
 
               {/* Traduções */}

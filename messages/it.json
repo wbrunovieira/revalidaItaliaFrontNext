@@ -776,6 +776,50 @@
       "fetchDescription": "Non è stato possibile caricare i dettagli del documento"
     }
   },
+  "documentEdit": {
+    "title": "Modifica Documento",
+    "loading": "Caricamento documento...",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "cancel": "Annulla",
+    "noUrl": "URL non disponibile",
+    "fields": {
+      "filename": "Nome del File",
+      "context": "Contesto",
+      "translations": "Traduzioni",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "url": "URL del Documento"
+    },
+    "placeholders": {
+      "title": "Inserisci il titolo del documento",
+      "description": "Inserisci la descrizione del documento"
+    },
+    "errors": {
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMin": "Il titolo deve avere almeno 3 caratteri",
+      "titleMax": "Il titolo non può superare i 255 caratteri",
+      "descriptionRequired": "La descrizione è obbligatoria",
+      "descriptionMin": "La descrizione deve avere almeno 10 caratteri",
+      "descriptionMax": "La descrizione non può superare i 1000 caratteri",
+      "fetchTitle": "Errore nel caricamento del documento",
+      "fetchDescription": "Non è stato possibile caricare i dati del documento",
+      "updateTitle": "Errore nell'aggiornamento",
+      "updateDescription": "Non è stato possibile aggiornare il documento",
+      "notFound": "Documento non trovato",
+      "invalidData": "Dati forniti non validi",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Correggi gli errori prima di salvare"
+    },
+    "success": {
+      "title": "Documento aggiornato",
+      "description": "Le modifiche sono state salvate con successo"
+    },
+    "validation": {
+      "titleValid": "Titolo valido",
+      "descriptionValid": "Descrizione valida"
+    }
+  },
   "tabs": {
     "overview": "Panoramica",
     "users": "Utenti",
@@ -2500,6 +2544,68 @@
     "loadModulesDescription": "Non è stato possibile caricare l'elenco dei moduli",
     "loadLessonsTitle": "Errore nel caricamento delle lezioni",
     "loadLessonsDescription": "Non è stato possibile caricare l'elenco delle lezioni"
+  }
+},
+"assessmentEdit": {
+  "title": "Modifica Valutazione",
+  "cancel": "Annulla",
+  "save": "Salva",
+  "saving": "Salvataggio...",
+  "loadingLessons": "Caricamento lezioni...",
+  "types": {
+    "quiz": "Quiz",
+    "simulado": "Simulazione",
+    "prova_aberta": "Prova Aperta"
+  },
+  "fields": {
+    "title": "Titolo",
+    "description": "Descrizione",
+    "lesson": "Lezione",
+    "passingScore": "Voto di Superamento (%)",
+    "quizPosition": "Posizione del Quiz",
+    "timeLimit": "Tempo Limite (minuti)",
+    "optional": "Opzionale",
+    "lessonHelp": "La lezione associata non può essere modificata dopo la creazione"
+  },
+  "placeholders": {
+    "title": "Inserisci il titolo della valutazione",
+    "description": "Inserisci una descrizione per la valutazione",
+    "lesson": "Seleziona una lezione",
+    "noLesson": "Nessuna lezione associata",
+    "passingScore": "Es: 70",
+    "timeLimit": "Es: 60"
+  },
+  "randomization": {
+    "title": "Opzioni di Randomizzazione",
+    "questions": "Randomizza ordine delle domande",
+    "options": "Randomizza ordine delle opzioni"
+  },
+  "quizPositions": {
+    "beforeLesson": "Prima della lezione",
+    "afterLesson": "Dopo la lezione"
+  },
+  "validation": {
+    "titleValid": "Titolo valido"
+  },
+  "errors": {
+    "titleRequired": "Il titolo è obbligatorio",
+    "titleMin": "Il titolo deve avere almeno 3 caratteri",
+    "titleMax": "Il titolo non può superare i 100 caratteri",
+    "descriptionMax": "La descrizione non può superare i 500 caratteri",
+    "passingScoreInvalid": "Il voto di superamento deve essere tra 0 e 100",
+    "timeLimitInvalid": "Il tempo limite deve essere tra 1 e 600 minuti",
+    "loadLessonsTitle": "Errore nel caricamento delle lezioni",
+    "loadLessonsDescription": "Non è stato possibile caricare l'elenco delle lezioni",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Correggi gli errori prima di salvare",
+    "updateTitle": "Errore nell'aggiornamento",
+    "updateDescription": "Non è stato possibile aggiornare la valutazione",
+    "notFound": "Valutazione non trovata",
+    "invalidData": "Dati forniti non validi"
+  },
+  "success": {
+    "title": "Valutazione aggiornata",
+    "description": "Le modifiche sono state salvate con successo"
   }
 },
 "viewAssessment": {

@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import ViewAssessmentModal from '@/components/ViewAssessmentModal';
+import AssessmentEditModal from '@/components/AssessmentEditModal';
 
 type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
 type QuizPosition = 'BEFORE_LESSON' | 'AFTER_LESSON' | null;
@@ -128,6 +129,10 @@ export default function AssessmentsList() {
   // View modal state
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
+  
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -341,6 +346,23 @@ export default function AssessmentsList() {
   const handleCloseViewModal = () => {
     setViewModalOpen(false);
     setSelectedAssessmentId(null);
+  };
+
+  // Handle edit assessment
+  const handleEditAssessment = (assessment: Assessment) => {
+    setSelectedAssessment(assessment);
+    setEditModalOpen(true);
+  };
+
+  // Handle close edit modal
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedAssessment(null);
+  };
+
+  // Handle save edit
+  const handleSaveEdit = () => {
+    loadAssessments();
   };
 
   // Get icon for assessment type
@@ -671,13 +693,7 @@ export default function AssessmentsList() {
                           <Eye size={16} />
                         </button>
                         <button
-                          onClick={() => {
-                            // TODO: Implement edit modal
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('editFeature'),
-                            });
-                          }}
+                          onClick={() => handleEditAssessment(assessment)}
                           className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('actions.edit')}
                         >
@@ -807,6 +823,14 @@ export default function AssessmentsList() {
           onClose={handleCloseViewModal}
         />
       )}
+
+      {/* Edit Assessment Modal */}
+      <AssessmentEditModal
+        assessment={selectedAssessment}
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

@@ -492,6 +492,48 @@
     }
   },
   
+  "questionDelete": {
+    "title": "Elimina Domanda",
+    "questionInfo": "Informazioni sulla Domanda",
+    "type": "Tipo",
+    "types": {
+      "multipleChoice": "Scelta Multipla",
+      "open": "Aperta"
+    },
+    "hasDependencies": "Questa domanda ha elementi associati",
+    "dependenciesDescription": "Puoi eliminare singoli elementi o l'intera domanda.",
+    "options": "Opzioni",
+    "answer": "Risposta",
+    "answerExplanation": "Spiegazione della Risposta",
+    "availableTranslations": "Traduzioni disponibili",
+    "correctOption": "Risposta corretta",
+    "deleteWarning": "Attenzione!",
+    "deleteWarningDescription": "Questa azione non può essere annullata. La domanda sarà eliminata permanentemente.",
+    "warningCorrectOption": "Avviso: Opzione corretta selezionata",
+    "warningCorrectOptionDescription": "Stai eliminando l'opzione contrassegnata come corretta. Considera di eliminare anche la risposta.",
+    "warning": "Avviso",
+    "confirmTitle": "Conferma Eliminazione",
+    "confirmPartialDelete": "Vuoi eliminare gli elementi selezionati?",
+    "confirmFullDelete": "Vuoi eliminare l'intera domanda?",
+    "confirmButton": "Sì, elimina",
+    "cancelButton": "Annulla",
+    "cancel": "Annulla",
+    "deleteSelected": "Elimina Selezionati",
+    "deleteAll": "Elimina Tutto",
+    "deleting": "Eliminazione...",
+    "success": {
+      "titleFull": "Domanda eliminata",
+      "descriptionFull": "La domanda è stata eliminata con successo",
+      "titlePartial": "Elementi eliminati",
+      "descriptionPartial": "Gli elementi selezionati sono stati eliminati con successo"
+    },
+    "errors": {
+      "hasDependencies": "La domanda ha dipendenze",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Non è stato possibile eliminare la domanda"
+    }
+  },
+  
   "questionEdit": {
     "title": "Modifica Domanda",
     "questionType": "Tipo di domanda",
@@ -656,6 +698,19 @@
     "viewFeature": "Visualizzazione domande sarà disponibile presto",
     "editFeature": "Modifica domande sarà disponibile presto",
     "deleteFeature": "Eliminazione domande sarà disponibile presto",
+    "deleteConfirm": {
+      "title": "Conferma Eliminazione",
+      "description": "Vuoi davvero eliminare questa domanda? Questa azione non può essere annullata.",
+      "confirm": "Sì, elimina"
+    },
+    "deleteSuccess": {
+      "title": "Domanda eliminata",
+      "description": "La domanda è stata eliminata con successo"
+    },
+    "deleteError": {
+      "title": "Errore nell'eliminazione",
+      "description": "Non è stato possibile eliminare la domanda"
+    },
     "pagination": {
       "pageOf": "Pagina {current} di {total}",
       "perPage": "Per pagina:",

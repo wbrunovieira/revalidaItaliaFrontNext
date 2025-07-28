@@ -502,6 +502,48 @@
     }
   },
   
+  "questionDelete": {
+    "title": "Excluir Questão",
+    "questionInfo": "Informações da Questão",
+    "type": "Tipo",
+    "types": {
+      "multipleChoice": "Múltipla Escolha",
+      "open": "Aberta"
+    },
+    "hasDependencies": "Esta questão possui elementos associados",
+    "dependenciesDescription": "Você pode excluir elementos individuais ou toda a questão.",
+    "options": "Opções",
+    "answer": "Resposta",
+    "answerExplanation": "Explicação da Resposta",
+    "availableTranslations": "Traduções disponíveis",
+    "correctOption": "Resposta correta",
+    "deleteWarning": "Atenção!",
+    "deleteWarningDescription": "Esta ação não pode ser desfeita. A questão será excluída permanentemente.",
+    "warningCorrectOption": "Aviso: Opção correta selecionada",
+    "warningCorrectOptionDescription": "Você está excluindo a opção marcada como correta. Considere excluir também a resposta.",
+    "warning": "Aviso",
+    "confirmTitle": "Confirmar Exclusão",
+    "confirmPartialDelete": "Deseja excluir os itens selecionados?",
+    "confirmFullDelete": "Deseja excluir toda a questão?",
+    "confirmButton": "Sim, excluir",
+    "cancelButton": "Cancelar",
+    "cancel": "Cancelar",
+    "deleteSelected": "Excluir Selecionados",
+    "deleteAll": "Excluir Tudo",
+    "deleting": "Excluindo...",
+    "success": {
+      "titleFull": "Questão excluída",
+      "descriptionFull": "A questão foi excluída com sucesso",
+      "titlePartial": "Itens excluídos",
+      "descriptionPartial": "Os itens selecionados foram excluídos com sucesso"
+    },
+    "errors": {
+      "hasDependencies": "Questão possui dependências",
+      "deleteTitle": "Erro ao excluir",
+      "deleteDescription": "Não foi possível excluir a questão"
+    }
+  },
+  
   "questionEdit": {
     "title": "Editar Questão",
     "questionType": "Tipo da questão",
@@ -666,6 +708,19 @@
     "viewFeature": "Visualização de questões estará disponível em breve",
     "editFeature": "Edição de questões estará disponível em breve",
     "deleteFeature": "Exclusão de questões estará disponível em breve",
+    "deleteConfirm": {
+      "title": "Confirmar Exclusão",
+      "description": "Deseja realmente excluir esta questão? Esta ação não pode ser desfeita.",
+      "confirm": "Sim, excluir"
+    },
+    "deleteSuccess": {
+      "title": "Questão excluída",
+      "description": "A questão foi excluída com sucesso"
+    },
+    "deleteError": {
+      "title": "Erro ao excluir",
+      "description": "Não foi possível excluir a questão"
+    },
     "pagination": {
       "pageOf": "Página {current} de {total}",
       "perPage": "Por página:",

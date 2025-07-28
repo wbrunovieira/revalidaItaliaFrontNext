@@ -490,6 +490,48 @@
     }
   },
   
+  "questionDelete": {
+    "title": "Eliminar Pregunta",
+    "questionInfo": "Información de la Pregunta",
+    "type": "Tipo",
+    "types": {
+      "multipleChoice": "Opción Múltiple",
+      "open": "Abierta"
+    },
+    "hasDependencies": "Esta pregunta tiene elementos asociados",
+    "dependenciesDescription": "Puedes eliminar elementos individuales o toda la pregunta.",
+    "options": "Opciones",
+    "answer": "Respuesta",
+    "answerExplanation": "Explicación de la Respuesta",
+    "availableTranslations": "Traducciones disponibles",
+    "correctOption": "Respuesta correcta",
+    "deleteWarning": "¡Atención!",
+    "deleteWarningDescription": "Esta acción no se puede deshacer. La pregunta será eliminada permanentemente.",
+    "warningCorrectOption": "Aviso: Opción correcta seleccionada",
+    "warningCorrectOptionDescription": "Estás eliminando la opción marcada como correcta. Considera eliminar también la respuesta.",
+    "warning": "Aviso",
+    "confirmTitle": "Confirmar Eliminación",
+    "confirmPartialDelete": "¿Deseas eliminar los elementos seleccionados?",
+    "confirmFullDelete": "¿Deseas eliminar toda la pregunta?",
+    "confirmButton": "Sí, eliminar",
+    "cancelButton": "Cancelar",
+    "cancel": "Cancelar",
+    "deleteSelected": "Eliminar Seleccionados",
+    "deleteAll": "Eliminar Todo",
+    "deleting": "Eliminando...",
+    "success": {
+      "titleFull": "Pregunta eliminada",
+      "descriptionFull": "La pregunta ha sido eliminada con éxito",
+      "titlePartial": "Elementos eliminados",
+      "descriptionPartial": "Los elementos seleccionados han sido eliminados con éxito"
+    },
+    "errors": {
+      "hasDependencies": "La pregunta tiene dependencias",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No se pudo eliminar la pregunta"
+    }
+  },
+  
   "questionEdit": {
     "title": "Editar Pregunta",
     "questionType": "Tipo de pregunta",
@@ -654,6 +696,19 @@
     "viewFeature": "Visualización de preguntas estará disponible pronto",
     "editFeature": "Edición de preguntas estará disponible pronto",
     "deleteFeature": "Eliminación de preguntas estará disponible pronto",
+    "deleteConfirm": {
+      "title": "Confirmar Eliminación",
+      "description": "¿Realmente deseas eliminar esta pregunta? Esta acción no se puede deshacer.",
+      "confirm": "Sí, eliminar"
+    },
+    "deleteSuccess": {
+      "title": "Pregunta eliminada",
+      "description": "La pregunta ha sido eliminada con éxito"
+    },
+    "deleteError": {
+      "title": "Error al eliminar",
+      "description": "No se pudo eliminar la pregunta"
+    },
     "pagination": {
       "pageOf": "Página {current} de {total}",
       "perPage": "Por página:",

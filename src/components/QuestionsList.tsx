@@ -25,6 +25,7 @@ import {
 import { Label } from '@/components/ui/label';
 import QuestionViewModal from '@/components/QuestionViewModal';
 import QuestionEditModal from '@/components/QuestionEditModal';
+import QuestionDeleteModal from '@/components/QuestionDeleteModal';
 
 interface Assessment {
   id: string;
@@ -113,6 +114,10 @@ export default function QuestionsList() {
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingQuestion, setDeletingQuestion] = useState<Question | null>(null);
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -246,6 +251,74 @@ export default function QuestionsList() {
   
   // Handle question updated
   const handleQuestionUpdated = useCallback(() => {
+    loadDetailedQuestions();
+  }, [loadDetailedQuestions]);
+  
+  // Handle delete question
+  const handleDeleteQuestion = useCallback((question: Question) => {
+    // If question has no options and no answer, delete directly with confirmation
+    if (question.options.length === 0 && !question.answer) {
+      toast({
+        title: t('deleteConfirm.title'),
+        description: t('deleteConfirm.description'),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={async () => {
+              try {
+                const response = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/v1/questions/${question.id}/complete`,
+                  {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ deleteQuestion: true }),
+                  }
+                );
+
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.message || 'Failed to delete question');
+                }
+
+                toast({
+                  title: t('deleteSuccess.title'),
+                  description: t('deleteSuccess.description'),
+                  variant: 'success',
+                });
+
+                loadDetailedQuestions();
+              } catch (error) {
+                console.error('Error deleting question:', error);
+                toast({
+                  title: t('deleteError.title'),
+                  description: t('deleteError.description'),
+                  variant: 'destructive',
+                });
+              }
+            }}
+            className="text-sm font-medium"
+          >
+            {t('deleteConfirm.confirm')}
+          </button>
+        ),
+      });
+    } else {
+      // Has dependencies, open modal
+      setDeletingQuestion(question);
+      setDeleteModalOpen(true);
+    }
+  }, [t, toast, loadDetailedQuestions]);
+  
+  // Handle close delete modal
+  const handleCloseDeleteModal = useCallback(() => {
+    setDeleteModalOpen(false);
+    setDeletingQuestion(null);
+  }, []);
+  
+  // Handle question deleted
+  const handleQuestionDeleted = useCallback(() => {
     loadDetailedQuestions();
   }, [loadDetailedQuestions]);
 
@@ -492,12 +565,7 @@ export default function QuestionsList() {
                               <Edit2 size={16} />
                             </button>
                             <button
-                              onClick={() => {
-                                toast({
-                                  title: t('comingSoon'),
-                                  description: t('deleteFeature'),
-                                });
-                              }}
+                              onClick={() => handleDeleteQuestion(question)}
                               className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
                               title={t('actions.delete')}
                             >
@@ -534,6 +602,16 @@ export default function QuestionsList() {
           isOpen={editModalOpen}
           onClose={handleCloseEditModal}
           onQuestionUpdated={handleQuestionUpdated}
+        />
+      )}
+      
+      {/* Question Delete Modal */}
+      {deletingQuestion && (
+        <QuestionDeleteModal
+          question={deletingQuestion}
+          isOpen={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          onQuestionDeleted={handleQuestionDeleted}
         />
       )}
     </div>

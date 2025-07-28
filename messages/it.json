@@ -2624,6 +2624,42 @@
     "invalidId": "ID non valido"
   }
 },
+"argumentEdit": {
+  "title": "Modifica Argomento",
+  "currentArgument": "Argomento attuale",
+  "cancel": "Annulla",
+  "save": "Salva",
+  "saving": "Salvataggio...",
+  "fields": {
+    "title": "Titolo"
+  },
+  "placeholders": {
+    "title": "Inserisci il titolo dell'argomento"
+  },
+  "hints": {
+    "title": "Minimo 3 caratteri, massimo 255 caratteri"
+  },
+  "validation": {
+    "titleValid": "Titolo valido"
+  },
+  "errors": {
+    "titleRequired": "Il titolo è obbligatorio",
+    "titleMin": "Il titolo deve avere almeno 3 caratteri",
+    "titleMax": "Il titolo deve avere massimo 255 caratteri",
+    "validationTitle": "Errore di validazione",
+    "validationDescription": "Si prega di correggere gli errori nel modulo",
+    "updateTitle": "Errore nell'aggiornamento",
+    "updateFailed": "Impossibile aggiornare l'argomento",
+    "notFound": "Argomento non trovato",
+    "duplicate": "Esiste già un argomento con questo titolo nella valutazione",
+    "invalidInput": "Dati non validi",
+    "connectionError": "Errore di connessione"
+  },
+  "success": {
+    "title": "Argomento aggiornato",
+    "description": "L'argomento è stato aggiornato con successo"
+  }
+},
 "Tutor": {
   "back": "Indietro",
   "dashboard": {

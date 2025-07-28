@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import ArgumentViewModal from './ArgumentViewModal';
+import ArgumentEditModal from './ArgumentEditModal';
 
 interface Argument {
   id: string;
@@ -56,7 +57,9 @@ export default function ArgumentsList() {
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedArgumentId, setSelectedArgumentId] = useState<string | null>(null);
+  const [selectedArgument, setSelectedArgument] = useState<Argument | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -311,6 +314,26 @@ export default function ArgumentsList() {
     setSelectedArgumentId(null);
   }, []);
 
+  // Handle edit argument
+  const handleEdit = useCallback((argumentId: string) => {
+    const argument = argumentsList.find(a => a.id === argumentId);
+    if (argument) {
+      setSelectedArgument(argument);
+      setEditModalOpen(true);
+    }
+  }, [argumentsList]);
+
+  // Handle close edit modal
+  const handleCloseEditModal = useCallback(() => {
+    setEditModalOpen(false);
+    setSelectedArgument(null);
+  }, []);
+
+  // Handle save edit
+  const handleSaveEdit = useCallback(() => {
+    loadArguments();
+  }, [loadArguments]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -406,12 +429,7 @@ export default function ArgumentsList() {
                           <Eye size={16} />
                         </button>
                         <button
-                          onClick={() => {
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('editFeature'),
-                            });
-                          }}
+                          onClick={() => handleEdit(argument.id)}
                           className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('actions.edit')}
                         >
@@ -537,6 +555,14 @@ export default function ArgumentsList() {
         argumentId={selectedArgumentId}
         isOpen={viewModalOpen}
         onClose={handleCloseViewModal}
+      />
+
+      {/* Edit Modal */}
+      <ArgumentEditModal
+        argument={selectedArgument}
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
       />
     </div>
   );

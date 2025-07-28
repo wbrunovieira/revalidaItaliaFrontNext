@@ -2839,6 +2839,42 @@
     "invalidId": "ID inválido"
   }
 },
+"argumentEdit": {
+  "title": "Editar Argumento",
+  "currentArgument": "Argumento atual",
+  "cancel": "Cancelar",
+  "save": "Salvar",
+  "saving": "Salvando...",
+  "fields": {
+    "title": "Título"
+  },
+  "placeholders": {
+    "title": "Digite o título do argumento"
+  },
+  "hints": {
+    "title": "Mínimo 3 caracteres, máximo 255 caracteres"
+  },
+  "validation": {
+    "titleValid": "Título válido"
+  },
+  "errors": {
+    "titleRequired": "O título é obrigatório",
+    "titleMin": "O título deve ter pelo menos 3 caracteres",
+    "titleMax": "O título deve ter no máximo 255 caracteres",
+    "validationTitle": "Erro de validação",
+    "validationDescription": "Por favor, corrija os erros no formulário",
+    "updateTitle": "Erro ao atualizar",
+    "updateFailed": "Não foi possível atualizar o argumento",
+    "notFound": "Argumento não encontrado",
+    "duplicate": "Já existe um argumento com este título na avaliação",
+    "invalidInput": "Dados inválidos",
+    "connectionError": "Erro de conexão"
+  },
+  "success": {
+    "title": "Argumento atualizado",
+    "description": "O argumento foi atualizado com sucesso"
+  }
+},
 "Tutor": {
   "back": "Voltar",
   "dashboard": {

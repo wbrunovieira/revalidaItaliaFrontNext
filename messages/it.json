@@ -672,12 +672,16 @@
       "invalidFileType": "Tipo di file non valido. Usa PDF, Word, Excel o CSV.",
       "fileTooLarge": "File troppo grande. La dimensione massima è 10MB.",
       "uploadFailed": "Errore nel caricamento del file. Riprova.",
-      "documentRequired": "Per favore, seleziona un documento da caricare"
+      "documentRequired": "Per favore, seleziona un documento da caricare",
+      "fileRequired": "È necessario caricare un file per questa lingua",
+      "uploadTitle": "Errore nel caricamento del file",
+      "uploadDescription": "Impossibile caricare il file. Riprova."
     },
     "upload": {
       "clickToSelect": "Clicca per selezionare il file",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (max. 10MB)",
-      "success": "File caricato con successo"
+      "success": "File caricato con successo",
+      "uploading": "Caricamento file"
     },
     "success": {
       "title": "Documento creato con successo!",

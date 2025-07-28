@@ -518,10 +518,16 @@ export default function CreateDocumentForm() {
       isValid = false;
     }
 
-
+    // Validar que arquivos foram carregados para todos os idiomas
+    const locales: Locale[] = ['pt', 'es', 'it'];
+    locales.forEach(locale => {
+      if (!formData.uploadedFiles[locale] || !formData.uploadedFiles[locale].url) {
+        newErrors[`upload_${locale}` as keyof FormErrors] = t('errors.fileRequired');
+        isValid = false;
+      }
+    });
 
     // Validar traduções
-    const locales: Locale[] = ['pt', 'es', 'it'];
     locales.forEach(locale => {
       const titleValidation = validateTextField(
         formData.translations[locale].title,
@@ -598,7 +604,28 @@ export default function CreateDocumentForm() {
     [formData.lessonId]
   );
 
-  const resetForm = useCallback(() => {
+  const resetForm = useCallback(async () => {
+    // Clean up any uploaded files that weren't submitted
+    const locales: Locale[] = ['pt', 'es', 'it'];
+    for (const locale of locales) {
+      const uploadedFile = formData.uploadedFiles[locale];
+      if (uploadedFile && uploadedFile.url) {
+        try {
+          const urlParts = uploadedFile.url.split('/');
+          const documentsIndex = urlParts.findIndex(part => part === 'documents');
+          
+          if (documentsIndex !== -1) {
+            const path = urlParts.slice(documentsIndex).join('/');
+            await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
+              method: 'DELETE',
+            });
+          }
+        } catch (error) {
+          console.error('Error cleaning up file:', error);
+        }
+      }
+    }
+    
     setFormData({
       courseId: '',
       moduleId: '',
@@ -627,7 +654,7 @@ export default function CreateDocumentForm() {
     });
     setErrors({});
     setTouched({});
-  }, []);
+  }, [formData.uploadedFiles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -851,17 +878,43 @@ export default function CreateDocumentForm() {
       }
 
       try {
-        // Gerar nome único
+        // Show uploading toast
+        toast({
+          title: t('upload.uploading'),
+          description: file.name,
+        });
+
+        // Generate unique filename
         const uniqueFileName = generateUniqueFileName(file.name);
         
-        // Salvar arquivo no estado
+        // Create FormData for upload
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+        uploadFormData.append('category', 'document');
+        uploadFormData.append('folder', locale); // Use locale as folder name
+        uploadFormData.append('filename', uniqueFileName);
+
+        // Upload file to server
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload file');
+        }
+
+        const uploadResult = await response.json();
+        
+        // Save file info in state with the actual uploaded URL
         setFormData(prev => ({
           ...prev,
           uploadedFiles: {
             ...prev.uploadedFiles,
             [locale]: {
               file,
-              url: `/uploads/documents/${locale}/${uniqueFileName}`,
+              url: uploadResult.url,
             },
           },
           translations: {
@@ -869,12 +922,12 @@ export default function CreateDocumentForm() {
             [locale]: {
               ...prev.translations[locale],
               title: prev.translations[locale].title || fileNameToTitle(file.name),
-              url: `/uploads/documents/${locale}/${uniqueFileName}`,
+              url: uploadResult.url,
             },
           },
         }));
 
-        // Limpar erro
+        // Clear error
         setErrors(prev => ({
           ...prev,
           [`upload_${locale}`]: undefined,
@@ -890,13 +943,39 @@ export default function CreateDocumentForm() {
           ...prev,
           [`upload_${locale}`]: t('errors.uploadFailed'),
         }));
+        toast({
+          title: t('error.uploadTitle'),
+          description: error instanceof Error ? error.message : t('errors.uploadFailed'),
+          variant: 'destructive',
+        });
       }
     },
     [t, toast, generateUniqueFileName, fileNameToTitle]
   );
 
   // Função para remover arquivo
-  const handleFileRemove = useCallback((locale: Locale) => {
+  const handleFileRemove = useCallback(async (locale: Locale) => {
+    const uploadedFile = formData.uploadedFiles[locale];
+    
+    if (uploadedFile && uploadedFile.url) {
+      try {
+        // Extract path from URL for deletion
+        const urlParts = uploadedFile.url.split('/');
+        const documentsIndex = urlParts.findIndex(part => part === 'documents');
+        
+        if (documentsIndex !== -1) {
+          const path = urlParts.slice(documentsIndex).join('/');
+          
+          // Delete file from server
+          await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
+            method: 'DELETE',
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting file:', error);
+      }
+    }
+    
     setFormData(prev => {
       const newUploadedFiles = { ...prev.uploadedFiles };
       delete newUploadedFiles[locale];
@@ -913,7 +992,7 @@ export default function CreateDocumentForm() {
         },
       };
     });
-  }, []);
+  }, [formData.uploadedFiles]);
 
   // Verificar status de validação para cada idioma
   const getTranslationStatus = useCallback(

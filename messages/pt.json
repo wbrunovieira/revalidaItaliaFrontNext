@@ -683,12 +683,16 @@
       "invalidFileType": "Tipo de arquivo inválido. Use PDF, Word, Excel ou CSV.",
       "fileTooLarge": "Arquivo muito grande. O tamanho máximo é 10MB.",
       "uploadFailed": "Falha ao fazer upload do arquivo. Tente novamente.",
-      "documentRequired": "Por favor, selecione um documento para upload"
+      "documentRequired": "Por favor, selecione um documento para upload",
+      "fileRequired": "É necessário fazer upload de um arquivo para este idioma",
+      "uploadTitle": "Erro ao enviar arquivo",
+      "uploadDescription": "Não foi possível enviar o arquivo. Tente novamente."
     },
     "upload": {
       "clickToSelect": "Clique para selecionar arquivo",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (máx. 10MB)",
-      "success": "Arquivo carregado com sucesso"
+      "success": "Arquivo carregado com sucesso",
+      "uploading": "Enviando arquivo"
     },
     "success": {
       "title": "Documento criado com sucesso!",

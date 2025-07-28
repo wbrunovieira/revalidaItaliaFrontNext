@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import DocumentViewModal from './DocumentViewModal';
+import DocumentEditModal from './DocumentEditModal';
 
 interface Translation {
   locale: string;
@@ -105,6 +106,13 @@ export default function DocumentsList() {
       lessonId: string;
       documentId: string;
     } | null>(null);
+  
+  // Estados para o modal de edição
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editDocumentData, setEditDocumentData] = useState<{
+    lessonId: string;
+    documentId: string;
+  } | null>(null);
 
 
   // Debug: Log dos estados do modal
@@ -533,6 +541,25 @@ export default function DocumentsList() {
     setIsDocumentModalOpen(false);
     setSelectedDocumentData(null);
   }, []);
+
+  // Handlers for edit modal
+  const handleOpenEditModal = useCallback(
+    (lessonId: string, documentId: string) => {
+      setEditDocumentData({ lessonId, documentId });
+      setIsEditModalOpen(true);
+    },
+    []
+  );
+
+  const handleCloseEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditDocumentData(null);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    // Reload data after successful edit
+    fetchData();
+  }, [fetchData]);
 
   // Função para calcular estatísticas de um curso
   const getCourseStats = useCallback(
@@ -1163,7 +1190,10 @@ export default function DocumentsList() {
                                                                   type="button"
                                                                   onClick={e => {
                                                                     e.stopPropagation();
-                                                                    // Função edit ainda não implementada
+                                                                    handleOpenEditModal(
+                                                                      lesson.id,
+                                                                      document.id
+                                                                    );
                                                                   }}
                                                                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
                                                                   title={t(
@@ -1278,6 +1308,15 @@ export default function DocumentsList() {
         }
         isOpen={isDocumentModalOpen}
         onClose={handleCloseDocumentModal}
+      />
+
+      {/* Modal de Edição de Documento */}
+      <DocumentEditModal
+        lessonId={editDocumentData?.lessonId || null}
+        documentId={editDocumentData?.documentId || null}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
       />
     </div>
   );

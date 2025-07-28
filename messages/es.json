@@ -2572,7 +2572,25 @@
     "loadModulesTitle": "Error al cargar módulos",
     "loadModulesDescription": "No fue posible cargar la lista de módulos",
     "loadLessonsTitle": "Error al cargar lecciones",
-    "loadLessonsDescription": "No fue posible cargar la lista de lecciones"
+    "loadLessonsDescription": "No fue posible cargar la lista de lecciones",
+    "deleteTitle": "Error al eliminar",
+    "deleteDescription": "No fue posible eliminar la evaluación",
+    "notFound": "Evaluación no encontrada",
+    "invalidId": "ID de evaluación no válido"
+  },
+  "success": {
+    "deleteTitle": "Evaluación eliminada",
+    "deleteDescription": "La evaluación fue eliminada exitosamente"
+  },
+  "deleteConfirmation": {
+    "title": "Confirmar Eliminación",
+    "message": "¿Está seguro de que desea eliminar la evaluación \"{assessmentTitle}\"?",
+    "assessmentTitle": "Evaluación",
+    "type": "Tipo",
+    "lesson": "Lección",
+    "warning": "⚠️ Esta acción es irreversible. Todas las preguntas y intentos asociados se perderán.",
+    "confirm": "Eliminar",
+    "deleting": "Eliminando..."
   }
 },
 "assessmentEdit": {

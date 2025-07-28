@@ -2758,7 +2758,25 @@
     "loadModulesTitle": "Erro ao carregar módulos",
     "loadModulesDescription": "Não foi possível carregar a lista de módulos",
     "loadLessonsTitle": "Erro ao carregar aulas",
-    "loadLessonsDescription": "Não foi possível carregar a lista de aulas"
+    "loadLessonsDescription": "Não foi possível carregar a lista de aulas",
+    "deleteTitle": "Erro ao excluir",
+    "deleteDescription": "Não foi possível excluir a avaliação",
+    "notFound": "Avaliação não encontrada",
+    "invalidId": "ID da avaliação inválido"
+  },
+  "success": {
+    "deleteTitle": "Avaliação excluída",
+    "deleteDescription": "A avaliação foi excluída com sucesso"
+  },
+  "deleteConfirmation": {
+    "title": "Confirmar Exclusão",
+    "message": "Tem certeza que deseja excluir a avaliação \"{assessmentTitle}\"?",
+    "assessmentTitle": "Avaliação",
+    "type": "Tipo",
+    "lesson": "Aula",
+    "warning": "⚠️ Esta ação é irreversível. Todas as questões e tentativas associadas serão perdidas.",
+    "confirm": "Excluir",
+    "deleting": "Excluindo..."
   }
 },
 "assessmentEdit": {

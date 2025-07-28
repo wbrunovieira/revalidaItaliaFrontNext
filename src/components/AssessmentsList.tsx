@@ -102,6 +102,7 @@ export default function AssessmentsList() {
   
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -364,6 +365,137 @@ export default function AssessmentsList() {
   const handleSaveEdit = () => {
     loadAssessments();
   };
+
+  // Delete assessment
+  const deleteAssessment = useCallback(
+    async (assessmentId: string) => {
+      setDeletingId(assessmentId);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${assessmentId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          toast({
+            title: t('success.deleteTitle'),
+            description: t('success.deleteDescription'),
+            variant: 'success',
+          });
+          loadAssessments();
+          return;
+        }
+
+        // Handle specific error codes
+        if (response.status === 404) {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.notFound'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (response.status === 400) {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.invalidId'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        // Generic error handling
+        toast({
+          title: t('error.deleteTitle'),
+          description: data.message || t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      } catch (error) {
+        console.error('Error deleting assessment:', error);
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [t, toast, loadAssessments]
+  );
+
+  // Handle delete with confirmation
+  const handleDelete = useCallback(
+    (assessmentId: string) => {
+      const assessment = assessments.find(a => a.id === assessmentId);
+      const name = assessment?.title || '';
+
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-2">
+            <p>
+              {t('deleteConfirmation.message', { assessmentTitle: name })}
+            </p>
+            <div className="p-3 bg-gray-700/50 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <ClipboardList size={14} />
+                  {t('deleteConfirmation.assessmentTitle')}:{' '}
+                  <span className="font-medium">{name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileQuestion size={14} />
+                  {t('deleteConfirmation.type')}:{' '}
+                  <span className="font-medium">
+                    {t(`types.${assessment?.type.toLowerCase()}`)}
+                  </span>
+                </div>
+                {assessment?.lesson && (
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={14} />
+                    {t('deleteConfirmation.lesson')}:{' '}
+                    <span className="font-medium">
+                      {assessment.lesson.title}
+                    </span>
+                  </div>
+                )}
+                <div className="text-red-300 font-medium mt-2">
+                  {t('deleteConfirmation.warning')}
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteAssessment(assessmentId)}
+            className="inline-flex h-8 items-center px-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            disabled={deletingId === assessmentId}
+          >
+            {deletingId === assessmentId ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                {t('deleteConfirmation.deleting')}
+              </>
+            ) : (
+              t('deleteConfirmation.confirm')
+            )}
+          </button>
+        ),
+      });
+    },
+    [assessments, deletingId, deleteAssessment, t, toast]
+  );
 
   // Get icon for assessment type
   const getAssessmentIcon = (type: AssessmentType) => {
@@ -700,17 +832,16 @@ export default function AssessmentsList() {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => {
-                            // TODO: Implement delete
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('deleteFeature'),
-                            });
-                          }}
-                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                          onClick={() => handleDelete(assessment.id)}
+                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title={t('actions.delete')}
+                          disabled={deletingId === assessment.id}
                         >
-                          <Trash2 size={16} />
+                          {deletingId === assessment.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
                         </button>
                       </div>
                     </td>

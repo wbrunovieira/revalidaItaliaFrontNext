@@ -11,7 +11,6 @@ import {
   Plus,
   Trash2,
   AlertCircle,
-  Check,
   Languages,
   FileText,
   CircleDot,
@@ -273,7 +272,7 @@ export default function QuestionEditModal({
 
     try {
       // Prepare request body
-      const requestBody: any = {
+      const requestBody: Record<string, unknown> = {
         text: formData.text.trim(),
       };
 
@@ -289,7 +288,7 @@ export default function QuestionEditModal({
               ...(opt._delete && { _delete: true }),
             };
           }
-        }).filter((opt: any) => opt.text || opt._delete);
+        }).filter((opt: { text?: string; _delete?: boolean }) => opt.text || opt._delete);
 
         // Add answer if provided
         if (formData.answer.correctOptionId && formData.answer.explanation.trim()) {

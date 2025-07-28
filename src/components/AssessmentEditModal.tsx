@@ -101,7 +101,6 @@ export default function AssessmentEditModal({
   const t = useTranslations('Admin.assessmentEdit');
   const { toast } = useToast();
   
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loadingLessons, setLoadingLessons] = useState(false);
@@ -159,7 +158,7 @@ export default function AssessmentEditModal({
               const lessons = lessonsData.lessons || [];
               
               // Add course and module names to each lesson
-              lessons.forEach((lesson: any) => {
+              lessons.forEach((lesson: Lesson & { courseName?: string; moduleName?: string }) => {
                 const courseTranslation = course.translations.find((t: Translation) => t.locale === 'pt');
                 const moduleTranslation = moduleItem.translations.find((t: Translation) => t.locale === 'pt');
                 
@@ -193,22 +192,22 @@ export default function AssessmentEditModal({
 
   // Validation functions
   const validateField = useCallback(
-    (field: keyof FormData, value: any): ValidationResult => {
+    (field: keyof FormData, value: string | number | boolean): ValidationResult => {
       switch (field) {
         case 'title':
-          if (!value || !value.trim()) {
+          if (!value || (typeof value === 'string' && !value.trim())) {
             return { isValid: false, message: t('errors.titleRequired') };
           }
-          if (value.trim().length < 3) {
+          if (typeof value === 'string' && value.trim().length < 3) {
             return { isValid: false, message: t('errors.titleMin') };
           }
-          if (value.trim().length > 100) {
+          if (typeof value === 'string' && value.trim().length > 100) {
             return { isValid: false, message: t('errors.titleMax') };
           }
           return { isValid: true };
           
         case 'description':
-          if (value && value.length > 500) {
+          if (value && typeof value === 'string' && value.length > 500) {
             return { isValid: false, message: t('errors.descriptionMax') };
           }
           return { isValid: true };
@@ -279,7 +278,7 @@ export default function AssessmentEditModal({
 
   // Handle field validation on blur
   const handleFieldValidation = useCallback(
-    (field: keyof FormData, value: any) => {
+    (field: keyof FormData, value: string | number | boolean) => {
       if (touched[field]) {
         const validation = validateField(field, value);
         setErrors(prev => ({
@@ -334,7 +333,7 @@ export default function AssessmentEditModal({
     
     try {
       // Prepare payload based on assessment type
-      const payload: any = {
+      const payload: Record<string, string | number | boolean | null> = {
         title: formData.title.trim(),
       };
       

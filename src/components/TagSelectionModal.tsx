@@ -1,7 +1,7 @@
 // /src/components/TagSelectionModal.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -82,7 +82,6 @@ export default function TagSelectionModal({
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         throw new Error(`Failed to load tags: ${response.status}`);
       }
 

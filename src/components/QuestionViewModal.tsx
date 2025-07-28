@@ -15,7 +15,6 @@ import {
   Copy,
   Check,
   CheckCircle,
-  XCircle,
   AlertCircle,
   FileText,
 } from 'lucide-react';
@@ -66,7 +65,6 @@ interface QuestionViewModalProps {
 
 export default function QuestionViewModal({
   question,
-  assessmentId,
   argumentData,
   isOpen,
   onClose,
@@ -99,7 +97,7 @@ export default function QuestionViewModal({
         variant: 'success',
       });
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (error) {
+    } catch {
       toast({
         title: t('copyError'),
         variant: 'destructive',

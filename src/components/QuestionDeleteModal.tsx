@@ -126,7 +126,7 @@ export default function QuestionDeleteModal({
           setLoading(true);
 
           try {
-            const requestBody: any = {};
+            const requestBody: Record<string, boolean | string[]> = {};
 
             // If nothing specific is selected, delete everything
             if (deletionState.options.size === 0 && !deletionState.answer) {

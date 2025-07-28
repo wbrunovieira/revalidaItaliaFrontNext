@@ -158,7 +158,7 @@ export default function CreateQuestionForm({
     setLoadingArguments(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/arguments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -538,7 +538,7 @@ export default function CreateQuestionForm({
 
       await createWithRetry(async () => {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/answers`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/answers`,
           {
             method: 'POST',
             headers: {

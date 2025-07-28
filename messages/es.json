@@ -457,6 +457,39 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "questionView": {
+    "title": "Detalles de la Pregunta",
+    "questionText": "Texto de la Pregunta",
+    "type": "Tipo",
+    "types": {
+      "multiple_choice": "Opción Múltiple",
+      "open": "Abierta"
+    },
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "argument": "Argumento",
+    "options": "Opciones",
+    "answer": "Respuesta",
+    "correctAnswer": "Respuesta Correcta",
+    "explanation": "Explicación",
+    "availableTranslations": "Traducciones disponibles",
+    "technicalInfo": "Información Técnica",
+    "copy": "Copiar",
+    "copySuccess": "¡Copiado con éxito!",
+    "copyError": "Error al copiar",
+    "close": "Cerrar",
+    "currentLanguage": "Idioma actual",
+    "allTranslations": "Todas las traducciones",
+    "noAnswer": {
+      "title": "Respuesta no disponible",
+      "description": "Esta pregunta aún no tiene una respuesta registrada. La respuesta correcta y las explicaciones se mostrarán aquí cuando se agreguen."
+    },
+    "openQuestion": {
+      "title": "Pregunta Abierta",
+      "description": "Esta es una pregunta dissertativa que no tiene una única respuesta correcta. Las respuestas de los estudiantes deben ser evaluadas individualmente."
+    }
+  },
+  
   "createFlashcard": {
     "title": "Crear Flashcard",
     "questionSection": "Pregunta",
@@ -561,7 +594,8 @@
     "questionTypes": {
       "multiple_choice": "Opción Múltiple",
       "true_false": "Verdadero/Falso",
-      "essay": "Ensayo"
+      "essay": "Ensayo",
+      "open": "Abierta"
     },
     "actions": {
       "view": "Ver",

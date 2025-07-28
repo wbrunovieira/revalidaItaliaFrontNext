@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import QuestionViewModal from '@/components/QuestionViewModal';
 
 interface Assessment {
   id: string;
@@ -102,6 +103,11 @@ export default function QuestionsList() {
   const [loading, setLoading] = useState(false);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  
+  // View modal state
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedArgument, setSelectedArgument] = useState<Argument | null>(null);
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -198,6 +204,28 @@ export default function QuestionsList() {
       return newSet;
     });
   };
+
+  // Handle view question
+  const handleViewQuestion = useCallback((question: Question) => {
+    setSelectedQuestion(question);
+    
+    // Find the argument if it exists
+    if (question.argumentId && detailedData?.arguments) {
+      const argument = detailedData.arguments.find(arg => arg.id === question.argumentId);
+      setSelectedArgument(argument || null);
+    } else {
+      setSelectedArgument(null);
+    }
+    
+    setViewModalOpen(true);
+  }, [detailedData]);
+
+  // Handle close view modal
+  const handleCloseViewModal = useCallback(() => {
+    setViewModalOpen(false);
+    setSelectedQuestion(null);
+    setSelectedArgument(null);
+  }, []);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -428,12 +456,7 @@ export default function QuestionsList() {
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center gap-2">
                             <button
-                              onClick={() => {
-                                toast({
-                                  title: t('comingSoon'),
-                                  description: t('viewFeature'),
-                                });
-                              }}
+                              onClick={() => handleViewQuestion(question)}
                               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                               title={t('actions.view')}
                             >
@@ -474,6 +497,17 @@ export default function QuestionsList() {
           </div>
 
         </>
+      )}
+
+      {/* Question View Modal */}
+      {selectedQuestion && (
+        <QuestionViewModal
+          question={selectedQuestion}
+          assessmentId={selectedAssessmentId}
+          argumentData={selectedArgument}
+          isOpen={viewModalOpen}
+          onClose={handleCloseViewModal}
+        />
       )}
     </div>
   );

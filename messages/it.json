@@ -459,6 +459,39 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "questionView": {
+    "title": "Dettagli Domanda",
+    "questionText": "Testo della Domanda",
+    "type": "Tipo",
+    "types": {
+      "multiple_choice": "Scelta Multipla",
+      "open": "Aperta"
+    },
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il",
+    "argument": "Argomento",
+    "options": "Opzioni",
+    "answer": "Risposta",
+    "correctAnswer": "Risposta Corretta",
+    "explanation": "Spiegazione",
+    "availableTranslations": "Traduzioni disponibili",
+    "technicalInfo": "Informazioni Tecniche",
+    "copy": "Copia",
+    "copySuccess": "Copiato con successo!",
+    "copyError": "Errore nella copia",
+    "close": "Chiudi",
+    "currentLanguage": "Lingua corrente",
+    "allTranslations": "Tutte le traduzioni",
+    "noAnswer": {
+      "title": "Risposta non disponibile",
+      "description": "Questa domanda non ha ancora una risposta registrata. La risposta corretta e le spiegazioni verranno visualizzate qui quando saranno aggiunte."
+    },
+    "openQuestion": {
+      "title": "Domanda Aperta",
+      "description": "Questa è una domanda dissertativa che non ha una singola risposta corretta. Le risposte degli studenti devono essere valutate individualmente."
+    }
+  },
+  
   "createFlashcard": {
     "title": "Crea Flashcard",
     "questionSection": "Domanda",
@@ -563,7 +596,8 @@
     "questionTypes": {
       "multiple_choice": "Scelta Multipla",
       "true_false": "Vero/Falso",
-      "essay": "Dissertativa"
+      "essay": "Dissertativa",
+      "open": "Aperta"
     },
     "actions": {
       "view": "Visualizza",

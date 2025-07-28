@@ -2786,7 +2786,27 @@
   },
   "error": {
     "fetchTitle": "Erro ao carregar argumentos",
-    "fetchDescription": "Não foi possível carregar a lista de argumentos"
+    "fetchDescription": "Não foi possível carregar a lista de argumentos",
+    "deleteTitle": "Erro ao excluir argumento",
+    "deleteDescription": "Não foi possível excluir o argumento",
+    "notFound": "Argumento não encontrado",
+    "hasDependencies": "Não é possível excluir o argumento pois possui dependências.",
+    "hasQuestions": "Não é possível excluir o argumento. {count} questão(questões) está(ão) associada(s) a este argumento.",
+    "hasFlashcards": "Não é possível excluir o argumento. {count} flashcard(s) está(ão) associado(s) a este argumento. Remova os flashcards primeiro.",
+    "serverError": "Erro no servidor. Por favor, tente novamente mais tarde."
+  },
+  "success": {
+    "deleteTitle": "Argumento excluído",
+    "deleteDescription": "O argumento foi excluído com sucesso"
+  },
+  "deleteConfirmation": {
+    "title": "Confirmar exclusão",
+    "message": "Tem certeza que deseja excluir o argumento '{argumentTitle}'?",
+    "argumentTitle": "Argumento",
+    "assessment": "Avaliação",
+    "warning": "Esta ação não pode ser desfeita.",
+    "confirm": "Excluir",
+    "deleting": "Excluindo..."
   }
 },
 "Tutor": {

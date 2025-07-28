@@ -53,6 +53,7 @@ export default function ArgumentsList() {
   
   const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -125,6 +126,175 @@ export default function ArgumentsList() {
       minute: '2-digit',
     });
   };
+
+  // Delete argument
+  const deleteArgument = useCallback(
+    async (argumentId: string) => {
+      setDeletingId(argumentId);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments/${argumentId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response.status === 204) {
+          toast({
+            title: t('success.deleteTitle'),
+            description: t('success.deleteDescription'),
+            variant: 'success',
+          });
+          loadArguments();
+          return;
+        }
+
+        // Handle specific status codes
+        if (response.status === 404) {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.notFound'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (response.status === 409) {
+          try {
+            const error = await response.json();
+            // Extract number and type of dependencies from error message
+            const questionMatch = error.message?.match(/(\d+) question\(s\)/);
+            const flashcardMatch = error.message?.match(/(\d+) flashcard\(s\)/);
+            
+            if (questionMatch) {
+              const count = parseInt(questionMatch[1]);
+              toast({
+                title: t('error.deleteTitle'),
+                description: t('error.hasQuestions', { count }),
+                variant: 'destructive',
+              });
+            } else if (flashcardMatch) {
+              const count = parseInt(flashcardMatch[1]);
+              toast({
+                title: t('error.deleteTitle'),
+                description: t('error.hasFlashcards', { count }),
+                variant: 'destructive',
+              });
+            } else {
+              toast({
+                title: t('error.deleteTitle'),
+                description: error.message || t('error.hasDependencies'),
+                variant: 'destructive',
+              });
+            }
+          } catch {
+            toast({
+              title: t('error.deleteTitle'),
+              description: t('error.hasDependencies'),
+              variant: 'destructive',
+            });
+          }
+          return;
+        }
+
+        if (response.status === 500) {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.serverError'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        // Try to parse error response for other status codes
+        try {
+          const error = await response.json();
+          toast({
+            title: t('error.deleteTitle'),
+            description: error.message || t('error.deleteDescription'),
+            variant: 'destructive',
+          });
+        } catch {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.deleteDescription'),
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting argument:', error);
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [t, toast, loadArguments]
+  );
+
+  // Handle delete with confirmation
+  const handleDelete = useCallback(
+    (argumentId: string) => {
+      const argument = argumentsList.find(a => a.id === argumentId);
+      const name = argument?.title || '';
+
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-2">
+            <p>
+              {t('deleteConfirmation.message', { argumentTitle: name })}
+            </p>
+            <div className="p-3 bg-gray-700/50 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <List size={14} />
+                  {t('deleteConfirmation.argumentTitle')}:{' '}
+                  <span className="font-medium">{name}</span>
+                </div>
+                {argument?.assessment && (
+                  <div className="flex items-center gap-2">
+                    <List size={14} />
+                    {t('deleteConfirmation.assessment')}:{' '}
+                    <span className="font-medium">
+                      {argument.assessment.title}
+                    </span>
+                  </div>
+                )}
+                <div className="text-red-300 font-medium mt-2">
+                  {t('deleteConfirmation.warning')}
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteArgument(argumentId)}
+            className="inline-flex h-8 items-center px-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            disabled={deletingId === argumentId}
+          >
+            {deletingId === argumentId ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                {t('deleteConfirmation.deleting')}
+              </>
+            ) : (
+              t('deleteConfirmation.confirm')
+            )}
+          </button>
+        ),
+      });
+    },
+    [argumentsList, deletingId, deleteArgument, t, toast]
+  );
 
   return (
     <div className="space-y-6">
@@ -238,16 +408,16 @@ export default function ArgumentsList() {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => {
-                            toast({
-                              title: t('comingSoon'),
-                              description: t('deleteFeature'),
-                            });
-                          }}
-                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                          onClick={() => handleDelete(argument.id)}
+                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title={t('actions.delete')}
+                          disabled={deletingId === argument.id}
                         >
-                          <Trash2 size={16} />
+                          {deletingId === argument.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
                         </button>
                       </div>
                     </td>

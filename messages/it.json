@@ -2571,7 +2571,27 @@
   },
   "error": {
     "fetchTitle": "Errore nel caricamento degli argomenti",
-    "fetchDescription": "Non è stato possibile caricare l'elenco degli argomenti"
+    "fetchDescription": "Non è stato possibile caricare l'elenco degli argomenti",
+    "deleteTitle": "Errore nell'eliminazione dell'argomento",
+    "deleteDescription": "Non è stato possibile eliminare l'argomento",
+    "notFound": "Argomento non trovato",
+    "hasDependencies": "Impossibile eliminare l'argomento perché ha dipendenze.",
+    "hasQuestions": "Impossibile eliminare l'argomento. {count} domanda(e) è(sono) associata(e) a questo argomento.",
+    "hasFlashcards": "Impossibile eliminare l'argomento. {count} flashcard sono associate a questo argomento. Rimuovi prima le flashcard.",
+    "serverError": "Errore del server. Riprova più tardi."
+  },
+  "success": {
+    "deleteTitle": "Argomento eliminato",
+    "deleteDescription": "L'argomento è stato eliminato con successo"
+  },
+  "deleteConfirmation": {
+    "title": "Conferma eliminazione",
+    "message": "Sei sicuro di voler eliminare l'argomento '{argumentTitle}'?",
+    "argumentTitle": "Argomento",
+    "assessment": "Valutazione",
+    "warning": "Questa azione non può essere annullata.",
+    "confirm": "Elimina",
+    "deleting": "Eliminazione..."
   }
 },
 "Tutor": {

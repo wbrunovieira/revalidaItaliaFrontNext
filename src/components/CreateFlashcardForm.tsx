@@ -24,7 +24,9 @@ import {
   X,
   Upload,
   RotateCcw,
+  Plus,
 } from 'lucide-react';
+import TagSelectionModal from '@/components/TagSelectionModal';
 
 interface FormData {
   questionType: 'TEXT' | 'IMAGE';
@@ -60,11 +62,11 @@ interface Argument {
   createdAt: string;
 }
 
-interface Tag {
+interface FlashcardTag {
   id: string;
   name: string;
-  slug: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface UploadedFile {
@@ -81,10 +83,10 @@ export default function CreateFlashcardForm({
   const [argumentsList, setArgumentsList] = useState<
     Argument[]
   >([]);
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<FlashcardTag[]>([]);
+  const [tagModalOpen, setTagModalOpen] = useState(false);
   const [loadingArguments, setLoadingArguments] =
     useState(false);
-  const [loadingTags, setLoadingTags] = useState(false);
   const [questionImageFile, setQuestionImageFile] =
     useState<UploadedFile | null>(null);
   const [answerImageFile, setAnswerImageFile] =
@@ -140,40 +142,10 @@ export default function CreateFlashcardForm({
     }
   }, [t, toast]);
 
-  const loadTags = useCallback(async () => {
-    setLoadingTags(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcard-tags`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to load tags');
-      }
-
-      const data = await response.json();
-      setTags(data.tags || []);
-    } catch (error) {
-      console.error('Error loading tags:', error);
-      toast({
-        title: t('errors.loadTagsTitle'),
-        description: t('errors.loadTagsDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingTags(false);
-    }
-  }, [t, toast]);
 
   useEffect(() => {
     loadArguments();
-    loadTags();
-  }, [loadArguments, loadTags]);
+  }, [loadArguments]);
 
   const validateField = (
     name: keyof FormData,
@@ -487,11 +459,12 @@ export default function CreateFlashcardForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-4xl space-y-6"
-    >
-      <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-4xl space-y-6"
+      >
+        <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-secondary/20 rounded-lg">
             <CreditCard
@@ -828,52 +801,52 @@ export default function CreateFlashcardForm({
 
           {/* Tags Selection */}
           <div>
-            <Label
-              htmlFor="tagIds"
-              className="text-gray-300"
-            >
-              <Tag className="inline mr-2" size={16} />
+            <Label className="text-gray-300 flex items-center gap-2">
+              <Tag size={16} />
               {t('tags')}
+              <span className="text-gray-400 text-sm ml-2">({t('optional')})</span>
             </Label>
-            <Select
-              value={formData.tagIds.join(',')}
-              onValueChange={value => {
-                const selectedTags = value
-                  ? value.split(',')
-                  : [];
-                handleFieldChange('tagIds', selectedTags);
-              }}
-            >
-              <SelectTrigger
-                id="tagIds"
-                className="mt-1 w-full bg-gray-700 border-gray-600 text-white focus:border-secondary focus:ring-secondary"
-              >
-                <SelectValue
-                  placeholder={t('selectTags')}
-                />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                {loadingTags ? (
-                  <SelectItem value="loading" disabled>
-                    {t('loadingTags')}
-                  </SelectItem>
-                ) : tags.length === 0 ? (
-                  <SelectItem value="no-tags" disabled>
-                    {t('noTags')}
-                  </SelectItem>
-                ) : (
-                  tags.map(tag => (
-                    <SelectItem
-                      key={tag.id}
-                      value={tag.id}
-                      className="text-white hover:bg-gray-600"
+            
+            {/* Selected Tags Display */}
+            {selectedTags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2 mb-3">
+                {selectedTags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm text-purple-300"
+                  >
+                    <Tag size={14} />
+                    <span>{tag.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedTags(prev => prev.filter(t => t.id !== tag.id));
+                        setFormData(prev => ({
+                          ...prev,
+                          tagIds: prev.tagIds.filter(id => id !== tag.id)
+                        }));
+                      }}
+                      className="ml-1 p-0.5 hover:bg-purple-500/30 rounded-full transition-colors"
                     >
-                      {tag.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Add Tags Button */}
+            <button
+              type="button"
+              onClick={() => setTagModalOpen(true)}
+              className="mt-2 w-full p-3 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg text-white transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus size={16} />
+              {selectedTags.length > 0 
+                ? t('addMoreTags', { count: selectedTags.length })
+                : t('selectTags')
+              }
+            </button>
           </div>
 
           {/* Actions */}
@@ -909,7 +882,22 @@ export default function CreateFlashcardForm({
               )}
             </button>
           </div>
-      </div>
-    </form>
+        </div>
+      </form>
+    
+    {/* Tag Selection Modal */}
+    <TagSelectionModal
+      isOpen={tagModalOpen}
+      onClose={() => setTagModalOpen(false)}
+      selectedTags={selectedTags}
+      onTagsSelected={(tags) => {
+        setSelectedTags(tags);
+        setFormData(prev => ({
+          ...prev,
+          tagIds: tags.map(tag => tag.id)
+        }));
+      }}
+    />
+    </>
   );
 }

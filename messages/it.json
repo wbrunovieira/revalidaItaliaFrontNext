@@ -492,6 +492,22 @@
     }
   },
   
+  "tagSelection": {
+    "title": "Seleziona Tag",
+    "selectTags": "Seleziona i tag per questa flashcard",
+    "selectedCount": "{count} tag selezionati",
+    "searchPlaceholder": "Cerca tag...",
+    "loading": "Caricamento tag...",
+    "noTags": "Nessun tag trovato",
+    "pageOf": "Pagina {current} di {total}",
+    "cancel": "Annulla",
+    "confirm": "Conferma ({count})",
+    "errors": {
+      "loadTitle": "Errore nel caricamento dei tag",
+      "loadDescription": "Non è stato possibile caricare i tag disponibili"
+    }
+  },
+  
   "questionDelete": {
     "title": "Elimina Domanda",
     "questionInfo": "Informazioni sulla Domanda",
@@ -601,7 +617,9 @@
     "loadingArguments": "Caricamento argomenti...",
     "noArguments": "Nessun argomento disponibile",
     "tags": "Tag",
-    "selectTags": "Seleziona i tag (opzionale)",
+    "optional": "opzionale",
+    "selectTags": "Seleziona tag",
+    "addMoreTags": "Aggiungi altri tag ({count} selezionati)",
     "loadingTags": "Caricamento tag...",
     "noTags": "Nessun tag disponibile",
     "slug": "Slug (URL)",

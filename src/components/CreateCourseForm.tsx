@@ -85,15 +85,6 @@ export default function CreateCourseForm() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [savedImageName, setSavedImageName] = useState<string | null>(null);
 
-  // Gerar nome único para arquivo
-  const generateUniqueFileName = useCallback((filename: string): string => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const extension = filename.split('.').pop() || 'jpg';
-    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
-    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
-  }, []);
 
   // Função para fazer upload da imagem
   const handleImageUpload = useCallback(
@@ -271,6 +262,7 @@ export default function CreateCourseForm() {
     },
     [
       formData.translations,
+      formData.imageFile,
       t,
       validateTextField,
     ]

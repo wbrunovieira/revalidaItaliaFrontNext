@@ -49,13 +49,21 @@ interface UserEditData {
   role: 'admin' | 'student' | 'tutor';
 }
 
+// API might return users with different property names
+interface ApiUser extends Partial<User> {
+  id?: string;
+  name?: string;
+}
+
 interface UsersResponse {
-  items: User[];
+  items: ApiUser[];
   page: number;
   limit: number;
   total: number;
   totalPages: number;
 }
+
+type SearchResponse = UsersResponse | { users: ApiUser[] } | ApiUser[];
 
 // Função utilitária movida para fora para evitar recriação
 const getCookie = (name: string): string | null => {
@@ -124,11 +132,17 @@ export default function UsersList() {
 
         // A API retorna { items, page, limit, total, totalPages }
         // Map name to fullName for consistency
-        const mappedUsers = (data.items || []).map((user: any) => ({
-          ...user,
-          identityId: user.id || user.identityId,
-          fullName: user.fullName || user.name || 'Unnamed User'
-        }));
+        const mappedUsers: User[] = (data.items || [])
+          .filter((user) => user.id || user.identityId) // Filter out users without ID
+          .map((user) => ({
+            ...user,
+            identityId: user.id || user.identityId || '',
+            fullName: user.fullName || user.name || 'Unnamed User',
+            email: user.email || '',
+            nationalId: user.nationalId || '',
+            role: user.role || 'student',
+            createdAt: user.createdAt || new Date().toISOString()
+          } as User));
         setUsers(mappedUsers);
         setCurrentPage(data.page || 1);
         setTotalPages(data.totalPages || 1);
@@ -201,30 +215,48 @@ export default function UsersList() {
           );
         }
 
-        const data = await response.json();
+        const data: SearchResponse = await response.json();
         console.log('API Search Response:', data);
 
         // Handle both possible response structures and map name to fullName
         let mappedUsers: User[] = [];
         
-        if (data.items) {
-          mappedUsers = data.items.map((user: any) => ({
-            ...user,
-            identityId: user.id || user.identityId,
-            fullName: user.fullName || user.name || 'Unnamed User'
-          }));
-        } else if (data.users) {
-          mappedUsers = data.users.map((user: any) => ({
-            ...user,
-            identityId: user.id || user.identityId,
-            fullName: user.fullName || user.name || 'Unnamed User'
-          }));
+        if ('items' in data) {
+          mappedUsers = data.items
+            .filter((user) => user.id || user.identityId)
+            .map((user) => ({
+              ...user,
+              identityId: user.id || user.identityId || '',
+              fullName: user.fullName || user.name || 'Unnamed User',
+              email: user.email || '',
+              nationalId: user.nationalId || '',
+              role: user.role || 'student',
+              createdAt: user.createdAt || new Date().toISOString()
+            } as User));
+        } else if ('users' in data) {
+          mappedUsers = data.users
+            .filter((user) => user.id || user.identityId)
+            .map((user) => ({
+              ...user,
+              identityId: user.id || user.identityId || '',
+              fullName: user.fullName || user.name || 'Unnamed User',
+              email: user.email || '',
+              nationalId: user.nationalId || '',
+              role: user.role || 'student',
+              createdAt: user.createdAt || new Date().toISOString()
+            } as User));
         } else if (Array.isArray(data)) {
-          mappedUsers = data.map((user: any) => ({
-            ...user,
-            identityId: user.id || user.identityId,
-            fullName: user.fullName || user.name || 'Unnamed User'
-          }));
+          mappedUsers = data
+            .filter((user) => user.id || user.identityId)
+            .map((user) => ({
+              ...user,
+              identityId: user.id || user.identityId || '',
+              fullName: user.fullName || user.name || 'Unnamed User',
+              email: user.email || '',
+              nationalId: user.nationalId || '',
+              role: user.role || 'student',
+              createdAt: user.createdAt || new Date().toISOString()
+            } as User));
         } else {
           console.error(
             'Unexpected API response structure:',

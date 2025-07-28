@@ -129,15 +129,6 @@ export default function CreateModuleForm() {
   const [savedImageName, setSavedImageName] = useState<string | null>(null);
 
   // Validação de URL
-  // Gerar nome único para arquivo
-  const generateUniqueFileName = useCallback((filename: string): string => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const extension = filename.split('.').pop() || 'jpg';
-    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
-    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
-  }, []);
 
   // Função para fazer upload da imagem
   const handleImageUpload = useCallback(
@@ -248,26 +239,6 @@ export default function CreateModuleForm() {
     setSavedImageName(null);
   }, []);
 
-  const validateUrl = useCallback(
-    (url: string): boolean => {
-      if (!url || !url.trim()) return false; // URL é obrigatória
-      try {
-        // Aceita URLs relativas (começando com /)
-        if (url.startsWith('/')) {
-          return true;
-        }
-        // Valida URLs absolutas
-        const urlObj = new URL(url);
-        return (
-          urlObj.protocol === 'http:' ||
-          urlObj.protocol === 'https:'
-        );
-      } catch {
-        return false;
-      }
-    },
-    []
-  );
 
 
   // Validação de campos de texto
@@ -375,8 +346,8 @@ export default function CreateModuleForm() {
     [
       formData.translations,
       formData.courseId,
+      formData.imageFile,
       t,
-      validateUrl,
       validateTextField,
       existingOrders,
     ]
@@ -666,7 +637,6 @@ export default function CreateModuleForm() {
   }, [
     formData,
     t,
-    validateUrl,
     validateTextField,
     existingOrders,
   ]);

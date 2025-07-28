@@ -141,20 +141,6 @@ export default function TrackEditModal({
     );
   };
 
-  // Extract filename from URL
-  const extractFilenameFromUrl = useCallback((url: string): string | null => {
-    try {
-      const urlParts = url.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      // If it looks like a filename (has extension), return it
-      if (filename && filename.includes('.')) {
-        return filename;
-      }
-    } catch (error) {
-      console.error('Error extracting filename:', error);
-    }
-    return null;
-  }, []);
 
   // Delete image from storage
   const deleteImage = useCallback(async (imageUrl: string) => {
@@ -497,7 +483,7 @@ export default function TrackEditModal({
         URL.revokeObjectURL(formData.newImageUrl);
       }
     };
-  }, []);
+  }, [formData.newImageUrl]);
 
   // Atualizar formulário quando track mudar
   useEffect(() => {
@@ -543,7 +529,7 @@ export default function TrackEditModal({
       setErrors({});
       setSavedImageName(null);
     }
-  }, [track, isOpen]);
+  }, [track, isOpen, formData.newImageUrl]);
 
   // Buscar cursos quando abrir o modal
   useEffect(() => {

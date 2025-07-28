@@ -186,7 +186,7 @@ export default function ModulesList() {
       try {
         // Primeiro, buscar os dados do módulo para obter a URL da imagem
         const course = coursesWithModules.find(c => c.id === courseId);
-        const module = course?.modules?.find(m => m.id === moduleId);
+        const foundModule = course?.modules?.find(m => m.id === moduleId);
         
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}`,
@@ -202,10 +202,10 @@ export default function ModulesList() {
         }
 
         // Se o módulo foi deletado com sucesso e tem uma imagem, tentar deletar a imagem
-        if (module?.imageUrl && module.imageUrl.startsWith('/uploads/')) {
+        if (foundModule?.imageUrl && foundModule.imageUrl.startsWith('/uploads/')) {
           try {
             // Extrair o path relativo da imagem
-            const imagePath = module.imageUrl.replace('/uploads/', '');
+            const imagePath = foundModule.imageUrl.replace('/uploads/', '');
             
             const deleteImageResponse = await fetch(`/api/upload?path=${encodeURIComponent(imagePath)}`, {
               method: 'DELETE',

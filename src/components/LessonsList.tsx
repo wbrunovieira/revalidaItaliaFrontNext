@@ -287,8 +287,8 @@ export default function LessonsList() {
       try {
         // Primeiro, buscar os dados da lição para obter a URL da imagem
         const course = coursesWithLessons.find(c => c.id === courseId);
-        const module = course?.modules?.find(m => m.id === moduleId);
-        const lesson = module?.lessons?.find(l => l.id === lessonId);
+        const foundModule = course?.modules?.find(m => m.id === moduleId);
+        const lesson = foundModule?.lessons?.find(l => l.id === lessonId);
         
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,

@@ -216,7 +216,6 @@ export default function LessonEditModal({
   );
 
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [savedImageName, setSavedImageName] = useState<string | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -712,7 +711,6 @@ export default function LessonEditModal({
       
       // If there's a new image to upload
       if (formData.newImageFile) {
-        setUploadingImage(true);
         toast({
           title: t('upload.uploading'),
           description: formData.newImageFile.name,
@@ -736,7 +734,6 @@ export default function LessonEditModal({
           });
           return;
         } finally {
-          setUploadingImage(false);
         }
       }
       

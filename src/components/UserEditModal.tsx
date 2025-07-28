@@ -356,7 +356,7 @@ export default function UserEditModal({
     async (
       userId: string,
       payload: { name: string; email: string; nationalId: string; role: UserRole }
-    ): Promise<any> => {
+    ): Promise<UserEditData> => {
       const tokenFromCookie = getCookie('token');
       const tokenFromStorage =
         localStorage.getItem('accessToken') ||
@@ -432,7 +432,7 @@ export default function UserEditModal({
       // Se a API retornar dados, use-os; caso contrário, use o payload enviado
       const userToSave: UserEditData = {
         ...user,
-        fullName: updatedUserData?.name || updatedUserData?.fullName || payload.name,
+        fullName: updatedUserData?.fullName || payload.name,
         email: updatedUserData?.email || payload.email,
         nationalId: updatedUserData?.nationalId || payload.nationalId,
         role: updatedUserData?.role || payload.role,

@@ -85,20 +85,6 @@ export default function CourseEditModal({
     );
   };
 
-  // Extract filename from URL
-  const extractFilenameFromUrl = useCallback((url: string): string | null => {
-    try {
-      const urlParts = url.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      // If it looks like a filename (has extension), return it
-      if (filename && filename.includes('.')) {
-        return filename;
-      }
-    } catch (error) {
-      console.error('Error extracting filename:', error);
-    }
-    return null;
-  }, []);
 
   // Delete image from storage
   const deleteImage = useCallback(async (imageUrl: string) => {
@@ -343,7 +329,7 @@ export default function CourseEditModal({
         URL.revokeObjectURL(formData.newImageUrl);
       }
     };
-  }, []);
+  }, [formData.newImageUrl]);
 
   // Atualizar formulário quando course mudar
   useEffect(() => {
@@ -384,7 +370,7 @@ export default function CourseEditModal({
       setErrors({});
       setSavedImageName(null);
     }
-  }, [course, isOpen]);
+  }, [course, isOpen, formData.newImageUrl]);
 
   // Fechar modal com ESC
   useEffect(() => {

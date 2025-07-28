@@ -941,14 +941,6 @@ export default function CreateLessonForm() {
     }
   };
 
-  // Handlers para mudança de valores
-  const handleInputChange = useCallback(
-    (field: 'imageUrl') => (value: string) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
-      handleFieldValidation(field, value);
-    },
-    [handleFieldValidation]
-  );
 
   const handleInputBlur = useCallback(
     (field: string) => () => {

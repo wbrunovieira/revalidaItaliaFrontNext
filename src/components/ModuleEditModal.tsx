@@ -101,7 +101,6 @@ export default function ModuleEditModal({
   });
 
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [savedImageName, setSavedImageName] = useState<string | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -448,7 +447,6 @@ export default function ModuleEditModal({
       
       // If there's a new image to upload
       if (formData.newImageFile) {
-        setUploadingImage(true);
         toast({
           title: t('upload.uploading'),
           description: formData.newImageFile.name,
@@ -472,7 +470,6 @@ export default function ModuleEditModal({
           });
           return;
         } finally {
-          setUploadingImage(false);
         }
       }
       

@@ -490,6 +490,54 @@
     }
   },
   
+  "questionEdit": {
+    "title": "Editar Pregunta",
+    "questionType": "Tipo de pregunta",
+    "types": {
+      "multipleChoice": "Opción Múltiple",
+      "open": "Abierta"
+    },
+    "typeCannotChange": "(no se puede cambiar)",
+    "fields": {
+      "text": "Texto de la Pregunta",
+      "options": "Opciones de Respuesta",
+      "explanation": "Explicación de la Respuesta",
+      "translations": "Traducciones de la Explicación"
+    },
+    "placeholders": {
+      "text": "Ingresa el texto de la pregunta",
+      "optionText": "Ingresa el texto de la opción",
+      "explanation": "Ingresa la explicación para la respuesta correcta",
+      "explanationPt": "Explicación en portugués",
+      "explanationIt": "Explicación en italiano",
+      "explanationEs": "Explicación en español"
+    },
+    "addOption": "Agregar Opción",
+    "newOption": "Nueva opción",
+    "defaultExplanation": "Explicación predeterminada",
+    "languages": {
+      "pt": "Portugués",
+      "it": "Italiano",
+      "es": "Español"
+    },
+    "openQuestionInfo": "Las preguntas abiertas no tienen opciones de múltiple elección o una respuesta correcta única.",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "success": {
+      "title": "Pregunta actualizada",
+      "description": "Los cambios se han guardado con éxito"
+    },
+    "errors": {
+      "textRequired": "El texto de la pregunta es obligatorio",
+      "minOptions": "Se requieren al menos 2 opciones válidas",
+      "correctOptionRequired": "Selecciona la opción correcta",
+      "explanationRequired": "La explicación es obligatoria cuando hay respuesta correcta",
+      "updateTitle": "Error al actualizar",
+      "updateDescription": "No se pudo actualizar la pregunta"
+    }
+  },
+  
   "createFlashcard": {
     "title": "Crear Flashcard",
     "questionSection": "Pregunta",

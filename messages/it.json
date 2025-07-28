@@ -492,6 +492,54 @@
     }
   },
   
+  "questionEdit": {
+    "title": "Modifica Domanda",
+    "questionType": "Tipo di domanda",
+    "types": {
+      "multipleChoice": "Scelta Multipla",
+      "open": "Aperta"
+    },
+    "typeCannotChange": "(non può essere modificato)",
+    "fields": {
+      "text": "Testo della Domanda",
+      "options": "Opzioni di Risposta",
+      "explanation": "Spiegazione della Risposta",
+      "translations": "Traduzioni della Spiegazione"
+    },
+    "placeholders": {
+      "text": "Inserisci il testo della domanda",
+      "optionText": "Inserisci il testo dell'opzione",
+      "explanation": "Inserisci la spiegazione per la risposta corretta",
+      "explanationPt": "Spiegazione in portoghese",
+      "explanationIt": "Spiegazione in italiano",
+      "explanationEs": "Spiegazione in spagnolo"
+    },
+    "addOption": "Aggiungi Opzione",
+    "newOption": "Nuova opzione",
+    "defaultExplanation": "Spiegazione predefinita",
+    "languages": {
+      "pt": "Portoghese",
+      "it": "Italiano",
+      "es": "Spagnolo"
+    },
+    "openQuestionInfo": "Le domande aperte non hanno opzioni a scelta multipla o una risposta corretta unica.",
+    "cancel": "Annulla",
+    "save": "Salva Modifiche",
+    "saving": "Salvataggio...",
+    "success": {
+      "title": "Domanda aggiornata",
+      "description": "Le modifiche sono state salvate con successo"
+    },
+    "errors": {
+      "textRequired": "Il testo della domanda è obbligatorio",
+      "minOptions": "Sono necessarie almeno 2 opzioni valide",
+      "correctOptionRequired": "Seleziona l'opzione corretta",
+      "explanationRequired": "La spiegazione è obbligatoria quando c'è una risposta corretta",
+      "updateTitle": "Errore nell'aggiornamento",
+      "updateDescription": "Non è stato possibile aggiornare la domanda"
+    }
+  },
+  
   "createFlashcard": {
     "title": "Crea Flashcard",
     "questionSection": "Domanda",

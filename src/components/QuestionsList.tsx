@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import QuestionViewModal from '@/components/QuestionViewModal';
+import QuestionEditModal from '@/components/QuestionEditModal';
 
 interface Assessment {
   id: string;
@@ -108,6 +109,10 @@ export default function QuestionsList() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [selectedArgument, setSelectedArgument] = useState<Argument | null>(null);
+  
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   // Load assessments
   const loadAssessments = useCallback(async () => {
@@ -226,6 +231,23 @@ export default function QuestionsList() {
     setSelectedQuestion(null);
     setSelectedArgument(null);
   }, []);
+  
+  // Handle edit question
+  const handleEditQuestion = useCallback((question: Question) => {
+    setEditingQuestion(question);
+    setEditModalOpen(true);
+  }, []);
+  
+  // Handle close edit modal
+  const handleCloseEditModal = useCallback(() => {
+    setEditModalOpen(false);
+    setEditingQuestion(null);
+  }, []);
+  
+  // Handle question updated
+  const handleQuestionUpdated = useCallback(() => {
+    loadDetailedQuestions();
+  }, [loadDetailedQuestions]);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -463,12 +485,7 @@ export default function QuestionsList() {
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => {
-                                toast({
-                                  title: t('comingSoon'),
-                                  description: t('editFeature'),
-                                });
-                              }}
+                              onClick={() => handleEditQuestion(question)}
                               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                               title={t('actions.edit')}
                             >
@@ -507,6 +524,16 @@ export default function QuestionsList() {
           argumentData={selectedArgument}
           isOpen={viewModalOpen}
           onClose={handleCloseViewModal}
+        />
+      )}
+      
+      {/* Question Edit Modal */}
+      {editingQuestion && (
+        <QuestionEditModal
+          question={editingQuestion}
+          isOpen={editModalOpen}
+          onClose={handleCloseEditModal}
+          onQuestionUpdated={handleQuestionUpdated}
         />
       )}
     </div>

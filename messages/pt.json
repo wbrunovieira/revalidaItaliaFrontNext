@@ -502,6 +502,54 @@
     }
   },
   
+  "questionEdit": {
+    "title": "Editar Questão",
+    "questionType": "Tipo da questão",
+    "types": {
+      "multipleChoice": "Múltipla Escolha",
+      "open": "Aberta"
+    },
+    "typeCannotChange": "(não pode ser alterado)",
+    "fields": {
+      "text": "Texto da Questão",
+      "options": "Opções de Resposta",
+      "explanation": "Explicação da Resposta",
+      "translations": "Traduções da Explicação"
+    },
+    "placeholders": {
+      "text": "Digite o texto da questão",
+      "optionText": "Digite o texto da opção",
+      "explanation": "Digite a explicação para a resposta correta",
+      "explanationPt": "Explicação em português",
+      "explanationIt": "Explicação em italiano",
+      "explanationEs": "Explicação em espanhol"
+    },
+    "addOption": "Adicionar Opção",
+    "newOption": "Nova opção",
+    "defaultExplanation": "Explicação padrão",
+    "languages": {
+      "pt": "Português",
+      "it": "Italiano",
+      "es": "Espanhol"
+    },
+    "openQuestionInfo": "Questões abertas não possuem opções de múltipla escolha ou resposta correta única.",
+    "cancel": "Cancelar",
+    "save": "Salvar Alterações",
+    "saving": "Salvando...",
+    "success": {
+      "title": "Questão atualizada",
+      "description": "As alterações foram salvas com sucesso"
+    },
+    "errors": {
+      "textRequired": "O texto da questão é obrigatório",
+      "minOptions": "É necessário ter pelo menos 2 opções válidas",
+      "correctOptionRequired": "Selecione a opção correta",
+      "explanationRequired": "A explicação é obrigatória quando há resposta correta",
+      "updateTitle": "Erro ao atualizar",
+      "updateDescription": "Não foi possível atualizar a questão"
+    }
+  },
+  
   "createFlashcard": {
     "title": "Criar Flashcard",
     "questionSection": "Pergunta",

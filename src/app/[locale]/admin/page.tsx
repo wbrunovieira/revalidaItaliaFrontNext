@@ -54,6 +54,7 @@ import CreateArgumentPage from '@/components/CreateArgumentPage';
 import QuestionsList from '@/components/QuestionsList';
 import CreateFlashcardForm from '@/components/CreateFlashcardForm';
 import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
+import FlashcardsList from '@/components/FlashcardsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -616,9 +617,7 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
               <TabsContent value="list">
-                <div className="p-4">
-                  <p>{t('comingSoon')}</p>
-                </div>
+                <FlashcardsList />
               </TabsContent>
             </Tabs>
           </TabsContent>

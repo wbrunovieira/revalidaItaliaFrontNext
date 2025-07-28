@@ -457,6 +457,53 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "flashcardsList": {
+    "title": "Lista de Flashcards",
+    "description": "Gestiona todas las flashcards del sistema",
+    "loading": "Cargando flashcards...",
+    "noFlashcards": "No se encontraron flashcards",
+    "tryAdjustingFilters": "Intenta ajustar los filtros o crear una nueva flashcard",
+    "showing": "Mostrando {count} de {total} flashcards",
+    "searchPlaceholder": "Buscar en preguntas y respuestas...",
+    "question": "Pregunta",
+    "answer": "Respuesta",
+    "activeFilters": "Filtros activos",
+    "searchingFor": "Buscando",
+    "questionType": "Tipo de pregunta",
+    "answerType": "Tipo de respuesta",
+    "filters": {
+      "questionType": "Tipo de Pregunta",
+      "answerType": "Tipo de Respuesta",
+      "sortBy": "Ordenar por",
+      "all": "Todos"
+    },
+    "types": {
+      "text": "Texto",
+      "image": "Imagen"
+    },
+    "sort": {
+      "newestFirst": "Más recientes",
+      "oldestFirst": "Más antiguos",
+      "recentlyUpdated": "Actualizados recientemente",
+      "alphabetical": "Alfabético"
+    },
+    "pagination": {
+      "pageOf": "Página {current} de {total}",
+      "first": "Primera",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "last": "Última"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar flashcards",
+      "fetchDescription": "No se pudo cargar la lista de flashcards"
+    },
+    "actions": {
+      "edit": "Editar flashcard",
+      "delete": "Eliminar flashcard"
+    }
+  },
+  
   "questionView": {
     "title": "Detalles de la Pregunta",
     "questionText": "Texto de la Pregunta",

@@ -11,6 +11,7 @@ import {
   Trash2,
   Search,
 } from 'lucide-react';
+import FlashcardTagEditModal from './FlashcardTagEditModal';
 
 interface FlashcardTag {
   id: string;
@@ -28,6 +29,8 @@ export default function FlashcardTagsList() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<FlashcardTag | null>(null);
 
   // Load tags
   const loadTags = useCallback(async () => {
@@ -82,6 +85,23 @@ export default function FlashcardTagsList() {
   useEffect(() => {
     loadTags();
   }, [debouncedSearch]);
+
+  // Handle edit tag
+  const handleEdit = useCallback((tag: FlashcardTag) => {
+    setSelectedTag(tag);
+    setEditModalOpen(true);
+  }, []);
+
+  // Handle close edit modal
+  const handleCloseEditModal = useCallback(() => {
+    setEditModalOpen(false);
+    setSelectedTag(null);
+  }, []);
+
+  // Handle save edit
+  const handleSaveEdit = useCallback(() => {
+    loadTags();
+  }, [loadTags]);
 
   return (
     <div className="space-y-6">
@@ -148,10 +168,7 @@ export default function FlashcardTagsList() {
               {/* Action Buttons */}
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={() => {
-                    // TODO: Implement edit
-                    console.log('Edit tag:', tag.id);
-                  }}
+                  onClick={() => handleEdit(tag)}
                   className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
                   title={t('actions.edit')}
                 >
@@ -179,6 +196,14 @@ export default function FlashcardTagsList() {
           {t('totalTags', { count: tags.length })}
         </p>
       )}
+
+      {/* Edit Modal */}
+      <FlashcardTagEditModal
+        tag={selectedTag}
+        isOpen={editModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

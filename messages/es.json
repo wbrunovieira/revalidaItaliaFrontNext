@@ -457,6 +457,43 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "flashcardTagEdit": {
+    "title": "Editar Etiqueta de Flashcard",
+    "currentTag": "Etiqueta actual",
+    "slug": "Slug",
+    "fields": {
+      "name": "Nombre de la Etiqueta"
+    },
+    "placeholders": {
+      "name": "Ingrese aquí la actualización del nombre de la etiqueta"
+    },
+    "hints": {
+      "name": ""
+    },
+    "validation": {
+      "nameValid": "Nombre válido"
+    },
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "nameMax": "El nombre no puede exceder los 200 caracteres",
+      "notFound": "Etiqueta no encontrada",
+      "duplicate": "Ya existe una etiqueta con este nombre",
+      "invalidInput": "Datos inválidos",
+      "updateFailed": "Error al actualizar la etiqueta",
+      "connectionError": "Error de conexión. Inténtalo de nuevo.",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Verifica los campos e inténtalo de nuevo",
+      "updateTitle": "Error al actualizar"
+    },
+    "success": {
+      "title": "¡Etiqueta actualizada!",
+      "description": "La etiqueta se actualizó correctamente"
+    },
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando..."
+  },
+  
   "flashcardEdit": {
     "title": "Editar Flashcard",
     "question": {

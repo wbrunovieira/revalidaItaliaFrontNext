@@ -459,6 +459,43 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "flashcardTagEdit": {
+    "title": "Modifica Tag Flashcard",
+    "currentTag": "Tag attuale",
+    "slug": "Slug",
+    "fields": {
+      "name": "Nome del Tag"
+    },
+    "placeholders": {
+      "name": "Inserisci qui l'aggiornamento del nome del tag"
+    },
+    "hints": {
+      "name": ""
+    },
+    "validation": {
+      "nameValid": "Nome valido"
+    },
+    "errors": {
+      "nameRequired": "Il nome è obbligatorio",
+      "nameMax": "Il nome non può superare i 200 caratteri",
+      "notFound": "Tag non trovato",
+      "duplicate": "Esiste già un tag con questo nome",
+      "invalidInput": "Dati non validi",
+      "updateFailed": "Impossibile aggiornare il tag",
+      "connectionError": "Errore di connessione. Riprova.",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Controlla i campi e riprova",
+      "updateTitle": "Errore nell'aggiornamento"
+    },
+    "success": {
+      "title": "Tag aggiornato!",
+      "description": "Il tag è stato aggiornato con successo"
+    },
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio..."
+  },
+  
   "flashcardEdit": {
     "title": "Modifica Flashcard",
     "question": {

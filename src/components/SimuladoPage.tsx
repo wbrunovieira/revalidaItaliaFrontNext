@@ -323,9 +323,9 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
         throw new Error('Token de autenticação inválido');
       }
       
-      const userId = payload.sub || payload.id;
+      const identityId = payload.sub || payload.id;
 
-      if (!userId) {
+      if (!identityId) {
         throw new Error('User ID not found in token');
       }
 
@@ -337,7 +337,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
         },
         credentials: 'include',
         body: JSON.stringify({
-          userId,
+          identityId,
           assessmentId: assessment.id,
         }),
       });

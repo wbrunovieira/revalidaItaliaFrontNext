@@ -187,9 +187,9 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
         throw new Error('Token de autenticação inválido');
       }
       
-      const userId = payload.sub || payload.id;
+      const identityId = payload.sub || payload.id;
 
-      if (!userId) {
+      if (!identityId) {
         throw new Error('User ID not found in token');
       }
 
@@ -201,7 +201,7 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
         },
         credentials: 'include',
         body: JSON.stringify({
-          userId,
+          identityId,
           assessmentId: assessment.id,
         }),
       });

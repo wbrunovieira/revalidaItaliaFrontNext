@@ -305,13 +305,13 @@ export default function QuizPage({
         throw new Error('Token de autenticação inválido');
       }
       
-      const userId = payload.sub || payload.id;
+      const identityId = payload.sub || payload.id;
 
-      if (!userId) {
+      if (!identityId) {
         throw new Error('User ID not found in token');
       }
 
-      console.log('Starting quiz with:', { userId, assessmentId: assessment.id });
+      console.log('Starting quiz with:', { identityId, assessmentId: assessment.id });
 
       const response = await fetch(
         `${apiUrl}/api/v1/attempts/start`,
@@ -323,7 +323,7 @@ export default function QuizPage({
           },
           credentials: 'include',
           body: JSON.stringify({
-            userId,
+            identityId,
             assessmentId: assessment.id,
           }),
         }
@@ -337,7 +337,8 @@ export default function QuizPage({
         let errorMessage = 'Failed to start quiz';
         try {
           const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
+          console.error('API Error Response:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }

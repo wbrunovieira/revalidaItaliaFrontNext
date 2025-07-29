@@ -582,11 +582,31 @@
     },
     "error": {
       "fetchTitle": "Error al cargar flashcards",
-      "fetchDescription": "No se pudo cargar la lista de flashcards"
+      "fetchDescription": "No se pudo cargar la lista de flashcards",
+      "deleteTitle": "Error al eliminar",
+      "notFound": "Flashcard no encontrada",
+      "deleteFailed": "Error al eliminar la flashcard",
+      "connectionError": "Error de conexión. Verifica tu conexión a internet"
     },
     "actions": {
       "edit": "Editar flashcard",
       "delete": "Eliminar flashcard"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar eliminación",
+      "message": "¿Está seguro de que desea eliminar esta flashcard?",
+      "warning": "¡Esta acción no se puede deshacer!",
+      "confirm": "Sí, eliminar",
+      "deleting": "Eliminando...",
+      "imageQuestion": "[Imagen]",
+      "imageAnswer": "[Imagen]"
+    },
+    "tags": {
+      "label": "Etiquetas"
+    },
+    "success": {
+      "deleteTitle": "Flashcard eliminada",
+      "deleteDescription": "La flashcard se eliminó correctamente"
     }
   },
   

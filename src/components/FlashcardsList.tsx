@@ -102,6 +102,9 @@ export default function FlashcardsList() {
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Delete state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
@@ -227,6 +230,175 @@ export default function FlashcardsList() {
   const handlePageChange = (newPage: number) => {
     loadFlashcards(newPage);
   };
+
+  // Helper function to delete image
+  const deleteImage = async (imageUrl: string) => {
+    if (!imageUrl || !imageUrl.includes('/uploads/')) return;
+    
+    try {
+      // Extract the path from the URL
+      const pathMatch = imageUrl.match(/\/uploads\/(.+)/);
+      if (!pathMatch) return;
+      
+      const path = pathMatch[1];
+      await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error deleting image:', error);
+    }
+  };
+
+  // Delete flashcard
+  const deleteFlashcard = useCallback(
+    async (flashcardId: string) => {
+      setDeletingId(flashcardId);
+
+      try {
+        // Find the flashcard to get image URLs before deletion
+        const flashcardToDelete = flashcards.find(f => f.id === flashcardId);
+        
+        // Get token from cookie
+        const getCookie = (name: string): string | null => {
+          if (typeof document === 'undefined') return null;
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+          return null;
+        };
+        
+        const tokenFromCookie = getCookie('token');
+        const tokenFromStorage =
+          localStorage.getItem('accessToken') ||
+          sessionStorage.getItem('accessToken');
+        const token = tokenFromCookie || tokenFromStorage;
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${flashcardId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          toast({
+            title: t('success.deleteTitle'),
+            description: t('success.deleteDescription'),
+            variant: 'success',
+          });
+          
+          // Delete associated images after successful flashcard deletion
+          if (flashcardToDelete) {
+            if (flashcardToDelete.questionType === 'IMAGE' && flashcardToDelete.questionImageUrl) {
+              await deleteImage(flashcardToDelete.questionImageUrl);
+            }
+            if (flashcardToDelete.answerType === 'IMAGE' && flashcardToDelete.answerImageUrl) {
+              await deleteImage(flashcardToDelete.answerImageUrl);
+            }
+          }
+          
+          // Reload flashcards
+          loadFlashcards(pagination.page);
+        } else {
+          // Handle errors
+          if (response.status === 404) {
+            toast({
+              title: t('error.deleteTitle'),
+              description: t('error.notFound'),
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: t('error.deleteTitle'),
+              description: t('error.deleteFailed'),
+              variant: 'destructive',
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting flashcard:', error);
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.connectionError'),
+          variant: 'destructive',
+        });
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [t, toast, loadFlashcards, pagination.page, flashcards]
+  );
+
+  // Handle delete confirmation
+  const handleDeleteConfirmation = useCallback(
+    (flashcard: Flashcard) => {
+      const questionPreview = flashcard.questionType === 'TEXT' 
+        ? flashcard.questionText 
+        : t('deleteConfirmation.imageQuestion');
+      
+      const answerPreview = flashcard.answerType === 'TEXT' 
+        ? flashcard.answerText 
+        : t('deleteConfirmation.imageAnswer');
+
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p>{t('deleteConfirmation.message')}</p>
+            <div className="p-3 bg-gray-700/50 rounded-lg space-y-2">
+              <div className="text-xs text-gray-300">
+                <div className="flex items-start gap-2">
+                  <span className="font-medium">{t('question')}:</span>
+                  <span className="break-words">
+                    {questionPreview ? questionPreview.substring(0, 100) : ''}
+                    {questionPreview && questionPreview.length > 100 ? '...' : ''}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 mt-1">
+                  <span className="font-medium">{t('answer')}:</span>
+                  <span className="break-words">
+                    {answerPreview ? answerPreview.substring(0, 100) : ''}
+                    {answerPreview && answerPreview.length > 100 ? '...' : ''}
+                  </span>
+                </div>
+                {flashcard.tags.length > 0 && (
+                  <div className="flex items-start gap-2 mt-1">
+                    <span className="font-medium">{t('tags.label')}:</span>
+                    <span>{flashcard.tags.map(t => t.name).join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              ⚠️ {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteFlashcard(flashcard.id)}
+            className="inline-flex h-8 items-center px-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+            disabled={deletingId === flashcard.id}
+          >
+            {deletingId === flashcard.id ? (
+              <>
+                <Loader2 size={14} className="animate-spin mr-2" />
+                {t('deleteConfirmation.deleting')}
+              </>
+            ) : (
+              t('deleteConfirmation.confirm')
+            )}
+          </button>
+        ),
+      });
+    },
+    [t, toast, deleteFlashcard, deletingId]
+  );
 
   return (
     <div className="space-y-6">
@@ -470,14 +642,16 @@ export default function FlashcardsList() {
                     <Edit2 size={14} />
                   </button>
                   <button
-                    onClick={() => {
-                      // TODO: Implement delete
-                      console.log('Delete flashcard:', flashcard.id);
-                    }}
+                    onClick={() => handleDeleteConfirmation(flashcard)}
                     className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
                     title={t('actions.delete')}
+                    disabled={deletingId === flashcard.id}
                   >
-                    <Trash2 size={14} />
+                    {deletingId === flashcard.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
                   </button>
                 </div>
 

@@ -2,6 +2,8 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import ConnectionStatus from '@/components/ConnectionStatus';
+import PandaVideoErrorSuppressor from '@/components/PandaVideoErrorSuppressor';
+import DevToolsManager from '@/components/DevToolsManager';
 
 import {
   Plus_Jakarta_Sans,
@@ -38,6 +40,8 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <PandaVideoErrorSuppressor />
+        <DevToolsManager />
         {children}
         
         <ConnectionStatus />

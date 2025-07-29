@@ -7,7 +7,7 @@ import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
-import LessonVideoPlayer from '@/components/LessonVideoPlayer';
+import StableVideoPlayer from '@/components/StableVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
 import Link from 'next/link';
 import {
@@ -240,6 +240,9 @@ export default async function LessonPage({
       t => t.locale === locale
     ) || lesson.video?.translations[0];
 
+  // Calculate lesson image URL outside of JSX
+  const lessonImageUrl = lesson.imageUrl || pandaData?.thumbnail || '';
+
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
@@ -308,7 +311,7 @@ export default async function LessonPage({
               className="flex-1 bg-primary lg:ml-4"
               style={{ minHeight: '480px' }}
             >
-              <LessonVideoPlayer
+              <StableVideoPlayer
                 videoId={
                   pandaData?.video_external_id ??
                   lesson.video?.providerVideoId ??
@@ -333,15 +336,7 @@ export default async function LessonPage({
                 courseSlug={slug}
                 moduleTitle={mt.title}
                 moduleSlug={moduleSlug}
-                lessonImageUrl={(() => {
-                  const imageUrl = lesson.imageUrl || pandaData?.thumbnail || '';
-                  console.log('[LessonPage] Image URL:', { 
-                    lessonImageUrl: lesson.imageUrl, 
-                    pandaThumbnail: pandaData?.thumbnail,
-                    final: imageUrl 
-                  });
-                  return imageUrl;
-                })()}
+                lessonImageUrl={lessonImageUrl}
               />
             </div>
           )}

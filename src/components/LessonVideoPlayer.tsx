@@ -132,17 +132,23 @@ export default function LessonVideoPlayer({
   }, [lessonId, progress]);
 
   const handleResume = useCallback(() => {
-    console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', progress?.currentTime);
-    setStartTime(progress?.currentTime || 0);
-    setShowBanner(false);
+    // Use setTimeout to avoid setState during render
+    setTimeout(() => {
+      console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', progress?.currentTime);
+      setStartTime(progress?.currentTime || 0);
+      setShowBanner(false);
+    }, 0);
   }, [progress]);
 
   const handleRestart = useCallback(() => {
-    console.log('[LessonVideoPlayer] 🔄 Restarting from beginning');
-    setStartTime(0);
-    setShowBanner(false);
-    // Clear the saved progress
-    clearProgress();
+    // Use setTimeout to avoid setState during render
+    setTimeout(() => {
+      console.log('[LessonVideoPlayer] 🔄 Restarting from beginning');
+      setStartTime(0);
+      setShowBanner(false);
+      // Clear the saved progress
+      clearProgress();
+    }, 0);
   }, [clearProgress]);
 
   // Log loading state

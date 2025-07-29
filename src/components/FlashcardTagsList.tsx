@@ -85,7 +85,7 @@ export default function FlashcardTagsList() {
   // Load tags on mount and when search changes
   useEffect(() => {
     loadTags();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, loadTags]);
 
   // Handle edit tag
   const handleEdit = useCallback((tag: FlashcardTag) => {

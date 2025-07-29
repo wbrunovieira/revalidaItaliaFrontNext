@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   Search,
   Filter,
@@ -27,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 
 interface FlashcardTag {
   id: string;
@@ -206,25 +206,9 @@ export default function FlashcardsList() {
     answerType,
     sortBy,
     sortOrder,
+    loadFlashcards,
   ]);
 
-  // Get content preview
-  const getContentPreview = (
-    flashcard: Flashcard,
-    type: 'question' | 'answer'
-  ) => {
-    if (type === 'question') {
-      if (flashcard.questionType === 'TEXT') {
-        return flashcard.questionText || '';
-      }
-      return flashcard.questionImageUrl || '';
-    } else {
-      if (flashcard.answerType === 'TEXT') {
-        return flashcard.answerText || '';
-      }
-      return flashcard.answerImageUrl || '';
-    }
-  };
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -672,11 +656,13 @@ export default function FlashcardsList() {
                       </p>
                     ) : (
                       <div className="relative h-16 bg-gray-700 rounded overflow-hidden">
-                        <img
+                        <Image
                           src={
-                            flashcard.questionImageUrl || ''
+                            flashcard.questionImageUrl || '/placeholder.png'
                           }
                           alt="Question"
+                          width={64}
+                          height={64}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -701,11 +687,13 @@ export default function FlashcardsList() {
                       </p>
                     ) : (
                       <div className="relative h-16 bg-gray-700 rounded overflow-hidden">
-                        <img
+                        <Image
                           src={
-                            flashcard.answerImageUrl || ''
+                            flashcard.answerImageUrl || '/placeholder.png'
                           }
                           alt="Answer"
+                          width={64}
+                          height={64}
                           className="w-full h-full object-cover"
                         />
                       </div>

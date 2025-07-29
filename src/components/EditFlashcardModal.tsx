@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   X,
   CreditCard,
@@ -149,14 +150,15 @@ export default function EditFlashcardModal({
 
   // Validate question content
   const validateQuestionContent = useCallback(
-    (value: string, type: 'TEXT' | 'IMAGE'): ValidationResult => {
-      if (!value.trim()) {
+    (value: string | File | null, type: 'TEXT' | 'IMAGE'): ValidationResult => {
+      const contentValue = typeof value === 'string' ? value : '';
+      if (!contentValue.trim()) {
         return {
           isValid: false,
           message: t(`errors.question${type === 'TEXT' ? 'Text' : 'Image'}Required`),
         };
       }
-      if (type === 'TEXT' && value.trim().length > 1000) {
+      if (type === 'TEXT' && contentValue.trim().length > 1000) {
         return {
           isValid: false,
           message: t('errors.questionTextMax'),
@@ -169,14 +171,15 @@ export default function EditFlashcardModal({
 
   // Validate answer content
   const validateAnswerContent = useCallback(
-    (value: string, type: 'TEXT' | 'IMAGE'): ValidationResult => {
-      if (!value.trim()) {
+    (value: string | File | null, type: 'TEXT' | 'IMAGE'): ValidationResult => {
+      const contentValue = typeof value === 'string' ? value : '';
+      if (!contentValue.trim()) {
         return {
           isValid: false,
           message: t(`errors.answer${type === 'TEXT' ? 'Text' : 'Image'}Required`),
         };
       }
-      if (type === 'TEXT' && value.trim().length > 1000) {
+      if (type === 'TEXT' && contentValue.trim().length > 1000) {
         return {
           isValid: false,
           message: t('errors.answerTextMax'),
@@ -224,7 +227,7 @@ export default function EditFlashcardModal({
 
   // Handle input changes
   const handleInputChange = useCallback(
-    (field: keyof FormData, value: any) => {
+    (field: keyof FormData, value: string | File | null) => {
       setFormData(prev => ({ ...prev, [field]: value }));
       
       if (touched[field]) {
@@ -238,10 +241,10 @@ export default function EditFlashcardModal({
             validation = validateAnswerContent(value, formData.answerType);
             break;
           case 'slug':
-            validation = validateSlug(value);
+            validation = validateSlug(typeof value === 'string' ? value : '');
             break;
           case 'argumentId':
-            validation = validateArgument(value);
+            validation = validateArgument(typeof value === 'string' ? value : '');
             break;
         }
         
@@ -251,7 +254,7 @@ export default function EditFlashcardModal({
         }));
       }
     },
-    [touched, formData.questionType, formData.answerType, validateQuestionContent, validateAnswerContent, validateSlug]
+    [touched, formData.questionType, formData.answerType, validateQuestionContent, validateAnswerContent, validateSlug, validateArgument]
   );
 
   // Handle input blur
@@ -279,7 +282,7 @@ export default function EditFlashcardModal({
       ...prev,
       [field]: validation.isValid ? undefined : validation.message,
     }));
-  }, [formData, validateQuestionContent, validateAnswerContent, validateSlug]);
+  }, [formData, validateQuestionContent, validateAnswerContent, validateSlug, validateArgument]);
 
   // Helper function to delete old image
   const deleteOldImage = async (imageUrl: string) => {
@@ -316,8 +319,6 @@ export default function EditFlashcardModal({
     setUploadingQuestionImage(true);
 
     try {
-      // Store old image URL before uploading new one
-      const oldImageUrl = formData.questionContent;
       
       const uploadData = new FormData();
       uploadData.append('file', file);
@@ -370,8 +371,6 @@ export default function EditFlashcardModal({
     setUploadingAnswerImage(true);
 
     try {
-      // Store old image URL before uploading new one
-      const oldImageUrl = formData.answerContent;
       
       const uploadData = new FormData();
       uploadData.append('file', file);
@@ -482,7 +481,19 @@ export default function EditFlashcardModal({
         sessionStorage.getItem('accessToken');
       const token = tokenFromCookie || tokenFromStorage;
       
-      const updateData: any = {};
+      const updateData: {
+        question?: {
+          type: 'TEXT' | 'IMAGE';
+          content: string;
+        };
+        answer?: {
+          type: 'TEXT' | 'IMAGE';
+          content: string;
+        };
+        slug?: string;
+        argumentId?: string;
+        tagIds?: string[];
+      } = {};
       const imagesToDelete: string[] = [];
       
       // Only include fields that have changed
@@ -714,9 +725,11 @@ export default function EditFlashcardModal({
                   </label>
                   {formData.questionContent ? (
                     <div className="relative">
-                      <img
+                      <Image
                         src={formData.questionContent}
                         alt="Question"
+                        width={400}
+                        height={192}
                         className="w-full h-48 object-cover rounded-lg"
                       />
                       <button
@@ -830,9 +843,11 @@ export default function EditFlashcardModal({
                   </label>
                   {formData.answerContent ? (
                     <div className="relative">
-                      <img
+                      <Image
                         src={formData.answerContent}
                         alt="Answer"
+                        width={400}
+                        height={192}
                         className="w-full h-48 object-cover rounded-lg"
                       />
                       <button

@@ -588,7 +588,23 @@
     },
     "error": {
       "fetchTitle": "Erro ao carregar tags",
-      "fetchDescription": "Não foi possível carregar as tags"
+      "fetchDescription": "Não foi possível carregar as tags",
+      "deleteTitle": "Erro ao excluir",
+      "deleteDescription": "Não foi possível excluir a tag",
+      "notFound": "Tag não encontrada",
+      "hasFlashcards": "Não é possível excluir esta tag. {count} flashcard(s) estão associados a ela."
+    },
+    "success": {
+      "deleteTitle": "Tag excluída!",
+      "deleteDescription": "A tag foi excluída com sucesso"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar exclusão",
+      "message": "Tem certeza que deseja excluir a tag '{tagName}'?",
+      "tagName": "Tag",
+      "warning": "Esta ação não pode ser desfeita!",
+      "confirm": "Excluir",
+      "deleting": "Excluindo..."
     }
   },
   

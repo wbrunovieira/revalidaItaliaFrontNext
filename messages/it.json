@@ -578,7 +578,23 @@
     },
     "error": {
       "fetchTitle": "Errore nel caricamento dei tag",
-      "fetchDescription": "Impossibile caricare i tag"
+      "fetchDescription": "Impossibile caricare i tag",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Impossibile eliminare il tag",
+      "notFound": "Tag non trovato",
+      "hasFlashcards": "Impossibile eliminare questo tag. {count} flashcard sono associate ad esso."
+    },
+    "success": {
+      "deleteTitle": "Tag eliminato!",
+      "deleteDescription": "Il tag è stato eliminato con successo"
+    },
+    "deleteConfirmation": {
+      "title": "Conferma eliminazione",
+      "message": "Sei sicuro di voler eliminare il tag '{tagName}'?",
+      "tagName": "Tag",
+      "warning": "Questa azione non può essere annullata!",
+      "confirm": "Elimina",
+      "deleting": "Eliminazione..."
     }
   },
   

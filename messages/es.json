@@ -576,7 +576,23 @@
     },
     "error": {
       "fetchTitle": "Error al cargar etiquetas",
-      "fetchDescription": "No se pudieron cargar las etiquetas"
+      "fetchDescription": "No se pudieron cargar las etiquetas",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No se pudo eliminar la etiqueta",
+      "notFound": "Etiqueta no encontrada",
+      "hasFlashcards": "No se puede eliminar esta etiqueta. {count} flashcard(s) están asociadas a ella."
+    },
+    "success": {
+      "deleteTitle": "¡Etiqueta eliminada!",
+      "deleteDescription": "La etiqueta se eliminó correctamente"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar eliminación",
+      "message": "¿Estás seguro de que deseas eliminar la etiqueta '{tagName}'?",
+      "tagName": "Etiqueta",
+      "warning": "¡Esta acción no se puede deshacer!",
+      "confirm": "Eliminar",
+      "deleting": "Eliminando..."
     }
   },
   

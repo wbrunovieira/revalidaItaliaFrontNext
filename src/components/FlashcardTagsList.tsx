@@ -31,6 +31,7 @@ export default function FlashcardTagsList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<FlashcardTag | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Load tags
   const loadTags = useCallback(async () => {
@@ -102,6 +103,117 @@ export default function FlashcardTagsList() {
   const handleSaveEdit = useCallback(() => {
     loadTags();
   }, [loadTags]);
+
+  // Delete tag
+  const deleteTag = useCallback(
+    async (tagId: string) => {
+      setDeletingId(tagId);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcard-tags/${tagId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response.ok) {
+          toast({
+            title: t('success.deleteTitle'),
+            description: t('success.deleteDescription'),
+            variant: 'success',
+          });
+          loadTags();
+          return;
+        }
+
+        const error = await response.json();
+
+        // Handle specific error cases
+        if (response.status === 404) {
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.notFound'),
+            variant: 'destructive',
+          });
+        } else if (response.status === 409) {
+          // Extract flashcard count from error message
+          const match = error.message?.match(/(\d+) flashcard\(s\)/);
+          const count = match ? parseInt(match[1]) : 0;
+          
+          toast({
+            title: t('error.deleteTitle'),
+            description: t('error.hasFlashcards', { count }),
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: t('error.deleteTitle'),
+            description: error.message || t('error.deleteDescription'),
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting tag:', error);
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [t, toast, loadTags]
+  );
+
+  // Handle delete with confirmation
+  const handleDelete = useCallback(
+    (tag: FlashcardTag) => {
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-2">
+            <p>
+              {t('deleteConfirmation.message', { tagName: tag.name })}
+            </p>
+            <div className="p-3 bg-gray-700/50 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Tag size={14} />
+                  {t('deleteConfirmation.tagName')}:{' '}
+                  <span className="font-medium">{tag.name}</span>
+                </div>
+                <div className="text-red-300 font-medium mt-2">
+                  {t('deleteConfirmation.warning')}
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteTag(tag.id)}
+            className="inline-flex h-8 items-center px-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            disabled={deletingId === tag.id}
+          >
+            {deletingId === tag.id ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                {t('deleteConfirmation.deleting')}
+              </>
+            ) : (
+              t('deleteConfirmation.confirm')
+            )}
+          </button>
+        ),
+      });
+    },
+    [deleteTag, deletingId, t, toast]
+  );
 
   return (
     <div className="space-y-6">
@@ -175,14 +287,16 @@ export default function FlashcardTagsList() {
                   <Edit2 size={14} />
                 </button>
                 <button
-                  onClick={() => {
-                    // TODO: Implement delete
-                    console.log('Delete tag:', tag.id);
-                  }}
-                  className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
+                  onClick={() => handleDelete(tag)}
+                  className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title={t('actions.delete')}
+                  disabled={deletingId === tag.id}
                 >
-                  <Trash2 size={14} />
+                  {deletingId === tag.id ? (
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-400"></div>
+                  ) : (
+                    <Trash2 size={14} />
+                  )}
                 </button>
               </div>
             </div>

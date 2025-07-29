@@ -469,6 +469,75 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "flashcardEdit": {
+    "title": "Editar Flashcard",
+    "question": {
+      "title": "Pergunta",
+      "text": "Texto da Pergunta",
+      "textPlaceholder": "Digite a pergunta...",
+      "image": "Imagem da Pergunta",
+      "uploadPrompt": "Clique para carregar uma imagem"
+    },
+    "answer": {
+      "title": "Resposta",
+      "text": "Texto da Resposta",
+      "textPlaceholder": "Digite a resposta...",
+      "image": "Imagem da Resposta",
+      "uploadPrompt": "Clique para carregar uma imagem"
+    },
+    "slug": {
+      "label": "Slug",
+      "placeholder": "exemplo-de-slug",
+      "hint": "Use apenas letras minúsculas, números e hífens"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Selecione as tags",
+      "selected": "{count} tags selecionadas"
+    },
+    "argument": {
+      "label": "Argumento",
+      "placeholder": "Selecione um argumento",
+      "loading": "Carregando argumentos..."
+    },
+    "types": {
+      "text": "Texto",
+      "image": "Imagem"
+    },
+    "uploading": "Carregando...",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "errors": {
+      "questionTextRequired": "O texto da pergunta é obrigatório",
+      "questionImageRequired": "A imagem da pergunta é obrigatória",
+      "questionTextMax": "O texto da pergunta deve ter no máximo 1000 caracteres",
+      "answerTextRequired": "O texto da resposta é obrigatório",
+      "answerImageRequired": "A imagem da resposta é obrigatória",
+      "answerTextMax": "O texto da resposta deve ter no máximo 1000 caracteres",
+      "slugRequired": "O slug é obrigatório",
+      "slugInvalid": "Slug inválido. Use apenas letras minúsculas, números e hífens",
+      "argumentRequired": "O argumento é obrigatório",
+      "loadArgumentsTitle": "Erro ao carregar argumentos",
+      "loadArgumentsDescription": "Não foi possível carregar a lista de argumentos",
+      "imageTitle": "Erro na imagem",
+      "imageInvalid": "Por favor, selecione um arquivo de imagem válido",
+      "imageUploadFailed": "Falha ao carregar a imagem",
+      "validationTitle": "Erro de validação",
+      "validationDescription": "Por favor, corrija os erros no formulário",
+      "updateTitle": "Erro ao atualizar",
+      "updateFailed": "Falha ao atualizar o flashcard",
+      "serverError": "Erro no servidor. Tente novamente mais tarde",
+      "connectionError": "Erro de conexão. Verifique sua internet"
+    },
+    "success": {
+      "title": "Sucesso",
+      "description": "Flashcard atualizado com sucesso",
+      "imageTitle": "Imagem carregada",
+      "imageDescription": "Imagem carregada com sucesso"
+    }
+  },
+  
   "flashcardTagsList": {
     "title": "Lista de Tags de Flashcards",
     "description": "Gerencie as tags dos seus flashcards",

@@ -459,6 +459,75 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "flashcardEdit": {
+    "title": "Modifica Flashcard",
+    "question": {
+      "title": "Domanda",
+      "text": "Testo della Domanda",
+      "textPlaceholder": "Inserisci la domanda...",
+      "image": "Immagine della Domanda",
+      "uploadPrompt": "Clicca per caricare un'immagine"
+    },
+    "answer": {
+      "title": "Risposta",
+      "text": "Testo della Risposta",
+      "textPlaceholder": "Inserisci la risposta...",
+      "image": "Immagine della Risposta",
+      "uploadPrompt": "Clicca per caricare un'immagine"
+    },
+    "slug": {
+      "label": "Slug",
+      "placeholder": "esempio-di-slug",
+      "hint": "Usa solo lettere minuscole, numeri e trattini"
+    },
+    "tags": {
+      "label": "Tag",
+      "placeholder": "Seleziona i tag",
+      "selected": "{count} tag selezionati"
+    },
+    "argument": {
+      "label": "Argomento",
+      "placeholder": "Seleziona un argomento",
+      "loading": "Caricamento argomenti..."
+    },
+    "types": {
+      "text": "Testo",
+      "image": "Immagine"
+    },
+    "uploading": "Caricamento...",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "cancel": "Annulla",
+    "errors": {
+      "questionTextRequired": "Il testo della domanda è obbligatorio",
+      "questionImageRequired": "L'immagine della domanda è obbligatoria",
+      "questionTextMax": "Il testo della domanda deve avere al massimo 1000 caratteri",
+      "answerTextRequired": "Il testo della risposta è obbligatorio",
+      "answerImageRequired": "L'immagine della risposta è obbligatoria",
+      "answerTextMax": "Il testo della risposta deve avere al massimo 1000 caratteri",
+      "slugRequired": "Lo slug è obbligatorio",
+      "slugInvalid": "Slug non valido. Usa solo lettere minuscole, numeri e trattini",
+      "argumentRequired": "L'argomento è obbligatorio",
+      "loadArgumentsTitle": "Errore nel caricamento degli argomenti",
+      "loadArgumentsDescription": "Impossibile caricare l'elenco degli argomenti",
+      "imageTitle": "Errore nell'immagine",
+      "imageInvalid": "Seleziona un file immagine valido",
+      "imageUploadFailed": "Impossibile caricare l'immagine",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Correggi gli errori nel modulo",
+      "updateTitle": "Errore nell'aggiornamento",
+      "updateFailed": "Impossibile aggiornare la flashcard",
+      "serverError": "Errore del server. Riprova più tardi",
+      "connectionError": "Errore di connessione. Controlla la tua connessione internet"
+    },
+    "success": {
+      "title": "Successo",
+      "description": "Flashcard aggiornata con successo",
+      "imageTitle": "Immagine caricata",
+      "imageDescription": "Immagine caricata con successo"
+    }
+  },
+  
   "flashcardTagsList": {
     "title": "Lista dei Tag delle Flashcard",
     "description": "Gestisci i tag delle tue flashcard",

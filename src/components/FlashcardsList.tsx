@@ -19,6 +19,7 @@ import {
   Edit2,
   Trash2,
 } from 'lucide-react';
+import EditFlashcardModal from '@/components/EditFlashcardModal';
 import {
   Select,
   SelectContent,
@@ -96,6 +97,10 @@ export default function FlashcardsList() {
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] =
     useState('');
+
+  // Edit modal state
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -456,8 +461,8 @@ export default function FlashcardsList() {
                 <div className="absolute top-2 right-2 flex items-center gap-1">
                   <button
                     onClick={() => {
-                      // TODO: Implement edit
-                      console.log('Edit flashcard:', flashcard.id);
+                      setEditingFlashcard(flashcard);
+                      setShowEditModal(true);
                     }}
                     className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
                     title={t('actions.edit')}
@@ -613,6 +618,21 @@ export default function FlashcardsList() {
           )}
         </>
       )}
+
+      {/* Edit Modal */}
+      <EditFlashcardModal
+        flashcard={editingFlashcard}
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingFlashcard(null);
+        }}
+        onSave={() => {
+          setShowEditModal(false);
+          setEditingFlashcard(null);
+          loadFlashcards(pagination.page); // Reload current page
+        }}
+      />
     </div>
   );
 }

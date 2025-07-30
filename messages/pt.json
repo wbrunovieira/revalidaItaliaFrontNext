@@ -150,7 +150,8 @@
     },
     "tabs": {
       "available": "Avaliações Disponíveis",
-      "results": "Meus Resultados"
+      "results": "Meus Resultados",
+      "openExams": "Questões Dissertativas"
     },
     "status": {
       "notStarted": "Não Iniciada",
@@ -342,7 +343,7 @@
     "breadcrumb": {
       "dashboard": "Dashboard"
     },
-    "back": "Voltar ao módulo",
+    "back": "Voltar à aula",
     "lessonNumber": "Aula {number}",
     "minutes": "minutos",
     "noVideo": "Nenhum vídeo disponível para esta aula",

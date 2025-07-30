@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
-import StudentAssessmentStatus from '@/components/StudentAssessmentStatus';
 import EditProfileForm from '@/components/EditProfileForm';
 import { ModernDivider, SimpleDivider } from '@/components/ui/modern-divider';
 import {
@@ -235,15 +234,6 @@ export default function ProfileContent({
   return (
     <>
       <div className="space-y-8">
-        {/* Avaliações Abertas */}
-        <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl p-6 backdrop-blur-sm">
-          <StudentAssessmentStatus userId={userData.id} locale={locale} />
-        </div>
-        
-        {/* Linha divisória moderna */}
-        <div className="px-6">
-          <ModernDivider variant="center" glowColor="secondary" />
-        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-6">
           {/* Informações Pessoais */}

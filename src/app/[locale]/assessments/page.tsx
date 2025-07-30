@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import StudentQuizResults from '@/components/StudentQuizResults';
+import StudentAssessmentStatus from '@/components/StudentAssessmentStatus';
 import { 
   FileText, 
   ClipboardList, 
@@ -16,7 +17,8 @@ import {
   Play,
   ArrowRight,
   Trophy,
-  BookOpen
+  BookOpen,
+  PenTool
 } from 'lucide-react';
 
 interface PageProps {
@@ -69,8 +71,9 @@ export default function AssessmentsPage({ params }: PageProps) {
     simulado: 0,
     provaAberta: 0
   });
-  const [activeTab, setActiveTab] = useState<'available' | 'results'>('available');
+  const [activeTab, setActiveTab] = useState<'available' | 'results' | 'openExams'>('available');
   const [attemptIds, setAttemptIds] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string>('');
 
   const calculateStats = useCallback((assessments: Assessment[]) => {
     const quiz = assessments.filter(a => a.type === 'QUIZ').length;
@@ -171,6 +174,7 @@ export default function AssessmentsPage({ params }: PageProps) {
         const userIdFromToken = decodedToken?.sub;
         
         if (userIdFromToken) {
+          setUserId(userIdFromToken);
           // Fetch both assessments and user attempts
           await Promise.all([
             fetchAssessments(),
@@ -298,6 +302,19 @@ export default function AssessmentsPage({ params }: PageProps) {
               <span className="flex items-center gap-2">
                 <Trophy size={18} />
                 {t('tabs.results')}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('openExams')}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                activeTab === 'openExams'
+                  ? 'bg-secondary text-primary'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <PenTool size={18} />
+                {t('tabs.openExams')}
               </span>
             </button>
           </div>
@@ -449,10 +466,15 @@ export default function AssessmentsPage({ params }: PageProps) {
             </div>
           )}
             </>
-          ) : (
+          ) : activeTab === 'results' ? (
             /* Results Tab */
             <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl p-6 backdrop-blur-sm">
               <StudentQuizResults attemptIds={attemptIds} locale={locale} />
+            </div>
+          ) : (
+            /* Open Exams Tab */
+            <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl p-6 backdrop-blur-sm">
+              <StudentAssessmentStatus userId={userId} locale={locale} />
             </div>
           )}
         </div>

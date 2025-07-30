@@ -138,7 +138,8 @@
     },
     "tabs": {
       "available": "Evaluaciones Disponibles",
-      "results": "Mis Resultados"
+      "results": "Mis Resultados",
+      "openExams": "Preguntas Abiertas"
     },
     "status": {
       "notStarted": "No Iniciada",
@@ -330,7 +331,7 @@
     "breadcrumb": {
       "dashboard": "Panel"
     },
-    "back": "Volver al módulo",
+    "back": "Volver a la lección",
     "lessonNumber": "Lección {number}",
     "minutes": "minutos",
     "noVideo": "No hay video disponible para esta lección",

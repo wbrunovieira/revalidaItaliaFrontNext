@@ -126,6 +126,7 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [autoSaveTimeouts, setAutoSaveTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  const [savingAnswers, setSavingAnswers] = useState<Set<string>>(new Set()); // Track which answers are being saved
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -257,7 +258,22 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
   const saveAnswer = async (questionId: string, textAnswer: string) => {
     if (!attempt || !textAnswer.trim()) return;
 
+    // Check if already saving this answer
+    if (savingAnswers.has(questionId)) {
+      console.log(`Already saving answer for question ${questionId}, skipping...`);
+      return;
+    }
+
+    // Check if attempt is still active
+    if (attempt.status !== 'IN_PROGRESS') {
+      console.log(`Attempt is not active (status: ${attempt.status}), skipping save...`);
+      return;
+    }
+
     try {
+      // Mark as saving
+      setSavingAnswers(prev => new Set(prev).add(questionId));
+
       const token = document.cookie
         .split(';')
         .find(c => c.trim().startsWith('token='))
@@ -293,10 +309,20 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
       });
     } catch (error) {
       console.error('Error saving answer:', error);
-      toast({
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar sua resposta. Tente novamente.',
-        variant: 'destructive',
+      // Only show error toast if attempt is still active
+      if (attempt.status === 'IN_PROGRESS') {
+        toast({
+          title: 'Erro ao salvar',
+          description: 'Não foi possível salvar sua resposta. Tente novamente.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      // Remove from saving set
+      setSavingAnswers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(questionId);
+        return newSet;
       });
     }
   };
@@ -312,6 +338,12 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
 
   const handleSubmitExam = async () => {
     if (!attempt) return;
+
+    // Prevent double submission
+    if (submitting || attempt.status !== 'IN_PROGRESS') {
+      console.log(`Submission already in progress or attempt not active (status: ${attempt.status})`);
+      return;
+    }
 
     // Verificar se todas as questões foram respondidas
     const unansweredQuestions = openQuestions.filter(q => !answers.has(q.id) && !textAnswers.get(q.id)?.trim());
@@ -332,16 +364,24 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
 
+      // Wait for any ongoing saves to complete
+      if (savingAnswers.size > 0) {
+        console.log(`Waiting for ${savingAnswers.size} answers to finish saving...`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+      }
+
       // Salvar respostas pendentes antes de submeter
       const pendingSaves = [];
       for (const [questionId, textAnswer] of textAnswers.entries()) {
-        if (textAnswer.trim() && !answers.has(questionId)) {
+        if (textAnswer.trim() && !answers.has(questionId) && !savingAnswers.has(questionId)) {
           pendingSaves.push(saveAnswer(questionId, textAnswer));
         }
       }
       
       if (pendingSaves.length > 0) {
         await Promise.all(pendingSaves);
+        // Add a small delay to ensure saves are processed
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       const submitResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/submit`, {
@@ -567,12 +607,24 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
                   />
                   
                   {/* Indicador de salvamento */}
-                  {currentAnswer && (
-                    <div className="flex items-center gap-2 text-sm text-green-400">
-                      <CheckCircle size={16} />
-                      <span>Resposta salva automaticamente</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    {savingAnswers.has(currentQuestion.id) ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-secondary"></div>
+                        <span className="text-secondary">Salvando...</span>
+                      </>
+                    ) : currentAnswer ? (
+                      <>
+                        <CheckCircle size={16} className="text-green-400" />
+                        <span className="text-green-400">Resposta salva automaticamente</span>
+                      </>
+                    ) : currentTextAnswer.trim() ? (
+                      <>
+                        <Edit size={16} className="text-gray-400" />
+                        <span className="text-gray-400">Digite para salvar automaticamente</span>
+                      </>
+                    ) : null}
+                  </div>
                   
                   {/* Feedback do tutor, se disponível */}
                   {currentAnswer?.teacherComment && (

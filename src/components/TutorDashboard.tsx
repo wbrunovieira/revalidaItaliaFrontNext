@@ -15,7 +15,10 @@ import {
   Filter,
   Search,
   RefreshCw,
+  BarChart3,
+  Activity,
 } from 'lucide-react';
+import TutorAnalytics from './TutorAnalytics';
 
 interface Student {
   id: string;
@@ -98,6 +101,8 @@ export default function TutorDashboard({
     'all' | 'pending' | 'in-progress' | 'completed'
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
+  const [analyticsAttempts, setAnalyticsAttempts] = useState<any[]>([]);
   const [groupBy, setGroupBy] = useState<
     'student' | 'assessment'
   >('student');
@@ -410,9 +415,204 @@ export default function TutorDashboard({
     }
   }, [apiUrl, toast]);
 
+  // Fetch detailed analytics data
+  const fetchAnalyticsData = useCallback(async () => {
+    try {
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+      
+      const response = await fetch(`${apiUrl}/api/v1/attempts`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics data');
+      }
+
+      const data = await response.json();
+      const allAttempts = data.attempts || [];
+      
+      // Fetch detailed results for each attempt
+      const analyticsData = await Promise.all(
+        allAttempts
+          .filter((attempt: any) => 
+            (attempt.assessment?.type === 'QUIZ' || attempt.assessment?.type === 'SIMULADO') &&
+            (attempt.status === 'SUBMITTED' || attempt.status === 'GRADED')
+          )
+          .map(async (attempt: any) => {
+            try {
+              const resultsResponse = await fetch(
+                `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token ? `Bearer ${token}` : '',
+                  },
+                  credentials: 'include',
+                }
+              );
+
+              if (resultsResponse.ok) {
+                const resultsData = await resultsResponse.json();
+                console.log('Analytics - Full results data:', resultsData);
+                
+                // Log detalhado das respostas
+                resultsData.answers?.forEach((answer: any, index: number) => {
+                  console.log(`Answer ${index} full data:`, answer);
+                });
+                
+                // Log dados do attempt original
+                console.log('Original attempt answers:', attempt.answers);
+                
+                return {
+                  id: attempt.id,
+                  student: attempt.student,
+                  assessment: attempt.assessment,
+                  status: attempt.status,
+                  submittedAt: attempt.submittedAt,
+                  startedAt: attempt.createdAt || attempt.submittedAt,
+                  results: resultsData.results || {
+                    totalQuestions: resultsData.answers?.length || 0,
+                    correctAnswers: resultsData.answers?.filter((a: any) => a.isCorrect === true).length || 0,
+                    scorePercentage: resultsData.results?.scorePercentage || resultsData.attempt?.score || 0,
+                  },
+                  answers: resultsData.answers?.map((answer: any) => {
+                    // Buscar informações da questão nos dados do attempt
+                    const attemptAnswer = attempt.answers?.find((a: any) => a.questionId === answer.questionId);
+                    
+                    console.log('Mapping answer:', {
+                      questionId: answer.questionId,
+                      answerIsCorrect: answer.isCorrect,
+                      attemptAnswer: attemptAnswer ? {
+                        selectedOptionId: attemptAnswer.selectedOptionId,
+                        correctOptionId: attemptAnswer.correctOptionId,
+                        isCorrect: attemptAnswer.isCorrect
+                      } : null
+                    });
+                    
+                    // Determinar se a resposta está correta baseado nos resultados
+                    let isCorrect = false;
+                    
+                    // Primeiro verificar no próprio answer
+                    if (answer.isCorrect === true) {
+                      isCorrect = true;
+                    } 
+                    // Depois verificar no attemptAnswer
+                    else if (attemptAnswer && attemptAnswer.isCorrect === true) {
+                      isCorrect = true;
+                    }
+                    // Se ainda não temos a informação, comparar selectedOptionId com correctOptionId
+                    else if (attemptAnswer && attemptAnswer.selectedOptionId && attemptAnswer.correctOptionId) {
+                      isCorrect = attemptAnswer.selectedOptionId === attemptAnswer.correctOptionId;
+                    }
+                    // Última tentativa: verificar o texto da opção
+                    else if (attemptAnswer && attemptAnswer.selectedOptionText && attemptAnswer.correctOptionText) {
+                      isCorrect = attemptAnswer.selectedOptionText === attemptAnswer.correctOptionText;
+                    }
+                    
+                    console.log(`Answer ${answer.questionId} final isCorrect: ${isCorrect}`);
+                    
+                    return {
+                      id: answer.id,
+                      questionId: answer.questionId,
+                      question: {
+                        id: answer.questionId,
+                        text: attemptAnswer?.questionText || answer.question?.text || `Questão ${answer.questionId?.substring(0, 8)}`,
+                        type: attemptAnswer?.questionType || answer.question?.type || 'MULTIPLE_CHOICE'
+                      },
+                      selectedOptionId: answer.selectedOptionId,
+                      isCorrect: isCorrect,
+                      attemptId: attempt.id,
+                      studentId: attempt.student.id,
+                    };
+                  }) || [],
+                };
+              }
+            } catch (error) {
+              console.error(`Error fetching results for attempt ${attempt.id}:`, error);
+            }
+            return null;
+          })
+      );
+      
+      // Filter out null values
+      const validAnalyticsData = analyticsData.filter(item => item !== null);
+      
+      console.log('TutorDashboard - Final analytics data:', {
+        totalAttempts: validAnalyticsData.length,
+        sample: validAnalyticsData[0]
+      });
+      
+      setAnalyticsAttempts(validAnalyticsData);
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+      toast({
+        title: 'Erro ao carregar dados de análise',
+        description: 'Não foi possível carregar os dados detalhados para análise.',
+        variant: 'destructive',
+      });
+    }
+  }, [apiUrl, toast]);
+
   useEffect(() => {
     fetchPendingAttempts();
   }, [fetchPendingAttempts]);
+  
+  // Preparar dados para analytics quando mudar de aba
+  useEffect(() => {
+    if (activeTab === 'analytics' && (quizAttempts.length > 0 || simuladoAttempts.length > 0)) {
+      const analyticsData = [...quizAttempts, ...simuladoAttempts].map(attempt => {
+        console.log('Preparing analytics for attempt:', attempt.id, {
+          hasAnswers: !!attempt.answers,
+          answersCount: attempt.answers?.length,
+          hasResults: !!attempt.results
+        });
+        
+        return {
+          id: attempt.id,
+          student: attempt.student,
+          assessment: attempt.assessment,
+          status: attempt.status,
+          submittedAt: attempt.submittedAt,
+          startedAt: attempt.createdAt || attempt.submittedAt,
+          results: attempt.results || {
+            totalQuestions: 0,
+            correctAnswers: 0,
+            scorePercentage: 0
+          },
+          answers: attempt.answers?.map((answer: any) => {
+            // Determinar se está correta comparando com correctOptionId
+            const isCorrect = answer.selectedOptionId === answer.correctOptionId;
+            
+            return {
+              id: answer.id,
+              questionId: answer.questionId,
+              question: {
+                id: answer.questionId,
+                text: answer.questionText || `Questão`,
+                type: answer.questionType || 'MULTIPLE_CHOICE'
+              },
+              selectedOptionId: answer.selectedOptionId,
+              isCorrect: isCorrect,
+              attemptId: attempt.id,
+              studentId: attempt.student.id,
+            };
+          }) || [],
+        };
+      });
+      
+      console.log('Setting analytics data:', analyticsData.length, 'attempts');
+      setAnalyticsAttempts(analyticsData);
+    }
+  }, [activeTab, quizAttempts, simuladoAttempts]);
 
   const getStatusColor = (
     status: string,
@@ -576,8 +776,36 @@ export default function TutorDashboard({
   return (
     <div className="flex-1 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Filters and Search */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        {/* Tabs */}
+        <div className="bg-gray-800 rounded-lg p-1 inline-flex mb-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'overview'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Activity size={18} />
+            Visão Geral
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'analytics'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <BarChart3 size={18} />
+            Análise Detalhada
+          </button>
+        </div>
+
+        {activeTab === 'overview' ? (
+          <>
+            {/* Filters and Search */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Filter size={20} className="text-gray-400" />
@@ -1443,6 +1671,20 @@ export default function TutorDashboard({
             )
           )}
         </div>
+          </>
+        ) : (
+          /* Analytics Tab */
+          <div className="bg-gray-800 rounded-lg p-6">
+            {analyticsAttempts.length > 0 ? (
+              <TutorAnalytics attempts={analyticsAttempts} locale={locale} />
+            ) : (
+              <div className="text-center py-12">
+                <BarChart3 size={48} className="mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-300">Carregando dados de análise...</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

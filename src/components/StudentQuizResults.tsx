@@ -694,10 +694,11 @@ export default function StudentQuizResults({
             const totalTime = assessment.attempts.reduce((sum, attempt) => {
               const start = new Date(attempt.attempt.startedAt);
               const end = new Date(attempt.attempt.submittedAt);
-              return sum + (end.getTime() - start.getTime());
+              const timeDiff = end.getTime() - start.getTime();
+              return sum + timeDiff;
             }, 0);
+            
             const avgTimeMs = totalTime / assessment.attempts.length;
-            const avgMinutes = Math.floor(avgTimeMs / 60000);
 
             return (
               <motion.div
@@ -750,10 +751,21 @@ export default function StudentQuizResults({
                             <div className="text-right">
                               <p className="text-xs text-white/60 mb-1">{t('averageTime')}</p>
                               <p className="text-sm font-medium text-white">
-                                {avgMinutes < 60 
-                                  ? `${avgMinutes} min` 
-                                  : `${Math.floor(avgMinutes / 60)}h ${avgMinutes % 60}min`
-                                }
+                                {(() => {
+                                  const totalSeconds = Math.round(avgTimeMs / 1000);
+                                  const minutes = Math.floor(totalSeconds / 60);
+                                  const seconds = totalSeconds % 60;
+                                  
+                                  if (minutes === 0) {
+                                    return `${seconds}s`;
+                                  } else if (minutes < 60) {
+                                    return `${minutes}min ${seconds}s`;
+                                  } else {
+                                    const hours = Math.floor(minutes / 60);
+                                    const remainingMinutes = minutes % 60;
+                                    return `${hours}h ${remainingMinutes}min`;
+                                  }
+                                })()}
                               </p>
                             </div>
                           </div>

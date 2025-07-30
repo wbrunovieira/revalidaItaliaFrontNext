@@ -196,86 +196,37 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
           return;
         }
 
-        // Fazer uma chamada "dry-run" para verificar status
-        const response = await fetch(`${apiUrl}/api/v1/attempts/start`, {
-          method: 'POST',
+        // Primeiro, buscar o status correto usando o novo endpoint
+        const statusResponse = await fetch(`${apiUrl}/api/v1/assessments/${assessment.id}/attempt-status`, {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
           credentials: 'include',
-          body: JSON.stringify({
-            identityId,
-            assessmentId: assessment.id,
-          }),
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const { attempt, isNew } = data;
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
           
-          if (!isNew && attempt) {
-            setExistingAttempt(attempt);
-          }
-        } else {
-          // Check if it's a graded attempt error
-          const errorText = await response.text();
-          try {
-            const errorData = JSON.parse(errorText);
-            if (errorData.detail && errorData.detail.includes('already has a graded attempt')) {
-              // Create a fake attempt to show it's graded
-              setExistingAttempt({
-                id: '', // We'll fetch the real ID later
-                userId: identityId,
-                assessmentId: assessment.id,
-                status: 'GRADED',
-                startedAt: new Date().toISOString(),
-              });
-              
-              // Try to get the real attempt ID
-              const attemptsResponse = await fetch(`${apiUrl}/api/v1/attempts`, {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              });
-              
-              if (attemptsResponse.ok) {
-                const attemptsData = await attemptsResponse.json();
-                interface GradedAttempt {
-                  student?: { id: string };
-                  assessment?: { id: string };
-                  status: string;
-                  id: string;
-                  startedAt: string;
-                  submittedAt?: string;
-                  gradedAt?: string;
-                }
-                
-                const userAttempt = attemptsData.attempts?.find(
-                  (attempt: GradedAttempt) => 
-                    attempt.student?.id === identityId && 
-                    attempt.assessment?.id === assessment.id &&
-                    attempt.status === 'GRADED'
-                );
-                
-                if (userAttempt) {
-                  setExistingAttempt({
-                    id: userAttempt.id,
-                    userId: identityId,
-                    assessmentId: assessment.id,
-                    status: 'GRADED',
-                    startedAt: userAttempt.startedAt,
-                    submittedAt: userAttempt.submittedAt,
-                    gradedAt: userAttempt.gradedAt,
-                  });
-                }
-              }
-            }
-          } catch {
-            // Ignore parse errors
+          if (statusData.hasActiveAttempt && statusData.attemptId) {
+            // Usar o status correto da nova API
+            setExistingAttempt({
+              id: statusData.attemptId,
+              userId: identityId,
+              assessmentId: assessment.id,
+              status: statusData.status || 'IN_PROGRESS',
+              startedAt: new Date().toISOString(),
+              submittedAt: statusData.submittedAt,
+              gradedAt: statusData.gradedAt,
+            });
+            setInitialCheckDone(true);
+            return;
           }
         }
+
+        // Se não tem tentativa pela nova API, não há tentativa existente
+        setInitialCheckDone(true);
       } catch (error) {
         console.error('Error checking existing attempt:', error);
       } finally {
@@ -700,14 +651,19 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
             
             <button
               onClick={() => {
-                if (existingAttempt.status === 'GRADED') {
+                if (existingAttempt.status === 'GRADED' || existingAttempt.status === 'SUBMITTED' || existingAttempt.status === 'GRADING') {
+                  // Para qualquer status que não seja IN_PROGRESS, redirecionar para a página específica da tentativa
                   router.push(`/${locale}/assessments/open-exams/${existingAttempt.id}`);
                 } else if (existingAttempt.status === 'IN_PROGRESS') {
-                  // Continue exam
-                  setAttempt(existingAttempt);
-                  setPhase('exam');
-                } else {
-                  router.push(`/${locale}/assessments/open-exams`);
+                  // Continue exam only if really IN_PROGRESS
+                  // Double check the status
+                  if (existingAttempt.status === 'IN_PROGRESS') {
+                    setAttempt(existingAttempt);
+                    setPhase('exam');
+                  } else {
+                    // If not really IN_PROGRESS, redirect
+                    router.push(`/${locale}/assessments/open-exams/${existingAttempt.id}`);
+                  }
                 }
               }}
               className="w-full flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors font-medium"
@@ -717,15 +673,10 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
                   <Edit size={20} />
                   Continuar Prova
                 </>
-              ) : existingAttempt.status === 'GRADED' ? (
-                <>
-                  <Eye size={20} />
-                  Ver Resultado
-                </>
               ) : (
                 <>
                   <Eye size={20} />
-                  Acompanhar Status
+                  {existingAttempt.status === 'GRADED' ? 'Ver Resultado' : 'Acompanhar Status'}
                 </>
               )}
             </button>

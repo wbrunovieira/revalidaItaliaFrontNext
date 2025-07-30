@@ -25,6 +25,7 @@ interface Answer {
   id: string;
   questionId: string;
   isCorrect?: boolean | null;
+  reviewDecision?: 'ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION' | null;
 }
 
 interface StudentAttempt {
@@ -49,14 +50,33 @@ interface StudentAttempt {
   passed?: boolean;
 }
 
+interface AssessmentStatusData {
+  assessmentId: string;
+  assessmentTitle: string;
+  hasActiveAttempt: boolean;
+  canStartNewAttempt: boolean;
+  attemptId?: string;
+  status?: 'IN_PROGRESS' | 'SUBMITTED' | 'GRADING' | 'GRADED';
+  score?: number;
+  submittedAt?: string;
+  gradedAt?: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  pendingReviewQuestions: number;
+  rejectedQuestions: number;
+  needsStudentAction: boolean;
+}
+
 interface StudentAssessmentStatusProps {
   userId: string;
   locale: string;
+  assessmentStatuses?: Map<string, AssessmentStatusData>;
 }
 
 export default function StudentAssessmentStatus({
   userId,
   locale,
+  assessmentStatuses,
 }: StudentAssessmentStatusProps) {
   const t = useTranslations('Profile');
   const { toast } = useToast();
@@ -143,6 +163,17 @@ export default function StudentAssessmentStatus({
                 if (resultsResponse.ok) {
                   const resultsData =
                     await resultsResponse.json();
+                  console.log(
+                    `Detalhes para ${attempt.assessment?.title}:`,
+                    {
+                      attemptId: attempt.id,
+                      answers: resultsData.answers?.map((a: Answer) => ({
+                        id: a.id,
+                        isCorrect: a.isCorrect,
+                        reviewDecision: a.reviewDecision
+                      }))
+                    }
+                  );
                   return {
                     ...attempt,
                     results: resultsData.results,
@@ -180,22 +211,73 @@ export default function StudentAssessmentStatus({
             let pendingReview = 0;
             let reviewedQuestions = 0;
 
-            if (
+            // Primeiro, tentar usar dados da nova API se disponível
+            const newApiData = assessmentStatuses?.get(attempt.assessment?.id || '');
+            if (newApiData) {
+              pendingReview = newApiData.pendingReviewQuestions;
+              reviewedQuestions = newApiData.totalQuestions - newApiData.pendingReviewQuestions - newApiData.rejectedQuestions;
+              
+              console.log(
+                `Usando dados da nova API para ${attempt.assessment?.title}:`,
+                {
+                  pendingReview: newApiData.pendingReviewQuestions,
+                  rejected: newApiData.rejectedQuestions,
+                  reviewed: reviewedQuestions,
+                  total: newApiData.totalQuestions
+                }
+              );
+            } else if (
               attempt.answers &&
               Array.isArray(attempt.answers)
             ) {
               // Para o aluno:
-              // - pendingReview = questões rejeitadas que precisam ser respondidas novamente
-              // - reviewedQuestions = questões aprovadas pelo professor
+              // - pendingReview = questões que precisam de ação do aluno (rejeitadas ou parcialmente aceitas)
+              // - reviewedQuestions = questões totalmente aprovadas pelo professor
+              
+              // Contar baseado em reviewDecision quando disponível, senão usar isCorrect
               pendingReview = attempt.answers.filter(
-                (answer: Answer) =>
-                  answer.isCorrect === false
+                (answer: Answer) => {
+                  if (answer.reviewDecision) {
+                    // NEEDS_REVISION = rejeitada, precisa refazer
+                    // PARTIALLY_ACCEPTED = aprovada com pendência, aluno pode optar por revisar
+                    return answer.reviewDecision === 'NEEDS_REVISION' || 
+                           answer.reviewDecision === 'PARTIALLY_ACCEPTED';
+                  }
+                  // Fallback para isCorrect
+                  return answer.isCorrect === false;
+                }
               ).length;
 
               reviewedQuestions = attempt.answers.filter(
-                (answer: Answer) =>
-                  answer.isCorrect === true
+                (answer: Answer) => {
+                  if (answer.reviewDecision) {
+                    // ACCEPTED e PARTIALLY_ACCEPTED contam como aprovadas
+                    // (PARTIALLY_ACCEPTED é aprovada, mas com sugestões)
+                    return answer.reviewDecision === 'ACCEPTED' || 
+                           answer.reviewDecision === 'PARTIALLY_ACCEPTED';
+                  }
+                  // Fallback para isCorrect
+                  return answer.isCorrect === true;
+                }
               ).length;
+              
+              // Se não há questões pendentes nem aprovadas, mas há respostas,
+              // provavelmente estão aguardando revisão
+              const questionsAwaitingReview = attempt.answers.filter(
+                (answer: Answer) => 
+                  answer.reviewDecision === null && 
+                  answer.isCorrect === null
+              ).length;
+              
+              console.log(
+                `Análise detalhada para ${attempt.assessment?.title}:`,
+                {
+                  totalAnswers: attempt.answers.length,
+                  pendingReview,
+                  reviewedQuestions,
+                  awaitingReview: questionsAwaitingReview
+                }
+              );
             } else {
               // Fallback
               const pendingAnswers =
@@ -205,6 +287,16 @@ export default function StudentAssessmentStatus({
               reviewedQuestions =
                 totalQuestions - pendingAnswers;
             }
+
+            console.log(
+              `Contagens para ${attempt.assessment?.title}:`,
+              {
+                totalQuestions,
+                pendingReview,
+                reviewedQuestions,
+                status: attempt.status
+              }
+            );
 
             return {
               id: attempt.id,
@@ -289,14 +381,12 @@ export default function StudentAssessmentStatus({
     }
   };
 
-  const canRetake = (attempt: StudentAttempt): boolean => {
-    // Permitir retomar se houver questões rejeitadas
-    return attempt.pendingReview > 0;
-  };
 
   const getStatusText = (
     status: string,
-    pendingReview: number
+    pendingReview: number,
+    reviewedQuestions: number = 0,
+    totalQuestions: number = 0
   ) => {
     switch (status) {
       case 'IN_PROGRESS':
@@ -304,6 +394,11 @@ export default function StudentAssessmentStatus({
       case 'SUBMITTED':
         if (pendingReview > 0) {
           return t('assessments.status.submitted');
+        }
+        // Se não há questões pendentes mas também não há questões aprovadas,
+        // significa que está aguardando primeira revisão
+        if (reviewedQuestions === 0 && totalQuestions > 0) {
+          return t('assessments.status.submitted'); // Aguardando revisão
         }
         return t('assessments.status.submittedComplete');
       case 'GRADING':
@@ -449,7 +544,9 @@ export default function StudentAssessmentStatus({
                       )}
                       {getStatusText(
                         attempt.status,
-                        attempt.pendingReview
+                        attempt.pendingReview,
+                        attempt.reviewedQuestions,
+                        attempt.totalQuestions
                       )}
                     </div>
                   </div>
@@ -534,11 +631,6 @@ export default function StudentAssessmentStatus({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {canRetake(attempt) && (
-                    <button className="px-3 py-1 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition-colors">
-                      {t('assessments.actions.retake')}
-                    </button>
-                  )}
                   {attempt.pendingReview > 0 &&
                     attempt.reviewedQuestions > 0 && (
                       <button

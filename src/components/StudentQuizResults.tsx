@@ -134,6 +134,7 @@ export default function StudentQuizResults({
         'assessmentType.PROVA_ABERTA': 'Prova Aberta',
         passed: 'Aprovado',
         failed: 'Reprovado',
+        pending: 'Pendente',
         'summary.correct': 'Acertos',
         'summary.accuracy': 'Precisão',
         'summary.duration': 'Duração',
@@ -161,6 +162,7 @@ export default function StudentQuizResults({
         'assessmentType.PROVA_ABERTA': 'Prova Aperta',
         passed: 'Promosso',
         failed: 'Bocciato',
+        pending: 'In attesa',
         'summary.correct': 'Corrette',
         'summary.accuracy': 'Precisione',
         'summary.duration': 'Durata',
@@ -189,6 +191,7 @@ export default function StudentQuizResults({
         'assessmentType.PROVA_ABERTA': 'Prueba Abierta',
         passed: 'Aprobado',
         failed: 'Reprobado',
+        pending: 'Pendiente',
         'summary.correct': 'Correctas',
         'summary.accuracy': 'Precisión',
         'summary.duration': 'Duración',
@@ -384,9 +387,12 @@ export default function StudentQuizResults({
       // Check if passed based on assessment type
       let isPassed = false;
       if (result.assessment.type === 'PROVA_ABERTA') {
-        // For open exams, check scorePercentage against passingScore
-        const passingScore = result.assessment.passingScore || 70;
-        isPassed = (result.results?.scorePercentage || 0) >= passingScore;
+        // For open exams, check if it has been graded
+        if (result.attempt.status === 'GRADED' && result.results?.scorePercentage !== undefined) {
+          const passingScore = result.assessment.passingScore || 70;
+          isPassed = result.results.scorePercentage >= passingScore;
+        }
+        // If not graded yet, isPassed remains false (will show as pending)
       } else {
         // For quiz and simulado, use the passed field
         isPassed = result.results?.passed || false;
@@ -448,13 +454,48 @@ export default function StudentQuizResults({
     // Filtro por status
     if (statusFilter !== 'all') {
       if (statusFilter === 'passed') {
-        filtered = filtered.filter(
-          g => g.passedAttempts > 0
-        );
+        filtered = filtered.filter(g => {
+          // Deve ter pelo menos uma tentativa aprovada
+          if (g.assessmentType === 'PROVA_ABERTA') {
+            // Para prova aberta, verifica se tem tentativa corrigida e aprovada
+            return g.attempts.some(
+              attempt => attempt.attempt.status === 'GRADED' && 
+              attempt.results?.scorePercentage !== undefined &&
+              attempt.results.scorePercentage >= (attempt.assessment.passingScore || 70)
+            );
+          }
+          return g.passedAttempts > 0;
+        });
       } else if (statusFilter === 'failed') {
-        filtered = filtered.filter(
-          g => g.passedAttempts === 0
-        );
+        filtered = filtered.filter(g => {
+          // Deve ter sido corrigido e reprovado
+          if (g.assessmentType === 'PROVA_ABERTA') {
+            // Para prova aberta, verifica se tem tentativa corrigida e reprovada
+            const hasGradedAttempt = g.attempts.some(
+              attempt => attempt.attempt.status === 'GRADED' && 
+              attempt.results?.scorePercentage !== undefined
+            );
+            if (!hasGradedAttempt) return false; // Se não foi corrigida, não é reprovada
+            
+            return !g.attempts.some(
+              attempt => attempt.attempt.status === 'GRADED' && 
+              attempt.results?.scorePercentage !== undefined &&
+              attempt.results.scorePercentage >= (attempt.assessment.passingScore || 70)
+            );
+          }
+          return g.passedAttempts === 0;
+        });
+      } else if (statusFilter === 'pending') {
+        filtered = filtered.filter(g => {
+          // Apenas provas abertas podem estar pendentes
+          if (g.assessmentType !== 'PROVA_ABERTA') return false;
+          
+          // Verifica se não tem nenhuma tentativa corrigida
+          return !g.attempts.some(
+            attempt => attempt.attempt.status === 'GRADED' && 
+            attempt.results?.scorePercentage !== undefined
+          );
+        });
       }
     }
 
@@ -653,6 +694,9 @@ export default function StudentQuizResults({
               <SelectItem value="failed">
                 Reprovado
               </SelectItem>
+              <SelectItem value="pending">
+                Pendente
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -748,8 +792,35 @@ export default function StudentQuizResults({
                             <div className="flex items-center gap-4">
                               <div>
                                 <p className="text-xs text-white/60 mb-1">{t('status')}</p>
-                                <Badge variant={hasPassed ? 'default' : 'destructive'} className="text-sm">
-                                  {hasPassed ? t('passed') : t('failed')}
+                                <Badge 
+                                  variant={(() => {
+                                    // Para provas abertas não corrigidas
+                                    if (assessment.assessmentType === 'PROVA_ABERTA') {
+                                      const hasGradedAttempt = assessment.attempts.some(
+                                        attempt => attempt.attempt.status === 'GRADED' && 
+                                        attempt.results?.scorePercentage !== undefined
+                                      );
+                                      if (!hasGradedAttempt) {
+                                        return 'secondary'; // Badge amarelo para pendente
+                                      }
+                                    }
+                                    return hasPassed ? 'default' : 'destructive';
+                                  })()} 
+                                  className="text-sm"
+                                >
+                                  {(() => {
+                                    // Para provas abertas não corrigidas
+                                    if (assessment.assessmentType === 'PROVA_ABERTA') {
+                                      const hasGradedAttempt = assessment.attempts.some(
+                                        attempt => attempt.attempt.status === 'GRADED' && 
+                                        attempt.results?.scorePercentage !== undefined
+                                      );
+                                      if (!hasGradedAttempt) {
+                                        return t('pending');
+                                      }
+                                    }
+                                    return hasPassed ? t('passed') : t('failed');
+                                  })()}
                                 </Badge>
                               </div>
                               <div>
@@ -782,20 +853,34 @@ export default function StudentQuizResults({
                           </div>
 
                           {/* Progresso para aprovação */}
-                          {!hasPassed && (
-                            <div className="bg-white/5 rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm text-white/70">{t('progressToPass')}</span>
-                                <span className="text-sm font-medium text-white">
-                                  {t('missingPoints').replace('{points}', progressToPass.toString()).replace('{passing}', passingScore.toString())}
-                                </span>
-                              </div>
-                              <Progress 
-                                value={(assessment.bestScore / passingScore) * 100} 
-                                className="h-2 bg-white/10"
-                              />
-                            </div>
-                          )}
+                          {(() => {
+                            // Não mostrar progresso para provas abertas pendentes
+                            if (assessment.assessmentType === 'PROVA_ABERTA') {
+                              const hasGradedAttempt = assessment.attempts.some(
+                                attempt => attempt.attempt.status === 'GRADED' && 
+                                attempt.results?.scorePercentage !== undefined
+                              );
+                              if (!hasGradedAttempt) return null;
+                            }
+                            
+                            if (!hasPassed) {
+                              return (
+                                <div className="bg-white/5 rounded-lg p-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm text-white/70">{t('progressToPass')}</span>
+                                    <span className="text-sm font-medium text-white">
+                                      {t('missingPoints').replace('{points}', progressToPass.toString()).replace('{passing}', passingScore.toString())}
+                                    </span>
+                                  </div>
+                                  <Progress 
+                                    value={(assessment.bestScore / passingScore) * 100} 
+                                    className="h-2 bg-white/10"
+                                  />
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
 
                           {/* Última tentativa */}
                           <p className="text-sm text-white/60">

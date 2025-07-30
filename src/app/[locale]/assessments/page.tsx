@@ -1209,6 +1209,7 @@ export default function AssessmentsPage({
               <StudentAssessmentStatus
                 userId={userId}
                 locale={locale}
+                assessmentStatuses={assessmentStatuses}
               />
             </div>
           )}

@@ -147,7 +147,7 @@ export default function AssessmentsPage({ params }: PageProps) {
                 // Only log errors that are not expected
                 console.error(`Error response for exam ${exam.id}:`, response.status, errorText);
               }
-            } catch (e) {
+            } catch {
               // If error parsing fails, log the original error
               console.error(`Error response for exam ${exam.id}:`, response.status, errorText);
             }
@@ -172,15 +172,22 @@ export default function AssessmentsPage({ params }: PageProps) {
 
           if (attemptsResponse.ok) {
             const attemptsData = await attemptsResponse.json();
+            interface UserAttempt {
+              student?: { id: string };
+              assessment?: { id: string };
+              status: string;
+              id: string;
+            }
+            
             const userAttempts = (attemptsData.attempts || []).filter(
-              (attempt: any) => attempt.student?.id === identityId
+              (attempt: UserAttempt) => attempt.student?.id === identityId
             );
 
             // Update attemptIds for graded exams
             for (const [examId, status] of statusMap.entries()) {
               if (status.status === 'GRADED' && !status.attemptId) {
                 const examAttempt = userAttempts.find(
-                  (attempt: any) => 
+                  (attempt: UserAttempt) => 
                     attempt.assessment?.id === examId && 
                     attempt.status === 'GRADED'
                 );

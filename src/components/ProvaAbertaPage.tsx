@@ -128,7 +128,6 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
   const [autoSaveTimeouts, setAutoSaveTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
   const [savingAnswers, setSavingAnswers] = useState<Set<string>>(new Set()); // Track which answers are being saved
   const [existingAttempt, setExistingAttempt] = useState<Attempt | null>(null);
-  const [checkingStatus, setCheckingStatus] = useState(true);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
@@ -181,7 +180,6 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
           ?.split('=')[1];
 
         if (!token) {
-          setCheckingStatus(false);
           return;
         }
 
@@ -190,13 +188,11 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         try {
           payload = JSON.parse(atob(token.split('.')[1]));
         } catch {
-          setCheckingStatus(false);
           return;
         }
         
         const identityId = payload.sub || payload.id;
         if (!identityId) {
-          setCheckingStatus(false);
           return;
         }
 
@@ -246,8 +242,18 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
               
               if (attemptsResponse.ok) {
                 const attemptsData = await attemptsResponse.json();
+                interface GradedAttempt {
+                  student?: { id: string };
+                  assessment?: { id: string };
+                  status: string;
+                  id: string;
+                  startedAt: string;
+                  submittedAt?: string;
+                  gradedAt?: string;
+                }
+                
                 const userAttempt = attemptsData.attempts?.find(
-                  (attempt: any) => 
+                  (attempt: GradedAttempt) => 
                     attempt.student?.id === identityId && 
                     attempt.assessment?.id === assessment.id &&
                     attempt.status === 'GRADED'
@@ -266,14 +272,13 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
                 }
               }
             }
-          } catch (e) {
+          } catch {
             // Ignore parse errors
           }
         }
       } catch (error) {
         console.error('Error checking existing attempt:', error);
       } finally {
-        setCheckingStatus(false);
         setInitialCheckDone(true);
       }
     };

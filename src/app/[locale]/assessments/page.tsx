@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
+import StudentQuizResults from '@/components/StudentQuizResults';
 import { 
   FileText, 
   ClipboardList, 
@@ -13,7 +14,9 @@ import {
   Filter,
   Search,
   Play,
-  ArrowRight
+  ArrowRight,
+  Trophy,
+  BookOpen
 } from 'lucide-react';
 
 interface PageProps {
@@ -66,6 +69,8 @@ export default function AssessmentsPage({ params }: PageProps) {
     simulado: 0,
     provaAberta: 0
   });
+  const [activeTab, setActiveTab] = useState<'available' | 'results'>('available');
+  const [attemptIds, setAttemptIds] = useState<string[]>([]);
 
   const calculateStats = useCallback((assessments: Assessment[]) => {
     const quiz = assessments.filter(a => a.type === 'QUIZ').length;
@@ -103,6 +108,51 @@ export default function AssessmentsPage({ params }: PageProps) {
     }
   }, [calculateStats]);
 
+  // Function to decode JWT token
+  const decodeJWT = (token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = Buffer.from(base64, 'base64').toString('utf-8');
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  };
+
+  // Fetch user attempts
+  const fetchUserAttempts = useCallback(async (userId: string, token: string) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      
+      // Fetch all attempts for the user
+      const response = await fetch(
+        `${apiUrl}/api/v1/attempts?identityId=${userId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Filter only finalized attempts (SUBMITTED or GRADED)
+        const finalizedAttempts = data.attempts?.filter((attempt: { status: string; id: string }) => 
+          attempt.status === 'SUBMITTED' || attempt.status === 'GRADED'
+        ) || [];
+        
+        // Extract only the IDs
+        const ids = finalizedAttempts.map((attempt: { id: string }) => attempt.id);
+        setAttemptIds(ids);
+      }
+    } catch (error) {
+      console.error('Error fetching user attempts:', error);
+    }
+  }, []);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -116,7 +166,19 @@ export default function AssessmentsPage({ params }: PageProps) {
           return;
         }
 
-        await fetchAssessments();
+        // Decode token to get user ID
+        const decodedToken = decodeJWT(token);
+        const userIdFromToken = decodedToken?.sub;
+        
+        if (userIdFromToken) {
+          // Fetch both assessments and user attempts
+          await Promise.all([
+            fetchAssessments(),
+            fetchUserAttempts(userIdFromToken, token)
+          ]);
+        } else {
+          await fetchAssessments();
+        }
       } catch (error) {
         console.error('Auth error:', error);
         router.push(`/${locale}/login`);
@@ -126,7 +188,7 @@ export default function AssessmentsPage({ params }: PageProps) {
     };
 
     checkAuth();
-  }, [locale, router, fetchAssessments]);
+  }, [locale, router, fetchAssessments, fetchUserAttempts]);
 
   useEffect(() => {
     let filtered = assessments;
@@ -210,8 +272,41 @@ export default function AssessmentsPage({ params }: PageProps) {
             <p className="text-gray-300">{t('subtitle')}</p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Tabs */}
+          <div className="flex gap-1 mb-6 bg-primary-dark/30 p-1 rounded-lg inline-flex">
+            <button
+              onClick={() => setActiveTab('available')}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                activeTab === 'available'
+                  ? 'bg-secondary text-primary'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <BookOpen size={18} />
+                {t('tabs.available')}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('results')}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                activeTab === 'results'
+                  ? 'bg-secondary text-primary'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Trophy size={18} />
+                {t('tabs.results')}
+              </span>
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === 'available' ? (
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-primary-dark/50 backdrop-blur-sm rounded-xl p-4 border border-secondary/20">
               <div className="flex items-center justify-between">
                 <div>
@@ -351,6 +446,13 @@ export default function AssessmentsPage({ params }: PageProps) {
             <div className="text-center py-12">
               <ClipboardList size={48} className="mx-auto mb-4 text-gray-400" />
               <p className="text-gray-300">{t('noAssessments')}</p>
+            </div>
+          )}
+            </>
+          ) : (
+            /* Results Tab */
+            <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl p-6 backdrop-blur-sm">
+              <StudentQuizResults attemptIds={attemptIds} locale={locale} />
             </div>
           )}
         </div>

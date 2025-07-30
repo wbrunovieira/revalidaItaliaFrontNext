@@ -294,7 +294,9 @@ export default function QuizPage({
         ?.split('=')[1];
 
       if (!token) {
-        throw new Error('Você precisa fazer login para iniciar o quiz');
+        throw new Error(
+          'Você precisa fazer login para iniciar o quiz'
+        );
       }
 
       // Decode token to get userId (basic JWT decode)
@@ -304,14 +306,17 @@ export default function QuizPage({
       } catch {
         throw new Error('Token de autenticação inválido');
       }
-      
+
       const identityId = payload.sub || payload.id;
 
       if (!identityId) {
         throw new Error('User ID not found in token');
       }
 
-      console.log('Starting quiz with:', { identityId, assessmentId: assessment.id });
+      console.log('Starting quiz with:', {
+        identityId,
+        assessmentId: assessment.id,
+      });
 
       const response = await fetch(
         `${apiUrl}/api/v1/attempts/start`,
@@ -331,18 +336,23 @@ export default function QuizPage({
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('Sessão expirada. Por favor, faça login novamente.');
+          throw new Error(
+            'Sessão expirada. Por favor, faça login novamente.'
+          );
         }
-        
+
         let errorMessage = 'Failed to start quiz';
         try {
           const errorData = await response.json();
           console.error('API Error Response:', errorData);
-          errorMessage = errorData.message || errorData.error || errorMessage;
+          errorMessage =
+            errorData.message ||
+            errorData.error ||
+            errorMessage;
         } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }
-        
+
         throw new Error(errorMessage);
       }
 
@@ -746,23 +756,27 @@ export default function QuizPage({
 
   if (phase === 'results') {
     const detailedResults = attempt?.detailedResults;
-    
+
     // Função helper para extrair estatísticas de forma mais limpa
     const getResultStats = () => {
       const results = detailedResults?.results;
-      const score = results?.scorePercentage || attempt?.score || 0;
-      const totalQuestions = results?.totalQuestions || questions.length;
+      const score =
+        results?.scorePercentage || attempt?.score || 0;
+      const totalQuestions =
+        results?.totalQuestions || questions.length;
       const correctAnswers = results?.correctAnswers || 0;
-      
+
       return {
         score,
-        passed: results?.passed ?? (score >= (assessment.passingScore || 70)),
+        passed:
+          results?.passed ??
+          score >= (assessment.passingScore || 70),
         correct: correctAnswers,
         total: totalQuestions,
-        wrong: totalQuestions - correctAnswers
+        wrong: totalQuestions - correctAnswers,
       };
     };
-    
+
     const stats = getResultStats();
 
     return (
@@ -873,7 +887,6 @@ export default function QuizPage({
                   const isCorrect =
                     answer.selectedOptionId ===
                     answer.correctOptionId;
-
 
                   // Obter os textos reais das opções
                   let displaySelectedText =

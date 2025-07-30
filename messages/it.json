@@ -137,6 +137,10 @@
       "simulado": "Simulazione",
       "prova_aberta": "Prova Aperta"
     },
+    "tabs": {
+      "available": "Valutazioni Disponibili",
+      "results": "I Miei Risultati"
+    },
     "status": {
       "notStarted": "Non Iniziata",
       "not_started": "Non Iniziata",
@@ -1197,6 +1201,33 @@
     "assessments": "Valutazioni",
     "arguments": "Argomenti",
     "flashcards": "Flashcard"
+  },
+  "StudentQuizResults": {
+    "title": "I Miei Risultati",
+    "totalAttempts": "tentativi",
+    "noResults": {
+      "title": "Nessun risultato trovato",
+      "description": "Non hai ancora completato nessuna valutazione."
+    },
+    "assessmentType": {
+      "QUIZ": "Quiz",
+      "SIMULADO": "Simulazione",
+      "PROVA_ABERTA": "Prova Aperta"
+    },
+    "passed": "Promosso",
+    "failed": "Bocciato",
+    "summary": {
+      "correct": "Corrette",
+      "accuracy": "Precisione",
+      "duration": "Durata"
+    },
+    "scoreProgress": "Progresso del Punteggio",
+    "passingScore": "Voto di Passaggio",
+    "viewDetails": "Vedi Dettagli",
+    "error": {
+      "fetchTitle": "Errore nel caricamento dei risultati",
+      "fetchDescription": "Non è stato possibile caricare i tuoi risultati. Riprova."
+    }
   },
   "users": {
     "create": "Crea Utente",

@@ -148,6 +148,10 @@
       "simulado": "Simulado",
       "prova_aberta": "Prova Aberta"
     },
+    "tabs": {
+      "available": "Avaliações Disponíveis",
+      "results": "Meus Resultados"
+    },
     "status": {
       "notStarted": "Não Iniciada",
       "not_started": "Não Iniciada",
@@ -1320,6 +1324,33 @@
   "list": "Listar Avaliações",
   "questions": "Listar Questões",
   "approved": "Aprovadas"
+},
+"StudentQuizResults": {
+  "title": "Meus Resultados",
+  "totalAttempts": "tentativas",
+  "noResults": {
+    "title": "Nenhum resultado encontrado",
+    "description": "Você ainda não completou nenhuma avaliação."
+  },
+  "assessmentType": {
+    "QUIZ": "Quiz",
+    "SIMULADO": "Simulado",
+    "PROVA_ABERTA": "Prova Aberta"
+  },
+  "passed": "Aprovado",
+  "failed": "Reprovado",
+  "summary": {
+    "correct": "Acertos",
+    "accuracy": "Precisão",
+    "duration": "Duração"
+  },
+  "scoreProgress": "Progresso da Pontuação",
+  "passingScore": "Nota de Aprovação",
+  "viewDetails": "Ver Detalhes",
+  "error": {
+    "fetchTitle": "Erro ao carregar resultados",
+    "fetchDescription": "Não foi possível carregar seus resultados. Tente novamente."
+  }
 },
 "arguments": {
   "create": "Criar Argumento",

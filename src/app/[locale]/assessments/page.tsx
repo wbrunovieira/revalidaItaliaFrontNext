@@ -1,3 +1,4 @@
+// src/app/[locale]/assessments/page.tsx
 'use client';
 
 import {

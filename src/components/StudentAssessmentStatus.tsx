@@ -45,14 +45,13 @@ interface StudentAttempt {
   answeredQuestions: number;
   pendingReview: number;
   reviewedQuestions: number;
+  partiallyAcceptedQuestions?: number;
   correctAnswers?: number;
   scorePercentage?: number;
   passed?: boolean;
 }
 
-interface AssessmentStatusData {
-  assessmentId: string;
-  assessmentTitle: string;
+interface AssessmentAttemptStatus {
   hasActiveAttempt: boolean;
   canStartNewAttempt: boolean;
   attemptId?: string;
@@ -70,7 +69,7 @@ interface AssessmentStatusData {
 interface StudentAssessmentStatusProps {
   userId: string;
   locale: string;
-  assessmentStatuses?: Map<string, AssessmentStatusData>;
+  assessmentStatuses?: Map<string, AssessmentAttemptStatus>;
 }
 
 export default function StudentAssessmentStatus({
@@ -210,6 +209,7 @@ export default function StudentAssessmentStatus({
             // Count rejected questions that need new answers from student
             let pendingReview = 0;
             let reviewedQuestions = 0;
+            let partiallyAccepted = 0;
 
             // Primeiro, tentar usar dados da nova API se disponível
             const newApiData = assessmentStatuses?.get(attempt.assessment?.id || '');
@@ -235,31 +235,36 @@ export default function StudentAssessmentStatus({
               // - reviewedQuestions = questões totalmente aprovadas pelo professor
               
               // Contar baseado em reviewDecision quando disponível, senão usar isCorrect
+              // pendingReview = questões que requerem ação do aluno (NEEDS_REVISION)
               pendingReview = attempt.answers.filter(
                 (answer: Answer) => {
                   if (answer.reviewDecision) {
                     // NEEDS_REVISION = rejeitada, precisa refazer
-                    // PARTIALLY_ACCEPTED = aprovada com pendência, aluno pode optar por revisar
-                    return answer.reviewDecision === 'NEEDS_REVISION' || 
-                           answer.reviewDecision === 'PARTIALLY_ACCEPTED';
+                    return answer.reviewDecision === 'NEEDS_REVISION';
                   }
                   // Fallback para isCorrect
                   return answer.isCorrect === false;
                 }
               ).length;
 
-              reviewedQuestions = attempt.answers.filter(
+              // Contar questões aprovadas e parcialmente aceitas separadamente
+              const fullyApproved = attempt.answers.filter(
                 (answer: Answer) => {
                   if (answer.reviewDecision) {
-                    // ACCEPTED e PARTIALLY_ACCEPTED contam como aprovadas
-                    // (PARTIALLY_ACCEPTED é aprovada, mas com sugestões)
-                    return answer.reviewDecision === 'ACCEPTED' || 
-                           answer.reviewDecision === 'PARTIALLY_ACCEPTED';
+                    return answer.reviewDecision === 'ACCEPTED';
                   }
-                  // Fallback para isCorrect
                   return answer.isCorrect === true;
                 }
               ).length;
+              
+              partiallyAccepted = attempt.answers.filter(
+                (answer: Answer) => {
+                  return answer.reviewDecision === 'PARTIALLY_ACCEPTED';
+                }
+              ).length;
+
+              // reviewedQuestions = total de questões já revisadas (aprovadas + parcialmente aceitas)
+              reviewedQuestions = fullyApproved + partiallyAccepted;
               
               // Se não há questões pendentes nem aprovadas, mas há respostas,
               // provavelmente estão aguardando revisão
@@ -275,6 +280,8 @@ export default function StudentAssessmentStatus({
                   totalAnswers: attempt.answers.length,
                   pendingReview,
                   reviewedQuestions,
+                  fullyApproved,
+                  partiallyAccepted,
                   awaitingReview: questionsAwaitingReview
                 }
               );
@@ -313,6 +320,7 @@ export default function StudentAssessmentStatus({
               answeredQuestions: totalQuestions,
               pendingReview,
               reviewedQuestions,
+              partiallyAcceptedQuestions: partiallyAccepted,
               correctAnswers: attempt.correctAnswers,
               scorePercentage: attempt.scorePercentage,
               passed: attempt.passed,
@@ -579,9 +587,19 @@ export default function StudentAssessmentStatus({
                         {t('assessments.approved')}
                       </p>
                       <p className="text-green-400 font-medium">
-                        {attempt.reviewedQuestions}
+                        {attempt.reviewedQuestions - (attempt.partiallyAcceptedQuestions || 0)}
                       </p>
                     </div>
+                    {attempt.partiallyAcceptedQuestions ? (
+                      <div>
+                        <p className="text-gray-400">
+                          Parcialmente Aceitas
+                        </p>
+                        <p className="text-orange-400 font-medium">
+                          {attempt.partiallyAcceptedQuestions}
+                        </p>
+                      </div>
+                    ) : null}
                     {attempt.scorePercentage !==
                       undefined && (
                       <div>

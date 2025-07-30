@@ -381,7 +381,18 @@ export default function StudentQuizResults({
       group.bestScore = Math.max(group.bestScore, score);
       group.totalAttempts++;
 
-      if (result.results?.passed) {
+      // Check if passed based on assessment type
+      let isPassed = false;
+      if (result.assessment.type === 'PROVA_ABERTA') {
+        // For open exams, check scorePercentage against passingScore
+        const passingScore = result.assessment.passingScore || 70;
+        isPassed = (result.results?.scorePercentage || 0) >= passingScore;
+      } else {
+        // For quiz and simulado, use the passed field
+        isPassed = result.results?.passed || false;
+      }
+      
+      if (isPassed) {
         group.passedAttempts++;
       }
 

@@ -18,7 +18,8 @@ import {
   ArrowRight,
   Trophy,
   BookOpen,
-  PenTool
+  PenTool,
+  Eye
 } from 'lucide-react';
 
 interface PageProps {
@@ -74,6 +75,8 @@ export default function AssessmentsPage({ params }: PageProps) {
   const [activeTab, setActiveTab] = useState<'available' | 'results' | 'openExams'>('available');
   const [attemptIds, setAttemptIds] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>('');
+  const [assessmentStatuses, setAssessmentStatuses] = useState<Map<string, { status: string; attemptId: string }>>(new Map());
+  const [checkingStatuses, setCheckingStatuses] = useState(false);
 
   const calculateStats = useCallback((assessments: Assessment[]) => {
     const quiz = assessments.filter(a => a.type === 'QUIZ').length;
@@ -86,6 +89,122 @@ export default function AssessmentsPage({ params }: PageProps) {
       simulado,
       provaAberta
     });
+  }, []);
+
+  // Check status of open exams - moved before fetchAssessments
+  const checkOpenExamStatuses = useCallback(async (openExams: Assessment[], token: string) => {
+    if (!token || openExams.length === 0) return;
+
+    setCheckingStatuses(true);
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const identityId = payload.sub || payload.id;
+      
+      if (!identityId) return;
+
+      const statusMap = new Map<string, { status: string; attemptId: string }>();
+
+      // Check each open exam
+      for (const exam of openExams) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/start`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              identityId,
+              assessmentId: exam.id,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const { attempt, isNew } = data;
+            
+            if (!isNew && attempt) {
+              statusMap.set(exam.id, {
+                status: attempt.status,
+                attemptId: attempt.id
+              });
+            }
+          } else {
+            const errorText = await response.text();
+            
+            // Check if it's a "already graded" error
+            try {
+              const errorData = JSON.parse(errorText);
+              if (errorData.detail && errorData.detail.includes('already has a graded attempt')) {
+                // This means the exam is already graded, we need to find the attempt ID
+                // For now, we'll mark it as graded without the attemptId
+                statusMap.set(exam.id, {
+                  status: 'GRADED',
+                  attemptId: '' // We'll need to fetch this separately
+                });
+              } else {
+                // Only log errors that are not expected
+                console.error(`Error response for exam ${exam.id}:`, response.status, errorText);
+              }
+            } catch (e) {
+              // If error parsing fails, log the original error
+              console.error(`Error response for exam ${exam.id}:`, response.status, errorText);
+            }
+          }
+        } catch (error) {
+          console.error(`Error checking status for exam ${exam.id}:`, error);
+        }
+      }
+
+      // If we have any graded exams without attemptId, fetch attempts to get the IDs
+      if (Array.from(statusMap.values()).some(s => s.status === 'GRADED' && !s.attemptId)) {
+        try {
+          const attemptsResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (attemptsResponse.ok) {
+            const attemptsData = await attemptsResponse.json();
+            const userAttempts = (attemptsData.attempts || []).filter(
+              (attempt: any) => attempt.student?.id === identityId
+            );
+
+            // Update attemptIds for graded exams
+            for (const [examId, status] of statusMap.entries()) {
+              if (status.status === 'GRADED' && !status.attemptId) {
+                const examAttempt = userAttempts.find(
+                  (attempt: any) => 
+                    attempt.assessment?.id === examId && 
+                    attempt.status === 'GRADED'
+                );
+                
+                if (examAttempt) {
+                  statusMap.set(examId, {
+                    status: 'GRADED',
+                    attemptId: examAttempt.id
+                  });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching attempt IDs:', error);
+        }
+      }
+
+      setAssessmentStatuses(statusMap);
+    } catch (error) {
+      console.error('Error checking open exam statuses:', error);
+    } finally {
+      setCheckingStatuses(false);
+    }
   }, []);
 
   const fetchAssessments = useCallback(async () => {
@@ -105,11 +224,25 @@ export default function AssessmentsPage({ params }: PageProps) {
         setFilteredAssessments(data.assessments || []);
         setPagination(data.pagination);
         calculateStats(data.assessments || []);
+        
+        // Check status of open exams
+        const openExams = (data.assessments || []).filter((a: Assessment) => a.type === 'PROVA_ABERTA');
+        
+        if (openExams.length > 0) {
+          const token = document.cookie
+            .split(';')
+            .find(c => c.trim().startsWith('token='))
+            ?.split('=')[1];
+          
+          if (token) {
+            await checkOpenExamStatuses(openExams, token);
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching assessments:', error);
     }
-  }, [calculateStats]);
+  }, [calculateStats, checkOpenExamStatuses]);
 
   // Function to decode JWT token
   const decodeJWT = (token: string) => {
@@ -241,6 +374,20 @@ export default function AssessmentsPage({ params }: PageProps) {
   };
 
   const handleStartAssessment = (assessment: Assessment) => {
+    // Check if it's an open exam with status
+    if (assessment.type === 'PROVA_ABERTA') {
+      const status = assessmentStatuses.get(assessment.id);
+      if (status) {
+        // If already has a status, redirect to appropriate page
+        if (status.status === 'GRADED') {
+          router.push(`/${locale}/assessments/open-exams/${status.attemptId}`);
+        } else {
+          router.push(`/${locale}/assessments/open-exams`);
+        }
+        return;
+      }
+    }
+    
     if (assessment.lessonId) {
       // Use the simplified URL pattern
       router.push(`/${locale}/lessons/${assessment.lessonId}/assessments/${assessment.id}`);
@@ -446,14 +593,70 @@ export default function AssessmentsPage({ params }: PageProps) {
                 )}
 
                 <div className="mt-auto">
-                  <button
-                    onClick={() => handleStartAssessment(assessment)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-all duration-300 font-medium group/btn"
-                  >
-                    <Play size={16} className="group-hover/btn:scale-110 transition-transform" />
-                    {t('startAssessment')}
-                    <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
+                  {assessment.type === 'PROVA_ABERTA' && checkingStatuses ? (
+                    <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Verificando status...</span>
+                    </div>
+                  ) : assessment.type === 'PROVA_ABERTA' && assessmentStatuses.has(assessment.id) ? (
+                    <>
+                      {/* Status Badge */}
+                      <div className="mb-3 p-2 rounded-lg bg-gray-800">
+                        {(() => {
+                          const status = assessmentStatuses.get(assessment.id)?.status;
+                          if (status === 'SUBMITTED') {
+                            return (
+                              <div className="flex items-center gap-2 text-blue-400">
+                                <Clock size={16} />
+                                <span className="text-sm">Enviada para correção</span>
+                              </div>
+                            );
+                          } else if (status === 'GRADING') {
+                            return (
+                              <div className="flex items-center gap-2 text-yellow-400">
+                                <Clock size={16} />
+                                <span className="text-sm">Em correção</span>
+                              </div>
+                            );
+                          } else if (status === 'GRADED') {
+                            return (
+                              <div className="flex items-center gap-2 text-green-400">
+                                <CheckCircle size={16} />
+                                <span className="text-sm">Corrigida</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                      
+                      {/* Action Button */}
+                      <button
+                        onClick={() => {
+                          const status = assessmentStatuses.get(assessment.id);
+                          if (status?.status === 'GRADED') {
+                            router.push(`/${locale}/assessments/open-exams/${status.attemptId}`);
+                          } else {
+                            router.push(`/${locale}/assessments/open-exams`);
+                          }
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium"
+                      >
+                        <Eye size={16} />
+                        {assessmentStatuses.get(assessment.id)?.status === 'GRADED' ? 'Ver Resultado' : 'Acompanhar Status'}
+                        <ArrowRight size={16} />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleStartAssessment(assessment)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-all duration-300 font-medium group/btn"
+                    >
+                      <Play size={16} className="group-hover/btn:scale-110 transition-transform" />
+                      {t('startAssessment')}
+                      <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

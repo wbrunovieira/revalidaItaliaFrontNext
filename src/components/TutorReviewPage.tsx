@@ -234,6 +234,9 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       });
       return;
     }
+    
+    // Clear comment for FULLY_ACCEPTED to ensure it's not sent
+    const finalComment = reviewState === 'FULLY_ACCEPTED' ? '' : teacherComment.trim();
 
     setSaving(true);
     try {
@@ -257,10 +260,16 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
         throw new Error('Não foi possível obter o ID da resposta');
       }
 
+      // Map reviewState to isCorrect for backward compatibility
+      const isCorrect = reviewState === 'FULLY_ACCEPTED' ? true : 
+                       reviewState === 'NEEDS_REVISION' ? false : 
+                       true; // PARTIALLY_ACCEPTED is treated as correct but with additional info
+      
       const reviewPayload = {
         reviewerId: userId,
-        reviewState,
-        teacherComment: teacherComment.trim() || undefined,
+        isCorrect: isCorrect,
+        teacherComment: finalComment || undefined,
+        reviewDecision: reviewState, // Use reviewDecision instead of reviewState
       };
       
       console.log('Review URL:', `${apiUrl}/api/v1/attempts/answers/${answer.id}/review`);
@@ -294,11 +303,6 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       console.log('Review response:', data);
       
       // Update local state
-      // Map review state back to isCorrect for backward compatibility
-      const isCorrect = reviewState === 'FULLY_ACCEPTED' ? true : 
-                       reviewState === 'NEEDS_REVISION' ? false : 
-                       true; // PARTIALLY_ACCEPTED is treated as correct but with additional info
-      
       setAttemptData(prev => prev ? {
         ...prev,
         answers: prev.answers.map(a => 
@@ -306,7 +310,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
             ? { 
                 ...a, 
                 isCorrect: isCorrect,
-                teacherComment: teacherComment,
+                teacherComment: finalComment,
                 status: 'GRADED',
                 reviewerId: userId,
               }
@@ -640,7 +644,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'FULLY_ACCEPTED' }))}
+                      onClick={() => setCurrentReview({ reviewState: 'FULLY_ACCEPTED', teacherComment: '' })}
                       className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                         currentReview.reviewState === 'FULLY_ACCEPTED'
                           ? 'border-green-500 bg-green-500/10 text-green-400'
@@ -680,41 +684,53 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                   </div>
                 </div>
 
-                {/* Teacher Comment */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
-                  </label>
-                  <textarea
-                    value={currentReview.teacherComment}
-                    onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
-                    placeholder={
-                      currentReview.reviewState === 'FULLY_ACCEPTED' 
-                        ? "Adicione um comentário para o aluno (opcional)..." 
-                        : currentReview.reviewState === 'PARTIALLY_ACCEPTED' 
-                        ? "Adicione informações complementares para completar a resposta..." 
-                        : currentReview.reviewState === 'NEEDS_REVISION' 
-                        ? "Explique o que precisa ser corrigido na resposta..."
-                        : "Selecione uma avaliação acima para comentar..."
-                    }
-                    className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
-                  />
-                  {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
-                    <p className="text-sm text-red-400 mt-1">
-                      Comentário obrigatório quando a resposta precisa de revisão.
-                    </p>
-                  )}
-                  {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
-                    <p className="text-sm text-orange-400 mt-1">
-                      Comentário obrigatório para adicionar informações complementares.
-                    </p>
-                  )}
-                  {currentReview.reviewState === null && (
-                    <p className="text-sm text-yellow-400 mt-1">
-                      Selecione uma opção de avaliação antes de enviar a revisão.
-                    </p>
-                  )}
-                </div>
+                {/* Teacher Comment - Only show for PARTIALLY_ACCEPTED and NEEDS_REVISION */}
+                {currentReview.reviewState !== 'FULLY_ACCEPTED' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
+                    </label>
+                    <textarea
+                      value={currentReview.teacherComment}
+                      onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
+                      placeholder={
+                        currentReview.reviewState === 'PARTIALLY_ACCEPTED' 
+                          ? "Adicione informações complementares para completar a resposta..." 
+                          : currentReview.reviewState === 'NEEDS_REVISION' 
+                          ? "Explique o que precisa ser corrigido na resposta..."
+                          : "Selecione uma avaliação acima para comentar..."
+                      }
+                      className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
+                    />
+                    {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
+                      <p className="text-sm text-red-400 mt-1">
+                        Comentário obrigatório quando a resposta precisa de revisão.
+                      </p>
+                    )}
+                    {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
+                      <p className="text-sm text-orange-400 mt-1">
+                        Comentário obrigatório para adicionar informações complementares.
+                      </p>
+                    )}
+                    {currentReview.reviewState === null && (
+                      <p className="text-sm text-yellow-400 mt-1">
+                        Selecione uma opção de avaliação antes de enviar a revisão.
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Success message for FULLY_ACCEPTED */}
+                {currentReview.reviewState === 'FULLY_ACCEPTED' && (
+                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={20} className="text-green-400" />
+                      <p className="text-green-400">
+                        A resposta será marcada como totalmente aceita.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* Cannot Review - No Response or Invalid State */

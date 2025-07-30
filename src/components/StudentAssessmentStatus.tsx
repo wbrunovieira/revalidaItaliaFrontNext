@@ -106,12 +106,14 @@ export default function StudentAssessmentStatus({
         );
 
         // Filtrar apenas PROVA_ABERTA e tentativas do usuário atual
+        // Excluir tentativas IN_PROGRESS pois não foram finalizadas
         const userOpenAttempts = (
           data.attempts || []
         ).filter(
           (attempt: StudentAttempt) =>
             attempt.student?.id === userId &&
-            attempt.assessment?.type === 'PROVA_ABERTA'
+            attempt.assessment?.type === 'PROVA_ABERTA' &&
+            attempt.status !== 'IN_PROGRESS' // Apenas tentativas finalizadas
         );
 
         console.log(

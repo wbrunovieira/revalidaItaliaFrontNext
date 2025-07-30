@@ -72,7 +72,7 @@ interface AttemptDetails {
   totalOpenQuestions?: number;
   pendingAnswers?: number;
   answers: AttemptAnswer[];
-  status: 'SUBMITTED' | 'GRADING' | 'GRADED';
+  status: 'IN_PROGRESS' | 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt?: string;
   gradedAt?: string;
 }
@@ -140,8 +140,11 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       console.log('StudentAssessmentsPage - User ID:', userId);
       
       // Filtrar apenas PROVA_ABERTA e tentativas do usuário atual
+      // Excluir tentativas IN_PROGRESS pois não foram finalizadas
       const userOpenAttempts = (data.attempts || []).filter((attempt: AttemptDetails) => 
-        attempt.student?.id === userId && attempt.assessment?.type === 'PROVA_ABERTA'
+        attempt.student?.id === userId && 
+        attempt.assessment?.type === 'PROVA_ABERTA' &&
+        attempt.status !== 'IN_PROGRESS' // Apenas tentativas finalizadas
       );
       
       console.log('StudentAssessmentsPage - Filtered user open attempts:', userOpenAttempts.length);
@@ -149,6 +152,12 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       // Para cada tentativa, buscar os detalhes reais usando o endpoint /results
       const attemptsWithDetails = await Promise.all(
         userOpenAttempts.map(async (attempt: AttemptDetails) => {
+          // Skip fetching results for IN_PROGRESS attempts (safety check)
+          if (attempt.status === 'IN_PROGRESS') {
+            console.log(`Skipping results fetch for IN_PROGRESS attempt ${attempt.id}`);
+            return attempt;
+          }
+          
           try {
             const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/results`, {
               method: 'GET',
@@ -219,8 +228,8 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           pendingReview,
           reviewedQuestions,
           correctAnswers: reviewedQuestions, // Use reviewed questions as correct answers
-          scorePercentage: attempt.results?.scorePercentage || ((reviewedQuestions / totalQuestions) * 100),
-          passed: attempt.results?.passed || (reviewedQuestions / totalQuestions >= 0.7),
+          scorePercentage: attempt.results?.scorePercentage || (totalQuestions > 0 ? ((reviewedQuestions / totalQuestions) * 100) : 0),
+          passed: attempt.results?.passed || (totalQuestions > 0 && reviewedQuestions / totalQuestions >= 0.7),
         };
       });
 
@@ -615,7 +624,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
                                 <p className={`text-lg font-semibold ${
                                   attempt.passed ? 'text-green-400' : 'text-red-400'
                                 }`}>
-                                  {attempt.scorePercentage}%
+                                  {Math.round(attempt.scorePercentage || 0)}%
                                 </p>
                               </div>
                             )}
@@ -680,7 +689,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
                                     <p className={`text-lg font-semibold ${
                                       attempt.passed ? 'text-green-400' : 'text-red-400'
                                     }`}>
-                                      {attempt.scorePercentage}%
+                                      {Math.round(attempt.scorePercentage || 0)}%
                                     </p>
                                   </div>
                                 )}

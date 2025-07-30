@@ -111,7 +111,7 @@ interface ArgumentGroup {
   questions: Question[];
 }
 
-export default function ProvaAbertaPage({ assessment, questions, backUrl }: ProvaAbertaPageProps) {
+export default function ProvaAbertaPage({ assessment, questions, locale, backUrl }: ProvaAbertaPageProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -127,6 +127,9 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
   const [submitting, setSubmitting] = useState(false);
   const [autoSaveTimeouts, setAutoSaveTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
   const [savingAnswers, setSavingAnswers] = useState<Set<string>>(new Set()); // Track which answers are being saved
+  const [existingAttempt, setExistingAttempt] = useState<Attempt | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -167,6 +170,116 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
       autoSaveTimeouts.forEach(timeout => clearTimeout(timeout));
     };
   }, [autoSaveTimeouts]);
+
+  // Verificar se já existe uma tentativa ao carregar
+  useEffect(() => {
+    const checkExistingAttempt = async () => {
+      try {
+        const token = document.cookie
+          .split(';')
+          .find(c => c.trim().startsWith('token='))
+          ?.split('=')[1];
+
+        if (!token) {
+          setCheckingStatus(false);
+          return;
+        }
+
+        // Tentar iniciar para verificar se já existe
+        let payload;
+        try {
+          payload = JSON.parse(atob(token.split('.')[1]));
+        } catch {
+          setCheckingStatus(false);
+          return;
+        }
+        
+        const identityId = payload.sub || payload.id;
+        if (!identityId) {
+          setCheckingStatus(false);
+          return;
+        }
+
+        // Fazer uma chamada "dry-run" para verificar status
+        const response = await fetch(`${apiUrl}/api/v1/attempts/start`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            identityId,
+            assessmentId: assessment.id,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const { attempt, isNew } = data;
+          
+          if (!isNew && attempt) {
+            setExistingAttempt(attempt);
+          }
+        } else {
+          // Check if it's a graded attempt error
+          const errorText = await response.text();
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.detail && errorData.detail.includes('already has a graded attempt')) {
+              // Create a fake attempt to show it's graded
+              setExistingAttempt({
+                id: '', // We'll fetch the real ID later
+                userId: identityId,
+                assessmentId: assessment.id,
+                status: 'GRADED',
+                startedAt: new Date().toISOString(),
+              });
+              
+              // Try to get the real attempt ID
+              const attemptsResponse = await fetch(`${apiUrl}/api/v1/attempts`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              
+              if (attemptsResponse.ok) {
+                const attemptsData = await attemptsResponse.json();
+                const userAttempt = attemptsData.attempts?.find(
+                  (attempt: any) => 
+                    attempt.student?.id === identityId && 
+                    attempt.assessment?.id === assessment.id &&
+                    attempt.status === 'GRADED'
+                );
+                
+                if (userAttempt) {
+                  setExistingAttempt({
+                    id: userAttempt.id,
+                    userId: identityId,
+                    assessmentId: assessment.id,
+                    status: 'GRADED',
+                    startedAt: userAttempt.startedAt,
+                    submittedAt: userAttempt.submittedAt,
+                    gradedAt: userAttempt.gradedAt,
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing attempt:', error);
+      } finally {
+        setCheckingStatus(false);
+        setInitialCheckDone(true);
+      }
+    };
+
+    checkExistingAttempt();
+  }, [assessment.id, apiUrl]);
 
 
   const startExam = async () => {
@@ -215,7 +328,14 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
         let errorMessage = 'Falha ao iniciar a prova';
         try {
           const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
+          errorMessage = errorData.message || errorData.detail || errorMessage;
+          
+          // Check if it's a "already graded" error
+          if (errorData.detail && errorData.detail.includes('already has a graded attempt')) {
+            // Refresh the page to show the correct status
+            window.location.reload();
+            return;
+          }
         } catch {
           // Se não conseguir fazer parse do JSON, usar mensagem padrão
         }
@@ -229,11 +349,38 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
       setAttempt(attempt);
       
       if (!isNew) {
-        // Tentativa existente - carregar respostas já salvas
-        toast({
-          title: 'Continuando prova',
-          description: 'Encontramos uma tentativa em andamento. Continuando de onde você parou.',
-        });
+        // Verificar status da tentativa existente
+        if (attempt.status === 'SUBMITTED' || attempt.status === 'GRADING') {
+          toast({
+            title: 'Prova já enviada',
+            description: 'Esta prova já foi enviada para correção. Acompanhe o status na página de provas abertas.',
+            variant: 'destructive',
+          });
+          
+          // Redirecionar para página de acompanhamento
+          setTimeout(() => {
+            router.push(`/${locale}/assessments/open-exams`);
+          }, 2000);
+          return;
+        } else if (attempt.status === 'GRADED') {
+          toast({
+            title: 'Prova já avaliada',
+            description: 'Esta prova já foi corrigida. Veja o resultado na página de provas abertas.',
+            variant: 'destructive',
+          });
+          
+          // Redirecionar para página de resultados
+          setTimeout(() => {
+            router.push(`/${locale}/assessments/open-exams/${attempt.id}`);
+          }, 2000);
+          return;
+        } else {
+          // Status IN_PROGRESS - continuar prova
+          toast({
+            title: 'Continuando prova',
+            description: 'Encontramos uma tentativa em andamento. Continuando de onde você parou.',
+          });
+        }
         
         // TODO: Carregar respostas salvas quando disponível
       }
@@ -466,11 +613,8 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
     const hasSavedAnswer = answers.has(question.id);
     const hasLocalAnswer = textAnswers.get(question.id)?.trim();
     const isAnswered = hasSavedAnswer || hasLocalAnswer;
-    console.log(`Question ${question.id}: saved=${hasSavedAnswer}, local=${!!hasLocalAnswer}, answered=${isAnswered}`);
     return isAnswered;
   }).length;
-  
-  console.log(`Total questions: ${openQuestions.length}, Answered: ${answeredCount}, Should show button: ${answeredCount === openQuestions.length}`);
   const progressPercentage = (answeredCount / openQuestions.length) * 100;
 
   // Encontrar o grupo atual da questão
@@ -478,6 +622,115 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
     group.questions.some(q => q.id === currentQuestion?.id)
   );
 
+  // Se ainda estamos verificando o status inicial, mostrar loading
+  if (!initialCheckDone) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex items-center gap-2">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary"></div>
+          <span className="text-gray-400">Verificando status da prova...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Se existe uma tentativa, mostrar o status imediatamente
+  if (existingAttempt && phase === 'start') {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div className="space-y-4">
+            {existingAttempt.status === 'IN_PROGRESS' && (
+              <div className="p-4 bg-gray-800 rounded-lg">
+                <h2 className="text-lg font-semibold text-white mb-4">
+                  Instruções da Prova Aberta
+                </h2>
+                <div className="space-y-2 text-sm text-gray-300">
+                  <p>• {openQuestions.length} questões dissertativas</p>
+                  {assessment.passingScore && (
+                    <p>• Nota mínima: {assessment.passingScore}%</p>
+                  )}
+                  <p>• Suas respostas serão revisadas por um tutor</p>
+                  <p>• Salvamento automático das respostas</p>
+                  <p className="text-blue-400">• Você pode pausar e continuar depois</p>
+                </div>
+              </div>
+            )}
+
+            {existingAttempt.status === 'SUBMITTED' && (
+              <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle size={20} className="text-blue-400" />
+                  <span className="text-blue-400 font-medium">Prova enviada para correção</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  Esta prova já foi enviada e está aguardando revisão do tutor.
+                </p>
+              </div>
+            )}
+            
+            {existingAttempt.status === 'GRADING' && (
+              <div className="p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock size={20} className="text-yellow-400" />
+                  <span className="text-yellow-400 font-medium">Prova em correção</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  O tutor está revisando suas respostas.
+                </p>
+              </div>
+            )}
+            
+            {existingAttempt.status === 'GRADED' && (
+              <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle size={20} className="text-green-400" />
+                  <span className="text-green-400 font-medium">Prova corrigida</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  A correção foi concluída. Veja o resultado detalhado.
+                </p>
+              </div>
+            )}
+            
+            <button
+              onClick={() => {
+                if (existingAttempt.status === 'GRADED') {
+                  router.push(`/${locale}/assessments/open-exams/${existingAttempt.id}`);
+                } else if (existingAttempt.status === 'IN_PROGRESS') {
+                  // Continue exam
+                  setAttempt(existingAttempt);
+                  setPhase('exam');
+                } else {
+                  router.push(`/${locale}/assessments/open-exams`);
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors font-medium"
+            >
+              {existingAttempt.status === 'IN_PROGRESS' ? (
+                <>
+                  <Edit size={20} />
+                  Continuar Prova
+                </>
+              ) : existingAttempt.status === 'GRADED' ? (
+                <>
+                  <Eye size={20} />
+                  Ver Resultado
+                </>
+              ) : (
+                <>
+                  <Eye size={20} />
+                  Acompanhar Status
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não existe tentativa ou fase não é start, mostrar tela normal
   if (phase === 'start') {
     return (
       <div className="flex-1 flex items-center justify-center p-6">
@@ -515,23 +768,24 @@ export default function ProvaAbertaPage({ assessment, questions, backUrl }: Prov
               </div>
             )}
             
+            {/* Se chegou aqui, não há tentativa existente */}
             <button
-              onClick={startExam}
-              disabled={loading || openQuestions.length === 0}
-              className="w-full flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors font-medium disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-                  Iniciando...
-                </>
-              ) : (
-                <>
-                  <FileText size={20} />
-                  Iniciar Prova
-                </>
-              )}
-            </button>
+                onClick={startExam}
+                disabled={loading || openQuestions.length === 0}
+                className="w-full flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors font-medium disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                    Iniciando...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={20} />
+                    Iniciar Prova
+                  </>
+                )}
+              </button>
           </div>
         </div>
       </div>

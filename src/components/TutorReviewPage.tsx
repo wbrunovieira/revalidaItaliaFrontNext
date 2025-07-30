@@ -93,10 +93,10 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   
   // Local state for current question review
   const [currentReview, setCurrentReview] = useState<{
-    isCorrect: boolean | null;
+    reviewState: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION' | null;
     teacherComment: string;
   }>({
-    isCorrect: null,
+    reviewState: null,
     teacherComment: '',
   });
 
@@ -196,32 +196,40 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       const currentQuestion = attemptData.questions[currentQuestionIndex];
       const currentAnswer = attemptData.answers.find(a => a.questionId === currentQuestion.id);
       
+      // Map existing isCorrect to new review states
+      let reviewState: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION' | null = null;
+      if (currentAnswer?.isCorrect !== undefined && currentAnswer?.isCorrect !== null) {
+        reviewState = currentAnswer.isCorrect ? 'FULLY_ACCEPTED' : 'NEEDS_REVISION';
+      }
+      
       setCurrentReview({
-        isCorrect: currentAnswer?.isCorrect ?? null,
+        reviewState: reviewState,
         teacherComment: currentAnswer?.teacherComment || '',
       });
     }
   }, [currentQuestionIndex, attemptData]);
 
 
-  const saveReview = async (questionId: string, isCorrect: boolean | null, teacherComment: string) => {
+  const saveReview = async (questionId: string, reviewState: typeof currentReview.reviewState, teacherComment: string) => {
     if (!attemptData) return;
 
-    // Validar que o professor marcou como correta ou incorreta
-    if (isCorrect === null) {
+    // Validar que o professor selecionou um estado de revisão
+    if (reviewState === null) {
       toast({
         title: 'Atenção',
-        description: 'Você deve marcar a resposta como correta ou incorreta.',
+        description: 'Você deve selecionar um estado de revisão.',
         variant: 'destructive',
       });
       return;
     }
 
-    // Se marcou como incorreta, deve fornecer comentário
-    if (isCorrect === false && !teacherComment.trim()) {
+    // Se marcou como NEEDS_REVISION ou PARTIALLY_ACCEPTED, deve fornecer comentário
+    if ((reviewState === 'NEEDS_REVISION' || reviewState === 'PARTIALLY_ACCEPTED') && !teacherComment.trim()) {
       toast({
         title: 'Atenção',
-        description: 'Você deve fornecer um comentário quando a resposta está incorreta.',
+        description: reviewState === 'NEEDS_REVISION' 
+          ? 'Você deve fornecer um comentário explicando o que precisa ser corrigido.'
+          : 'Você deve fornecer informações complementares para a resposta parcialmente aceita.',
         variant: 'destructive',
       });
       return;
@@ -251,7 +259,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
 
       const reviewPayload = {
         reviewerId: userId,
-        isCorrect,
+        reviewState,
         teacherComment: teacherComment.trim() || undefined,
       };
       
@@ -286,6 +294,11 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       console.log('Review response:', data);
       
       // Update local state
+      // Map review state back to isCorrect for backward compatibility
+      const isCorrect = reviewState === 'FULLY_ACCEPTED' ? true : 
+                       reviewState === 'NEEDS_REVISION' ? false : 
+                       true; // PARTIALLY_ACCEPTED is treated as correct but with additional info
+      
       setAttemptData(prev => prev ? {
         ...prev,
         answers: prev.answers.map(a => 
@@ -324,7 +337,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
     if (!attemptData) return;
     
     const currentQuestion = attemptData.questions[currentQuestionIndex];
-    saveReview(currentQuestion.id, currentReview.isCorrect, currentReview.teacherComment);
+    saveReview(currentQuestion.id, currentReview.reviewState, currentReview.teacherComment);
   };
 
 
@@ -590,15 +603,20 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      {currentAnswer?.isCorrect ? (
+                      {currentAnswer?.isCorrect === true ? (
                         <>
                           <ThumbsUp size={16} className="text-green-400" />
-                          <span className="text-green-400">Marcada como correta</span>
+                          <span className="text-green-400">Resposta totalmente aceita</span>
+                        </>
+                      ) : currentAnswer?.isCorrect === false ? (
+                        <>
+                          <ThumbsDown size={16} className="text-red-400" />
+                          <span className="text-red-400">Resposta precisa de revisão</span>
                         </>
                       ) : (
                         <>
-                          <ThumbsDown size={16} className="text-red-400" />
-                          <span className="text-red-400">Marcada como incorreta</span>
+                          <AlertCircle size={16} className="text-orange-400" />
+                          <span className="text-orange-400">Resposta parcialmente aceita</span>
                         </>
                       )}
                     </div>
@@ -620,29 +638,44 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Avaliação da Resposta
                   </label>
-                  <div className="flex gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, isCorrect: true }))}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-                        currentReview.isCorrect === true
+                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'FULLY_ACCEPTED' }))}
+                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                        currentReview.reviewState === 'FULLY_ACCEPTED'
                           ? 'border-green-500 bg-green-500/10 text-green-400'
                           : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
                       }`}
                     >
                       <ThumbsUp size={20} />
-                      Correta
+                      <span className="font-medium">Totalmente Aceita</span>
+                      <span className="text-xs text-center">A resposta está completa e correta</span>
                     </button>
                     
                     <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, isCorrect: false }))}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-                        currentReview.isCorrect === false
+                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'PARTIALLY_ACCEPTED' }))}
+                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                        currentReview.reviewState === 'PARTIALLY_ACCEPTED'
+                          ? 'border-orange-500 bg-orange-500/10 text-orange-400'
+                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
+                      }`}
+                    >
+                      <AlertCircle size={20} />
+                      <span className="font-medium">Parcialmente Aceita</span>
+                      <span className="text-xs text-center">Resposta correta mas incompleta</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'NEEDS_REVISION' }))}
+                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                        currentReview.reviewState === 'NEEDS_REVISION'
                           ? 'border-red-500 bg-red-500/10 text-red-400'
                           : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
                       }`}
                     >
                       <ThumbsDown size={20} />
-                      Incorreta
+                      <span className="font-medium">Precisa Revisão</span>
+                      <span className="text-xs text-center">Resposta incorreta ou inadequada</span>
                     </button>
                   </div>
                 </div>
@@ -650,22 +683,35 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                 {/* Teacher Comment */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Comentário do Tutor {currentReview.isCorrect === false && <span className="text-red-400">*</span>}
+                    Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
                   </label>
                   <textarea
                     value={currentReview.teacherComment}
                     onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
-                    placeholder={currentReview.isCorrect === true ? "Adicione um comentário para o aluno (opcional)..." : currentReview.isCorrect === false ? "Explique por que a resposta está incorreta..." : "Selecione uma avaliação acima para comentar..."}
+                    placeholder={
+                      currentReview.reviewState === 'FULLY_ACCEPTED' 
+                        ? "Adicione um comentário para o aluno (opcional)..." 
+                        : currentReview.reviewState === 'PARTIALLY_ACCEPTED' 
+                        ? "Adicione informações complementares para completar a resposta..." 
+                        : currentReview.reviewState === 'NEEDS_REVISION' 
+                        ? "Explique o que precisa ser corrigido na resposta..."
+                        : "Selecione uma avaliação acima para comentar..."
+                    }
                     className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
                   />
-                  {currentReview.isCorrect === false && !currentReview.teacherComment.trim() && (
+                  {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
                     <p className="text-sm text-red-400 mt-1">
-                      Comentário obrigatório quando a resposta está incorreta.
+                      Comentário obrigatório quando a resposta precisa de revisão.
                     </p>
                   )}
-                  {currentReview.isCorrect === null && (
+                  {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
+                    <p className="text-sm text-orange-400 mt-1">
+                      Comentário obrigatório para adicionar informações complementares.
+                    </p>
+                  )}
+                  {currentReview.reviewState === null && (
                     <p className="text-sm text-yellow-400 mt-1">
-                      Selecione &quot;Correta&quot; ou &quot;Incorreta&quot; antes de enviar a revisão.
+                      Selecione uma opção de avaliação antes de enviar a revisão.
                     </p>
                   )}
                 </div>

@@ -28,10 +28,12 @@ interface Answer {
   questionText: string;
   studentAnswer: string;
   tutorFeedback?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PARTIALLY_ACCEPTED';
+  reviewState?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   score?: number;
   answeredAt: string;
   reviewedAt?: string;
+  needsAcknowledgment?: boolean;
 }
 
 interface AttemptDetails {
@@ -76,6 +78,7 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
   const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
   const [newAnswer, setNewAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [acknowledgingAnswer, setAcknowledgingAnswer] = useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -157,6 +160,7 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
             questionType?: string; 
             isCorrect?: boolean | null; 
             reviewerId?: string;
+            reviewState?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
             textAnswer?: string;
             answer?: string;
             teacherComment?: string;
@@ -164,18 +168,43 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
             submittedAt?: string;
             answeredAt?: string;
             reviewedAt?: string;
+            acknowledgedAt?: string;
           }) => {
             console.log('Processing answer:', ans);
             
-            // Determine status based on isCorrect field
-            let status: 'PENDING' | 'APPROVED' | 'REJECTED';
-            if (ans.isCorrect === true) {
-              status = 'APPROVED';
-            } else if (ans.isCorrect === false) {
-              status = 'REJECTED';
+            // Determine status based on reviewState or isCorrect field
+            let status: Answer['status'];
+            let reviewState: Answer['reviewState'];
+            let needsAcknowledgment = false;
+            
+            // Check if we have the new reviewState field
+            if (ans.reviewState) {
+              reviewState = ans.reviewState;
+              switch (ans.reviewState) {
+                case 'FULLY_ACCEPTED':
+                  status = 'APPROVED';
+                  break;
+                case 'PARTIALLY_ACCEPTED':
+                  status = 'PARTIALLY_ACCEPTED';
+                  needsAcknowledgment = !ans.acknowledgedAt; // Check if student acknowledged
+                  break;
+                case 'NEEDS_REVISION':
+                  status = 'REJECTED';
+                  break;
+                default:
+                  status = 'PENDING';
+              }
             } else {
-              // isCorrect is null - not reviewed yet
-              status = 'PENDING';
+              // Fallback to old isCorrect logic
+              if (ans.isCorrect === true) {
+                status = 'APPROVED';
+                reviewState = 'FULLY_ACCEPTED';
+              } else if (ans.isCorrect === false) {
+                status = 'REJECTED';
+                reviewState = 'NEEDS_REVISION';
+              } else {
+                status = 'PENDING';
+              }
             }
             
             return {
@@ -185,9 +214,11 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
               studentAnswer: ans.textAnswer || ans.answer || '',
               tutorFeedback: ans.teacherComment || '',
               status: status,
+              reviewState: reviewState,
               score: ans.score,
               answeredAt: ans.submittedAt || ans.answeredAt || attemptData.submittedAt,
               reviewedAt: ans.reviewedAt || (ans.isCorrect !== null ? new Date().toISOString() : undefined),
+              needsAcknowledgment: needsAcknowledgment,
             };
           });
       } else {
@@ -282,8 +313,17 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
       return { status: 'APPROVED', color: 'text-green-400', bgColor: 'bg-green-900/20', icon: <CheckCircle size={16} /> };
     }
     
+    if (answer.status === 'PARTIALLY_ACCEPTED') {
+      return { 
+        status: 'PARTIALLY_ACCEPTED', 
+        color: answer.needsAcknowledgment ? 'text-yellow-400' : 'text-orange-400', 
+        bgColor: answer.needsAcknowledgment ? 'bg-yellow-900/20' : 'bg-orange-900/20', 
+        icon: <AlertCircle size={16} /> 
+      };
+    }
+    
     if (answer.status === 'REJECTED') {
-      return { status: 'REJECTED', color: 'text-orange-400', bgColor: 'bg-orange-900/20', icon: <AlertCircle size={16} /> };
+      return { status: 'REJECTED', color: 'text-red-400', bgColor: 'bg-red-900/20', icon: <AlertCircle size={16} /> };
     }
     
     return { status: 'PENDING', color: 'text-blue-400', bgColor: 'bg-blue-900/20', icon: <Eye size={16} /> };
@@ -291,9 +331,72 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
 
   const handleEditAnswer = (questionId: string) => {
     const answer = attempt?.answers.find(a => a.questionId === questionId);
+    
+    // Only allow editing for rejected answers
     if (answer && answer.status === 'REJECTED') {
       setEditingAnswer(questionId);
       setNewAnswer(''); // Limpar o input para nova resposta
+    } else if (answer && answer.status === 'PARTIALLY_ACCEPTED') {
+      toast({
+        title: 'Atenção',
+        description: 'Respostas parcialmente aceitas não podem ser editadas. Por favor, confirme a leitura do feedback do tutor.',
+        variant: 'destructive',
+      });
+    } else if (answer && answer.status === 'APPROVED') {
+      toast({
+        title: 'Atenção', 
+        description: 'Esta resposta já foi aprovada e não pode ser alterada.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleAcknowledgeAnswer = async (questionId: string) => {
+    if (!questionId) return;
+    
+    setSubmitting(true);
+    try {
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+
+      // Find the answer to acknowledge
+      const answer = attempt?.answers.find(a => a.questionId === questionId);
+      if (!answer) {
+        throw new Error('Resposta não encontrada');
+      }
+
+      const response = await fetch(`${apiUrl}/api/v1/attempts/answers/${answer.id}/acknowledge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Falha ao confirmar leitura');
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Feedback do tutor confirmado!',
+      });
+
+      setAcknowledgingAnswer(null);
+      fetchAttemptDetails(); // Reload data
+    } catch (error) {
+      console.error('Error acknowledging answer:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível confirmar a leitura.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -440,15 +543,19 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                <span className="text-gray-300">Aprovadas ({attempt.reviewedQuestions})</span>
+                <span className="text-gray-300">Aprovadas ({attempt.answers.filter(a => a.status === 'APPROVED').length})</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
-                <span className="text-gray-300">Aguardando Resposta ({attempt.pendingReview})</span>
+                <span className="text-gray-300">Parcialmente Aceitas ({attempt.answers.filter(a => a.status === 'PARTIALLY_ACCEPTED').length})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                <span className="text-gray-300">Aguardando Correção ({attempt.answers.filter(a => a.status === 'REJECTED').length})</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                <span className="text-gray-300">Em Revisão ({attempt.answeredQuestions - attempt.reviewedQuestions - attempt.pendingReview})</span>
+                <span className="text-gray-300">Em Revisão ({attempt.answers.filter(a => a.status === 'PENDING').length})</span>
               </div>
             </div>
           </div>
@@ -489,8 +596,12 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
                 className={`rounded-lg border-2 transition-all ${
                   status.status === 'APPROVED' 
                     ? 'bg-green-900/10 border-green-500/30' 
+                    : status.status === 'PARTIALLY_ACCEPTED'
+                    ? answer?.needsAcknowledgment
+                      ? 'bg-yellow-900/10 border-yellow-500/30'
+                      : 'bg-orange-900/10 border-orange-500/30'
                     : status.status === 'REJECTED'
-                    ? 'bg-orange-900/10 border-orange-500/30'
+                    ? 'bg-red-900/10 border-red-500/30'
                     : status.status === 'PENDING'
                     ? 'bg-blue-900/10 border-blue-500/30'
                     : 'bg-gray-900/10 border-gray-500/30'
@@ -504,8 +615,12 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                           status.status === 'APPROVED' 
                             ? 'bg-green-500 text-white' 
+                            : status.status === 'PARTIALLY_ACCEPTED'
+                            ? answer?.needsAcknowledgment
+                              ? 'bg-yellow-500 text-white'
+                              : 'bg-orange-500 text-white'
                             : status.status === 'REJECTED'
-                            ? 'bg-orange-500 text-white'
+                            ? 'bg-red-500 text-white'
                             : status.status === 'PENDING'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-500 text-white'
@@ -520,6 +635,8 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
                       {status.icon}
                       <span className={status.color}>
                         {status.status === 'APPROVED' ? 'Aprovada' :
+                         status.status === 'PARTIALLY_ACCEPTED' ? 
+                           answer?.needsAcknowledgment ? 'Aguardando Confirmação' : 'Parcialmente Aceita' :
                          status.status === 'REJECTED' ? 'Requer Correção' :
                          status.status === 'PENDING' ? 'Aguardando Revisão' :
                          'Não Respondida'}
@@ -531,26 +648,56 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
                   {answer?.tutorFeedback && (
                     <div className={`mb-4 p-4 rounded-lg ${
                       answer.status === 'REJECTED'
-                        ? 'bg-orange-900/20 border border-orange-500/30'
+                        ? 'bg-red-900/20 border border-red-500/30'
+                        : answer.status === 'PARTIALLY_ACCEPTED'
+                        ? answer.needsAcknowledgment
+                          ? 'bg-yellow-900/20 border border-yellow-500/30'
+                          : 'bg-orange-900/20 border border-orange-500/30'
                         : 'bg-green-900/20 border border-green-500/30'
                     }`}>
                       <div className="flex items-start gap-3">
                         {answer.status === 'REJECTED' ? (
-                          <AlertCircle size={20} className="text-orange-400 mt-0.5" />
+                          <AlertCircle size={20} className="text-red-400 mt-0.5" />
+                        ) : answer.status === 'PARTIALLY_ACCEPTED' ? (
+                          <AlertCircle size={20} className={`mt-0.5 ${answer.needsAcknowledgment ? 'text-yellow-400' : 'text-orange-400'}`} />
                         ) : (
                           <CheckCircle size={20} className="text-green-400 mt-0.5" />
                         )}
                         <div className="flex-1">
                           <h4 className={`font-semibold mb-1 ${
-                            answer.status === 'REJECTED' ? 'text-orange-400' : 'text-green-400'
+                            answer.status === 'REJECTED' ? 'text-red-400' : 
+                            answer.status === 'PARTIALLY_ACCEPTED' ? 
+                              answer.needsAcknowledgment ? 'text-yellow-400' : 'text-orange-400'
+                            : 'text-green-400'
                           }`}>
-                            Feedback do Tutor:
+                            {answer.status === 'REJECTED' ? 'Resposta Precisa de Revisão:' :
+                             answer.status === 'PARTIALLY_ACCEPTED' ? 
+                               answer.needsAcknowledgment ? 'Resposta Aceita com Informações Adicionais:' : 'Resposta Parcialmente Aceita:'
+                             : 'Resposta Aprovada:'}
                           </h4>
                           <p className={`text-sm ${
-                            answer.status === 'REJECTED' ? 'text-orange-200' : 'text-green-200'
+                            answer.status === 'REJECTED' ? 'text-red-200' : 
+                            answer.status === 'PARTIALLY_ACCEPTED' ? 
+                              answer.needsAcknowledgment ? 'text-yellow-200' : 'text-orange-200'
+                            : 'text-green-200'
                           }`}>
                             {answer.tutorFeedback}
                           </p>
+                          {answer.status === 'PARTIALLY_ACCEPTED' && answer.needsAcknowledgment && (
+                            <div className="mt-3 p-3 bg-yellow-800/20 rounded">
+                              <p className="text-sm text-yellow-300 mb-2">
+                                <strong>Atenção:</strong> O tutor adicionou informações complementares à sua resposta. Por favor, leia e confirme que você entendeu.
+                              </p>
+                              <button
+                                onClick={() => handleAcknowledgeAnswer(question.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 disabled:opacity-50"
+                              >
+                                <CheckCircle size={14} />
+                                {submitting ? 'Confirmando...' : 'Confirmar Leitura'}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -600,17 +747,30 @@ export function StudentAssessmentDetails({ attemptId, locale }: StudentAssessmen
                             </p>
                           </div>
 
-                          {/* Action button for rejected questions */}
+                          {/* Action buttons based on status */}
                           {answer.status === 'REJECTED' && attempt.status !== 'GRADED' && (
                             <button
                               onClick={() => handleEditAnswer(question.id)}
-                              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                             >
                               <Edit size={16} />
                               Responder Novamente
                             </button>
                           )}
-                          {answer.status === 'REJECTED' && attempt.status === 'GRADED' && (
+                          
+                          {answer.status === 'PARTIALLY_ACCEPTED' && !answer.needsAcknowledgment && (
+                            <div className="text-center text-sm text-orange-400">
+                              Resposta parcialmente aceita - Feedback do tutor já confirmado
+                            </div>
+                          )}
+                          
+                          {answer.status === 'APPROVED' && (
+                            <div className="text-center text-sm text-green-400">
+                              Resposta totalmente aprovada
+                            </div>
+                          )}
+                          
+                          {(answer.status === 'REJECTED' || answer.status === 'PARTIALLY_ACCEPTED') && attempt.status === 'GRADED' && (
                             <div className="text-center text-sm text-gray-400">
                               Esta prova foi finalizada e não pode mais receber alterações
                             </div>

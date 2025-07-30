@@ -52,6 +52,10 @@ interface Answer {
   questionId: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
+  selectedOptionId?: string;
+  correctOptionId?: string;
+  questionText?: string;
+  questionType?: string;
 }
 
 interface TutorAttempt {
@@ -64,6 +68,7 @@ interface TutorAttempt {
   };
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt: string;
+  startedAt?: string;
   totalOpenQuestions?: number;
   pendingAnswers?: number;
   results?: {
@@ -71,10 +76,44 @@ interface TutorAttempt {
     correctAnswers: number;
     reviewedQuestions: number;
     percentage?: number;
+    scorePercentage?: number;
   };
   grade?: number;
   createdAt?: string;
   answers?: Answer[];
+}
+
+interface AnalyticsAttempt {
+  id: string;
+  student: Student;
+  assessment: {
+    id: string;
+    title: string;
+    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+  };
+  status: 'SUBMITTED' | 'GRADING' | 'GRADED';
+  submittedAt: string;
+  startedAt?: string;
+  results?: {
+    totalQuestions: number;
+    correctAnswers: number;
+    reviewedQuestions?: number;
+    percentage?: number;
+    scorePercentage?: number;
+  };
+  answers?: Array<{
+    id: string;
+    questionId: string;
+    selectedOptionId?: string;
+    isCorrect?: boolean;
+    attemptId: string;
+    studentId: string;
+    question?: {
+      id: string;
+      text: string;
+      type: 'MULTIPLE_CHOICE' | 'OPEN';
+    };
+  }>;
 }
 
 interface TutorDashboardProps {
@@ -90,9 +129,9 @@ export default function TutorDashboard({
   const [attempts, setAttempts] = useState<
     PendingAttempt[]
   >([]);
-  const [quizAttempts, setQuizAttempts] = useState<TutorAttempt[]>(
-    []
-  );
+  const [quizAttempts, setQuizAttempts] = useState<
+    TutorAttempt[]
+  >([]);
   const [simuladoAttempts, setSimuladoAttempts] = useState<
     TutorAttempt[]
   >([]);
@@ -101,8 +140,11 @@ export default function TutorDashboard({
     'all' | 'pending' | 'in-progress' | 'completed'
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
-  const [analyticsAttempts, setAnalyticsAttempts] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'analytics'
+  >('overview');
+  const [analyticsAttempts, setAnalyticsAttempts] =
+    useState<AnalyticsAttempt[]>([]);
   const [groupBy, setGroupBy] = useState<
     'student' | 'assessment'
   >('student');
@@ -116,14 +158,17 @@ export default function TutorDashboard({
         .find(c => c.trim().startsWith('token='))
         ?.split('=')[1];
 
-      const response = await fetch(`${apiUrl}/api/v1/attempts`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${apiUrl}/api/v1/attempts`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -167,40 +212,42 @@ export default function TutorDashboard({
 
       // Para cada tentativa, buscar os detalhes reais usando o endpoint /results
       const attemptsWithDetails = await Promise.all(
-        openAssessmentAttempts.map(async (attempt: TutorAttempt) => {
-          try {
-            const resultsResponse = await fetch(
-              `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
-              {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: token
-                    ? `Bearer ${token}`
-                    : '',
-                },
-                credentials: 'include',
-              }
-            );
+        openAssessmentAttempts.map(
+          async (attempt: TutorAttempt) => {
+            try {
+              const resultsResponse = await fetch(
+                `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token
+                      ? `Bearer ${token}`
+                      : '',
+                  },
+                  credentials: 'include',
+                }
+              );
 
-            if (resultsResponse.ok) {
-              const resultsData =
-                await resultsResponse.json();
-              // Merge the results data with the attempt data
-              return {
-                ...attempt,
-                results: resultsData.results,
-                answers: resultsData.answers,
-              };
+              if (resultsResponse.ok) {
+                const resultsData =
+                  await resultsResponse.json();
+                // Merge the results data with the attempt data
+                return {
+                  ...attempt,
+                  results: resultsData.results,
+                  answers: resultsData.answers,
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching results for attempt ${attempt.id}:`,
+                error
+              );
             }
-          } catch (error) {
-            console.error(
-              `Error fetching results for attempt ${attempt.id}:`,
-              error
-            );
+            return attempt;
           }
-          return attempt;
-        })
+        )
       );
 
       // Mapear os dados da API para o formato esperado pelo componente
@@ -319,39 +366,41 @@ export default function TutorDashboard({
       );
 
       const simuladoAttemptsWithDetails = await Promise.all(
-        simuladoAttempts.map(async (attempt: TutorAttempt) => {
-          try {
-            const resultsResponse = await fetch(
-              `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
-              {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: token
-                    ? `Bearer ${token}`
-                    : '',
-                },
-                credentials: 'include',
-              }
-            );
+        simuladoAttempts.map(
+          async (attempt: TutorAttempt) => {
+            try {
+              const resultsResponse = await fetch(
+                `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token
+                      ? `Bearer ${token}`
+                      : '',
+                  },
+                  credentials: 'include',
+                }
+              );
 
-            if (resultsResponse.ok) {
-              const resultsData =
-                await resultsResponse.json();
-              return {
-                ...attempt,
-                results: resultsData.results,
-                answers: resultsData.answers,
-              };
+              if (resultsResponse.ok) {
+                const resultsData =
+                  await resultsResponse.json();
+                return {
+                  ...attempt,
+                  results: resultsData.results,
+                  answers: resultsData.answers,
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching results for simulado attempt ${attempt.id}:`,
+                error
+              );
             }
-          } catch (error) {
-            console.error(
-              `Error fetching results for simulado attempt ${attempt.id}:`,
-              error
-            );
+            return attempt;
           }
-          return attempt;
-        })
+        )
       );
 
       setQuizAttempts(quizAttemptsWithDetails);
@@ -415,201 +464,76 @@ export default function TutorDashboard({
     }
   }, [apiUrl, toast]);
 
-  // Fetch detailed analytics data
-  const fetchAnalyticsData = useCallback(async () => {
-    try {
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-      
-      const response = await fetch(`${apiUrl}/api/v1/attempts`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics data');
-      }
-
-      const data = await response.json();
-      const allAttempts = data.attempts || [];
-      
-      // Fetch detailed results for each attempt
-      const analyticsData = await Promise.all(
-        allAttempts
-          .filter((attempt: any) => 
-            (attempt.assessment?.type === 'QUIZ' || attempt.assessment?.type === 'SIMULADO') &&
-            (attempt.status === 'SUBMITTED' || attempt.status === 'GRADED')
-          )
-          .map(async (attempt: any) => {
-            try {
-              const resultsResponse = await fetch(
-                `${apiUrl}/api/v1/attempts/${attempt.id}/results`,
-                {
-                  method: 'GET',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: token ? `Bearer ${token}` : '',
-                  },
-                  credentials: 'include',
-                }
-              );
-
-              if (resultsResponse.ok) {
-                const resultsData = await resultsResponse.json();
-                console.log('Analytics - Full results data:', resultsData);
-                
-                // Log detalhado das respostas
-                resultsData.answers?.forEach((answer: any, index: number) => {
-                  console.log(`Answer ${index} full data:`, answer);
-                });
-                
-                // Log dados do attempt original
-                console.log('Original attempt answers:', attempt.answers);
-                
-                return {
-                  id: attempt.id,
-                  student: attempt.student,
-                  assessment: attempt.assessment,
-                  status: attempt.status,
-                  submittedAt: attempt.submittedAt,
-                  startedAt: attempt.createdAt || attempt.submittedAt,
-                  results: resultsData.results || {
-                    totalQuestions: resultsData.answers?.length || 0,
-                    correctAnswers: resultsData.answers?.filter((a: any) => a.isCorrect === true).length || 0,
-                    scorePercentage: resultsData.results?.scorePercentage || resultsData.attempt?.score || 0,
-                  },
-                  answers: resultsData.answers?.map((answer: any) => {
-                    // Buscar informações da questão nos dados do attempt
-                    const attemptAnswer = attempt.answers?.find((a: any) => a.questionId === answer.questionId);
-                    
-                    console.log('Mapping answer:', {
-                      questionId: answer.questionId,
-                      answerIsCorrect: answer.isCorrect,
-                      attemptAnswer: attemptAnswer ? {
-                        selectedOptionId: attemptAnswer.selectedOptionId,
-                        correctOptionId: attemptAnswer.correctOptionId,
-                        isCorrect: attemptAnswer.isCorrect
-                      } : null
-                    });
-                    
-                    // Determinar se a resposta está correta baseado nos resultados
-                    let isCorrect = false;
-                    
-                    // Primeiro verificar no próprio answer
-                    if (answer.isCorrect === true) {
-                      isCorrect = true;
-                    } 
-                    // Depois verificar no attemptAnswer
-                    else if (attemptAnswer && attemptAnswer.isCorrect === true) {
-                      isCorrect = true;
-                    }
-                    // Se ainda não temos a informação, comparar selectedOptionId com correctOptionId
-                    else if (attemptAnswer && attemptAnswer.selectedOptionId && attemptAnswer.correctOptionId) {
-                      isCorrect = attemptAnswer.selectedOptionId === attemptAnswer.correctOptionId;
-                    }
-                    // Última tentativa: verificar o texto da opção
-                    else if (attemptAnswer && attemptAnswer.selectedOptionText && attemptAnswer.correctOptionText) {
-                      isCorrect = attemptAnswer.selectedOptionText === attemptAnswer.correctOptionText;
-                    }
-                    
-                    console.log(`Answer ${answer.questionId} final isCorrect: ${isCorrect}`);
-                    
-                    return {
-                      id: answer.id,
-                      questionId: answer.questionId,
-                      question: {
-                        id: answer.questionId,
-                        text: attemptAnswer?.questionText || answer.question?.text || `Questão ${answer.questionId?.substring(0, 8)}`,
-                        type: attemptAnswer?.questionType || answer.question?.type || 'MULTIPLE_CHOICE'
-                      },
-                      selectedOptionId: answer.selectedOptionId,
-                      isCorrect: isCorrect,
-                      attemptId: attempt.id,
-                      studentId: attempt.student.id,
-                    };
-                  }) || [],
-                };
-              }
-            } catch (error) {
-              console.error(`Error fetching results for attempt ${attempt.id}:`, error);
-            }
-            return null;
-          })
-      );
-      
-      // Filter out null values
-      const validAnalyticsData = analyticsData.filter(item => item !== null);
-      
-      console.log('TutorDashboard - Final analytics data:', {
-        totalAttempts: validAnalyticsData.length,
-        sample: validAnalyticsData[0]
-      });
-      
-      setAnalyticsAttempts(validAnalyticsData);
-    } catch (error) {
-      console.error('Error fetching analytics data:', error);
-      toast({
-        title: 'Erro ao carregar dados de análise',
-        description: 'Não foi possível carregar os dados detalhados para análise.',
-        variant: 'destructive',
-      });
-    }
-  }, [apiUrl, toast]);
-
   useEffect(() => {
     fetchPendingAttempts();
   }, [fetchPendingAttempts]);
-  
+
   // Preparar dados para analytics quando mudar de aba
   useEffect(() => {
-    if (activeTab === 'analytics' && (quizAttempts.length > 0 || simuladoAttempts.length > 0)) {
-      const analyticsData = [...quizAttempts, ...simuladoAttempts].map(attempt => {
-        console.log('Preparing analytics for attempt:', attempt.id, {
-          hasAnswers: !!attempt.answers,
-          answersCount: attempt.answers?.length,
-          hasResults: !!attempt.results
-        });
-        
+    if (
+      activeTab === 'analytics' &&
+      (quizAttempts.length > 0 ||
+        simuladoAttempts.length > 0)
+    ) {
+      const analyticsData = [
+        ...quizAttempts,
+        ...simuladoAttempts,
+      ].map(attempt => {
+        console.log(
+          'Preparing analytics for attempt:',
+          attempt.id,
+          {
+            hasAnswers: !!attempt.answers,
+            answersCount: attempt.answers?.length,
+            hasResults: !!attempt.results,
+          }
+        );
+
         return {
           id: attempt.id,
           student: attempt.student,
           assessment: attempt.assessment,
           status: attempt.status,
           submittedAt: attempt.submittedAt,
-          startedAt: attempt.createdAt || attempt.submittedAt,
+          startedAt:
+            attempt.startedAt ||
+            attempt.createdAt ||
+            attempt.submittedAt,
           results: attempt.results || {
             totalQuestions: 0,
             correctAnswers: 0,
-            scorePercentage: 0
+            scorePercentage: 0,
+            reviewedQuestions: 0,
           },
-          answers: attempt.answers?.map((answer: any) => {
-            // Determinar se está correta comparando com correctOptionId
-            const isCorrect = answer.selectedOptionId === answer.correctOptionId;
-            
-            return {
-              id: answer.id,
-              questionId: answer.questionId,
-              question: {
-                id: answer.questionId,
-                text: answer.questionText || `Questão`,
-                type: answer.questionType || 'MULTIPLE_CHOICE'
-              },
-              selectedOptionId: answer.selectedOptionId,
-              isCorrect: isCorrect,
-              attemptId: attempt.id,
-              studentId: attempt.student.id,
-            };
-          }) || [],
+          answers:
+            attempt.answers?.map((answer: Answer) => {
+              // Determinar se está correta comparando com correctOptionId
+              const isCorrect =
+                answer.selectedOptionId ===
+                answer.correctOptionId;
+
+              return {
+                id: answer.id,
+                questionId: answer.questionId,
+                selectedOptionId: answer.selectedOptionId,
+                isCorrect: isCorrect,
+                attemptId: attempt.id,
+                studentId: attempt.student.id,
+                question: {
+                  id: answer.questionId,
+                  text: answer.questionText || `Questão`,
+                  type: (answer.questionType === 'OPEN' ? 'OPEN' : 'MULTIPLE_CHOICE') as 'MULTIPLE_CHOICE' | 'OPEN',
+                },
+              };
+            }) || [],
         };
       });
-      
-      console.log('Setting analytics data:', analyticsData.length, 'attempts');
+
+      console.log(
+        'Setting analytics data:',
+        analyticsData.length,
+        'attempts'
+      );
       setAnalyticsAttempts(analyticsData);
     }
   }, [activeTab, quizAttempts, simuladoAttempts]);
@@ -621,6 +545,7 @@ export default function TutorDashboard({
     if (status === 'SUBMITTED' && pendingReview > 0) {
       return 'text-red-400 bg-red-900/20';
     }
+
     if (status === 'GRADING') {
       return 'text-yellow-400 bg-yellow-900/20';
     }
@@ -806,881 +731,940 @@ export default function TutorDashboard({
           <>
             {/* Filters and Search */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter size={20} className="text-gray-400" />
-              <select
-                value={filter}
-                onChange={e =>
-                  setFilter(e.target.value as 'all' | 'pending' | 'completed')
-                }
-                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
-              >
-                <option value="all">Todas</option>
-                <option value="pending">
-                  Aguardando revisão
-                </option>
-                <option value="in-progress">
-                  Em revisão
-                </option>
-                <option value="completed">Revisadas</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BookOpen
-                size={20}
-                className="text-gray-400"
-              />
-              <select
-                value={groupBy}
-                onChange={e =>
-                  setGroupBy(
-                    e.target.value as
-                      | 'student'
-                      | 'assessment'
-                  )
-                }
-                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
-              >
-                <option value="student">
-                  Agrupar por Aluno
-                </option>
-                <option value="assessment">
-                  Agrupar por Prova
-                </option>
-              </select>
-            </div>
-
-            <div className="relative">
-              <Search
-                size={20}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                placeholder="Buscar por aluno ou prova..."
-                value={searchTerm}
-                onChange={e =>
-                  setSearchTerm(e.target.value)
-                }
-                className="bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:border-secondary focus:outline-none w-64"
-              />
-            </div>
-          </div>
-
-          <div className="text-sm text-gray-400">
-            {deduplicatedAttempts.length} tentativas
-            encontradas
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Provas Abertas
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Eye size={24} className="text-blue-400" />
-                <div>
-                  <p className="text-2xl font-bold text-blue-400">
-                    {deduplicatedAttempts
-                      .filter(a => a.status === 'SUBMITTED')
-                      .reduce(
-                        (total, attempt) =>
-                          total + attempt.pendingReview,
-                        0
-                      )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Aguardando Revisão
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <User
-                  size={24}
-                  className="text-orange-400"
-                />
-                <div>
-                  <p className="text-2xl font-bold text-orange-400">
-                    {deduplicatedAttempts.reduce(
-                      (total, attempt) =>
-                        total +
-                        (attempt.rejectedQuestions || 0),
-                      0
-                    )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Aguardando Aluno
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <CheckCircle
-                  size={24}
-                  className="text-green-400"
-                />
-                <div>
-                  <p className="text-2xl font-bold text-green-400">
-                    {deduplicatedAttempts.reduce(
-                      (total, attempt) =>
-                        total + attempt.reviewedQuestions,
-                      0
-                    )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Aprovadas
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <FileText
-                  size={24}
-                  className="text-blue-400"
-                />
-                <div>
-                  <p className="text-2xl font-bold text-blue-400">
-                    {deduplicatedAttempts.reduce(
-                      (total, attempt) =>
-                        total + attempt.totalQuestions,
-                      0
-                    )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Total
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quiz e Simulado Stats */}
-        <div className="mb-6 space-y-6">
-          {/* Quiz Stats */}
-          {quizAttempts.length > 0 && (
-            <div className="bg-gray-800 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                  <BookOpen
-                    size={24}
-                    className="text-green-400"
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Filter
+                    size={20}
+                    className="text-gray-400"
                   />
-                  Estatísticas de Quiz
-                </h2>
-                <button
-                  onClick={() => fetchPendingAttempts()}
-                  className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <RefreshCw size={16} />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-green-400">
-                    {quizAttempts.length}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Total de Tentativas
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-400">
-                    {
-                      [
-                        ...new Set(
-                          quizAttempts.map(
-                            (a: TutorAttempt) => a.assessment?.id
-                          )
-                        ),
-                      ].length
+                  <select
+                    value={filter}
+                    onChange={e =>
+                      setFilter(
+                        e.target.value as
+                          | 'all'
+                          | 'pending'
+                          | 'completed'
+                      )
                     }
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Quizzes Diferentes
-                  </p>
+                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
+                  >
+                    <option value="all">Todas</option>
+                    <option value="pending">
+                      Aguardando revisão
+                    </option>
+                    <option value="in-progress">
+                      Em revisão
+                    </option>
+                    <option value="completed">
+                      Revisadas
+                    </option>
+                  </select>
                 </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {
-                      [
-                        ...new Set(
-                          quizAttempts.map(
-                            (a: TutorAttempt) => a.student?.id
-                          )
-                        ),
-                      ].length
-                    }
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Alunos Únicos
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-red-400">
-                    {quizAttempts.reduce(
-                      (total: number, attempt: TutorAttempt) => {
-                        // Para Quiz/Simulado, usar os dados de results
-                        if (attempt.results) {
-                          const totalQuestions =
-                            attempt.results
-                              .totalQuestions || 0;
-                          const correctAnswers =
-                            attempt.results
-                              .correctAnswers || 0;
-                          return (
-                            total +
-                            (totalQuestions -
-                              correctAnswers)
-                          );
-                        }
-                        return total;
-                      },
-                      0
-                    )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Total de Erros
-                  </p>
-                </div>
-              </div>
-              {/* Lista de tentativas por quiz */}
-              <div className="space-y-2">
-                {Object.entries(
-                  quizAttempts.reduce(
-                    (
-                      acc: Record<string, TutorAttempt[]>,
-                      attempt: TutorAttempt
-                    ) => {
-                      const key =
-                        attempt.assessment?.title ||
-                        'Quiz sem título';
-                      if (!acc[key]) acc[key] = [];
-                      acc[key].push(attempt);
-                      return acc;
-                    },
-                    {} as Record<string, TutorAttempt[]>
-                  )
-                ).map(([quizTitle, attempts]) => {
-                  // Para Quiz/Simulado, usar os dados de results
-                  const totalCorrect = attempts.reduce(
-                    (sum, att) =>
-                      sum +
-                      (att.results?.correctAnswers || 0),
-                    0
-                  );
-                  const totalQuestions = attempts.reduce(
-                    (sum, att) =>
-                      sum +
-                      (att.results?.totalQuestions || 0),
-                    0
-                  );
-                  const totalIncorrect =
-                    totalQuestions - totalCorrect;
 
-                  return (
-                    <div
-                      key={quizTitle}
-                      className="bg-gray-700 rounded-lg p-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-white">
-                          {quizTitle}
-                        </h3>
-                        <span className="text-sm text-gray-400">
-                          {attempts.length} tentativas
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-4 text-xs">
-                        <span className="text-green-400">
-                          ✓ {totalCorrect} corretas
-                        </span>
-                        <span className="text-red-400">
-                          ✗ {totalIncorrect} erradas
-                        </span>
-                        {totalQuestions > 0 && (
-                          <span className="text-gray-400">
-                            (
-                            {Math.round(
-                              (totalCorrect /
-                                totalQuestions) *
-                                100
-                            )}
-                            % acerto)
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 text-xs text-gray-400">
-                        Alunos:{' '}
-                        {[
-                          ...new Set(
-                            attempts.map(
-                              a => a.student?.name
-                            )
-                          ),
-                        ].join(', ')}
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="flex items-center gap-2">
+                  <BookOpen
+                    size={20}
+                    className="text-gray-400"
+                  />
+                  <select
+                    value={groupBy}
+                    onChange={e =>
+                      setGroupBy(
+                        e.target.value as
+                          | 'student'
+                          | 'assessment'
+                      )
+                    }
+                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
+                  >
+                    <option value="student">
+                      Agrupar por Aluno
+                    </option>
+                    <option value="assessment">
+                      Agrupar por Prova
+                    </option>
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <Search
+                    size={20}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Buscar por aluno ou prova..."
+                    value={searchTerm}
+                    onChange={e =>
+                      setSearchTerm(e.target.value)
+                    }
+                    className="bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:border-secondary focus:outline-none w-64"
+                  />
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-400">
+                {deduplicatedAttempts.length} tentativas
+                encontradas
               </div>
             </div>
-          )}
 
-          {/* Simulado Stats */}
-          {simuladoAttempts.length > 0 && (
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                <GraduationCap
-                  size={24}
-                  className="text-purple-400"
-                />
-                Estatísticas de Simulado
+            {/* Stats Cards */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Provas Abertas
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-purple-400">
-                    {simuladoAttempts.length}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Total de Tentativas
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-400">
-                    {
-                      [
-                        ...new Set(
-                          simuladoAttempts.map(
-                            (a: TutorAttempt) => a.assessment?.id
-                          )
-                        ),
-                      ].length
-                    }
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Simulados Diferentes
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {
-                      [
-                        ...new Set(
-                          simuladoAttempts.map(
-                            (a: TutorAttempt) => a.student?.id
-                          )
-                        ),
-                      ].length
-                    }
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Alunos Únicos
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-red-400">
-                    {simuladoAttempts.reduce(
-                      (total: number, attempt: TutorAttempt) => {
-                        // Para Quiz/Simulado, usar os dados de results
-                        if (attempt.results) {
-                          const totalQuestions =
-                            attempt.results
-                              .totalQuestions || 0;
-                          const correctAnswers =
-                            attempt.results
-                              .correctAnswers || 0;
-                          return (
-                            total +
-                            (totalQuestions -
-                              correctAnswers)
-                          );
-                        }
-                        return total;
-                      },
-                      0
-                    )}
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Total de Erros
-                  </p>
-                </div>
-              </div>
-              {/* Lista de tentativas por simulado */}
-              <div className="space-y-2">
-                {Object.entries(
-                  simuladoAttempts.reduce(
-                    (
-                      acc: Record<string, TutorAttempt[]>,
-                      attempt: TutorAttempt
-                    ) => {
-                      const key =
-                        attempt.assessment?.title ||
-                        'Simulado sem título';
-                      if (!acc[key]) acc[key] = [];
-                      acc[key].push(attempt);
-                      return acc;
-                    },
-                    {} as Record<string, TutorAttempt[]>
-                  )
-                ).map(([simuladoTitle, attempts]) => {
-                  //   Para Quiz/Simulado, usar os dados de results
-                  const totalCorrect = attempts.reduce(
-                    (sum, att) =>
-                      sum +
-                      (att.results?.correctAnswers || 0),
-                    0
-                  );
-                  const totalQuestions = attempts.reduce(
-                    (sum, att) =>
-                      sum +
-                      (att.results?.totalQuestions || 0),
-                    0
-                  );
-                  const totalIncorrect =
-                    totalQuestions - totalCorrect;
-
-                  return (
-                    <div
-                      key={simuladoTitle}
-                      className="bg-gray-700 rounded-lg p-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-white">
-                          {simuladoTitle}
-                        </h3>
-                        <span className="text-sm text-gray-400">
-                          {attempts.length} tentativas
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-4 text-xs">
-                        <span className="text-green-400">
-                          ✓ {totalCorrect} corretas
-                        </span>
-                        <span className="text-red-400">
-                          ✗ {totalIncorrect} erradas
-                        </span>
-                        {totalQuestions > 0 && (
-                          <span className="text-gray-400">
-                            (
-                            {Math.round(
-                              (totalCorrect /
-                                totalQuestions) *
-                                100
-                            )}
-                            % acerto)
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 text-xs text-gray-400">
-                        Alunos:{' '}
-                        {[
-                          ...new Set(
-                            attempts.map(
-                              a => a.student?.name
-                            )
-                          ),
-                        ].join(', ')}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Attempts grouped by student or assessment */}
-        <div className="space-y-6">
-          {Object.keys(groupedAttempts).length === 0 ? (
-            <div className="text-center py-12">
-              <FileText
-                size={48}
-                className="text-gray-600 mx-auto mb-4"
-              />
-              <h3 className="text-lg font-semibold text-gray-400 mb-2">
-                Nenhuma tentativa encontrada
-              </h3>
-              <p className="text-gray-500">
-                Não há provas{' '}
-                {filter === 'all'
-                  ? ''
-                  : `${
-                      filter === 'pending'
-                        ? 'aguardando revisão'
-                        : filter === 'in-progress'
-                        ? 'em revisão'
-                        : 'revisadas'
-                    }`}{' '}
-                no momento.
-              </p>
-            </div>
-          ) : (
-            Object.entries(groupedAttempts).map(
-              ([
-                groupId,
-                {
-                  student,
-                  assessment,
-                  attempts: groupAttempts,
-                },
-              ]) => (
-                <div
-                  key={groupId}
-                  className="bg-gray-800 rounded-lg p-6"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                      {groupBy === 'student' ? (
-                        <User
-                          size={24}
-                          className="text-primary"
-                        />
-                      ) : (
-                        <FileText
-                          size={24}
-                          className="text-primary"
-                        />
-                      )}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Eye
+                      size={24}
+                      className="text-blue-400"
+                    />
                     <div>
-                      {groupBy === 'student' ? (
-                        <>
-                          <h3 className="text-lg font-semibold text-white">
-                            {student.name}
-                          </h3>
-                          <p className="text-gray-400 text-sm">
-                            {student.email}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <h3 className="text-lg font-semibold text-white">
-                            {assessment.title}
-                          </h3>
-                          <p className="text-gray-400 text-sm">
-                            Prova Aberta
-                          </p>
-                        </>
-                      )}
-                    </div>
-                    <div className="ml-auto">
-                      <span className="text-sm text-gray-400">
-                        {groupBy === 'student'
-                          ? `${groupAttempts.length} prova${
-                              groupAttempts.length !== 1
-                                ? 's'
-                                : ''
-                            }`
-                          : `${groupAttempts.length} aluno${
-                              groupAttempts.length !== 1
-                                ? 's'
-                                : ''
-                            }`}
-                      </span>
+                      <p className="text-2xl font-bold text-blue-400">
+                        {deduplicatedAttempts
+                          .filter(
+                            a => a.status === 'SUBMITTED'
+                          )
+                          .reduce(
+                            (total, attempt) =>
+                              total + attempt.pendingReview,
+                            0
+                          )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Aguardando Revisão
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-4">
-                    {groupAttempts.map(attempt => {
-                      const priority = getPriorityLevel(
-                        attempt.submittedAt
+                <div className="p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <User
+                      size={24}
+                      className="text-orange-400"
+                    />
+                    <div>
+                      <p className="text-2xl font-bold text-orange-400">
+                        {deduplicatedAttempts.reduce(
+                          (total, attempt) =>
+                            total +
+                            (attempt.rejectedQuestions ||
+                              0),
+                          0
+                        )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Aguardando Aluno
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle
+                      size={24}
+                      className="text-green-400"
+                    />
+                    <div>
+                      <p className="text-2xl font-bold text-green-400">
+                        {deduplicatedAttempts.reduce(
+                          (total, attempt) =>
+                            total +
+                            attempt.reviewedQuestions,
+                          0
+                        )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Aprovadas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText
+                      size={24}
+                      className="text-blue-400"
+                    />
+                    <div>
+                      <p className="text-2xl font-bold text-blue-400">
+                        {deduplicatedAttempts.reduce(
+                          (total, attempt) =>
+                            total + attempt.totalQuestions,
+                          0
+                        )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Total
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quiz e Simulado Stats */}
+            <div className="mb-6 space-y-6">
+              {/* Quiz Stats */}
+              {quizAttempts.length > 0 && (
+                <div className="bg-gray-800 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                      <BookOpen
+                        size={24}
+                        className="text-green-400"
+                      />
+                      Estatísticas de Quiz
+                    </h2>
+                    <button
+                      onClick={() => fetchPendingAttempts()}
+                      className="p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      <RefreshCw size={16} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-green-400">
+                        {quizAttempts.length}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Total de Tentativas
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-400">
+                        {
+                          [
+                            ...new Set(
+                              quizAttempts.map(
+                                (a: TutorAttempt) =>
+                                  a.assessment?.id
+                              )
+                            ),
+                          ].length
+                        }
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Quizzes Diferentes
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-yellow-400">
+                        {
+                          [
+                            ...new Set(
+                              quizAttempts.map(
+                                (a: TutorAttempt) =>
+                                  a.student?.id
+                              )
+                            ),
+                          ].length
+                        }
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Alunos Únicos
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-red-400">
+                        {quizAttempts.reduce(
+                          (
+                            total: number,
+                            attempt: TutorAttempt
+                          ) => {
+                            // Para Quiz/Simulado, usar os dados de results
+                            if (attempt.results) {
+                              const totalQuestions =
+                                attempt.results
+                                  .totalQuestions || 0;
+                              const correctAnswers =
+                                attempt.results
+                                  .correctAnswers || 0;
+                              return (
+                                total +
+                                (totalQuestions -
+                                  correctAnswers)
+                              );
+                            }
+                            return total;
+                          },
+                          0
+                        )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Total de Erros
+                      </p>
+                    </div>
+                  </div>
+                  {/* Lista de tentativas por quiz */}
+                  <div className="space-y-2">
+                    {Object.entries(
+                      quizAttempts.reduce(
+                        (
+                          acc: Record<
+                            string,
+                            TutorAttempt[]
+                          >,
+                          attempt: TutorAttempt
+                        ) => {
+                          const key =
+                            attempt.assessment?.title ||
+                            'Quiz sem título';
+                          if (!acc[key]) acc[key] = [];
+                          acc[key].push(attempt);
+                          return acc;
+                        },
+                        {} as Record<string, TutorAttempt[]>
+                      )
+                    ).map(([quizTitle, attempts]) => {
+                      // Para Quiz/Simulado, usar os dados de results
+                      const totalCorrect = attempts.reduce(
+                        (sum, att) =>
+                          sum +
+                          (att.results?.correctAnswers ||
+                            0),
+                        0
                       );
+                      const totalQuestions =
+                        attempts.reduce(
+                          (sum, att) =>
+                            sum +
+                            (att.results?.totalQuestions ||
+                              0),
+                          0
+                        );
+                      const totalIncorrect =
+                        totalQuestions - totalCorrect;
 
                       return (
                         <div
-                          key={attempt.id}
-                          className="space-y-3"
+                          key={quizTitle}
+                          className="bg-gray-700 rounded-lg p-3"
                         >
-                          {/* Header da Prova */}
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <FileText
-                                size={20}
-                                className="text-blue-400"
-                              />
-                              <div>
-                                <h4 className="font-semibold text-white">
-                                  {attempt.assessment.title}
-                                </h4>
-                                <div
-                                  className={`inline-flex items-center gap-2 px-2 py-1 rounded-lg text-xs ${getStatusColor(
-                                    attempt.status,
-                                    attempt.pendingReview
-                                  )}`}
-                                >
-                                  <div className="w-2 h-2 rounded-full bg-current"></div>
-                                  {getStatusText(
-                                    attempt.status,
-                                    attempt.pendingReview
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-400">
-                              Enviada em{' '}
-                              {new Date(
-                                attempt.submittedAt
-                              ).toLocaleDateString(
-                                'pt-BR',
-                                {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                }
-                              )}
-                            </div>
+                            <h3 className="font-medium text-white">
+                              {quizTitle}
+                            </h3>
+                            <span className="text-sm text-gray-400">
+                              {attempts.length} tentativas
+                            </span>
                           </div>
-
-                          {/* Cards das Questões */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {Array.from(
-                              {
-                                length:
-                                  attempt.totalQuestions,
-                              },
-                              (_, questionIndex) => {
-                                const questionNumber =
-                                  questionIndex + 1;
-
-                                // Determinar status baseado nos dados reais das respostas
-                                let statusText =
-                                  'Aguardando';
-                                let statusColor =
-                                  'text-gray-400';
-                                let cardBgColor =
-                                  'bg-gray-700 border-gray-600';
-                                let numberBgColor =
-                                  'bg-gray-600 text-gray-300';
-
-                                // Se temos as respostas detalhadas, usar o status real
-                                if (
-                                  attempt.answers &&
-                                  attempt.answers[
-                                    questionIndex
-                                  ]
-                                ) {
-                                  const answer =
-                                    attempt.answers[
-                                      questionIndex
-                                    ];
-
-                                  if (
-                                    answer.isCorrect ===
-                                    true
-                                  ) {
-                                    // Questão aprovada
-                                    statusText = 'Aprovada';
-                                    statusColor =
-                                      'text-green-400';
-                                    cardBgColor =
-                                      'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
-                                    numberBgColor =
-                                      'bg-green-500 text-white';
-                                  } else if (
-                                    answer.isCorrect ===
-                                    false
-                                  ) {
-                                    // Questão rejeitada - aguardando nova resposta do aluno
-                                    statusText =
-                                      'Aguardando Aluno';
-                                    statusColor =
-                                      'text-orange-400';
-                                    cardBgColor =
-                                      'bg-orange-900/10 border-orange-500/30 hover:border-orange-500/50';
-                                    numberBgColor =
-                                      'bg-orange-500 text-white';
-                                  } else if (
-                                    answer.isCorrect ===
-                                    null
-                                  ) {
-                                    // Questão ainda não revisada
-                                    statusText =
-                                      'Aguardando Revisão';
-                                    statusColor =
-                                      'text-blue-400';
-                                    cardBgColor =
-                                      'bg-blue-900/10 border-blue-500/30 hover:border-blue-500/50';
-                                    numberBgColor =
-                                      'bg-blue-500 text-white';
-                                  }
-                                } else {
-                                  // Fallback para lógica antiga se não temos dados detalhados
-                                  if (
-                                    attempt.status ===
-                                      'SUBMITTED' ||
-                                    attempt.status ===
-                                      'GRADING'
-                                  ) {
-                                    const totalReviewed =
-                                      attempt.reviewedQuestions;
-                                    const totalRejected =
-                                      attempt.rejectedQuestions ||
-                                      0;
-
-                                    if (
-                                      questionIndex <
-                                      totalReviewed
-                                    ) {
-                                      statusText =
-                                        'Aprovada';
-                                      statusColor =
-                                        'text-green-400';
-                                      cardBgColor =
-                                        'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
-                                      numberBgColor =
-                                        'bg-green-500 text-white';
-                                    } else if (
-                                      questionIndex <
-                                      totalReviewed +
-                                        totalRejected
-                                    ) {
-                                      statusText =
-                                        'Aguardando Aluno';
-                                      statusColor =
-                                        'text-orange-400';
-                                      cardBgColor =
-                                        'bg-orange-900/10 border-orange-500/30 hover:border-orange-500/50';
-                                      numberBgColor =
-                                        'bg-orange-500 text-white';
-                                    } else {
-                                      statusText =
-                                        'Aguardando Revisão';
-                                      statusColor =
-                                        'text-blue-400';
-                                      cardBgColor =
-                                        'bg-blue-900/10 border-blue-500/30 hover:border-blue-500/50';
-                                      numberBgColor =
-                                        'bg-blue-500 text-white';
-                                    }
-                                  } else if (
-                                    attempt.status ===
-                                    'GRADED'
-                                  ) {
-                                    statusText =
-                                      'Concluída';
-                                    statusColor =
-                                      'text-green-400';
-                                    cardBgColor =
-                                      'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
-                                    numberBgColor =
-                                      'bg-green-500 text-white';
-                                  }
-                                }
-
-                                return (
-                                  <div
-                                    key={`${attempt.id}-question-${questionNumber}`}
-                                    className={`p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors ${cardBgColor}`}
-                                    onClick={() =>
-                                      handleViewAttempt(
-                                        attempt.id
-                                      )
-                                    }
-                                  >
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex items-center gap-2">
-                                        <div
-                                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${numberBgColor}`}
-                                        >
-                                          {questionNumber}
-                                        </div>
-                                        <div className="flex flex-col">
-                                          <span className="text-sm font-medium text-white">
-                                            Questão{' '}
-                                            {questionNumber}
-                                          </span>
-                                          <span className="text-xs text-gray-400 truncate max-w-32">
-                                            {groupBy ===
-                                            'student'
-                                              ? attempt
-                                                  .assessment
-                                                  .title
-                                              : attempt
-                                                  .student
-                                                  .name}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      <ChevronRight
-                                        size={14}
-                                        className="text-gray-400"
-                                      />
-                                    </div>
-
-                                    <div className="space-y-1 text-xs">
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-gray-400">
-                                          Status:
-                                        </span>
-                                        <span
-                                          className={`font-semibold ${statusColor}`}
-                                        >
-                                          {statusText}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-gray-400">
-                                          Prioridade:
-                                        </span>
-                                        <span
-                                          className={`font-semibold ${
-                                            priority ===
-                                            'high'
-                                              ? 'text-red-400'
-                                              : priority ===
-                                                'medium'
-                                              ? 'text-yellow-400'
-                                              : 'text-gray-400'
-                                          }`}
-                                        >
-                                          {priority ===
-                                          'high'
-                                            ? 'Alta'
-                                            : priority ===
-                                              'medium'
-                                            ? 'Média'
-                                            : 'Baixa'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              }
+                          <div className="mt-2 flex items-center gap-4 text-xs">
+                            <span className="text-green-400">
+                              ✓ {totalCorrect} corretas
+                            </span>
+                            <span className="text-red-400">
+                              ✗ {totalIncorrect} erradas
+                            </span>
+                            {totalQuestions > 0 && (
+                              <span className="text-gray-400">
+                                (
+                                {Math.round(
+                                  (totalCorrect /
+                                    totalQuestions) *
+                                    100
+                                )}
+                                % acerto)
+                              </span>
                             )}
+                          </div>
+                          <div className="mt-1 text-xs text-gray-400">
+                            Alunos:{' '}
+                            {[
+                              ...new Set(
+                                attempts.map(
+                                  a => a.student?.name
+                                )
+                              ),
+                            ].join(', ')}
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-              )
-            )
-          )}
-        </div>
+              )}
+
+              {/* Simulado Stats */}
+              {simuladoAttempts.length > 0 && (
+                <div className="bg-gray-800 rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                    <GraduationCap
+                      size={24}
+                      className="text-purple-400"
+                    />
+                    Estatísticas de Simulado
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-purple-400">
+                        {simuladoAttempts.length}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Total de Tentativas
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-blue-400">
+                        {
+                          [
+                            ...new Set(
+                              simuladoAttempts.map(
+                                (a: TutorAttempt) =>
+                                  a.assessment?.id
+                              )
+                            ),
+                          ].length
+                        }
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Simulados Diferentes
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-yellow-400">
+                        {
+                          [
+                            ...new Set(
+                              simuladoAttempts.map(
+                                (a: TutorAttempt) =>
+                                  a.student?.id
+                              )
+                            ),
+                          ].length
+                        }
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Alunos Únicos
+                      </p>
+                    </div>
+                    <div className="p-4 bg-gray-700 rounded-lg">
+                      <p className="text-2xl font-bold text-red-400">
+                        {simuladoAttempts.reduce(
+                          (
+                            total: number,
+                            attempt: TutorAttempt
+                          ) => {
+                            // Para Quiz/Simulado, usar os dados de results
+                            if (attempt.results) {
+                              const totalQuestions =
+                                attempt.results
+                                  .totalQuestions || 0;
+                              const correctAnswers =
+                                attempt.results
+                                  .correctAnswers || 0;
+                              return (
+                                total +
+                                (totalQuestions -
+                                  correctAnswers)
+                              );
+                            }
+                            return total;
+                          },
+                          0
+                        )}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Total de Erros
+                      </p>
+                    </div>
+                  </div>
+                  {/* Lista de tentativas por simulado */}
+                  <div className="space-y-2">
+                    {Object.entries(
+                      simuladoAttempts.reduce(
+                        (
+                          acc: Record<
+                            string,
+                            TutorAttempt[]
+                          >,
+                          attempt: TutorAttempt
+                        ) => {
+                          const key =
+                            attempt.assessment?.title ||
+                            'Simulado sem título';
+                          if (!acc[key]) acc[key] = [];
+                          acc[key].push(attempt);
+                          return acc;
+                        },
+                        {} as Record<string, TutorAttempt[]>
+                      )
+                    ).map(([simuladoTitle, attempts]) => {
+                      //   Para Quiz/Simulado, usar os dados de results
+                      const totalCorrect = attempts.reduce(
+                        (sum, att) =>
+                          sum +
+                          (att.results?.correctAnswers ||
+                            0),
+                        0
+                      );
+                      const totalQuestions =
+                        attempts.reduce(
+                          (sum, att) =>
+                            sum +
+                            (att.results?.totalQuestions ||
+                              0),
+                          0
+                        );
+                      const totalIncorrect =
+                        totalQuestions - totalCorrect;
+
+                      return (
+                        <div
+                          key={simuladoTitle}
+                          className="bg-gray-700 rounded-lg p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-white">
+                              {simuladoTitle}
+                            </h3>
+                            <span className="text-sm text-gray-400">
+                              {attempts.length} tentativas
+                            </span>
+                          </div>
+                          <div className="mt-2 flex items-center gap-4 text-xs">
+                            <span className="text-green-400">
+                              ✓ {totalCorrect} corretas
+                            </span>
+                            <span className="text-red-400">
+                              ✗ {totalIncorrect} erradas
+                            </span>
+                            {totalQuestions > 0 && (
+                              <span className="text-gray-400">
+                                (
+                                {Math.round(
+                                  (totalCorrect /
+                                    totalQuestions) *
+                                    100
+                                )}
+                                % acerto)
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-1 text-xs text-gray-400">
+                            Alunos:{' '}
+                            {[
+                              ...new Set(
+                                attempts.map(
+                                  a => a.student?.name
+                                )
+                              ),
+                            ].join(', ')}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Attempts grouped by student or assessment */}
+            <div className="space-y-6">
+              {Object.keys(groupedAttempts).length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText
+                    size={48}
+                    className="text-gray-600 mx-auto mb-4"
+                  />
+                  <h3 className="text-lg font-semibold text-gray-400 mb-2">
+                    Nenhuma tentativa encontrada
+                  </h3>
+                  <p className="text-gray-500">
+                    Não há provas{' '}
+                    {filter === 'all'
+                      ? ''
+                      : `${
+                          filter === 'pending'
+                            ? 'aguardando revisão'
+                            : filter === 'in-progress'
+                            ? 'em revisão'
+                            : 'revisadas'
+                        }`}{' '}
+                    no momento.
+                  </p>
+                </div>
+              ) : (
+                Object.entries(groupedAttempts).map(
+                  ([
+                    groupId,
+                    {
+                      student,
+                      assessment,
+                      attempts: groupAttempts,
+                    },
+                  ]) => (
+                    <div
+                      key={groupId}
+                      className="bg-gray-800 rounded-lg p-6"
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                          {groupBy === 'student' ? (
+                            <User
+                              size={24}
+                              className="text-primary"
+                            />
+                          ) : (
+                            <FileText
+                              size={24}
+                              className="text-primary"
+                            />
+                          )}
+                        </div>
+                        <div>
+                          {groupBy === 'student' ? (
+                            <>
+                              <h3 className="text-lg font-semibold text-white">
+                                {student.name}
+                              </h3>
+                              <p className="text-gray-400 text-sm">
+                                {student.email}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <h3 className="text-lg font-semibold text-white">
+                                {assessment.title}
+                              </h3>
+                              <p className="text-gray-400 text-sm">
+                                Prova Aberta
+                              </p>
+                            </>
+                          )}
+                        </div>
+                        <div className="ml-auto">
+                          <span className="text-sm text-gray-400">
+                            {groupBy === 'student'
+                              ? `${
+                                  groupAttempts.length
+                                } prova${
+                                  groupAttempts.length !== 1
+                                    ? 's'
+                                    : ''
+                                }`
+                              : `${
+                                  groupAttempts.length
+                                } aluno${
+                                  groupAttempts.length !== 1
+                                    ? 's'
+                                    : ''
+                                }`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {groupAttempts.map(attempt => {
+                          const priority = getPriorityLevel(
+                            attempt.submittedAt
+                          );
+
+                          return (
+                            <div
+                              key={attempt.id}
+                              className="space-y-3"
+                            >
+                              {/* Header da Prova */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <FileText
+                                    size={20}
+                                    className="text-blue-400"
+                                  />
+                                  <div>
+                                    <h4 className="font-semibold text-white">
+                                      {
+                                        attempt.assessment
+                                          .title
+                                      }
+                                    </h4>
+                                    <div
+                                      className={`inline-flex items-center gap-2 px-2 py-1 rounded-lg text-xs ${getStatusColor(
+                                        attempt.status,
+                                        attempt.pendingReview
+                                      )}`}
+                                    >
+                                      <div className="w-2 h-2 rounded-full bg-current"></div>
+                                      {getStatusText(
+                                        attempt.status,
+                                        attempt.pendingReview
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                  Enviada em{' '}
+                                  {new Date(
+                                    attempt.submittedAt
+                                  ).toLocaleDateString(
+                                    'pt-BR',
+                                    {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    }
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Cards das Questões */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {Array.from(
+                                  {
+                                    length:
+                                      attempt.totalQuestions,
+                                  },
+                                  (_, questionIndex) => {
+                                    const questionNumber =
+                                      questionIndex + 1;
+
+                                    // Determinar status baseado nos dados reais das respostas
+                                    let statusText =
+                                      'Aguardando';
+                                    let statusColor =
+                                      'text-gray-400';
+                                    let cardBgColor =
+                                      'bg-gray-700 border-gray-600';
+                                    let numberBgColor =
+                                      'bg-gray-600 text-gray-300';
+
+                                    // Se temos as respostas detalhadas, usar o status real
+                                    if (
+                                      attempt.answers &&
+                                      attempt.answers[
+                                        questionIndex
+                                      ]
+                                    ) {
+                                      const answer =
+                                        attempt.answers[
+                                          questionIndex
+                                        ];
+
+                                      if (
+                                        answer.isCorrect ===
+                                        true
+                                      ) {
+                                        // Questão aprovada
+                                        statusText =
+                                          'Aprovada';
+                                        statusColor =
+                                          'text-green-400';
+                                        cardBgColor =
+                                          'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
+                                        numberBgColor =
+                                          'bg-green-500 text-white';
+                                      } else if (
+                                        answer.isCorrect ===
+                                        false
+                                      ) {
+                                        // Questão rejeitada - aguardando nova resposta do aluno
+                                        statusText =
+                                          'Aguardando Aluno';
+                                        statusColor =
+                                          'text-orange-400';
+                                        cardBgColor =
+                                          'bg-orange-900/10 border-orange-500/30 hover:border-orange-500/50';
+                                        numberBgColor =
+                                          'bg-orange-500 text-white';
+                                      } else if (
+                                        answer.isCorrect ===
+                                        null
+                                      ) {
+                                        // Questão ainda não revisada
+                                        statusText =
+                                          'Aguardando Revisão';
+                                        statusColor =
+                                          'text-blue-400';
+                                        cardBgColor =
+                                          'bg-blue-900/10 border-blue-500/30 hover:border-blue-500/50';
+                                        numberBgColor =
+                                          'bg-blue-500 text-white';
+                                      }
+                                    } else {
+                                      // Fallback para lógica antiga se não temos dados detalhados
+                                      if (
+                                        attempt.status ===
+                                          'SUBMITTED' ||
+                                        attempt.status ===
+                                          'GRADING'
+                                      ) {
+                                        const totalReviewed =
+                                          attempt.reviewedQuestions;
+                                        const totalRejected =
+                                          attempt.rejectedQuestions ||
+                                          0;
+
+                                        if (
+                                          questionIndex <
+                                          totalReviewed
+                                        ) {
+                                          statusText =
+                                            'Aprovada';
+                                          statusColor =
+                                            'text-green-400';
+                                          cardBgColor =
+                                            'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
+                                          numberBgColor =
+                                            'bg-green-500 text-white';
+                                        } else if (
+                                          questionIndex <
+                                          totalReviewed +
+                                            totalRejected
+                                        ) {
+                                          statusText =
+                                            'Aguardando Aluno';
+                                          statusColor =
+                                            'text-orange-400';
+                                          cardBgColor =
+                                            'bg-orange-900/10 border-orange-500/30 hover:border-orange-500/50';
+                                          numberBgColor =
+                                            'bg-orange-500 text-white';
+                                        } else {
+                                          statusText =
+                                            'Aguardando Revisão';
+                                          statusColor =
+                                            'text-blue-400';
+                                          cardBgColor =
+                                            'bg-blue-900/10 border-blue-500/30 hover:border-blue-500/50';
+                                          numberBgColor =
+                                            'bg-blue-500 text-white';
+                                        }
+                                      } else if (
+                                        attempt.status ===
+                                        'GRADED'
+                                      ) {
+                                        statusText =
+                                          'Concluída';
+                                        statusColor =
+                                          'text-green-400';
+                                        cardBgColor =
+                                          'bg-green-900/10 border-green-500/30 hover:border-green-500/50';
+                                        numberBgColor =
+                                          'bg-green-500 text-white';
+                                      }
+                                    }
+
+                                    return (
+                                      <div
+                                        key={`${attempt.id}-question-${questionNumber}`}
+                                        className={`p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors ${cardBgColor}`}
+                                        onClick={() =>
+                                          handleViewAttempt(
+                                            attempt.id
+                                          )
+                                        }
+                                      >
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center gap-2">
+                                            <div
+                                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${numberBgColor}`}
+                                            >
+                                              {
+                                                questionNumber
+                                              }
+                                            </div>
+                                            <div className="flex flex-col">
+                                              <span className="text-sm font-medium text-white">
+                                                Questão{' '}
+                                                {
+                                                  questionNumber
+                                                }
+                                              </span>
+                                              <span className="text-xs text-gray-400 truncate max-w-32">
+                                                {groupBy ===
+                                                'student'
+                                                  ? attempt
+                                                      .assessment
+                                                      .title
+                                                  : attempt
+                                                      .student
+                                                      .name}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          <ChevronRight
+                                            size={14}
+                                            className="text-gray-400"
+                                          />
+                                        </div>
+
+                                        <div className="space-y-1 text-xs">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-gray-400">
+                                              Status:
+                                            </span>
+                                            <span
+                                              className={`font-semibold ${statusColor}`}
+                                            >
+                                              {statusText}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-gray-400">
+                                              Prioridade:
+                                            </span>
+                                            <span
+                                              className={`font-semibold ${
+                                                priority ===
+                                                'high'
+                                                  ? 'text-red-400'
+                                                  : priority ===
+                                                    'medium'
+                                                  ? 'text-yellow-400'
+                                                  : 'text-gray-400'
+                                              }`}
+                                            >
+                                              {priority ===
+                                              'high'
+                                                ? 'Alta'
+                                                : priority ===
+                                                  'medium'
+                                                ? 'Média'
+                                                : 'Baixa'}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )
+                )
+              )}
+            </div>
           </>
         ) : (
           /* Analytics Tab */
           <div className="bg-gray-800 rounded-lg p-6">
             {analyticsAttempts.length > 0 ? (
-              <TutorAnalytics attempts={analyticsAttempts} locale={locale} />
+              <TutorAnalytics
+                attempts={analyticsAttempts}
+                locale={locale}
+              />
             ) : (
               <div className="text-center py-12">
-                <BarChart3 size={48} className="mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-300">Carregando dados de análise...</p>
+                <BarChart3
+                  size={48}
+                  className="mx-auto mb-4 text-gray-400"
+                />
+                <p className="text-gray-300">
+                  Carregando dados de análise...
+                </p>
               </div>
             )}
           </div>

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
 import EditProfileForm from '@/components/EditProfileForm';
-import { ModernDivider, SimpleDivider } from '@/components/ui/modern-divider';
+import { SimpleDivider } from '@/components/ui/modern-divider';
 import {
   MapPin,
   Plus,

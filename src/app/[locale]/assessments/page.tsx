@@ -815,7 +815,8 @@ export default function AssessmentsPage({
                               assessment.type !==
                                 'PROVA_ABERTA' &&
                               status.canStartNewAttempt &&
-                              !status.hasActiveAttempt
+                              !status.hasActiveAttempt &&
+                              status.status !== 'GRADED' // Não mostrar este botão se já foi concluído
                             ) {
                               return (
                                 <button
@@ -1051,12 +1052,20 @@ export default function AssessmentsPage({
                                         'GRADED' &&
                                       status.attemptId
                                     ) {
-                                      console.log(
-                                        '➡️ Redirecionando para ver resultado'
-                                      );
-                                      router.push(
-                                        `/${locale}/assessments/open-exams/${status.attemptId}`
-                                      );
+                                      if (assessment.type === 'PROVA_ABERTA') {
+                                        console.log(
+                                          '➡️ Redirecionando para ver resultado da prova aberta'
+                                        );
+                                        router.push(
+                                          `/${locale}/assessments/open-exams/${status.attemptId}`
+                                        );
+                                      } else {
+                                        // Para QUIZ/SIMULADO: refazer
+                                        console.log(
+                                          '➡️ Iniciando nova tentativa de QUIZ/SIMULADO'
+                                        );
+                                        handleStartAssessment(assessment);
+                                      }
                                     } else if (
                                       status.status ===
                                         'IN_PROGRESS' &&
@@ -1122,8 +1131,8 @@ export default function AssessmentsPage({
                                           />
                                           {assessment.type ===
                                           'PROVA_ABERTA'
-                                            ? 'Prova Concluída'
-                                            : 'Ver Resultado'}
+                                            ? 'Ver Resultado'
+                                            : 'Refazer Quiz'}
                                         </>
                                       );
                                     } else if (

@@ -48,6 +48,7 @@ interface Assessment {
   randomizeQuestions?: boolean;
   randomizeOptions?: boolean;
   lessonId?: string | null;
+  lessonTitle?: string | null;
   createdAt: string;
   updatedAt: string;
   // TODO: API needs to return these fields for navigation
@@ -232,10 +233,14 @@ export default function AssessmentsPage({
 
       if (response.ok) {
         const data = await response.json();
-        setAssessments(data.assessments || []);
-        setFilteredAssessments(data.assessments || []);
+        // Filtrar apenas assessments que têm lessonId
+        const assessmentsWithLesson = (data.assessments || []).filter(
+          (assessment: Assessment) => assessment.lessonId !== null && assessment.lessonId !== undefined
+        );
+        setAssessments(assessmentsWithLesson);
+        setFilteredAssessments(assessmentsWithLesson);
         setPagination(data.pagination);
-        calculateStats(data.assessments || []);
+        calculateStats(assessmentsWithLesson);
 
         // Check status of all assessments
         const token = document.cookie
@@ -748,10 +753,10 @@ export default function AssessmentsPage({
                         </div>
                       </div>
 
-                      {assessment.lessonId && (
+                      {assessment.lessonTitle && (
                         <div className="mb-4 pt-4 border-t border-secondary/20">
                           <p className="text-xs text-gray-400">
-                            {t('linkedToLesson')}
+                            Aula: <span className="text-white font-medium">{assessment.lessonTitle}</span>
                           </p>
                         </div>
                       )}

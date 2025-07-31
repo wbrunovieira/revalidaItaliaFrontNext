@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Clock,
   CheckCircle,
+  XCircle,
   Filter,
   Search,
   Play,
@@ -145,8 +146,8 @@ export default function AssessmentsPage({
 
   // Check status of all assessments using the new API
   const checkAssessmentStatuses = useCallback(
-    async (assessments: Assessment[], token: string) => {
-      if (!token || assessments.length === 0) return;
+    async (assessments: Assessment[], token: string, currentUserId: string) => {
+      if (!token || assessments.length === 0 || !currentUserId) return;
 
       console.log(
         '🔍 Iniciando verificação de status para',
@@ -183,6 +184,131 @@ export default function AssessmentsPage({
                 console.log(
                   `✅ Status completo para ${assessment.title}:`,
                   statusData
+                );
+                
+                // Se está GRADED, buscar TODAS as tentativas para pegar a melhor nota
+                if (statusData.status === 'GRADED') {
+                  console.log(
+                    `🎯 Assessment GRADED - ${assessment.title} (type: ${assessment.type})`
+                  );
+                  
+                  try {
+                    // Para QUIZ/SIMULADO, buscar todas as tentativas e pegar a melhor nota
+                    if (assessment.type === 'QUIZ' || assessment.type === 'SIMULADO') {
+                      console.log(
+                        `🔍 Buscando TODAS as tentativas para ${assessment.title} (${assessment.type}) para encontrar a melhor nota`
+                      );
+                      
+                      // Buscar todas as tentativas do usuário
+                      const attemptsResponse = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts?identityId=${currentUserId}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                          },
+                        }
+                      );
+                      
+                      if (attemptsResponse.ok) {
+                        const attemptsData = await attemptsResponse.json();
+                        
+                        // Filtrar tentativas GRADED deste assessment
+                        const gradedAttempts = attemptsData.attempts?.filter(
+                          (attempt: any) => 
+                            attempt.assessmentId === assessment.id && 
+                            attempt.status === 'GRADED'
+                        ) || [];
+                        
+                        console.log(
+                          `📊 Encontradas ${gradedAttempts.length} tentativas GRADED para ${assessment.title}`
+                        );
+                        
+                        // Buscar os resultados de cada tentativa e encontrar a melhor nota
+                        let bestScore = 0;
+                        let bestAttemptId = statusData.attemptId;
+                        
+                        for (const attempt of gradedAttempts) {
+                          try {
+                            const resultsResponse = await fetch(
+                              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/${attempt.id}/results`,
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                  'Content-Type': 'application/json',
+                                },
+                              }
+                            );
+                            
+                            if (resultsResponse.ok) {
+                              const resultsData = await resultsResponse.json();
+                              const score = resultsData.results?.scorePercentage || 0;
+                              
+                              console.log(
+                                `  - Attempt ${attempt.id}: score = ${score}%`
+                              );
+                              
+                              if (score > bestScore) {
+                                bestScore = score;
+                                bestAttemptId = attempt.id;
+                              }
+                            }
+                          } catch (error) {
+                            console.error(`Error fetching results for attempt ${attempt.id}:`, error);
+                          }
+                        }
+                        
+                        statusData.score = bestScore;
+                        statusData.attemptId = bestAttemptId;
+                        
+                        console.log(
+                          `✅ Melhor nota para ${assessment.title}: ${bestScore}% (attemptId: ${bestAttemptId})`
+                        );
+                      }
+                    } else if (statusData.attemptId) {
+                      // Para PROVA_ABERTA, usar apenas a tentativa retornada
+                      console.log(
+                        `🔍 Buscando resultado da única tentativa para ${assessment.title} - attemptId: ${statusData.attemptId}`
+                      );
+                      
+                      const resultsResponse = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/${statusData.attemptId}/results`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                          },
+                        }
+                      );
+                      
+                      if (resultsResponse.ok) {
+                        const resultsData = await resultsResponse.json();
+                        
+                        if (resultsData.results?.scorePercentage !== undefined) {
+                          statusData.score = resultsData.results.scorePercentage;
+                          console.log(
+                            `✅ Score para PROVA_ABERTA: ${statusData.score}%`
+                          );
+                        }
+                      }
+                    }
+                    
+                    // Debug da comparação final
+                    if (assessment.passingScore !== null && assessment.passingScore !== undefined && statusData.score !== undefined) {
+                      console.log(
+                        `🔍 Comparação final de aprovação para ${assessment.title}: score=${statusData.score} >= passingScore=${assessment.passingScore} ? ${statusData.score >= assessment.passingScore}`
+                      );
+                    }
+                  } catch (error) {
+                    console.error(
+                      `Error fetching results for assessment ${assessment.id}:`,
+                      error
+                    );
+                  }
+                }
+                
+                console.log(
+                  `📊 Score: ${statusData.score}, PassingScore: ${assessment.passingScore}, Status: ${statusData.status}`
                 );
                 statusMap.set(assessment.id, statusData);
               } else {
@@ -248,17 +374,18 @@ export default function AssessmentsPage({
           .find(c => c.trim().startsWith('token='))
           ?.split('=')[1];
 
-        if (token && data.assessments?.length > 0) {
+        if (token && data.assessments?.length > 0 && userId) {
           await checkAssessmentStatuses(
             data.assessments,
-            token
+            token,
+            userId
           );
         }
       }
     } catch (error) {
       console.error('Error fetching assessments:', error);
     }
-  }, [calculateStats, checkAssessmentStatuses]);
+  }, [calculateStats, checkAssessmentStatuses, userId]);
 
   // Function to decode JWT token
   const decodeJWT = (token: string) => {
@@ -775,21 +902,45 @@ export default function AssessmentsPage({
                               assessmentStatuses.get(
                                 assessment.id
                               );
+                            const debugInfo = {
+                              assessmentTitle: assessment.title,
+                              hasStatus: !!status,
+                              status: status?.status,
+                              canStartNewAttempt:
+                                status?.canStartNewAttempt,
+                              hasActiveAttempt:
+                                status?.hasActiveAttempt,
+                              attemptId:
+                                status?.attemptId,
+                              score: status?.score,
+                              passingScore: assessment.passingScore,
+                              shouldShowBadge: status?.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined,
+                              passed: status?.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined && status.score >= assessment.passingScore,
+                              type: assessment.type,
+                            };
+                            
                             console.log(
                               `🎯 Renderizando card para ${assessment.title}:`,
-                              {
-                                hasStatus: !!status,
-                                status: status?.status,
-                                canStartNewAttempt:
-                                  status?.canStartNewAttempt,
-                                hasActiveAttempt:
-                                  status?.hasActiveAttempt,
-                                attemptId:
-                                  status?.attemptId,
-                                score: status?.score,
-                                type: assessment.type,
-                              }
+                              debugInfo
                             );
+                            
+                            // Log especial para badge
+                            if (status?.status === 'GRADED') {
+                              console.log(`🏅 Assessment GRADED - Badge info para ${assessment.title}:`, {
+                                score: status?.score,
+                                scoreType: typeof status?.score,
+                                passingScore: assessment.passingScore,
+                                passingScoreType: typeof assessment.passingScore,
+                                shouldShowBadge: debugInfo.shouldShowBadge,
+                                willRenderBadge: status?.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined,
+                                comparison: status?.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined 
+                                  ? `${status.score} >= ${assessment.passingScore} = ${status.score >= assessment.passingScore}`
+                                  : 'Cannot compare - missing values',
+                                passed: status?.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined 
+                                  ? status.score >= assessment.passingScore 
+                                  : false
+                              });
+                            }
 
                             // Se não há status ou pode iniciar nova tentativa (mas não está GRADED)
                             if (!status) {
@@ -952,6 +1103,26 @@ export default function AssessmentsPage({
                                       </span>
                                     )}
                                   </div>
+
+                                  {/* Badge de aprovação */}
+                                  {status.score !== undefined && assessment.passingScore !== null && assessment.passingScore !== undefined && (
+                                    <div className="flex items-center gap-2 mt-2">
+                                      {status.score >= assessment.passingScore ? (
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-green-900/30 border border-green-500/30 rounded-full">
+                                          <CheckCircle size={12} className="text-green-400" />
+                                          <span className="text-xs text-green-400 font-medium">Aprovado</span>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-red-900/30 border border-red-500/30 rounded-full">
+                                          <XCircle size={12} className="text-red-400" />
+                                          <span className="text-xs text-red-400 font-medium">Reprovado</span>
+                                        </div>
+                                      )}
+                                      <span className="text-xs text-gray-400">
+                                        Nota mínima: {assessment.passingScore}%
+                                      </span>
+                                    </div>
+                                  )}
 
                                   {/* Progresso de questões */}
                                   {status.totalQuestions >

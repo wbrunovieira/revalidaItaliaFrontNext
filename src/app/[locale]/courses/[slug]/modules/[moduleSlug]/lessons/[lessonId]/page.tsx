@@ -565,7 +565,7 @@ export default async function LessonPage({
                 {/* Simple button to study flashcards */}
                 <Link
                   href={`/${locale}/flashcards/study?lessonId=${lessonId}`}
-                  className="block w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
+                  className="w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
                 >
                   <CreditCard size={18} />
                   {tLesson('studyFlashcards')}

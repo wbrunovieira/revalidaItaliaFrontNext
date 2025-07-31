@@ -366,6 +366,38 @@
     "answerType": "Tipo di risposta",
     "studyFlashcards": "Studia flashcard"
   },
+  "FlashcardStudy": {
+    "back": "Indietro",
+    "shuffle": "Mescola",
+    "question": "Domanda",
+    "answer": "Risposta",
+    "tapToFlip": "Tocca per girare",
+    "mastered": "Lo so",
+    "difficult": "Difficile",
+    "loading": "Caricamento flashcard...",
+    "instructions": {
+      "swipe": "Scorri a destra (Lo so) o sinistra (Difficile)",
+      "tap": "Tocca la card per vedere la risposta"
+    },
+    "results": {
+      "title": "Sessione Completata!",
+      "subtitle": "Hai ripassato tutte le flashcard",
+      "mastered": "Card padroneggiate",
+      "difficult": "Card difficili",
+      "total": "Totale card",
+      "studyAgain": "Studia di nuovo",
+      "back": "Indietro"
+    },
+    "error": {
+      "title": "Errore nel caricamento",
+      "back": "Indietro"
+    },
+    "noFlashcards": {
+      "title": "Nessuna flashcard trovata",
+      "subtitle": "Questa lezione non ha ancora flashcard",
+      "back": "Indietro"
+    }
+  },
   "Video": {
     "continueWatching": {
       "title": "Continua a guardare",

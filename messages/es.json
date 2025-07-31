@@ -534,6 +534,16 @@
       "text": "Texto",
       "image": "Imagen"
     },
+    "lessonAssociation": {
+      "title": "Asociación con Clases",
+      "optional": "Opcional",
+      "course": "Curso",
+      "module": "Módulo",
+      "selectCourse": "Selecciona un curso",
+      "selectModule": "Selecciona un módulo",
+      "selectLessons": "Selecciona las clases",
+      "selectedCount": "{count} clases seleccionadas"
+    },
     "uploading": "Cargando...",
     "save": "Guardar",
     "saving": "Guardando...",
@@ -558,7 +568,15 @@
       "updateTitle": "Error al actualizar",
       "updateFailed": "Error al actualizar la flashcard",
       "serverError": "Error del servidor. Intenta de nuevo más tarde",
-      "connectionError": "Error de conexión. Verifica tu conexión a internet"
+      "connectionError": "Error de conexión. Verifica tu conexión a internet",
+      "flashcardNotFound": "Flashcard no encontrada",
+      "invalidInput": "Entrada inválida",
+      "duplicateSlug": "Este slug ya está en uso",
+      "argumentNotFound": "Argumento no encontrado",
+      "tagNotFound": "Etiqueta no encontrada",
+      "lessonNotFound": "Clase no encontrada",
+      "loadCoursesTitle": "Error al cargar cursos",
+      "loadCoursesDescription": "No se pudo cargar la lista de cursos"
     },
     "success": {
       "title": "Éxito",

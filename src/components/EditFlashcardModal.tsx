@@ -17,6 +17,9 @@ import {
   Image as ImageIcon,
   Tag,
   List,
+  BookOpen,
+  Layers,
+  FileText,
 } from 'lucide-react';
 import TagSelectionModal from '@/components/TagSelectionModal';
 import {
@@ -26,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useParams } from 'next/navigation';
 
 // Tag type that includes slug (from API response)
 interface FlashcardTagWithSlug {
@@ -47,6 +52,36 @@ interface Argument {
   title: string;
 }
 
+interface Translation {
+  locale: string;
+  title: string;
+  description: string;
+}
+
+interface Lesson {
+  id: string;
+  moduleId: string;
+  order: number;
+  translations: Translation[];
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  imageUrl: string | null;
+  order: number;
+  translations: Translation[];
+  lessons?: Lesson[];
+}
+
+interface Course {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  translations: Translation[];
+  modules?: Module[];
+}
+
 interface FlashcardData {
   id: string;
   slug: string;
@@ -58,6 +93,11 @@ interface FlashcardData {
   answerType: 'TEXT' | 'IMAGE';
   argumentId: string;
   tags: FlashcardTagWithSlug[];
+  lessons?: Array<{
+    id: string;
+    order: number;
+    lesson: Lesson;
+  }>;
 }
 
 interface EditFlashcardModalProps {
@@ -75,6 +115,12 @@ interface FormData {
   slug: string;
   argumentId: string;
   tags: FlashcardTagWithSlug[];
+  courseId: string;
+  moduleId: string;
+  lessons: Array<{
+    lessonId: string;
+    order: number;
+  }>;
 }
 
 interface FormErrors {
@@ -97,6 +143,8 @@ export default function EditFlashcardModal({
 }: EditFlashcardModalProps) {
   const t = useTranslations('Admin.flashcardEdit');
   const { toast } = useToast();
+  const params = useParams();
+  const locale = params.locale as string;
 
   const [formData, setFormData] = useState<FormData>({
     questionType: 'TEXT',
@@ -106,6 +154,9 @@ export default function EditFlashcardModal({
     slug: '',
     argumentId: '',
     tags: [],
+    courseId: '',
+    moduleId: '',
+    lessons: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -116,6 +167,18 @@ export default function EditFlashcardModal({
   const [showTagModal, setShowTagModal] = useState(false);
   const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [loadingArguments, setLoadingArguments] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [selectedLessons, setSelectedLessons] = useState<Lesson[]>([]);
+
+  // Helper function to get translation by locale
+  const getTranslationByLocale = (translations: Translation[], targetLocale: string) => {
+    return translations.find(t => t.locale === targetLocale) || {
+      locale: targetLocale,
+      title: '',
+      description: '',
+    };
+  };
 
   // Load arguments
   const loadArguments = useCallback(async () => {
@@ -147,6 +210,77 @@ export default function EditFlashcardModal({
       setLoadingArguments(false);
     }
   }, [t, toast]);
+
+  // Load courses with modules and lessons
+  const loadCourses = useCallback(async () => {
+    setLoadingCourses(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?isDeleted=false&include=modules.lessons`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to load courses');
+      }
+
+      const data = await response.json();
+      setCourses(data.courses || []);
+    } catch (error) {
+      console.error('Error loading courses:', error);
+      toast({
+        title: t('errors.loadCoursesTitle'),
+        description: t('errors.loadCoursesDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingCourses(false);
+    }
+  }, [t, toast]);
+
+  // Handler for course change
+  const handleCourseChange = (courseId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      courseId,
+      moduleId: '',
+      lessons: [],
+    }));
+    setSelectedLessons([]);
+  };
+
+  // Handler for module change
+  const handleModuleChange = (moduleId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      moduleId,
+      lessons: [],
+    }));
+    setSelectedLessons([]);
+  };
+
+  // Handler for lesson toggle
+  const handleLessonToggle = (lesson: Lesson) => {
+    const isSelected = selectedLessons.some(l => l.id === lesson.id);
+    
+    if (isSelected) {
+      setSelectedLessons(prev => prev.filter(l => l.id !== lesson.id));
+      setFormData(prev => ({
+        ...prev,
+        lessons: prev.lessons.filter(l => l.lessonId !== lesson.id),
+      }));
+    } else {
+      setSelectedLessons(prev => [...prev, lesson]);
+      setFormData(prev => ({
+        ...prev,
+        lessons: [...prev.lessons, { lessonId: lesson.id, order: 1 }],
+      }));
+    }
+  };
 
   // Validate question content
   const validateQuestionContent = useCallback(
@@ -493,6 +627,10 @@ export default function EditFlashcardModal({
         slug?: string;
         argumentId?: string;
         tagIds?: string[];
+        lessons?: Array<{
+          lessonId: string;
+          order: number;
+        }>;
       } = {};
       const imagesToDelete: string[] = [];
       
@@ -541,6 +679,15 @@ export default function EditFlashcardModal({
       if (tagsChanged) {
         updateData.tagIds = formData.tags.map(tag => tag.id);
       }
+      
+      // Check if lessons have changed
+      const currentLessonIds = flashcard.lessons?.map(l => l.lesson.id).sort() || [];
+      const newLessonIds = formData.lessons.map(l => l.lessonId).sort();
+      const lessonsChanged = currentLessonIds.join(',') !== newLessonIds.join(',');
+      
+      if (lessonsChanged && formData.lessons.length > 0) {
+        updateData.lessons = formData.lessons;
+      }
 
       // If no changes, just close
       if (Object.keys(updateData).length === 0) {
@@ -564,7 +711,32 @@ export default function EditFlashcardModal({
         const data = await response.json();
         let errorMessage = t('error.updateFailed');
         
-        if (response.status === 400 && data.message) {
+        // Handle new error structure
+        if (data.error) {
+          switch (data.error.code) {
+            case 'FLASHCARD_NOT_FOUND':
+              errorMessage = t('error.flashcardNotFound');
+              break;
+            case 'INVALID_INPUT':
+              errorMessage = data.error.message || t('error.invalidInput');
+              break;
+            case 'DUPLICATE_SLUG':
+              errorMessage = t('error.duplicateSlug');
+              break;
+            case 'ARGUMENT_NOT_FOUND':
+              errorMessage = t('error.argumentNotFound');
+              break;
+            case 'TAG_NOT_FOUND':
+              errorMessage = t('error.tagNotFound');
+              break;
+            case 'LESSON_NOT_FOUND':
+              errorMessage = t('error.lessonNotFound');
+              break;
+            default:
+              errorMessage = data.error.message || t('error.updateFailed');
+          }
+        } else if (response.status === 400 && data.message) {
+          // Legacy error handling
           errorMessage = Array.isArray(data.message) ? data.message[0] : data.message;
         } else if (response.status === 500) {
           errorMessage = t('error.serverError');
@@ -606,6 +778,25 @@ export default function EditFlashcardModal({
   // Update form when flashcard changes
   useEffect(() => {
     if (flashcard && isOpen) {
+      // Set selected lessons from flashcard data
+      const flashcardLessons = flashcard.lessons?.map(fl => fl.lesson) || [];
+      setSelectedLessons(flashcardLessons);
+      
+      // Find course and module IDs from the first lesson
+      let courseId = '';
+      let moduleId = '';
+      if (flashcardLessons.length > 0) {
+        const firstLesson = flashcardLessons[0];
+        moduleId = firstLesson.moduleId;
+        
+        // Find the course that contains this module
+        courses.forEach(course => {
+          if (course.modules?.some(m => m.id === moduleId)) {
+            courseId = course.id;
+          }
+        });
+      }
+      
       setFormData({
         questionType: flashcard.questionType,
         questionContent: flashcard.questionType === 'TEXT' 
@@ -618,18 +809,25 @@ export default function EditFlashcardModal({
         slug: flashcard.slug,
         argumentId: flashcard.argumentId,
         tags: flashcard.tags,
+        courseId,
+        moduleId,
+        lessons: flashcard.lessons?.map(fl => ({
+          lessonId: fl.lesson.id,
+          order: fl.order,
+        })) || [],
       });
       setErrors({});
       setTouched({});
     }
-  }, [flashcard, isOpen]);
+  }, [flashcard, isOpen, courses]);
 
-  // Load arguments when modal opens
+  // Load arguments and courses when modal opens
   useEffect(() => {
     if (isOpen) {
       loadArguments();
+      loadCourses();
     }
-  }, [isOpen, loadArguments]);
+  }, [isOpen, loadArguments, loadCourses]);
 
   if (!isOpen || !flashcard) return null;
 
@@ -996,6 +1194,141 @@ export default function EditFlashcardModal({
                       {tag.name}
                     </span>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Lesson Association */}
+            <div className="space-y-4 pt-4 border-t border-gray-700">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <BookOpen className="text-secondary" size={20} />
+                {t('lessonAssociation.title')}
+                <span className="text-gray-400 text-sm ml-2">({t('lessonAssociation.optional')})</span>
+              </h3>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Course Selection */}
+                <div>
+                  <label className="block text-gray-300 mb-2 flex items-center gap-2">
+                    <BookOpen size={16} />
+                    {t('lessonAssociation.course')}
+                  </label>
+                  {loadingCourses ? (
+                    <div className="animate-pulse">
+                      <div className="h-10 bg-gray-700 rounded"></div>
+                    </div>
+                  ) : (
+                    <Select
+                      value={formData.courseId}
+                      onValueChange={handleCourseChange}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectValue placeholder={t('lessonAssociation.selectCourse')} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-700 border-gray-600">
+                        {courses.map(course => {
+                          const courseTranslation = getTranslationByLocale(
+                            course.translations,
+                            locale
+                          );
+                          return (
+                            <SelectItem
+                              key={course.id}
+                              value={course.id}
+                              className="text-white hover:bg-gray-600"
+                            >
+                              {courseTranslation.title}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {/* Module Selection */}
+                <div>
+                  <label className="block text-gray-300 mb-2 flex items-center gap-2">
+                    <Layers size={16} />
+                    {t('lessonAssociation.module')}
+                  </label>
+                  <Select
+                    value={formData.moduleId}
+                    onValueChange={handleModuleChange}
+                    disabled={!formData.courseId}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
+                      <SelectValue placeholder={t('lessonAssociation.selectModule')} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-700 border-gray-600">
+                      {formData.courseId &&
+                        courses
+                          .find(c => c.id === formData.courseId)
+                          ?.modules?.map(module => {
+                            const moduleTranslation = getTranslationByLocale(
+                              module.translations,
+                              locale
+                            );
+                            return (
+                              <SelectItem
+                                key={module.id}
+                                value={module.id}
+                                className="text-white hover:bg-gray-600"
+                              >
+                                {moduleTranslation.title}
+                              </SelectItem>
+                            );
+                          })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Lessons List */}
+              {formData.moduleId && (
+                <div>
+                  <label className="block text-gray-300 mb-3 flex items-center gap-2">
+                    <FileText size={16} />
+                    {t('lessonAssociation.selectLessons')}
+                  </label>
+                  <div className="space-y-2 max-h-60 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                    {courses
+                      .find(c => c.id === formData.courseId)
+                      ?.modules?.find(m => m.id === formData.moduleId)
+                      ?.lessons?.map(lesson => {
+                        const lessonTranslation = getTranslationByLocale(
+                          lesson.translations,
+                          locale
+                        );
+                        const isSelected = selectedLessons.some(
+                          l => l.id === lesson.id
+                        );
+                        return (
+                          <div
+                            key={lesson.id}
+                            className="flex items-center space-x-2 p-2 hover:bg-gray-600/50 rounded transition-colors"
+                          >
+                            <Checkbox
+                              id={`lesson-${lesson.id}`}
+                              checked={isSelected}
+                              onCheckedChange={() => handleLessonToggle(lesson)}
+                              className="border-gray-400 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+                            />
+                            <label
+                              htmlFor={`lesson-${lesson.id}`}
+                              className="text-sm text-gray-300 cursor-pointer flex-1"
+                            >
+                              {lessonTranslation.title}
+                            </label>
+                          </div>
+                        );
+                      })}
+                  </div>
+                  {selectedLessons.length > 0 && (
+                    <p className="mt-2 text-sm text-gray-400">
+                      {t('lessonAssociation.selectedCount', { count: selectedLessons.length })}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

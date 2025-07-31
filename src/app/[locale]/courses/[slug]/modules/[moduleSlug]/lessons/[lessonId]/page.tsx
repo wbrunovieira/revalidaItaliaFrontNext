@@ -19,6 +19,7 @@ import {
   User,
   ClipboardList,
   ExternalLink,
+  CreditCard,
 } from 'lucide-react';
 
 interface Translation {
@@ -60,6 +61,7 @@ interface Lesson {
   imageUrl?: string;
   video?: Video;
   translations: Translation[];
+  flashcardIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -109,6 +111,23 @@ interface Document {
   translations: DocumentTranslation[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface FlashcardTranslation {
+  locale: string;
+  title: string;
+}
+
+interface Flashcard {
+  id: string;
+  slug: string;
+  questionText?: string;
+  questionImageUrl?: string;
+  questionType: 'TEXT' | 'IMAGE';
+  answerText?: string;
+  answerImageUrl?: string;
+  answerType: 'TEXT' | 'IMAGE';
+  translations?: FlashcardTranslation[];
 }
 
 interface PandaVideoResponse {
@@ -211,6 +230,25 @@ export default async function LessonPage({
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : [])),
   ]);
+
+  // Buscar flashcards se a lesson tiver flashcardIds
+  let flashcards: Flashcard[] = [];
+  if (lesson.flashcardIds && lesson.flashcardIds.length > 0) {
+    try {
+      flashcards = await Promise.all(
+        lesson.flashcardIds.map(id =>
+          fetch(`${API_URL}/api/v1/flashcards/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store'
+          }).then(r => r.ok ? r.json() : null)
+        )
+      );
+      // Filtrar nulls caso algum flashcard não seja encontrado
+      flashcards = flashcards.filter(f => f !== null);
+    } catch (error) {
+      console.error('Error fetching flashcards:', error);
+    }
+  }
 
   const sorted = allLessons.lessons.sort(
     (a, b) =>
@@ -507,6 +545,34 @@ export default async function LessonPage({
               documents={documents}
               locale={locale}
             />
+
+            {/* Flashcards section */}
+            {flashcards.length > 0 && (
+              <div className="mt-8">
+                <div className="mb-4">
+                  <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                    <div className="p-2 bg-secondary/20 rounded-lg">
+                      <CreditCard
+                        size={20}
+                        className="text-secondary"
+                      />
+                    </div>
+                    {tLesson('flashcards')}
+                  </h4>
+                  <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
+                </div>
+                
+                {/* Simple button to study flashcards */}
+                <Link
+                  href={`/${locale}/flashcards/study?lessonId=${lessonId}`}
+                  className="block w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
+                >
+                  <CreditCard size={18} />
+                  {tLesson('studyFlashcards')}
+                  <ExternalLink size={14} />
+                </Link>
+              </div>
+            )}
 
             {/* Assessments section */}
             {assessments.length > 0 && (

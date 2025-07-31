@@ -367,7 +367,15 @@
     "openDocument": "Abrir",
     "completed": "Concluída",
     "current": "Atual",
-    "locked": "Bloqueada"
+    "locked": "Bloqueada",
+    "flashcards": "Flashcards",
+    "flashcard": "Flashcard",
+    "textQuestion": "Pergunta em texto",
+    "imageQuestion": "Pergunta em imagem",
+    "question": "Pergunta",
+    "imageContent": "Conteúdo em imagem",
+    "answerType": "Tipo de resposta",
+    "studyFlashcards": "Estudar flashcards"
   },
   "Video": {
     "continueWatching": {

@@ -829,6 +829,13 @@
     "noArguments": "Nessun argomento disponibile",
     "tags": "Tag",
     "optional": "opzionale",
+    "lessonAssociation": "Associa a Lezioni",
+    "course": "Corso",
+    "selectCourse": "Seleziona un corso",
+    "module": "Modulo",
+    "selectModule": "Seleziona un modulo",
+    "selectLessons": "Seleziona le lezioni",
+    "selectedLessonsCount": "{count} lezioni selezionate",
     "selectTags": "Seleziona tag",
     "addMoreTags": "Aggiungi altri tag ({count} selezionati)",
     "loadingTags": "Caricamento tag...",
@@ -860,7 +867,9 @@
       "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
       "imageTooLarge": "File troppo grande. La dimensione massima è 5MB",
       "createTitle": "Errore nella creazione della flashcard",
-      "createDescription": "Impossibile creare la flashcard"
+      "createDescription": "Impossibile creare la flashcard",
+      "loadCoursesTitle": "Errore nel caricamento dei corsi",
+      "loadCoursesDescription": "Impossibile caricare l'elenco dei corsi"
     },
     "success": {
       "createTitle": "Flashcard creata",

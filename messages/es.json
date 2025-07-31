@@ -827,6 +827,13 @@
     "noArguments": "No hay argumentos disponibles",
     "tags": "Etiquetas",
     "optional": "opcional",
+    "lessonAssociation": "Asociar a Clases",
+    "course": "Curso",
+    "selectCourse": "Seleccione un curso",
+    "module": "Módulo",
+    "selectModule": "Seleccione un módulo",
+    "selectLessons": "Seleccione las clases",
+    "selectedLessonsCount": "{count} clases seleccionadas",
     "selectTags": "Seleccionar etiquetas",
     "addMoreTags": "Agregar más etiquetas ({count} seleccionadas)",
     "loadingTags": "Cargando etiquetas...",
@@ -858,7 +865,9 @@
       "invalidImageType": "Tipo de archivo no válido. Usa JPG, PNG, GIF o WebP",
       "imageTooLarge": "Archivo demasiado grande. El tamaño máximo es 5MB",
       "createTitle": "Error al crear flashcard",
-      "createDescription": "No se pudo crear el flashcard"
+      "createDescription": "No se pudo crear el flashcard",
+      "loadCoursesTitle": "Error al cargar cursos",
+      "loadCoursesDescription": "No se pudo cargar la lista de cursos"
     },
     "success": {
       "createTitle": "Flashcard creado",

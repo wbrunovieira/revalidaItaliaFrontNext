@@ -4,6 +4,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { useParams } from 'next/navigation';
 import NextImage from 'next/image';
 import {
   Select,
@@ -25,7 +26,11 @@ import {
   Upload,
   RotateCcw,
   Plus,
+  BookOpen,
+  Layers,
+  FileText,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import TagSelectionModal from '@/components/TagSelectionModal';
 
 interface FormData {
@@ -35,6 +40,12 @@ interface FormData {
   answerContent: string;
   argumentId: string;
   tagIds: string[];
+  courseId: string;
+  moduleId: string;
+  lessons: Array<{
+    lessonId: string;
+    order: number;
+  }>;
 }
 
 interface FormErrors {
@@ -42,6 +53,9 @@ interface FormErrors {
   answerContent?: string;
   argumentId?: string;
   tagIds?: string;
+  courseId?: string;
+  moduleId?: string;
+  lessons?: string;
   [key: string]: string | undefined;
 }
 
@@ -74,10 +88,42 @@ interface UploadedFile {
   url: string;
 }
 
+interface Translation {
+  locale: string;
+  title: string;
+  description: string;
+}
+
+interface Lesson {
+  id: string;
+  moduleId: string;
+  order: number;
+  translations: Translation[];
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  imageUrl: string | null;
+  order: number;
+  translations: Translation[];
+  lessons?: Lesson[];
+}
+
+interface Course {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  translations: Translation[];
+  modules?: Module[];
+}
+
 export default function CreateFlashcardForm({
   onFlashcardCreated,
 }: CreateFlashcardFormProps) {
   const t = useTranslations('Admin.createFlashcard');
+  const params = useParams();
+  const locale = params.locale as string;
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [argumentsList, setArgumentsList] = useState<
@@ -97,6 +143,11 @@ export default function CreateFlashcardForm({
   ] = useState(false);
   const [uploadingAnswerImage, setUploadingAnswerImage] =
     useState(false);
+  
+  // Estados para curso, módulo e aulas
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [selectedLessons, setSelectedLessons] = useState<Lesson[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     questionType: 'TEXT',
@@ -105,6 +156,9 @@ export default function CreateFlashcardForm({
     answerContent: '',
     argumentId: '',
     tagIds: [],
+    courseId: '',
+    moduleId: '',
+    lessons: [],
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -147,9 +201,117 @@ export default function CreateFlashcardForm({
     loadArguments();
   }, [loadArguments]);
 
+  // Helper function to get translation by locale
+  const getTranslationByLocale = (
+    translations: Translation[],
+    locale: string
+  ): Translation => {
+    return (
+      translations.find(t => t.locale === locale) ||
+      translations[0] || {
+        locale: '',
+        title: '',
+        description: '',
+      }
+    );
+  };
+
+  // Função para buscar aulas de um módulo específico
+  const fetchLessonsForModule = useCallback(
+    async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        console.error(`Error fetching lessons for module ${moduleId}:`, error);
+        return [];
+      }
+    },
+    []
+  );
+
+  // Função para buscar módulos de um curso específico
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const modules: Module[] = await response.json();
+
+        // Buscar aulas para cada módulo
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(courseId, module.id);
+            return { ...module, lessons };
+          })
+        );
+
+        return modulesWithLessons;
+      } catch (error) {
+        console.error(`Error fetching modules for course ${courseId}:`, error);
+        return [];
+      }
+    },
+    [fetchLessonsForModule]
+  );
+
+  // Função para buscar cursos com módulos e aulas
+  const fetchCourses = useCallback(async () => {
+    setLoadingCourses(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch courses: ${response.status}`);
+      }
+
+      const coursesData: Course[] = await response.json();
+
+      // Buscar módulos e aulas para cada curso
+      const coursesWithData = await Promise.all(
+        coursesData.map(async course => {
+          const modules = await fetchModulesForCourse(course.id);
+          return { ...course, modules };
+        })
+      );
+
+      setCourses(coursesWithData);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      toast({
+        title: t('errors.loadCoursesTitle'),
+        description: t('errors.loadCoursesDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingCourses(false);
+    }
+  }, [toast, t, fetchModulesForCourse]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
   const validateField = (
     name: keyof FormData,
-    value: string | string[]
+    value: string | string[] | Array<{ lessonId: string; order: number }>
   ): ValidationResult => {
     switch (name) {
       case 'questionContent':
@@ -210,7 +372,7 @@ export default function CreateFlashcardForm({
 
   const handleFieldChange = (
     name: keyof FormData,
-    value: string | string[]
+    value: string | string[] | Array<{ lessonId: string; order: number }>
   ) => {
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -235,6 +397,46 @@ export default function CreateFlashcardForm({
         ? undefined
         : validation.message,
     }));
+  };
+
+  // Handler para mudança de curso
+  const handleCourseChange = (courseId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      courseId,
+      moduleId: '',
+      lessons: [],
+    }));
+    setSelectedLessons([]);
+  };
+
+  // Handler para mudança de módulo
+  const handleModuleChange = (moduleId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      moduleId,
+      lessons: [],
+    }));
+    setSelectedLessons([]);
+  };
+
+  // Handler para seleção/deseleção de aulas
+  const handleLessonToggle = (lesson: Lesson) => {
+    const isSelected = selectedLessons.some(l => l.id === lesson.id);
+    
+    if (isSelected) {
+      setSelectedLessons(prev => prev.filter(l => l.id !== lesson.id));
+      setFormData(prev => ({
+        ...prev,
+        lessons: prev.lessons.filter(l => l.lessonId !== lesson.id),
+      }));
+    } else {
+      setSelectedLessons(prev => [...prev, lesson]);
+      setFormData(prev => ({
+        ...prev,
+        lessons: [...prev.lessons, { lessonId: lesson.id, order: 1 }],
+      }));
+    }
   };
 
   const handleQuestionImageUpload = async (
@@ -400,6 +602,9 @@ export default function CreateFlashcardForm({
     ];
 
     fieldsToValidate.forEach(field => {
+      // Skip lessons field as it has different type
+      if (field === 'lessons') return;
+      
       const validation = validateField(
         field,
         formData[field]
@@ -455,6 +660,9 @@ export default function CreateFlashcardForm({
         slug,
         ...(formData.tagIds.length > 0 && {
           tagIds: formData.tagIds,
+        }),
+        ...(formData.lessons.length > 0 && {
+          lessons: formData.lessons,
         }),
       };
 
@@ -512,9 +720,13 @@ export default function CreateFlashcardForm({
       answerContent: '',
       argumentId: '',
       tagIds: [],
+      courseId: '',
+      moduleId: '',
+      lessons: [],
     });
     setQuestionImageFile(null);
     setAnswerImageFile(null);
+    setSelectedLessons([]);
     setErrors({});
     setTouched({});
   };
@@ -908,6 +1120,141 @@ export default function CreateFlashcardForm({
                 : t('selectTags')
               }
             </button>
+          </div>
+
+          {/* Seleção de Curso, Módulo e Aulas */}
+          <div className="space-y-4 pt-4 border-t border-gray-700">
+            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <BookOpen className="text-secondary" size={20} />
+              {t('lessonAssociation')}
+              <span className="text-gray-400 text-sm ml-2">({t('optional')})</span>
+            </h3>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Seleção de Curso */}
+              <div>
+                <Label className="text-gray-300 flex items-center gap-2">
+                  <BookOpen size={16} />
+                  {t('course')}
+                </Label>
+                {loadingCourses ? (
+                  <div className="animate-pulse">
+                    <div className="h-10 bg-gray-700 rounded mt-1"></div>
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.courseId}
+                    onValueChange={handleCourseChange}
+                  >
+                    <SelectTrigger className="mt-1 bg-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder={t('selectCourse')} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-700 border-gray-600">
+                      {courses.map(course => {
+                        const courseTranslation = getTranslationByLocale(
+                          course.translations,
+                          locale
+                        );
+                        return (
+                          <SelectItem
+                            key={course.id}
+                            value={course.id}
+                            className="text-white hover:bg-gray-600"
+                          >
+                            {courseTranslation.title}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Seleção de Módulo */}
+              <div>
+                <Label className="text-gray-300 flex items-center gap-2">
+                  <Layers size={16} />
+                  {t('module')}
+                </Label>
+                <Select
+                  value={formData.moduleId}
+                  onValueChange={handleModuleChange}
+                  disabled={!formData.courseId}
+                >
+                  <SelectTrigger className="mt-1 bg-gray-700 border-gray-600 text-white disabled:opacity-50">
+                    <SelectValue placeholder={t('selectModule')} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600">
+                    {formData.courseId &&
+                      courses
+                        .find(c => c.id === formData.courseId)
+                        ?.modules?.map(module => {
+                          const moduleTranslation = getTranslationByLocale(
+                            module.translations,
+                            locale
+                          );
+                          return (
+                            <SelectItem
+                              key={module.id}
+                              value={module.id}
+                              className="text-white hover:bg-gray-600"
+                            >
+                              {moduleTranslation.title}
+                            </SelectItem>
+                          );
+                        })}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Lista de Aulas */}
+            {formData.moduleId && (
+              <div>
+                <Label className="text-gray-300 flex items-center gap-2 mb-3">
+                  <FileText size={16} />
+                  {t('selectLessons')}
+                </Label>
+                <div className="space-y-2 max-h-60 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                  {courses
+                    .find(c => c.id === formData.courseId)
+                    ?.modules?.find(m => m.id === formData.moduleId)
+                    ?.lessons?.map(lesson => {
+                      const lessonTranslation = getTranslationByLocale(
+                        lesson.translations,
+                        locale
+                      );
+                      const isSelected = selectedLessons.some(
+                        l => l.id === lesson.id
+                      );
+                      return (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center space-x-2 p-2 hover:bg-gray-600/50 rounded transition-colors"
+                        >
+                          <Checkbox
+                            id={`lesson-${lesson.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => handleLessonToggle(lesson)}
+                            className="border-gray-400 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+                          />
+                          <label
+                            htmlFor={`lesson-${lesson.id}`}
+                            className="text-sm text-gray-300 cursor-pointer flex-1"
+                          >
+                            {lessonTranslation.title}
+                          </label>
+                        </div>
+                      );
+                    })}
+                </div>
+                {selectedLessons.length > 0 && (
+                  <p className="mt-2 text-sm text-gray-400">
+                    {t('selectedLessonsCount', { count: selectedLessons.length })}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Actions */}

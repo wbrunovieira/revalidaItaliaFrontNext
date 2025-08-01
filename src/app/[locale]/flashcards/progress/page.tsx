@@ -207,9 +207,8 @@ export default function FlashcardProgressPage() {
     );
     const studyDays = uniqueDays.size;
 
-    // Calculate average per day
-    const daysDiff = Math.max(1, Math.ceil((new Date(dateRange.dateTo).getTime() - new Date(dateRange.dateFrom).getTime()) / (1000 * 60 * 60 * 24)));
-    const averagePerDay = Math.round(data.pagination.total / daysDiff);
+    // Calculate average per day based on study days
+    const averagePerDay = studyDays > 0 ? Math.round(data.pagination.total / studyDays) : 0;
 
     // Find most active hour
     const hourCounts = interactions.reduce((acc, interaction) => {

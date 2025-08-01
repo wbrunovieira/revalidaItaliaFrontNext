@@ -390,6 +390,9 @@
       "swipe": "Deslize para direita (Já sei) ou esquerda (Difícil)",
       "tap": "Toque no card para ver a resposta"
     },
+    "saving": "Salvando...",
+    "saved": "Salvo",
+    "saveError": "Erro ao salvar",
     "results": {
       "title": "Sessão Concluída!",
       "subtitle": "Você revisou todos os flashcards",

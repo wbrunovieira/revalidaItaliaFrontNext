@@ -379,6 +379,9 @@
       "swipe": "Scorri a destra (Lo so) o sinistra (Difficile)",
       "tap": "Tocca la card per vedere la risposta"
     },
+    "saving": "Salvataggio...",
+    "saved": "Salvato",
+    "saveError": "Errore nel salvataggio",
     "results": {
       "title": "Sessione Completata!",
       "subtitle": "Hai ripassato tutte le flashcard",

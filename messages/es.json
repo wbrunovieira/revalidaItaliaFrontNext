@@ -378,6 +378,9 @@
       "swipe": "Desliza a la derecha (Ya lo sé) o izquierda (Difícil)",
       "tap": "Toca la tarjeta para ver la respuesta"
     },
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "saveError": "Error al guardar",
     "results": {
       "title": "¡Sesión Completada!",
       "subtitle": "Has revisado todas las flashcards",

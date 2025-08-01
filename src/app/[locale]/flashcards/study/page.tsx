@@ -61,6 +61,8 @@ export default function FlashcardStudyPage() {
   const [masteredCount, setMasteredCount] = useState(0);
   const [difficultCount, setDifficultCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [showFlipHint, setShowFlipHint] = useState(false);
+  const [shakeCard, setShakeCard] = useState(false);
 
   // Fetch flashcards from lesson
   useEffect(() => {
@@ -171,6 +173,17 @@ export default function FlashcardStudyPage() {
   };
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Se o card não está virado, mostra hint para virar primeiro
+    if (!isFlipped) {
+      setShowFlipHint(true);
+      setShakeCard(true);
+      setTimeout(() => {
+        setShowFlipHint(false);
+        setShakeCard(false);
+      }, 2000);
+      return;
+    }
+    
     const swipeThreshold = 100;
     const swipeVelocity = 500;
     
@@ -409,7 +422,15 @@ export default function FlashcardStudyPage() {
                 key={currentCard.id}
                 className="relative w-full h-[500px] cursor-grab active:cursor-grabbing"
                 initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                animate={shakeCard ? {
+                  scale: 1,
+                  opacity: 1,
+                  x: [0, -10, 10, -10, 10, 0],
+                  rotateZ: [0, -2, 2, -2, 2, 0]
+                } : {
+                  scale: 1,
+                  opacity: 1
+                }}
                 exit={{
                   x: exitDirection === 'left' ? -300 : 300,
                   opacity: 0,
@@ -421,6 +442,10 @@ export default function FlashcardStudyPage() {
                 dragElastic={0.2}
                 onDragEnd={handleDragEnd}
                 whileDrag={{ scale: 1.05 }}
+                transition={shakeCard ? {
+                  duration: 0.5,
+                  ease: "easeInOut"
+                } : {}}
                 style={{ perspective: 1000 }}
               >
                 <motion.div
@@ -461,9 +486,16 @@ export default function FlashcardStudyPage() {
                       )}
                     </div>
                     
-                    <p className="absolute bottom-6 text-gray-500 text-sm">
+                    <motion.p 
+                      className="absolute bottom-6 text-gray-500 text-sm"
+                      animate={showFlipHint ? {
+                        scale: [1, 1.2, 1],
+                        color: ['#9CA3AF', '#FCD34D', '#9CA3AF']
+                      } : {}}
+                      transition={{ duration: 0.5 }}
+                    >
                       {t('tapToFlip')}
-                    </p>
+                    </motion.p>
                   </motion.div>
 
                   {/* Back (Answer) */}

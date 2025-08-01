@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Layers,
   ClipboardList,
+  Brain,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { JSX, useState, useEffect, useCallback } from 'react';
@@ -195,6 +196,12 @@ export default function Sidebar({
       icon: <ClipboardList size={24} />,
       href: `/${locale}/assessments`,
       matchPaths: [`/${locale}/assessments`],
+    },
+    {
+      label: t('flashcards'),
+      icon: <Brain size={24} />,
+      href: `/${locale}/flashcards/progress`,
+      matchPaths: [`/${locale}/flashcards`],
     },
     {
       label: t('faq'),

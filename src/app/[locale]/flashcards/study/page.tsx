@@ -4,8 +4,6 @@
 import {
   useState,
   useEffect,
-  useRef,
-  useCallback,
 } from 'react';
 import {
   useSearchParams,
@@ -97,7 +95,6 @@ export default function FlashcardStudyPage() {
   const [metadata, setMetadata] = useState<FlashcardsMetadata | null>(null);
   const [showFlipHint, setShowFlipHint] = useState(false);
   const [shakeCard, setShakeCard] = useState(false);
-  const [hardCardsCount, setHardCardsCount] = useState(0);
   const [saveStatus, setSaveStatus] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
@@ -301,12 +298,6 @@ export default function FlashcardStudyPage() {
         console.log('Setting flashcards:', shuffled);
         setFlashcards(shuffled);
         
-        // Count hard cards
-        const hardCount = shuffled.filter(card => 
-          card.userInteraction?.difficultyLevel === 'HARD'
-        ).length;
-        setHardCardsCount(hardCount);
-        console.log('Hard cards count:', hardCount);
         
         setLoading(false);
       } catch (err) {
@@ -328,8 +319,7 @@ export default function FlashcardStudyPage() {
     ((currentIndex + 1) / flashcards.length) * 100;
 
   const handleSwipe = async (
-    direction: 'left' | 'right',
-    velocity: number = 0
+    direction: 'left' | 'right'
   ) => {
     const cardId = currentCard.id;
     
@@ -463,12 +453,12 @@ export default function FlashcardStudyPage() {
       info.offset.x > swipeThreshold ||
       info.velocity.x > swipeVelocity
     ) {
-      handleSwipe('right', info.velocity.x);
+      handleSwipe('right');
     } else if (
       info.offset.x < -swipeThreshold ||
       info.velocity.x < -swipeVelocity
     ) {
-      handleSwipe('left', info.velocity.x);
+      handleSwipe('left');
     }
   };
 
@@ -483,11 +473,6 @@ export default function FlashcardStudyPage() {
     window.location.reload();
   };
 
-  const getSwipeIndicatorColor = (x: number) => {
-    if (x > 50) return 'rgba(34, 197, 94, 0.2)'; // Verde para "Já sei"
-    if (x < -50) return 'rgba(239, 68, 68, 0.2)'; // Vermelho para "Difícil"
-    return 'transparent';
-  };
 
   // Loading state
   if (loading) {
@@ -538,7 +523,6 @@ export default function FlashcardStudyPage() {
   // No flashcards or all completed
   if (flashcards.length === 0 && !loading) {
     // Use metadata to determine the state
-    const hasNoFlashcards = metadata?.totalFlashcards === 0;
     const allCompleted = metadata && metadata.completedFlashcards === metadata.totalFlashcards && metadata.totalFlashcards > 0;
     
     return (

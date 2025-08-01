@@ -32,7 +32,9 @@ interface Answer {
     | 'PENDING'
     | 'APPROVED'
     | 'REJECTED'
-    | 'PARTIALLY_ACCEPTED';
+    | 'PARTIALLY_ACCEPTED'
+    | 'GRADING'
+    | 'GRADED';
   reviewState?:
     | 'FULLY_ACCEPTED'
     | 'PARTIALLY_ACCEPTED'
@@ -41,6 +43,8 @@ interface Answer {
   answeredAt: string;
   reviewedAt?: string;
   needsAcknowledgment?: boolean;
+  isCorrect?: boolean;
+  studentAcceptedAt?: string;
 }
 
 interface AttemptDetails {
@@ -96,8 +100,6 @@ export function StudentAssessmentDetails({
   >(null);
   const [newAnswer, setNewAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [acknowledgingAnswer, setAcknowledgingAnswer] =
-    useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -296,8 +298,8 @@ export function StudentAssessmentDetails({
               } else {
                 // Use API status + isCorrect logic
                 // ans.status aqui se refere ao status da API, não ao nosso status interno
-                const apiStatus = (ans as any).status;
-                const studentAcceptedAt = (ans as any).studentAcceptedAt;
+                const apiStatus = ans.status;
+                const studentAcceptedAt = ans.studentAcceptedAt;
                 
                 if (apiStatus === 'GRADING' && ans.isCorrect === true) {
                   // GRADING + isCorrect true = parcialmente aceita (aguardando confirmação do aluno)
@@ -608,7 +610,6 @@ export function StudentAssessmentDetails({
         description: 'Feedback do tutor confirmado!',
       });
 
-      setAcknowledgingAnswer(null);
       fetchAttemptDetails(); // Reload data
     } catch (error) {
       console.error('Error acknowledging answer:', error);

@@ -361,7 +361,7 @@ export default function StudentAssessmentStatus({
         if (showRefreshing) setRefreshing(false);
       }
     },
-    [apiUrl, toast, userId]
+    [apiUrl, toast, userId, assessmentStatuses]
   );
 
   useEffect(() => {

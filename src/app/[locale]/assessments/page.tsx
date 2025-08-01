@@ -57,6 +57,19 @@ interface Assessment {
   // moduleSlug?: string;
 }
 
+interface StudentAttempt {
+  id: string;
+  assessmentId: string;
+  userId: string;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'GRADED';
+  score?: number;
+  totalQuestions: number;
+  answeredQuestions: number;
+  startedAt: string;
+  completedAt?: string;
+  gradedAt?: string;
+}
+
 interface AssessmentAttemptStatus {
   hasActiveAttempt: boolean;
   canStartNewAttempt: boolean;
@@ -76,14 +89,6 @@ interface AssessmentAttemptStatus {
   needsStudentAction: boolean;
 }
 
-interface PaginationInfo {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
 
 export default function AssessmentsPage({
   params,
@@ -100,8 +105,6 @@ export default function AssessmentsPage({
   const [selectedType, setSelectedType] =
     useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-  const [pagination, setPagination] =
-    useState<PaginationInfo | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [stats, setStats] = useState({
     total: 0,
     quiz: 0,
@@ -215,7 +218,7 @@ export default function AssessmentsPage({
                         
                         // Filtrar tentativas GRADED deste assessment
                         const gradedAttempts = attemptsData.attempts?.filter(
-                          (attempt: any) => 
+                          (attempt: StudentAttempt) => 
                             attempt.assessmentId === assessment.id && 
                             attempt.status === 'GRADED'
                         ) || [];
@@ -365,7 +368,6 @@ export default function AssessmentsPage({
         );
         setAssessments(assessmentsWithLesson);
         setFilteredAssessments(assessmentsWithLesson);
-        setPagination(data.pagination);
         calculateStats(assessmentsWithLesson);
 
         // Check status of all assessments

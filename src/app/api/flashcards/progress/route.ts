@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Endpoint to force flush (useful for page unload)
-export async function PUT(request: NextRequest) {
+export async function PUT() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -226,7 +226,6 @@ export async function PUT(request: NextRequest) {
 // This will be called by a client-side interval or external cron
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
     const cronSecret = request.headers.get('x-cron-secret');
     
     // Simple auth for cron endpoint
@@ -238,7 +237,7 @@ export async function GET(request: NextRequest) {
     }
 
     let totalFlushed = 0;
-    let totalFailed = 0;
+    const totalFailed = 0;
     const now = Date.now();
 
     // Flush all users with old data

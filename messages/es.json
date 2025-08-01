@@ -381,6 +381,7 @@
     "saving": "Guardando...",
     "saved": "Guardado",
     "saveError": "Error al guardar",
+    "new": "Nuevo",
     "results": {
       "title": "¡Sesión Completada!",
       "subtitle": "Has revisado todas las flashcards",
@@ -392,12 +393,18 @@
     },
     "error": {
       "title": "Error al cargar",
+      "description": "No se pudieron cargar las flashcards. Intente nuevamente más tarde.",
       "back": "Volver"
     },
     "noFlashcards": {
       "title": "No se encontraron flashcards",
       "subtitle": "Esta lección aún no tiene flashcards",
       "back": "Volver"
+    },
+    "allCompleted": {
+      "title": "¡Todas las flashcards completadas!",
+      "subtitle": "¡Felicitaciones! Has completado todas las flashcards de esta lección.",
+      "stats": "Dominados: {mastered} | Difíciles: {difficult}"
     }
   },
   "Video": {

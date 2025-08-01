@@ -60,6 +60,17 @@ interface FlashcardData {
   tagIds: string[];
   createdAt: string;
   updatedAt: string;
+  userInteraction?: {
+    difficultyLevel: 'EASY' | 'HARD';
+    reviewedAt: string;
+    daysSinceReview?: number;
+  };
+}
+
+interface FlashcardsMetadata {
+  totalFlashcards: number;
+  completedFlashcards: number;
+  availableFlashcards: number;
 }
 
 export default function FlashcardStudyPage() {
@@ -83,8 +94,10 @@ export default function FlashcardStudyPage() {
   const [masteredCount, setMasteredCount] = useState(0);
   const [difficultCount, setDifficultCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [metadata, setMetadata] = useState<FlashcardsMetadata | null>(null);
   const [showFlipHint, setShowFlipHint] = useState(false);
   const [shakeCard, setShakeCard] = useState(false);
+  const [hardCardsCount, setHardCardsCount] = useState(0);
   const [saveStatus, setSaveStatus] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
@@ -220,8 +233,14 @@ export default function FlashcardStudyPage() {
         const url = `${API_URL}/api/v1/flashcards?lessonId=${lessonId}`;
         console.log('Fetching from URL:', url);
 
-        // Fetch flashcards by lessonId
-        const response = await fetch(url, {
+        // Fetch flashcards by lessonId with user interactions
+        const urlWithParams = new URL(url);
+        urlWithParams.searchParams.append('includeUserInteractions', 'true');
+        urlWithParams.searchParams.append('randomize', 'true');
+        
+        console.log('Final URL with params:', urlWithParams.toString());
+        
+        const response = await fetch(urlWithParams.toString(), {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -243,6 +262,12 @@ export default function FlashcardStudyPage() {
         const data = await response.json();
         console.log('Response data:', data);
 
+        // Extract metadata if available
+        if (data.metadata) {
+          console.log('Metadata:', data.metadata);
+          setMetadata(data.metadata);
+        }
+
         const flashcardsList =
           data.flashcards || data || [];
         console.log('Flashcards list:', flashcardsList);
@@ -251,19 +276,38 @@ export default function FlashcardStudyPage() {
           flashcardsList.length
         );
 
-        if (flashcardsList.length === 0) {
+        // Remove duplicates based on ID
+        const uniqueFlashcards = flashcardsList.filter((card: FlashcardData, index: number, self: FlashcardData[]) => 
+          index === self.findIndex((c) => c.id === card.id)
+        );
+        
+        console.log('Unique flashcards:', uniqueFlashcards.length);
+        
+        if (uniqueFlashcards.length === 0) {
           console.log('No flashcards found');
-          setError('No flashcards found for this lesson');
+          // Don't set error, let the metadata determine what to show
           setLoading(false);
           return;
         }
 
+        // Check if any card has userInteraction
+        const cardsWithInteraction = uniqueFlashcards.filter((card: FlashcardData) => card.userInteraction);
+        console.log('Cards with userInteraction:', cardsWithInteraction.length);
+        
         // Shuffle flashcards
-        const shuffled = [...flashcardsList].sort(
+        const shuffled = [...uniqueFlashcards].sort(
           () => Math.random() - 0.5
         );
         console.log('Setting flashcards:', shuffled);
         setFlashcards(shuffled);
+        
+        // Count hard cards
+        const hardCount = shuffled.filter(card => 
+          card.userInteraction?.difficultyLevel === 'HARD'
+        ).length;
+        setHardCardsCount(hardCount);
+        console.log('Hard cards count:', hardCount);
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching flashcards:', err);
@@ -287,11 +331,13 @@ export default function FlashcardStudyPage() {
     direction: 'left' | 'right',
     velocity: number = 0
   ) => {
+    const cardId = currentCard.id;
+    
     if (direction === 'right') {
-      console.log('Marked as MASTERED:', currentCard.id);
+      console.log('Marked as MASTERED:', cardId);
       setMasteredCount(prev => prev + 1);
     } else {
-      console.log('Marked as DIFFICULT:', currentCard.id);
+      console.log('Marked as DIFFICULT:', cardId);
       setDifficultCount(prev => prev + 1);
     }
 
@@ -306,7 +352,7 @@ export default function FlashcardStudyPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            flashcardId: currentCard.id,
+            flashcardId: cardId,
             result:
               direction === 'right'
                 ? 'mastered'
@@ -322,6 +368,11 @@ export default function FlashcardStudyPage() {
       } else {
         const data = await response.json();
         console.log('Progress saved:', data);
+        console.log('Backend response for progress:', {
+          flashcardId: cardId,
+          result: direction === 'right' ? 'mastered' : 'difficult',
+          backendResponse: data
+        });
 
         // Update queue size based on response
         if (data.status === 'flushed') {
@@ -347,13 +398,46 @@ export default function FlashcardStudyPage() {
     setExitDirection(direction);
     setIsFlipped(false);
 
+    // Handle card transition
     setTimeout(() => {
-      if (currentIndex < flashcards.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-        setExitDirection(null);
+      if (direction === 'right') {
+        // For EASY cards, remove from list but stay on same index
+        setFlashcards(prev => {
+          const newCards = prev.filter((_, index) => index !== currentIndex);
+          
+          // Check if we have more cards
+          if (newCards.length === 0) {
+            setShowResults(true);
+          } else if (currentIndex >= newCards.length) {
+            // If we're at the end, go back one
+            setCurrentIndex(newCards.length - 1);
+          }
+          // If currentIndex is still valid, keep it (next card slides in)
+          
+          return newCards;
+        });
       } else {
-        setShowResults(true);
+        // For HARD cards, update userInteraction and move to next
+        setFlashcards(prev => prev.map((card) => {
+          if (card.id === cardId) {
+            return {
+              ...card,
+              userInteraction: {
+                difficultyLevel: 'HARD' as const,
+                reviewedAt: new Date().toISOString(),
+              }
+            };
+          }
+          return card;
+        }));
+        
+        if (currentIndex < flashcards.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        } else {
+          setShowResults(true);
+        }
       }
+      setExitDirection(null);
     }, 300);
   };
 
@@ -395,10 +479,8 @@ export default function FlashcardStudyPage() {
     setMasteredCount(0);
     setDifficultCount(0);
     setShowResults(false);
-    // Embaralhar cards
-    setFlashcards(
-      [...flashcards].sort(() => Math.random() - 0.5)
-    );
+    // Reload the page to get fresh flashcards
+    window.location.reload();
   };
 
   const getSwipeIndicatorColor = (x: number) => {
@@ -424,8 +506,8 @@ export default function FlashcardStudyPage() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state (only for real errors, not empty flashcards)
+  if (error && flashcards.length === 0 && !loading) {
     return (
       <NavSidebar>
         <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
@@ -436,7 +518,7 @@ export default function FlashcardStudyPage() {
             <h2 className="text-xl font-bold text-white mb-2">
               {t('error.title')}
             </h2>
-            <p className="text-gray-400 mb-6">{error}</p>
+            <p className="text-gray-400 mb-6">{t('error.description')}</p>
             <Link
               href={
                 lessonId
@@ -453,24 +535,47 @@ export default function FlashcardStudyPage() {
     );
   }
 
-  // No flashcards
-  if (flashcards.length === 0) {
+  // No flashcards or all completed
+  if (flashcards.length === 0 && !loading) {
+    // Use metadata to determine the state
+    const hasNoFlashcards = metadata?.totalFlashcards === 0;
+    const allCompleted = metadata && metadata.completedFlashcards === metadata.totalFlashcards && metadata.totalFlashcards > 0;
+    
     return (
       <NavSidebar>
         <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
           <div className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-secondary/20 shadow-2xl text-center">
             <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CreditCard
-                size={40}
-                className="text-secondary"
-              />
+              {allCompleted ? (
+                <CheckCircle
+                  size={40}
+                  className="text-secondary"
+                />
+              ) : (
+                <CreditCard
+                  size={40}
+                  className="text-secondary"
+                />
+              )}
             </div>
             <h2 className="text-xl font-bold text-white mb-2">
-              {t('noFlashcards.title')}
+              {allCompleted 
+                ? t('allCompleted.title') 
+                : t('noFlashcards.title')}
             </h2>
             <p className="text-gray-400 mb-6">
-              {t('noFlashcards.subtitle')}
+              {allCompleted 
+                ? t('allCompleted.subtitle') 
+                : t('noFlashcards.subtitle')}
             </p>
+            {allCompleted && metadata && (
+              <div className="mb-6 text-sm text-gray-500">
+                <p>{t('allCompleted.stats', { 
+                  mastered: metadata.completedFlashcards, 
+                  difficult: metadata.totalFlashcards - metadata.completedFlashcards 
+                })}</p>
+              </div>
+            )}
             <Link
               href={
                 lessonId
@@ -728,7 +833,7 @@ export default function FlashcardStudyPage() {
 
               {/* Flashcard */}
               <AnimatePresence mode="wait">
-                {currentCard && !exitDirection && (
+                {currentCard && (
                   <motion.div
                     key={currentCard.id}
                     className="relative w-full h-[500px] cursor-grab active:cursor-grabbing"
@@ -795,11 +900,30 @@ export default function FlashcardStudyPage() {
                         }}
                         drag={false}
                       >
-                        <div className="absolute top-6 right-6 bg-secondary/20 rounded-full p-3">
-                          <CreditCard
-                            size={24}
-                            className="text-secondary"
-                          />
+                        <div className="absolute top-6 right-6 flex items-center gap-2">
+                          {/* Badge for card status */}
+                          {currentCard.userInteraction?.difficultyLevel === 'HARD' && (
+                            <div className="bg-red-500/20 px-3 py-1 rounded-full flex items-center gap-1">
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                              <span className="text-xs text-red-400 font-medium">
+                                {t('difficult')}
+                              </span>
+                            </div>
+                          )}
+                          {!currentCard.userInteraction && (
+                            <div className="bg-blue-500/20 px-3 py-1 rounded-full flex items-center gap-1">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                              <span className="text-xs text-blue-400 font-medium">
+                                {t('new')}
+                              </span>
+                            </div>
+                          )}
+                          <div className="bg-secondary/20 rounded-full p-3">
+                            <CreditCard
+                              size={24}
+                              className="text-secondary"
+                            />
+                          </div>
                         </div>
 
                         <div className="text-center">

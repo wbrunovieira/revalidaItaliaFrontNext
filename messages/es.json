@@ -365,6 +365,62 @@
     "answerType": "Tipo de respuesta",
     "studyFlashcards": "Estudiar flashcards"
   },
+  "FlashcardProgress": {
+    "title": "Progreso de Flashcards",
+    "subtitle": "Sigue tu rendimiento y evolución",
+    "loading": "Cargando datos...",
+    "error": "Error al cargar datos",
+    "filters": "Filtros",
+    "period": "Periodo",
+    "difficulty": "Dificultad",
+    "periods": {
+      "week": "Última semana",
+      "month": "Último mes",
+      "all": "Todo el periodo"
+    },
+    "difficulties": {
+      "all": "Todas",
+      "easy": "Fácil",
+      "hard": "Difícil",
+      "neutral": "Neutro"
+    },
+    "stats": {
+      "totalInteractions": "Total de interacciones",
+      "successRate": "Tasa de acierto",
+      "currentStreak": "Racha actual",
+      "studyDays": "Días de estudio"
+    },
+    "charts": {
+      "difficultyDistribution": "Distribución por Dificultad"
+    },
+    "recentActivity": {
+      "title": "Actividad Reciente",
+      "empty": "No se encontró actividad"
+    },
+    "calendar": {
+      "title": "Calendario de Estudios"
+    },
+    "insights": {
+      "title": "Insights de Estudio",
+      "mostActiveHour": "Horario más activo",
+      "averagePerDay": "Promedio por día",
+      "flashcards": "flashcards",
+      "greatStreak": "¡Excelente racha!",
+      "keepItUp": "¡Sigue así!"
+    },
+    "recommendations": {
+      "title": "Recomendaciones",
+      "reviewHard": "Revisar tarjetas difíciles",
+      "difficultCards": "tarjetas difíciles",
+      "continueStudying": "Continuar estudiando",
+      "maintainStreak": "Mantén tu racha"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {current} de {total}"
+    }
+  },
   "FlashcardStudy": {
     "back": "Volver",
     "shuffle": "Mezclar",

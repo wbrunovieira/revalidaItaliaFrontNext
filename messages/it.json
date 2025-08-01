@@ -366,6 +366,62 @@
     "answerType": "Tipo di risposta",
     "studyFlashcards": "Studia flashcard"
   },
+  "FlashcardProgress": {
+    "title": "Progressi Flashcard",
+    "subtitle": "Monitora le tue prestazioni e l'evoluzione",
+    "loading": "Caricamento dati...",
+    "error": "Errore nel caricamento dei dati",
+    "filters": "Filtri",
+    "period": "Periodo",
+    "difficulty": "Difficoltà",
+    "periods": {
+      "week": "Ultima settimana",
+      "month": "Ultimo mese",
+      "all": "Tutto il periodo"
+    },
+    "difficulties": {
+      "all": "Tutte",
+      "easy": "Facile",
+      "hard": "Difficile",
+      "neutral": "Neutro"
+    },
+    "stats": {
+      "totalInteractions": "Interazioni totali",
+      "successRate": "Tasso di successo",
+      "currentStreak": "Serie attuale",
+      "studyDays": "Giorni di studio"
+    },
+    "charts": {
+      "difficultyDistribution": "Distribuzione per Difficoltà"
+    },
+    "recentActivity": {
+      "title": "Attività Recente",
+      "empty": "Nessuna attività trovata"
+    },
+    "calendar": {
+      "title": "Calendario di Studio"
+    },
+    "insights": {
+      "title": "Approfondimenti di Studio",
+      "mostActiveHour": "Orario più attivo",
+      "averagePerDay": "Media al giorno",
+      "flashcards": "flashcard",
+      "greatStreak": "Ottima serie!",
+      "keepItUp": "Continua così!"
+    },
+    "recommendations": {
+      "title": "Raccomandazioni",
+      "reviewHard": "Rivedere card difficili",
+      "difficultCards": "card difficili",
+      "continueStudying": "Continua a studiare",
+      "maintainStreak": "Mantieni la tua serie"
+    },
+    "pagination": {
+      "previous": "Precedente",
+      "next": "Successivo",
+      "page": "Pagina {current} di {total}"
+    }
+  },
   "FlashcardStudy": {
     "back": "Indietro",
     "shuffle": "Mescola",

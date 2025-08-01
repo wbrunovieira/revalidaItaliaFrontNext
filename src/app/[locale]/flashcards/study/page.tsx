@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import NavSidebar from '@/components/NavSidebar';
 
 // Utility function to get cookie
 const getCookie = (name: string): string | null => {
@@ -200,65 +201,72 @@ export default function FlashcardStudyPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 size={48} className="text-secondary animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">{t('loading')}</p>
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 size={48} className="text-secondary animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">{t('loading')}</p>
+          </div>
         </div>
-      </div>
+      </NavSidebar>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
-        <div className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-red-500/20 shadow-2xl text-center">
-          <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X size={40} className="text-red-500" />
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
+          <div className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-red-500/20 shadow-2xl text-center">
+            <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <X size={40} className="text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">{t('error.title')}</h2>
+            <p className="text-gray-400 mb-6">{error}</p>
+            <Link
+              href={lessonId ? `/${locale}/lessons/${lessonId}` : `/${locale}`}
+              className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
+            >
+              {t('error.back')}
+            </Link>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{t('error.title')}</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
-          <Link
-            href={lessonId ? `/${locale}/lessons/${lessonId}` : `/${locale}`}
-            className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
-          >
-            {t('error.back')}
-          </Link>
         </div>
-      </div>
+      </NavSidebar>
     );
   }
 
   // No flashcards
   if (flashcards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
-        <div className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-secondary/20 shadow-2xl text-center">
-          <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CreditCard size={40} className="text-secondary" />
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
+          <div className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-secondary/20 shadow-2xl text-center">
+            <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CreditCard size={40} className="text-secondary" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">{t('noFlashcards.title')}</h2>
+            <p className="text-gray-400 mb-6">{t('noFlashcards.subtitle')}</p>
+            <Link
+              href={lessonId ? `/${locale}/lessons/${lessonId}` : `/${locale}`}
+              className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
+            >
+              {t('noFlashcards.back')}
+            </Link>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">{t('noFlashcards.title')}</h2>
-          <p className="text-gray-400 mb-6">{t('noFlashcards.subtitle')}</p>
-          <Link
-            href={lessonId ? `/${locale}/lessons/${lessonId}` : `/${locale}`}
-            className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
-          >
-            {t('noFlashcards.back')}
-          </Link>
         </div>
-      </div>
+      </NavSidebar>
     );
   }
 
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-secondary/20 shadow-2xl"
-        >
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-primary-dark/90 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-secondary/20 shadow-2xl"
+          >
           <div className="text-center">
             <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Brain size={40} className="text-secondary" />
@@ -309,13 +317,15 @@ export default function FlashcardStudyPage() {
           </div>
         </motion.div>
       </div>
+      </NavSidebar>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-6">
+    <NavSidebar>
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden">
+        {/* Header */}
+      <div className="absolute top-24 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <Link
@@ -364,8 +374,9 @@ export default function FlashcardStudyPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex items-center justify-center min-h-screen p-4 pt-32">
-        <div className="relative w-full max-w-lg">
+      <div className="flex items-center justify-center min-h-screen p-4 pt-48 lg:pt-40">
+        <div className="relative w-full max-w-4xl mx-auto">
+          <div className="max-w-lg mx-auto">
           {/* Swipe indicators */}
           <div className="absolute inset-0 flex items-center justify-between px-12 pointer-events-none">
             <motion.div
@@ -523,8 +534,10 @@ export default function FlashcardStudyPage() {
             <p>{t('instructions.swipe')}</p>
             <p>{t('instructions.tap')}</p>
           </div>
+          </div>
         </div>
       </div>
     </div>
+    </NavSidebar>
   );
 }

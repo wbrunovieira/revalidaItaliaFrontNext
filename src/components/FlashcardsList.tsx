@@ -29,6 +29,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+// Utility function to get cookie
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2)
+    return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
 interface FlashcardTag {
   id: string;
   name: string;
@@ -148,11 +158,17 @@ export default function FlashcardsList() {
           queryParams.append('sortOrder', sortOrder);
         }
 
+        const token = getCookie('token');
+        if (!token) {
+          throw new Error('No authentication token');
+        }
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards?${queryParams}`,
           {
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
           }
         );
@@ -241,15 +257,6 @@ export default function FlashcardsList() {
       try {
         // Find the flashcard to get image URLs before deletion
         const flashcardToDelete = flashcards.find(f => f.id === flashcardId);
-        
-        // Get token from cookie
-        const getCookie = (name: string): string | null => {
-          if (typeof document === 'undefined') return null;
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-          return null;
-        };
         
         const tokenFromCookie = getCookie('token');
         const tokenFromStorage =

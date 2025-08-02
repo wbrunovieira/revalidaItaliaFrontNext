@@ -440,6 +440,26 @@
     "saved": "Salvato",
     "saveError": "Errore nel salvataggio",
     "new": "Nuovo",
+    "reset": {
+      "button": "Ricominciare Flashcard",
+      "title": "Ricominciare lo Studio?",
+      "description": "Questo resetterà il progresso di tutte le flashcard di questa lezione. Potrai studiarle di nuovo dall'inizio.",
+      "reason": "Motivo",
+      "reasonManual": "Voglio rivedere tutto di nuovo",
+      "reasonCompleted": "Ho completato tutte le flashcard",
+      "confirm": "Sì, ricomincia",
+      "cancel": "Annulla",
+      "resetting": "Ripristino...",
+      "success": {
+        "title": "Flashcard ripristinate!",
+        "description": "{count} flashcard sono state ripristinate e sono pronte per essere riviste."
+      },
+      "error": {
+        "title": "Errore nel ripristino",
+        "description": "Non è stato possibile ripristinare le flashcard. Riprova.",
+        "noFlashcards": "Non ci sono flashcard da ripristinare in questa lezione."
+      }
+    },
     "results": {
       "title": "Sessione Completata!",
       "subtitle": "Hai ripassato tutte le flashcard",

@@ -451,6 +451,26 @@
     "saved": "Salvo",
     "saveError": "Erro ao salvar",
     "new": "Novo",
+    "reset": {
+      "button": "Recomeçar Flashcards",
+      "title": "Recomeçar Estudo?",
+      "description": "Isso irá resetar o progresso de todos os flashcards desta lição. Você poderá estudá-los novamente desde o início.",
+      "reason": "Motivo",
+      "reasonManual": "Quero revisar tudo novamente",
+      "reasonCompleted": "Completei todos os flashcards",
+      "confirm": "Sim, recomeçar",
+      "cancel": "Cancelar",
+      "resetting": "Resetando...",
+      "success": {
+        "title": "Flashcards resetados!",
+        "description": "{count} flashcards foram resetados e estão prontos para revisar novamente."
+      },
+      "error": {
+        "title": "Erro ao resetar",
+        "description": "Não foi possível resetar os flashcards. Tente novamente.",
+        "noFlashcards": "Não há flashcards para resetar nesta lição."
+      }
+    },
     "results": {
       "title": "Sessão Concluída!",
       "subtitle": "Você revisou todos os flashcards",

@@ -30,10 +30,13 @@ import {
   Cloud,
   CloudOff,
   CheckCircle,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 // Utility function to get cookie
 const getCookie = (name: string): string | null => {
@@ -76,6 +79,7 @@ export default function FlashcardStudyPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations('FlashcardStudy');
+  const { toast } = useToast();
   const locale = params.locale as string;
   const lessonId = searchParams.get('lessonId');
 
@@ -99,6 +103,7 @@ export default function FlashcardStudyPage() {
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
   const [queueSize, setQueueSize] = useState(0);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Force flush on page unload
   useEffect(() => {
@@ -473,6 +478,110 @@ export default function FlashcardStudyPage() {
     window.location.reload();
   };
 
+  // Handle reset flashcards
+  const handleResetFlashcards = () => {
+    // Determinar o motivo do reset
+    const allMastered = metadata && metadata.completedFlashcards === metadata.totalFlashcards && metadata.totalFlashcards > 0;
+    const resetReason = allMastered ? 'COMPLETED' : 'MANUAL';
+
+    toast({
+      title: t('reset.title'),
+      description: (
+        <div className="space-y-3">
+          <p className="text-sm">{t('reset.description')}</p>
+          
+          <div className="p-3 bg-gray-700/50 rounded-lg">
+            <p className="text-xs text-gray-300 mb-2">{t('reset.reason')}:</p>
+            <p className="text-sm text-white font-medium">
+              {resetReason === 'COMPLETED' ? t('reset.reasonCompleted') : t('reset.reasonManual')}
+            </p>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-secondary hover:bg-secondary/90 text-primary"
+              onClick={async () => {
+                setIsResetting(true);
+                
+                try {
+                  const token = getCookie('token');
+                  if (!token) {
+                    throw new Error('No authentication token');
+                  }
+
+                  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+                  const response = await fetch(
+                    `${API_URL}/api/v1/flashcard-interactions/lessons/${lessonId}/reset`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ resetReason }),
+                    }
+                  );
+
+                  if (!response.ok) {
+                    const error = await response.json();
+                    if (error.type === 'no-flashcards-to-reset') {
+                      throw new Error(t('reset.error.noFlashcards'));
+                    }
+                    throw new Error(error.detail || t('reset.error.description'));
+                  }
+
+                  const result = await response.json();
+                  
+                  // Fechar o toast atual
+                  toast({
+                    title: t('reset.success.title'),
+                    description: t('reset.success.description', { count: result.totalReset }),
+                    className: 'bg-green-500/10 border-green-500/30',
+                  });
+
+                  // Recarregar a página após um breve delay
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 1500);
+                  
+                } catch (error) {
+                  toast({
+                    title: t('reset.error.title'),
+                    description: error instanceof Error ? error.message : t('reset.error.description'),
+                    variant: 'destructive',
+                  });
+                  setIsResetting(false);
+                }
+              }}
+            >
+              {isResetting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin mr-1" />
+                  {t('reset.resetting')}
+                </>
+              ) : (
+                t('reset.confirm')
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
+              onClick={() => {
+                // Toast será automaticamente fechado
+              }}
+            >
+              {t('reset.cancel')}
+            </Button>
+          </div>
+        </div>
+      ),
+      duration: 10000, // 10 segundos para dar tempo de ler
+    });
+  };
+
 
   // Loading state
   if (loading) {
@@ -560,16 +669,29 @@ export default function FlashcardStudyPage() {
                 })}</p>
               </div>
             )}
-            <Link
-              href={
-                lessonId
-                  ? `/${locale}/lessons/${lessonId}`
-                  : `/${locale}`
-              }
-              className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
-            >
-              {t('noFlashcards.back')}
-            </Link>
+            <div className="space-y-3">
+              {allCompleted && (
+                <button
+                  onClick={handleResetFlashcards}
+                  className="w-full py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2"
+                  disabled={isResetting}
+                >
+                  <RefreshCw size={18} className={isResetting ? 'animate-spin' : ''} />
+                  {t('reset.button')}
+                </button>
+              )}
+              
+              <Link
+                href={
+                  lessonId
+                    ? `/${locale}/lessons/${lessonId}`
+                    : `/${locale}`
+                }
+                className="inline-block w-full text-center py-3 px-6 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
+              >
+                {t('noFlashcards.back')}
+              </Link>
+            </div>
           </div>
         </div>
       </NavSidebar>
@@ -681,13 +803,24 @@ export default function FlashcardStudyPage() {
                 <span>{t('back')}</span>
               </Link>
 
-              <button
-                onClick={resetStudy}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <Shuffle size={20} />
-                <span>{t('shuffle')}</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleResetFlashcards}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all border border-secondary/30"
+                  disabled={isResetting}
+                >
+                  <RefreshCw size={18} className={isResetting ? 'animate-spin' : ''} />
+                  <span className="text-sm font-medium">{t('reset.button')}</span>
+                </button>
+                
+                <button
+                  onClick={resetStudy}
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <Shuffle size={20} />
+                  <span>{t('shuffle')}</span>
+                </button>
+              </div>
             </div>
 
             {/* Save status indicator */}

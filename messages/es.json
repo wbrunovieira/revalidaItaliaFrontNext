@@ -439,6 +439,26 @@
     "saved": "Guardado",
     "saveError": "Error al guardar",
     "new": "Nuevo",
+    "reset": {
+      "button": "Reiniciar Flashcards",
+      "title": "¿Reiniciar Estudio?",
+      "description": "Esto restablecerá el progreso de todas las flashcards de esta lección. Podrás estudiarlas nuevamente desde el principio.",
+      "reason": "Motivo",
+      "reasonManual": "Quiero revisar todo de nuevo",
+      "reasonCompleted": "He completado todas las flashcards",
+      "confirm": "Sí, reiniciar",
+      "cancel": "Cancelar",
+      "resetting": "Reiniciando...",
+      "success": {
+        "title": "¡Flashcards reiniciadas!",
+        "description": "{count} flashcards han sido reiniciadas y están listas para revisar nuevamente."
+      },
+      "error": {
+        "title": "Error al reiniciar",
+        "description": "No fue posible reiniciar las flashcards. Inténtalo nuevamente.",
+        "noFlashcards": "No hay flashcards para reiniciar en esta lección."
+      }
+    },
     "results": {
       "title": "¡Sesión Completada!",
       "subtitle": "Has revisado todas las flashcards",

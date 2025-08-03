@@ -336,7 +336,9 @@
     "createTopic": "Nuevo Tema",
     "filterBy": "Filtrar por",
     "filterByCourse": "Filtrar por curso",
+    "filterByLesson": "Filtrar por clase",
     "allCourses": "Todos los cursos",
+    "allLessons": "Todas las clases",
     "filters": {
       "all": "Todos",
       "pinned": "Fijados",

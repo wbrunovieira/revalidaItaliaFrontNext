@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Plus, MessageSquare, Eye, Calendar, User, Filter, Hash, BookOpen, Layers } from 'lucide-react';
+import { Search, Plus, MessageSquare, Eye, Calendar, User, Filter, Hash, BookOpen, Layers, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -56,6 +56,15 @@ interface Topic {
   isPinned?: boolean;
 }
 
+// Mock lessons data
+const mockLessons = [
+  { id: '1', title: 'Processo de Equivalência', courseId: '1' },
+  { id: '2', title: 'Sistema Cardiovascular', courseId: '1' },
+  { id: '3', title: 'Sistema Respiratório', courseId: '1' },
+  { id: '4', title: 'Anatomia Básica', courseId: '2' },
+  { id: '5', title: 'Técnicas Cirúrgicas', courseId: '2' },
+];
+
 // Mock data
 const mockTopics: Topic[] = [
   {
@@ -91,6 +100,10 @@ const mockTopics: Topic[] = [
       id: '1',
       title: 'Fundamentos'
     },
+    lesson: {
+      id: '2',
+      title: 'Sistema Cardiovascular'
+    },
     isPinned: true
   },
   {
@@ -118,6 +131,10 @@ const mockTopics: Topic[] = [
       userReactions: ['thumbsUp'] as ReactionType[]
     },
     tags: ['documentação', 'burocracia', 'dicas'],
+    lesson: {
+      id: '1',
+      title: 'Processo de Equivalência'
+    }
   },
   {
     id: '3',
@@ -157,6 +174,7 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState('all');
+  const [selectedLesson, setSelectedLesson] = useState('all');
   const [selectedTab, setSelectedTab] = useState('recent');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -165,6 +183,16 @@ export default function CommunityPage() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Get filtered lessons based on selected course
+  const filteredLessons = selectedCourse === 'all' 
+    ? mockLessons 
+    : mockLessons.filter(lesson => lesson.courseId === selectedCourse);
+
+  // Reset lesson filter when course changes
+  useEffect(() => {
+    setSelectedLesson('all');
+  }, [selectedCourse]);
 
   // Handle reaction
   const handleReaction = useCallback((topicId: string, reactionType: ReactionType) => {
@@ -228,8 +256,10 @@ export default function CommunityPage() {
                          (selectedFilter === 'my-posts' && topic.author.id === '1'); // Mock user ID
 
     const matchesCourse = selectedCourse === 'all' || topic.course?.id === selectedCourse;
+    
+    const matchesLesson = selectedLesson === 'all' || topic.lesson?.id === selectedLesson;
 
-    return matchesSearch && matchesFilter && matchesCourse;
+    return matchesSearch && matchesFilter && matchesCourse && matchesLesson;
   });
 
   // Sort topics based on selected tab
@@ -240,8 +270,6 @@ export default function CommunityPage() {
       const bTotal = b.viewCount + b.replyCount + b.reactions.heart + b.reactions.thumbsUp + b.reactions.surprised + b.reactions.clap + b.reactions.sad;
       const aTotal = a.viewCount + a.replyCount + a.reactions.heart + a.reactions.thumbsUp + a.reactions.surprised + a.reactions.clap + a.reactions.sad;
       return bTotal - aTotal;
-    } else if (selectedTab === 'unanswered') {
-      return a.replyCount - b.replyCount;
     }
     return 0;
   });
@@ -306,6 +334,21 @@ export default function CommunityPage() {
                 <SelectItem value="3" className="text-white hover:bg-primary/50">Pediatria</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select value={selectedLesson} onValueChange={setSelectedLesson}>
+              <SelectTrigger className="w-[250px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
+                <GraduationCap size={16} className="mr-2 text-gray-400" />
+                <SelectValue placeholder={t('filterByLesson')} />
+              </SelectTrigger>
+              <SelectContent className="bg-primary-dark border-gray-700 max-h-[300px]">
+                <SelectItem value="all" className="text-white hover:bg-primary/50">{t('allLessons')}</SelectItem>
+                {filteredLessons.map((lesson) => (
+                  <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-primary/50">
+                    {lesson.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tabs */}
@@ -313,7 +356,6 @@ export default function CommunityPage() {
             <TabsList className="bg-primary-dark/50 border-gray-700">
               <TabsTrigger value="recent" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary">{t('tabs.recent')}</TabsTrigger>
               <TabsTrigger value="popular" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary">{t('tabs.popular')}</TabsTrigger>
-              <TabsTrigger value="unanswered" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary">{t('tabs.unanswered')}</TabsTrigger>
             </TabsList>
 
         <TabsContent value={selectedTab} className="mt-6">

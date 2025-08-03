@@ -334,7 +334,7 @@
     "title": "Comunità",
     "description": "Connettiti con altri professionisti, risolvi dubbi e condividi esperienze",
     "searchPlaceholder": "Cerca per argomenti, tag o parole chiave...",
-    "createTopic": "Nuovo Argomento",
+    "createTopic": "Nuovo Post",
     "filterBy": "Filtra per",
     "filterByCourse": "Filtra per corso",
     "filterByLesson": "Filtra per lezione",
@@ -416,6 +416,41 @@
     "wow": "Wow",
     "applause": "Applausi",
     "sad": "Triste"
+  },
+  "CreatePost": {
+    "title": "Crea Nuovo Post",
+    "type": "Tipo di Post",
+    "types": {
+      "general": "Argomento Generale",
+      "lesson": "Commento sulla Lezione"
+    },
+    "titleLabel": "Titolo",
+    "titlePlaceholder": "Inserisci un titolo per il tuo post...",
+    "lessonLabel": "Seleziona la Lezione",
+    "lessonPlaceholder": "Scegli una lezione...",
+    "contentLabel": "Contenuto",
+    "contentPlaceholder": "Condividi i tuoi dubbi, esperienze o conoscenze...",
+    "hashtagsLabel": "Hashtag",
+    "hashtagsPlaceholder": "anatomia, revalida, studio (separati da virgola o spazio)",
+    "hashtagsHelp": "Usa solo lettere minuscole, numeri e underscore",
+    "cancel": "Annulla",
+    "create": "Crea Post",
+    "creating": "Creazione...",
+    "success": "Post creato con successo!",
+    "successDescriptionTopic": "Il tuo post è stato pubblicato nella comunità",
+    "successDescriptionComment": "Il tuo commento è stato aggiunto alla lezione",
+    "error": "Errore nella creazione del post",
+    "errors": {
+      "contentRequired": "Il contenuto è obbligatorio",
+      "contentTooLong": "Il contenuto non può superare i 10.000 caratteri",
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleTooShort": "Il titolo deve avere almeno 3 caratteri",
+      "titleTooLong": "Il titolo non può superare i 200 caratteri",
+      "lessonRequired": "Seleziona una lezione",
+      "invalidHashtags": "Hashtag non validi: {tags}",
+      "createFailed": "Impossibile creare il post. Riprova.",
+      "unauthorized": "Devi essere connesso"
+    }
   },
   "FlashcardProgress": {
     "title": "Progressi Flashcard",

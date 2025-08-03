@@ -345,7 +345,7 @@
     "title": "Comunidade",
     "description": "Conecte-se com outros profissionais, tire dúvidas e compartilhe experiências",
     "searchPlaceholder": "Buscar por tópicos, tags ou palavras-chave...",
-    "createTopic": "Novo Tópico",
+    "createTopic": "Novo Post",
     "filterBy": "Filtrar por",
     "filterByCourse": "Filtrar por curso",
     "filterByLesson": "Filtrar por aula",
@@ -427,6 +427,42 @@
     "wow": "Uau",
     "applause": "Aplausos",
     "sad": "Triste"
+  },
+  "CreatePost": {
+    "title": "Criar Novo Post",
+    "type": "Tipo de Post",
+    "types": {
+      "general": "Tópico Geral",
+      "lesson": "Comentário em Aula"
+    },
+    "titleLabel": "Título",
+    "titlePlaceholder": "Digite um título para seu post...",
+    "lessonLabel": "Selecione a Aula",
+    "lessonPlaceholder": "Escolha uma aula...",
+    "contentLabel": "Conteúdo",
+    "contentPlaceholder": "Compartilhe suas dúvidas, experiências ou conhecimentos...",
+    "hashtagsLabel": "Hashtags",
+    "hashtagsPlaceholder": "anatomia, revalida, estudos (separadas por vírgula ou espaço)",
+    "hashtagsHelp": "Use apenas letras minúsculas, números e underscore",
+    "cancel": "Cancelar",
+    "create": "Criar Post",
+    "creating": "Criando...",
+    "success": "Post criado com sucesso!",
+    "successDescriptionTopic": "Seu post foi publicado na comunidade",
+    "successDescriptionComment": "Seu comentário foi adicionado à aula",
+    "error": "Erro ao criar post",
+    "errors": {
+      "contentRequired": "O conteúdo é obrigatório",
+      "contentTooLong": "O conteúdo não pode ter mais de 10.000 caracteres",
+      "titleRequired": "O título é obrigatório",
+      "titleTooShort": "O título deve ter pelo menos 3 caracteres",
+      "titleTooLong": "O título não pode ter mais de 200 caracteres",
+      "lessonRequired": "Selecione uma aula",
+      "invalidHashtags": "Hashtags inválidas: {tags}",
+      "createFailed": "Falha ao criar o post. Tente novamente.",
+      "unauthorized": "Você precisa estar logado",
+      "authorNotFound": "Usuário não encontrado. Por favor, faça login novamente."
+    }
   },
   "FlashcardProgress": {
     "title": "Progresso dos Flashcards",

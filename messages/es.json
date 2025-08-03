@@ -333,7 +333,7 @@
     "title": "Comunidad",
     "description": "Conéctate con otros profesionales, resuelve dudas y comparte experiencias",
     "searchPlaceholder": "Buscar por temas, etiquetas o palabras clave...",
-    "createTopic": "Nuevo Tema",
+    "createTopic": "Nueva Publicación",
     "filterBy": "Filtrar por",
     "filterByCourse": "Filtrar por curso",
     "filterByLesson": "Filtrar por clase",
@@ -415,6 +415,41 @@
     "wow": "Sorprendente",
     "applause": "Aplausos",
     "sad": "Triste"
+  },
+  "CreatePost": {
+    "title": "Crear Nueva Publicación",
+    "type": "Tipo de Publicación",
+    "types": {
+      "general": "Tema General",
+      "lesson": "Comentario en Clase"
+    },
+    "titleLabel": "Título",
+    "titlePlaceholder": "Ingresa un título para tu publicación...",
+    "lessonLabel": "Selecciona la Clase",
+    "lessonPlaceholder": "Elige una clase...",
+    "contentLabel": "Contenido",
+    "contentPlaceholder": "Comparte tus dudas, experiencias o conocimientos...",
+    "hashtagsLabel": "Hashtags",
+    "hashtagsPlaceholder": "anatomia, revalida, estudios (separados por coma o espacio)",
+    "hashtagsHelp": "Usa solo letras minúsculas, números y guión bajo",
+    "cancel": "Cancelar",
+    "create": "Crear Publicación",
+    "creating": "Creando...",
+    "success": "¡Publicación creada con éxito!",
+    "successDescriptionTopic": "Tu publicación ha sido publicada en la comunidad",
+    "successDescriptionComment": "Tu comentario ha sido agregado a la clase",
+    "error": "Error al crear publicación",
+    "errors": {
+      "contentRequired": "El contenido es obligatorio",
+      "contentTooLong": "El contenido no puede tener más de 10.000 caracteres",
+      "titleRequired": "El título es obligatorio",
+      "titleTooShort": "El título debe tener al menos 3 caracteres",
+      "titleTooLong": "El título no puede tener más de 200 caracteres",
+      "lessonRequired": "Selecciona una clase",
+      "invalidHashtags": "Hashtags inválidos: {tags}",
+      "createFailed": "Error al crear la publicación. Intenta nuevamente.",
+      "unauthorized": "Necesitas estar conectado"
+    }
   },
   "FlashcardProgress": {
     "title": "Progreso de Flashcards",

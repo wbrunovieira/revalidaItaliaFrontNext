@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NavSidebar from '@/components/NavSidebar';
 import ReactionsButton, { ReactionType } from '@/components/ReactionsButton';
+import CreatePostModal from '@/components/CreatePostModal';
 
 // Mock data types
 interface Author {
@@ -476,6 +477,16 @@ export default function CommunityPage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onPostCreated={() => {
+          // TODO: Refresh posts list after creation
+          console.log('Post created - refresh list');
+        }}
+      />
     </NavSidebar>
   );
 }

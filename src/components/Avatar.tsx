@@ -66,7 +66,6 @@ export default function Avatar() {
           return;
         }
 
-        console.log('Fetching user data for ID:', userId);
 
         // Usar a rota GET /users/:id que existe no controller
         const controller = new AbortController();
@@ -90,7 +89,8 @@ export default function Avatar() {
         if (response.ok) {
           const data = await response.json();
           setUserData(data.user);
-        } else {
+        } else if (response.status !== 404) {
+          // Only log non-404 errors, as 404 is expected for non-existent users
           console.error(
             'Failed to fetch user data:',
             response.status

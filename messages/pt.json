@@ -341,6 +341,31 @@
     "collapse": "Recolher menu",
     "profile": "Perfil"
   },
+  "Community": {
+    "title": "Comunidade",
+    "description": "Conecte-se com outros profissionais, tire dúvidas e compartilhe experiências",
+    "searchPlaceholder": "Buscar por tópicos, tags ou palavras-chave...",
+    "createTopic": "Novo Tópico",
+    "filterBy": "Filtrar por",
+    "filterByCourse": "Filtrar por curso",
+    "allCourses": "Todos os cursos",
+    "filters": {
+      "all": "Todos",
+      "pinned": "Fixados",
+      "myPosts": "Meus posts"
+    },
+    "tabs": {
+      "recent": "Recentes",
+      "popular": "Populares",
+      "unanswered": "Sem resposta"
+    },
+    "pinned": "Fixado",
+    "justNow": "Agora mesmo",
+    "hoursAgo": "{hours}h atrás",
+    "daysAgo": "{days}d atrás",
+    "noTopics": "Nenhum tópico encontrado",
+    "noTopicsDescription": "Seja o primeiro a criar um tópico e iniciar uma discussão!"
+  },
   "Lesson": {
     "breadcrumb": {
       "dashboard": "Dashboard"
@@ -601,6 +626,32 @@
   "title": "Painel Administrativo",
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
+  
+  "Community": {
+    "title": "Comunidade",
+    "description": "Conecte-se com outros estudantes e compartilhe conhecimento",
+    "searchPlaceholder": "Pesquisar tópicos...",
+    "createTopic": "Criar Tópico",
+    "filterBy": "Filtrar por",
+    "filterByCourse": "Filtrar por curso",
+    "allCourses": "Todos os cursos",
+    "filters": {
+      "all": "Todos",
+      "pinned": "Fixados",
+      "myPosts": "Minhas postagens"
+    },
+    "tabs": {
+      "recent": "Recentes",
+      "popular": "Populares",
+      "unanswered": "Sem resposta"
+    },
+    "pinned": "Fixado",
+    "justNow": "agora",
+    "hoursAgo": "há {hours}h",
+    "daysAgo": "há {days}d",
+    "noTopics": "Nenhum tópico encontrado",
+    "noTopicsDescription": "Seja o primeiro a iniciar uma discussão nesta comunidade!"
+  },
   
   "flashcardTagEdit": {
     "title": "Editar Tag de Flashcard",

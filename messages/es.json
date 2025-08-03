@@ -329,6 +329,31 @@
     "collapse": "Cerrar menú",
     "profile": "Perfil"
   },
+  "Community": {
+    "title": "Comunidad",
+    "description": "Conéctate con otros profesionales, resuelve dudas y comparte experiencias",
+    "searchPlaceholder": "Buscar por temas, etiquetas o palabras clave...",
+    "createTopic": "Nuevo Tema",
+    "filterBy": "Filtrar por",
+    "filterByCourse": "Filtrar por curso",
+    "allCourses": "Todos los cursos",
+    "filters": {
+      "all": "Todos",
+      "pinned": "Fijados",
+      "myPosts": "Mis publicaciones"
+    },
+    "tabs": {
+      "recent": "Recientes",
+      "popular": "Populares",
+      "unanswered": "Sin respuesta"
+    },
+    "pinned": "Fijado",
+    "justNow": "Ahora mismo",
+    "hoursAgo": "hace {hours}h",
+    "daysAgo": "hace {days}d",
+    "noTopics": "No se encontraron temas",
+    "noTopicsDescription": "¡Sé el primero en crear un tema e iniciar una discusión!"
+  },
   "Lesson": {
     "breadcrumb": {
       "dashboard": "Panel"

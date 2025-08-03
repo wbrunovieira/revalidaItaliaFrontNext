@@ -14,9 +14,15 @@ import {
   Layers,
   ClipboardList,
   Brain,
+  HeartHandshake,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { JSX, useState, useEffect, useCallback } from 'react';
+import {
+  JSX,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 
 interface Module {
   id: string;
@@ -70,8 +76,9 @@ export default function Sidebar({
     useState<Course | null>(null);
   const [expandedCourse, setExpandedCourse] =
     useState(false);
-    
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+
+  const [currentTrack, setCurrentTrack] =
+    useState<Track | null>(null);
 
   // Extract course slug from pathname
   const courseSlugMatch = pathname.match(
@@ -81,64 +88,77 @@ export default function Sidebar({
     ? courseSlugMatch[1]
     : null;
   const isInCoursePage = !!courseSlug;
-  
+
   // Extract track slug from pathname
-  const trackSlugMatch = pathname.match(/\/tracks\/([^\/]+)/);
-  const trackSlug = trackSlugMatch ? trackSlugMatch[1] : null;
+  const trackSlugMatch = pathname.match(
+    /\/tracks\/([^\/]+)/
+  );
+  const trackSlug = trackSlugMatch
+    ? trackSlugMatch[1]
+    : null;
   const isInTrackPage = !!trackSlug;
 
-  const fetchTrackAndCourses = useCallback(async (slug: string) => {
-    try {
-      // Fetch track details
-      const trackResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`
-      );
-      if (trackResponse.ok) {
-        const tracks = await trackResponse.json();
-        const track = tracks.find((t: Track) => t.slug === slug);
-        if (track) {
-          setCurrentTrack(track);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching track data:', error);
-    }
-  }, []);
-
-  const fetchCourseAndModules = useCallback(async (slug: string) => {
-    try {
-      // Fetch course details
-      const courseResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?slug=${slug}`
-      );
-      if (courseResponse.ok) {
-        const courses = await courseResponse.json();
-        const course = courses.find(
-          (c: Course) => c.slug === slug
+  const fetchTrackAndCourses = useCallback(
+    async (slug: string) => {
+      try {
+        // Fetch track details
+        const trackResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`
         );
-        if (course) {
-          setCurrentCourse(course);
-          setExpandedCourse(true);
-
-          // Fetch modules
-          const modulesResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules`
+        if (trackResponse.ok) {
+          const tracks = await trackResponse.json();
+          const track = tracks.find(
+            (t: Track) => t.slug === slug
           );
-          if (modulesResponse.ok) {
-            const modulesData =
-              await modulesResponse.json();
-            setModules(
-              modulesData.sort(
-                (a: Module, b: Module) => a.order - b.order
-              )
-            );
+          if (track) {
+            setCurrentTrack(track);
           }
         }
+      } catch (error) {
+        console.error('Error fetching track data:', error);
       }
-    } catch (error) {
-      console.error('Error fetching course data:', error);
-    }
-  }, []);
+    },
+    []
+  );
+
+  const fetchCourseAndModules = useCallback(
+    async (slug: string) => {
+      try {
+        // Fetch course details
+        const courseResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?slug=${slug}`
+        );
+        if (courseResponse.ok) {
+          const courses = await courseResponse.json();
+          const course = courses.find(
+            (c: Course) => c.slug === slug
+          );
+          if (course) {
+            setCurrentCourse(course);
+            setExpandedCourse(true);
+
+            // Fetch modules
+            const modulesResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules`
+            );
+            if (modulesResponse.ok) {
+              const modulesData =
+                await modulesResponse.json();
+              setModules(
+                modulesData.sort(
+                  (a: Module, b: Module) =>
+                    a.order - b.order
+                )
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching course data:', error);
+      }
+    },
+    []
+  );
 
   // Fetch course and modules when in a course page
   useEffect(() => {
@@ -150,7 +170,7 @@ export default function Sidebar({
       setExpandedCourse(false);
     }
   }, [courseSlug, fetchCourseAndModules]);
-  
+
   // Fetch track and courses when in a track page
   useEffect(() => {
     if (trackSlug) {
@@ -202,6 +222,12 @@ export default function Sidebar({
       icon: <Brain size={24} />,
       href: `/${locale}/flashcards/progress`,
       matchPaths: [`/${locale}/flashcards`],
+    },
+    {
+      label: t('community'),
+      icon: <HeartHandshake size={24} />,
+      href: `/${locale}/community`,
+      matchPaths: [`/${locale}/community`],
     },
     {
       label: t('faq'),
@@ -303,11 +329,12 @@ export default function Sidebar({
                 isCoursesItem &&
                 isInCoursePage &&
                 currentCourse;
-                
-              const isTracksItem = href === `/${locale}/tracks`;
-              const showTrackExpansion = 
-                isTracksItem && 
-                isInTrackPage && 
+
+              const isTracksItem =
+                href === `/${locale}/tracks`;
+              const showTrackExpansion =
+                isTracksItem &&
+                isInTrackPage &&
                 currentTrack;
 
               return (
@@ -383,7 +410,7 @@ export default function Sidebar({
                         />
                       )}
                     </Link>
-                    
+
                     {/* Track expansion under Tracks item */}
                     {showTrackExpansion && (
                       <>
@@ -428,7 +455,8 @@ export default function Sidebar({
                               <span className="text-sm font-medium truncate flex-1 text-left">
                                 {currentTrack.translations.find(
                                   t => t.locale === locale
-                                )?.title || currentTrack.slug}
+                                )?.title ||
+                                  currentTrack.slug}
                               </span>
                             </div>
                           </div>
@@ -462,12 +490,12 @@ export default function Sidebar({
                         {/* Expanded state - show full course and modules */}
                         {!collapsed && (
                           <div className="mt-1 ml-12 relative">
-                              {/* Connection line for modules */}
-                              <div className="absolute -left-2 top-0 bottom-0 w-px bg-white/20"></div>
-                              <div className="absolute -left-2 top-4 w-2 h-px bg-white/20"></div>
+                            {/* Connection line for modules */}
+                            <div className="absolute -left-2 top-0 bottom-0 w-px bg-white/20"></div>
+                            <div className="absolute -left-2 top-4 w-2 h-px bg-white/20"></div>
 
-                              {/* Current course */}
-                              <button
+                            {/* Current course */}
+                            <button
                               onClick={() =>
                                 setExpandedCourse(
                                   !expandedCourse

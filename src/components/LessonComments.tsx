@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import ReactionsButton, { ReactionType } from './ReactionsButton';
+import { useToast } from '@/hooks/use-toast';
 
 interface Author {
   id: string;
@@ -125,10 +126,12 @@ interface LessonCommentsProps {
   courseId: string;
   moduleId: string;
   locale: string;
+  lessonTitle?: string;
 }
 
-export default function LessonComments({ lessonId, courseId, moduleId, locale }: LessonCommentsProps) {
+export default function LessonComments({ lessonId, courseId, moduleId, locale, lessonTitle = 'Aula' }: LessonCommentsProps) {
   const t = useTranslations('LessonComments');
+  const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>(mockComments);
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -136,9 +139,122 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
   const [isLoading, setIsLoading] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [replyAttachedFiles, setReplyAttachedFiles] = useState<{ [key: string]: File[] }>({});
+  const [currentUser, setCurrentUser] = useState<Author | null>(null);
 
   // Get locale for date formatting
   const dateLocale = locale === 'pt' ? ptBR : locale === 'it' ? it : es;
+
+  // Decode JWT to get user ID
+  const decodeJWT = useCallback((token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  }, []);
+
+  // Fetch current user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+
+        if (!token) return;
+
+        const decodedToken = decodeJWT(token);
+        const userId = decodedToken?.sub;
+
+        if (!userId) {
+          console.error('User ID not found in token');
+          return;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const userData = data.user;
+          
+          // Try to fetch address data if available
+          let addressData = null;
+          try {
+            const addressResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userData.id}`,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            
+            if (addressResponse.ok) {
+              const addresses = await addressResponse.json();
+              if (addresses.length > 0) {
+                addressData = addresses[0]; // Use first address
+              }
+            }
+          } catch (error) {
+            console.log('Could not fetch address data:', error);
+          }
+          
+          // Set user data with available fields
+          setCurrentUser({
+            id: userData.id,
+            name: userData.name,
+            avatar: userData.profileImageUrl,
+            city: addressData?.city || userData.city,
+            country: addressData?.country || userData.country,
+            profession: userData.profession
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [decodeJWT]);
+
+  // Generate title from lesson name and comment preview
+  const generateCommentTitle = useCallback((content: string, lessonName: string) => {
+    // Clean and get first words from content
+    const cleanContent = content.trim().replace(/\s+/g, ' ');
+    const maxPreviewLength = 60; // Characters for the preview part
+    
+    // Get the preview text
+    let preview = cleanContent;
+    if (preview.length > maxPreviewLength) {
+      // Cut at the last complete word before limit
+      preview = preview.substring(0, maxPreviewLength);
+      const lastSpace = preview.lastIndexOf(' ');
+      if (lastSpace > 0) {
+        preview = preview.substring(0, lastSpace);
+      }
+      preview += '...';
+    }
+    
+    // Format: "Lesson Name: Preview..."
+    return `${lessonName}: ${preview}`;
+  }, []);
 
   // Format date
   const formatDate = useCallback((date: Date) => {
@@ -219,25 +335,87 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
 
   // Handle submit new comment
   const handleSubmitComment = useCallback(async () => {
-    if (!newComment.trim()) return;
+    console.log('🚀 handleSubmitComment called');
+    console.log('Comment content:', newComment);
+    
+    if (!newComment.trim()) {
+      console.log('❌ Comment is empty, returning');
+      return;
+    }
 
     setIsLoading(true);
+    console.log('✅ Loading state set to true');
     
-    // Mock API call
-    setTimeout(() => {
-      const newCommentObj: Comment = {
-        id: Date.now().toString(),
-        content: newComment,
-        author: {
-          id: 'current-user',
-          name: 'Current User',
-          avatar: undefined,
-          city: 'São Paulo',
-          country: 'Brasil',
-          profession: 'Médico'
+    try {
+      console.log('📝 Starting API call process...');
+      
+      // Get token from cookies
+      console.log('🔐 Getting token from cookies...');
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+      
+      console.log('Token found:', token ? 'Yes' : 'No');
+      
+      if (!token) {
+        throw new Error(t('errors.unauthorized'));
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log('API URL from env:', apiUrl);
+      
+      // Generate automatic title
+      console.log('📝 Generating title with lesson:', lessonTitle);
+      const autoTitle = generateCommentTitle(newComment, lessonTitle);
+      console.log('Generated title:', autoTitle);
+      
+      // Prepare request body - LESSON_COMMENT cannot have title
+      const requestBody = {
+        type: 'LESSON_COMMENT',
+        content: newComment.trim(),
+        lessonId: lessonId,
+      };
+
+      console.log('📤 Request body prepared:', requestBody);
+      console.log('Full API URL:', `${apiUrl}/api/v1/community/posts`);
+      console.log('Token present:', token ? 'Yes' : 'No');
+
+      const response = await fetch(`${apiUrl}/api/v1/community/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      console.log('API Response Status:', response.status);
+      console.log('API Response Data:', data);
+
+      if (!response.ok) {
+        // Handle specific error types
+        if (data.type?.includes('author-not-found')) {
+          throw new Error(t('errors.authorNotFound'));
+        }
+        if (data.type?.includes('lesson-not-found')) {
+          throw new Error(t('errors.lessonNotFound'));
+        }
+        throw new Error(data.detail || t('errors.createFailed'));
+      }
+
+      // Create comment object with API response data
+      const newCommentObj: Comment = {
+        id: data.post.id,
+        content: data.post.content,
+        author: currentUser || {
+          id: data.post.authorId,
+          name: 'Usuário',
+          avatar: undefined
+        },
+        createdAt: new Date(data.post.createdAt),
+        updatedAt: new Date(data.post.updatedAt),
         reactions: {
           heart: 0,
           thumbsUp: 0,
@@ -254,9 +432,38 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
       setComments([newCommentObj, ...comments]);
       setNewComment('');
       setAttachedFiles([]);
+      
+      console.log('✅ Comment created successfully!');
+      console.log('📝 Post details:', {
+        id: data.post.id,
+        slug: data.post.slug,
+        type: data.post.type,
+        status: data.post.status,
+        createdAt: data.post.createdAt
+      });
+      console.log('🏷️ Generated title for display:', autoTitle);
+      console.log('📊 Full API response:', data);
+      
+      toast({
+        title: t('success'),
+        description: t('successDescription'),
+      });
+    } catch (error) {
+      console.error('❌ Error creating comment:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      toast({
+        title: t('error'),
+        description: error instanceof Error ? error.message : t('errors.createFailed'),
+        variant: 'destructive',
+      });
+    } finally {
+      console.log('🏁 Resetting loading state');
       setIsLoading(false);
-    }, 500);
-  }, [newComment, comments, lessonId, courseId, moduleId]);
+    }
+  }, [newComment, comments, lessonId, courseId, moduleId, lessonTitle, generateCommentTitle, t, toast]);
 
   // Handle submit reply
   const handleSubmitReply = useCallback(async (parentId: string) => {
@@ -269,13 +476,10 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
       const newReply: Comment = {
         id: Date.now().toString(),
         content: replyContent,
-        author: {
+        author: currentUser || {
           id: 'current-user',
-          name: 'Current User',
-          avatar: undefined,
-          city: 'São Paulo',
-          country: 'Brasil',
-          profession: 'Médico'
+          name: 'Usuário',
+          avatar: undefined
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -432,9 +636,15 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
                         <h4 className="font-semibold text-white hover:text-secondary cursor-pointer transition-colors">
                           {comment.author.name}
                         </h4>
-                        <p className="text-xs text-gray-500">
-                          {comment.author.profession} • {comment.author.city}, {comment.author.country}
-                        </p>
+                        {(comment.author.profession || comment.author.city || comment.author.country) && (
+                          <p className="text-xs text-gray-500">
+                            {[
+                              comment.author.profession,
+                              comment.author.city && comment.author.country ? `${comment.author.city}, ${comment.author.country}` : 
+                              comment.author.city || comment.author.country
+                            ].filter(Boolean).join(' • ')}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500">

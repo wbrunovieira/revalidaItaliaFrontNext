@@ -768,6 +768,7 @@ export default async function LessonPage({
           courseId={course.id}
           moduleId={moduleFound.id}
           locale={locale}
+          lessonTitle={lt.title}
         />
         
         {/* Heartbeat Status Indicator (Development Only) */}

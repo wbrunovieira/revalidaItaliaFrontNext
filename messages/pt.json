@@ -419,7 +419,16 @@
     "noComments": "Nenhum comentário ainda",
     "beFirst": "Seja o primeiro a iniciar uma discussão!",
     "attachFile": "Anexar arquivo",
-    "filesAttached": "{count} arquivo(s) anexado(s)"
+    "filesAttached": "{count} arquivo(s) anexado(s)",
+    "success": "Comentário publicado!",
+    "successDescription": "Seu comentário foi adicionado à aula",
+    "error": "Erro ao publicar",
+    "errors": {
+      "unauthorized": "Você precisa estar logado",
+      "authorNotFound": "Usuário não encontrado. Por favor, faça login novamente",
+      "lessonNotFound": "Aula não encontrada",
+      "createFailed": "Falha ao criar comentário. Tente novamente"
+    }
   },
   "Reactions": {
     "love": "Amei",

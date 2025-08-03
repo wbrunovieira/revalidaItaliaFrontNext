@@ -408,7 +408,16 @@
     "noComments": "Nessun commento ancora",
     "beFirst": "Sii il primo a iniziare una discussione!",
     "attachFile": "Allega file",
-    "filesAttached": "{count} file allegato/i"
+    "filesAttached": "{count} file allegato/i",
+    "success": "Commento pubblicato!",
+    "successDescription": "Il tuo commento è stato aggiunto alla lezione",
+    "error": "Errore nella pubblicazione",
+    "errors": {
+      "unauthorized": "Devi essere connesso",
+      "authorNotFound": "Utente non trovato. Per favore, accedi di nuovo",
+      "lessonNotFound": "Lezione non trovata",
+      "createFailed": "Impossibile creare il commento. Riprova"
+    }
   },
   "Reactions": {
     "love": "Amore",

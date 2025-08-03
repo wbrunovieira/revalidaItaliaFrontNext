@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, Hash, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Hash, AlertCircle, Loader2, MessageSquare, Sparkles, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface CreatePostModalProps {
   open: boolean;
@@ -163,117 +164,202 @@ export default function CreatePostModal({ open, onClose, onPostCreated, type: pr
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-primary-dark border-gray-700">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-white">
-            {t('title')}
-          </DialogTitle>
+      <DialogContent className="max-w-2xl bg-gradient-to-br from-primary via-primary-dark to-primary-dark/95 border-secondary/20 shadow-2xl">
+        <DialogHeader className="relative">
+          {/* Decorative elements */}
+          <div className="absolute -top-6 -right-6 w-24 h-24 bg-secondary/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-4 -left-6 w-20 h-20 bg-secondary/10 rounded-full blur-2xl" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 bg-secondary/20 rounded-lg">
+                <MessageSquare size={24} className="text-secondary" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-white">
+                {t('title')}
+              </DialogTitle>
+            </div>
+            <p className="text-gray-400 text-sm flex items-center gap-1">
+              <Sparkles size={14} className="text-secondary" />
+              {type === 'GENERAL_TOPIC' ? t('subtitleTopic') : t('subtitleComment')}
+            </p>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="space-y-5 mt-6">
           {/* Title (only for GENERAL_TOPIC) */}
           {type === 'GENERAL_TOPIC' && (
-            <div>
-              <Label className="text-white mb-2">{t('titleLabel')}</Label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={t('titlePlaceholder')}
-                className="bg-primary-dark/50 border-gray-700 text-white placeholder:text-gray-500"
-                maxLength={200}
-              />
-              {errors.title && (
-                <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle size={14} />
-                  {errors.title}
+            <div className="space-y-2">
+              <Label className="text-white font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-secondary" />
+                {t('titleLabel')}
+              </Label>
+              <div className="relative group">
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={t('titlePlaceholder')}
+                  className={cn(
+                    "bg-primary/50 border-gray-700 text-white placeholder:text-gray-500",
+                    "focus:border-secondary focus:ring-1 focus:ring-secondary/50",
+                    "transition-all duration-200",
+                    errors.title && "border-red-500/50 focus:border-red-500 focus:ring-red-500/50"
+                  )}
+                  maxLength={200}
+                />
+                <div className="absolute inset-0 rounded-md bg-gradient-to-r from-secondary/0 via-secondary/10 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </div>
+              <div className="flex items-center justify-between">
+                {errors.title ? (
+                  <p className="text-red-400 text-sm flex items-center gap-1">
+                    <AlertCircle size={14} />
+                    {errors.title}
+                  </p>
+                ) : (
+                  <div />
+                )}
+                <p className={cn(
+                  "text-xs transition-colors",
+                  title.length > 180 ? "text-orange-400" : "text-gray-500"
+                )}>
+                  {title.length}/200
                 </p>
-              )}
-              <p className="text-gray-500 text-xs mt-1">
-                {title.length}/200
-              </p>
+              </div>
             </div>
           )}
 
           {/* Content */}
-          <div>
-            <Label className="text-white mb-2">{t('contentLabel')}</Label>
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={t('contentPlaceholder')}
-              className="bg-primary-dark/50 border-gray-700 text-white placeholder:text-gray-500 min-h-[200px]"
-              maxLength={10000}
-            />
-            {errors.content && (
-              <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <AlertCircle size={14} />
-                {errors.content}
+          <div className="space-y-2">
+            <Label className="text-white font-semibold flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-secondary" />
+              {t('contentLabel')}
+            </Label>
+            <div className="relative group">
+              <Textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={t('contentPlaceholder')}
+                className={cn(
+                  "bg-primary/50 border-gray-700 text-white placeholder:text-gray-500 min-h-[200px]",
+                  "focus:border-secondary focus:ring-1 focus:ring-secondary/50",
+                  "transition-all duration-200 resize-none",
+                  errors.content && "border-red-500/50 focus:border-red-500 focus:ring-red-500/50"
+                )}
+                maxLength={10000}
+              />
+              <div className="absolute inset-0 rounded-md bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </div>
+            <div className="flex items-center justify-between">
+              {errors.content ? (
+                <p className="text-red-400 text-sm flex items-center gap-1">
+                  <AlertCircle size={14} />
+                  {errors.content}
+                </p>
+              ) : (
+                <div />
+              )}
+              <p className={cn(
+                "text-xs transition-colors",
+                content.length > 9000 ? "text-orange-400" : "text-gray-500"
+              )}>
+                {content.length}/10000
               </p>
-            )}
-            <p className="text-gray-500 text-xs mt-1">
-              {content.length}/10000
-            </p>
+            </div>
           </div>
 
           {/* Hashtags */}
-          <div>
-            <Label className="text-white mb-2">
-              <Hash size={14} className="inline mr-1" />
+          <div className="space-y-2">
+            <Label className="text-white font-semibold flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-secondary" />
               {t('hashtagsLabel')}
+              <span className="text-gray-500 font-normal text-xs">{t('optional')}</span>
             </Label>
-            <Input
-              value={hashtags}
-              onChange={(e) => setHashtags(e.target.value.toLowerCase())}
-              placeholder={t('hashtagsPlaceholder')}
-              className="bg-primary-dark/50 border-gray-700 text-white placeholder:text-gray-500"
-            />
-            {errors.hashtags && (
-              <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+            <div className="relative group">
+              <Hash size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Input
+                value={hashtags}
+                onChange={(e) => setHashtags(e.target.value.toLowerCase())}
+                placeholder={t('hashtagsPlaceholder')}
+                className={cn(
+                  "bg-primary/50 border-gray-700 text-white placeholder:text-gray-500 pl-10",
+                  "focus:border-secondary focus:ring-1 focus:ring-secondary/50",
+                  "transition-all duration-200",
+                  errors.hashtags && "border-red-500/50 focus:border-red-500 focus:ring-red-500/50"
+                )}
+              />
+              <div className="absolute inset-0 rounded-md bg-gradient-to-r from-secondary/0 via-secondary/10 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </div>
+            
+            {errors.hashtags ? (
+              <p className="text-red-400 text-sm flex items-center gap-1">
                 <AlertCircle size={14} />
                 {errors.hashtags}
               </p>
+            ) : (
+              <p className="text-gray-500 text-xs flex items-center gap-1">
+                <Info size={12} />
+                {t('hashtagsHelp')}
+              </p>
             )}
-            <p className="text-gray-500 text-xs mt-1">
-              {t('hashtagsHelp')}
-            </p>
             
             {/* Hashtag Preview */}
             {hashtags.trim() && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {hashtags.split(/[\s,]+/).filter(tag => tag.length > 0).map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-secondary/20 text-secondary border-secondary/30">
-                    #{tag}
-                  </Badge>
-                ))}
+              <div className="p-3 bg-primary/30 rounded-lg border border-gray-700">
+                <p className="text-xs text-gray-500 mb-2">{t('preview')}:</p>
+                <div className="flex flex-wrap gap-2">
+                  {hashtags.split(/[\s,]+/).filter(tag => tag.length > 0).map((tag, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary" 
+                      className="bg-gradient-to-r from-secondary/20 to-secondary/10 text-secondary border-secondary/30 hover:border-secondary/50 transition-colors"
+                    >
+                      <Hash size={12} className="mr-1" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-gray-400 hover:text-white"
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-secondary hover:bg-secondary/90 text-white"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="mr-2 animate-spin" />
-                {t('creating')}
-              </>
-            ) : (
-              t('create')
-            )}
-          </Button>
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-700">
+          <p className="text-xs text-gray-500">
+            {type === 'GENERAL_TOPIC' ? t('tipTopic') : t('tipComment')}
+          </p>
+          <div className="flex gap-3">
+            <Button
+              variant="ghost"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || (!content.trim() || (type === 'GENERAL_TOPIC' && !title.trim()))}
+              className={cn(
+                "bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70",
+                "text-white font-semibold shadow-lg hover:shadow-secondary/25",
+                "transition-all duration-200 transform hover:scale-105",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              )}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  {t('creating')}
+                </>
+              ) : (
+                <>
+                  <MessageSquare size={16} className="mr-2" />
+                  {t('create')}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

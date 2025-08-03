@@ -433,6 +433,8 @@
       "general": "Argomento Generale",
       "lesson": "Commento sulla Lezione"
     },
+    "subtitleTopic": "Condividi conoscenze e risolvi dubbi con la comunità",
+    "subtitleComment": "Aggiungi un commento relativo a questa lezione",
     "titleLabel": "Titolo",
     "titlePlaceholder": "Inserisci un titolo per il tuo post...",
     "lessonLabel": "Seleziona la Lezione",
@@ -442,9 +444,13 @@
     "hashtagsLabel": "Hashtag",
     "hashtagsPlaceholder": "anatomia, revalida, studio (separati da virgola o spazio)",
     "hashtagsHelp": "Usa solo lettere minuscole, numeri e underscore",
+    "optional": "(opzionale)",
+    "preview": "Anteprima",
+    "tipTopic": "Suggerimento: Usa gli hashtag per aiutare gli altri a trovare il tuo post",
+    "tipComment": "Suggerimento: Sii specifico per ricevere risposte più utili",
     "cancel": "Annulla",
-    "create": "Crea Post",
-    "creating": "Creazione...",
+    "create": "Pubblica",
+    "creating": "Pubblicazione...",
     "success": "Post creato con successo!",
     "successDescriptionTopic": "Il tuo post è stato pubblicato nella comunità",
     "successDescriptionComment": "Il tuo commento è stato aggiunto alla lezione",
@@ -458,7 +464,8 @@
       "lessonRequired": "Seleziona una lezione",
       "invalidHashtags": "Hashtag non validi: {tags}",
       "createFailed": "Impossibile creare il post. Riprova.",
-      "unauthorized": "Devi essere connesso"
+      "unauthorized": "Devi essere connesso",
+      "authorNotFound": "Utente non trovato. Effettua nuovamente l'accesso."
     }
   },
   "FlashcardProgress": {

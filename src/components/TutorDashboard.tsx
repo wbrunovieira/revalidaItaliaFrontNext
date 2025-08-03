@@ -17,8 +17,10 @@ import {
   RefreshCw,
   BarChart3,
   Activity,
+  Brain,
 } from 'lucide-react';
 import TutorAnalytics from './TutorAnalytics';
+import TutorFlashcardStats from './TutorFlashcardStats';
 
 interface Student {
   id: string;
@@ -141,7 +143,7 @@ export default function TutorDashboard({
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'analytics'
+    'overview' | 'analytics' | 'flashcards'
   >('overview');
   const [analyticsAttempts, setAnalyticsAttempts] =
     useState<AnalyticsAttempt[]>([]);
@@ -724,6 +726,17 @@ export default function TutorDashboard({
           >
             <BarChart3 size={18} />
             Avaliações - Análise
+          </button>
+          <button
+            onClick={() => setActiveTab('flashcards')}
+            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'flashcards'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Brain size={18} />
+            Flashcards
           </button>
         </div>
 
@@ -1648,7 +1661,7 @@ export default function TutorDashboard({
               )}
             </div>
           </>
-        ) : (
+        ) : activeTab === 'analytics' ? (
           /* Analytics Tab */
           <div className="bg-gray-800 rounded-lg p-6">
             {analyticsAttempts.length > 0 ? (
@@ -1671,6 +1684,9 @@ export default function TutorDashboard({
               </div>
             )}
           </div>
+        ) : (
+          /* Flashcards Tab */
+          <TutorFlashcardStats locale={locale} />
         )}
       </div>
     </div>

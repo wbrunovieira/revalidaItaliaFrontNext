@@ -1662,8 +1662,11 @@ export default function TutorDashboard({
                   size={48}
                   className="mx-auto mb-4 text-gray-400"
                 />
-                <p className="text-gray-300">
-                  Carregando dados de análise...
+                <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                  Nenhum dado de análise disponível
+                </h3>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  As análises detalhadas estarão disponíveis quando houver tentativas de Quiz ou Simulado realizadas pelos alunos.
                 </p>
               </div>
             )}

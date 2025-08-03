@@ -459,6 +459,19 @@
     "preview": "Visualização",
     "tipTopic": "Dica: Use hashtags para ajudar outros a encontrar seu post",
     "tipComment": "Dica: Seja específico para receber respostas mais úteis",
+    "attachmentsLabel": "Anexos",
+    "attachmentTypes": {
+      "images": "Imagens",
+      "pdf": "Documento PDF",
+      "video": "Link de Vídeo"
+    },
+    "attachmentLimits": {
+      "images": "Até 6 imagens",
+      "pdf": "1 arquivo PDF",
+      "video": "YouTube, Vimeo, etc"
+    },
+    "videoUrlPlaceholder": "Cole o link do vídeo aqui...",
+    "removeAttachment": "Remover anexo",
     "cancel": "Cancelar",
     "create": "Publicar",
     "creating": "Publicando...",
@@ -474,6 +487,9 @@
       "titleTooLong": "O título não pode ter mais de 200 caracteres",
       "lessonRequired": "Selecione uma aula",
       "invalidHashtags": "Hashtags inválidas: {tags}",
+      "invalidVideoUrl": "URL de vídeo inválida",
+      "invalidImageType": "Selecione apenas arquivos de imagem",
+      "invalidPdfType": "Selecione apenas arquivos PDF",
       "createFailed": "Falha ao criar o post. Tente novamente.",
       "unauthorized": "Você precisa estar logado",
       "authorNotFound": "Usuário não encontrado. Por favor, faça login novamente."

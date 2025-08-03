@@ -448,6 +448,19 @@
     "preview": "Anteprima",
     "tipTopic": "Suggerimento: Usa gli hashtag per aiutare gli altri a trovare il tuo post",
     "tipComment": "Suggerimento: Sii specifico per ricevere risposte più utili",
+    "attachmentsLabel": "Allegati",
+    "attachmentTypes": {
+      "images": "Immagini",
+      "pdf": "Documento PDF",
+      "video": "Link Video"
+    },
+    "attachmentLimits": {
+      "images": "Fino a 6 immagini",
+      "pdf": "1 file PDF",
+      "video": "YouTube, Vimeo, ecc"
+    },
+    "videoUrlPlaceholder": "Incolla il link del video qui...",
+    "removeAttachment": "Rimuovi allegato",
     "cancel": "Annulla",
     "create": "Pubblica",
     "creating": "Pubblicazione...",
@@ -463,6 +476,9 @@
       "titleTooLong": "Il titolo non può superare i 200 caratteri",
       "lessonRequired": "Seleziona una lezione",
       "invalidHashtags": "Hashtag non validi: {tags}",
+      "invalidVideoUrl": "URL video non valido",
+      "invalidImageType": "Seleziona solo file immagine",
+      "invalidPdfType": "Seleziona solo file PDF",
       "createFailed": "Impossibile creare il post. Riprova.",
       "unauthorized": "Devi essere connesso",
       "authorNotFound": "Utente non trovato. Effettua nuovamente l'accesso."

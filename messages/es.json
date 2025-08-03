@@ -447,6 +447,19 @@
     "preview": "Vista previa",
     "tipTopic": "Consejo: Usa hashtags para ayudar a otros a encontrar tu publicación",
     "tipComment": "Consejo: Sé específico para recibir respuestas más útiles",
+    "attachmentsLabel": "Adjuntos",
+    "attachmentTypes": {
+      "images": "Imágenes",
+      "pdf": "Documento PDF",
+      "video": "Enlace de Video"
+    },
+    "attachmentLimits": {
+      "images": "Hasta 6 imágenes",
+      "pdf": "1 archivo PDF",
+      "video": "YouTube, Vimeo, etc"
+    },
+    "videoUrlPlaceholder": "Pega el enlace del video aquí...",
+    "removeAttachment": "Eliminar adjunto",
     "cancel": "Cancelar",
     "create": "Publicar",
     "creating": "Publicando...",
@@ -462,8 +475,12 @@
       "titleTooLong": "El título no puede tener más de 200 caracteres",
       "lessonRequired": "Selecciona una clase",
       "invalidHashtags": "Hashtags inválidos: {tags}",
+      "invalidVideoUrl": "URL de video inválida",
+      "invalidImageType": "Selecciona solo archivos de imagen",
+      "invalidPdfType": "Selecciona solo archivos PDF",
       "createFailed": "Error al crear la publicación. Intenta nuevamente.",
-      "unauthorized": "Necesitas estar conectado"
+      "unauthorized": "Necesitas estar conectado",
+      "authorNotFound": "Usuario no encontrado. Por favor, inicia sesión nuevamente."
     }
   },
   "FlashcardProgress": {

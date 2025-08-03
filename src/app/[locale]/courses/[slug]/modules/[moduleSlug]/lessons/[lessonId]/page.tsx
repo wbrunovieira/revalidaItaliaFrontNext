@@ -9,6 +9,7 @@ import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import StableVideoPlayer from '@/components/StableVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
+import LessonComments from '@/components/LessonComments';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -760,6 +761,14 @@ export default async function LessonPage({
             </div>
           </aside>
         </div>
+        
+        {/* Comments Section - After video and sidebar */}
+        <LessonComments 
+          lessonId={lessonId}
+          courseId={course.id}
+          moduleId={moduleFound.id}
+          locale={locale}
+        />
         
         {/* Heartbeat Status Indicator (Development Only) */}
       </div>

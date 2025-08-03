@@ -393,6 +393,21 @@
     "answerType": "Tipo di risposta",
     "studyFlashcards": "Studia flashcard"
   },
+  "LessonComments": {
+    "title": "Commenti e Discussione",
+    "description": "Condividi i tuoi dubbi e scambia esperienze con altri studenti",
+    "placeholder": "Scrivi il tuo commento o domanda...",
+    "submit": "Invia",
+    "reply": "Rispondi",
+    "report": "Segnala",
+    "replyPlaceholder": "Scrivi la tua risposta...",
+    "cancel": "Annulla",
+    "submitReply": "Invia Risposta",
+    "noComments": "Nessun commento ancora",
+    "beFirst": "Sii il primo a iniziare una discussione!",
+    "attachFile": "Allega file",
+    "filesAttached": "{count} file allegato/i"
+  },
   "FlashcardProgress": {
     "title": "Progressi Flashcard",
     "subtitle": "Monitora le tue prestazioni e l'evoluzione",

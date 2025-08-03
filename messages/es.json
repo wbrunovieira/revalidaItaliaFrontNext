@@ -392,6 +392,21 @@
     "answerType": "Tipo de respuesta",
     "studyFlashcards": "Estudiar flashcards"
   },
+  "LessonComments": {
+    "title": "Comentarios y Discusión",
+    "description": "Comparte tus dudas e intercambia experiencias con otros estudiantes",
+    "placeholder": "Escribe tu comentario o pregunta...",
+    "submit": "Enviar",
+    "reply": "Responder",
+    "report": "Reportar",
+    "replyPlaceholder": "Escribe tu respuesta...",
+    "cancel": "Cancelar",
+    "submitReply": "Enviar Respuesta",
+    "noComments": "Aún no hay comentarios",
+    "beFirst": "¡Sé el primero en iniciar una discusión!",
+    "attachFile": "Adjuntar archivo",
+    "filesAttached": "{count} archivo(s) adjunto(s)"
+  },
   "FlashcardProgress": {
     "title": "Progreso de Flashcards",
     "subtitle": "Sigue tu rendimiento y evolución",

@@ -712,7 +712,7 @@ export default function TutorDashboard({
             }`}
           >
             <Activity size={18} />
-            Visão Geral
+            Avaliações - Visão Geral
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
@@ -723,7 +723,7 @@ export default function TutorDashboard({
             }`}
           >
             <BarChart3 size={18} />
-            Análise Detalhada
+            Avaliações - Análise
           </button>
         </div>
 

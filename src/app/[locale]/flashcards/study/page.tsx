@@ -1025,7 +1025,7 @@ export default function FlashcardStudyPage() {
                     >
                       {/* Front (Question) */}
                       <motion.div
-                        className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary-dark to-primary rounded-2xl shadow-2xl border border-secondary/30 p-8 flex flex-col items-center justify-center"
+                        className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary-dark to-primary rounded-2xl shadow-2xl border border-secondary/30 p-6 md:p-8 flex flex-col"
                         style={{
                           backfaceVisibility: 'hidden',
                         }}
@@ -1057,18 +1057,18 @@ export default function FlashcardStudyPage() {
                           </div>
                         </div>
 
-                        <div className="text-center">
+                        <div className="flex-1 flex flex-col items-center justify-center w-full overflow-hidden">
                           <p className="text-secondary text-sm font-semibold mb-4 uppercase tracking-wider">
                             {t('question')}
                           </p>
 
                           {currentCard.questionType ===
                           'TEXT' ? (
-                            <p className="text-white text-xl leading-relaxed">
+                            <p className="text-white text-xl leading-relaxed px-4">
                               {currentCard.questionText}
                             </p>
                           ) : (
-                            <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden">
                               <Image
                                 src={
                                   currentCard.questionImageUrl!
@@ -1076,13 +1076,15 @@ export default function FlashcardStudyPage() {
                                 alt="Question"
                                 fill
                                 className="object-contain"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
                               />
                             </div>
                           )}
                         </div>
 
                         <motion.p
-                          className="absolute bottom-6 text-gray-500 text-sm"
+                          className="mt-6 pb-4 text-gray-500 text-sm text-center"
                           animate={
                             showFlipHint
                               ? {
@@ -1103,7 +1105,7 @@ export default function FlashcardStudyPage() {
 
                       {/* Back (Answer) */}
                       <motion.div
-                        className="absolute inset-0 w-full h-full bg-gradient-to-br from-secondary/20 to-accent-light/20 rounded-2xl shadow-2xl border border-secondary/30 p-8 flex flex-col items-center justify-center"
+                        className="absolute inset-0 w-full h-full bg-gradient-to-br from-secondary/20 to-accent-light/20 rounded-2xl shadow-2xl border border-secondary/30 p-6 md:p-8 flex flex-col"
                         style={{
                           backfaceVisibility: 'hidden',
                           transform: 'rotateY(180deg)',
@@ -1117,18 +1119,18 @@ export default function FlashcardStudyPage() {
                           />
                         </div>
 
-                        <div className="text-center">
+                        <div className="flex-1 flex flex-col items-center justify-center w-full overflow-hidden">
                           <p className="text-accent-light text-sm font-semibold mb-4 uppercase tracking-wider">
                             {t('answer')}
                           </p>
 
                           {currentCard.answerType ===
                           'TEXT' ? (
-                            <p className="text-white text-lg leading-relaxed">
+                            <p className="text-white text-lg leading-relaxed px-4">
                               {currentCard.answerText}
                             </p>
                           ) : (
-                            <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden">
                               <Image
                                 src={
                                   currentCard.answerImageUrl!
@@ -1136,12 +1138,14 @@ export default function FlashcardStudyPage() {
                                 alt="Answer"
                                 fill
                                 className="object-contain"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
                               />
                             </div>
                           )}
                         </div>
 
-                        <div className="absolute bottom-6 flex items-center gap-6">
+                        <div className="mt-6 pb-4 flex items-center gap-4 justify-center">
                           <button
                             onClick={e => {
                               e.stopPropagation();

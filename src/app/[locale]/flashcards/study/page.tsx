@@ -104,6 +104,8 @@ export default function FlashcardStudyPage() {
   >('idle');
   const [queueSize, setQueueSize] = useState(0);
   const [isResetting, setIsResetting] = useState(false);
+  const [totalFlashcards, setTotalFlashcards] = useState(0);
+  const [completedCards, setCompletedCards] = useState<Set<string>>(new Set());
 
   // Force flush on page unload
   useEffect(() => {
@@ -302,7 +304,7 @@ export default function FlashcardStudyPage() {
         );
         console.log('Setting flashcards:', shuffled);
         setFlashcards(shuffled);
-        
+        setTotalFlashcards(shuffled.length);
         
         setLoading(false);
       } catch (err) {
@@ -331,6 +333,7 @@ export default function FlashcardStudyPage() {
     if (direction === 'right') {
       console.log('Marked as MASTERED:', cardId);
       setMasteredCount(prev => prev + 1);
+      setCompletedCards(prev => new Set(prev).add(cardId));
     } else {
       console.log('Marked as DIFFICULT:', cardId);
       setDifficultCount(prev => prev + 1);
@@ -396,21 +399,31 @@ export default function FlashcardStudyPage() {
     // Handle card transition
     setTimeout(() => {
       if (direction === 'right') {
-        // For EASY cards, remove from list but stay on same index
-        setFlashcards(prev => {
-          const newCards = prev.filter((_, index) => index !== currentIndex);
+        // For EASY cards, check if all cards are completed
+        const allCardsCompleted = completedCards.size + 1 === totalFlashcards;
+        
+        if (allCardsCompleted) {
+          setShowResults(true);
+        } else {
+          // Move to next unmastered card
+          let nextIndex = currentIndex;
+          let found = false;
           
-          // Check if we have more cards
-          if (newCards.length === 0) {
-            setShowResults(true);
-          } else if (currentIndex >= newCards.length) {
-            // If we're at the end, go back one
-            setCurrentIndex(newCards.length - 1);
+          // Look for next unmastered card
+          for (let i = 0; i < flashcards.length; i++) {
+            nextIndex = (currentIndex + i + 1) % flashcards.length;
+            if (!completedCards.has(flashcards[nextIndex].id)) {
+              found = true;
+              break;
+            }
           }
-          // If currentIndex is still valid, keep it (next card slides in)
           
-          return newCards;
-        });
+          if (found) {
+            setCurrentIndex(nextIndex);
+          } else {
+            setShowResults(true);
+          }
+        }
       } else {
         // For HARD cards, update userInteraction and move to next
         setFlashcards(prev => prev.map((card) => {
@@ -474,6 +487,7 @@ export default function FlashcardStudyPage() {
     setMasteredCount(0);
     setDifficultCount(0);
     setShowResults(false);
+    setCompletedCards(new Set());
     // Reload the page to get fresh flashcards
     window.location.reload();
   };
@@ -632,7 +646,7 @@ export default function FlashcardStudyPage() {
   // No flashcards or all completed
   if (flashcards.length === 0 && !loading) {
     // Use metadata to determine the state
-    const allCompleted = metadata && metadata.completedFlashcards === metadata.totalFlashcards && metadata.totalFlashcards > 0;
+    const allCompleted = (metadata && metadata.completedFlashcards === metadata.totalFlashcards && metadata.totalFlashcards > 0) || (totalFlashcards > 0 && completedCards.size === totalFlashcards);
     
     return (
       <NavSidebar>
@@ -950,7 +964,7 @@ export default function FlashcardStudyPage() {
 
               {/* Flashcard */}
               <AnimatePresence mode="wait">
-                {currentCard && (
+                {currentCard && !completedCards.has(currentCard.id) && (
                   <motion.div
                     key={currentCard.id}
                     className="relative w-full h-[500px] cursor-grab active:cursor-grabbing"

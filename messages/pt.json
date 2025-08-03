@@ -419,6 +419,13 @@
     "attachFile": "Anexar arquivo",
     "filesAttached": "{count} arquivo(s) anexado(s)"
   },
+  "Reactions": {
+    "love": "Amei",
+    "like": "Curtir",
+    "wow": "Uau",
+    "applause": "Aplausos",
+    "sad": "Triste"
+  },
   "FlashcardProgress": {
     "title": "Progresso dos Flashcards",
     "subtitle": "Acompanhe seu desempenho e evolução",

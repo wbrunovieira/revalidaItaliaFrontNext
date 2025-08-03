@@ -408,6 +408,13 @@
     "attachFile": "Allega file",
     "filesAttached": "{count} file allegato/i"
   },
+  "Reactions": {
+    "love": "Amore",
+    "like": "Mi piace",
+    "wow": "Wow",
+    "applause": "Applausi",
+    "sad": "Triste"
+  },
   "FlashcardProgress": {
     "title": "Progressi Flashcard",
     "subtitle": "Monitora le tue prestazioni e l'evoluzione",

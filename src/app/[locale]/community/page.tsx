@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Plus, MessageSquare, Heart, ThumbsUp, Eye, Calendar, User, Filter, Hash, BookOpen, Layers } from 'lucide-react';
+import { Search, Plus, MessageSquare, Eye, Calendar, User, Filter, Hash, BookOpen, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NavSidebar from '@/components/NavSidebar';
+import ReactionsButton, { ReactionType } from '@/components/ReactionsButton';
 
 // Mock data types
 interface Author {
@@ -34,6 +35,10 @@ interface Topic {
   reactions: {
     heart: number;
     thumbsUp: number;
+    surprised: number;
+    clap: number;
+    sad: number;
+    userReactions: ReactionType[];
   };
   tags: string[];
   course?: {
@@ -71,7 +76,11 @@ const mockTopics: Topic[] = [
     replyCount: 12,
     reactions: {
       heart: 8,
-      thumbsUp: 15
+      thumbsUp: 15,
+      surprised: 2,
+      clap: 5,
+      sad: 0,
+      userReactions: []
     },
     tags: ['medicina-interna', 'estudos', 'prova'],
     course: {
@@ -102,7 +111,11 @@ const mockTopics: Topic[] = [
     replyCount: 8,
     reactions: {
       heart: 12,
-      thumbsUp: 20
+      thumbsUp: 20,
+      surprised: 3,
+      clap: 8,
+      sad: 1,
+      userReactions: ['thumbsUp'] as ReactionType[]
     },
     tags: ['documentação', 'burocracia', 'dicas'],
   },
@@ -124,7 +137,11 @@ const mockTopics: Topic[] = [
     replyCount: 5,
     reactions: {
       heart: 3,
-      thumbsUp: 7
+      thumbsUp: 7,
+      surprised: 1,
+      clap: 2,
+      sad: 0,
+      userReactions: []
     },
     tags: ['especialização', 'cardiologia', 'equivalência'],
     lesson: {
@@ -147,6 +164,39 @@ export default function CommunityPage() {
   // Ensure component is hydrated before rendering dynamic content
   useEffect(() => {
     setIsHydrated(true);
+  }, []);
+
+  // Handle reaction
+  const handleReaction = useCallback((topicId: string, reactionType: ReactionType) => {
+    setTopics(prevTopics => 
+      prevTopics.map(topic => {
+        if (topic.id === topicId) {
+          const userReactions = [...topic.reactions.userReactions];
+          const hasReaction = userReactions.includes(reactionType);
+          
+          if (hasReaction) {
+            // Remove reaction
+            const index = userReactions.indexOf(reactionType);
+            userReactions.splice(index, 1);
+          } else {
+            // Add reaction
+            userReactions.push(reactionType);
+          }
+          
+          return {
+            ...topic,
+            reactions: {
+              ...topic.reactions,
+              [reactionType]: hasReaction 
+                ? topic.reactions[reactionType] - 1 
+                : topic.reactions[reactionType] + 1,
+              userReactions
+            }
+          };
+        }
+        return topic;
+      })
+    );
   }, []);
 
   // Format date - consistent between server and client
@@ -187,8 +237,9 @@ export default function CommunityPage() {
     if (selectedTab === 'recent') {
       return b.createdAt.getTime() - a.createdAt.getTime();
     } else if (selectedTab === 'popular') {
-      return (b.viewCount + b.replyCount + b.reactions.heart + b.reactions.thumbsUp) - 
-             (a.viewCount + a.replyCount + a.reactions.heart + a.reactions.thumbsUp);
+      const bTotal = b.viewCount + b.replyCount + b.reactions.heart + b.reactions.thumbsUp + b.reactions.surprised + b.reactions.clap + b.reactions.sad;
+      const aTotal = a.viewCount + a.replyCount + a.reactions.heart + a.reactions.thumbsUp + a.reactions.surprised + a.reactions.clap + a.reactions.sad;
+      return bTotal - aTotal;
     } else if (selectedTab === 'unanswered') {
       return a.replyCount - b.replyCount;
     }
@@ -269,7 +320,7 @@ export default function CommunityPage() {
           {/* Topics List */}
           <div className="space-y-4">
             {sortedTopics.map((topic) => (
-              <Card key={topic.id} className={`group relative p-6 bg-primary-dark/50 border-gray-700 hover:bg-primary-dark/70 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300 cursor-pointer overflow-hidden ${topic.isPinned ? 'border-secondary ring-2 ring-secondary/20' : ''}`}>
+              <Card key={topic.id} className={`group relative p-6 bg-primary-dark/50 border-gray-700 hover:bg-primary-dark/70 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300 cursor-pointer ${topic.isPinned ? 'border-secondary ring-2 ring-secondary/20' : ''}`}>
                 {/* Hover gradient effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
@@ -341,7 +392,7 @@ export default function CommunityPage() {
                       </div>
 
                       {/* Stats */}
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-gray-500 relative">
                         <div className="flex items-center gap-1">
                           <Eye size={16} className="text-gray-600" />
                           <span>{topic.viewCount}</span>
@@ -350,15 +401,18 @@ export default function CommunityPage() {
                           <MessageSquare size={16} className="text-gray-600" />
                           <span>{topic.replyCount}</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button className="flex items-center gap-1 hover:text-red-400 transition-colors group">
-                            <Heart size={16} className={`${topic.reactions.heart > 0 ? 'fill-current text-red-400' : 'text-gray-600'} group-hover:text-red-400`} />
-                            <span>{topic.reactions.heart}</span>
-                          </button>
-                          <button className="flex items-center gap-1 hover:text-blue-400 transition-colors group">
-                            <ThumbsUp size={16} className={`${topic.reactions.thumbsUp > 0 ? 'fill-current text-blue-400' : 'text-gray-600'} group-hover:text-blue-400`} />
-                            <span>{topic.reactions.thumbsUp}</span>
-                          </button>
+                        <div className="relative">
+                          <ReactionsButton
+                            reactions={[
+                              { type: 'heart', emoji: '❤️', count: topic.reactions.heart, hasReacted: topic.reactions.userReactions.includes('heart') },
+                              { type: 'thumbsUp', emoji: '👍', count: topic.reactions.thumbsUp, hasReacted: topic.reactions.userReactions.includes('thumbsUp') },
+                              { type: 'surprised', emoji: '😮', count: topic.reactions.surprised, hasReacted: topic.reactions.userReactions.includes('surprised') },
+                              { type: 'clap', emoji: '👏', count: topic.reactions.clap, hasReacted: topic.reactions.userReactions.includes('clap') },
+                              { type: 'sad', emoji: '😢', count: topic.reactions.sad, hasReacted: topic.reactions.userReactions.includes('sad') }
+                            ]}
+                            onReact={(type) => handleReaction(topic.id, type)}
+                            size="sm"
+                          />
                         </div>
                       </div>
                     </div>

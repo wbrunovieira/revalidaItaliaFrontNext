@@ -4,12 +4,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { MessageSquare, Send, Heart, Reply, MoreVertical, Flag, User, Paperclip, X } from 'lucide-react';
+import { MessageSquare, Send, Reply, MoreVertical, Flag, User, Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
+import ReactionsButton, { ReactionType } from './ReactionsButton';
 
 interface Author {
   id: string;
@@ -20,14 +21,22 @@ interface Author {
   profession?: string;
 }
 
+interface CommentReactions {
+  heart: number;
+  thumbsUp: number;
+  surprised: number;
+  clap: number;
+  sad: number;
+  userReactions: ReactionType[];
+}
+
 interface Comment {
   id: string;
   content: string;
   author: Author;
   createdAt: Date;
   updatedAt: Date;
-  likes: number;
-  hasLiked: boolean;
+  reactions: CommentReactions;
   parentId?: string;
   replies?: Comment[];
   lessonId: string;
@@ -50,8 +59,14 @@ const mockComments: Comment[] = [
     },
     createdAt: new Date('2024-01-15T10:00:00'),
     updatedAt: new Date('2024-01-15T10:00:00'),
-    likes: 5,
-    hasLiked: false,
+    reactions: {
+      heart: 3,
+      thumbsUp: 2,
+      surprised: 0,
+      clap: 0,
+      sad: 0,
+      userReactions: []
+    },
     lessonId: 'current',
     replies: [
       {
@@ -67,8 +82,14 @@ const mockComments: Comment[] = [
         },
         createdAt: new Date('2024-01-15T11:30:00'),
         updatedAt: new Date('2024-01-15T11:30:00'),
-        likes: 2,
-        hasLiked: true,
+        reactions: {
+          heart: 1,
+          thumbsUp: 1,
+          surprised: 0,
+          clap: 0,
+          sad: 0,
+          userReactions: ['thumbsUp']
+        },
         parentId: '1',
         lessonId: 'current'
       }
@@ -87,8 +108,14 @@ const mockComments: Comment[] = [
     },
     createdAt: new Date('2024-01-14T15:30:00'),
     updatedAt: new Date('2024-01-14T15:30:00'),
-    likes: 3,
-    hasLiked: false,
+    reactions: {
+      heart: 2,
+      thumbsUp: 1,
+      surprised: 0,
+      clap: 0,
+      sad: 0,
+      userReactions: []
+    },
     lessonId: 'current'
   }
 ];
@@ -149,15 +176,32 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
     }
   }, []);
 
-  // Handle like
-  const handleLike = useCallback((commentId: string, parentId?: string) => {
+  // Handle reaction
+  const handleReaction = useCallback((commentId: string, reactionType: ReactionType) => {
     setComments(prevComments => {
       const updateComment = (comment: Comment): Comment => {
         if (comment.id === commentId) {
+          const userReactions = [...comment.reactions.userReactions];
+          const hasReaction = userReactions.includes(reactionType);
+          
+          if (hasReaction) {
+            // Remove reaction
+            const index = userReactions.indexOf(reactionType);
+            userReactions.splice(index, 1);
+          } else {
+            // Add reaction
+            userReactions.push(reactionType);
+          }
+          
           return {
             ...comment,
-            likes: comment.hasLiked ? comment.likes - 1 : comment.likes + 1,
-            hasLiked: !comment.hasLiked
+            reactions: {
+              ...comment.reactions,
+              [reactionType]: hasReaction 
+                ? comment.reactions[reactionType] - 1 
+                : comment.reactions[reactionType] + 1,
+              userReactions
+            }
           };
         }
         if (comment.replies) {
@@ -194,8 +238,14 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        likes: 0,
-        hasLiked: false,
+        reactions: {
+          heart: 0,
+          thumbsUp: 0,
+          surprised: 0,
+          clap: 0,
+          sad: 0,
+          userReactions: []
+        },
         lessonId: lessonId,
         courseId: courseId,
         moduleId: moduleId
@@ -229,8 +279,14 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        likes: 0,
-        hasLiked: false,
+        reactions: {
+          heart: 0,
+          thumbsUp: 0,
+          surprised: 0,
+          clap: 0,
+          sad: 0,
+          userReactions: []
+        },
         parentId: parentId,
         lessonId: lessonId
       };
@@ -400,15 +456,17 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
 
                   {/* Actions */}
                   <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => handleLike(comment.id)}
-                      className={`flex items-center gap-1 text-sm transition-colors ${
-                        comment.hasLiked ? 'text-red-400' : 'text-gray-500 hover:text-red-400'
-                      }`}
-                    >
-                      <Heart size={16} className={comment.hasLiked ? 'fill-current' : ''} />
-                      <span>{comment.likes}</span>
-                    </button>
+                    <ReactionsButton
+                      reactions={[
+                        { type: 'heart', emoji: '❤️', count: comment.reactions.heart, hasReacted: comment.reactions.userReactions.includes('heart') },
+                        { type: 'thumbsUp', emoji: '👍', count: comment.reactions.thumbsUp, hasReacted: comment.reactions.userReactions.includes('thumbsUp') },
+                        { type: 'surprised', emoji: '😮', count: comment.reactions.surprised, hasReacted: comment.reactions.userReactions.includes('surprised') },
+                        { type: 'clap', emoji: '👏', count: comment.reactions.clap, hasReacted: comment.reactions.userReactions.includes('clap') },
+                        { type: 'sad', emoji: '😢', count: comment.reactions.sad, hasReacted: comment.reactions.userReactions.includes('sad') }
+                      ]}
+                      onReact={(type) => handleReaction(comment.id, type)}
+                      size="sm"
+                    />
                     <button
                       onClick={() => setReplyingTo(comment.id)}
                       className="flex items-center gap-1 text-sm text-gray-500 hover:text-secondary transition-colors"
@@ -532,15 +590,17 @@ export default function LessonComments({ lessonId, courseId, moduleId, locale }:
                                 {reply.content}
                               </p>
                               <div className="flex items-center gap-3">
-                                <button
-                                  onClick={() => handleLike(reply.id, comment.id)}
-                                  className={`flex items-center gap-1 text-xs transition-colors ${
-                                    reply.hasLiked ? 'text-red-400' : 'text-gray-500 hover:text-red-400'
-                                  }`}
-                                >
-                                  <Heart size={14} className={reply.hasLiked ? 'fill-current' : ''} />
-                                  <span>{reply.likes}</span>
-                                </button>
+                                <ReactionsButton
+                                  reactions={[
+                                    { type: 'heart', emoji: '❤️', count: reply.reactions.heart, hasReacted: reply.reactions.userReactions.includes('heart') },
+                                    { type: 'thumbsUp', emoji: '👍', count: reply.reactions.thumbsUp, hasReacted: reply.reactions.userReactions.includes('thumbsUp') },
+                                    { type: 'surprised', emoji: '😮', count: reply.reactions.surprised, hasReacted: reply.reactions.userReactions.includes('surprised') },
+                                    { type: 'clap', emoji: '👏', count: reply.reactions.clap, hasReacted: reply.reactions.userReactions.includes('clap') },
+                                    { type: 'sad', emoji: '😢', count: reply.reactions.sad, hasReacted: reply.reactions.userReactions.includes('sad') }
+                                  ]}
+                                  onReact={(type) => handleReaction(reply.id, type)}
+                                  size="sm"
+                                />
                                 <button
                                   onClick={() => setReplyingTo(reply.id)}
                                   className="flex items-center gap-1 text-xs text-gray-500 hover:text-secondary transition-colors"

@@ -106,6 +106,7 @@ export default function FlashcardStudyPage() {
   const [isResetting, setIsResetting] = useState(false);
   const [totalFlashcards, setTotalFlashcards] = useState(0);
   const [completedCards, setCompletedCards] = useState<Set<string>>(new Set());
+  const [dragX, setDragX] = useState(0);
 
   // Force flush on page unload
   useEffect(() => {
@@ -464,8 +465,8 @@ export default function FlashcardStudyPage() {
       return;
     }
 
-    const swipeThreshold = 100;
-    const swipeVelocity = 500;
+    const swipeThreshold = 50; // Reduzido de 100
+    const swipeVelocity = 200; // Reduzido de 500
 
     if (
       info.offset.x > swipeThreshold ||
@@ -928,12 +929,11 @@ export default function FlashcardStudyPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{
-                    opacity:
-                      currentIndex < flashcards.length
-                        ? 0.5
-                        : 0,
+                    opacity: dragX < -30 ? 0.8 : currentIndex < flashcards.length ? 0.3 : 0,
+                    scale: dragX < -30 ? 1.2 : 1,
                   }}
                   className="text-red-400 -rotate-12"
+                  transition={{ duration: 0.2 }}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <X size={40} />
@@ -946,12 +946,11 @@ export default function FlashcardStudyPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{
-                    opacity:
-                      currentIndex < flashcards.length
-                        ? 0.5
-                        : 0,
+                    opacity: dragX > 30 ? 0.8 : currentIndex < flashcards.length ? 0.3 : 0,
+                    scale: dragX > 30 ? 1.2 : 1,
                   }}
                   className="text-green-400 rotate-12"
+                  transition={{ duration: 0.2 }}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Check size={40} />
@@ -967,7 +966,7 @@ export default function FlashcardStudyPage() {
                 {currentCard && !completedCards.has(currentCard.id) && (
                   <motion.div
                     key={currentCard.id}
-                    className="relative w-full h-[500px] cursor-grab active:cursor-grabbing"
+                    className="relative w-full h-[500px] cursor-grab touch-pan-y"
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={
                       shakeCard
@@ -980,6 +979,7 @@ export default function FlashcardStudyPage() {
                         : {
                             scale: 1,
                             opacity: 1,
+                            rotateZ: dragX * 0.1, // Rotação sutil baseada no drag
                           }
                     }
                     exit={{
@@ -992,10 +992,15 @@ export default function FlashcardStudyPage() {
                       transition: { duration: 0.3 },
                     }}
                     drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.2}
-                    onDragEnd={handleDragEnd}
-                    whileDrag={{ scale: 1.05 }}
+                    dragConstraints={{ left: -200, right: 200 }}
+                    dragElastic={0.7}
+                    onDrag={(e, info) => setDragX(info.offset.x)}
+                    onDragEnd={(e, info) => {
+                      setDragX(0);
+                      handleDragEnd(e, info);
+                    }}
+                    whileDrag={{ scale: 1.02, cursor: 'grabbing' }}
+                    dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
                     transition={
                       shakeCard
                         ? {
@@ -1068,14 +1073,14 @@ export default function FlashcardStudyPage() {
                               {currentCard.questionText}
                             </p>
                           ) : (
-                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden">
+                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden pointer-events-none">
                               <Image
                                 src={
                                   currentCard.questionImageUrl!
                                 }
                                 alt="Question"
                                 fill
-                                className="object-contain"
+                                className="object-contain pointer-events-none select-none"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
                               />
@@ -1130,14 +1135,14 @@ export default function FlashcardStudyPage() {
                               {currentCard.answerText}
                             </p>
                           ) : (
-                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden">
+                            <div className="relative w-full flex-1 max-h-[50vh] rounded-lg overflow-hidden pointer-events-none">
                               <Image
                                 src={
                                   currentCard.answerImageUrl!
                                 }
                                 alt="Answer"
                                 fill
-                                className="object-contain"
+                                className="object-contain pointer-events-none select-none"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
                               />

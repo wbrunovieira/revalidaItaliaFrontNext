@@ -158,7 +158,10 @@
     "FAQ": "Preguntas Frecuentes",
     "cursos": "Cursos",
     "profile": "Perfil",
-"viewProfile": "Ver perfil"
+    "viewProfile": "Ver perfil",
+    "userMenu": "Menú de usuario",
+    "settings": "Configuraciones",
+    "logout": "Salir"
   },
   "meta": {
     "title": "Revalida Italia",

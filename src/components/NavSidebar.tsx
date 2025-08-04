@@ -174,7 +174,7 @@ export default function NavSidebar({
       <main
         className={`flex-1 transition-margin duration-300 ease-in-out ${
           collapsed ? 'ml-20' : 'ml-64'
-        } pt-14`}
+        } pt-16`}
       >
         {/* Connection Status Banner */}
         {isHydrated &&

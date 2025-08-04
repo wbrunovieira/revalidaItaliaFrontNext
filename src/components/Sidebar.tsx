@@ -287,7 +287,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed top-14 left-0 bottom-0 bg-primary text-background-white flex flex-col transition-all duration-300 ease-in-out shadow-2xl ${
+      className={`fixed top-16 left-0 bottom-0 bg-primary text-background-white flex flex-col transition-all duration-300 ease-in-out shadow-2xl ${
         collapsed ? 'w-20' : 'w-64'
       } z-10`}
     >

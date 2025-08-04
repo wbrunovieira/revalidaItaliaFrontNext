@@ -170,7 +170,10 @@
     "FAQ": "Perguntas Frequentes",
     "cursos": "Cursos",
     "profile": "Perfil",
-    "viewProfile": "Ver Perfil"
+    "viewProfile": "Ver Perfil",
+    "userMenu": "Menu do usuário",
+    "settings": "Configurações",
+    "logout": "Sair"
   },
   "meta": {
     "title": "Revalida Italia",

@@ -1,7 +1,7 @@
 // src/app/[locale]/community/page.tsx
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Search,
@@ -226,7 +226,7 @@ const mockTopics: Topic[] = [
 
 export default function CommunityPage() {
   const t = useTranslations('Community');
-  const [topics, setTopics] = useState<Topic[]>(mockTopics);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] =
     useState('all');
@@ -239,6 +239,13 @@ export default function CommunityPage() {
     useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [currentUser, setCurrentUser] = useState<Author | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   // Decode JWT to get user ID
   const decodeJWT = useCallback((token: string) => {
@@ -336,6 +343,132 @@ export default function CommunityPage() {
     fetchUserData();
   }, [decodeJWT]);
 
+  // Fetch posts from API
+  const fetchPosts = useCallback(async (page = 1, append = false) => {
+    try {
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        setError('Unauthorized');
+        return;
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20',
+      });
+
+      // Add search parameter
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+
+      // Add course filter
+      if (selectedCourse !== 'all') {
+        params.append('courseId', selectedCourse);
+      }
+
+      // Add lesson filter
+      if (selectedLesson !== 'all') {
+        params.append('lessonId', selectedLesson);
+      }
+
+      // Add type filter based on selectedFilter
+      if (selectedFilter === 'lesson-comments') {
+        params.append('type', 'LESSON_COMMENT');
+      } else if (selectedFilter === 'general-topics') {
+        params.append('type', 'GENERAL_TOPIC');
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+
+      const data = await response.json();
+
+      // Transform API response to match our Topic interface
+      const transformedPosts: Topic[] = data.posts.map((post: any) => ({
+        id: post.id,
+        title: post.title || '',
+        content: post.content,
+        author: post.author || {
+          id: post.authorId,
+          name: 'Unknown User',
+          avatar: undefined,
+          city: '',
+          country: '',
+          profession: ''
+        },
+        createdAt: new Date(post.createdAt),
+        updatedAt: new Date(post.updatedAt),
+        viewCount: post.viewCount || 0,
+        replyCount: post.replyCount || 0,
+        reactions: {
+          heart: post.reactions?.heart || 0,
+          thumbsUp: post.reactions?.thumbsUp || 0,
+          surprised: post.reactions?.surprised || 0,
+          clap: post.reactions?.clap || 0,
+          sad: post.reactions?.sad || 0,
+          userReactions: post.reactions?.userReactions || []
+        },
+        tags: post.hashtags || [],
+        course: post.course,
+        module: post.module,
+        lesson: post.lesson,
+        isPinned: post.isPinned || false,
+        attachments: post.attachments || [],
+        mediaType: post.mediaType
+      }));
+
+      if (append) {
+        setTopics(prev => [...prev, ...transformedPosts]);
+      } else {
+        setTopics(transformedPosts);
+      }
+      setCurrentPage(data.pagination.page);
+      setTotalPages(data.pagination.totalPages);
+      setHasMore(data.pagination.hasNext);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load posts');
+      // Use mock data as fallback if not appending
+      if (!append) {
+        setTopics(mockTopics);
+      }
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [searchQuery, selectedCourse, selectedLesson, selectedFilter]);
+
+  // Fetch posts on component mount and when filters change
+  useEffect(() => {
+    if (isHydrated) {
+      setCurrentPage(1); // Reset to first page when filters change
+      fetchPosts(1);
+    }
+  }, [isHydrated, searchQuery, selectedCourse, selectedLesson, selectedFilter]);
+
   // Get filtered lessons based on selected course
   const filteredLessons =
     selectedCourse === 'all'
@@ -348,6 +481,29 @@ export default function CommunityPage() {
   useEffect(() => {
     setSelectedLesson('all');
   }, [selectedCourse]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          fetchPosts(currentPage + 1, true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentElement = observerTarget.current;
+    if (currentElement) {
+      observer.observe(currentElement);
+    }
+
+    return () => {
+      if (currentElement) {
+        observer.unobserve(currentElement);
+      }
+    };
+  }, [currentPage, hasMore, isLoadingMore, isLoading, fetchPosts]);
 
   // Handle reaction
   const handleReaction = useCallback(
@@ -415,69 +571,28 @@ export default function CommunityPage() {
     [t]
   );
 
-  // Filter topics based on search and filters
-  const filteredTopics = topics.filter(topic => {
-    const matchesSearch =
-      topic.title
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      topic.content
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (topic.tags &&
-        topic.tags.some(tag =>
-          tag
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-        ));
-
-    const matchesFilter =
-      selectedFilter === 'all' ||
-      (selectedFilter === 'pinned' && topic.isPinned) ||
-      (selectedFilter === 'my-posts' &&
-        topic.author.id === '1'); // Mock user ID
-
-    const matchesCourse =
-      selectedCourse === 'all' ||
-      topic.course?.id === selectedCourse;
-
-    const matchesLesson =
-      selectedLesson === 'all' ||
-      topic.lesson?.id === selectedLesson;
-
-    return (
-      matchesSearch &&
-      matchesFilter &&
-      matchesCourse &&
-      matchesLesson
-    );
-  });
-
-  // Sort topics based on selected tab
-  const sortedTopics = [...filteredTopics].sort((a, b) => {
-    if (selectedTab === 'recent') {
-      return b.createdAt.getTime() - a.createdAt.getTime();
-    } else if (selectedTab === 'popular') {
-      const bTotal =
-        b.viewCount +
-        b.replyCount +
-        b.reactions.heart +
-        b.reactions.thumbsUp +
-        b.reactions.surprised +
-        b.reactions.clap +
-        b.reactions.sad;
-      const aTotal =
-        a.viewCount +
-        a.replyCount +
-        a.reactions.heart +
-        a.reactions.thumbsUp +
-        a.reactions.surprised +
-        a.reactions.clap +
-        a.reactions.sad;
-      return bTotal - aTotal;
-    }
-    return 0;
-  });
+  // Sort topics based on selected tab (API already returns sorted by recent)
+  const sortedTopics = selectedTab === 'popular' 
+    ? [...topics].sort((a, b) => {
+        const bTotal =
+          b.viewCount +
+          b.replyCount +
+          b.reactions.heart +
+          b.reactions.thumbsUp +
+          b.reactions.surprised +
+          b.reactions.clap +
+          b.reactions.sad;
+        const aTotal =
+          a.viewCount +
+          a.replyCount +
+          a.reactions.heart +
+          a.reactions.thumbsUp +
+          a.reactions.surprised +
+          a.reactions.clap +
+          a.reactions.sad;
+        return bTotal - aTotal;
+      })
+    : topics;
 
   return (
     <NavSidebar>
@@ -656,9 +771,31 @@ export default function CommunityPage() {
               value={selectedTab}
               className="mt-6"
             >
+              {/* Loading State */}
+              {isLoading && (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && !isLoading && (
+                <div className="text-center py-12">
+                  <p className="text-red-400 mb-4">{error}</p>
+                  <Button 
+                    onClick={() => fetchPosts(currentPage)}
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-primary/50"
+                  >
+                    {t('retry')}
+                  </Button>
+                </div>
+              )}
+
               {/* Topics List */}
-              <div className="space-y-4">
-                {sortedTopics.map(topic => (
+              {!isLoading && !error && (
+                <div className="space-y-4">
+                  {sortedTopics.map(topic => (
                   <PostCard
                     key={topic.id}
                     post={{
@@ -674,11 +811,12 @@ export default function CommunityPage() {
                     }}
                     onClick={() => console.log('Post clicked:', topic.id)}
                   />
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* Empty State */}
-              {sortedTopics.length === 0 && (
+              {!isLoading && !error && sortedTopics.length === 0 && (
                 <div className="text-center py-12">
                   <MessageSquare
                     size={48}
@@ -692,6 +830,17 @@ export default function CommunityPage() {
                   </p>
                 </div>
               )}
+
+              {/* Loading More Indicator */}
+              {isLoadingMore && (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
+                  <span className="ml-3 text-gray-400">{t('loadingMore')}</span>
+                </div>
+              )}
+
+              {/* Intersection Observer Target */}
+              <div ref={observerTarget} className="h-1" />
             </TabsContent>
           </Tabs>
         </div>

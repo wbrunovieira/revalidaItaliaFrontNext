@@ -366,7 +366,12 @@
     "hoursAgo": "{hours}h atrás",
     "daysAgo": "{days}d atrás",
     "noTopics": "Nenhum tópico encontrado",
-    "noTopicsDescription": "Seja o primeiro a criar um tópico e iniciar uma discussão!"
+    "noTopicsDescription": "Seja o primeiro a criar um tópico e iniciar uma discussão!",
+    "retry": "Tentar novamente",
+    "loadingMore": "Carregando mais posts...",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "pageOf": "Página {current} de {total}"
   },
   "Lesson": {
     "breadcrumb": {

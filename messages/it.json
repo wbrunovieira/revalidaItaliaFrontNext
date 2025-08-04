@@ -355,7 +355,12 @@
     "hoursAgo": "{hours}h fa",
     "daysAgo": "{days}g fa",
     "noTopics": "Nessun argomento trovato",
-    "noTopicsDescription": "Sii il primo a creare un argomento e iniziare una discussione!"
+    "noTopicsDescription": "Sii il primo a creare un argomento e iniziare una discussione!",
+    "retry": "Riprova",
+    "loadingMore": "Caricamento altri post...",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "pageOf": "Pagina {current} di {total}"
   },
   "Lesson": {
     "breadcrumb": {

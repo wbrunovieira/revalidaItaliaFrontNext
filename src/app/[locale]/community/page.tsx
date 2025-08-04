@@ -49,6 +49,7 @@ interface Author {
   city: string;
   country: string;
   profession: string;
+  role?: 'student' | 'admin' | 'tutor';
 }
 
 interface Topic {
@@ -607,6 +608,7 @@ export default function CommunityPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [userRolesMap, setUserRolesMap] = useState<Record<string, 'student' | 'admin' | 'tutor'>>({});
 
   // Decode JWT to get user ID
   const decodeJWT = useCallback((token: string) => {
@@ -644,10 +646,16 @@ export default function CommunityPage() {
 
         const decodedToken = decodeJWT(token);
         const userId = decodedToken?.sub;
+        const userRole = decodedToken?.role;
 
         if (!userId) {
           console.error('User ID not found in token');
           return;
+        }
+        
+        // Store current user's role from JWT
+        if (userRole) {
+          setUserRolesMap(prev => ({ ...prev, [userId]: userRole }));
         }
 
         const response = await fetch(
@@ -693,7 +701,8 @@ export default function CommunityPage() {
             avatar: userData.profileImageUrl,
             city: addressData?.city || userData.city,
             country: addressData?.country || userData.country,
-            profession: userData.profession
+            profession: userData.profession,
+            role: userData.role as 'student' | 'admin' | 'tutor'
           });
         }
       } catch (error) {
@@ -703,6 +712,57 @@ export default function CommunityPage() {
 
     fetchUserData();
   }, [decodeJWT]);
+
+  // Fetch user roles for authors in posts
+  const fetchUserRoles = useCallback(async (userIds: string[]) => {
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+
+    if (!token) return;
+
+    const uniqueIds = [...new Set(userIds)].filter(id => !userRolesMap[id]);
+    if (uniqueIds.length === 0) return;
+
+    try {
+      // Fetch user details for each unique user ID
+      const rolePromises = uniqueIds.map(async (userId) => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            return { userId, role: data.user.role };
+          }
+          return null;
+        } catch (error) {
+          console.error(`Error fetching user ${userId}:`, error);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(rolePromises);
+      const newRoles: Record<string, 'student' | 'admin' | 'tutor'> = {};
+      
+      results.forEach(result => {
+        if (result) {
+          newRoles[result.userId] = result.role;
+        }
+      });
+
+      setUserRolesMap(prev => ({ ...prev, ...newRoles }));
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+    }
+  }, [userRolesMap]);
 
   // Fetch posts from API
   const fetchPosts = useCallback(async (page = 1, append = false) => {
@@ -772,13 +832,22 @@ export default function CommunityPage() {
         id: post.id,
         title: post.title || '',
         content: post.content,
-        author: post.author || {
+        author: post.author ? {
+          id: post.author.id,
+          name: post.author.name,
+          avatar: post.author.profileImageUrl,
+          city: post.author.city || '',
+          country: post.author.country || '',
+          profession: post.author.profession || '',
+          role: userRolesMap[post.author.id] || undefined
+        } : {
           id: post.authorId,
           name: 'Unknown User',
           avatar: undefined,
           city: '',
           country: '',
-          profession: ''
+          profession: '',
+          role: undefined
         },
         createdAt: new Date(post.createdAt),
         updatedAt: new Date(post.updatedAt),
@@ -809,6 +878,15 @@ export default function CommunityPage() {
       setCurrentPage(data.pagination.page);
       setTotalPages(data.pagination.totalPages);
       setHasMore(data.pagination.hasNext);
+      
+      // Fetch roles for all authors in the posts
+      const authorIds = transformedPosts
+        .map(post => post.author.id)
+        .filter(id => id && id !== 'Unknown User');
+      
+      if (authorIds.length > 0) {
+        fetchUserRoles(authorIds);
+      }
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError(error instanceof Error ? error.message : 'Failed to load posts');

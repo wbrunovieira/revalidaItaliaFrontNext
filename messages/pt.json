@@ -376,7 +376,12 @@
     "loadingMore": "Carregando mais posts...",
     "previous": "Anterior",
     "next": "Próximo",
-    "pageOf": "Página {current} de {total}"
+    "pageOf": "Página {current} de {total}",
+    "roles": {
+      "admin": "Admin",
+      "tutor": "Tutor",
+      "student": "Aluno"
+    }
   },
   "Lesson": {
     "breadcrumb": {

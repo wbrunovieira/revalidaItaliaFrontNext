@@ -28,6 +28,8 @@ import ReactionsButton, {
   ReactionType,
 } from '@/components/ReactionsButton';
 import { cn } from '@/lib/utils';
+import { RoleBadge } from '@/components/ui/role-badge';
+import ReplyCard from '@/components/ReplyCard';
 
 interface Author {
   id: string;
@@ -36,6 +38,7 @@ interface Author {
   city?: string;
   country?: string;
   profession?: string;
+  role?: 'student' | 'admin' | 'tutor';
 }
 
 interface Attachment {
@@ -536,6 +539,9 @@ export default function PostCard({
               <span className="font-medium text-white">
                 {post.author.name}
               </span>
+              {post.author.role && (
+                <RoleBadge role={post.author.role} />
+              )}
               {post.author.profession && (
                 <>
                   <span className="text-gray-500">·</span>
@@ -724,17 +730,32 @@ export default function PostCard({
 
     {/* Replies */}
     {post.replies && post.replies.length > 0 && (
-      <div className="ml-8 mt-4 space-y-3 border-l-2 border-gray-700 pl-4">
-        {post.replies.map((reply) => (
-          <PostCard
-            key={reply.id}
-            post={reply}
-            onReaction={onReaction}
-            onClick={onClick}
-            compactVideo={compactVideo}
-            compactImages={compactImages}
-          />
-        ))}
+      <div className="mt-6">
+        <div className="flex items-center gap-2 mb-4 px-4">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+          <span className="text-sm text-gray-500 font-medium flex items-center gap-2 px-3">
+            <MessageSquare size={14} />
+            {post.replies.length} {post.replies.length === 1 ? 'resposta' : 'respostas'}
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+        </div>
+        <div className="pl-12 md:pl-20 pr-8 md:pr-16 lg:pr-24 space-y-2">
+          {post.replies.map((reply) => (
+            <ReplyCard
+              key={reply.id}
+              reply={{
+                id: reply.id,
+                content: reply.content,
+                author: reply.author,
+                createdAt: reply.createdAt,
+                updatedAt: reply.updatedAt,
+                reactions: reply.reactions,
+                attachments: reply.attachments
+              }}
+              onReaction={onReaction}
+            />
+          ))}
+        </div>
       </div>
     )}
 

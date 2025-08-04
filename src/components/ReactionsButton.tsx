@@ -21,6 +21,7 @@ interface ReactionsButtonProps {
   postId?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  compact?: boolean;
 }
 
 const reactionEmojis: Record<ReactionType, string> = {
@@ -36,7 +37,8 @@ export default function ReactionsButton({
   onReact, 
   postId,
   size = 'md',
-  className 
+  className,
+  compact = false 
 }: ReactionsButtonProps) {
   const t = useTranslations('Reactions');
   const [showPicker, setShowPicker] = useState(false);
@@ -89,6 +91,15 @@ export default function ReactionsButton({
   };
 
   const getSizeClasses = () => {
+    if (compact) {
+      return {
+        button: 'px-1.5 py-0.5 text-xs gap-0.5',
+        emoji: 'text-xs',
+        picker: 'p-1 gap-1',
+        pickerEmoji: 'text-base p-0.5'
+      };
+    }
+    
     switch (size) {
       case 'sm':
         return {

@@ -362,6 +362,8 @@
       "unanswered": "Sem resposta"
     },
     "pinned": "Fixado",
+    "timeAgo": "há {time}",
+    "yesterday": "ontem",
     "justNow": "Agora mesmo",
     "hoursAgo": "{hours}h atrás",
     "daysAgo": "{days}d atrás",

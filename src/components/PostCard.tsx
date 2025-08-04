@@ -140,10 +140,10 @@ export default function PostCard({
         const diffInMinutes = Math.floor(
           (now.getTime() - dateObj.getTime()) / (1000 * 60)
         );
-        return `${diffInMinutes} min`;
+        return t('timeAgo', { time: `${diffInMinutes} min` });
       }
       if (diffInHours < 24)
-        return `${diffInHours}h`;
+        return t('timeAgo', { time: `${diffInHours}h` });
       if (diffInHours < 48) return t('yesterday');
       return dateObj.toLocaleDateString();
     },

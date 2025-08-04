@@ -351,6 +351,8 @@
       "unanswered": "Senza risposta"
     },
     "pinned": "In evidenza",
+    "timeAgo": "{time} fa",
+    "yesterday": "ieri",
     "justNow": "Proprio ora",
     "hoursAgo": "{hours}h fa",
     "daysAgo": "{days}g fa",

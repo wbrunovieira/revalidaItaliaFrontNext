@@ -493,9 +493,20 @@ export default function CommunityPage() {
             </p>
           </div>
 
-          {/* Search and Create */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
+          {/* Create Post Button - Prominent Position */}
+          <div className="mb-8 flex justify-center">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-secondary hover:bg-secondary/80 text-white font-bold text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+            >
+              <Plus size={24} className="mr-3" />
+              {t('createTopic')}
+            </Button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative max-w-2xl mx-auto">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={20}
@@ -509,13 +520,6 @@ export default function CommunityPage() {
                 className="pl-10 bg-primary-dark/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-secondary focus:ring-secondary"
               />
             </div>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-secondary hover:bg-secondary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Plus size={20} className="mr-2" />
-              {t('createTopic')}
-            </Button>
           </div>
 
           {/* Filters */}

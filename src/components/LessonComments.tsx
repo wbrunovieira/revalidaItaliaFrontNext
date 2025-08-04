@@ -12,6 +12,7 @@ import { ReactionType } from './ReactionsButton';
 import { useToast } from '@/hooks/use-toast';
 import AttachmentsModal, { AttachmentData } from '@/components/AttachmentsModal';
 import PostCard from '@/components/PostCard';
+import CreateCommentModal from '@/components/CreateCommentModal';
 
 interface Author {
   id: string;
@@ -151,6 +152,9 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [replyingToPost, setReplyingToPost] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; author: Author } | null>(null);
 
   // Decode JWT to get user ID
   const decodeJWT = useCallback((token: string) => {
@@ -316,12 +320,14 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         viewCount: post.viewCount || 0,
         replyCount: post.replyCount || 0,
         attachments: post.attachments || [],
-        hashtags: post.hashtags || []
+        hashtags: post.hashtags || [],
+        replies: post.replies || []
       }));
 
       if (append) {
         setComments(prev => [...prev, ...transformedComments]);
       } else {
+        console.log('Setting comments with replies:', transformedComments);
         setComments(transformedComments);
       }
       
@@ -596,6 +602,35 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     setIsCreateModalOpen(false);
   }, []);
 
+  // Handle comment creation from modal
+  const handleCommentCreated = useCallback((newComment: any) => {
+    console.log('Comment created:', newComment);
+    
+    // Add the comment directly to the post's replies
+    if (replyingToPost) {
+      setComments(prevComments =>
+        prevComments.map(post => {
+          if (post.id === replyingToPost) {
+            return {
+              ...post,
+              replies: [...(post.replies || []), {
+                id: newComment.id,
+                content: newComment.content,
+                author: newComment.author,
+                createdAt: newComment.createdAt,
+                updatedAt: newComment.updatedAt,
+                reactions: newComment.reactions,
+                parentId: newComment.parentId
+              }],
+              replyCount: (post.replyCount || 0) + 1
+            };
+          }
+          return post;
+        })
+      );
+    }
+  }, [replyingToPost]);
+
   return (
     <div className="w-full bg-primary-dark/50 border-t border-gray-700">
       <div className="lg:flex">
@@ -781,6 +816,12 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                         handleReaction(postId, reaction);
                       }
                     }}
+                    onReply={(postId) => {
+                      console.log('Reply button clicked for post:', postId);
+                      setReplyingToPost(postId);
+                      setReplyingTo(null);
+                      setIsCommentModalOpen(true);
+                    }}
                     compactVideo={true}
                     compactImages={true}
                   />
@@ -821,6 +862,22 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         initialHashtags={selectedHashtags}
         initialAttachments={selectedAttachments}
       />
+
+      {/* Comment Modal */}
+      {replyingToPost && (
+        <CreateCommentModal
+          open={isCommentModalOpen}
+          onClose={() => {
+            setIsCommentModalOpen(false);
+            setReplyingToPost(null);
+            setReplyingTo(null);
+          }}
+          postId={replyingToPost}
+          parentId={replyingTo?.id}
+          parentAuthor={replyingTo?.author}
+          onCommentCreated={handleCommentCreated}
+        />
+      )}
     </div>
   );
 }

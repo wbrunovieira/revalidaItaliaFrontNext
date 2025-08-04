@@ -1,18 +1,45 @@
+// src/app/[locale]/community/page.tsx
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Search, Plus, MessageSquare, Eye, Calendar, User, Filter, Hash, BookOpen, Layers, GraduationCap } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  MessageSquare,
+  Eye,
+  Calendar,
+  User,
+  Filter,
+  Hash,
+  BookOpen,
+  Layers,
+  GraduationCap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import Image from 'next/image';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import NavSidebar from '@/components/NavSidebar';
-import ReactionsButton, { ReactionType } from '@/components/ReactionsButton';
+import ReactionsButton, {
+  ReactionType,
+} from '@/components/ReactionsButton';
 import CreatePostModal from '@/components/CreatePostModal';
+import PostCard from '@/components/PostCard';
 
 // Mock data types
 interface Author {
@@ -55,12 +82,36 @@ interface Topic {
     title: string;
   };
   isPinned?: boolean;
+  attachments?: Array<{
+    id: string;
+    url: string;
+    type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+    mimeType: string;
+    sizeInBytes: number;
+    fileName: string;
+    uploadedAt?: string;
+    videoInfo?: {
+      provider: 'youtube' | 'vimeo';
+      videoId: string;
+      embedUrl: string;
+      thumbnailUrl: string;
+    };
+  }>;
+  mediaType?: string;
 }
 
 // Mock lessons data
 const mockLessons = [
-  { id: '1', title: 'Processo de Equivalência', courseId: '1' },
-  { id: '2', title: 'Sistema Cardiovascular', courseId: '1' },
+  {
+    id: '1',
+    title: 'Processo de Equivalência',
+    courseId: '1',
+  },
+  {
+    id: '2',
+    title: 'Sistema Cardiovascular',
+    courseId: '1',
+  },
   { id: '3', title: 'Sistema Respiratório', courseId: '1' },
   { id: '4', title: 'Anatomia Básica', courseId: '2' },
   { id: '5', title: 'Técnicas Cirúrgicas', courseId: '2' },
@@ -70,15 +121,17 @@ const mockLessons = [
 const mockTopics: Topic[] = [
   {
     id: '1',
-    title: 'Como me preparar para a prova de Medicina Interna?',
-    content: 'Olá pessoal! Estou começando a estudar para a prova de Medicina Interna e gostaria de dicas de quem já passou...',
+    title:
+      'Como me preparar para a prova de Medicina Interna?',
+    content:
+      'Olá pessoal! Estou começando a estudar para a prova de Medicina Interna e gostaria de dicas de quem já passou...',
     author: {
       id: '1',
       name: 'Maria Silva',
       avatar: undefined,
       city: 'Roma',
       country: 'Itália',
-      profession: 'Médica'
+      profession: 'Médica',
     },
     createdAt: new Date('2024-01-15T10:00:00'),
     updatedAt: new Date('2024-01-15T10:00:00'),
@@ -90,34 +143,35 @@ const mockTopics: Topic[] = [
       surprised: 2,
       clap: 5,
       sad: 0,
-      userReactions: []
+      userReactions: [],
     },
     tags: ['medicina-interna', 'estudos', 'prova'],
     course: {
       id: '1',
-      title: 'Medicina Interna'
+      title: 'Medicina Interna',
     },
     module: {
       id: '1',
-      title: 'Fundamentos'
+      title: 'Fundamentos',
     },
     lesson: {
       id: '2',
-      title: 'Sistema Cardiovascular'
+      title: 'Sistema Cardiovascular',
     },
-    isPinned: true
+    isPinned: true,
   },
   {
     id: '2',
     title: 'Experiência com o processo de documentação',
-    content: 'Compartilho aqui minha experiência com a documentação necessária para o processo de revalidação...',
+    content:
+      'Compartilho aqui minha experiência com a documentação necessária para o processo de revalidação...',
     author: {
       id: '2',
       name: 'Giovanni Rossi',
       avatar: undefined,
       city: 'Milão',
       country: 'Itália',
-      profession: 'Cirurgião'
+      profession: 'Cirurgião',
     },
     createdAt: new Date('2024-01-14T15:30:00'),
     updatedAt: new Date('2024-01-14T15:30:00'),
@@ -129,25 +183,26 @@ const mockTopics: Topic[] = [
       surprised: 3,
       clap: 8,
       sad: 1,
-      userReactions: ['thumbsUp'] as ReactionType[]
+      userReactions: ['thumbsUp'] as ReactionType[],
     },
     tags: ['documentação', 'burocracia', 'dicas'],
     lesson: {
       id: '1',
-      title: 'Processo de Equivalência'
-    }
+      title: 'Processo de Equivalência',
+    },
   },
   {
     id: '3',
     title: 'Dúvida sobre equivalência de especialização',
-    content: 'Alguém sabe como funciona a equivalência de especialização em Cardiologia? Preciso fazer nova residência?',
+    content:
+      'Alguém sabe como funciona a equivalência de especialização em Cardiologia? Preciso fazer nova residência?',
     author: {
       id: '3',
       name: 'Lucia Bianchi',
       avatar: undefined,
       city: 'Nápoles',
       country: 'Itália',
-      profession: 'Cardiologista'
+      profession: 'Cardiologista',
     },
     createdAt: new Date('2024-01-13T09:15:00'),
     updatedAt: new Date('2024-01-14T11:20:00'),
@@ -159,25 +214,29 @@ const mockTopics: Topic[] = [
       surprised: 1,
       clap: 2,
       sad: 0,
-      userReactions: []
+      userReactions: [],
     },
     tags: ['especialização', 'cardiologia', 'equivalência'],
     lesson: {
       id: '1',
-      title: 'Processo de Equivalência'
-    }
-  }
+      title: 'Processo de Equivalência',
+    },
+  },
 ];
 
 export default function CommunityPage() {
   const t = useTranslations('Community');
   const [topics, setTopics] = useState<Topic[]>(mockTopics);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [selectedCourse, setSelectedCourse] = useState('all');
-  const [selectedLesson, setSelectedLesson] = useState('all');
+  const [selectedFilter, setSelectedFilter] =
+    useState('all');
+  const [selectedCourse, setSelectedCourse] =
+    useState('all');
+  const [selectedLesson, setSelectedLesson] =
+    useState('all');
   const [selectedTab, setSelectedTab] = useState('recent');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] =
+    useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Ensure component is hydrated before rendering dynamic content
@@ -186,9 +245,12 @@ export default function CommunityPage() {
   }, []);
 
   // Get filtered lessons based on selected course
-  const filteredLessons = selectedCourse === 'all' 
-    ? mockLessons 
-    : mockLessons.filter(lesson => lesson.courseId === selectedCourse);
+  const filteredLessons =
+    selectedCourse === 'all'
+      ? mockLessons
+      : mockLessons.filter(
+          lesson => lesson.courseId === selectedCourse
+        );
 
   // Reset lesson filter when course changes
   useEffect(() => {
@@ -196,71 +258,107 @@ export default function CommunityPage() {
   }, [selectedCourse]);
 
   // Handle reaction
-  const handleReaction = useCallback((topicId: string, reactionType: ReactionType) => {
-    setTopics(prevTopics => 
-      prevTopics.map(topic => {
-        if (topic.id === topicId) {
-          const userReactions = [...topic.reactions.userReactions];
-          const hasReaction = userReactions.includes(reactionType);
-          
-          if (hasReaction) {
-            // Remove reaction
-            const index = userReactions.indexOf(reactionType);
-            userReactions.splice(index, 1);
-          } else {
-            // Add reaction
-            userReactions.push(reactionType);
-          }
-          
-          return {
-            ...topic,
-            reactions: {
-              ...topic.reactions,
-              [reactionType]: hasReaction 
-                ? topic.reactions[reactionType] - 1 
-                : topic.reactions[reactionType] + 1,
-              userReactions
+  const handleReaction = useCallback(
+    (topicId: string, reactionType: ReactionType) => {
+      setTopics(prevTopics =>
+        prevTopics.map(topic => {
+          if (topic.id === topicId) {
+            const userReactions = [
+              ...topic.reactions.userReactions,
+            ];
+            const hasReaction =
+              userReactions.includes(reactionType);
+
+            if (hasReaction) {
+              // Remove reaction
+              const index =
+                userReactions.indexOf(reactionType);
+              userReactions.splice(index, 1);
+            } else {
+              // Add reaction
+              userReactions.push(reactionType);
             }
-          };
-        }
-        return topic;
-      })
-    );
-  }, []);
+
+            return {
+              ...topic,
+              reactions: {
+                ...topic.reactions,
+                [reactionType]: hasReaction
+                  ? topic.reactions[reactionType] - 1
+                  : topic.reactions[reactionType] + 1,
+                userReactions,
+              },
+            };
+          }
+          return topic;
+        })
+      );
+    },
+    []
+  );
 
   // Format date - consistent between server and client
-  const formatDate = useCallback((date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+  const formatDate = useCallback(
+    (date: Date) => {
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const days = Math.floor(hours / 24);
 
-    if (hours < 1) return t('justNow');
-    if (hours < 24) return t('hoursAgo', { hours });
-    if (days < 7) return t('daysAgo', { days });
-    
-    // Use a consistent date format to avoid hydration mismatch
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }, [t]);
+      if (hours < 1) return t('justNow');
+      if (hours < 24) return t('hoursAgo', { hours });
+      if (days < 7) return t('daysAgo', { days });
+
+      // Use a consistent date format to avoid hydration mismatch
+      const day = date
+        .getDate()
+        .toString()
+        .padStart(2, '0');
+      const month = (date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    },
+    [t]
+  );
 
   // Filter topics based on search and filters
   const filteredTopics = topics.filter(topic => {
-    const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         topic.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         topic.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesFilter = selectedFilter === 'all' || 
-                         (selectedFilter === 'pinned' && topic.isPinned) ||
-                         (selectedFilter === 'my-posts' && topic.author.id === '1'); // Mock user ID
+    const matchesSearch =
+      topic.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      topic.content
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (topic.tags &&
+        topic.tags.some(tag =>
+          tag
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        ));
 
-    const matchesCourse = selectedCourse === 'all' || topic.course?.id === selectedCourse;
-    
-    const matchesLesson = selectedLesson === 'all' || topic.lesson?.id === selectedLesson;
+    const matchesFilter =
+      selectedFilter === 'all' ||
+      (selectedFilter === 'pinned' && topic.isPinned) ||
+      (selectedFilter === 'my-posts' &&
+        topic.author.id === '1'); // Mock user ID
 
-    return matchesSearch && matchesFilter && matchesCourse && matchesLesson;
+    const matchesCourse =
+      selectedCourse === 'all' ||
+      topic.course?.id === selectedCourse;
+
+    const matchesLesson =
+      selectedLesson === 'all' ||
+      topic.lesson?.id === selectedLesson;
+
+    return (
+      matchesSearch &&
+      matchesFilter &&
+      matchesCourse &&
+      matchesLesson
+    );
   });
 
   // Sort topics based on selected tab
@@ -268,8 +366,22 @@ export default function CommunityPage() {
     if (selectedTab === 'recent') {
       return b.createdAt.getTime() - a.createdAt.getTime();
     } else if (selectedTab === 'popular') {
-      const bTotal = b.viewCount + b.replyCount + b.reactions.heart + b.reactions.thumbsUp + b.reactions.surprised + b.reactions.clap + b.reactions.sad;
-      const aTotal = a.viewCount + a.replyCount + a.reactions.heart + a.reactions.thumbsUp + a.reactions.surprised + a.reactions.clap + a.reactions.sad;
+      const bTotal =
+        b.viewCount +
+        b.replyCount +
+        b.reactions.heart +
+        b.reactions.thumbsUp +
+        b.reactions.surprised +
+        b.reactions.clap +
+        b.reactions.sad;
+      const aTotal =
+        a.viewCount +
+        a.replyCount +
+        a.reactions.heart +
+        a.reactions.thumbsUp +
+        a.reactions.surprised +
+        a.reactions.clap +
+        a.reactions.sad;
       return bTotal - aTotal;
     }
     return 0;
@@ -292,15 +404,20 @@ export default function CommunityPage() {
           {/* Search and Create */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <Input
                 placeholder={t('searchPlaceholder')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e =>
+                  setSearchQuery(e.target.value)
+                }
                 className="pl-10 bg-primary-dark/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-secondary focus:ring-secondary"
               />
             </div>
-            <Button 
+            <Button
               onClick={() => setShowCreateModal(true)}
               className="bg-secondary hover:bg-secondary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
@@ -311,40 +428,106 @@ export default function CommunityPage() {
 
           {/* Filters */}
           <div className="flex flex-wrap gap-4 mb-6">
-            <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+            <Select
+              value={selectedFilter}
+              onValueChange={setSelectedFilter}
+            >
               <SelectTrigger className="w-[180px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <Filter size={16} className="mr-2 text-gray-400" />
+                <Filter
+                  size={16}
+                  className="mr-2 text-gray-400"
+                />
                 <SelectValue placeholder={t('filterBy')} />
               </SelectTrigger>
               <SelectContent className="bg-primary-dark border-gray-700">
-                <SelectItem value="all" className="text-white hover:bg-primary/50">{t('filters.all')}</SelectItem>
-                <SelectItem value="pinned" className="text-white hover:bg-primary/50">{t('filters.pinned')}</SelectItem>
-                <SelectItem value="my-posts" className="text-white hover:bg-primary/50">{t('filters.myPosts')}</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="text-white hover:bg-primary/50"
+                >
+                  {t('filters.all')}
+                </SelectItem>
+                <SelectItem
+                  value="pinned"
+                  className="text-white hover:bg-primary/50"
+                >
+                  {t('filters.pinned')}
+                </SelectItem>
+                <SelectItem
+                  value="my-posts"
+                  className="text-white hover:bg-primary/50"
+                >
+                  {t('filters.myPosts')}
+                </SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+            <Select
+              value={selectedCourse}
+              onValueChange={setSelectedCourse}
+            >
               <SelectTrigger className="w-[200px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <BookOpen size={16} className="mr-2 text-gray-400" />
-                <SelectValue placeholder={t('filterByCourse')} />
+                <BookOpen
+                  size={16}
+                  className="mr-2 text-gray-400"
+                />
+                <SelectValue
+                  placeholder={t('filterByCourse')}
+                />
               </SelectTrigger>
               <SelectContent className="bg-primary-dark border-gray-700">
-                <SelectItem value="all" className="text-white hover:bg-primary/50">{t('allCourses')}</SelectItem>
-                <SelectItem value="1" className="text-white hover:bg-primary/50">Medicina Interna</SelectItem>
-                <SelectItem value="2" className="text-white hover:bg-primary/50">Cirurgia Geral</SelectItem>
-                <SelectItem value="3" className="text-white hover:bg-primary/50">Pediatria</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="text-white hover:bg-primary/50"
+                >
+                  {t('allCourses')}
+                </SelectItem>
+                <SelectItem
+                  value="1"
+                  className="text-white hover:bg-primary/50"
+                >
+                  Medicina Interna
+                </SelectItem>
+                <SelectItem
+                  value="2"
+                  className="text-white hover:bg-primary/50"
+                >
+                  Cirurgia Geral
+                </SelectItem>
+                <SelectItem
+                  value="3"
+                  className="text-white hover:bg-primary/50"
+                >
+                  Pediatria
+                </SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={selectedLesson} onValueChange={setSelectedLesson}>
+            <Select
+              value={selectedLesson}
+              onValueChange={setSelectedLesson}
+            >
               <SelectTrigger className="w-[250px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <GraduationCap size={16} className="mr-2 text-gray-400" />
-                <SelectValue placeholder={t('filterByLesson')} />
+                <GraduationCap
+                  size={16}
+                  className="mr-2 text-gray-400"
+                />
+                <SelectValue
+                  placeholder={t('filterByLesson')}
+                />
               </SelectTrigger>
               <SelectContent className="bg-primary-dark border-gray-700 max-h-[300px]">
-                <SelectItem value="all" className="text-white hover:bg-primary/50">{t('allLessons')}</SelectItem>
-                {filteredLessons.map((lesson) => (
-                  <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-primary/50">
+                <SelectItem
+                  value="all"
+                  className="text-white hover:bg-primary/50"
+                >
+                  {t('allLessons')}
+                </SelectItem>
+                {filteredLessons.map(lesson => (
+                  <SelectItem
+                    key={lesson.id}
+                    value={lesson.id}
+                    className="text-white hover:bg-primary/50"
+                  >
                     {lesson.title}
                   </SelectItem>
                 ))}
@@ -353,126 +536,66 @@ export default function CommunityPage() {
           </div>
 
           {/* Tabs */}
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
+          <Tabs
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="mb-6"
+          >
             <TabsList className="bg-primary-dark/50 border-gray-700">
-              <TabsTrigger value="recent" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary">{t('tabs.recent')}</TabsTrigger>
-              <TabsTrigger value="popular" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary">{t('tabs.popular')}</TabsTrigger>
+              <TabsTrigger
+                value="recent"
+                className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary"
+              >
+                {t('tabs.recent')}
+              </TabsTrigger>
+              <TabsTrigger
+                value="popular"
+                className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary"
+              >
+                {t('tabs.popular')}
+              </TabsTrigger>
             </TabsList>
 
-        <TabsContent value={selectedTab} className="mt-6">
-          {/* Topics List */}
-          <div className="space-y-4">
-            {sortedTopics.map((topic) => (
-              <Card key={topic.id} className={`group relative p-6 bg-primary-dark/50 border-gray-700 hover:bg-primary-dark/70 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300 cursor-pointer ${topic.isPinned ? 'border-secondary ring-2 ring-secondary/20' : ''}`}>
-                {/* Hover gradient effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                <div className="relative flex items-start justify-between">
-                  <div className="flex-1">
-                    {/* Topic Header */}
-                    <div className="flex items-center gap-2 mb-2">
-                      {topic.isPinned && (
-                        <Badge variant="secondary" className="bg-secondary/20 text-secondary border-secondary/30">
-                          {t('pinned')}
-                        </Badge>
-                      )}
-                      <h3 className="text-xl font-semibold text-white group-hover:text-secondary transition-colors">
-                        {topic.title}
-                      </h3>
-                    </div>
+            <TabsContent
+              value={selectedTab}
+              className="mt-6"
+            >
+              {/* Topics List */}
+              <div className="space-y-4">
+                {sortedTopics.map(topic => (
+                  <PostCard
+                    key={topic.id}
+                    post={{
+                      ...topic,
+                      type: 'GENERAL_TOPIC',
+                      hashtags: topic.tags,
+                      attachments: topic.attachments || []
+                    }}
+                    onReaction={(postId, reaction) => {
+                      if (reaction) {
+                        handleReaction(postId, reaction);
+                      }
+                    }}
+                    onClick={() => console.log('Post clicked:', topic.id)}
+                  />
+                ))}
+              </div>
 
-                    {/* Content Preview */}
-                    <p className="text-gray-400 mb-4 line-clamp-2">
-                      {topic.content}
-                    </p>
-
-                    {/* Course/Module/Lesson Info */}
-                    {(topic.course || topic.module || topic.lesson) && (
-                      <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
-                        {topic.course && (
-                          <div className="flex items-center gap-1">
-                            <BookOpen size={14} className="text-secondary" />
-                            <span>{topic.course.title}</span>
-                          </div>
-                        )}
-                        {topic.module && (
-                          <div className="flex items-center gap-1">
-                            <Layers size={14} className="text-secondary" />
-                            <span>{topic.module.title}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {topic.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs border-gray-600 text-gray-400 hover:border-secondary hover:text-secondary transition-colors">
-                          <Hash size={10} className="mr-1" />
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between">
-                      {/* Author Info */}
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20">
-                          <Image
-                            src={topic.author.avatar || '/icons/avatar.svg'}
-                            alt={topic.author.name}
-                            width={32}
-                            height={32}
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="font-medium text-white">{topic.author.name}</span>
-                          <span className="text-gray-500">·</span>
-                          <span className="text-gray-500">{isHydrated ? formatDate(topic.createdAt) : ''}</span>
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex items-center gap-4 text-sm text-gray-500 relative">
-                        <div className="flex items-center gap-1">
-                          <Eye size={16} className="text-gray-600" />
-                          <span>{topic.viewCount}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageSquare size={16} className="text-gray-600" />
-                          <span>{topic.replyCount}</span>
-                        </div>
-                        <div className="relative">
-                          <ReactionsButton
-                            reactions={[
-                              { type: 'heart', emoji: '❤️', count: topic.reactions.heart, hasReacted: topic.reactions.userReactions.includes('heart') },
-                              { type: 'thumbsUp', emoji: '👍', count: topic.reactions.thumbsUp, hasReacted: topic.reactions.userReactions.includes('thumbsUp') },
-                              { type: 'surprised', emoji: '😮', count: topic.reactions.surprised, hasReacted: topic.reactions.userReactions.includes('surprised') },
-                              { type: 'clap', emoji: '👏', count: topic.reactions.clap, hasReacted: topic.reactions.userReactions.includes('clap') },
-                              { type: 'sad', emoji: '😢', count: topic.reactions.sad, hasReacted: topic.reactions.userReactions.includes('sad') }
-                            ]}
-                            onReact={(type) => handleReaction(topic.id, type)}
-                            size="sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              {/* Empty State */}
+              {sortedTopics.length === 0 && (
+                <div className="text-center py-12">
+                  <MessageSquare
+                    size={48}
+                    className="mx-auto text-gray-600 mb-4"
+                  />
+                  <h3 className="text-lg font-semibold mb-2 text-white">
+                    {t('noTopics')}
+                  </h3>
+                  <p className="text-gray-400">
+                    {t('noTopicsDescription')}
+                  </p>
                 </div>
-              </Card>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {sortedTopics.length === 0 && (
-            <div className="text-center py-12">
-              <MessageSquare size={48} className="mx-auto text-gray-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-white">{t('noTopics')}</h3>
-              <p className="text-gray-400">{t('noTopicsDescription')}</p>
-            </div>
-          )}
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -482,9 +605,45 @@ export default function CommunityPage() {
       <CreatePostModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onPostCreated={() => {
-          // TODO: Refresh posts list after creation
-          console.log('Post created - refresh list');
+        onPostCreated={createdPost => {
+          // Transform the API response to match our Topic interface
+          const newPost: Topic = {
+            id: createdPost.id,
+            title: createdPost.title,
+            content: createdPost.content,
+            author: {
+              id: createdPost.authorId || 'current-user',
+              name: 'Usuário Atual',
+              avatar: undefined,
+              city: 'São Paulo',
+              country: 'Brasil',
+              profession: 'Médico',
+            },
+            createdAt: new Date(createdPost.createdAt),
+            updatedAt: new Date(createdPost.createdAt),
+            viewCount: createdPost.viewCount || 0,
+            replyCount: createdPost.commentCount || 0,
+            reactions: {
+              heart: 0,
+              thumbsUp: 0,
+              surprised: 0,
+              clap: 0,
+              sad: 0,
+              userReactions: [],
+            },
+            tags: createdPost.hashtags || [],
+            isPinned: createdPost.isPinned || false,
+            // Add attachments support
+            attachments: createdPost.attachments,
+            mediaType: createdPost.mediaType,
+          };
+
+          // Add the new post to the top of the list
+          setTopics(prev => [newPost, ...prev]);
+          console.log(
+            'Post created successfully with attachments:',
+            createdPost
+          );
         }}
       />
     </NavSidebar>

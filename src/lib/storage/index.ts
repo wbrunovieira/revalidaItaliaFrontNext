@@ -1,3 +1,4 @@
+// src/lib/storage/index.ts
 import { StorageAdapter } from './types';
 import { LocalStorageAdapter } from './local.adapter';
 import { S3StorageAdapter } from './s3.adapter';
@@ -14,8 +15,13 @@ export function createStorageAdapter(): StorageAdapter {
   }
 
   // Production environment - use S3
-  if (process.env.NODE_ENV === 'production' && process.env.S3_BUCKET) {
-    console.log('🚀 Using S3 Storage Adapter for production');
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.S3_BUCKET
+  ) {
+    console.log(
+      '🚀 Using S3 Storage Adapter for production'
+    );
     storageInstance = new S3StorageAdapter({
       bucket: process.env.S3_BUCKET,
       region: process.env.AWS_REGION || 'us-east-1',
@@ -23,7 +29,9 @@ export function createStorageAdapter(): StorageAdapter {
     });
   } else {
     // Development environment - use local storage
-    console.log('💾 Using Local Storage Adapter for development');
+    console.log(
+      '💾 Using Local Storage Adapter for development'
+    );
     storageInstance = new LocalStorageAdapter({
       basePath: 'public/uploads',
       publicPath: 'uploads',

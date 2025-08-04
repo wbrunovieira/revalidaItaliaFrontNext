@@ -1,9 +1,15 @@
+// src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getStorage } from '@/lib/storage';
 
 // Allowed file types by category
 const ALLOWED_TYPES = {
-  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+  image: [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ],
   document: [
     'application/pdf',
     'application/msword',
@@ -13,6 +19,16 @@ const ALLOWED_TYPES = {
     'text/csv',
   ],
   video: ['video/mp4', 'video/webm', 'video/ogg'],
+  attachment: [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'application/pdf',
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+  ],
 };
 
 // Max file sizes by category (in bytes)
@@ -20,14 +36,16 @@ const MAX_SIZES = {
   image: 5 * 1024 * 1024, // 5MB
   document: 10 * 1024 * 1024, // 10MB
   video: 100 * 1024 * 1024, // 100MB
+  attachment: 10 * 1024 * 1024, // 10MB
 };
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const category = formData.get('category') as string || 'image';
-    const folder = formData.get('folder') as string || '';
+    const category =
+      (formData.get('category') as string) || 'image';
+    const folder = (formData.get('folder') as string) || '';
 
     // Validate file
     if (!file) {
@@ -38,7 +56,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate category
-    if (!ALLOWED_TYPES[category as keyof typeof ALLOWED_TYPES]) {
+    if (
+      !ALLOWED_TYPES[category as keyof typeof ALLOWED_TYPES]
+    ) {
       return NextResponse.json(
         { error: 'Invalid category' },
         { status: 400 }
@@ -46,33 +66,53 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ALLOWED_TYPES[category as keyof typeof ALLOWED_TYPES];
+    const allowedTypes =
+      ALLOWED_TYPES[category as keyof typeof ALLOWED_TYPES];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}` },
+        {
+          error: `Invalid file type. Allowed types: ${allowedTypes.join(
+            ', '
+          )}`,
+        },
         { status: 400 }
       );
     }
 
     // Validate file size
-    const maxSize = MAX_SIZES[category as keyof typeof MAX_SIZES];
+    const maxSize =
+      MAX_SIZES[category as keyof typeof MAX_SIZES];
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: `File too large. Maximum size: ${maxSize / 1024 / 1024}MB` },
+        {
+          error: `File too large. Maximum size: ${
+            maxSize / 1024 / 1024
+          }MB`,
+        },
         { status: 400 }
       );
     }
 
     // Generate unique filename
     const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
+    const randomString = Math.random()
+      .toString(36)
+      .substring(2, 8);
     const extension = file.name.split('.').pop() || 'bin';
-    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
+    const nameWithoutExt = file.name.replace(
+      /\.[^/.]+$/,
+      ''
+    );
+    const sanitizedName = nameWithoutExt.replace(
+      /[^a-zA-Z0-9-_]/g,
+      '-'
+    );
     const uniqueFilename = `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
 
     // Construct path
-    const path = folder ? `${category}s/${folder}/${uniqueFilename}` : `${category}s/${uniqueFilename}`;
+    const path = folder
+      ? `${category}s/${folder}/${uniqueFilename}`
+      : `${category}s/${uniqueFilename}`;
 
     // Get storage adapter and save file
     const storage = getStorage();
@@ -88,7 +128,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to upload file',
+        details:
+          error instanceof Error
+            ? error.message
+            : 'Unknown error',
+      },
       { status: 500 }
     );
   }

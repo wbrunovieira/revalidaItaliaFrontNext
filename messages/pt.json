@@ -472,6 +472,9 @@
     },
     "videoUrlPlaceholder": "Cole o link do vídeo aqui...",
     "removeAttachment": "Remover anexo",
+    "image": "imagem",
+    "images": "imagens",
+    "selected": "selecionada(s)",
     "cancel": "Cancelar",
     "create": "Publicar",
     "creating": "Publicando...",
@@ -487,12 +490,20 @@
       "titleTooLong": "O título não pode ter mais de 200 caracteres",
       "lessonRequired": "Selecione uma aula",
       "invalidHashtags": "Hashtags inválidas: {tags}",
-      "invalidVideoUrl": "URL de vídeo inválida",
+      "invalidVideoUrl": "URL de vídeo inválida. Use links do YouTube ou Vimeo",
       "invalidImageType": "Selecione apenas arquivos de imagem",
       "invalidPdfType": "Selecione apenas arquivos PDF",
       "createFailed": "Falha ao criar o post. Tente novamente.",
       "unauthorized": "Você precisa estar logado",
-      "authorNotFound": "Usuário não encontrado. Por favor, faça login novamente."
+      "authorNotFound": "Usuário não encontrado. Por favor, faça login novamente.",
+      "contentTooShort": "O conteúdo deve ter pelo menos 10 caracteres",
+      "tooManyHashtags": "Máximo de 5 hashtags permitidas",
+      "tooManyImages": "Máximo de 6 imagens permitidas",
+      "imagesTooLarge": "Uma ou mais imagens excedem o limite de 5MB",
+      "pdfTooLarge": "O arquivo PDF excede o limite de 10MB",
+      "lessonNotFound": "Aula não encontrada",
+      "invalidAttachment": "Anexo inválido",
+      "uploadFailed": "Falha ao fazer upload do arquivo"
     }
   },
   "FlashcardProgress": {

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 
 export type ReactionType = 'heart' | 'thumbsUp' | 'surprised' | 'clap' | 'sad';
 
-interface Reaction {
+export interface Reaction {
   type: ReactionType;
   emoji: string;
   count: number;

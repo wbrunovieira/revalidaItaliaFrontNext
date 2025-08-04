@@ -106,12 +106,14 @@ interface PostCardProps {
     reaction: ReactionType | null
   ) => void;
   onClick?: () => void;
+  compactVideo?: boolean;
 }
 
 export default function PostCard({
   post,
   onReaction,
   onClick,
+  compactVideo = false,
 }: PostCardProps) {
   const t = useTranslations('Community');
   const [isHydrated, setIsHydrated] = useState(false);
@@ -394,7 +396,7 @@ export default function PostCard({
     
     if (embedUrl) {
       return (
-        <div className="relative w-full h-0 pb-[56.25%] mb-4">
+        <div className={compactVideo ? "relative w-full max-w-md h-0 pb-[56.25%] mb-4" : "relative w-full h-0 pb-[56.25%] mb-4"}>
           <iframe
             src={embedUrl}
             className="absolute top-0 left-0 w-full h-full rounded-lg"
@@ -709,6 +711,7 @@ export default function PostCard({
             post={reply}
             onReaction={onReaction}
             onClick={onClick}
+            compactVideo={compactVideo}
           />
         ))}
       </div>

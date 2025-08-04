@@ -735,6 +735,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                         handleReaction(postId, reaction);
                       }
                     }}
+                    compactVideo={true}
                   />
                 ))}
               </div>

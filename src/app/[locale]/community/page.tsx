@@ -238,11 +238,103 @@ export default function CommunityPage() {
   const [showCreateModal, setShowCreateModal] =
     useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<Author | null>(null);
+
+  // Decode JWT to get user ID
+  const decodeJWT = useCallback((token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  }, []);
 
   // Ensure component is hydrated before rendering dynamic content
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Fetch current user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+
+        if (!token) return;
+
+        const decodedToken = decodeJWT(token);
+        const userId = decodedToken?.sub;
+
+        if (!userId) {
+          console.error('User ID not found in token');
+          return;
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const userData = data.user;
+          
+          // Try to fetch address data if available
+          let addressData = null;
+          try {
+            const addressResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userData.id}`,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+              }
+            );
+            
+            if (addressResponse.ok) {
+              const addresses = await addressResponse.json();
+              if (addresses.length > 0) {
+                addressData = addresses[0]; // Use first address
+              }
+            }
+          } catch (error) {
+            console.log('Could not fetch address data:', error);
+          }
+          
+          // Set user data with available fields
+          setCurrentUser({
+            id: userData.id,
+            name: userData.name,
+            avatar: userData.profileImageUrl,
+            city: addressData?.city || userData.city,
+            country: addressData?.country || userData.country,
+            profession: userData.profession
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [decodeJWT]);
 
   // Get filtered lessons based on selected course
   const filteredLessons =
@@ -611,9 +703,9 @@ export default function CommunityPage() {
             id: createdPost.id,
             title: createdPost.title,
             content: createdPost.content,
-            author: {
+            author: currentUser || {
               id: createdPost.authorId || 'current-user',
-              name: 'Usuário Atual',
+              name: 'Usuário',
               avatar: undefined,
               city: 'São Paulo',
               country: 'Brasil',

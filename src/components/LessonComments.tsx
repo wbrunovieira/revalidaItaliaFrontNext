@@ -206,6 +206,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
               {
                 headers: {
                   'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
                 },
               }
             );

@@ -395,8 +395,21 @@ export default function PostCard({
     const embedUrl = videoAttachment.embedUrl || videoAttachment.videoInfo?.embedUrl;
     
     if (embedUrl) {
+      if (compactVideo) {
+        return (
+          <div className="relative w-full max-w-2xl h-64 mb-4">
+            <iframe
+              src={embedUrl}
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+      
       return (
-        <div className={compactVideo ? "relative w-full max-w-md h-0 pb-[56.25%] mb-4" : "relative w-full h-0 pb-[56.25%] mb-4"}>
+        <div className="relative w-full h-0 pb-[56.25%] mb-4">
           <iframe
             src={embedUrl}
             className="absolute top-0 left-0 w-full h-full rounded-lg"

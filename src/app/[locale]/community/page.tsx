@@ -1171,6 +1171,7 @@ export default function CommunityPage() {
                       }
                     }}
                     onClick={() => console.log('Post clicked:', topic.id)}
+                    compactVideo={true}
                   />
                   ))}
                 </div>
@@ -1227,6 +1228,7 @@ export default function CommunityPage() {
                     console.log('Mock post reaction:', postId, reaction);
                   }}
                   onClick={() => console.log('Mock post clicked:', topic.id)}
+                  compactVideo={true}
                 />
               ))}
             </div>

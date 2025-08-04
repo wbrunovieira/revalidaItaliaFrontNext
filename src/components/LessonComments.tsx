@@ -23,11 +23,11 @@ interface Author {
 }
 
 interface CommentReactions {
-  heart: number;
-  thumbsUp: number;
-  surprised: number;
-  clap: number;
-  sad: number;
+  LOVE: number;
+  LIKE: number;
+  SURPRISE: number;
+  CLAP: number;
+  SAD: number;
   userReactions: ReactionType[];
 }
 
@@ -303,11 +303,11 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         createdAt: new Date(post.createdAt),
         updatedAt: new Date(post.updatedAt),
         reactions: {
-          heart: post.reactions?.heart || 0,
-          thumbsUp: post.reactions?.thumbsUp || 0,
-          surprised: post.reactions?.surprised || 0,
-          clap: post.reactions?.clap || 0,
-          sad: post.reactions?.sad || 0,
+          LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
+          LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
+          SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
+          CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
+          SAD: post.reactions?.SAD || post.reactions?.sad || 0,
           userReactions: post.reactions?.userReactions || []
         },
         lessonId: lessonId,
@@ -345,39 +345,85 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   }, [fetchComments]);
 
   // Handle reaction
-  const handleReaction = useCallback((commentId: string, reactionType: ReactionType) => {
-    setComments(prevComments => {
-      const updateComment = (comment: Comment): Comment => {
-        if (comment.id === commentId) {
-          const userReactions = [...comment.reactions.userReactions];
-          const hasReaction = userReactions.includes(reactionType);
-          
-          if (hasReaction) {
-            // Remove reaction
-            const index = userReactions.indexOf(reactionType);
-            userReactions.splice(index, 1);
-          } else {
-            // Add reaction
-            userReactions.push(reactionType);
-          }
-          
-          return {
-            ...comment,
-            reactions: {
-              ...comment.reactions,
-              [reactionType]: hasReaction 
-                ? comment.reactions[reactionType] - 1 
-                : comment.reactions[reactionType] + 1,
-              userReactions
-            }
-          };
-        }
-        return comment;
-      };
+  const handleReaction = useCallback(async (commentId: string, reactionType: ReactionType | null) => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+
+      // Find the current reaction to remove
+      const comment = comments.find(c => c.id === commentId);
+      if (!comment) return;
+
+      const currentReaction = comment.reactions.userReactions[0]; // User can only have one reaction
       
-      return prevComments.map(updateComment);
-    });
-  }, []);
+      // If trying to add the same reaction that already exists, remove it
+      if (reactionType === currentReaction) {
+        reactionType = null;
+      }
+
+      console.log('Sending reaction request:', { commentId, reactionType, currentReaction });
+
+      // Make API call
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${commentId}/reactions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            type: reactionType || currentReaction, // Send current reaction if removing
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log('Reaction API response:', data);
+
+      if (!response.ok) {
+        console.error('Failed to update reaction:', data);
+        return;
+      }
+
+      // Update local state optimistically
+      setComments(prevComments =>
+        prevComments.map(comment => {
+          if (comment.id === commentId) {
+            const newReactions = { ...comment.reactions };
+            
+            // Remove old reaction count
+            if (currentReaction) {
+              newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+            }
+            
+            // Add new reaction count
+            if (reactionType) {
+              newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+              newReactions.userReactions = [reactionType];
+            } else {
+              newReactions.userReactions = [];
+            }
+
+            return {
+              ...comment,
+              reactions: newReactions,
+            };
+          }
+          return comment;
+        })
+      );
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+    }
+  }, [comments]);
 
   // Handle submit simple comment (text only)
   const handleSubmitSimpleComment = useCallback(async () => {
@@ -505,11 +551,11 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         createdAt: new Date(data.post.createdAt),
         updatedAt: new Date(data.post.updatedAt || data.post.createdAt),
         reactions: data.post.reactions || {
-          heart: 0,
-          thumbsUp: 0,
-          surprised: 0,
-          clap: 0,
-          sad: 0,
+          LOVE: 0,
+          LIKE: 0,
+          SURPRISE: 0,
+          CLAP: 0,
+          SAD: 0,
           userReactions: []
         },
         lessonId: lessonId,

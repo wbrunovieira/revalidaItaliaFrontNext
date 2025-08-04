@@ -38,7 +38,11 @@ function decodeJWT(token: string) {
   }
 }
 
-export default function Avatar() {
+interface AvatarProps {
+  asButton?: boolean;
+}
+
+export default function Avatar({ asButton = true }: AvatarProps = {}) {
   const t = useTranslations('Nav');
   const pathname = usePathname();
   const router = useRouter();
@@ -109,15 +113,13 @@ export default function Avatar() {
   }, []);
 
   const handleClick = () => {
-    router.push(`/${locale}/profile`);
+    if (asButton) {
+      router.push(`/${locale}/profile`);
+    }
   };
 
-  return (
-    <button
-      onClick={handleClick}
-      className="group relative p-1 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
-      aria-label={t('profile')}
-    >
+  const content = (
+    <>
       {/* Glow effect */}
       <div className="absolute inset-0 rounded-full bg-secondary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -141,6 +143,26 @@ export default function Avatar() {
 
       {/* Pulse animation on hover */}
       <div className="absolute inset-0 rounded-full border-2 border-secondary/50 opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-    </button>
+    </>
+  );
+
+  const className = "group relative p-1 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary";
+
+  if (asButton) {
+    return (
+      <button
+        onClick={handleClick}
+        className={className}
+        aria-label={t('profile')}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {content}
+    </div>
   );
 }

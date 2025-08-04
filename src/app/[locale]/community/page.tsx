@@ -61,11 +61,11 @@ interface Topic {
   viewCount: number;
   replyCount: number;
   reactions: {
-    heart: number;
-    thumbsUp: number;
-    surprised: number;
-    clap: number;
-    sad: number;
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
     userReactions: ReactionType[];
   };
   tags: string[];
@@ -138,11 +138,11 @@ const mockTopics: Topic[] = [
     viewCount: 245,
     replyCount: 12,
     reactions: {
-      heart: 8,
-      thumbsUp: 15,
-      surprised: 2,
-      clap: 5,
-      sad: 0,
+      LOVE: 8,
+      LIKE: 15,
+      SURPRISE: 2,
+      CLAP: 5,
+      SAD: 0,
       userReactions: [],
     },
     tags: ['medicina-interna', 'estudos', 'prova'],
@@ -178,12 +178,12 @@ const mockTopics: Topic[] = [
     viewCount: 189,
     replyCount: 8,
     reactions: {
-      heart: 12,
-      thumbsUp: 20,
-      surprised: 3,
-      clap: 8,
-      sad: 1,
-      userReactions: ['thumbsUp'] as ReactionType[],
+      LOVE: 12,
+      LIKE: 20,
+      SURPRISE: 3,
+      CLAP: 8,
+      SAD: 1,
+      userReactions: ['LIKE'] as ReactionType[],
     },
     tags: ['documentação', 'burocracia', 'dicas'],
     lesson: {
@@ -209,11 +209,11 @@ const mockTopics: Topic[] = [
     viewCount: 156,
     replyCount: 5,
     reactions: {
-      heart: 3,
-      thumbsUp: 7,
-      surprised: 1,
-      clap: 2,
-      sad: 0,
+      LOVE: 3,
+      LIKE: 7,
+      SURPRISE: 1,
+      CLAP: 2,
+      SAD: 0,
       userReactions: [],
     },
     tags: ['especialização', 'cardiologia', 'equivalência'],
@@ -243,11 +243,11 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 45,
     replyCount: 3,
     reactions: {
-      heart: 5,
-      thumbsUp: 8,
-      surprised: 0,
-      clap: 2,
-      sad: 0,
+      LOVE: 5,
+      LIKE: 8,
+      SURPRISE: 0,
+      CLAP: 2,
+      SAD: 0,
       userReactions: [],
     },
     tags: ['exemplo', 'imagem'],
@@ -280,12 +280,12 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 89,
     replyCount: 5,
     reactions: {
-      heart: 12,
-      thumbsUp: 20,
-      surprised: 3,
-      clap: 8,
-      sad: 0,
-      userReactions: ['thumbsUp'] as ReactionType[],
+      LOVE: 12,
+      LIKE: 20,
+      SURPRISE: 3,
+      CLAP: 8,
+      SAD: 0,
+      userReactions: ['LIKE'] as ReactionType[],
     },
     tags: ['galeria', 'multiplas-imagens'],
     attachments: [
@@ -332,11 +332,11 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 67,
     replyCount: 2,
     reactions: {
-      heart: 3,
-      thumbsUp: 7,
-      surprised: 1,
-      clap: 2,
-      sad: 0,
+      LOVE: 3,
+      LIKE: 7,
+      SURPRISE: 1,
+      CLAP: 2,
+      SAD: 0,
       userReactions: [],
     },
     tags: ['documento', 'pdf', 'material'],
@@ -368,12 +368,12 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 234,
     replyCount: 15,
     reactions: {
-      heart: 18,
-      thumbsUp: 45,
-      surprised: 5,
-      clap: 22,
-      sad: 0,
-      userReactions: ['heart', 'thumbsUp'] as ReactionType[],
+      LOVE: 18,
+      LIKE: 45,
+      SURPRISE: 5,
+      CLAP: 22,
+      SAD: 0,
+      userReactions: ['LOVE', 'LIKE'] as ReactionType[],
     },
     tags: ['video', 'anatomia', 'youtube'],
     attachments: [
@@ -408,12 +408,12 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 156,
     replyCount: 9,
     reactions: {
-      heart: 25,
-      thumbsUp: 38,
-      surprised: 7,
-      clap: 15,
-      sad: 0,
-      userReactions: ['clap'] as ReactionType[],
+      LOVE: 25,
+      LIKE: 38,
+      SURPRISE: 7,
+      CLAP: 15,
+      SAD: 0,
+      userReactions: ['CLAP'] as ReactionType[],
     },
     tags: ['galeria-completa', 'multiplas-fotos'],
     attachments: Array.from({ length: 6 }, (_, i) => ({
@@ -442,11 +442,11 @@ const mockTopicsWithAttachments: Topic[] = [
     viewCount: 312,
     replyCount: 4,
     reactions: {
-      heart: 15,
-      thumbsUp: 28,
-      surprised: 3,
-      clap: 10,
-      sad: 0,
+      LOVE: 15,
+      LIKE: 28,
+      SURPRISE: 3,
+      CLAP: 10,
+      SAD: 0,
       userReactions: [],
     },
     tags: ['discussao', 'duvida', 'neurologia'],
@@ -468,12 +468,12 @@ const mockTopicsWithAttachments: Topic[] = [
         createdAt: new Date('2024-01-10T17:30:00'),
         updatedAt: new Date('2024-01-10T17:30:00'),
         reactions: {
-          heart: 8,
-          thumbsUp: 12,
-          surprised: 0,
-          clap: 5,
-          sad: 0,
-          userReactions: ['thumbsUp'] as ReactionType[],
+          LOVE: 8,
+          LIKE: 12,
+          SURPRISE: 0,
+          CLAP: 5,
+          SAD: 0,
+          userReactions: ['LIKE'] as ReactionType[],
         },
         parentId: 'mock-6',
         lessonId: '',
@@ -498,11 +498,11 @@ const mockTopicsWithAttachments: Topic[] = [
         createdAt: new Date('2024-01-10T18:15:00'),
         updatedAt: new Date('2024-01-10T18:15:00'),
         reactions: {
-          heart: 5,
-          thumbsUp: 9,
-          surprised: 1,
-          clap: 3,
-          sad: 0,
+          LOVE: 5,
+          LIKE: 9,
+          SURPRISE: 1,
+          CLAP: 3,
+          SAD: 0,
           userReactions: [],
         },
         parentId: 'mock-6',
@@ -528,11 +528,11 @@ const mockTopicsWithAttachments: Topic[] = [
         createdAt: new Date('2024-01-10T19:00:00'),
         updatedAt: new Date('2024-01-10T19:00:00'),
         reactions: {
-          heart: 2,
-          thumbsUp: 4,
-          surprised: 0,
-          clap: 1,
-          sad: 0,
+          LOVE: 2,
+          LIKE: 4,
+          SURPRISE: 0,
+          CLAP: 1,
+          SAD: 0,
           userReactions: [],
         },
         parentId: 'mock-6',
@@ -558,12 +558,12 @@ const mockTopicsWithAttachments: Topic[] = [
         createdAt: new Date('2024-01-10T19:30:00'),
         updatedAt: new Date('2024-01-10T19:30:00'),
         reactions: {
-          heart: 10,
-          thumbsUp: 18,
-          surprised: 0,
-          clap: 8,
-          sad: 0,
-          userReactions: ['heart', 'thumbsUp'] as ReactionType[],
+          LOVE: 10,
+          LIKE: 18,
+          SURPRISE: 0,
+          CLAP: 8,
+          SAD: 0,
+          userReactions: ['LOVE', 'LIKE'] as ReactionType[],
         },
         parentId: 'mock-6',
         lessonId: '',
@@ -785,11 +785,11 @@ export default function CommunityPage() {
         viewCount: post.viewCount || 0,
         replyCount: post.replyCount || 0,
         reactions: {
-          heart: post.reactions?.heart || 0,
-          thumbsUp: post.reactions?.thumbsUp || 0,
-          surprised: post.reactions?.surprised || 0,
-          clap: post.reactions?.clap || 0,
-          sad: post.reactions?.sad || 0,
+          LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
+          LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
+          SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
+          CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
+          SAD: post.reactions?.SAD || post.reactions?.sad || 0,
           userReactions: post.reactions?.userReactions || []
         },
         tags: post.hashtags || [],
@@ -868,42 +868,87 @@ export default function CommunityPage() {
 
   // Handle reaction
   const handleReaction = useCallback(
-    (topicId: string, reactionType: ReactionType) => {
-      setTopics(prevTopics =>
-        prevTopics.map(topic => {
-          if (topic.id === topicId) {
-            const userReactions = [
-              ...topic.reactions.userReactions,
-            ];
-            const hasReaction =
-              userReactions.includes(reactionType);
+    async (topicId: string, reactionType: ReactionType | null) => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
 
-            if (hasReaction) {
-              // Remove reaction
-              const index =
-                userReactions.indexOf(reactionType);
-              userReactions.splice(index, 1);
-            } else {
-              // Add reaction
-              userReactions.push(reactionType);
-            }
+        if (!token) {
+          console.error('No authentication token found');
+          return;
+        }
 
-            return {
-              ...topic,
-              reactions: {
-                ...topic.reactions,
-                [reactionType]: hasReaction
-                  ? topic.reactions[reactionType] - 1
-                  : topic.reactions[reactionType] + 1,
-                userReactions,
-              },
-            };
+        // If reactionType is null, we're removing the reaction
+        // Find the current reaction to remove
+        const topic = topics.find(t => t.id === topicId);
+        if (!topic) return;
+
+        const currentReaction = topic.reactions.userReactions[0]; // User can only have one reaction
+        
+        // If trying to add the same reaction that already exists, remove it
+        if (reactionType === currentReaction) {
+          reactionType = null;
+        }
+
+        console.log('Sending reaction request:', { topicId, reactionType, currentReaction });
+
+        // Make API call
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              type: reactionType || currentReaction, // Send current reaction if removing
+            }),
           }
-          return topic;
-        })
-      );
+        );
+
+        const data = await response.json();
+        console.log('Reaction API response:', data);
+
+        if (!response.ok) {
+          console.error('Failed to update reaction:', data);
+          return;
+        }
+
+        // Update local state optimistically
+        setTopics(prevTopics =>
+          prevTopics.map(topic => {
+            if (topic.id === topicId) {
+              const newReactions = { ...topic.reactions };
+              
+              // Remove old reaction count
+              if (currentReaction) {
+                newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+              }
+              
+              // Add new reaction count
+              if (reactionType) {
+                newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+                newReactions.userReactions = [reactionType];
+              } else {
+                newReactions.userReactions = [];
+              }
+
+              return {
+                ...topic,
+                reactions: newReactions,
+              };
+            }
+            return topic;
+          })
+        );
+      } catch (error) {
+        console.error('Error updating reaction:', error);
+      }
     },
-    []
+    [topics]
   );
 
   // Format date - consistent between server and client
@@ -938,19 +983,19 @@ export default function CommunityPage() {
         const bTotal =
           b.viewCount +
           b.replyCount +
-          b.reactions.heart +
-          b.reactions.thumbsUp +
-          b.reactions.surprised +
-          b.reactions.clap +
-          b.reactions.sad;
+          b.reactions.LOVE +
+          b.reactions.LIKE +
+          b.reactions.SURPRISE +
+          b.reactions.CLAP +
+          b.reactions.SAD;
         const aTotal =
           a.viewCount +
           a.replyCount +
-          a.reactions.heart +
-          a.reactions.thumbsUp +
-          a.reactions.surprised +
-          a.reactions.clap +
-          a.reactions.sad;
+          a.reactions.LOVE +
+          a.reactions.LIKE +
+          a.reactions.SURPRISE +
+          a.reactions.CLAP +
+          a.reactions.SAD;
         return bTotal - aTotal;
       })
     : topics;
@@ -1261,11 +1306,11 @@ export default function CommunityPage() {
             viewCount: createdPost.viewCount || 0,
             replyCount: createdPost.commentCount || 0,
             reactions: {
-              heart: 0,
-              thumbsUp: 0,
-              surprised: 0,
-              clap: 0,
-              sad: 0,
+              LOVE: 0,
+              LIKE: 0,
+              SURPRISE: 0,
+              CLAP: 0,
+              SAD: 0,
               userReactions: [],
             },
             tags: createdPost.hashtags || [],

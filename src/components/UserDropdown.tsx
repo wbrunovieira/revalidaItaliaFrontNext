@@ -60,7 +60,7 @@ export default function UserDropdown() {
         aria-haspopup="true"
         aria-label={t('userMenu')}
       >
-        <Avatar />
+        <Avatar asButton={false} />
         <ChevronDown 
           size={16} 
           className={cn(

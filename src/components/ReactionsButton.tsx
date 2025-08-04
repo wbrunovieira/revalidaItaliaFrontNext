@@ -5,7 +5,7 @@ import { Heart, ThumbsUp, Smile } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
-export type ReactionType = 'heart' | 'thumbsUp' | 'surprised' | 'clap' | 'sad';
+export type ReactionType = 'LOVE' | 'LIKE' | 'SURPRISE' | 'CLAP' | 'SAD';
 
 export interface Reaction {
   type: ReactionType;
@@ -22,11 +22,11 @@ interface ReactionsButtonProps {
 }
 
 const reactionEmojis: Record<ReactionType, string> = {
-  heart: '❤️',
-  thumbsUp: '👍',
-  surprised: '😮',
-  clap: '👏',
-  sad: '😢'
+  LOVE: '❤️',
+  LIKE: '👍',
+  SURPRISE: '😮',
+  CLAP: '👏',
+  SAD: '😢'
 };
 
 export default function ReactionsButton({ 
@@ -188,7 +188,7 @@ export default function ReactionsButton({
                 {isHovered && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
                     <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      {t(type === 'heart' ? 'love' : type === 'thumbsUp' ? 'like' : type === 'surprised' ? 'wow' : type === 'clap' ? 'applause' : 'sad')}
+                      {t(type === 'LOVE' ? 'love' : type === 'LIKE' ? 'like' : type === 'SURPRISE' ? 'wow' : type === 'CLAP' ? 'applause' : 'sad')}
                       {reaction && reaction.count > 0 && (
                         <span className="ml-1 text-gray-400">({reaction.count})</span>
                       )}

@@ -74,11 +74,11 @@ interface Post {
   viewCount?: number;
   replyCount?: number;
   reactions?: {
-    heart: number;
-    thumbsUp: number;
-    surprised: number;
-    clap: number;
-    sad: number;
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
     userReactions: ReactionType[];
   };
   hashtags?: string[];
@@ -680,34 +680,34 @@ export default function PostCard({
                 <ReactionsButton
                 reactions={[
                   {
-                    type: 'heart' as ReactionType,
+                    type: 'LOVE' as ReactionType,
                     emoji: '❤️',
-                    count: post.reactions.heart,
-                    hasReacted: post.reactions.userReactions.includes('heart'),
+                    count: post.reactions.LOVE,
+                    hasReacted: post.reactions.userReactions.includes('LOVE'),
                   },
                   {
-                    type: 'thumbsUp' as ReactionType,
+                    type: 'LIKE' as ReactionType,
                     emoji: '👍',
-                    count: post.reactions.thumbsUp,
-                    hasReacted: post.reactions.userReactions.includes('thumbsUp'),
+                    count: post.reactions.LIKE,
+                    hasReacted: post.reactions.userReactions.includes('LIKE'),
                   },
                   {
-                    type: 'surprised' as ReactionType,
+                    type: 'SURPRISE' as ReactionType,
                     emoji: '😮',
-                    count: post.reactions.surprised,
-                    hasReacted: post.reactions.userReactions.includes('surprised'),
+                    count: post.reactions.SURPRISE,
+                    hasReacted: post.reactions.userReactions.includes('SURPRISE'),
                   },
                   {
-                    type: 'clap' as ReactionType,
+                    type: 'CLAP' as ReactionType,
                     emoji: '👏',
-                    count: post.reactions.clap,
-                    hasReacted: post.reactions.userReactions.includes('clap'),
+                    count: post.reactions.CLAP,
+                    hasReacted: post.reactions.userReactions.includes('CLAP'),
                   },
                   {
-                    type: 'sad' as ReactionType,
+                    type: 'SAD' as ReactionType,
                     emoji: '😢',
-                    count: post.reactions.sad,
-                    hasReacted: post.reactions.userReactions.includes('sad'),
+                    count: post.reactions.SAD,
+                    hasReacted: post.reactions.userReactions.includes('SAD'),
                   },
                 ]}
                 onReact={(type: ReactionType) =>

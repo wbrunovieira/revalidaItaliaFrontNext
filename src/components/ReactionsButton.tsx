@@ -126,27 +126,20 @@ export default function ReactionsButton({
           className
         )}
       >
-        {/* Show reactions with opacity based on count */}
+        {/* Show all reactions with opacity based on count */}
         {reactions
-          .filter(r => r.count > 0 || r.hasReacted)
           .slice(0, 3)
           .map((r) => (
             <span 
               key={r.type} 
               className={cn(
                 sizeClasses.emoji,
-                r.count === 0 && !r.hasReacted && "opacity-40 grayscale"
+                r.count === 0 && !r.hasReacted && "opacity-40"
               )}
             >
               {reactionEmojis[r.type]}
             </span>
           ))}
-        {/* If no reactions at all, show heart with opacity */}
-        {totalReactions === 0 && (
-          <span className={cn(sizeClasses.emoji, "opacity-40 grayscale")}>
-            {reactionEmojis.heart}
-          </span>
-        )}
         {totalReactions > 0 && (
           <span className="font-medium">{totalReactions}</span>
         )}
@@ -186,7 +179,7 @@ export default function ReactionsButton({
               >
                 <span className={cn(
                   "block transform transition-transform duration-200",
-                  reaction?.count === 0 && !hasReacted && "opacity-50 grayscale"
+                  reaction?.count === 0 && !hasReacted && "opacity-50"
                 )}>
                   {reactionEmojis[type]}
                 </span>

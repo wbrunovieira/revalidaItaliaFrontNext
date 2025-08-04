@@ -424,7 +424,9 @@
       "authorNotFound": "Utente non trovato. Per favore, accedi di nuovo",
       "lessonNotFound": "Lezione non trovata",
       "createFailed": "Impossibile creare il commento. Riprova"
-    }
+    },
+    "retry": "Riprova",
+    "loadMore": "Carica altri commenti"
   },
   "Reactions": {
     "love": "Amore",

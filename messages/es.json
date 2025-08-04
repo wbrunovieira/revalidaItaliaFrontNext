@@ -423,7 +423,9 @@
       "authorNotFound": "Usuario no encontrado. Por favor, inicia sesión nuevamente",
       "lessonNotFound": "Clase no encontrada",
       "createFailed": "Error al crear el comentario. Intenta nuevamente"
-    }
+    },
+    "retry": "Intentar de nuevo",
+    "loadMore": "Cargar más comentarios"
   },
   "Reactions": {
     "love": "Me encanta",

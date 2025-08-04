@@ -140,13 +140,17 @@ interface LessonCommentsProps {
 export default function LessonComments({ lessonId, courseId, moduleId }: LessonCommentsProps) {
   const t = useTranslations('LessonComments');
   const { toast } = useToast();
-  const [comments, setComments] = useState<Comment[]>(mockComments);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [currentUser, setCurrentUser] = useState<Author | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(true);
   const [selectedHashtags, setSelectedHashtags] = useState<string[]>([]);
   const [selectedAttachments, setSelectedAttachments] = useState<AttachmentData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Decode JWT to get user ID
   const decodeJWT = useCallback((token: string) => {
@@ -238,6 +242,107 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
 
     fetchUserData();
   }, [decodeJWT]);
+
+  // Fetch comments from API
+  const fetchComments = useCallback(async (page = 1, append = false) => {
+    try {
+      if (!append) {
+        setIsLoadingComments(true);
+      }
+      setError(null);
+
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        setError('Unauthorized');
+        return;
+      }
+
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '20',
+        lessonId: lessonId,
+        type: 'LESSON_COMMENT'
+      });
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch comments');
+      }
+
+      const data = await response.json();
+
+      // Transform API response to match our Comment interface
+      const transformedComments: Comment[] = data.posts.map((post: any) => ({
+        id: post.id,
+        type: 'LESSON_COMMENT',
+        title: post.title || '',
+        content: post.content,
+        slug: post.slug,
+        author: post.author || {
+          id: post.authorId,
+          name: 'Unknown User',
+          avatar: undefined,
+          city: '',
+          country: '',
+          profession: ''
+        },
+        authorId: post.authorId,
+        createdAt: new Date(post.createdAt),
+        updatedAt: new Date(post.updatedAt),
+        reactions: {
+          heart: post.reactions?.heart || 0,
+          thumbsUp: post.reactions?.thumbsUp || 0,
+          surprised: post.reactions?.surprised || 0,
+          clap: post.reactions?.clap || 0,
+          sad: post.reactions?.sad || 0,
+          userReactions: post.reactions?.userReactions || []
+        },
+        lessonId: lessonId,
+        courseId: courseId,
+        moduleId: moduleId,
+        viewCount: post.viewCount || 0,
+        replyCount: post.replyCount || 0,
+        attachments: post.attachments || [],
+        hashtags: post.hashtags || []
+      }));
+
+      if (append) {
+        setComments(prev => [...prev, ...transformedComments]);
+      } else {
+        setComments(transformedComments);
+      }
+      
+      setCurrentPage(data.pagination.page);
+      setHasMore(data.pagination.hasNext);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load comments');
+      // Use mock data as fallback if not appending
+      if (!append) {
+        setComments(mockComments);
+      }
+    } finally {
+      setIsLoadingComments(false);
+    }
+  }, [lessonId, courseId, moduleId]);
+
+  // Fetch comments on component mount
+  useEffect(() => {
+    fetchComments(1);
+  }, [fetchComments]);
 
   // Handle reaction
   const handleReaction = useCallback((commentId: string, reactionType: ReactionType) => {
@@ -416,7 +521,8 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         hashtags: data.hashtags || [] // Using data.hashtags like CreatePostModal
       };
 
-      setComments([newCommentObj, ...comments]);
+      // Refresh comments from API to get the new comment with all data
+      fetchComments(1);
       setNewComment('');
       setSelectedHashtags([]);
       setSelectedAttachments([]);
@@ -596,23 +702,59 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
               </div>
             </div>
 
+            {/* Loading State */}
+            {isLoadingComments && (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoadingComments && (
+              <div className="text-center py-12">
+                <p className="text-red-400 mb-4">{error}</p>
+                <Button 
+                  onClick={() => fetchComments(currentPage)}
+                  variant="outline"
+                  className="border-gray-600 text-white hover:bg-primary/50"
+                >
+                  {t('retry')}
+                </Button>
+              </div>
+            )}
+
             {/* Comments List */}
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <PostCard
-                  key={comment.id}
-                  post={comment}
-                  onReaction={(postId, reaction) => {
-                    if (reaction) {
-                      handleReaction(postId, reaction);
-                    }
-                  }}
-                />
-              ))}
-            </div>
+            {!isLoadingComments && !error && (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <PostCard
+                    key={comment.id}
+                    post={comment}
+                    onReaction={(postId, reaction) => {
+                      if (reaction) {
+                        handleReaction(postId, reaction);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {!isLoadingComments && !error && hasMore && comments.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  onClick={() => fetchComments(currentPage + 1, true)}
+                  variant="outline"
+                  className="border-gray-600 text-white hover:bg-primary/50"
+                >
+                  {t('loadMore')}
+                </Button>
+              </div>
+            )}
 
             {/* Empty State */}
-            {comments.length === 0 && (
+            {!isLoadingComments && !error && comments.length === 0 && (
               <div className="text-center py-12">
                 <MessageSquare size={48} className="mx-auto text-gray-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2 text-white">{t('noComments')}</h3>

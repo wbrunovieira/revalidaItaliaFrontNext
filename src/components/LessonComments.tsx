@@ -289,12 +289,21 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       }
 
       // Upload attachments first
-      const uploadedAttachments: Attachment[] = [];
+      // Using a simpler type for API payload (without id)
+      const uploadedAttachments: Array<{
+        url: string;
+        type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+        mimeType: string;
+        sizeInBytes: number;
+        fileName: string;
+      }> = [];
       
       for (const attachment of selectedAttachments) {
         if (attachment.type === 'IMAGE' && attachment.file) {
           const formData = new FormData();
           formData.append('file', attachment.file);
+          formData.append('category', 'image');
+          formData.append('folder', 'posts');
 
           const uploadResponse = await fetch('/api/upload', {
             method: 'POST',
@@ -314,6 +323,8 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         } else if (attachment.type === 'DOCUMENT' && attachment.file) {
           const formData = new FormData();
           formData.append('file', attachment.file);
+          formData.append('category', 'document');
+          formData.append('folder', 'posts');
 
           const uploadResponse = await fetch('/api/upload', {
             method: 'POST',
@@ -357,8 +368,6 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         requestBody.attachments = uploadedAttachments;
       }
 
-      console.log('Sending comment request:', requestBody);
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts`, {
         method: 'POST',
         headers: {
@@ -369,7 +378,6 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       });
 
       const data = await response.json();
-      console.log('API Response:', response.status, data);
 
       if (!response.ok) {
         console.error('API Error:', data);
@@ -403,8 +411,8 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         moduleId: moduleId,
         viewCount: data.post.viewCount || 0,
         replyCount: 0,
-        attachments: data.post.attachments || [],
-        hashtags: data.post.hashtags || []
+        attachments: data.attachments || [], // Using data.attachments like CreatePostModal
+        hashtags: data.hashtags || [] // Using data.hashtags like CreatePostModal
       };
 
       setComments([newCommentObj, ...comments]);
@@ -429,7 +437,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
 
   // Handle attachments modal confirmation
   const handleAttachmentsConfirm = useCallback((hashtags: string[], attachments: AttachmentData[]) => {
-    console.log('Received from modal - Hashtags:', hashtags, 'Attachments:', attachments);
+    console.log('Attachments from modal:', attachments);
     setSelectedHashtags(hashtags);
     setSelectedAttachments(attachments);
     setIsCreateModalOpen(false);

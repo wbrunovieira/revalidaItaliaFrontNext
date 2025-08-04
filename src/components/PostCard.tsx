@@ -109,6 +109,8 @@ interface PostCardProps {
     reaction: ReactionType | null
   ) => void;
   onClick?: () => void;
+  onReply?: (postId: string) => void;
+  onReplyToComment?: (commentId: string, author: Author) => void;
   compactVideo?: boolean;
   compactImages?: boolean;
 }
@@ -117,6 +119,8 @@ export default function PostCard({
   post,
   onReaction,
   onClick,
+  onReply,
+  onReplyToComment,
   compactVideo = false,
   compactImages = false,
 }: PostCardProps) {
@@ -660,7 +664,9 @@ export default function PostCard({
                 className="text-gray-500 hover:text-secondary text-sm px-3 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('Reply to:', post.id);
+                  if (onReply) {
+                    onReply(post.id);
+                  }
                 }}
               >
                 <MessageSquare size={14} />
@@ -730,8 +736,8 @@ export default function PostCard({
 
     {/* Replies */}
     {post.replies && post.replies.length > 0 && (
-      <div className="mt-6">
-        <div className="flex items-center gap-2 mb-4 px-4">
+      <div className="-mt-1 mb-16">
+        <div className="flex items-center gap-2 mb-1.5 px-4">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
           <span className="text-sm text-gray-500 font-medium flex items-center gap-2 px-3">
             <MessageSquare size={14} />
@@ -739,7 +745,7 @@ export default function PostCard({
           </span>
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
         </div>
-        <div className="pl-12 md:pl-20 pr-8 md:pr-16 lg:pr-24 space-y-2">
+        <div className="pl-12 md:pl-20 pr-12 md:pr-24 lg:pr-32 xl:pr-40 space-y-2">
           {post.replies.map((reply) => (
             <ReplyCard
               key={reply.id}
@@ -753,6 +759,8 @@ export default function PostCard({
                 attachments: reply.attachments
               }}
               onReaction={onReaction}
+              onReply={onReplyToComment}
+              canReply={!reply.parentId} // Only allow replies to top-level comments
             />
           ))}
         </div>

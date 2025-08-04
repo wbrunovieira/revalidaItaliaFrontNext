@@ -381,6 +381,23 @@
       "admin": "Admin",
       "tutor": "Tutor",
       "student": "Aluno"
+    },
+    "comments": {
+      "addComment": "Adicionar Comentário",
+      "replyToComment": "Responder Comentário",
+      "replyingTo": "Respondendo a:",
+      "placeholder": "Escreva seu comentário aqui...",
+      "cancel": "Cancelar",
+      "submit": "Enviar",
+      "submitting": "Enviando...",
+      "success": "Sucesso",
+      "commentCreated": "Comentário criado com sucesso!",
+      "replyCreated": "Resposta enviada com sucesso!",
+      "error": "Erro",
+      "contentRequired": "O conteúdo é obrigatório",
+      "contentTooLong": "O conteúdo não pode ter mais de 10.000 caracteres",
+      "unauthorized": "Você precisa estar logado",
+      "createFailed": "Falha ao criar comentário"
     }
   },
   "Lesson": {

@@ -39,6 +39,7 @@ import ReactionsButton, {
   ReactionType,
 } from '@/components/ReactionsButton';
 import CreatePostModal from '@/components/CreatePostModal';
+import CreateCommentModal from '@/components/CreateCommentModal';
 import PostCard from '@/components/PostCard';
 
 // Mock data types
@@ -599,6 +600,9 @@ export default function CommunityPage() {
   const [selectedTab, setSelectedTab] = useState('recent');
   const [showCreateModal, setShowCreateModal] =
     useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentingOnPost, setCommentingOnPost] = useState<string | null>(null);
+  const [replyingToComment, setReplyingToComment] = useState<{id: string; author: Author} | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [currentUser, setCurrentUser] = useState<Author | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -943,6 +947,43 @@ export default function CommunityPage() {
       }
     };
   }, [currentPage, hasMore, isLoadingMore, isLoading, fetchPosts]);
+
+  // Handle reply to post
+  const handleReplyToPost = useCallback((postId: string) => {
+    setCommentingOnPost(postId);
+    setReplyingToComment(null);
+    setShowCommentModal(true);
+  }, []);
+
+  // Handle reply to comment
+  const handleReplyToComment = useCallback((commentId: string, author: Author) => {
+    // Find the post that contains this comment
+    const post = topics.find(t => 
+      t.replies?.some(r => r.id === commentId)
+    );
+    if (post) {
+      setCommentingOnPost(post.id);
+      setReplyingToComment({ id: commentId, author });
+      setShowCommentModal(true);
+    }
+  }, [topics]);
+
+  // Handle comment created
+  const handleCommentCreated = useCallback((comment: any) => {
+    // Update the post's reply count and add the comment to replies
+    setTopics(prevTopics =>
+      prevTopics.map(topic => {
+        if (topic.id === commentingOnPost) {
+          return {
+            ...topic,
+            replyCount: (topic.replyCount || 0) + 1,
+            replies: [...(topic.replies || []), comment]
+          };
+        }
+        return topic;
+      })
+    );
+  }, [commentingOnPost]);
 
   // Handle reaction
   const handleReaction = useCallback(
@@ -1293,6 +1334,8 @@ export default function CommunityPage() {
                         handleReaction(postId, reaction);
                       }
                     }}
+                    onReply={handleReplyToPost}
+                    onReplyToComment={handleReplyToComment}
                     onClick={() => console.log('Post clicked:', topic.id)}
                     compactVideo={true}
                     compactImages={true}
@@ -1360,6 +1403,20 @@ export default function CommunityPage() {
           </div>
         </div>
       </div>
+
+      {/* Create Comment Modal */}
+      <CreateCommentModal
+        open={showCommentModal}
+        onClose={() => {
+          setShowCommentModal(false);
+          setCommentingOnPost(null);
+          setReplyingToComment(null);
+        }}
+        postId={commentingOnPost || ''}
+        parentId={replyingToComment?.id}
+        parentAuthor={replyingToComment?.author}
+        onCommentCreated={handleCommentCreated}
+      />
 
       {/* Create Post Modal */}
       <CreatePostModal

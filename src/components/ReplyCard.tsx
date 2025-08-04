@@ -51,13 +51,17 @@ interface Reply {
 interface ReplyCardProps {
   reply: Reply;
   onReaction?: (replyId: string, reaction: ReactionType | null) => void;
+  onReply?: (replyId: string, author: Author) => void;
   depth?: number;
+  canReply?: boolean;
 }
 
 export default function ReplyCard({
   reply,
   onReaction,
+  onReply,
   depth = 0,
+  canReply = true,
 }: ReplyCardProps) {
   const t = useTranslations('Community');
   const [isHydrated, setIsHydrated] = useState(false);
@@ -112,92 +116,95 @@ export default function ReplyCard({
       <div className="relative z-10">
         {/* Reply Header - More Compact */}
         <div className="flex items-start gap-3 mb-3">
-        {/* Avatar - Smaller */}
-        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
-          <Image
-            src={reply.author.avatar || '/icons/avatar.svg'}
-            alt={reply.author.name}
-            width={32}
-            height={32}
-            className="object-cover w-full h-full"
-          />
-        </div>
+          {/* Avatar - Smaller */}
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
+            <Image
+              src={reply.author.avatar || '/icons/avatar.svg'}
+              alt={reply.author.name}
+              width={32}
+              height={32}
+              className="object-cover w-full h-full"
+            />
+          </div>
 
-        {/* Author Info - Inline */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-white text-sm">
-              {reply.author.name}
-            </span>
-            {reply.author.role && (
-              <RoleBadge role={reply.author.role} className="scale-90" />
-            )}
-            <span className="text-gray-500 text-xs">·</span>
-            <span className="text-gray-500 text-xs flex items-center gap-1">
-              <Calendar size={10} />
-              {isHydrated ? formatDate(reply.createdAt) : ''}
-            </span>
+          {/* Author Info - Inline */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-white text-sm">
+                {reply.author.name}
+              </span>
+              {reply.author.role && (
+                <RoleBadge role={reply.author.role} className="scale-90" />
+              )}
+              <span className="text-gray-500 text-xs">·</span>
+              <span className="text-gray-500 text-xs flex items-center gap-1">
+                <Calendar size={10} />
+                {isHydrated ? formatDate(reply.createdAt) : ''}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-gray-500 hover:text-secondary text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Reply to:', reply.id);
-            }}
-          >
-            <MessageSquare size={12} className="mr-1" />
-            <span className="hidden sm:inline">Responder</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-gray-500 hover:text-red-400"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Report reply:', reply.id);
-            }}
-          >
-            <Flag size={12} />
-          </Button>
+        {/* Content - No title for replies */}
+        <div className="text-gray-300 text-sm mb-3">
+          {reply.content}
         </div>
-      </div>
 
-      {/* Content - No title for replies */}
-      <div className="text-gray-300 text-sm mb-3 pl-11">
-        {reply.content}
-      </div>
+        {/* Attachments - Compact */}
+        {reply.attachments && reply.attachments.length > 0 && (
+          <div className="mb-3">
+            {reply.attachments.map((attachment) => (
+              <a
+                key={attachment.id}
+                href={attachment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-xs text-secondary hover:text-secondary/80 transition-colors"
+              >
+                {attachment.type === 'IMAGE' && '🖼️'}
+                {attachment.type === 'VIDEO' && '🎥'}
+                {attachment.type === 'DOCUMENT' && '📄'}
+                {attachment.fileName}
+              </a>
+            ))}
+          </div>
+        )}
 
-      {/* Attachments - Compact */}
-      {reply.attachments && reply.attachments.length > 0 && (
-        <div className="pl-11 mb-3">
-          {reply.attachments.map((attachment) => (
-            <a
-              key={attachment.id}
-              href={attachment.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs text-secondary hover:text-secondary/80 transition-colors"
-            >
-              {attachment.type === 'IMAGE' && '🖼️'}
-              {attachment.type === 'VIDEO' && '🎥'}
-              {attachment.type === 'DOCUMENT' && '📄'}
-              {attachment.fileName}
-            </a>
-          ))}
-        </div>
-      )}
+        {/* Footer with Actions and Reactions */}
+        <div className="pt-3 border-t border-gray-800">
+          <div className="flex items-center justify-between">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              {canReply && (
+                <button
+                  className="text-gray-500 hover:text-secondary text-xs px-2 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onReply) {
+                      onReply(reply.id, reply.author);
+                    }
+                  }}
+                >
+                  <MessageSquare size={12} />
+                  <span className="hidden sm:inline">Responder</span>
+                </button>
+              )}
+              <button
+                className="text-gray-500 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Report reply:', reply.id);
+                }}
+              >
+                <Flag size={12} />
+                <span className="hidden sm:inline">Denunciar</span>
+              </button>
+            </div>
 
-      {/* Reactions - Compact */}
-      {reply.reactions && onReaction && (
-        <div className="pl-11">
-          <div className="inline-flex">
-            <ReactionsButton
+            {/* Reactions - Compact */}
+            {reply.reactions && onReaction && (
+              <div className="relative ml-auto">
+                <ReactionsButton
               reactions={[
                 {
                   type: 'LOVE' as ReactionType,
@@ -230,13 +237,14 @@ export default function ReplyCard({
                   hasReacted: reply.reactions.userReactions.includes('SAD'),
                 },
               ]}
-              postId={reply.id}
-              onReact={(type: ReactionType) => onReaction(reply.id, type)}
-              compact={true}
-            />
+                  postId={reply.id}
+                  onReact={(type: ReactionType) => onReaction(reply.id, type)}
+                  compact={true}
+                />
+              </div>
+            )}
           </div>
         </div>
-      )}
       </div>
     </div>
     </div>

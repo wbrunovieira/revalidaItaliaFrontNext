@@ -107,6 +107,7 @@ interface PostCardProps {
   ) => void;
   onClick?: () => void;
   compactVideo?: boolean;
+  compactImages?: boolean;
 }
 
 export default function PostCard({
@@ -114,6 +115,7 @@ export default function PostCard({
   onReaction,
   onClick,
   compactVideo = false,
+  compactImages = false,
 }: PostCardProps) {
   const t = useTranslations('Community');
   const [isHydrated, setIsHydrated] = useState(false);
@@ -176,7 +178,9 @@ export default function PostCard({
     if (imageAttachments.length === 1) {
       return (
         <div 
-          className="relative w-full rounded-lg overflow-hidden mb-4 bg-black/5 cursor-pointer"
+          className={`relative rounded-lg overflow-hidden mb-4 bg-black/5 cursor-pointer ${
+            compactImages ? 'w-full max-w-2xl' : 'w-full'
+          }`}
           onClick={(e) => {
             e.stopPropagation();
             setSelectedImage(fixAttachmentUrl(imageAttachments[0].url, 'IMAGE'));
@@ -188,7 +192,9 @@ export default function PostCard({
             alt={imageAttachments[0].fileName}
             width={800}
             height={600}
-            className="w-full h-auto max-h-[600px] object-contain"
+            className={`w-full h-auto ${
+              compactImages ? 'max-h-[400px]' : 'max-h-[600px]'
+            } object-contain`}
           />
         </div>
       );
@@ -725,6 +731,7 @@ export default function PostCard({
             onReaction={onReaction}
             onClick={onClick}
             compactVideo={compactVideo}
+            compactImages={compactImages}
           />
         ))}
       </div>

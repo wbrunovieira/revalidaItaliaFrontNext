@@ -438,7 +438,16 @@
     "like": "Mi piace",
     "wow": "Wow",
     "applause": "Applausi",
-    "sad": "Triste"
+    "sad": "Triste",
+    "reactions": "Reazioni",
+    "all": "Tutte",
+    "surprise": "Sorpresa",
+    "retry": "Riprova",
+    "noReactions": "Ancora nessuna reazione",
+    "noReactionsOfType": "Nessuna reazione di questo tipo",
+    "loadMore": "Carica altre",
+    "timeAgo": "{time} fa",
+    "yesterday": "ieri"
   },
   "CreatePost": {
     "title": "Crea Nuovo Post",

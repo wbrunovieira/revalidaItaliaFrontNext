@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Heart, ThumbsUp, Smile } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import ReactionsModal from './ReactionsModal';
 
 export type ReactionType = 'LOVE' | 'LIKE' | 'SURPRISE' | 'CLAP' | 'SAD';
 
@@ -17,6 +18,7 @@ export interface Reaction {
 interface ReactionsButtonProps {
   reactions: Reaction[];
   onReact: (type: ReactionType) => void;
+  postId?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -32,14 +34,17 @@ const reactionEmojis: Record<ReactionType, string> = {
 export default function ReactionsButton({ 
   reactions, 
   onReact, 
+  postId,
   size = 'md',
   className 
 }: ReactionsButtonProps) {
   const t = useTranslations('Reactions');
   const [showPicker, setShowPicker] = useState(false);
   const [hoveredReaction, setHoveredReaction] = useState<ReactionType | null>(null);
+  const [showReactionsModal, setShowReactionsModal] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   // Close picker when clicking outside
@@ -112,7 +117,7 @@ export default function ReactionsButton({
   const sizeClasses = getSizeClasses();
 
   return (
-    <div className="relative inline-block" style={{ zIndex: showPicker ? 50 : 'auto' }}>
+    <div ref={containerRef} className="relative inline-block" style={{ zIndex: showPicker ? 50 : 'auto' }}>
       <button
         ref={buttonRef}
         onMouseEnter={handleMouseEnter}
@@ -141,7 +146,20 @@ export default function ReactionsButton({
             </span>
           ))}
         {totalReactions > 0 && (
-          <span className="font-medium">{totalReactions}</span>
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              if (postId) {
+                setShowReactionsModal(true);
+              }
+            }}
+            className={cn(
+              "font-medium px-2 py-0.5 rounded",
+              postId && "hover:bg-gray-700 cursor-pointer transition-colors"
+            )}
+          >
+            {totalReactions}
+          </span>
         )}
       </button>
 
@@ -202,6 +220,16 @@ export default function ReactionsButton({
             );
           })}
         </div>
+      )}
+
+      {/* Reactions Modal */}
+      {postId && (
+        <ReactionsModal
+          isOpen={showReactionsModal}
+          onClose={() => setShowReactionsModal(false)}
+          postId={postId}
+          anchorRef={containerRef}
+        />
       )}
     </div>
   );

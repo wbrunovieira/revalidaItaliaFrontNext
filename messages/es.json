@@ -437,7 +437,16 @@
     "like": "Me gusta",
     "wow": "Sorprendente",
     "applause": "Aplausos",
-    "sad": "Triste"
+    "sad": "Triste",
+    "reactions": "Reacciones",
+    "all": "Todas",
+    "surprise": "Sorpresa",
+    "retry": "Intentar de nuevo",
+    "noReactions": "Aún no hay reacciones",
+    "noReactionsOfType": "No hay reacciones de este tipo",
+    "loadMore": "Cargar más",
+    "timeAgo": "hace {time}",
+    "yesterday": "ayer"
   },
   "CreatePost": {
     "title": "Crear Nueva Publicación",

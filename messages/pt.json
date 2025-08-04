@@ -449,7 +449,16 @@
     "like": "Curtir",
     "wow": "Uau",
     "applause": "Aplausos",
-    "sad": "Triste"
+    "sad": "Triste",
+    "reactions": "Reações",
+    "all": "Todas",
+    "surprise": "Surpresa",
+    "retry": "Tentar novamente",
+    "noReactions": "Nenhuma reação ainda",
+    "noReactionsOfType": "Nenhuma reação deste tipo",
+    "loadMore": "Carregar mais",
+    "timeAgo": "{time} atrás",
+    "yesterday": "ontem"
   },
   "CreatePost": {
     "title": "Criar Novo Post",

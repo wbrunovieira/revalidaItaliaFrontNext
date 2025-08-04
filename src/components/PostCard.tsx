@@ -710,6 +710,7 @@ export default function PostCard({
                     hasReacted: post.reactions.userReactions.includes('SAD'),
                   },
                 ]}
+                postId={post.id}
                 onReact={(type: ReactionType) =>
                   onReaction(post.id, type)
                 }

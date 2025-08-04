@@ -736,6 +736,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                       }
                     }}
                     compactVideo={true}
+                    compactImages={true}
                   />
                 ))}
               </div>

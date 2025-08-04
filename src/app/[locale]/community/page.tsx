@@ -224,6 +224,367 @@ const mockTopics: Topic[] = [
   },
 ];
 
+// Mock topics with attachments and replies for reference
+const mockTopicsWithAttachments: Topic[] = [
+  {
+    id: 'mock-1',
+    title: '📸 Post com 1 Imagem - Layout Simples',
+    content: 'Este é um exemplo de post com uma única imagem. A imagem aparece em tamanho grande, ocupando toda a largura disponível.',
+    author: {
+      id: '1',
+      name: 'Maria Silva',
+      avatar: undefined,
+      city: 'Roma',
+      country: 'Itália',
+      profession: 'Médica',
+    },
+    createdAt: new Date('2024-01-15T10:00:00'),
+    updatedAt: new Date('2024-01-15T10:00:00'),
+    viewCount: 45,
+    replyCount: 3,
+    reactions: {
+      heart: 5,
+      thumbsUp: 8,
+      surprised: 0,
+      clap: 2,
+      sad: 0,
+      userReactions: [],
+    },
+    tags: ['exemplo', 'imagem'],
+    isPinned: false,
+    attachments: [
+      {
+        id: '1',
+        url: 'https://picsum.photos/800/600',
+        type: 'IMAGE',
+        mimeType: 'image/jpeg',
+        sizeInBytes: 1048576,
+        fileName: 'exemplo1.jpg'
+      }
+    ]
+  },
+  {
+    id: 'mock-2',
+    title: '🖼️ Post com 3 Imagens - Layout Especial',
+    content: 'Exemplo com 3 imagens: uma grande à esquerda e duas menores à direita, criando um layout assimétrico interessante.',
+    author: {
+      id: '2',
+      name: 'Giovanni Rossi',
+      avatar: undefined,
+      city: 'Milão',
+      country: 'Itália',
+      profession: 'Cirurgião',
+    },
+    createdAt: new Date('2024-01-14T15:30:00'),
+    updatedAt: new Date('2024-01-14T15:30:00'),
+    viewCount: 89,
+    replyCount: 5,
+    reactions: {
+      heart: 12,
+      thumbsUp: 20,
+      surprised: 3,
+      clap: 8,
+      sad: 0,
+      userReactions: ['thumbsUp'] as ReactionType[],
+    },
+    tags: ['galeria', 'multiplas-imagens'],
+    attachments: [
+      {
+        id: '1',
+        url: 'https://picsum.photos/600/800',
+        type: 'IMAGE',
+        mimeType: 'image/jpeg',
+        sizeInBytes: 1048576,
+        fileName: 'exemplo1.jpg'
+      },
+      {
+        id: '2',
+        url: 'https://picsum.photos/601/400',
+        type: 'IMAGE',
+        mimeType: 'image/jpeg',
+        sizeInBytes: 1048576,
+        fileName: 'exemplo2.jpg'
+      },
+      {
+        id: '3',
+        url: 'https://picsum.photos/602/400',
+        type: 'IMAGE',
+        mimeType: 'image/jpeg',
+        sizeInBytes: 1048576,
+        fileName: 'exemplo3.jpg'
+      }
+    ]
+  },
+  {
+    id: 'mock-3',
+    title: '📄 Post com PDF Anexado',
+    content: 'Este post contém um documento PDF anexado. Clique no anexo para visualizar ou baixar o documento.',
+    author: {
+      id: '3',
+      name: 'Lucia Bianchi',
+      avatar: undefined,
+      city: 'Nápoles',
+      country: 'Itália',
+      profession: 'Cardiologista',
+    },
+    createdAt: new Date('2024-01-13T09:15:00'),
+    updatedAt: new Date('2024-01-14T11:20:00'),
+    viewCount: 67,
+    replyCount: 2,
+    reactions: {
+      heart: 3,
+      thumbsUp: 7,
+      surprised: 1,
+      clap: 2,
+      sad: 0,
+      userReactions: [],
+    },
+    tags: ['documento', 'pdf', 'material'],
+    attachments: [
+      {
+        id: '1',
+        url: '/sample.pdf',
+        type: 'DOCUMENT',
+        mimeType: 'application/pdf',
+        sizeInBytes: 2097152,
+        fileName: 'Guia_Revalidacao_2024.pdf'
+      }
+    ]
+  },
+  {
+    id: 'mock-4',
+    title: '🎥 Post com Vídeo do YouTube',
+    content: 'Compartilhando este vídeo excelente sobre anatomia cardiovascular. O vídeo é incorporado diretamente no post.',
+    author: {
+      id: '4',
+      name: 'Paulo Santos',
+      avatar: undefined,
+      city: 'São Paulo',
+      country: 'Brasil',
+      profession: 'Professor',
+    },
+    createdAt: new Date('2024-01-12T14:00:00'),
+    updatedAt: new Date('2024-01-12T14:00:00'),
+    viewCount: 234,
+    replyCount: 15,
+    reactions: {
+      heart: 18,
+      thumbsUp: 45,
+      surprised: 5,
+      clap: 22,
+      sad: 0,
+      userReactions: ['heart', 'thumbsUp'] as ReactionType[],
+    },
+    tags: ['video', 'anatomia', 'youtube'],
+    attachments: [
+      {
+        id: '1',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        type: 'VIDEO',
+        mimeType: 'video/external',
+        sizeInBytes: 0,
+        fileName: 'Anatomia Cardiovascular',
+        provider: 'youtube',
+        videoId: 'dQw4w9WgXcQ',
+        embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
+      }
+    ]
+  },
+  {
+    id: 'mock-5',
+    title: '🎯 Post com 6 Imagens - Grid Completo',
+    content: 'Exemplo máximo: 6 imagens organizadas em um grid 3x2, com indicador de "+N" se houver mais imagens.',
+    author: {
+      id: '5',
+      name: 'Ana Costa',
+      avatar: undefined,
+      city: 'Lisboa',
+      country: 'Portugal',
+      profession: 'Pediatra',
+    },
+    createdAt: new Date('2024-01-11T08:30:00'),
+    updatedAt: new Date('2024-01-11T08:30:00'),
+    viewCount: 156,
+    replyCount: 9,
+    reactions: {
+      heart: 25,
+      thumbsUp: 38,
+      surprised: 7,
+      clap: 15,
+      sad: 0,
+      userReactions: ['clap'] as ReactionType[],
+    },
+    tags: ['galeria-completa', 'multiplas-fotos'],
+    attachments: Array.from({ length: 6 }, (_, i) => ({
+      id: `${i + 1}`,
+      url: `https://picsum.photos/400/300?random=${i}`,
+      type: 'IMAGE' as const,
+      mimeType: 'image/jpeg',
+      sizeInBytes: 524288,
+      fileName: `foto${i + 1}.jpg`
+    }))
+  },
+  {
+    id: 'mock-6',
+    title: '💬 Post com Respostas - Discussão Completa',
+    content: 'Este é um exemplo de post com várias respostas, mostrando os botões de Responder e Denunciar. As respostas ficam aninhadas abaixo do post principal.',
+    author: {
+      id: '6',
+      name: 'Roberto Ferrari',
+      avatar: undefined,
+      city: 'Veneza',
+      country: 'Itália',
+      profession: 'Neurologista',
+    },
+    createdAt: new Date('2024-01-10T16:45:00'),
+    updatedAt: new Date('2024-01-10T16:45:00'),
+    viewCount: 312,
+    replyCount: 4,
+    reactions: {
+      heart: 15,
+      thumbsUp: 28,
+      surprised: 3,
+      clap: 10,
+      sad: 0,
+      userReactions: [],
+    },
+    tags: ['discussao', 'duvida', 'neurologia'],
+    replies: [
+      {
+        id: 'reply-1',
+        type: 'GENERAL_TOPIC',
+        title: '',
+        content: 'Excelente pergunta! Eu passei por essa situação recentemente. O processo todo levou cerca de 6 meses, mas pode variar dependendo da documentação.',
+        author: {
+          id: '7',
+          name: 'Carla Mendes',
+          avatar: undefined,
+          city: 'Florença',
+          country: 'Itália',
+          profession: 'Médica Geral',
+        },
+        authorId: '7',
+        createdAt: new Date('2024-01-10T17:30:00'),
+        updatedAt: new Date('2024-01-10T17:30:00'),
+        reactions: {
+          heart: 8,
+          thumbsUp: 12,
+          surprised: 0,
+          clap: 5,
+          sad: 0,
+          userReactions: ['thumbsUp'] as ReactionType[],
+        },
+        parentId: 'mock-6',
+        lessonId: '',
+        viewCount: 45,
+        replyCount: 0,
+        hashtags: []
+      },
+      {
+        id: 'reply-2',
+        type: 'GENERAL_TOPIC',
+        title: '',
+        content: 'Concordo com a Carla. No meu caso demorou 8 meses porque tive que traduzir muitos documentos. Recomendo começar pelas traduções o quanto antes!',
+        author: {
+          id: '8',
+          name: 'Marco Giuliani',
+          avatar: undefined,
+          city: 'Turim',
+          country: 'Itália',
+          profession: 'Ortopedista',
+        },
+        authorId: '8',
+        createdAt: new Date('2024-01-10T18:15:00'),
+        updatedAt: new Date('2024-01-10T18:15:00'),
+        reactions: {
+          heart: 5,
+          thumbsUp: 9,
+          surprised: 1,
+          clap: 3,
+          sad: 0,
+          userReactions: [],
+        },
+        parentId: 'mock-6',
+        lessonId: '',
+        viewCount: 32,
+        replyCount: 0,
+        hashtags: []
+      },
+      {
+        id: 'reply-3',
+        type: 'GENERAL_TOPIC',
+        title: '',
+        content: 'Obrigado pelas respostas! Vocês fizeram a tradução juramentada aqui na Itália ou no Brasil? E quanto custou aproximadamente?',
+        author: {
+          id: '6',
+          name: 'Roberto Ferrari',
+          avatar: undefined,
+          city: 'Veneza',
+          country: 'Itália',
+          profession: 'Neurologista',
+        },
+        authorId: '6',
+        createdAt: new Date('2024-01-10T19:00:00'),
+        updatedAt: new Date('2024-01-10T19:00:00'),
+        reactions: {
+          heart: 2,
+          thumbsUp: 4,
+          surprised: 0,
+          clap: 1,
+          sad: 0,
+          userReactions: [],
+        },
+        parentId: 'mock-6',
+        lessonId: '',
+        viewCount: 28,
+        replyCount: 0,
+        hashtags: []
+      },
+      {
+        id: 'reply-4',
+        type: 'GENERAL_TOPIC',
+        title: '',
+        content: 'Eu fiz no consulado brasileiro aqui em Roma. Custou cerca de €50 por documento. Vale a pena ligar antes para confirmar os valores atualizados.',
+        author: {
+          id: '7',
+          name: 'Carla Mendes',
+          avatar: undefined,
+          city: 'Florença',
+          country: 'Itália',
+          profession: 'Médica Geral',
+        },
+        authorId: '7',
+        createdAt: new Date('2024-01-10T19:30:00'),
+        updatedAt: new Date('2024-01-10T19:30:00'),
+        reactions: {
+          heart: 10,
+          thumbsUp: 18,
+          surprised: 0,
+          clap: 8,
+          sad: 0,
+          userReactions: ['heart', 'thumbsUp'] as ReactionType[],
+        },
+        parentId: 'mock-6',
+        lessonId: '',
+        viewCount: 52,
+        replyCount: 0,
+        hashtags: [],
+        attachments: [
+          {
+            id: '1',
+            url: 'https://picsum.photos/600/400?random=reply',
+            type: 'IMAGE',
+            mimeType: 'image/jpeg',
+            sizeInBytes: 204800,
+            fileName: 'consulado_romano.jpg'
+          }
+        ]
+      }
+    ]
+  }
+];
+
 export default function CommunityPage() {
   const t = useTranslations('Community');
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -843,6 +1204,33 @@ export default function CommunityPage() {
               <div ref={observerTarget} className="h-1" />
             </TabsContent>
           </Tabs>
+
+          {/* Mock Posts Section - For Reference */}
+          <div className="mt-16 p-6 bg-gray-800/30 rounded-lg border-2 border-dashed border-gray-700">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              📋 Modelos de Referência (Exemplos de Posts)
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Abaixo estão exemplos de todos os tipos de posts possíveis com diferentes layouts de anexos
+            </p>
+            <div className="space-y-4">
+              {mockTopicsWithAttachments.map(topic => (
+                <PostCard
+                  key={topic.id}
+                  post={{
+                    ...topic,
+                    type: 'GENERAL_TOPIC',
+                    hashtags: topic.tags,
+                    attachments: topic.attachments || []
+                  }}
+                  onReaction={(postId, reaction) => {
+                    console.log('Mock post reaction:', postId, reaction);
+                  }}
+                  onClick={() => console.log('Mock post clicked:', topic.id)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

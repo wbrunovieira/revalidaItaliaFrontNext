@@ -18,6 +18,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Flag,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -95,6 +96,7 @@ interface Post {
     title: string;
   };
   isPinned?: boolean;
+  replies?: Post[];
 }
 
 interface PostCardProps {
@@ -602,9 +604,9 @@ export default function PostCard({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+        <div className="pt-4 border-t border-gray-800">
           {/* Stats */}
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
             {post.viewCount !== undefined && (
               <div className="flex items-center gap-1">
                 <Eye size={16} className="text-gray-600" />
@@ -622,10 +624,39 @@ export default function PostCard({
             )}
           </div>
 
-          {/* Reactions */}
-          {post.reactions && onReaction && (
-            <div className="relative">
-              <ReactionsButton
+          {/* Actions and Reactions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+            {/* Reply Button */}
+              {/* Reply Button */}
+              <button
+                className="text-gray-500 hover:text-secondary text-sm px-3 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Reply to:', post.id);
+                }}
+              >
+                <MessageSquare size={14} />
+                Responder
+              </button>
+              
+              {/* Report Button */}
+              <button
+                className="text-gray-500 hover:text-red-400 text-sm px-3 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Report post:', post.id);
+                }}
+              >
+                <Flag size={14} />
+                Denunciar
+              </button>
+            </div>
+
+            {/* Reactions */}
+            {post.reactions && onReaction && (
+              <div className="relative ml-auto">
+                <ReactionsButton
                 reactions={[
                   {
                     type: 'heart' as ReactionType,
@@ -662,11 +693,26 @@ export default function PostCard({
                   onReaction(post.id, type)
                 }
               />
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Card>
+
+    {/* Replies */}
+    {post.replies && post.replies.length > 0 && (
+      <div className="ml-8 mt-4 space-y-3 border-l-2 border-gray-700 pl-4">
+        {post.replies.map((reply) => (
+          <PostCard
+            key={reply.id}
+            post={reply}
+            onReaction={onReaction}
+            onClick={onClick}
+          />
+        ))}
+      </div>
+    )}
 
     {/* Image Viewer Modal */}
     {selectedImage && (

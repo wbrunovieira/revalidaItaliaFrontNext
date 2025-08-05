@@ -832,47 +832,114 @@ export default function CommunityPage() {
       const data = await response.json();
 
       // Transform API response to match our Topic interface
-      const transformedPosts: Topic[] = data.posts.map((post: any) => ({
-        id: post.id,
-        title: post.title || '',
-        content: post.content,
-        author: post.author ? {
-          id: post.author.id,
-          name: post.author.name,
-          avatar: post.author.profileImageUrl,
-          city: post.author.city || '',
-          country: post.author.country || '',
-          profession: post.author.profession || '',
-          role: userRolesMap[post.author.id] || undefined
-        } : {
-          id: post.authorId,
-          name: 'Unknown User',
-          avatar: undefined,
-          city: '',
-          country: '',
-          profession: '',
-          role: undefined
-        },
-        createdAt: new Date(post.createdAt),
-        updatedAt: new Date(post.updatedAt),
-        viewCount: post.viewCount || 0,
-        replyCount: post.replyCount || 0,
-        reactions: {
-          LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
-          LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
-          SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
-          CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
-          SAD: post.reactions?.SAD || post.reactions?.sad || 0,
-          userReactions: post.reactions?.userReactions || []
-        },
-        tags: post.hashtags || [],
-        course: post.course,
-        module: post.module,
-        lesson: post.lesson,
-        isPinned: post.isPinned || false,
-        attachments: post.attachments || [],
-        mediaType: post.mediaType
-      }));
+      const transformedPosts: Topic[] = await Promise.all(
+        data.posts.map(async (post: any) => {
+          // Fetch comments for each post
+          let replies = [];
+          try {
+            const commentsResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${post.id}/comments`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            
+            if (commentsResponse.ok) {
+              const commentsData = await commentsResponse.json();
+              // Transform comments to match our interface
+              replies = commentsData.comments.filter((c: any) => c.isTopLevelComment).map((comment: any) => ({
+                id: comment.id,
+                content: comment.content,
+                author: {
+                  id: comment.author.id,
+                  name: comment.author.fullName,
+                  avatar: comment.author.profileImageUrl,
+                  role: comment.author.role
+                },
+                createdAt: new Date(comment.createdAt),
+                updatedAt: new Date(comment.updatedAt),
+                reactions: {
+                  LOVE: comment.reactions?.heart || 0,
+                  LIKE: comment.reactions?.thumbsUp || 0,
+                  SURPRISE: comment.reactions?.surprised || 0,
+                  CLAP: comment.reactions?.clap || 0,
+                  SAD: comment.reactions?.sad || 0,
+                  userReactions: comment.reactions?.userReactions || []
+                },
+                parentId: comment.parentId,
+                replies: comment.replies?.map((reply: any) => ({
+                  id: reply.id,
+                  content: reply.content,
+                  author: {
+                    id: reply.author.id,
+                    name: reply.author.fullName,
+                    avatar: reply.author.profileImageUrl,
+                    role: reply.author.role
+                  },
+                  createdAt: new Date(reply.createdAt),
+                  updatedAt: new Date(reply.updatedAt),
+                  reactions: {
+                    LOVE: reply.reactions?.heart || 0,
+                    LIKE: reply.reactions?.thumbsUp || 0,
+                    SURPRISE: reply.reactions?.surprised || 0,
+                    CLAP: reply.reactions?.clap || 0,
+                    SAD: reply.reactions?.sad || 0,
+                    userReactions: reply.reactions?.userReactions || []
+                  },
+                  parentId: reply.parentId
+                }))
+              }));
+            }
+          } catch (error) {
+            console.error('Error fetching comments for post:', post.id, error);
+          }
+
+          return {
+            id: post.id,
+            title: post.title || '',
+            content: post.content,
+            author: post.author ? {
+              id: post.author.id,
+              name: post.author.name,
+              avatar: post.author.profileImageUrl,
+              city: post.author.city || '',
+              country: post.author.country || '',
+              profession: post.author.profession || '',
+              role: userRolesMap[post.author.id] || undefined
+            } : {
+              id: post.authorId,
+              name: 'Unknown User',
+              avatar: undefined,
+              city: '',
+              country: '',
+              profession: '',
+              role: undefined
+            },
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt),
+            viewCount: post.viewCount || 0,
+            replyCount: replies.length,
+            reactions: {
+              LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
+              LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
+              SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
+              CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
+              SAD: post.reactions?.SAD || post.reactions?.sad || 0,
+              userReactions: post.reactions?.userReactions || []
+            },
+            tags: post.hashtags || [],
+            course: post.course,
+            module: post.module,
+            lesson: post.lesson,
+            isPinned: post.isPinned || false,
+            attachments: post.attachments || [],
+            mediaType: post.mediaType,
+            replies: replies
+          };
+        })
+      );
 
       if (append) {
         setTopics(prev => [...prev, ...transformedPosts]);
@@ -970,14 +1037,37 @@ export default function CommunityPage() {
 
   // Handle comment created
   const handleCommentCreated = useCallback((comment: any) => {
-    // Update the post's reply count and add the comment to replies
+    // Add the comment immediately to the UI
     setTopics(prevTopics =>
       prevTopics.map(topic => {
         if (topic.id === commentingOnPost) {
+          // Transform the comment to match our interface
+          const newReply = {
+            id: comment.id,
+            content: comment.content,
+            author: {
+              id: comment.author.id,
+              name: comment.author.name || comment.author.fullName,
+              avatar: comment.author.avatar || comment.author.profileImageUrl,
+              role: comment.author.role
+            },
+            createdAt: comment.createdAt,
+            updatedAt: comment.updatedAt,
+            reactions: comment.reactions || {
+              LOVE: 0,
+              LIKE: 0,
+              SURPRISE: 0,
+              CLAP: 0,
+              SAD: 0,
+              userReactions: []
+            },
+            parentId: comment.parentId
+          };
+          
           return {
             ...topic,
             replyCount: (topic.replyCount || 0) + 1,
-            replies: [...(topic.replies || []), comment]
+            replies: [...(topic.replies || []), newReply]
           };
         }
         return topic;

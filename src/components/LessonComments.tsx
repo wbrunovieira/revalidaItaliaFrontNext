@@ -289,40 +289,106 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       const data = await response.json();
 
       // Transform API response to match our Comment interface
-      const transformedComments: Comment[] = data.posts.map((post: any) => ({
-        id: post.id,
-        type: 'LESSON_COMMENT',
-        title: post.title || '',
-        content: post.content,
-        slug: post.slug,
-        author: post.author || {
-          id: post.authorId,
-          name: 'Unknown User',
-          avatar: undefined,
-          city: '',
-          country: '',
-          profession: ''
-        },
-        authorId: post.authorId,
-        createdAt: new Date(post.createdAt),
-        updatedAt: new Date(post.updatedAt),
-        reactions: {
-          LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
-          LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
-          SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
-          CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
-          SAD: post.reactions?.SAD || post.reactions?.sad || 0,
-          userReactions: post.reactions?.userReactions || []
-        },
-        lessonId: lessonId,
-        courseId: courseId,
-        moduleId: moduleId,
-        viewCount: post.viewCount || 0,
-        replyCount: post.replyCount || 0,
-        attachments: post.attachments || [],
-        hashtags: post.hashtags || [],
-        replies: post.replies || []
-      }));
+      const transformedComments: Comment[] = await Promise.all(
+        data.posts.map(async (post: any) => {
+          // Fetch comments for each post
+          let replies = [];
+          try {
+            const commentsResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${post.id}/comments`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            
+            if (commentsResponse.ok) {
+              const commentsData = await commentsResponse.json();
+              // Transform comments to match our interface
+              replies = commentsData.comments.filter((c: any) => c.isTopLevelComment).map((comment: any) => ({
+                id: comment.id,
+                content: comment.content,
+                author: {
+                  id: comment.author.id,
+                  name: comment.author.fullName,
+                  avatar: comment.author.profileImageUrl,
+                  role: comment.author.role
+                },
+                createdAt: new Date(comment.createdAt),
+                updatedAt: new Date(comment.updatedAt),
+                reactions: {
+                  LOVE: comment.reactions?.heart || 0,
+                  LIKE: comment.reactions?.thumbsUp || 0,
+                  SURPRISE: comment.reactions?.surprised || 0,
+                  CLAP: comment.reactions?.clap || 0,
+                  SAD: comment.reactions?.sad || 0,
+                  userReactions: comment.reactions?.userReactions || []
+                },
+                parentId: comment.parentId,
+                replies: comment.replies?.map((reply: any) => ({
+                  id: reply.id,
+                  content: reply.content,
+                  author: {
+                    id: reply.author.id,
+                    name: reply.author.fullName,
+                    avatar: reply.author.profileImageUrl,
+                    role: reply.author.role
+                  },
+                  createdAt: new Date(reply.createdAt),
+                  updatedAt: new Date(reply.updatedAt),
+                  reactions: {
+                    LOVE: reply.reactions?.heart || 0,
+                    LIKE: reply.reactions?.thumbsUp || 0,
+                    SURPRISE: reply.reactions?.surprised || 0,
+                    CLAP: reply.reactions?.clap || 0,
+                    SAD: reply.reactions?.sad || 0,
+                    userReactions: reply.reactions?.userReactions || []
+                  },
+                  parentId: reply.parentId
+                }))
+              }));
+            }
+          } catch (error) {
+            console.error('Error fetching comments for post:', post.id, error);
+          }
+
+          return {
+            id: post.id,
+            type: 'LESSON_COMMENT',
+            title: post.title || '',
+            content: post.content,
+            slug: post.slug,
+            author: post.author || {
+              id: post.authorId,
+              name: 'Unknown User',
+              avatar: undefined,
+              city: '',
+              country: '',
+              profession: ''
+            },
+            authorId: post.authorId,
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt),
+            reactions: {
+              LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
+              LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
+              SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
+              CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
+              SAD: post.reactions?.SAD || post.reactions?.sad || 0,
+              userReactions: post.reactions?.userReactions || []
+            },
+            lessonId: lessonId,
+            courseId: courseId,
+            moduleId: moduleId,
+            viewCount: post.viewCount || 0,
+            replyCount: replies.length,
+            attachments: post.attachments || [],
+            hashtags: post.hashtags || [],
+            replies: replies
+          };
+        })
+      );
 
       if (append) {
         setComments(prev => [...prev, ...transformedComments]);

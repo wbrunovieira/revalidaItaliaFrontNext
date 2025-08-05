@@ -497,17 +497,28 @@ export default function PostCard({
     <>
     <Card
       className={cn(
-        'group relative p-6 bg-primary-dark/50 border-gray-700',
+        'group relative p-6 bg-primary-dark/50',
         'hover:bg-primary-dark/70 hover:shadow-xl hover:shadow-secondary/10',
         'transition-all duration-300',
         onClick && 'cursor-pointer',
         post.isPinned &&
-          'border-secondary ring-2 ring-secondary/20'
+          'border-secondary ring-2 ring-secondary/20',
+        // Add subtle secondary border for lesson posts
+        (post.lesson || post.module || post.course) ? 
+          'border-secondary/30' : 
+          'border-gray-700'
       )}
       onClick={onClick}
     >
       {/* Hover gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-lg" />
+      
+      {/* Lesson indicator - subtle corner accent */}
+      {(post.lesson || post.module || post.course) && (
+        <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-20 h-20 bg-secondary/10 transform rotate-45" />
+        </div>
+      )}
 
       <div className="relative">
         {/* Post Header */}
@@ -587,34 +598,42 @@ export default function PostCard({
 
         {/* Course/Module/Lesson Info */}
         {(post.course || post.module || post.lesson) && (
-          <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
-            {post.course && (
-              <div className="flex items-center gap-1">
-                <BookOpen
-                  size={14}
-                  className="text-secondary"
-                />
-                <span>{post.course.title}</span>
-              </div>
-            )}
-            {post.module && (
-              <div className="flex items-center gap-1">
-                <Layers
-                  size={14}
-                  className="text-secondary"
-                />
-                <span>{post.module.title}</span>
-              </div>
-            )}
-            {post.lesson && (
-              <div className="flex items-center gap-1">
-                <GraduationCap
-                  size={14}
-                  className="text-secondary"
-                />
-                <span>{post.lesson.title}</span>
-              </div>
-            )}
+          <div className="inline-block bg-secondary/10 border border-secondary/20 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-4 text-sm">
+              {post.course && (
+                <div className="flex items-center gap-1.5">
+                  <BookOpen
+                    size={16}
+                    className="text-secondary"
+                  />
+                  <span className="text-white font-medium">{post.course.title}</span>
+                </div>
+              )}
+              {post.module && (
+                <>
+                  <span className="text-secondary/50">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <Layers
+                      size={16}
+                      className="text-secondary"
+                    />
+                    <span className="text-white font-medium">{post.module.title}</span>
+                  </div>
+                </>
+              )}
+              {post.lesson && (
+                <>
+                  <span className="text-secondary/50">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <GraduationCap
+                      size={16}
+                      className="text-secondary"
+                    />
+                    <span className="text-white font-medium">{post.lesson.title}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 

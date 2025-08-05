@@ -257,7 +257,7 @@ const mockTopicsWithAttachments: Topic[] = [
     attachments: [
       {
         id: '1',
-        url: 'https://picsum.photos/800/600',
+        url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop',
         type: 'IMAGE',
         mimeType: 'image/jpeg',
         sizeInBytes: 1048576,
@@ -293,7 +293,7 @@ const mockTopicsWithAttachments: Topic[] = [
     attachments: [
       {
         id: '1',
-        url: 'https://picsum.photos/600/800',
+        url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=800',
         type: 'IMAGE',
         mimeType: 'image/jpeg',
         sizeInBytes: 1048576,
@@ -301,7 +301,7 @@ const mockTopicsWithAttachments: Topic[] = [
       },
       {
         id: '2',
-        url: 'https://picsum.photos/601/400',
+        url: 'https://images.unsplash.com/photo-1582719188393-bb71ca45dbb9?w=600&h=400',
         type: 'IMAGE',
         mimeType: 'image/jpeg',
         sizeInBytes: 1048576,
@@ -309,7 +309,7 @@ const mockTopicsWithAttachments: Topic[] = [
       },
       {
         id: '3',
-        url: 'https://picsum.photos/602/400',
+        url: 'https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?w=600&h=400',
         type: 'IMAGE',
         mimeType: 'image/jpeg',
         sizeInBytes: 1048576,
@@ -420,7 +420,7 @@ const mockTopicsWithAttachments: Topic[] = [
     tags: ['galeria-completa', 'multiplas-fotos'],
     attachments: Array.from({ length: 6 }, (_, i) => ({
       id: `${i + 1}`,
-      url: `https://picsum.photos/400/300?random=${i}`,
+      url: `https://images.unsplash.com/photo-1584467541268-b040f83be3fd?w=400&h=300?random=${i}`,
       type: 'IMAGE' as const,
       mimeType: 'image/jpeg',
       sizeInBytes: 524288,

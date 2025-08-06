@@ -24,6 +24,20 @@ interface Author {
   profession?: string;
 }
 
+interface ReactionCounts {
+  heart?: number;
+  thumbsUp?: number;
+  surprised?: number;
+  clap?: number;
+  sad?: number;
+  LOVE?: number;
+  LIKE?: number;
+  SURPRISE?: number;
+  CLAP?: number;
+  SAD?: number;
+  userReactions?: ReactionType[];
+}
+
 interface CommentReactions {
   LOVE: number;
   LIKE: number;
@@ -240,15 +254,15 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                 createdAt: new Date(comment.createdAt as string),
                 updatedAt: new Date(comment.updatedAt as string),
                 reactions: {
-                  LOVE: (comment.reactions as any)?.heart || 0,
-                  LIKE: (comment.reactions as any)?.thumbsUp || 0,
-                  SURPRISE: (comment.reactions as any)?.surprised || 0,
-                  CLAP: (comment.reactions as any)?.clap || 0,
-                  SAD: (comment.reactions as any)?.sad || 0,
-                  userReactions: (comment.reactions as any)?.userReactions || []
+                  LOVE: (comment.reactions as ReactionCounts)?.heart || 0,
+                  LIKE: (comment.reactions as ReactionCounts)?.thumbsUp || 0,
+                  SURPRISE: (comment.reactions as ReactionCounts)?.surprised || 0,
+                  CLAP: (comment.reactions as ReactionCounts)?.clap || 0,
+                  SAD: (comment.reactions as ReactionCounts)?.sad || 0,
+                  userReactions: (comment.reactions as ReactionCounts)?.userReactions || []
                 },
                 parentId: comment.parentId,
-                replies: comment.replies?.map((reply: Record<string, unknown>) => ({
+                replies: (comment.replies as Record<string, unknown>[] | undefined)?.map((reply: Record<string, unknown>) => ({
                   id: reply.id,
                   content: reply.content,
                   author: {
@@ -260,12 +274,12 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                   createdAt: new Date(reply.createdAt as string),
                   updatedAt: new Date(reply.updatedAt as string),
                   reactions: {
-                    LOVE: (reply.reactions as any)?.heart || 0,
-                    LIKE: (reply.reactions as any)?.thumbsUp || 0,
-                    SURPRISE: (reply.reactions as any)?.surprised || 0,
-                    CLAP: (reply.reactions as any)?.clap || 0,
-                    SAD: (reply.reactions as any)?.sad || 0,
-                    userReactions: (reply.reactions as any)?.userReactions || []
+                    LOVE: (reply.reactions as ReactionCounts)?.heart || 0,
+                    LIKE: (reply.reactions as ReactionCounts)?.thumbsUp || 0,
+                    SURPRISE: (reply.reactions as ReactionCounts)?.surprised || 0,
+                    CLAP: (reply.reactions as ReactionCounts)?.clap || 0,
+                    SAD: (reply.reactions as ReactionCounts)?.sad || 0,
+                    userReactions: (reply.reactions as ReactionCounts)?.userReactions || []
                   },
                   parentId: reply.parentId
                 }))
@@ -278,35 +292,35 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
           return {
             id: post.id,
             type: 'LESSON_COMMENT',
-            title: post.title || '',
-            content: post.content,
-            slug: post.slug,
-            author: post.author || {
-              id: post.authorId,
+            title: (post.title as string) || '',
+            content: post.content as string,
+            slug: post.slug as string | undefined,
+            author: (post.author as Author) || {
+              id: post.authorId as string,
               name: 'Unknown User',
               avatar: undefined,
               city: '',
               country: '',
               profession: ''
             },
-            authorId: post.authorId,
-            createdAt: new Date(post.createdAt),
-            updatedAt: new Date(post.updatedAt),
+            authorId: post.authorId as string,
+            createdAt: new Date(post.createdAt as string),
+            updatedAt: new Date(post.updatedAt as string),
             reactions: {
-              LOVE: post.reactions?.LOVE || post.reactions?.heart || 0,
-              LIKE: post.reactions?.LIKE || post.reactions?.thumbsUp || 0,
-              SURPRISE: post.reactions?.SURPRISE || post.reactions?.surprised || 0,
-              CLAP: post.reactions?.CLAP || post.reactions?.clap || 0,
-              SAD: post.reactions?.SAD || post.reactions?.sad || 0,
-              userReactions: post.reactions?.userReactions || []
+              LOVE: (post.reactions as ReactionCounts)?.LOVE || (post.reactions as ReactionCounts)?.heart || 0,
+              LIKE: (post.reactions as ReactionCounts)?.LIKE || (post.reactions as ReactionCounts)?.thumbsUp || 0,
+              SURPRISE: (post.reactions as ReactionCounts)?.SURPRISE || (post.reactions as ReactionCounts)?.surprised || 0,
+              CLAP: (post.reactions as ReactionCounts)?.CLAP || (post.reactions as ReactionCounts)?.clap || 0,
+              SAD: (post.reactions as ReactionCounts)?.SAD || (post.reactions as ReactionCounts)?.sad || 0,
+              userReactions: (post.reactions as ReactionCounts)?.userReactions || []
             },
             lessonId: lessonId,
             courseId: courseId,
             moduleId: moduleId,
-            viewCount: post.viewCount || 0,
+            viewCount: (post.viewCount as number) || 0,
             replyCount: replies.length,
-            attachments: post.attachments || [],
-            hashtags: post.hashtags || [],
+            attachments: (post.attachments as Attachment[]) || [],
+            hashtags: (post.hashtags as string[]) || [],
             replies: replies
           };
         })
@@ -331,7 +345,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     } finally {
       setIsLoadingComments(false);
     }
-  }, [lessonId, courseId, moduleId]);
+  }, [lessonId, courseId, moduleId, token, isAuthenticated]);
 
   // Fetch comments on component mount
   useEffect(() => {
@@ -412,7 +426,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     } catch (error) {
       console.error('Error updating reaction:', error);
     }
-  }, [comments]);
+  }, [comments, token, isAuthenticated]);
 
   // Handle submit simple comment (text only)
   const handleSubmitSimpleComment = useCallback(async () => {
@@ -585,7 +599,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     } finally {
       setIsLoading(false);
     }
-  }, [newComment, comments, lessonId, courseId, moduleId, currentUser, t, toast, isLoading, selectedHashtags, selectedAttachments, fetchComments, isAuthenticated, token]);
+  }, [newComment, lessonId, courseId, moduleId, currentUser, t, toast, isLoading, selectedHashtags, selectedAttachments, fetchComments, isAuthenticated, token]);
 
   // Handle attachments modal confirmation
   const handleAttachmentsConfirm = useCallback((hashtags: string[], attachments: AttachmentData[]) => {
@@ -599,10 +613,21 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   const handleCommentCreated = useCallback((newComment: {
     id: string;
     content: string;
-    author: Author;
+    author: {
+      id: string;
+      name: string;
+      avatar?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
-    reactions: CommentReactions;
+    reactions: {
+      LOVE: number;
+      LIKE: number;
+      SURPRISE: number;
+      CLAP: number;
+      SAD: number;
+      userReactions: string[];
+    };
     parentId?: string;
   }) => {
     console.log('Comment created:', newComment);
@@ -616,12 +641,24 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
               ...post,
               replies: [...(post.replies || []), {
                 id: newComment.id,
+                type: 'LESSON_COMMENT' as const,
+                title: '',
                 content: newComment.content,
-                author: newComment.author,
+                author: newComment.author as Author,
                 createdAt: newComment.createdAt,
                 updatedAt: newComment.updatedAt,
-                reactions: newComment.reactions,
-                parentId: newComment.parentId
+                reactions: {
+                  ...newComment.reactions,
+                  userReactions: newComment.reactions.userReactions as ReactionType[]
+                },
+                parentId: newComment.parentId,
+                lessonId: post.lessonId,
+                courseId: post.courseId,
+                moduleId: post.moduleId,
+                viewCount: 0,
+                replyCount: 0,
+                attachments: [],
+                hashtags: []
               }],
               replyCount: (post.replyCount || 0) + 1
             };

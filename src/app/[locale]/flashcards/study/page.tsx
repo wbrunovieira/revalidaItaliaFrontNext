@@ -312,7 +312,7 @@ export default function FlashcardStudyPage() {
     };
 
     fetchFlashcards();
-  }, [lessonId, locale, router]);
+  }, [lessonId, locale, router, token, isAuthenticated]);
 
   const currentCard = flashcards[currentIndex];
   const progress =

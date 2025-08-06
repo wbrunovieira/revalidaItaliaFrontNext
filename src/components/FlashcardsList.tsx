@@ -193,6 +193,8 @@ export default function FlashcardsList() {
       pagination.limit,
       t,
       toast,
+      token,
+      isAuthenticated,
     ]
   );
 
@@ -311,7 +313,7 @@ export default function FlashcardsList() {
         setDeletingId(null);
       }
     },
-    [t, toast, loadFlashcards, pagination.page, flashcards]
+    [t, toast, loadFlashcards, pagination.page, flashcards, token, isAuthenticated]
   );
 
   // Handle delete confirmation

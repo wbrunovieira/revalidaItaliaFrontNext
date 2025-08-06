@@ -186,7 +186,6 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         }
 
         // Tentar iniciar para verificar se já existe
-        let payload;
         try {
           if (!token || !isAuthenticated || !user) {
             throw new Error('Sessão expirada. Faça login novamente.');
@@ -196,7 +195,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
           return;
         }
         
-        const identityId = payload.sub || payload.id;
+        const identityId = user?.id;
         if (!identityId) {
           return;
         }

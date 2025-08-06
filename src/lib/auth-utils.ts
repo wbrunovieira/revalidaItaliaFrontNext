@@ -46,7 +46,7 @@ export const removeCookie = (name: string): void => {
  * Decodifica um token JWT (sem validar assinatura)
  * Usado apenas para extrair dados do payload
  */
-export const decodeJWT = (token: string): Record<string, unknown> => {
+export const decodeJWT = (token: string): Record<string, unknown> | null => {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -72,7 +72,7 @@ export const isTokenExpired = (token: string): boolean => {
     if (!decoded || !decoded.exp) return true;
     
     const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime;
+    return (decoded.exp as number) < currentTime;
   } catch {
     return true;
   }
@@ -140,16 +140,16 @@ export const extractUserFromToken = (tokenOrUser: string | Record<string, unknow
   // Se for um objeto (dados do user da API), usa diretamente
   if (typeof tokenOrUser === 'object' && tokenOrUser !== null) {
     return {
-      id: tokenOrUser.id || tokenOrUser.identityId || '',
-      email: tokenOrUser.email || '',
-      name: tokenOrUser.fullName || tokenOrUser.name || '',
-      role: tokenOrUser.role || 'student',
-      profileImageUrl: tokenOrUser.profileImageUrl || null,
-      nationalId: tokenOrUser.nationalId || tokenOrUser.cpf,
-      phone: tokenOrUser.phone,
-      emailVerified: tokenOrUser.emailVerified,
-      createdAt: tokenOrUser.createdAt,
-      lastLogin: tokenOrUser.lastLogin,
+      id: (tokenOrUser.id as string) || (tokenOrUser.identityId as string) || '',
+      email: (tokenOrUser.email as string) || '',
+      name: (tokenOrUser.fullName as string) || (tokenOrUser.name as string) || '',
+      role: (tokenOrUser.role as 'student' | 'admin' | 'tutor') || 'student',
+      profileImageUrl: (tokenOrUser.profileImageUrl as string) || undefined,
+      nationalId: (tokenOrUser.nationalId as string) || (tokenOrUser.cpf as string) || undefined,
+      phone: (tokenOrUser.phone as string) || undefined,
+      emailVerified: (tokenOrUser.emailVerified as boolean) || undefined,
+      createdAt: (tokenOrUser.createdAt as string) || undefined,
+      lastLogin: (tokenOrUser.lastLogin as string) || undefined,
     };
   }
   
@@ -158,15 +158,15 @@ export const extractUserFromToken = (tokenOrUser: string | Record<string, unknow
   if (!decoded) return null;
   
   return {
-    id: decoded.id || decoded.sub || '',
-    email: decoded.email || '',
-    name: decoded.name || decoded.fullName || '',
-    role: decoded.role || 'student',
-    profileImageUrl: decoded.profileImageUrl || null,
-    nationalId: decoded.nationalId || decoded.cpf,
-    phone: decoded.phone,
-    emailVerified: decoded.emailVerified,
-    createdAt: decoded.createdAt,
-    lastLogin: decoded.lastLogin,
+    id: (decoded.id as string) || (decoded.sub as string) || '',
+    email: (decoded.email as string) || '',
+    name: (decoded.name as string) || (decoded.fullName as string) || '',
+    role: (decoded.role as 'student' | 'admin' | 'tutor') || 'student',
+    profileImageUrl: (decoded.profileImageUrl as string) || undefined,
+    nationalId: (decoded.nationalId as string) || (decoded.cpf as string) || undefined,
+    phone: (decoded.phone as string) || undefined,
+    emailVerified: (decoded.emailVerified as boolean) || undefined,
+    createdAt: (decoded.createdAt as string) || undefined,
+    lastLogin: (decoded.lastLogin as string) || undefined,
   };
 };

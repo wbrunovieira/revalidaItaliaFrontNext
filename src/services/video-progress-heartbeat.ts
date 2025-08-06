@@ -435,7 +435,7 @@ export class VideoProgressHeartbeat {
             endpoint: this.NEW_API_ENDPOINT,
             lessonTitle: payload.lessonTitle,
             percentage:
-              payload.videoProgress.percentage.toFixed(2) +
+              (payload.videoProgress as { percentage: number }).percentage.toFixed(2) +
               '%',
           }
         );

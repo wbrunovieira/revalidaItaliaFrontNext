@@ -47,7 +47,7 @@ export default function ReactionsButton({
   const pickerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -79,7 +79,9 @@ export default function ReactionsButton({
   const totalReactions = reactions.reduce((sum, r) => sum + r.count, 0);
 
   const handleMouseEnter = () => {
-    clearTimeout(timeoutRef.current);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     setShowPicker(true);
   };
 
@@ -243,7 +245,7 @@ export default function ReactionsButton({
           isOpen={showReactionsModal}
           onClose={() => setShowReactionsModal(false)}
           postId={postId}
-          anchorRef={containerRef}
+          anchorRef={containerRef as React.RefObject<HTMLElement>}
         />
       )}
     </div>

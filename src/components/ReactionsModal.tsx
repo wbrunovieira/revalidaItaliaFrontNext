@@ -112,7 +112,7 @@ export default function ReactionsModal({ isOpen, onClose, postId, initialTab = '
       console.log('Reactions API response:', data);
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Failed to fetch reactions');
+        throw new Error((data as { detail?: string }).detail || 'Failed to fetch reactions');
       }
 
       // Sort reaction groups by count (descending)

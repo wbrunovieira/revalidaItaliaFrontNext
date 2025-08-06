@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/stores/auth.store';
 import {
   Users,
   Edit,
@@ -69,6 +70,7 @@ type SearchResponse = UsersResponse | { users: ApiUser[] } | ApiUser[];
 export default function UsersList() {
   const t = useTranslations('Admin.usersList');
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +154,7 @@ export default function UsersList() {
         setLoading(false);
       }
     },
-    [t, toast, pageSize]
+    [t, toast, pageSize, token, isAuthenticated]
   );
 
   const searchUsersAPI = useCallback(
@@ -271,7 +273,7 @@ export default function UsersList() {
         setApiSearchLoading(false);
       }
     },
-    [t, toast]
+    [t, toast, token, isAuthenticated]
   );
 
   const clearApiSearch = useCallback(() => {
@@ -363,7 +365,7 @@ export default function UsersList() {
         });
       }
     },
-    [toast, fetchUsers, currentPage]
+    [toast, fetchUsers, currentPage, token, isAuthenticated]
   );
 
   // Função para mostrar confirmação personalizada usando toast

@@ -254,7 +254,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           throw new Error('Sessão expirada. Faça login novamente.');
         }
         console.log('Tutor ID:', user.id);
-        userId = payload.sub || payload.id;
+        userId = user?.id;
       } catch {
         throw new Error('Token inválido');
       }

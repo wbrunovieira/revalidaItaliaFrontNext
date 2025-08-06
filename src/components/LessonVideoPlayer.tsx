@@ -57,7 +57,7 @@ export default function LessonVideoPlayer({
       // Dynamic import to avoid require
       import('@/services/video-progress-heartbeat').then(({ getHeartbeatService }) => {
         const heartbeat = getHeartbeatService();
-        (window as Record<string, unknown>).videoProgressHeartbeat = heartbeat;
+        (window as unknown as Record<string, unknown>).videoProgressHeartbeat = heartbeat;
         console.log('[LessonVideoPlayer] 🎯 Heartbeat service initialized and exposed');
       });
     }
@@ -92,7 +92,9 @@ export default function LessonVideoPlayer({
     updateProgress(newProgress);
 
     // Send to heartbeat service with full context for new API
-    const heartbeatService = (window as Record<string, unknown>).videoProgressHeartbeat;
+    const heartbeatService = (window as unknown as Record<string, unknown>).videoProgressHeartbeat as { 
+      enqueueWithContext?: (data: unknown) => void 
+    } | undefined;
     
     if (!heartbeatService) {
       console.warn('[LessonVideoPlayer] ⚠️ Heartbeat service not available on window');
@@ -108,20 +110,18 @@ export default function LessonVideoPlayer({
       });
       
       // Call with correct parameters order: lessonId, progress, context
-      heartbeatService.enqueueWithContext(
+      heartbeatService.enqueueWithContext({
         lessonId,
-        newProgress,
-        {
-          courseId,
-          moduleId,
-          lessonTitle: lessonTitle || title,
-          courseTitle,
-          courseSlug,
-          moduleTitle,
-          moduleSlug,
-          lessonImageUrl: imageUrl
-        }
-      );
+        progress: newProgress,
+        courseId,
+        moduleId,
+        lessonTitle: lessonTitle || title,
+        courseTitle,
+        courseSlug,
+        moduleTitle,
+        moduleSlug,
+        lessonImageUrl: imageUrl
+      });
     }
   }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 

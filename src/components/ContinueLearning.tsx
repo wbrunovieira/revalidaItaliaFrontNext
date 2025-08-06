@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -44,11 +44,35 @@ export default function ContinueLearning() {
   const [imageError, setImageError] = useState(false);
   const { getLastLessonAccess } = useLessonAccess();
 
-  useEffect(() => {
-    fetchContinueLearning();
-  }, []);
+  const checkLocalStorageForLessonAccess = useCallback(() => {
+    const lastAccess = getLastLessonAccess();
+    
+    if (lastAccess) {
+      console.log('[ContinueLearning] Found lesson access in localStorage:', lastAccess);
+      
+      // Convert localStorage data to ContinueLearning format
+      const localData: ContinueLearningResponse = {
+        hasProgress: true,
+        lastAccessed: {
+          lessonId: lastAccess.lessonId,
+          lessonTitle: lastAccess.lessonTitle,
+          courseTitle: lastAccess.courseTitle,
+          moduleTitle: lastAccess.moduleTitle,
+          lessonImageUrl: lastAccess.lessonImageUrl || '',
+          videoProgress: lastAccess.progress,
+          lessonUrl: lastAccess.lessonUrl,
+          lastUpdatedAt: lastAccess.accessedAt,
+        },
+      };
+      
+      setData(localData);
+    } else {
+      // No data from backend or localStorage
+      setData({ hasProgress: false });
+    }
+  }, [getLastLessonAccess]);
 
-  const fetchContinueLearning = async () => {
+  const fetchContinueLearning = useCallback(async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
       const token = document.cookie
@@ -142,35 +166,11 @@ export default function ContinueLearning() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getLastLessonAccess, checkLocalStorageForLessonAccess]);
 
-  const checkLocalStorageForLessonAccess = () => {
-    const lastAccess = getLastLessonAccess();
-    
-    if (lastAccess) {
-      console.log('[ContinueLearning] Found lesson access in localStorage:', lastAccess);
-      
-      // Convert localStorage data to ContinueLearning format
-      const localData: ContinueLearningResponse = {
-        hasProgress: true,
-        lastAccessed: {
-          lessonId: lastAccess.lessonId,
-          lessonTitle: lastAccess.lessonTitle,
-          courseTitle: lastAccess.courseTitle,
-          moduleTitle: lastAccess.moduleTitle,
-          lessonImageUrl: lastAccess.lessonImageUrl || '',
-          videoProgress: lastAccess.progress,
-          lessonUrl: lastAccess.lessonUrl,
-          lastUpdatedAt: lastAccess.accessedAt,
-        },
-      };
-      
-      setData(localData);
-    } else {
-      // No data from backend or localStorage
-      setData({ hasProgress: false });
-    }
-  };
+  useEffect(() => {
+    fetchContinueLearning();
+  }, [fetchContinueLearning]);
 
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);

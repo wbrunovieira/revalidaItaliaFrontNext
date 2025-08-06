@@ -777,7 +777,7 @@ export default function PostCard({
               }}
               onReaction={onReaction}
               onReply={onReplyToComment}
-              canReply={!reply.parentId} // Only allow replies to top-level comments
+              canReply={true} // Allow replies to comments
             />
           ))}
         </div>

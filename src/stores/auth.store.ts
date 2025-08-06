@@ -228,8 +228,23 @@ export const useAuthStore = create<AuthState>()(
           const existingToken = getAuthToken();
 
           if (existingToken && !isTokenExpired(existingToken)) {
-            // Token válido encontrado
-            const userData = extractUserFromToken(existingToken);
+            // Token válido encontrado - primeiro tenta extrair do JWT
+            let userData = extractUserFromToken(existingToken);
+            
+            // Se não tiver nome, tenta buscar do localStorage do auth-storage
+            if (!userData?.name) {
+              try {
+                const authStorage = localStorage.getItem('auth-storage');
+                if (authStorage) {
+                  const parsed = JSON.parse(authStorage);
+                  if (parsed?.state?.user) {
+                    userData = parsed.state.user;
+                  }
+                }
+              } catch (e) {
+                console.log('Não foi possível recuperar dados do usuário do storage');
+              }
+            }
             
             set({
               token: existingToken,

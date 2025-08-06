@@ -6,10 +6,13 @@ import { useRouter } from 'next/navigation';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import Avatar from './Avatar';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/stores/auth.store';
+import { RoleBadge } from '@/components/ui/role-badge';
 
 export default function UserDropdown() {
   const t = useTranslations('Nav');
   const router = useRouter();
+  const { user, logout: authLogout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -27,12 +30,8 @@ export default function UserDropdown() {
 
   const handleLogout = async () => {
     try {
-      // Clear the auth token cookie
-      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      
-      // Clear any other auth-related data from localStorage
-      localStorage.removeItem('user');
-      localStorage.removeItem('authToken');
+      // Usar o logout do Auth Store
+      authLogout();
       
       // Redirect to login page
       router.push('/login');
@@ -48,11 +47,11 @@ export default function UserDropdown() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Trigger Button */}
+      {/* Trigger Button with User Info */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 p-2 rounded-lg transition-all duration-200",
+          "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
           "hover:bg-white/10",
           isOpen && "bg-white/10"
         )}
@@ -61,10 +60,21 @@ export default function UserDropdown() {
         aria-label={t('userMenu')}
       >
         <Avatar asButton={false} />
+        
+        {/* User Name and Badge - Hidden on mobile */}
+        {user && (
+          <div className="hidden md:flex flex-col items-start">
+            <span className="text-white text-sm font-medium leading-tight">
+              {user.name || user.email?.split('@')[0] || 'Usuário'}
+            </span>
+            <RoleBadge role={user.role} className="mt-0.5 scale-90 origin-left" />
+          </div>
+        )}
+        
         <ChevronDown 
           size={16} 
           className={cn(
-            "text-white transition-transform duration-200",
+            "text-white transition-transform duration-200 ml-auto",
             isOpen && "rotate-180"
           )}
         />

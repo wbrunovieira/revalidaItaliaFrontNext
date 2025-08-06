@@ -89,8 +89,19 @@ const useFlashcardInteractions = (filters: {
     const fetchInteractions = async () => {
       try {
         setLoading(true);
-        if (!token || !isAuthenticated) {
-          throw new Error('No authentication token');
+        
+        // Aguardar um pouco para o token ser carregado do storage
+        if (!isAuthenticated) {
+          console.log('User not authenticated, skipping fetch');
+          setError('Please login to view flashcard progress');
+          setLoading(false);
+          return;
+        }
+        
+        if (!token) {
+          console.log('No token available yet');
+          setLoading(false);
+          return;
         }
 
         const params = new URLSearchParams();
@@ -141,6 +152,7 @@ export default function FlashcardProgressPage() {
   const router = useRouter();
   const t = useTranslations('FlashcardProgress');
   const locale = params.locale as string;
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   // States
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('all');
@@ -181,6 +193,14 @@ export default function FlashcardProgressPage() {
     dateFrom: dateRange.dateFrom,
     dateTo: dateRange.dateTo,
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      console.log('User not authenticated, redirecting to login');
+      router.push(`/${locale}/login`);
+    }
+  }, [authLoading, isAuthenticated, router, locale]);
 
   // Calculate statistics
   useEffect(() => {
@@ -281,6 +301,22 @@ export default function FlashcardProgressPage() {
         </div>
       </NavSidebar>
     );
+  }
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary p-4 lg:p-8 flex items-center justify-center">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
+      </NavSidebar>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

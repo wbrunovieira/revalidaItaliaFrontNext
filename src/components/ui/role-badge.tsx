@@ -14,17 +14,17 @@ const roleConfig = {
   admin: {
     icon: Shield,
     labelKey: 'admin',
-    className: 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30',
+    className: 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30',
   },
   tutor: {
     icon: Users,
     labelKey: 'tutor',
-    className: 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30',
+    className: 'bg-gradient-to-r from-[#3887A6]/20 to-amber-500/10 text-[#3887A6] border-amber-500/40 hover:from-[#3887A6]/30 hover:to-amber-500/20',
   },
   student: {
     icon: GraduationCap,
     labelKey: 'student',
-    className: 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30',
+    className: 'bg-[#79BED9]/20 text-[#79BED9] border-[#79BED9]/30 hover:bg-[#79BED9]/30',
   },
 };
 

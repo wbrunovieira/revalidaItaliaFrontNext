@@ -1,42 +1,10 @@
 // src/components/Avatar.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  profileImageUrl?: string;
-  role: string;
-}
-
-// Função para decodificar JWT (sem validação de assinatura - apenas para extrair dados)
-function decodeJWT(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(
-          c =>
-            '%' +
-            ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        )
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Error decoding JWT:', error);
-    return null;
-  }
-}
+import { useAuth } from '@/stores/auth.store';
 
 interface AvatarProps {
   asButton?: boolean;
@@ -47,70 +15,7 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const locale = pathname.split('/')[1];
-  const [userData, setUserData] = useState<UserData | null>(
-    null
-  );
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1];
-
-        if (!token) return;
-
-        // Decodificar o JWT para extrair o ID do usuário
-        const decodedToken = decodeJWT(token);
-        const userId = decodedToken?.sub; // 'sub' é normalmente onde fica o ID do usuário
-
-        if (!userId) {
-          console.error('User ID not found in token');
-          return;
-        }
-
-
-        // Usar a rota GET /users/:id que existe no controller
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
-
-        const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL ||
-            'http://localhost:3333'
-          }/api/v1/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          }
-        );
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data.user);
-        } else if (response.status !== 404) {
-          // Only log non-404 errors, as 404 is expected for non-existent users
-          console.error(
-            'Failed to fetch user data:',
-            response.status
-          );
-        }
-      } catch (error) {
-        // Only log network errors, not aborts
-        const err = error as Error;
-        if (err.name !== 'AbortError') {
-          console.warn('Avatar: Failed to fetch user data (using fallback):', err.message);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  const { user } = useAuth();
 
   const handleClick = () => {
     if (asButton) {
@@ -127,9 +32,9 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
       <div className="relative w-10 h-10 rounded-full overflow-hidden">
         <Image
           src={
-            userData?.profileImageUrl || '/icons/avatar.svg'
+            user?.profileImageUrl || '/icons/avatar.svg'
           }
-          alt={userData?.name || t('profile')}
+          alt={user?.name || t('profile')}
           width={40}
           height={40}
           className="object-cover w-full h-full"

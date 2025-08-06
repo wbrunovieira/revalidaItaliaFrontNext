@@ -34,7 +34,6 @@ export interface User {
 export interface LoginCredentials {
   email: string;
   password: string;
-  rememberMe?: boolean;
 }
 
 /**
@@ -104,7 +103,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!apiUrl) {
+            throw new Error('API URL não configurada');
+          }
           const loginUrl = `${apiUrl}/api/v1/auth/login`;
           
           console.log('🔐 Tentando login em:', loginUrl);
@@ -123,11 +125,13 @@ export const useAuthStore = create<AuthState>()(
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.message || 'Erro ao fazer login');
+            console.log('❌ Erro da API:', errorData);
+            throw new Error(errorData?.message || errorData?.error || `Erro ${response.status}: ${response.statusText}`);
           }
 
           const data = await response.json();
-          console.log('📦 Resposta da API:', data);
+          console.log('📦 Resposta completa da API:', data);
+          console.log('👤 Dados do user na resposta:', data.user);
 
           // A API pode retornar o token em diferentes formatos
           const token = data.token || data.accessToken || data.access_token;
@@ -137,6 +141,7 @@ export const useAuthStore = create<AuthState>()(
             
             // Usar dados do usuário retornados pela API primeiro, senão extrai do token
             const userData = data.user ? extractUserFromToken(data.user) : extractUserFromToken(token);
+            console.log('🔄 Dados extraídos para salvar:', userData);
             
             set({
               token: token,
@@ -173,7 +178,22 @@ export const useAuthStore = create<AuthState>()(
 
       // Action: Logout
       logout: () => {
+        // Limpar todos os tokens
         clearAuthToken();
+        
+        // Limpar localStorage do auth-storage (importante!)
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth-storage');
+          // Limpar também qualquer outro storage relacionado
+          localStorage.removeItem('accessToken');
+          sessionStorage.clear();
+        }
+        
+        // Limpar cookies também
+        removeCookie('auth-storage');
+        removeCookie('token');
+        
+        // Resetar o estado
         set({
           token: null,
           user: null,
@@ -185,7 +205,8 @@ export const useAuthStore = create<AuthState>()(
           isTutor: false,
           isStudent: false,
         });
-        console.log('👋 Logout realizado');
+        
+        console.log('👋 Logout realizado - todos os dados limpos');
       },
 
       // Action: Update User

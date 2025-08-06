@@ -11,6 +11,7 @@ import TextField from './TextField';
 import Button from './Button';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/stores/auth.store';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
@@ -18,6 +19,7 @@ export default function LoginForm() {
   const router = useRouter();
   const { locale } =
     (useParams() as { locale?: string }) ?? 'pt';
+  const { login } = useAuth();
 
   const [formError, setFormError] = useState<string | null>(
     null
@@ -62,21 +64,13 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginData) => {
     try {
-      const res = await fetch(`${API}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      // Usar o Auth Store para fazer login
+      await login({
+        email: data.email,
+        password: data.password
       });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => null);
-        throw new Error(payload?.message ?? 'loginFailed');
-      }
-      const { accessToken } = await res.json();
-      document.cookie = [
-        `token=${accessToken}`,
-        `Path=/`,
-        `SameSite=Lax`,
-      ].join('; ');
+      
+      // Redirecionar após sucesso
       router.push(`/${locale}`);
     } catch (err: unknown) {
       let message: string;

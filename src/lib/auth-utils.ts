@@ -140,11 +140,11 @@ export const extractUserFromToken = (tokenOrUser: string | any) => {
   // Se for um objeto (dados do user da API), usa diretamente
   if (typeof tokenOrUser === 'object' && tokenOrUser !== null) {
     return {
-      id: tokenOrUser.identityId || tokenOrUser.id || '',
+      id: tokenOrUser.id || tokenOrUser.identityId || '',
       email: tokenOrUser.email || '',
       name: tokenOrUser.fullName || tokenOrUser.name || '',
       role: tokenOrUser.role || 'student',
-      profileImageUrl: tokenOrUser.profileImageUrl,
+      profileImageUrl: tokenOrUser.profileImageUrl || null,
       nationalId: tokenOrUser.nationalId || tokenOrUser.cpf,
       phone: tokenOrUser.phone,
       emailVerified: tokenOrUser.emailVerified,
@@ -162,7 +162,7 @@ export const extractUserFromToken = (tokenOrUser: string | any) => {
     email: decoded.email || '',
     name: decoded.name || decoded.fullName || '',
     role: decoded.role || 'student',
-    profileImageUrl: decoded.profileImageUrl,
+    profileImageUrl: decoded.profileImageUrl || null,
     nationalId: decoded.nationalId || decoded.cpf,
     phone: decoded.phone,
     emailVerified: decoded.emailVerified,

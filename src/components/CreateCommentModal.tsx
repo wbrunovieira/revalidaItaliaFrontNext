@@ -91,41 +91,66 @@ export default function CreateCommentModal({
         return;
       }
 
-      const body: { content: string; parentId?: string } = { content };
+      let response;
+      let endpoint;
+      
+      // Determine which endpoint to use
       if (parentId) {
-        body.parentId = parentId;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${postId}/comments`,
-        {
+        // Use reply endpoint for replies to comments
+        endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${parentId}/reply`;
+        response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(body),
-        }
-      );
+          body: JSON.stringify({ content }),
+        });
+      } else {
+        // Use comments endpoint for top-level comments
+        endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${postId}/comments`;
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content }),
+        });
+      }
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.detail || 'Failed to create comment');
+        
+        // Handle specific error cases
+        if (error.type?.includes('comment-hierarchy')) {
+          throw new Error(t('comments.maxDepthError'));
+        } else if (error.type?.includes('comment-not-found')) {
+          throw new Error(t('comments.commentNotFound'));
+        } else if (error.type?.includes('post-not-found')) {
+          throw new Error(t('comments.postNotFound'));
+        }
+        
+        throw new Error(error.detail || error.message || 'Failed to create comment');
       }
 
       const data = await response.json();
       
       // Transform the response to match our interface
+      // Response structure differs between comment and reply endpoints
+      const responseData = parentId ? data.reply : data.comment;
+      const authorData = data.author;
+      
       const newComment = {
-        id: data.comment.id,
-        content: data.comment.content,
+        id: responseData.id,
+        content: responseData.content,
         author: {
-          id: data.author.id,
-          name: data.author.fullName,
-          avatar: data.author.profileImageUrl,
+          id: authorData.id,
+          name: authorData.fullName,
+          avatar: authorData.profileImageUrl,
         },
-        createdAt: new Date(data.comment.createdAt),
-        updatedAt: new Date(data.comment.updatedAt),
+        createdAt: new Date(responseData.createdAt),
+        updatedAt: new Date(responseData.updatedAt),
         reactions: {
           LOVE: 0,
           LIKE: 0,
@@ -134,7 +159,7 @@ export default function CreateCommentModal({
           SAD: 0,
           userReactions: [],
         },
-        parentId: data.comment.parentId,
+        parentId: responseData.parentId,
       };
 
       onCommentCreated(newComment);

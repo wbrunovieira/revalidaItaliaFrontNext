@@ -388,7 +388,10 @@
       "contentRequired": "Il contenuto è obbligatorio",
       "contentTooLong": "Il contenuto non può superare i 10.000 caratteri",
       "unauthorized": "Devi essere loggato",
-      "createFailed": "Impossibile creare il commento"
+      "createFailed": "Impossibile creare il commento",
+      "maxDepthError": "Non è possibile rispondere a questa risposta. Solo i commenti di primo livello possono ricevere risposte",
+      "commentNotFound": "Commento non trovato o è stato rimosso",
+      "postNotFound": "Post non trovato o è stato rimosso"
     }
   },
   "Lesson": {

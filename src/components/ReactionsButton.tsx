@@ -29,16 +29,16 @@ const reactionEmojis: Record<ReactionType, string> = {
   LIKE: '👍',
   SURPRISE: '😮',
   CLAP: '👏',
-  SAD: '😢'
+  SAD: '😢',
 };
 
-export default function ReactionsButton({ 
-  reactions, 
-  onReact, 
+export default function ReactionsButton({
+  reactions,
+  onReact,
   postId,
   size = 'md',
   className,
-  compact = false 
+  compact = false,
 }: ReactionsButtonProps) {
   const t = useTranslations('Reactions');
   const [showPicker, setShowPicker] = useState(false);
@@ -53,7 +53,7 @@ export default function ReactionsButton({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        pickerRef.current && 
+        pickerRef.current &&
         !pickerRef.current.contains(event.target as Node) &&
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
@@ -67,13 +67,11 @@ export default function ReactionsButton({
   }, []);
 
   // Get most reacted type or default to heart
-  const getMostReacted = () => reactions.reduce((prev, current) => 
-    current.count > prev.count ? current : prev
-  , reactions[0]);
-  
+  const getMostReacted = () =>
+    reactions.reduce((prev, current) => (current.count > prev.count ? current : prev), reactions[0]);
+
   // Use mostReacted if needed
   const mostReacted = getMostReacted();
-  console.log('Most reacted:', mostReacted);
 
   const hasAnyReaction = reactions.some(r => r.hasReacted);
   const totalReactions = reactions.reduce((sum, r) => sum + r.count, 0);
@@ -102,31 +100,31 @@ export default function ReactionsButton({
         button: 'px-1.5 py-0.5 text-xs gap-0.5',
         emoji: 'text-xs',
         picker: 'p-1 gap-1',
-        pickerEmoji: 'text-base p-0.5'
+        pickerEmoji: 'text-base p-0.5',
       };
     }
-    
+
     switch (size) {
       case 'sm':
         return {
           button: 'px-2 py-1 text-xs gap-1',
           emoji: 'text-sm',
           picker: 'p-1.5 gap-1',
-          pickerEmoji: 'text-lg p-1'
+          pickerEmoji: 'text-lg p-1',
         };
       case 'lg':
         return {
           button: 'px-4 py-2 text-base gap-2',
           emoji: 'text-xl',
           picker: 'p-3 gap-2',
-          pickerEmoji: 'text-3xl p-2'
+          pickerEmoji: 'text-3xl p-2',
         };
       default:
         return {
           button: 'px-3 py-1.5 text-sm gap-1.5',
           emoji: 'text-base',
           picker: 'p-2 gap-1.5',
-          pickerEmoji: 'text-2xl p-1.5'
+          pickerEmoji: 'text-2xl p-1.5',
         };
     }
   };
@@ -141,38 +139,30 @@ export default function ReactionsButton({
         onMouseLeave={handleMouseLeave}
         onClick={() => setShowPicker(!showPicker)}
         className={cn(
-          "flex items-center rounded-full transition-all duration-200",
-          "hover:bg-gray-800 hover:scale-105",
-          hasAnyReaction ? "text-white bg-gray-800/50" : "text-gray-500",
+          'flex items-center rounded-full transition-all duration-200',
+          'hover:bg-gray-800 hover:scale-105',
+          hasAnyReaction ? 'text-white bg-gray-800/50' : 'text-gray-500',
           sizeClasses.button,
           className
         )}
       >
         {/* Show all reactions with opacity based on count */}
-        {reactions
-          .slice(0, 3)
-          .map((r) => (
-            <span 
-              key={r.type} 
-              className={cn(
-                sizeClasses.emoji,
-                r.count === 0 && !r.hasReacted && "opacity-40"
-              )}
-            >
-              {reactionEmojis[r.type]}
-            </span>
-          ))}
+        {reactions.slice(0, 3).map(r => (
+          <span key={r.type} className={cn(sizeClasses.emoji, r.count === 0 && !r.hasReacted && 'opacity-40')}>
+            {reactionEmojis[r.type]}
+          </span>
+        ))}
         {totalReactions > 0 && (
           <span
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               if (postId) {
                 setShowReactionsModal(true);
               }
             }}
             className={cn(
-              "font-medium px-2 py-0.5 rounded",
-              postId && "hover:bg-gray-700 cursor-pointer transition-colors"
+              'font-medium px-2 py-0.5 rounded',
+              postId && 'hover:bg-gray-700 cursor-pointer transition-colors'
             )}
           >
             {totalReactions}
@@ -187,18 +177,18 @@ export default function ReactionsButton({
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           className={cn(
-            "absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50",
-            "bg-gray-900 rounded-full shadow-xl border border-gray-700",
-            "flex items-center",
-            "animate-in fade-in-0 zoom-in-95 duration-200",
+            'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50',
+            'bg-gray-900 rounded-full shadow-xl border border-gray-700',
+            'flex items-center',
+            'animate-in fade-in-0 zoom-in-95 duration-200',
             sizeClasses.picker
           )}
         >
-          {(Object.keys(reactionEmojis) as ReactionType[]).map((type) => {
+          {(Object.keys(reactionEmojis) as ReactionType[]).map(type => {
             const reaction = reactions.find(r => r.type === type);
             const isHovered = hoveredReaction === type;
             const hasReacted = reaction?.hasReacted || false;
-            
+
             return (
               <button
                 key={type}
@@ -206,27 +196,37 @@ export default function ReactionsButton({
                 onMouseEnter={() => setHoveredReaction(type)}
                 onMouseLeave={() => setHoveredReaction(null)}
                 className={cn(
-                  "relative rounded-full transition-all duration-200",
-                  "hover:scale-125 hover:bg-gray-800",
-                  hasReacted && "bg-gray-800",
+                  'relative rounded-full transition-all duration-200',
+                  'hover:scale-125 hover:bg-gray-800',
+                  hasReacted && 'bg-gray-800',
                   sizeClasses.pickerEmoji
                 )}
               >
-                <span className={cn(
-                  "block transform transition-transform duration-200",
-                  reaction?.count === 0 && !hasReacted && "opacity-50"
-                )}>
+                <span
+                  className={cn(
+                    'block transform transition-transform duration-200',
+                    reaction?.count === 0 && !hasReacted && 'opacity-50'
+                  )}
+                >
                   {reactionEmojis[type]}
                 </span>
-                
+
                 {/* Tooltip */}
                 {isHovered && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
                     <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      {t(type === 'LOVE' ? 'love' : type === 'LIKE' ? 'like' : type === 'SURPRISE' ? 'wow' : type === 'CLAP' ? 'applause' : 'sad')}
-                      {reaction && reaction.count > 0 && (
-                        <span className="ml-1 text-gray-400">({reaction.count})</span>
+                      {t(
+                        type === 'LOVE'
+                          ? 'love'
+                          : type === 'LIKE'
+                          ? 'like'
+                          : type === 'SURPRISE'
+                          ? 'wow'
+                          : type === 'CLAP'
+                          ? 'applause'
+                          : 'sad'
                       )}
+                      {reaction && reaction.count > 0 && <span className="ml-1 text-gray-400">({reaction.count})</span>}
                     </div>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
                       <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800" />

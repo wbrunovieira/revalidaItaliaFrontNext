@@ -44,6 +44,7 @@ interface Reply {
     type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
     fileName: string;
   }>;
+  replies?: Reply[]; // Add support for nested replies
 }
 
 interface ReplyCardProps {
@@ -245,6 +246,22 @@ export default function ReplyCard({
         </div>
       </div>
     </div>
+    
+    {/* Nested Replies */}
+    {reply.replies && reply.replies.length > 0 && (
+      <div className="ml-8 mt-2 space-y-2">
+        {reply.replies.map((nestedReply) => (
+          <ReplyCard
+            key={nestedReply.id}
+            reply={nestedReply}
+            onReaction={onReaction}
+            onReply={onReply}
+            depth={(depth || 0) + 1}
+            canReply={false} // Don't allow replies beyond second level (as per API spec)
+          />
+        ))}
+      </div>
+    )}
     </div>
   );
 }

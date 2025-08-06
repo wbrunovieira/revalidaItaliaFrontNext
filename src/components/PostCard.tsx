@@ -39,6 +39,25 @@ interface Author {
   role?: 'student' | 'admin' | 'tutor';
 }
 
+interface Reply {
+  id: string;
+  content: string;
+  author: Author;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  reactions: {
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
+    userReactions: ReactionType[];
+  };
+  parentId?: string;
+  replies?: Reply[];
+  attachments?: Attachment[];
+}
+
 interface Attachment {
   id: string;
   url: string;
@@ -97,7 +116,7 @@ interface Post {
     title: string;
   };
   isPinned?: boolean;
-  replies?: Post[];
+  replies?: Reply[];
 }
 
 interface PostCardProps {
@@ -773,7 +792,8 @@ export default function PostCard({
                 createdAt: reply.createdAt,
                 updatedAt: reply.updatedAt,
                 reactions: reply.reactions,
-                attachments: reply.attachments
+                attachments: reply.attachments,
+                replies: reply.replies // Pass nested replies
               }}
               onReaction={onReaction}
               onReply={onReplyToComment}

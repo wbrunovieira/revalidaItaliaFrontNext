@@ -1018,19 +1018,42 @@ export default function CommunityPage() {
               SAD: comment.reactions?.SAD || 0,
               userReactions: (comment.reactions?.userReactions as ReactionType[]) || []
             },
-            parentId: comment.parentId
+            parentId: comment.parentId,
+            replies: [] // Initialize empty replies array for new comment
           };
           
-          return {
-            ...topic,
-            replyCount: (topic.replyCount || 0) + 1,
-            replies: [...(topic.replies || []), newReply]
-          };
+          // Check if this is a reply to a comment or a top-level comment
+          if (comment.parentId && replyingToComment) {
+            // This is a reply to an existing comment
+            const updatedReplies = topic.replies?.map(reply => {
+              if (reply.id === comment.parentId) {
+                // Add the new reply to this comment's replies
+                return {
+                  ...reply,
+                  replies: [...(reply.replies || []), newReply]
+                };
+              }
+              return reply;
+            }) || [];
+            
+            return {
+              ...topic,
+              replyCount: (topic.replyCount || 0) + 1,
+              replies: updatedReplies
+            };
+          } else {
+            // This is a top-level comment on the post
+            return {
+              ...topic,
+              replyCount: (topic.replyCount || 0) + 1,
+              replies: [...(topic.replies || []), newReply]
+            };
+          }
         }
         return topic;
       })
     );
-  }, [commentingOnPost]);
+  }, [commentingOnPost, replyingToComment]);
 
   // Handle reaction
   const handleReaction = useCallback(
@@ -1345,7 +1368,7 @@ export default function CommunityPage() {
                       type: 'GENERAL_TOPIC',
                       hashtags: topic.tags,
                       attachments: topic.attachments || [],
-                      replies: undefined // Exclude replies as they have different type
+                      replies: topic.replies // Mantém os comentários do post
                     }}
                     onReaction={(postId, reaction) => {
                       if (reaction) {
@@ -1408,7 +1431,7 @@ export default function CommunityPage() {
                     type: 'GENERAL_TOPIC',
                     hashtags: topic.tags,
                     attachments: topic.attachments || [],
-                    replies: undefined // Exclude replies as they have different type
+                    replies: topic.replies // Mantém os comentários do post
                   }}
                   onReaction={(postId, reaction) => {
                     console.log('Mock post reaction:', postId, reaction);

@@ -358,83 +358,62 @@ export default async function LessonPage({
         </div>
 
         {/* Main content */}
-        <div className="flex-1 lg:flex">
-          {/* Video player - Only show if lesson has video */}
+        <div className="flex-1">
+          {/* Check if has video to determine layout */}
           {(lesson.video?.providerVideoId ||
-            pandaData?.video_external_id) && (
-            <div
-              className="flex-1 bg-primary lg:ml-4"
-              style={{ minHeight: '480px' }}
-            >
-              <StableVideoPlayer
-                videoId={
-                  pandaData?.video_external_id ??
-                  lesson.video?.providerVideoId ??
-                  ''
-                }
-                playerUrl={pandaData?.video_player}
-                title={
-                  vt?.title ||
-                  lt.title ||
-                  pandaData?.video_external_id
-                }
-                thumbnailUrl={
-                  lesson.video?.imageUrl ??
-                  pandaData?.thumbnail
-                }
-                lessonId={lessonId}
-                courseId={course.id}
-                moduleId={moduleFound.id}
-                // Additional context for Continue Learning
-                lessonTitle={lt.title}
-                courseTitle={ct.title}
-                courseSlug={slug}
-                moduleTitle={mt.title}
-                moduleSlug={moduleSlug}
-                lessonImageUrl={lessonImageUrl}
-              />
-            </div>
-          )}
-
-          {/* Sidebar */}
-          <aside
-            className={`bg-primary-dark p-6 overflow-y-auto ${
-              lesson.video?.providerVideoId ||
-              pandaData?.video_external_id
-                ? 'lg:w-96'
-                : 'flex-1'
-            }`}
-          >
-            {/* Show no video message if there's no video */}
-            {!(
-              lesson.video?.providerVideoId ||
-              pandaData?.video_external_id
-            ) && (
-              <div className="mb-8 max-w-md mx-auto">
-                <div className="p-4 bg-primary/50 rounded-lg border border-secondary/30 text-center">
-                  <div className="text-gray-400 mb-2">
-                    <svg
-                      className="w-12 h-12 mx-auto mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-gray-300 text-sm">
-                    {tLesson('noVideo')}
-                  </p>
+            pandaData?.video_external_id) ? (
+            // Layout WITH video - side by side
+            <div className="lg:flex">
+              {/* Left column - Video and Comments */}
+              <div className="flex-1 bg-primary">
+                <div
+                  className="bg-primary lg:ml-4"
+                  style={{ minHeight: '480px' }}
+                >
+                  <StableVideoPlayer
+                    videoId={
+                      pandaData?.video_external_id ??
+                      lesson.video?.providerVideoId ??
+                      ''
+                    }
+                    playerUrl={pandaData?.video_player}
+                    title={
+                      vt?.title ||
+                      lt.title ||
+                      pandaData?.video_external_id
+                    }
+                    thumbnailUrl={
+                      lesson.video?.imageUrl ??
+                      pandaData?.thumbnail
+                    }
+                    lessonId={lessonId}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    // Additional context for Continue Learning
+                    lessonTitle={lt.title}
+                    courseTitle={ct.title}
+                    courseSlug={slug}
+                    moduleTitle={mt.title}
+                    moduleSlug={moduleSlug}
+                    lessonImageUrl={lessonImageUrl}
+                  />
+                </div>
+                
+                {/* Comments below video */}
+                <div className="lg:ml-4 mt-8">
+                  <LessonComments 
+                    lessonId={lessonId}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    locale={locale}
+                    lessonTitle={lt.title}
+                  />
                 </div>
               </div>
-            )}
 
-            {/* Hierarquia do curso */}
+              {/* Sidebar - when has video */}
+              <aside className="bg-primary-dark p-6 overflow-y-auto lg:w-96">
+                {/* Hierarquia do curso */}
             <div className="mb-6">
               <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
                 <div className="flex items-center gap-2 text-sm">
@@ -777,17 +756,158 @@ export default async function LessonPage({
                 </ul>
               </div>
             </div>
-          </aside>
+              </aside>
+            </div>
+          ) : (
+            // Layout WITHOUT video - stacked
+            <>
+              {/* Content area - full width */}
+              <div className="bg-primary-dark p-6">
+                {/* Show no video message */}
+                <div className="mb-8 max-w-md mx-auto">
+                  <div className="p-4 bg-primary/50 rounded-lg border border-secondary/30 text-center">
+                    <div className="text-gray-400 mb-2">
+                      <svg
+                        className="w-12 h-12 mx-auto mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-300 text-sm">
+                      {tLesson('noVideo')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Lesson content in horizontal layout */}
+                <div className="max-w-7xl mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Course hierarchy */}
+                    <div>
+                      <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                            <User
+                              size={14}
+                              className="text-primary"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              {tLesson('course')}
+                            </p>
+                            <p className="text-white font-medium">
+                              {ct.title}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                            <BookOpen
+                              size={14}
+                              className="text-secondary"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              {tLesson('module')}
+                            </p>
+                            <p className="text-white font-medium">
+                              {mt.title}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Documents section */}
+                    {documents.length > 0 && (
+                      <div>
+                        <DocumentsSection
+                          documents={documents}
+                          lessonId={lessonId}
+                        />
+                      </div>
+                    )}
+
+                    {/* Assessments section */}
+                    {assessments.length > 0 && (
+                      <div className="bg-primary/30 rounded-lg p-4 border border-secondary/20">
+                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                          <ClipboardList size={18} className="text-secondary" />
+                          {tLesson('assessments')}
+                        </h3>
+                        <div className="space-y-2">
+                          {assessments.map(assessment => (
+                            <Link
+                              key={assessment.id}
+                              href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}/assessments/${assessment.id}`}
+                              className="block p-2 bg-primary/20 rounded hover:bg-primary/40 transition-colors"
+                            >
+                              <p className="text-white text-sm font-medium">
+                                {assessment.title}
+                              </p>
+                              {assessment.description && (
+                                <p className="text-gray-400 text-xs mt-1">
+                                  {assessment.description}
+                                </p>
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="mt-8 flex justify-between">
+                    {prev && (
+                      <Link
+                        href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${prev.id}`}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary/30 rounded-lg hover:bg-primary/50 transition-colors text-white"
+                      >
+                        <ChevronLeft size={20} />
+                        <span className="text-sm">
+                          {tLesson('previous')}
+                        </span>
+                      </Link>
+                    )}
+                    {next && (
+                      <Link
+                        href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${next.id}`}
+                        className="flex items-center gap-2 px-4 py-2 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors text-primary ml-auto"
+                      >
+                        <span className="text-sm font-medium">
+                          {tLesson('next')}
+                        </span>
+                        <ChevronRight size={20} />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Comments Section - Full width below content */}
+              <div className="bg-primary p-6 mt-8">
+                <LessonComments 
+                  lessonId={lessonId}
+                  courseId={course.id}
+                  moduleId={moduleFound.id}
+                  locale={locale}
+                  lessonTitle={lt.title}
+                />
+              </div>
+            </>
+          )}
         </div>
-        
-        {/* Comments Section - After video and sidebar */}
-        <LessonComments 
-          lessonId={lessonId}
-          courseId={course.id}
-          moduleId={moduleFound.id}
-          locale={locale}
-          lessonTitle={lt.title}
-        />
         
         {/* Heartbeat Status Indicator (Development Only) */}
       </div>

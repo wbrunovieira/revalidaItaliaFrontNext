@@ -83,6 +83,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Solução] Criação de layouts diferentes para lições com e sem vídeo - com vídeo: comentários abaixo do player; sem vídeo: comentários em área dedicada após o conteúdo
 - [Commit] fix: reorganize lesson comments position for pages with and without video
 
+**Atualização das Cores dos Badges de Role**
+- [Técnico] Redesign dos badges de role usando cores harmônicas do projeto - admin: dourado/amber (autoridade), tutor: gradiente azul-dourado (destaque especial), student: azul accent (#79BED9)
+- [Benefício] Melhora a consistência visual com a identidade da marca, remove conotações negativas e cria hierarquia visual clara entre os papéis
+- [Commit] feat: update role badge colors with harmonized design
+
 ---
 
 ## 📚 Documentações Criadas

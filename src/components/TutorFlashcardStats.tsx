@@ -6,11 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Brain,
   Users,
-  TrendingUp,
   Target,
   Zap,
   Activity,
-  AlertTriangle,
   Award,
   Calendar,
   Search,
@@ -90,16 +88,8 @@ interface TutorFlashcardStatsProps {
   locale: string;
 }
 
-// Utility function to get cookie
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
 
-export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps) {
+export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
   const { toast } = useToast();
   const { token, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -169,7 +159,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, page, dateFrom, dateTo, toast]);
+  }, [apiUrl, page, dateFrom, dateTo, toast, token, isAuthenticated]);
 
   useEffect(() => {
     fetchStats();
@@ -337,7 +327,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           {/* Tooltip */}
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <div className="font-semibold mb-1">Como é calculado:</div>
-            <div>% de flashcards marcados como "Já sei" (fácil)</div>
+            <div>% de flashcards marcados como &quot;Já sei&quot; (fácil)</div>
             <div className="text-gray-300 mt-1">Média de todos os alunos</div>
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
               <div className="border-4 border-transparent border-t-gray-900"></div>
@@ -552,7 +542,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-2">
             <Search size={16} className="text-green-400" />
             <p className="text-sm text-green-300">
-              {filteredUsers.length} {filteredUsers.length === 1 ? 'aluno encontrado' : 'alunos encontrados'} para "{searchTerm}"
+              {filteredUsers.length} {filteredUsers.length === 1 ? 'aluno encontrado' : 'alunos encontrados'} para &quot;{searchTerm}&quot;
             </p>
           </div>
         )}
@@ -564,7 +554,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             </h3>
             <p className="text-gray-500">
               {searchTerm 
-                ? `Nenhum aluno encontrado com "${searchTerm}" no nome ou email.`
+                ? `Nenhum aluno encontrado com &quot;${searchTerm}&quot; no nome ou email.`
                 : 'Não há alunos com atividade em flashcards para os filtros selecionados.'}
             </p>
           </div>

@@ -412,7 +412,7 @@ export class VideoProgressHeartbeat {
         update.moduleSlug
       ) {
         // Use new API with full context - exact field order as DTO
-        const payload: any = {
+        const payload: Record<string, unknown> = {
           lessonId: update.lessonId,
           lessonTitle: update.lessonTitle,
           courseId: update.courseId || '',

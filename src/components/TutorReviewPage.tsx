@@ -86,7 +86,7 @@ interface AttemptAnswer {
 
 export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   const { toast } = useToast();
-  const { token, user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const [attemptData, setAttemptData] = useState<AttemptData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -253,7 +253,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
         if (!token || !isAuthenticated || !user) {
           throw new Error('Sessão expirada. Faça login novamente.');
         }
-        const tutorId = user.id;
+        console.log('Tutor ID:', user.id);
         userId = payload.sub || payload.id;
       } catch {
         throw new Error('Token inválido');

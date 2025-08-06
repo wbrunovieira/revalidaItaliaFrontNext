@@ -7,19 +7,12 @@ import {
   Search,
   Plus,
   MessageSquare,
-  Eye,
-  Calendar,
-  User,
   Filter,
-  Hash,
   BookOpen,
-  Layers,
   GraduationCap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -27,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Image from 'next/image';
 import {
   Tabs,
   TabsContent,
@@ -35,23 +27,162 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import NavSidebar from '@/components/NavSidebar';
-import ReactionsButton, {
-  ReactionType,
-} from '@/components/ReactionsButton';
+import { ReactionType } from '@/components/ReactionsButton';
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateCommentModal from '@/components/CreateCommentModal';
 import PostCard from '@/components/PostCard';
 import { useAuth } from '@/stores/auth.store';
+
+// API response types
+interface CommentData {
+  id: string;
+  content: string;
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  reactions: {
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
+    userReactions: string[];
+  };
+  parentId?: string;
+}
+
+interface CommunityPost {
+  id: string;
+  title?: string;
+  content: string;
+  author?: {
+    id: string;
+    name: string;
+    fullName: string;
+    profileImageUrl?: string;
+    avatar?: string;
+    city?: string;
+    country?: string;
+    profession?: string;
+    role: 'student' | 'admin' | 'tutor';
+  };
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+  viewCount?: number;
+  reactions?: {
+    LOVE?: number;
+    LIKE?: number;
+    SURPRISE?: number;
+    CLAP?: number;
+    SAD?: number;
+    heart?: number;
+    thumbsUp?: number;
+    surprised?: number;
+    clap?: number;
+    sad?: number;
+    userReactions?: ReactionType[];
+  };
+  hashtags?: string[];
+  course?: { id: string; title: string; };
+  module?: { id: string; title: string; };
+  lesson?: { id: string; title: string; };
+  isPinned?: boolean;
+  attachments?: Array<{
+    id: string;
+    url: string;
+    type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+    mimeType: string;
+    sizeInBytes: number;
+    fileName: string;
+    uploadedAt?: string;
+    provider?: 'youtube' | 'vimeo';
+    videoId?: string;
+    embedUrl?: string;
+    thumbnailUrl?: string;
+  }>;
+  mediaType?: string;
+}
+
+interface CommunityComment {
+  id: string;
+  content: string;
+  author: {
+    id: string;
+    fullName: string;
+    profileImageUrl?: string;
+    role: 'student' | 'admin' | 'tutor';
+  };
+  createdAt: string;
+  updatedAt: string;
+  isTopLevelComment: boolean;
+  reactions?: {
+    heart?: number;
+    thumbsUp?: number;
+    surprised?: number;
+    clap?: number;
+    sad?: number;
+    userReactions?: ReactionType[];
+  };
+  parentId?: string;
+  replies?: CommunityComment[];
+}
+
+interface CommentResponse {
+  id: string;
+  content: string;
+  author: {
+    id: string;
+    name: string;
+    fullName: string;
+    avatar?: string;
+    profileImageUrl?: string;
+    role: 'student' | 'admin' | 'tutor';
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  reactions?: {
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
+    userReactions: ReactionType[];
+  };
+  parentId?: string;
+}
 
 // Mock data types
 interface Author {
   id: string;
   name: string;
   avatar?: string;
-  city: string;
-  country: string;
-  profession: string;
+  city?: string;
+  country?: string;
+  profession?: string;
   role?: 'student' | 'admin' | 'tutor';
+}
+
+interface Reply {
+  id: string;
+  content: string;
+  author: Author;
+  createdAt: Date;
+  updatedAt: Date;
+  reactions: {
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
+    userReactions: ReactionType[];
+  };
+  parentId?: string;
+  replies?: Reply[];
 }
 
 interface Topic {
@@ -105,7 +236,7 @@ interface Topic {
     };
   }>;
   mediaType?: string;
-  replies?: any[];
+  replies?: Reply[];
 }
 
 // Mock lessons data
@@ -461,8 +592,6 @@ const mockTopicsWithAttachments: Topic[] = [
     replies: [
       {
         id: 'reply-1',
-        type: 'GENERAL_TOPIC',
-        title: '',
         content: 'Excelente pergunta! Eu passei por essa situação recentemente. O processo todo levou cerca de 6 meses, mas pode variar dependendo da documentação.',
         author: {
           id: '7',
@@ -472,7 +601,6 @@ const mockTopicsWithAttachments: Topic[] = [
           country: 'Itália',
           profession: 'Médica Geral',
         },
-        authorId: '7',
         createdAt: new Date('2024-01-10T17:30:00'),
         updatedAt: new Date('2024-01-10T17:30:00'),
         reactions: {
@@ -483,16 +611,10 @@ const mockTopicsWithAttachments: Topic[] = [
           SAD: 0,
           userReactions: ['LIKE'] as ReactionType[],
         },
-        parentId: 'mock-6',
-        lessonId: '',
-        viewCount: 45,
-        replyCount: 0,
-        hashtags: []
+        parentId: 'mock-6'
       },
       {
         id: 'reply-2',
-        type: 'GENERAL_TOPIC',
-        title: '',
         content: 'Concordo com a Carla. No meu caso demorou 8 meses porque tive que traduzir muitos documentos. Recomendo começar pelas traduções o quanto antes!',
         author: {
           id: '8',
@@ -502,7 +624,6 @@ const mockTopicsWithAttachments: Topic[] = [
           country: 'Itália',
           profession: 'Ortopedista',
         },
-        authorId: '8',
         createdAt: new Date('2024-01-10T18:15:00'),
         updatedAt: new Date('2024-01-10T18:15:00'),
         reactions: {
@@ -513,16 +634,10 @@ const mockTopicsWithAttachments: Topic[] = [
           SAD: 0,
           userReactions: [],
         },
-        parentId: 'mock-6',
-        lessonId: '',
-        viewCount: 32,
-        replyCount: 0,
-        hashtags: []
+        parentId: 'mock-6'
       },
       {
         id: 'reply-3',
-        type: 'GENERAL_TOPIC',
-        title: '',
         content: 'Obrigado pelas respostas! Vocês fizeram a tradução juramentada aqui na Itália ou no Brasil? E quanto custou aproximadamente?',
         author: {
           id: '6',
@@ -532,7 +647,6 @@ const mockTopicsWithAttachments: Topic[] = [
           country: 'Itália',
           profession: 'Neurologista',
         },
-        authorId: '6',
         createdAt: new Date('2024-01-10T19:00:00'),
         updatedAt: new Date('2024-01-10T19:00:00'),
         reactions: {
@@ -543,16 +657,10 @@ const mockTopicsWithAttachments: Topic[] = [
           SAD: 0,
           userReactions: [],
         },
-        parentId: 'mock-6',
-        lessonId: '',
-        viewCount: 28,
-        replyCount: 0,
-        hashtags: []
+        parentId: 'mock-6'
       },
       {
         id: 'reply-4',
-        type: 'GENERAL_TOPIC',
-        title: '',
         content: 'Eu fiz no consulado brasileiro aqui em Roma. Custou cerca de €50 por documento. Vale a pena ligar antes para confirmar os valores atualizados.',
         author: {
           id: '7',
@@ -562,7 +670,6 @@ const mockTopicsWithAttachments: Topic[] = [
           country: 'Itália',
           profession: 'Médica Geral',
         },
-        authorId: '7',
         createdAt: new Date('2024-01-10T19:30:00'),
         updatedAt: new Date('2024-01-10T19:30:00'),
         reactions: {
@@ -573,21 +680,7 @@ const mockTopicsWithAttachments: Topic[] = [
           SAD: 0,
           userReactions: ['LOVE', 'LIKE'] as ReactionType[],
         },
-        parentId: 'mock-6',
-        lessonId: '',
-        viewCount: 52,
-        replyCount: 0,
-        hashtags: [],
-        attachments: [
-          {
-            id: '1',
-            url: 'https://picsum.photos/600/400?random=reply',
-            type: 'IMAGE',
-            mimeType: 'image/jpeg',
-            sizeInBytes: 204800,
-            fileName: 'consulado_romano.jpg'
-          }
-        ]
+        parentId: 'mock-6'
       }
     ]
   }
@@ -616,7 +709,7 @@ export default function CommunityPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -703,7 +796,7 @@ export default function CommunityPage() {
 
       // Transform API response to match our Topic interface
       const transformedPosts: Topic[] = await Promise.all(
-        data.posts.map(async (post: any) => {
+        data.posts.map(async (post: CommunityPost) => {
           // Fetch comments for each post
           let replies = [];
           try {
@@ -719,7 +812,7 @@ export default function CommunityPage() {
             if (commentsResponse.ok) {
               const commentsData = await commentsResponse.json();
               // Transform comments to match our interface
-              replies = commentsData.comments.filter((c: any) => c.isTopLevelComment).map((comment: any) => ({
+              replies = commentsData.comments.filter((c: CommunityComment) => c.isTopLevelComment).map((comment: CommunityComment) => ({
                 id: comment.id,
                 content: comment.content,
                 author: {
@@ -739,7 +832,7 @@ export default function CommunityPage() {
                   userReactions: comment.reactions?.userReactions || []
                 },
                 parentId: comment.parentId,
-                replies: comment.replies?.map((reply: any) => ({
+                replies: comment.replies?.map((reply: CommunityComment) => ({
                   id: reply.id,
                   content: reply.content,
                   author: {
@@ -830,7 +923,7 @@ export default function CommunityPage() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchQuery, selectedCourse, selectedLesson, selectedFilter]);
+  }, [searchQuery, selectedCourse, selectedLesson, selectedFilter, isAuthenticated, token]);
 
   // Fetch posts on component mount and when filters change
   useEffect(() => {
@@ -838,7 +931,7 @@ export default function CommunityPage() {
       setCurrentPage(1); // Reset to first page when filters change
       fetchPosts(1);
     }
-  }, [isHydrated, searchQuery, selectedCourse, selectedLesson, selectedFilter]);
+  }, [isHydrated, fetchPosts]);
 
   // Get filtered lessons based on selected course
   const filteredLessons =
@@ -887,7 +980,7 @@ export default function CommunityPage() {
   const handleReplyToComment = useCallback((commentId: string, author: Author) => {
     // Find the post that contains this comment
     const post = topics.find(t => 
-      t.replies?.some((r: any) => r.id === commentId)
+      t.replies?.some((r: Reply) => r.id === commentId)
     );
     if (post) {
       setCommentingOnPost(post.id);
@@ -896,8 +989,8 @@ export default function CommunityPage() {
     }
   }, [topics]);
 
-  // Handle comment created
-  const handleCommentCreated = useCallback((comment: any) => {
+  // Handle comment created  
+  const handleCommentCreated = useCallback((comment: CommentResponse | CommentData) => {
     // Add the comment immediately to the UI
     setTopics(prevTopics =>
       prevTopics.map(topic => {
@@ -908,19 +1001,22 @@ export default function CommunityPage() {
             content: comment.content,
             author: {
               id: comment.author.id,
-              name: comment.author.name || comment.author.fullName,
-              avatar: comment.author.avatar || comment.author.profileImageUrl,
-              role: comment.author.role
+              name: comment.author.name || ('fullName' in comment.author ? comment.author.fullName : ''),
+              avatar: comment.author.avatar || ('profileImageUrl' in comment.author ? comment.author.profileImageUrl : undefined),
+              city: '',
+              country: '',
+              profession: '',
+              role: ('role' in comment.author ? comment.author.role : undefined)
             },
             createdAt: comment.createdAt,
             updatedAt: comment.updatedAt,
-            reactions: comment.reactions || {
-              LOVE: 0,
-              LIKE: 0,
-              SURPRISE: 0,
-              CLAP: 0,
-              SAD: 0,
-              userReactions: []
+            reactions: {
+              LOVE: comment.reactions?.LOVE || 0,
+              LIKE: comment.reactions?.LIKE || 0,
+              SURPRISE: comment.reactions?.SURPRISE || 0,
+              CLAP: comment.reactions?.CLAP || 0,
+              SAD: comment.reactions?.SAD || 0,
+              userReactions: (comment.reactions?.userReactions as ReactionType[]) || []
             },
             parentId: comment.parentId
           };
@@ -1013,34 +1109,9 @@ export default function CommunityPage() {
         console.error('Error updating reaction:', error);
       }
     },
-    [topics]
+    [topics, isAuthenticated, token]
   );
 
-  // Format date - consistent between server and client
-  const formatDate = useCallback(
-    (date: Date) => {
-      const now = new Date();
-      const diff = now.getTime() - date.getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const days = Math.floor(hours / 24);
-
-      if (hours < 1) return t('justNow');
-      if (hours < 24) return t('hoursAgo', { hours });
-      if (days < 7) return t('daysAgo', { days });
-
-      // Use a consistent date format to avoid hydration mismatch
-      const day = date
-        .getDate()
-        .toString()
-        .padStart(2, '0');
-      const month = (date.getMonth() + 1)
-        .toString()
-        .padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    },
-    [t]
-  );
 
   // Sort topics based on selected tab (API already returns sorted by recent)
   const sortedTopics = selectedTab === 'popular' 
@@ -1273,7 +1344,8 @@ export default function CommunityPage() {
                       ...topic,
                       type: 'GENERAL_TOPIC',
                       hashtags: topic.tags,
-                      attachments: topic.attachments || []
+                      attachments: topic.attachments || [],
+                      replies: undefined // Exclude replies as they have different type
                     }}
                     onReaction={(postId, reaction) => {
                       if (reaction) {
@@ -1281,7 +1353,7 @@ export default function CommunityPage() {
                       }
                     }}
                     onReply={handleReplyToPost}
-                    onReplyToComment={handleReplyToComment as any}
+                    onReplyToComment={(commentId: string, author: Author) => handleReplyToComment(commentId, author)}
                     onClick={() => console.log('Post clicked:', topic.id)}
                     compactVideo={true}
                     compactImages={true}
@@ -1335,7 +1407,8 @@ export default function CommunityPage() {
                     ...topic,
                     type: 'GENERAL_TOPIC',
                     hashtags: topic.tags,
-                    attachments: topic.attachments || []
+                    attachments: topic.attachments || [],
+                    replies: undefined // Exclude replies as they have different type
                   }}
                   onReaction={(postId, reaction) => {
                     console.log('Mock post reaction:', postId, reaction);

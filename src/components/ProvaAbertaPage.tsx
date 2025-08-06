@@ -115,7 +115,7 @@ interface ArgumentGroup {
 export default function ProvaAbertaPage({ assessment, questions, locale, backUrl }: ProvaAbertaPageProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { token, user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // Filter only open questions for this component
   const openQuestions = questions.filter(q => q.type === 'OPEN_QUESTION' || q.type === 'OPEN');
@@ -191,7 +191,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
           if (!token || !isAuthenticated || !user) {
             throw new Error('Sessão expirada. Faça login novamente.');
           }
-          const identityId = user.id;
+          console.log('User ID:', user.id);
         } catch {
           return;
         }
@@ -240,7 +240,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
     };
 
     checkExistingAttempt();
-  }, [assessment.id, apiUrl]);
+  }, [assessment.id, apiUrl, isAuthenticated, user]);
 
 
   const startExam = async () => {

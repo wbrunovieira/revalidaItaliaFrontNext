@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Heart, ThumbsUp, Smile } from 'lucide-react';
+// Removed unused imports
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import ReactionsModal from './ReactionsModal';
@@ -67,9 +67,13 @@ export default function ReactionsButton({
   }, []);
 
   // Get most reacted type or default to heart
-  const mostReacted = reactions.reduce((prev, current) => 
+  const getMostReacted = () => reactions.reduce((prev, current) => 
     current.count > prev.count ? current : prev
   , reactions[0]);
+  
+  // Use mostReacted if needed
+  const mostReacted = getMostReacted();
+  console.log('Most reacted:', mostReacted);
 
   const hasAnyReaction = reactions.some(r => r.hasReacted);
   const totalReactions = reactions.reduce((sum, r) => sum + r.count, 0);

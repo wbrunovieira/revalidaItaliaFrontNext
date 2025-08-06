@@ -46,7 +46,7 @@ export const removeCookie = (name: string): void => {
  * Decodifica um token JWT (sem validar assinatura)
  * Usado apenas para extrair dados do payload
  */
-export const decodeJWT = (token: string): any => {
+export const decodeJWT = (token: string): Record<string, unknown> => {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -136,7 +136,7 @@ export const clearAuthToken = (): void => {
 /**
  * Extrai dados do usuário do token JWT ou do objeto user da API
  */
-export const extractUserFromToken = (tokenOrUser: string | any) => {
+export const extractUserFromToken = (tokenOrUser: string | Record<string, unknown>) => {
   // Se for um objeto (dados do user da API), usa diretamente
   if (typeof tokenOrUser === 'object' && tokenOrUser !== null) {
     return {

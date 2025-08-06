@@ -8,7 +8,6 @@ import {
   CalendarDays,
   Clock,
   TrendingUp,
-  TrendingDown,
   Filter,
   Calendar,
   ChevronDown,
@@ -22,7 +21,7 @@ import {
 } from 'lucide-react';
 import NavSidebar from '@/components/NavSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday, isSameDay } from 'date-fns';
+import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useAuth } from '@/stores/auth.store';
 
@@ -155,7 +154,7 @@ export default function FlashcardProgressPage() {
   const dateRange = useMemo(() => {
     const now = new Date();
     let dateFrom: Date;
-    let dateTo = now;
+    const dateTo = now;
 
     switch (selectedPeriod) {
       case 'week':

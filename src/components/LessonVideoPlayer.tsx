@@ -54,12 +54,12 @@ export default function LessonVideoPlayer({
   useEffect(() => {
     if (typeof window !== 'undefined' && courseTitle && moduleTitle) {
       // Get or create heartbeat service
-      const { getHeartbeatService } = require('@/services/video-progress-heartbeat');
-      const heartbeat = getHeartbeatService();
-      
-      // Expose it globally
-      (window as any).videoProgressHeartbeat = heartbeat;
-      console.log('[LessonVideoPlayer] 🎯 Heartbeat service initialized and exposed');
+      // Dynamic import to avoid require
+      import('@/services/video-progress-heartbeat').then(({ getHeartbeatService }) => {
+        const heartbeat = getHeartbeatService();
+        (window as Record<string, unknown>).videoProgressHeartbeat = heartbeat;
+        console.log('[LessonVideoPlayer] 🎯 Heartbeat service initialized and exposed');
+      });
     }
   }, [courseTitle, moduleTitle]);
   
@@ -92,7 +92,7 @@ export default function LessonVideoPlayer({
     updateProgress(newProgress);
 
     // Send to heartbeat service with full context for new API
-    const heartbeatService = (window as any).videoProgressHeartbeat;
+    const heartbeatService = (window as Record<string, unknown>).videoProgressHeartbeat;
     
     if (!heartbeatService) {
       console.warn('[LessonVideoPlayer] ⚠️ Heartbeat service not available on window');

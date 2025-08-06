@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,13 +17,34 @@ interface Author {
   role?: 'student' | 'admin' | 'tutor';
 }
 
+interface CommentData {
+  id: string;
+  content: string;
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  reactions: {
+    LOVE: number;
+    LIKE: number;
+    SURPRISE: number;
+    CLAP: number;
+    SAD: number;
+    userReactions: string[];
+  };
+  parentId?: string;
+}
+
 interface CreateCommentModalProps {
   open: boolean;
   onClose: () => void;
   postId: string;
   parentId?: string;
   parentAuthor?: Author;
-  onCommentCreated: (comment: any) => void;
+  onCommentCreated: (comment: CommentData) => void;
 }
 
 export default function CreateCommentModal({
@@ -71,7 +91,7 @@ export default function CreateCommentModal({
         return;
       }
 
-      const body: any = { content };
+      const body: { content: string; parentId?: string } = { content };
       if (parentId) {
         body.parentId = parentId;
       }

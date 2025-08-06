@@ -37,16 +37,8 @@ import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/stores/auth.store';
 
-// Utility function to get cookie
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2)
-    return parts.pop()?.split(';').shift() || null;
-  return null;
-};
 
 interface FlashcardData {
   id: string;
@@ -80,6 +72,7 @@ export default function FlashcardStudyPage() {
   const router = useRouter();
   const t = useTranslations('FlashcardStudy');
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuth();
   const locale = params.locale as string;
   const lessonId = searchParams.get('lessonId');
 

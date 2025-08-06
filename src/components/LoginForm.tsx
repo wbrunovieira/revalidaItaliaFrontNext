@@ -15,7 +15,6 @@ import { useAuth } from '@/stores/auth.store';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
-  const API = process.env.NEXT_PUBLIC_API_URL!;
   const router = useRouter();
   const { locale } =
     (useParams() as { locale?: string }) ?? 'pt';

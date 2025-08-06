@@ -4,7 +4,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  X,
   Hash,
   AlertCircle,
   Loader2,
@@ -14,7 +13,6 @@ import {
   Image as ImageIcon,
   FileText,
   Video,
-  Upload,
   Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -320,7 +318,7 @@ export default function CreatePostModal({
           images: imageFiles,
         });
         setErrors(prev => {
-          const { images, ...rest } = prev;
+          const { ...rest } = prev;
           return rest;
         });
 
@@ -395,7 +393,7 @@ export default function CreatePostModal({
 
         setAttachment({ type: 'pdf', pdf: file });
         setErrors(prev => {
-          const { pdf, ...rest } = prev;
+          const { ...rest } = prev;
           return rest;
         });
 
@@ -426,7 +424,7 @@ export default function CreatePostModal({
     setAttachment({ type: 'video', videoUrl: url });
     if (!url.trim()) {
       setErrors(prev => {
-        const { videoUrl, ...rest } = prev;
+        const { ...rest } = prev;
         return rest;
       });
     }
@@ -438,7 +436,7 @@ export default function CreatePostModal({
     setPreviewUrls([]);
     setAttachment({ type: null });
     setErrors(prev => {
-      const { images, pdf, videoUrl, ...rest } = prev;
+      const { ...rest } = prev;
       return rest;
     });
   }, [previewUrls]);
@@ -495,7 +493,7 @@ export default function CreatePostModal({
         .slice(0, 5); // Max 5 hashtags
 
       // Prepare request body
-      const requestBody: any = {
+      const requestBody: Record<string, unknown> = {
         type,
         title: type === 'GENERAL_TOPIC' ? title.trim() : content.trim().substring(0, 200),
         content: content.trim(),
@@ -510,7 +508,7 @@ export default function CreatePostModal({
       }
 
       // Prepare attachments array
-      const attachments: any[] = [];
+      const attachments: Record<string, unknown>[] = [];
 
       if (attachment.type === 'images' && uploadedUrls.length > 0 && attachment.images) {
         // Add image attachments
@@ -539,7 +537,7 @@ export default function CreatePostModal({
         // Add video attachment
         const videoInfo = extractVideoInfo(attachment.videoUrl);
         if (videoInfo) {
-          const videoAttachment: any = {
+          const videoAttachment: Record<string, unknown> = {
             url: attachment.videoUrl,
             type: 'VIDEO',
             mimeType: 'video/external', // Using the allowed mime type from API
@@ -666,6 +664,8 @@ export default function CreatePostModal({
     onClose,
     t,
     toast,
+    isAuthenticated,
+    token,
   ]);
 
   return (

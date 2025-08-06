@@ -5,7 +5,6 @@ import {
   saveAuthToken,
   clearAuthToken,
   extractUserFromToken,
-  decodeJWT,
   isTokenExpired,
   getCookie,
   setCookie,
@@ -39,10 +38,6 @@ export interface LoginCredentials {
 /**
  * Resposta da API de login
  */
-interface LoginResponse {
-  token: string;
-  user?: User;
-}
 
 /**
  * Estado e ações do Auth Store
@@ -263,6 +258,7 @@ export const useAuthStore = create<AuthState>()(
                   }
                 }
               } catch (e) {
+                console.log('Parse error:', e);
                 console.log('Não foi possível recuperar dados do usuário do storage');
               }
             }

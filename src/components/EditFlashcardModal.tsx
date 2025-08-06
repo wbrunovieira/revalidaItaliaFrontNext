@@ -602,14 +602,6 @@ export default function EditFlashcardModal({
     setLoading(true);
 
     try {
-      // Get token from cookie
-      const getCookie = (name: string): string | null => {
-        if (typeof document === 'undefined') return null;
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-        return null;
-      };
       
       if (!token || !isAuthenticated) {
         throw new Error('No authentication token');
@@ -617,7 +609,7 @@ export default function EditFlashcardModal({
       const tokenFromStorage =
         localStorage.getItem('accessToken') ||
         sessionStorage.getItem('accessToken');
-      const token = tokenFromCookie || tokenFromStorage;
+      const finalToken = token || tokenFromStorage;
       
       const updateData: {
         question?: {
@@ -705,7 +697,7 @@ export default function EditFlashcardModal({
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${finalToken}`,
           },
           body: JSON.stringify(updateData),
         }

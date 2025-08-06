@@ -65,15 +65,6 @@ interface UsersResponse {
 
 type SearchResponse = UsersResponse | { users: ApiUser[] } | ApiUser[];
 
-// Função utilitária movida para fora para evitar recriação
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2)
-    return parts.pop()?.split(';').shift() || null;
-  return null;
-};
 
 export default function UsersList() {
   const t = useTranslations('Admin.usersList');

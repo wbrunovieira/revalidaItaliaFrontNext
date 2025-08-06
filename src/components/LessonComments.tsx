@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { MessageSquare, Plus, Send, Paperclip, X, FileText, Video } from 'lucide-react';
+import { MessageSquare, Send, Paperclip, X, FileText, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -88,11 +88,11 @@ const mockComments: Comment[] = [
     createdAt: new Date('2024-01-15T10:00:00'),
     updatedAt: new Date('2024-01-15T10:00:00'),
     reactions: {
-      heart: 3,
-      thumbsUp: 2,
-      surprised: 0,
-      clap: 0,
-      sad: 0,
+      LOVE: 3,
+      LIKE: 2,
+      SURPRISE: 0,
+      CLAP: 0,
+      SAD: 0,
       userReactions: []
     },
     lessonId: 'current',
@@ -117,11 +117,11 @@ const mockComments: Comment[] = [
     createdAt: new Date('2024-01-14T15:30:00'),
     updatedAt: new Date('2024-01-14T15:30:00'),
     reactions: {
-      heart: 2,
-      thumbsUp: 1,
-      surprised: 0,
-      clap: 0,
-      sad: 0,
+      LOVE: 2,
+      LIKE: 1,
+      SURPRISE: 0,
+      CLAP: 0,
+      SAD: 0,
       userReactions: []
     },
     lessonId: 'current',
@@ -212,7 +212,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
 
       // Transform API response to match our Comment interface
       const transformedComments: Comment[] = await Promise.all(
-        data.posts.map(async (post: any) => {
+        data.posts.map(async (post: Record<string, unknown>) => {
           // Fetch comments for each post
           let replies = [];
           try {
@@ -228,44 +228,44 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
             if (commentsResponse.ok) {
               const commentsData = await commentsResponse.json();
               // Transform comments to match our interface
-              replies = commentsData.comments.filter((c: any) => c.isTopLevelComment).map((comment: any) => ({
+              replies = commentsData.comments.filter((c: Record<string, unknown>) => c.isTopLevelComment).map((comment: Record<string, unknown>) => ({
                 id: comment.id,
                 content: comment.content,
                 author: {
-                  id: comment.author.id,
-                  name: comment.author.fullName,
-                  avatar: comment.author.profileImageUrl,
-                  role: comment.author.role
+                  id: (comment.author as Record<string, unknown>).id,
+                  name: (comment.author as Record<string, unknown>).fullName,
+                  avatar: (comment.author as Record<string, unknown>).profileImageUrl,
+                  role: (comment.author as Record<string, unknown>).role
                 },
-                createdAt: new Date(comment.createdAt),
-                updatedAt: new Date(comment.updatedAt),
+                createdAt: new Date(comment.createdAt as string),
+                updatedAt: new Date(comment.updatedAt as string),
                 reactions: {
-                  LOVE: comment.reactions?.heart || 0,
-                  LIKE: comment.reactions?.thumbsUp || 0,
-                  SURPRISE: comment.reactions?.surprised || 0,
-                  CLAP: comment.reactions?.clap || 0,
-                  SAD: comment.reactions?.sad || 0,
-                  userReactions: comment.reactions?.userReactions || []
+                  LOVE: (comment.reactions as any)?.heart || 0,
+                  LIKE: (comment.reactions as any)?.thumbsUp || 0,
+                  SURPRISE: (comment.reactions as any)?.surprised || 0,
+                  CLAP: (comment.reactions as any)?.clap || 0,
+                  SAD: (comment.reactions as any)?.sad || 0,
+                  userReactions: (comment.reactions as any)?.userReactions || []
                 },
                 parentId: comment.parentId,
-                replies: comment.replies?.map((reply: any) => ({
+                replies: comment.replies?.map((reply: Record<string, unknown>) => ({
                   id: reply.id,
                   content: reply.content,
                   author: {
-                    id: reply.author.id,
-                    name: reply.author.fullName,
-                    avatar: reply.author.profileImageUrl,
-                    role: reply.author.role
+                    id: (reply.author as Record<string, unknown>).id,
+                    name: (reply.author as Record<string, unknown>).fullName,
+                    avatar: (reply.author as Record<string, unknown>).profileImageUrl,
+                    role: (reply.author as Record<string, unknown>).role
                   },
-                  createdAt: new Date(reply.createdAt),
-                  updatedAt: new Date(reply.updatedAt),
+                  createdAt: new Date(reply.createdAt as string),
+                  updatedAt: new Date(reply.updatedAt as string),
                   reactions: {
-                    LOVE: reply.reactions?.heart || 0,
-                    LIKE: reply.reactions?.thumbsUp || 0,
-                    SURPRISE: reply.reactions?.surprised || 0,
-                    CLAP: reply.reactions?.clap || 0,
-                    SAD: reply.reactions?.sad || 0,
-                    userReactions: reply.reactions?.userReactions || []
+                    LOVE: (reply.reactions as any)?.heart || 0,
+                    LIKE: (reply.reactions as any)?.thumbsUp || 0,
+                    SURPRISE: (reply.reactions as any)?.surprised || 0,
+                    CLAP: (reply.reactions as any)?.clap || 0,
+                    SAD: (reply.reactions as any)?.sad || 0,
+                    userReactions: (reply.reactions as any)?.userReactions || []
                   },
                   parentId: reply.parentId
                 }))
@@ -488,7 +488,19 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         }
       }
 
-      const requestBody: any = {
+      const requestBody: {
+        type: string;
+        content: string;
+        lessonId: string;
+        hashtags?: string[];
+        attachments?: Array<{
+          url: string;
+          type: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+          mimeType: string;
+          sizeInBytes: number;
+          fileName: string;
+        }>;
+      } = {
         type: 'LESSON_COMMENT',
         content: newComment.trim(),
         lessonId: lessonId,
@@ -557,6 +569,9 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       setSelectedHashtags([]);
       setSelectedAttachments([]);
       
+      // Use newCommentObj if needed
+      console.log('Created comment:', newCommentObj);
+      
       toast({
         title: t('success'),
         description: t('successDescription'),
@@ -570,7 +585,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     } finally {
       setIsLoading(false);
     }
-  }, [newComment, comments, lessonId, courseId, moduleId, currentUser, t, toast, isLoading, selectedHashtags, selectedAttachments]);
+  }, [newComment, comments, lessonId, courseId, moduleId, currentUser, t, toast, isLoading, selectedHashtags, selectedAttachments, fetchComments, isAuthenticated, token]);
 
   // Handle attachments modal confirmation
   const handleAttachmentsConfirm = useCallback((hashtags: string[], attachments: AttachmentData[]) => {
@@ -581,7 +596,15 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   }, []);
 
   // Handle comment creation from modal
-  const handleCommentCreated = useCallback((newComment: any) => {
+  const handleCommentCreated = useCallback((newComment: {
+    id: string;
+    content: string;
+    author: Author;
+    createdAt: Date;
+    updatedAt: Date;
+    reactions: CommentReactions;
+    parentId?: string;
+  }) => {
     console.log('Comment created:', newComment);
     
     // Add the comment directly to the post's replies

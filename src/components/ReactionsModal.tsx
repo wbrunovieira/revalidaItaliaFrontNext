@@ -126,7 +126,7 @@ export default function ReactionsModal({ isOpen, onClose, postId, initialTab = '
     } finally {
       setIsLoading(false);
     }
-  }, [postId, isOpen]);
+  }, [postId, isOpen, token, isAuthenticated]);
 
   // Fetch reactions when modal opens
   useEffect(() => {

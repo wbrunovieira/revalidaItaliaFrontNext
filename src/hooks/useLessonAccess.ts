@@ -1,7 +1,7 @@
 // src/hooks/useLessonAccess.ts
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 
 const STORAGE_KEY = 'revalida_last_lesson_access';
 const LOG_PREFIX = '[useLessonAccess]';

@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/stores/auth.store';
 import Image from 'next/image';
 import {
   Search,
@@ -29,15 +30,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Utility function to get cookie
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2)
-    return parts.pop()?.split(';').shift() || null;
-  return null;
-};
 
 interface FlashcardTag {
   id: string;
@@ -80,6 +72,7 @@ interface FlashcardsResponse {
 export default function FlashcardsList() {
   const t = useTranslations('Admin.flashcardsList');
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuth();
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>(
     []

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import { ModernDivider } from '@/components/ui/modern-divider';
+import { decodeJWT, isTokenExpired } from '@/lib/auth-utils';
 
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -34,23 +35,6 @@ interface UserData {
   role: string;
 }
 
-// Função para decodificar JWT no servidor
-function decodeJWT(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const jsonPayload = Buffer.from(
-      base64,
-      'base64'
-    ).toString('utf-8');
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Error decoding JWT:', error);
-    return null;
-  }
-}
 
 export default async function ProfilePage({
   params,
@@ -66,7 +50,7 @@ export default async function ProfilePage({
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
-  if (!token) {
+  if (!token || isTokenExpired(token)) {
     redirect(`/${locale}/login`);
   }
 

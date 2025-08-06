@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Timer,
 } from 'lucide-react';
+import { useAuth } from '@/stores/auth.store';
 
 interface Assessment {
   id: string;
@@ -146,6 +147,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const t = useTranslations('Assessment');
   const router = useRouter();
   const { toast } = useToast();
+  const { token, user, isAuthenticated } = useAuth();
 
   const [phase, setPhase] = useState<SimuladoPhase>('start');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -307,26 +309,14 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const startSimulado = async () => {
     setLoading(true);
     try {
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated || !user) {
         throw new Error('Você precisa fazer login para iniciar o simulado');
       }
-
-      let payload;
-      try {
-        payload = JSON.parse(atob(token.split('.')[1]));
-      } catch {
-        throw new Error('Token de autenticação inválido');
-      }
       
-      const identityId = payload.sub || payload.id;
+      const identityId = user.id;
 
       if (!identityId) {
-        throw new Error('User ID not found in token');
+        throw new Error('User ID not found');
       }
 
       const response = await fetch(`${apiUrl}/api/v1/attempts/start`, {

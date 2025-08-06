@@ -17,6 +17,7 @@ import LanguageButton from '@/components/LanguageButton';
 import LogoutButton from '@/components/LogoutButton';
 import Logo from '@/components/Logo';
 import { GradientDivider } from '@/components/ui/gradient-divider';
+import { useAuth } from '@/stores/auth.store';
 
 interface UserInfo {
   id: string;
@@ -33,22 +34,12 @@ interface ConnectionError {
 
 export default function AdminHeader() {
   const t = useTranslations('Admin');
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(
-    null
-  );
-  const [loadingUser, setLoadingUser] = useState(true);
+  const { user, isAuthenticated, token } = useAuth();
+  const [loadingUser, setLoadingUser] = useState(false);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-
-  const getCookie = (name: string): string | null => {
-    if (typeof document === 'undefined') return null;
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2)
-      return parts.pop()?.split(';').shift() || null;
-    return null;
-  };
+  const [additionalUserInfo, setAdditionalUserInfo] = useState<UserInfo | null>(null);
 
   const determineErrorType = (error: unknown): ConnectionError => {
     const err = error as Error;
@@ -73,47 +64,34 @@ export default function AdminHeader() {
     };
   };
 
-  const fetchUserInfo = useCallback(async (isRetry = false) => {
+  const fetchAdditionalUserInfo = useCallback(async (isRetry = false) => {
+    // Se já temos os dados do usuário no store, não precisa buscar novamente
+    if (user && user.name && user.email) {
+      setAdditionalUserInfo({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as 'admin' | 'student'
+      });
+      return;
+    }
+
+    if (!isAuthenticated || !token || !user?.id) {
+      setConnectionError({
+        type: 'auth',
+        message: 'Token de autenticação não encontrado.',
+        retryable: false
+      });
+      return;
+    }
+
     if (isRetry) {
       setIsRetrying(true);
     }
 
     try {
       setConnectionError(null);
-      
-      const tokenFromCookie = getCookie('token');
-      const tokenFromStorage =
-        localStorage.getItem('accessToken') ||
-        sessionStorage.getItem('accessToken');
-      const token = tokenFromCookie || tokenFromStorage;
-
-      if (!token) {
-        setConnectionError({
-          type: 'auth',
-          message: 'Token de autenticação não encontrado.',
-          retryable: false
-        });
-        setLoadingUser(false);
-        return;
-      }
-
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(
-            c =>
-              '%' +
-              ('00' + c.charCodeAt(0).toString(16)).slice(
-                -2
-              )
-          )
-          .join('')
-      );
-      const payload = JSON.parse(jsonPayload);
+      setLoadingUser(true);
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -121,10 +99,10 @@ export default function AdminHeader() {
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${payload.sub}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${user.id}`,
         { 
           headers,
           signal: controller.signal
@@ -135,7 +113,7 @@ export default function AdminHeader() {
 
       if (response.ok) {
         const userData = await response.json();
-        setUserInfo(userData.user);
+        setAdditionalUserInfo(userData.user);
         setRetryCount(0);
       } else if (response.status === 401) {
         setConnectionError({
@@ -151,32 +129,33 @@ export default function AdminHeader() {
         });
       }
     } catch (error) {
-      console.error('Erro ao buscar informações do usuário:', error);
+      console.error('Erro ao buscar informações adicionais do usuário:', error);
       const errorInfo = determineErrorType(error);
       setConnectionError(errorInfo);
       
-      // Auto-retry para erros de rede (máximo 3 tentativas)
       if (errorInfo.retryable && retryCount < 3 && !isRetry) {
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
-          fetchUserInfo(true);
-        }, 2000 * (retryCount + 1)); // Backoff exponencial
+          fetchAdditionalUserInfo(true);
+        }, 2000 * (retryCount + 1));
       }
     } finally {
       setLoadingUser(false);
       setIsRetrying(false);
     }
-  }, [retryCount]);
+  }, [retryCount, user, token, isAuthenticated]);
 
   const handleManualRetry = () => {
     setLoadingUser(true);
     setRetryCount(0);
-    fetchUserInfo(true);
+    fetchAdditionalUserInfo(true);
   };
 
   useEffect(() => {
-    fetchUserInfo();
-  }, [fetchUserInfo]);
+    if (isAuthenticated && user) {
+      fetchAdditionalUserInfo();
+    }
+  }, [fetchAdditionalUserInfo, isAuthenticated, user]);
 
   return (
     <header className="relative z-10 bg-gradient-to-r from-primary-dark/80 via-primary/60 to-primary-dark/80 backdrop-blur-md shadow-2xl shadow-primary/20 rounded-2xl border border-primary/20 mb-8">
@@ -217,12 +196,12 @@ export default function AdminHeader() {
           {/* Column 3 - User Info & Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-3 sm:gap-4">
             {/* User Profile */}
-            {!loadingUser && userInfo && !connectionError && (
+            {!loadingUser && (user || additionalUserInfo) && !connectionError && (
               <div className="group relative">
                 <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-800/60 to-gray-900/60 rounded-xl border border-gray-700/50 backdrop-blur-sm hover:from-gray-700/60 hover:to-gray-800/60 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-xl">
                   <div className="relative">
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-primary ring-2 ring-secondary/20 shadow-md">
-                      {userInfo.role === 'admin' ? (
+                      {(user?.role || additionalUserInfo?.role) === 'admin' ? (
                         <Shield
                           size={18}
                           className="text-white"
@@ -241,12 +220,12 @@ export default function AdminHeader() {
 
                   <div className="hidden sm:block text-right">
                     <p className="text-white text-sm font-medium leading-tight">
-                      {userInfo.name}
+                      {user?.name || additionalUserInfo?.name || 'Usuário'}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
                       <p className="text-gray-400 text-xs">
-                        {userInfo.role === 'admin'
+                        {(user?.role || additionalUserInfo?.role) === 'admin'
                           ? 'Administrador'
                           : 'Usuário'}
                       </p>

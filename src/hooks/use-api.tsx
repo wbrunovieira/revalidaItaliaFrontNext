@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface ApiError {
   type: 'network' | 'auth' | 'server';
@@ -39,14 +40,6 @@ const determineErrorType = (error: unknown): ApiError => {
   };
 };
 
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
-
 export function useApi<T>(
   url: string,
   options: {
@@ -59,6 +52,7 @@ export function useApi<T>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuthStore();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -70,13 +64,7 @@ export function useApi<T>(
       };
 
       if (options.requireAuth) {
-        const tokenFromCookie = getCookie('token');
-        const tokenFromStorage = 
-          localStorage.getItem('accessToken') || 
-          sessionStorage.getItem('accessToken');
-        const token = tokenFromCookie || tokenFromStorage;
-
-        if (!token) {
+        if (!isAuthenticated || !token) {
           throw new Error('401 - No authentication token found');
         }
 
@@ -120,7 +108,7 @@ export function useApi<T>(
     } finally {
       setLoading(false);
     }
-  }, [url, options.requireAuth, options.showToastOnError, options.fallbackData, toast]);
+  }, [url, options.requireAuth, options.showToastOnError, options.fallbackData, toast, token, isAuthenticated]);
 
   // Auto-fetch on mount
   useEffect(() => {

@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useAuth } from '@/stores/auth.store';
 
 export interface CreatedPost {
   id: string;
@@ -101,6 +102,7 @@ export default function CreatePostModal({
 }: CreatePostModalProps) {
   const t = useTranslations('CreatePost');
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [hashtags, setHashtags] = useState('');
@@ -477,12 +479,7 @@ export default function CreatePostModal({
     setIsSubmitting(true);
 
     try {
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated) {
         throw new Error(t('errors.unauthorized'));
       }
 

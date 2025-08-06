@@ -5,6 +5,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/stores/auth.store';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -12,10 +13,10 @@ export default function LogoutButton() {
     locale?: string;
   }) ?? { locale: 'pt' };
   const t = useTranslations('LogoutButton');
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    document.cookie =
-      'token=; Path=/; SameSite=Lax; max-age=0';
+    logout();
     router.push(`/${locale}/login`);
   };
 

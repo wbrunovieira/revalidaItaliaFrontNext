@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useParams } from 'next/navigation';
+import { useAuth } from '@/stores/auth.store';
 
 // Tag type that includes slug (from API response)
 interface FlashcardTagWithSlug {
@@ -145,6 +146,7 @@ export default function EditFlashcardModal({
   const { toast } = useToast();
   const params = useParams();
   const locale = params.locale as string;
+  const { token, isAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     questionType: 'TEXT',
@@ -609,7 +611,9 @@ export default function EditFlashcardModal({
         return null;
       };
       
-      const tokenFromCookie = getCookie('token');
+      if (!token || !isAuthenticated) {
+        throw new Error('No authentication token');
+      }
       const tokenFromStorage =
         localStorage.getItem('accessToken') ||
         sessionStorage.getItem('accessToken');

@@ -141,6 +141,7 @@ export default function QuizPage({
   const t = useTranslations('Assessment');
   const router = useRouter();
   const { toast } = useToast();
+  const { token, user, isAuthenticated } = useAuth();
 
   const [phase, setPhase] = useState<QuizPhase>('start');
   const [currentQuestionIndex, setCurrentQuestionIndex] =
@@ -214,11 +215,10 @@ export default function QuizPage({
     attemptId: string
   ) => {
     try {
-      // Get token for authentication
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
+      // Get token from Auth Store
+      if (!token || !isAuthenticated) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
 
       const resultsResponse = await fetch(
         `${apiUrl}/api/v1/attempts/${attemptId}/results`,
@@ -287,30 +287,17 @@ export default function QuizPage({
   const startQuiz = async () => {
     setLoading(true);
     try {
-      // Get user ID from token (similar to Avatar.tsx approach)
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      // Get user ID from Auth Store
+      if (!token || !isAuthenticated || !user) {
         throw new Error(
           'Você precisa fazer login para iniciar o quiz'
         );
       }
 
-      // Decode token to get userId (basic JWT decode)
-      let payload;
-      try {
-        payload = JSON.parse(atob(token.split('.')[1]));
-      } catch {
-        throw new Error('Token de autenticação inválido');
-      }
-
-      const identityId = payload.sub || payload.id;
+      const identityId = user.id;
 
       if (!identityId) {
-        throw new Error('User ID not found in token');
+        throw new Error('User ID not found');
       }
 
       console.log('Starting quiz with:', {
@@ -401,11 +388,10 @@ export default function QuizPage({
     if (!attempt) return;
 
     try {
-      // Get token for authentication
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
+      // Get token from Auth Store
+      if (!token || !isAuthenticated) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
 
       const response = await fetch(
         `${apiUrl}/api/v1/attempts/${attempt.id}/answers`,
@@ -462,11 +448,10 @@ export default function QuizPage({
 
     setSubmitting(true);
     try {
-      // Get token for authentication
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
+      // Get token from Auth Store
+      if (!token || !isAuthenticated) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
 
       // PASSO 4: Finalizar o Quiz
       const submitResponse = await fetch(

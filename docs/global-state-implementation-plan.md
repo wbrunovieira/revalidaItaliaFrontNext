@@ -238,14 +238,22 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
   - Tempo: 30 min
   - Prioridade: 🔴 Crítica
 
-- [ ] **1.6 - Migrar Todos os Componentes que Usam Token** *(Próximo passo)*
+- [x] **1.6 - Integração do Login com Auth Store** ✅
+  - LoginForm.tsx migrado para usar Auth Store
+  - Avatar.tsx usando dados do store
+  - UserDropdown.tsx integrado com store
+  - Navegação exibindo nome e badge
+  - Tempo real: 1 hora
+  - **Status**: CONCLUÍDO - 06/08/2025
+  
+- [ ] **1.7 - Migrar Componentes Restantes que Usam Token** *(Próximo passo)*
   - ProfileContent.tsx
   - DashboardClient.tsx
   - CourseAccessButton.tsx
   - VideoPlayer.tsx
   - FlashcardStudyPage.tsx
-  - (e outros 15+ componentes)
-  - Tempo: 2 horas
+  - (e outros 10+ componentes)
+  - Tempo estimado: 1.5 horas
   - Prioridade: 🔴 Crítica
 
 ### Checklist de Validação Fase 1
@@ -260,11 +268,15 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
 
 ### ✅ Resultados da Fase 1
 - **Data de Conclusão**: 06/08/2025
-- **Store Implementado**: Auth Store completo com interface User (name, role, email, etc)
+- **Store Implementado**: Auth Store completo com interface User (name, role, email, profileImageUrl)
 - **Features**: Login/logout, persistência, helpers de permissão, inicialização automática
 - **Validação**: Testado com sucesso para admin, tutor e student
-- **Próximos Passos**: Migrar componentes existentes para usar o Auth Store
-- **Commit**: feat: implement auth store with Zustand (Phase 1)
+- **Integração API**: Login agora recebe fullName e profileImageUrl do backend
+- **Componentes Migrados**: LoginForm, Avatar, UserDropdown
+- **Próximos Passos**: Migrar componentes restantes (1.7) e depois iniciar Fase 2
+- **Commits**: 
+  - feat: implement auth store with Zustand (Phase 1)
+  - fix: integrate login with Auth Store and display user data in navigation
 
 ---
 

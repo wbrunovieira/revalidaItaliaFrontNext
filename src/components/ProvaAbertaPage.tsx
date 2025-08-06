@@ -17,6 +17,7 @@ import {
   Send,
   Edit,
 } from 'lucide-react';
+import { useAuth } from '@/stores/auth.store';
 
 interface Assessment {
   id: string;
@@ -114,6 +115,7 @@ interface ArgumentGroup {
 export default function ProvaAbertaPage({ assessment, questions, locale, backUrl }: ProvaAbertaPageProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { token, user, isAuthenticated } = useAuth();
 
   // Filter only open questions for this component
   const openQuestions = questions.filter(q => q.type === 'OPEN_QUESTION' || q.type === 'OPEN');
@@ -186,7 +188,10 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         // Tentar iniciar para verificar se já existe
         let payload;
         try {
-          payload = JSON.parse(atob(token.split('.')[1]));
+          if (!token || !isAuthenticated || !user) {
+            throw new Error('Sessão expirada. Faça login novamente.');
+          }
+          const identityId = user.id;
         } catch {
           return;
         }

@@ -24,6 +24,7 @@ import NavSidebar from '@/components/NavSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday, isSameDay } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
+import { useAuth } from '@/stores/auth.store';
 
 // Types
 interface FlashcardInteraction {
@@ -72,15 +73,6 @@ interface DailyActivity {
   hardCount: number;
 }
 
-// Utility function to get cookie
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
-
 // Custom hook for fetching interactions
 const useFlashcardInteractions = (filters: {
   page: number;
@@ -92,14 +84,13 @@ const useFlashcardInteractions = (filters: {
   const [data, setData] = useState<InteractionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchInteractions = async () => {
       try {
         setLoading(true);
-        const token = getCookie('token');
-        
-        if (!token) {
+        if (!token || !isAuthenticated) {
           throw new Error('No authentication token');
         }
 
@@ -141,7 +132,7 @@ const useFlashcardInteractions = (filters: {
     };
 
     fetchInteractions();
-  }, [filters.page, filters.limit, filters.difficultyLevel, filters.dateFrom, filters.dateTo]);
+  }, [filters.page, filters.limit, filters.difficultyLevel, filters.dateFrom, filters.dateTo, token, isAuthenticated]);
 
   return { data, loading, error };
 };

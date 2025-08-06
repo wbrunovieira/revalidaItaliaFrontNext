@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { ReactionType } from './ReactionsButton';
+import { useAuth } from '@/stores/auth.store';
 
 interface User {
   id: string;
@@ -45,6 +46,7 @@ const reactionConfig: Record<ReactionType | 'all', { emoji: string; label: strin
 
 export default function ReactionsModal({ isOpen, onClose, postId, initialTab = 'all', anchorRef }: ReactionsModalProps) {
   const t = useTranslations('Reactions');
+  const { token, isAuthenticated } = useAuth();
   const [reactionGroups, setReactionGroups] = useState<ReactionGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,12 +92,7 @@ export default function ReactionsModal({ isOpen, onClose, postId, initialTab = '
       setIsLoading(true);
       setError(null);
 
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated) {
         setError('Not authenticated');
         return;
       }

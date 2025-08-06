@@ -215,10 +215,9 @@ export default function FlashcardStudyPage() {
 
       try {
         setLoading(true);
-        const token = getCookie('token');
         console.log('Token exists:', !!token);
 
-        if (!token) {
+        if (!token || !isAuthenticated) {
           console.log('No token, redirecting to login');
           router.push(`/${locale}/login`);
           return;
@@ -521,8 +520,7 @@ export default function FlashcardStudyPage() {
                 setIsResetting(true);
                 
                 try {
-                  const token = getCookie('token');
-                  if (!token) {
+                  if (!token || !isAuthenticated) {
                     throw new Error('No authentication token');
                   }
 

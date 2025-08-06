@@ -35,6 +35,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Elimina duplicação de lógica de autenticação em 20+ componentes, centraliza controle de permissões, melhora performance evitando decodificação repetida de JWT, e simplifica manutenção com fonte única de verdade para dados do usuário
 - [Commit] feat: implement auth store with Zustand (Phase 1)
 
+### 06/08/2025 (Continuação)
+
+**Integração do Login com Auth Store e Exibição de Dados do Usuário**
+- [Técnico] Migração do LoginForm para usar Auth Store ao invés de fetch direto, integração com resposta completa da API incluindo fullName e profileImageUrl, atualização do Avatar e UserDropdown para usar dados do store
+- [Benefício] Nome e badge de role do usuário aparecem imediatamente na navegação após login, foto de perfil é exibida quando disponível, elimina chamadas API duplicadas para buscar dados do usuário
+- [Commit] fix: integrate login with Auth Store and display user data in navigation
+
 ### 07/08/2025
 
 -

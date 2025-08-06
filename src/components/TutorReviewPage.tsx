@@ -14,6 +14,7 @@ import {
   ThumbsDown,
   Trophy,
 } from 'lucide-react';
+import { useAuth } from '@/stores/auth.store';
 
 interface Student {
   id: string;
@@ -85,6 +86,7 @@ interface AttemptAnswer {
 
 export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   const { toast } = useToast();
+  const { token, user, isAuthenticated } = useAuth();
 
   const [attemptData, setAttemptData] = useState<AttemptData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,7 +250,10 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       // Obter userId do token
       let userId = '';
       try {
-        const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+        if (!token || !isAuthenticated || !user) {
+          throw new Error('Sessão expirada. Faça login novamente.');
+        }
+        const tutorId = user.id;
         userId = payload.sub || payload.id;
       } catch {
         throw new Error('Token inválido');

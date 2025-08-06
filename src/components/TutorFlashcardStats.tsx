@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/stores/auth.store';
 
 // Types based on API documentation
 interface FlashcardUserStats {
@@ -100,6 +101,7 @@ const getCookie = (name: string): string | null => {
 
 export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps) {
   const { toast } = useToast();
+  const { token, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse['data'] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,10 +118,9 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
   const fetchStats = useCallback(async (searchQuery?: string, newPage?: number) => {
     try {
       setLoading(true);
-      const token = getCookie('token');
-      
-      if (!token) {
+      if (!token || !isAuthenticated) {
         throw new Error('No authentication token');
+        return;
       }
 
       const params = new URLSearchParams();

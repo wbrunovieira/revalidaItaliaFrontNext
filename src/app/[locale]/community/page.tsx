@@ -41,6 +41,7 @@ import ReactionsButton, {
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateCommentModal from '@/components/CreateCommentModal';
 import PostCard from '@/components/PostCard';
+import { useAuth } from '@/stores/auth.store';
 
 // Mock data types
 interface Author {
@@ -594,6 +595,7 @@ const mockTopicsWithAttachments: Topic[] = [
 
 export default function CommunityPage() {
   const t = useTranslations('Community');
+  const { token, user, isAuthenticated } = useAuth();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] =
@@ -618,102 +620,27 @@ export default function CommunityPage() {
   const [hasMore, setHasMore] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Decode JWT to get user ID
-  const decodeJWT = useCallback((token: string) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error('Error decoding JWT:', error);
-      return null;
-    }
-  }, []);
+  // Get user data from Auth Store
 
   // Ensure component is hydrated before rendering dynamic content
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  // Fetch current user data
+  // Set current user from Auth Store
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1];
-
-        if (!token) return;
-
-        const decodedToken = decodeJWT(token);
-        const userId = decodedToken?.sub;
-
-        if (!userId) {
-          console.error('User ID not found in token');
-          return;
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const userData = data.user;
-          
-          // Try to fetch address data if available
-          let addressData = null;
-          try {
-            const addressResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userData.id}`,
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-              }
-            );
-            
-            if (addressResponse.ok) {
-              const addresses = await addressResponse.json();
-              if (addresses.length > 0) {
-                addressData = addresses[0]; // Use first address
-              }
-            }
-          } catch (error) {
-            console.log('Could not fetch address data:', error);
-          }
-          
-          // Set user data with available fields
-          setCurrentUser({
-            id: userData.id,
-            name: userData.name,
-            avatar: userData.profileImageUrl,
-            city: addressData?.city || userData.city,
-            country: addressData?.country || userData.country,
-            profession: userData.profession,
-            role: userData.role as 'student' | 'admin' | 'tutor'
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [decodeJWT]);
+    if (user) {
+      setCurrentUser({
+        id: user.id,
+        name: user.name,
+        avatar: user.profileImageUrl,
+        city: '', // Address data not available in Auth Store
+        country: '',
+        profession: '',
+        role: user.role
+      });
+    }
+  }, [user]);
 
 
   // Fetch posts from API
@@ -726,12 +653,7 @@ export default function CommunityPage() {
       }
       setError(null);
 
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated) {
         setError('Unauthorized');
         return;
       }
@@ -1018,12 +940,7 @@ export default function CommunityPage() {
   const handleReaction = useCallback(
     async (topicId: string, reactionType: ReactionType | null) => {
       try {
-        const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1];
-
-        if (!token) {
+        if (!token || !isAuthenticated) {
           console.error('No authentication token found');
           return;
         }

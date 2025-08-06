@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from '@/hooks/use-toast';
 import { RoleBadge } from '@/components/ui/role-badge';
 import Image from 'next/image';
+import { useAuth } from '@/stores/auth.store';
 
 interface Author {
   id: string;
@@ -37,6 +38,7 @@ export default function CreateCommentModal({
   const t = useTranslations('Community');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { token, isAuthenticated } = useAuth();
 
   const handleSubmit = async () => {
     if (!content.trim()) {
@@ -60,12 +62,7 @@ export default function CreateCommentModal({
     setIsSubmitting(true);
 
     try {
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!isAuthenticated || !token) {
         toast({
           title: t('comments.error'),
           description: t('comments.unauthorized'),

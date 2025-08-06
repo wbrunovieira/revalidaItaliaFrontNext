@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import AttachmentsModal, { AttachmentData } from '@/components/AttachmentsModal';
 import PostCard from '@/components/PostCard';
 import CreateCommentModal from '@/components/CreateCommentModal';
+import { useAuth } from '@/stores/auth.store';
 
 interface Author {
   id: string;
@@ -156,96 +157,22 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   const [replyingToPost, setReplyingToPost] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ id: string; author: Author } | null>(null);
 
-  // Decode JWT to get user ID
-  const decodeJWT = useCallback((token: string) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error('Error decoding JWT:', error);
-      return null;
-    }
-  }, []);
+  // Get auth data from Auth Store
+  const { token, user, isAuthenticated } = useAuth();
 
-  // Fetch current user data
+  // Set current user from Auth Store
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1];
-
-        if (!token) return;
-
-        const decodedToken = decodeJWT(token);
-        const userId = decodedToken?.sub;
-
-        if (!userId) {
-          console.error('User ID not found in token');
-          return;
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const userData = data.user;
-          
-          // Try to fetch address data if available
-          let addressData = null;
-          try {
-            const addressResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/addresses?userId=${userData.id}`,
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-              }
-            );
-            
-            if (addressResponse.ok) {
-              const addresses = await addressResponse.json();
-              if (addresses.length > 0) {
-                addressData = addresses[0]; // Use first address
-              }
-            }
-          } catch (error) {
-            console.log('Could not fetch address data:', error);
-          }
-          
-          // Set user data with available fields
-          setCurrentUser({
-            id: userData.id,
-            name: userData.name,
-            avatar: userData.profileImageUrl,
-            city: addressData?.city || userData.city,
-            country: addressData?.country || userData.country,
-            profession: userData.profession
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [decodeJWT]);
+    if (user) {
+      setCurrentUser({
+        id: user.id,
+        name: user.name,
+        avatar: user.profileImageUrl,
+        city: undefined, // Address data not available in Auth Store
+        country: undefined,
+        profession: undefined
+      });
+    }
+  }, [user]);
 
   // Fetch comments from API
   const fetchComments = useCallback(async (page = 1, append = false) => {
@@ -255,12 +182,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       }
       setError(null);
 
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated) {
         setError('Unauthorized');
         return;
       }
@@ -419,12 +341,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   // Handle reaction
   const handleReaction = useCallback(async (commentId: string, reactionType: ReactionType | null) => {
     try {
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('token='))
-        ?.split('=')[1];
-
-      if (!token) {
+      if (!token || !isAuthenticated) {
         console.error('No authentication token found');
         return;
       }
@@ -503,12 +420,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
 
     setIsLoading(true);
     try {
-      const token = document.cookie
-        .split(';')
-        .find(c => c.trim().startsWith('token='))
-        ?.split('=')[1];
-      
-      if (!token) {
+      if (!token || !isAuthenticated) {
         throw new Error(t('errors.unauthorized'));
       }
 

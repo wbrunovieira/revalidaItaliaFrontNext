@@ -106,10 +106,10 @@ export default function UsersList() {
     async (page: number = 1) => {
       setLoading(true);
       try {
-        const token =
-          getCookie('token') ||
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
+        if (!token || !isAuthenticated) {
+          console.error('Token not found');
+          return;
+        }
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         };
@@ -174,10 +174,10 @@ export default function UsersList() {
       setIsApiSearchActive(true);
 
       try {
-        const token =
-          getCookie('token') ||
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
+        if (!token || !isAuthenticated) {
+          console.error('Token not found');
+          return;
+        }
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         };
@@ -332,10 +332,10 @@ export default function UsersList() {
   const deleteUser = useCallback(
     async (userId: string) => {
       try {
-        const token =
-          getCookie('token') ||
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
+        if (!token || !isAuthenticated) {
+          console.error('Token not found');
+          return;
+        }
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         };

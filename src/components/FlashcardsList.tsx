@@ -158,8 +158,7 @@ export default function FlashcardsList() {
           queryParams.append('sortOrder', sortOrder);
         }
 
-        const token = getCookie('token');
-        if (!token) {
+        if (!token || !isAuthenticated) {
           throw new Error('No authentication token');
         }
 
@@ -258,11 +257,9 @@ export default function FlashcardsList() {
         // Find the flashcard to get image URLs before deletion
         const flashcardToDelete = flashcards.find(f => f.id === flashcardId);
         
-        const tokenFromCookie = getCookie('token');
-        const tokenFromStorage =
-          localStorage.getItem('accessToken') ||
-          sessionStorage.getItem('accessToken');
-        const token = tokenFromCookie || tokenFromStorage;
+        if (!token || !isAuthenticated) {
+          throw new Error('No authentication token');
+        }
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${flashcardId}`,

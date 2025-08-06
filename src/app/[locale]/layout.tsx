@@ -7,6 +7,7 @@ import {
 import type { Metadata } from 'next';
 import { normalizeLocale } from '@/lib/normalizelocale';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { AuthInitializer } from '@/components/providers/auth-initializer';
 
 const SUPPORTED_LOCALES: Array<'pt' | 'es' | 'it'> = [
   'pt',
@@ -106,7 +107,9 @@ export default async function LocaleLayout({
       messages={messages}
     >
       <QueryProvider>
-        {children}
+        <AuthInitializer>
+          {children}
+        </AuthInitializer>
       </QueryProvider>
     </NextIntlClientProvider>
   );

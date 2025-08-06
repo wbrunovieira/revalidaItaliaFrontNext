@@ -25,6 +25,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Permite que o card "Continue de onde parou" funcione para todos os tipos de conteúdo (documentos, flashcards, avaliações), não apenas vídeos, melhorando a experiência de navegação
 - [Commit] feat: add lesson access tracking for non-video content
 
+**Fundação do Gerenciamento de Estado Global (Fase 0)**
+- [Técnico] Instalação e configuração do Zustand v5.0.7 e TanStack Query v5.84.1, criação de estrutura de pastas para stores e queries, configuração do QueryClient com cache otimizado e setup dos providers no layout root
+- [Benefício] Estabelece base para eliminar duplicação de código em 20+ componentes e reduzir chamadas API em 70% através de cache inteligente, preparando o sistema para melhor performance e manutenibilidade
+- [Commit] feat: implement global state management foundation
+
 ### 07/08/2025
 
 -
@@ -92,9 +97,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 
 ## 📚 Documentações Criadas
 
-**Exemplo de Documentação**
-- [Arquivo] README.md atualizado com instruções de deploy
-- [Conteúdo] Passo a passo para configuração em produção
+### 06/08/2025
+
+**Plano de Implementação do Estado Global**
+- [Arquivo] docs/global-state-implementation-plan.md
+- [Conteúdo] Documento detalhado com 7 fases de implementação, incluindo tarefas específicas, estimativas de tempo, exemplos de código e métricas de sucesso para migração completa para Zustand + TanStack Query
 
 ---
 

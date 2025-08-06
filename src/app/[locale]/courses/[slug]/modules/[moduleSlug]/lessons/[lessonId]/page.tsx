@@ -676,7 +676,7 @@ export default async function LessonPage({
 
                             <Link
                               href={`/${locale}/lessons/${lessonId}/assessments/${assessment.id}`}
-                              className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors text-sm font-medium transform scale-0 group-hover:scale-100 transition-transform duration-300"
+                              className="flex items-center gap-2 px-3 py-1 bg-secondary text-primary rounded-lg hover:bg-secondary/90 text-sm font-medium transform scale-0 group-hover:scale-100 transition-all duration-300"
                             >
                               {tLesson('startAssessment')}
                               <ExternalLink size={14} />
@@ -833,7 +833,7 @@ export default async function LessonPage({
                       <div>
                         <DocumentsSection
                           documents={documents}
-                          lessonId={lessonId}
+                          locale={locale}
                         />
                       </div>
                     )}

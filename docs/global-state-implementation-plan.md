@@ -1,5 +1,18 @@
 # 📋 Plano de Implementação - Estado Global com Zustand + TanStack Query
 
+## 📊 Status de Implementação
+
+| Fase | Status | Data Conclusão |
+|------|--------|----------------|
+| **Fase 0 - Setup Inicial** | ✅ **CONCLUÍDA** | 06/08/2025 |
+| Fase 1 - Auth Store | ⏳ Próxima | - |
+| Fase 2 - TanStack Query | 🔜 Pendente | - |
+| Fase 3 - Video Progress | 🔜 Pendente | - |
+| Fase 4 - Flashcards | 🔜 Pendente | - |
+| Fase 5 - UI Store | 🔜 Pendente | - |
+| Fase 6 - Otimizações | 🔜 Pendente | - |
+| Fase 7 - Testes | 🔜 Pendente | - |
+
 ## 📊 Resumo Executivo
 
 Este documento detalha o plano completo de implementação de gerenciamento de estado global para o projeto Revalida Italia, utilizando **Zustand** para estado local e **TanStack Query** para sincronização com servidor.
@@ -18,39 +31,39 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
 
 ---
 
-## 🎯 Fase 0: Preparação e Setup (Dia 1 - Manhã)
+## 🎯 Fase 0: Preparação e Setup (Dia 1 - Manhã) ✅ **CONCLUÍDA**
 
 ### Tarefas de Configuração Inicial
 
-- [ ] **0.1 - Instalar Dependências**
+- [x] **0.1 - Instalar Dependências**
   ```bash
   npm install zustand @tanstack/react-query @tanstack/react-query-devtools
   ```
   - Tempo: 5 min
   - Prioridade: 🔴 Crítica
 
-- [ ] **0.2 - Criar Estrutura de Pastas**
+- [x] **0.2 - Criar Estrutura de Pastas**
   ```
   src/
-  ├── stores/           # Zustand stores
+  ├── stores/           # Zustand stores ✅
   │   ├── auth.store.ts
   │   ├── progress.store.ts
   │   └── ui.store.ts
   ├── hooks/
-  │   └── queries/      # React Query hooks
+  │   └── queries/      # React Query hooks ✅
   │       ├── useCourses.ts
   │       ├── useTracks.ts
   │       ├── useModules.ts
   │       └── useLessons.ts
   └── lib/
-      └── query-client.ts
+      └── query-client.ts ✅
   ```
   - Tempo: 10 min
   - Prioridade: 🔴 Crítica
 
-- [ ] **0.3 - Configurar QueryClient**
+- [x] **0.3 - Configurar QueryClient**
   ```typescript
-  // lib/query-client.ts
+  // lib/query-client.ts ✅ IMPLEMENTADO
   export const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -66,9 +79,9 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
   - Tempo: 15 min
   - Prioridade: 🔴 Crítica
 
-- [ ] **0.4 - Adicionar Providers no Layout Root**
+- [x] **0.4 - Adicionar Providers no Layout Root**
   ```typescript
-  // app/[locale]/layout.tsx
+  // app/[locale]/layout.tsx ✅ IMPLEMENTADO
   <QueryClientProvider client={queryClient}>
     {children}
     <ReactQueryDevtools initialIsOpen={false} />
@@ -77,48 +90,129 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
   - Tempo: 15 min
   - Prioridade: 🔴 Crítica
 
+### ✅ Resultados da Fase 0
+- **Data de Conclusão**: 06/08/2025
+- **Dependências Instaladas**: zustand@5.0.7, @tanstack/react-query@5.84.1, @tanstack/react-query-devtools@5.84.1
+- **Estrutura Criada**: Pastas stores/, hooks/queries/, lib/query-client.ts
+- **Providers Configurados**: QueryProvider integrado no layout root
+- **DevTools**: React Query DevTools habilitado em desenvolvimento
+- **Commit**: feat: implement global state management foundation
+
 ---
 
 ## 🔐 Fase 1: Auth Store com Zustand (Dia 1 - Tarde)
 
 ### Implementação do Store de Autenticação
 
+#### 🎯 Benefícios da Estrutura Completa com Dados do Usuário
+
+**Por que incluir `name` e `role` no Auth Store:**
+1. **Elimina duplicação massiva**: 20+ componentes atualmente decodificam JWT manualmente
+2. **Centraliza lógica de permissões**: Um único lugar para definir acesso (admin, tutor, student)
+3. **Melhora performance**: Dados prontos para uso sem decodificar JWT repetidamente
+4. **Simplifica componentes**: De 5+ linhas para verificar role para apenas `if (isAdmin)`
+5. **Facilita manutenção**: Mudanças em permissões em um único lugar
+
+**Componentes que serão simplificados:**
+- `AdminHeader.tsx` - verificação de admin
+- `UsersList.tsx` - filtragem por role
+- `Avatar.tsx` - exibição de nome e role
+- `ProfileContent.tsx` - dados do perfil
+- Layouts de admin - controle de acesso
+- E mais 15+ componentes
+
 - [ ] **1.1 - Criar Auth Store Base**
   ```typescript
   // stores/auth.store.ts
+  interface User {
+    id: string
+    email: string
+    name: string  // ESSENCIAL - usado em 10+ componentes
+    role: 'admin' | 'student' | 'tutor'  // ESSENCIAL - controle de acesso
+    profileImageUrl?: string
+    nationalId?: string  // CPF
+    phone?: string
+    emailVerified?: boolean
+    createdAt?: string
+    lastLogin?: string
+  }
+
   interface AuthState {
+    // Estado principal
     token: string | null
     user: User | null
     isAuthenticated: boolean
     isLoading: boolean
+    
+    // Computed helpers (getters derivados)
+    isAdmin: boolean  // computed: user?.role === 'admin'
+    isTutor: boolean  // computed: user?.role === 'tutor'
+    isStudent: boolean  // computed: user?.role === 'student'
+    
+    // Actions
     login: (credentials: LoginCredentials) => Promise<void>
     logout: () => void
+    updateUser: (userData: Partial<User>) => void
     refreshToken: () => Promise<void>
-    initializeAuth: () => void
+    initializeAuth: () => Promise<void>  // carrega do cookie/localStorage
+    
+    // Permissões helpers
+    canAccessAdmin: () => boolean
+    canAccessTutorArea: () => boolean
+    hasRole: (role: 'admin' | 'student' | 'tutor') => boolean
   }
   ```
   - Tempo: 30 min
   - Prioridade: 🔴 Crítica
-  - Impacto: Elimina duplicação em 20+ componentes
+  - Impacto: Elimina duplicação em 20+ componentes e centraliza lógica de permissões
 
-- [ ] **1.2 - Implementar Persistência de Token**
+- [ ] **1.2 - Implementar Persistência com Zustand Persist**
+  ```typescript
+  import { persist } from 'zustand/middleware'
+  
+  export const useAuthStore = create(
+    persist<AuthState>(
+      (set, get) => ({
+        // ... store implementation
+      }),
+      {
+        name: 'auth-storage',
+        partialize: (state) => ({
+          token: state.token,
+          user: state.user
+        }),
+        storage: {
+          getItem: (name) => {
+            // 1. Try cookies first
+            const cookieValue = getCookie('token')
+            // 2. Fallback to localStorage
+            // 3. Fallback to sessionStorage
+          },
+          setItem: (name, value) => {
+            // Save to multiple storages
+          },
+          removeItem: (name) => {
+            // Clear all storages
+          }
+        }
+      }
+    )
+  )
+  ```
   - Integrar com cookies (principal)
   - Fallback para localStorage/sessionStorage
   - Sync automático entre abas
   - Tempo: 45 min
   - Prioridade: 🔴 Crítica
 
-- [ ] **1.3 - Criar Hook useAuth**
+- [ ] **1.3 - Implementar Helpers e Utilities**
   ```typescript
-  export const useAuth = () => {
-    const store = useAuthStore()
-    // Add computed properties
-    return {
-      ...store,
-      isAdmin: store.user?.role === 'admin',
-      canAccessCourse: (courseId: string) => {...}
-    }
-  }
+  // utils/auth.ts
+  export const getCookie = (name: string): string | null => { ... }
+  export const setCookie = (name: string, value: string, days?: number) => { ... }
+  export const removeCookie = (name: string) => { ... }
+  export const decodeJWT = (token: string) => { ... }
+  export const isTokenExpired = (token: string): boolean => { ... }
   ```
   - Tempo: 20 min
   - Prioridade: 🔴 Crítica
@@ -155,11 +249,14 @@ Este documento detalha o plano completo de implementação de gerenciamento de e
   - Prioridade: 🔴 Crítica
 
 ### Checklist de Validação Fase 1
-- [ ] Login funciona corretamente
-- [ ] Token persiste após refresh
-- [ ] Logout limpa todos os estados
-- [ ] Componentes não duplicam lógica de token
+- [ ] Login funciona corretamente e popula user com name e role
+- [ ] Token e dados do usuário persistem após refresh
+- [ ] Logout limpa todos os estados (token, user, permissões)
+- [ ] Componentes não duplicam lógica de token ou decodificação JWT
+- [ ] Helpers de permissão funcionam (isAdmin, isTutor, isStudent)
 - [ ] Auto-refresh de token funciona
+- [ ] Nome e role do usuário aparecem corretamente nos componentes
+- [ ] Controle de acesso baseado em role funciona
 
 ---
 

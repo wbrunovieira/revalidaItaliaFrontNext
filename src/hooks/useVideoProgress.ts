@@ -164,12 +164,20 @@ export function useVideoProgress(
 
         // Also make it available globally for components that need it
         if (typeof window !== 'undefined') {
-          (
-            window as Window & {
-              videoProgressHeartbeat?: ReturnType<typeof getHeartbeatService>;
-            }
-          ).videoProgressHeartbeat =
-            heartbeatService.current;
+          const windowWithHeartbeat = window as Window & {
+            videoProgressHeartbeat?: ReturnType<typeof getHeartbeatService>;
+            forceFlushProgress?: () => void;
+          };
+          
+          windowWithHeartbeat.videoProgressHeartbeat = heartbeatService.current;
+          
+          // Add manual flush command for debugging
+          windowWithHeartbeat.forceFlushProgress = () => {
+            console.log('[useVideoProgress] 🚀 Manual flush triggered');
+            heartbeatService.current.flush();
+          };
+          
+          console.log('[useVideoProgress] 💚 Heartbeat service exposed on window');
         }
 
         // Check if video is effectively completed (95% or more)

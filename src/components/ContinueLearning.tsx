@@ -49,7 +49,16 @@ export default function ContinueLearning() {
   const fetchContinueLearning = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
-      const token = document.cookie.split('token=')[1]?.split(';')[0] || '';
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1] || '';
+      
+      if (!token) {
+        console.warn('[ContinueLearning] No token found');
+        setLoading(false);
+        return;
+      }
       
       const response = await fetch(`${apiUrl}/api/v1/users/me/continue-learning`, {
         headers: {
@@ -58,14 +67,24 @@ export default function ContinueLearning() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch continue learning');
+        console.warn('[ContinueLearning] API returned status:', response.status);
+        if (response.status === 404) {
+          // No progress found - this is normal for new users
+          setData({ hasProgress: false });
+        } else {
+          throw new Error(`Failed to fetch continue learning: ${response.status}`);
+        }
+        setLoading(false);
+        return;
       }
 
       const result = await response.json();
       console.log('[ContinueLearning] API Response:', result);
       setData(result);
     } catch (error) {
-      console.error('Error fetching continue learning:', error);
+      console.error('[ContinueLearning] Error fetching data:', error);
+      // Set empty data to hide the component gracefully
+      setData({ hasProgress: false });
     } finally {
       setLoading(false);
     }

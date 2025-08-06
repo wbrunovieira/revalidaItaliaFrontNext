@@ -411,8 +411,8 @@ export class VideoProgressHeartbeat {
         update.courseSlug &&
         update.moduleSlug
       ) {
-        // Use new API with full context
-        const payload = {
+        // Use new API with full context - exact field order as DTO
+        const payload: any = {
           lessonId: update.lessonId,
           lessonTitle: update.lessonTitle,
           courseId: update.courseId || '',
@@ -421,15 +421,11 @@ export class VideoProgressHeartbeat {
           moduleId: update.moduleId || '',
           moduleTitle: update.moduleTitle || '',
           moduleSlug: update.moduleSlug,
-          lessonImageUrl:
-            update.lessonImageUrl &&
-            update.lessonImageUrl.startsWith('/')
-              ? update.lessonImageUrl
-              : update.lessonImageUrl || '',
+          lessonImageUrl: update.lessonImageUrl || '/uploads/images/lessons/default.png',
           videoProgress: {
-            currentTime: update.progress.currentTime,
-            duration: update.progress.duration,
-            percentage: update.progress.percentage,
+            currentTime: Math.round(update.progress.currentTime),
+            duration: Math.round(update.progress.duration),
+            percentage: Math.round(update.progress.percentage * 100) / 100, // Round to 2 decimal places
           },
         };
 
@@ -443,6 +439,19 @@ export class VideoProgressHeartbeat {
               '%',
           }
         );
+        
+        // Debug: log complete payload
+        console.log(
+          `${LOG_PREFIX} 📦 Full payload:`,
+          JSON.stringify(payload, null, 2)
+        );
+        
+        // Double check what we're actually sending
+        const bodyToSend = JSON.stringify(payload);
+        console.log(
+          `${LOG_PREFIX} 🔍 Exact body being sent:`,
+          bodyToSend
+        );
 
         const response = await fetch(
           `${apiUrl}${this.NEW_API_ENDPOINT}`,
@@ -452,12 +461,22 @@ export class VideoProgressHeartbeat {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
+            body: bodyToSend,
           }
         );
 
         if (!response.ok) {
           const errorText = await response.text();
+          console.error(
+            `${LOG_PREFIX} ❌ Backend validation error:`,
+            {
+              status: response.status,
+              response: errorText,
+              sentPayload: payload,
+              payloadKeys: Object.keys(payload),
+              hasLessonImageUrl: 'lessonImageUrl' in payload
+            }
+          );
           throw new Error(
             `API error: ${response.status} - ${errorText}`
           );

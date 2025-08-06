@@ -50,6 +50,19 @@ export default function LessonVideoPlayer({
     moduleId
   );
   
+  // Initialize heartbeat service directly here
+  useEffect(() => {
+    if (typeof window !== 'undefined' && courseTitle && moduleTitle) {
+      // Get or create heartbeat service
+      const { getHeartbeatService } = require('@/services/video-progress-heartbeat');
+      const heartbeat = getHeartbeatService();
+      
+      // Expose it globally
+      (window as any).videoProgressHeartbeat = heartbeat;
+      console.log('[LessonVideoPlayer] 🎯 Heartbeat service initialized and exposed');
+    }
+  }, [courseTitle, moduleTitle]);
+  
   // State for managing start time
   const [startTime, setStartTime] = useState<number>(0);
   const [showBanner, setShowBanner] = useState<boolean>(true);
@@ -79,15 +92,26 @@ export default function LessonVideoPlayer({
     updateProgress(newProgress);
 
     // Send to heartbeat service with full context for new API
-    const heartbeatService = (window as Window & { videoProgressHeartbeat?: { enqueueWithContext: (data: unknown) => void } }).videoProgressHeartbeat;
-    if (heartbeatService && heartbeatService.enqueueWithContext) {
+    const heartbeatService = (window as any).videoProgressHeartbeat;
+    
+    if (!heartbeatService) {
+      console.warn('[LessonVideoPlayer] ⚠️ Heartbeat service not available on window');
+    } else if (!heartbeatService.enqueueWithContext) {
+      console.warn('[LessonVideoPlayer] ⚠️ enqueueWithContext method not available');
+    } else {
       const imageUrl = lessonImageUrl || thumbnailUrl || '';
-      console.log('[LessonVideoPlayer] Sending image URL to heartbeat:', imageUrl);
-      
-      heartbeatService.enqueueWithContext({
+      console.log('[LessonVideoPlayer] 📤 Sending to heartbeat service:', {
         lessonId,
-        progress: newProgress,
-        context: {
+        lessonTitle: lessonTitle || title,
+        courseTitle,
+        percentage: newProgress.percentage.toFixed(2) + '%'
+      });
+      
+      // Call with correct parameters order: lessonId, progress, context
+      heartbeatService.enqueueWithContext(
+        lessonId,
+        newProgress,
+        {
           courseId,
           moduleId,
           lessonTitle: lessonTitle || title,
@@ -97,7 +121,7 @@ export default function LessonVideoPlayer({
           moduleSlug,
           lessonImageUrl: imageUrl
         }
-      });
+      );
     }
   }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 

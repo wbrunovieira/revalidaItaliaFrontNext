@@ -609,6 +609,20 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     setIsCreateModalOpen(false);
   }, []);
 
+  // Handle reply to comment
+  const handleReplyToComment = useCallback((commentId: string, author: Author) => {
+    // Find the post that contains this comment
+    const post = comments.find(c => 
+      c.id === commentId || c.replies?.some(r => r.id === commentId)
+    );
+    
+    if (post) {
+      setReplyingToPost(post.id);
+      setReplyingTo({ id: commentId, author });
+      setIsCommentModalOpen(true);
+    }
+  }, [comments]);
+
   // Handle comment creation from modal
   const handleCommentCreated = useCallback((newComment: {
     id: string;
@@ -632,42 +646,86 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
   }) => {
     console.log('Comment created:', newComment);
     
-    // Add the comment directly to the post's replies
+    // Add the comment to the appropriate location
     if (replyingToPost) {
       setComments(prevComments =>
         prevComments.map(post => {
           if (post.id === replyingToPost) {
-            return {
-              ...post,
-              replies: [...(post.replies || []), {
-                id: newComment.id,
-                type: 'LESSON_COMMENT' as const,
-                title: '',
-                content: newComment.content,
-                author: newComment.author as Author,
-                createdAt: newComment.createdAt,
-                updatedAt: newComment.updatedAt,
-                reactions: {
-                  ...newComment.reactions,
-                  userReactions: newComment.reactions.userReactions as ReactionType[]
-                },
-                parentId: newComment.parentId,
-                lessonId: post.lessonId,
-                courseId: post.courseId,
-                moduleId: post.moduleId,
-                viewCount: 0,
-                replyCount: 0,
-                attachments: [],
-                hashtags: []
-              }],
-              replyCount: (post.replyCount || 0) + 1
-            };
+            // Check if this is a reply to a comment or a top-level comment
+            if (newComment.parentId && replyingTo) {
+              // This is a reply to an existing comment
+              const updatedReplies = post.replies?.map(reply => {
+                if (reply.id === newComment.parentId) {
+                  // Add the new reply to this comment's replies
+                  return {
+                    ...reply,
+                    replies: [...(reply.replies || []), {
+                      id: newComment.id,
+                      type: 'LESSON_COMMENT' as const,
+                      title: '',
+                      content: newComment.content,
+                      author: newComment.author as Author,
+                      createdAt: newComment.createdAt,
+                      updatedAt: newComment.updatedAt,
+                      reactions: {
+                        ...newComment.reactions,
+                        userReactions: newComment.reactions.userReactions as ReactionType[]
+                      },
+                      parentId: newComment.parentId,
+                      lessonId: post.lessonId,
+                      courseId: post.courseId,
+                      moduleId: post.moduleId,
+                      viewCount: 0,
+                      replyCount: 0,
+                      attachments: [],
+                      hashtags: []
+                    }],
+                    replyCount: (reply.replyCount || 0) + 1
+                  };
+                }
+                return reply;
+              }) || [];
+              
+              return {
+                ...post,
+                replies: updatedReplies,
+                replyCount: (post.replyCount || 0) + 1
+              };
+            } else {
+              // This is a top-level comment on the post
+              return {
+                ...post,
+                replies: [...(post.replies || []), {
+                  id: newComment.id,
+                  type: 'LESSON_COMMENT' as const,
+                  title: '',
+                  content: newComment.content,
+                  author: newComment.author as Author,
+                  createdAt: newComment.createdAt,
+                  updatedAt: newComment.updatedAt,
+                  reactions: {
+                    ...newComment.reactions,
+                    userReactions: newComment.reactions.userReactions as ReactionType[]
+                  },
+                  parentId: newComment.parentId,
+                  lessonId: post.lessonId,
+                  courseId: post.courseId,
+                  moduleId: post.moduleId,
+                  viewCount: 0,
+                  replyCount: 0,
+                  attachments: [],
+                  hashtags: [],
+                  replies: []
+                }],
+                replyCount: (post.replyCount || 0) + 1
+              };
+            }
           }
           return post;
         })
       );
     }
-  }, [replyingToPost]);
+  }, [replyingToPost, replyingTo]);
 
   return (
     <div className="w-full bg-primary-dark/50 border-t border-gray-700">
@@ -860,6 +918,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                       setReplyingTo(null);
                       setIsCommentModalOpen(true);
                     }}
+                    onReplyToComment={handleReplyToComment}
                     compactVideo={true}
                     compactImages={true}
                   />

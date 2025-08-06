@@ -66,13 +66,6 @@ export default function ReactionsButton({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Get most reacted type or default to heart
-  const getMostReacted = () =>
-    reactions.reduce((prev, current) => (current.count > prev.count ? current : prev), reactions[0]);
-
-  // Use mostReacted if needed
-  const mostReacted = getMostReacted();
-
   const hasAnyReaction = reactions.some(r => r.hasReacted);
   const totalReactions = reactions.reduce((sum, r) => sum + r.count, 0);
 

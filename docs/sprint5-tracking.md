@@ -42,6 +42,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Nome e badge de role do usuário aparecem imediatamente na navegação após login, foto de perfil é exibida quando disponível, elimina chamadas API duplicadas para buscar dados do usuário
 - [Commit] fix: integrate login with Auth Store and display user data in navigation
 
+**Sistema de Respostas Aninhadas em Comentários da Comunidade**
+- [Técnico] Implementação de respostas a comentários usando endpoint /community/comments/:id/reply, suporte a renderização recursiva de replies com limite de 2 níveis, atualização do CreateCommentModal para diferenciar entre comentários e respostas
+- [Benefício] Permite discussões mais organizadas e contextualizadas na comunidade, usuários podem responder diretamente a comentários específicos criando threads de conversação
+- [Commit] feat: implement nested comment replies in community page
+
 ### 07/08/2025
 
 -

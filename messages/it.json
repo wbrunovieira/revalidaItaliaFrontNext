@@ -245,7 +245,9 @@
       "completed": "completato",
       "minutesAgo": "{minutes} minuti fa",
       "hoursAgo": "{hours} ore fa",
-      "daysAgo": "{days} giorni fa"
+      "daysAgo": "{days} giorni fa",
+      "textLesson": "Lezione in testo",
+      "accessed": "Acceduta"
     }
   },
   "Track": {

@@ -256,7 +256,9 @@
       "completed": "concluído",
       "minutesAgo": "há {minutes} minutos",
       "hoursAgo": "há {hours} horas",
-      "daysAgo": "há {days} dias"
+      "daysAgo": "há {days} dias",
+      "textLesson": "Conteúdo da aula",
+      "accessed": "Acessada"
     }
   },
   "Track": {

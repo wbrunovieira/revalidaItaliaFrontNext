@@ -12,6 +12,7 @@ import {
   Loader2,
   Sparkles
 } from 'lucide-react';
+import { useLessonAccess } from '@/hooks/useLessonAccess';
 
 interface VideoProgress {
   currentTime: number;
@@ -41,6 +42,7 @@ export default function ContinueLearning() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ContinueLearningResponse | null>(null);
   const [imageError, setImageError] = useState(false);
+  const { getLastLessonAccess } = useLessonAccess();
 
   useEffect(() => {
     fetchContinueLearning();
@@ -56,6 +58,8 @@ export default function ContinueLearning() {
       
       if (!token) {
         console.warn('[ContinueLearning] No token found');
+        // Even without token, check localStorage
+        checkLocalStorageForLessonAccess();
         setLoading(false);
         return;
       }
@@ -69,8 +73,14 @@ export default function ContinueLearning() {
       if (!response.ok) {
         console.warn('[ContinueLearning] API returned status:', response.status);
         if (response.status === 404) {
-          // No progress found - this is normal for new users
-          setData({ hasProgress: false });
+          // No video progress found - check localStorage for lesson access
+          console.log('[ContinueLearning] No video progress in backend (404), checking localStorage...');
+          const localAccess = getLastLessonAccess();
+          if (localAccess) {
+            checkLocalStorageForLessonAccess();
+          } else {
+            setData({ hasProgress: false });
+          }
         } else {
           throw new Error(`Failed to fetch continue learning: ${response.status}`);
         }
@@ -80,13 +90,85 @@ export default function ContinueLearning() {
 
       const result = await response.json();
       console.log('[ContinueLearning] API Response:', result);
-      setData(result);
+      
+      // Always check localStorage to compare timestamps
+      const localAccess = getLastLessonAccess();
+      
+      if (result.hasProgress && localAccess) {
+        // Both sources have data - compare timestamps
+        const backendTime = new Date(result.lastAccessed.lastUpdatedAt).getTime();
+        const localTime = new Date(localAccess.accessedAt).getTime();
+        
+        console.log('[ContinueLearning] Comparing timestamps:', {
+          backend: {
+            time: new Date(backendTime).toISOString(),
+            title: result.lastAccessed.lessonTitle,
+            hasVideo: true
+          },
+          local: {
+            time: new Date(localTime).toISOString(),
+            title: localAccess.lessonTitle,
+            hasVideo: localAccess.hasVideo
+          },
+          useLocal: localTime > backendTime
+        });
+        
+        if (localTime > backendTime) {
+          // Local is more recent - use it
+          console.log('[ContinueLearning] Using localStorage (more recent)');
+          checkLocalStorageForLessonAccess();
+        } else {
+          // Backend is more recent
+          console.log('[ContinueLearning] Using backend data (more recent)');
+          setData(result);
+        }
+      } else if (result.hasProgress) {
+        // Only backend has data
+        console.log('[ContinueLearning] Using backend data (no local data)');
+        setData(result);
+      } else if (localAccess) {
+        // Only localStorage has data
+        console.log('[ContinueLearning] Using localStorage (no backend data)');
+        checkLocalStorageForLessonAccess();
+      } else {
+        // No data from either source
+        console.log('[ContinueLearning] No progress data available');
+        setData({ hasProgress: false });
+      }
     } catch (error) {
       console.error('[ContinueLearning] Error fetching data:', error);
-      // Set empty data to hide the component gracefully
-      setData({ hasProgress: false });
+      // On error, try localStorage as fallback
+      checkLocalStorageForLessonAccess();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkLocalStorageForLessonAccess = () => {
+    const lastAccess = getLastLessonAccess();
+    
+    if (lastAccess) {
+      console.log('[ContinueLearning] Found lesson access in localStorage:', lastAccess);
+      
+      // Convert localStorage data to ContinueLearning format
+      const localData: ContinueLearningResponse = {
+        hasProgress: true,
+        lastAccessed: {
+          lessonId: lastAccess.lessonId,
+          lessonTitle: lastAccess.lessonTitle,
+          courseTitle: lastAccess.courseTitle,
+          moduleTitle: lastAccess.moduleTitle,
+          lessonImageUrl: lastAccess.lessonImageUrl || '',
+          videoProgress: lastAccess.progress,
+          lessonUrl: lastAccess.lessonUrl,
+          lastUpdatedAt: lastAccess.accessedAt,
+        },
+      };
+      
+      setData(localData);
+    } else {
+      // No data from backend or localStorage
+      setData({ hasProgress: false });
     }
   };
 
@@ -134,7 +216,8 @@ export default function ContinueLearning() {
   }
 
   const { lastAccessed } = data;
-  const remainingTime = lastAccessed.videoProgress.duration - lastAccessed.videoProgress.currentTime;
+  const hasVideo = lastAccessed.videoProgress.duration > 0;
+  const remainingTime = hasVideo ? lastAccessed.videoProgress.duration - lastAccessed.videoProgress.currentTime : 0;
   
   // Fix image URL if it has example.com prefix
   const fixedImageUrl = lastAccessed.lessonImageUrl?.replace('https://example.com', '') || '';
@@ -166,18 +249,24 @@ export default function ContinueLearning() {
             </div>
           )}
           
-          {/* Progress Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-            <div 
-              className="h-full bg-gradient-to-r from-secondary to-accent shadow-glow"
-              style={{ width: `${lastAccessed.videoProgress.percentage}%` }}
-            />
-          </div>
+          {/* Progress Overlay - only show for videos */}
+          {hasVideo && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
+              <div 
+                className="h-full bg-gradient-to-r from-secondary to-accent shadow-glow"
+                style={{ width: `${lastAccessed.videoProgress.percentage}%` }}
+              />
+            </div>
+          )}
           
-          {/* Play Button Overlay */}
+          {/* Icon Overlay - Play for video, BookOpen for other content */}
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-              <Play className="text-primary ml-1" size={24} fill="currentColor" />
+              {hasVideo ? (
+                <Play className="text-primary ml-1" size={24} fill="currentColor" />
+              ) : (
+                <BookOpen className="text-primary" size={24} />
+              )}
             </div>
           </div>
         </div>
@@ -200,13 +289,17 @@ export default function ContinueLearning() {
           </p>
           
           <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-white/60">
-            <div className="flex items-center gap-2">
-              <Clock size={14} />
-              <span>{t('continueWatching.timeRemaining', { time: formatTime(remainingTime) })}</span>
-            </div>
-            <span className="hidden md:block">•</span>
-            <span>{Math.round(lastAccessed.videoProgress.percentage)}% {t('continueWatching.completed')}</span>
-            <span className="hidden md:block">•</span>
+            {hasVideo && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} />
+                  <span>{t('continueWatching.timeRemaining', { time: formatTime(remainingTime) })}</span>
+                </div>
+                <span className="hidden md:block">•</span>
+                <span>{Math.round(lastAccessed.videoProgress.percentage)}% {t('continueWatching.completed')}</span>
+                <span className="hidden md:block">•</span>
+              </>
+            )}
             <span className="text-xs">{formatLastUpdated(lastAccessed.lastUpdatedAt)}</span>
           </div>
         </div>

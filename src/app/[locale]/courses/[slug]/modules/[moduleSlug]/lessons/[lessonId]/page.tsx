@@ -10,6 +10,7 @@ import NavSidebar from '@/components/NavSidebar';
 import StableVideoPlayer from '@/components/StableVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
 import LessonComments from '@/components/LessonComments';
+import LessonAccessTracker from '@/components/LessonAccessTracker';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -284,6 +285,21 @@ export default async function LessonPage({
 
   return (
     <NavSidebar>
+      {/* Track lesson access for continue learning */}
+      <LessonAccessTracker
+        lessonId={lesson.id}
+        lessonTitle={lt.title}
+        courseId={course.id}
+        courseTitle={ct.title}
+        courseSlug={course.slug}
+        moduleId={moduleFound.id}
+        moduleTitle={mt.title}
+        moduleSlug={moduleFound.slug}
+        lessonImageUrl={lessonImageUrl}
+        hasVideo={!!(lesson.video?.providerVideoId || pandaData?.video_external_id)}
+        locale={locale}
+      />
+      
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
         {/* Breadcrumb header melhorado */}
         <div className="bg-primary-dark border-b border-secondary/20">

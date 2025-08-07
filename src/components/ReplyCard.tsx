@@ -6,6 +6,7 @@ import {
   MessageSquare,
   Calendar,
   Flag,
+  Ban,
 } from 'lucide-react';
 import Image from 'next/image';
 import ReactionsButton, {
@@ -13,6 +14,8 @@ import ReactionsButton, {
 } from '@/components/ReactionsButton';
 import { RoleBadge } from '@/components/ui/role-badge';
 import { cn } from '@/lib/utils';
+import { ModerationControls } from '@/components/ui/moderation-controls';
+import { useAuth } from '@/stores/auth.store';
 
 interface Author {
   id: string;
@@ -46,12 +49,15 @@ interface Reply {
     fileName: string;
   }>;
   replies?: Reply[]; // Add support for nested replies
+  // Moderation fields
+  isBlocked?: boolean;
 }
 
 interface ReplyCardProps {
   reply: Reply;
   onReaction?: (replyId: string, reaction: ReactionType | null) => void;
   onReply?: (replyId: string, author: Author) => void;
+  onUpdate?: () => void;
   depth?: number;
   canReply?: boolean;
 }
@@ -60,10 +66,12 @@ export default function ReplyCard({
   reply,
   onReaction,
   onReply,
+  onUpdate,
   depth = 0,
   canReply = true,
 }: ReplyCardProps) {
   const t = useTranslations('Community');
+  const { user } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -91,6 +99,11 @@ export default function ReplyCard({
     [t]
   );
 
+  // REGRA DE VISIBILIDADE: Students não veem comentários bloqueados
+  if (reply.isBlocked && user?.role === 'student') {
+    return null; // Não renderiza nada para students
+  }
+
   return (
     <div className="relative">
       {/* Connection Line */}
@@ -106,7 +119,10 @@ export default function ReplyCard({
           'hover:from-primary-dark/40 hover:via-primary-dark/30 hover:to-secondary/20',
           'transition-all duration-300',
           'border-l-2 border-secondary/30',
-          depth > 0 && 'ml-6 mt-2'
+          depth > 0 && 'ml-6 mt-2',
+          // Admin/Tutor veem com opacidade reduzida
+          reply.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && 
+            'opacity-50 bg-red-50/5'
         )}
       >
       {/* Gradient Accent Effect */}
@@ -114,8 +130,17 @@ export default function ReplyCard({
       
       {/* Content Container */}
       <div className="relative z-10">
+        {/* Indicador de bloqueio apenas para admin/tutor */}
+        {reply.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && (
+          <div className="text-xs text-red-400 mb-1 flex items-center gap-1">
+            <Ban size={10} />
+            <span>Comentário bloqueado</span>
+          </div>
+        )}
+
         {/* Reply Header - More Compact */}
-        <div className="flex items-start gap-3 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-start gap-3 flex-1">
           {/* Avatar - Smaller */}
           <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
             <Image
@@ -142,6 +167,24 @@ export default function ReplyCard({
                 {isHydrated ? formatDate(reply.createdAt) : ''}
               </span>
             </div>
+          </div>
+          </div>
+
+          {/* Controles de Moderação - APENAS BLOQUEIO para comentários */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <ModerationControls
+              item={{
+                id: reply.id,
+                content: reply.content,
+                isBlocked: reply.isBlocked
+              }}
+              type="comment" // Não terá botão de editar por ser comment
+              size="xs"
+              onUpdate={() => {
+                console.log('♻️ Atualizando comentário após bloqueio/desbloqueio:', reply.id);
+                onUpdate?.();
+              }}
+            />
           </div>
         </div>
 
@@ -251,16 +294,24 @@ export default function ReplyCard({
     {/* Nested Replies */}
     {reply.replies && reply.replies.length > 0 && (
       <div className="ml-8 mt-2 space-y-2">
-        {reply.replies.map((nestedReply) => (
-          <ReplyCard
-            key={nestedReply.id}
-            reply={nestedReply}
-            onReaction={onReaction}
-            onReply={onReply}
-            depth={(depth || 0) + 1}
-            canReply={false} // Don't allow replies beyond second level (as per API spec)
-          />
-        ))}
+        {reply.replies.map((nestedReply) => {
+          // Aplicar mesma regra de visibilidade
+          if (nestedReply.isBlocked && user?.role === 'student') {
+            return null;
+          }
+
+          return (
+            <ReplyCard
+              key={nestedReply.id}
+              reply={nestedReply}
+              onReaction={onReaction}
+              onReply={onReply}
+              onUpdate={onUpdate}
+              depth={(depth || 0) + 1}
+              canReply={false} // Don't allow replies beyond second level (as per API spec)
+            />
+          );
+        })}
       </div>
     )}
     </div>

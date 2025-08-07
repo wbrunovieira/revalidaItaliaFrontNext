@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Flag,
+  Ban,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,8 @@ import ReactionsButton, {
 import { cn } from '@/lib/utils';
 import { RoleBadge } from '@/components/ui/role-badge';
 import ReplyCard from '@/components/ReplyCard';
+import { ModerationControls } from '@/components/ui/moderation-controls';
+import { useAuth } from '@/stores/auth.store';
 
 interface Author {
   id: string;
@@ -57,6 +60,7 @@ interface Reply {
   parentId?: string;
   replies?: Reply[];
   attachments?: Attachment[];
+  isBlocked?: boolean;
 }
 
 interface Attachment {
@@ -118,6 +122,11 @@ interface Post {
   };
   isPinned?: boolean;
   replies?: Reply[];
+  // Moderation fields
+  isBlocked?: boolean;
+  wasTitleEdited?: boolean;
+  titleEditedBy?: string;
+  titleEditedAt?: Date | string;
 }
 
 interface PostCardProps {
@@ -133,6 +142,7 @@ interface PostCardProps {
   onClick?: () => void;
   onReply?: (postId: string) => void;
   onReplyToComment?: (commentId: string, author: Author) => void;
+  onUpdate?: () => void;
   compactVideo?: boolean;
   compactImages?: boolean;
 }
@@ -144,10 +154,12 @@ export default function PostCard({
   onClick,
   onReply,
   onReplyToComment,
+  onUpdate,
   compactVideo = false,
   compactImages = false,
 }: PostCardProps) {
   const t = useTranslations('Community');
+  const { user } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
@@ -179,6 +191,11 @@ export default function PostCard({
     },
     [t]
   );
+
+  // REGRA DE VISIBILIDADE: Students não veem posts bloqueados
+  if (post.isBlocked && user?.role === 'student') {
+    return null; // Não renderiza nada para students
+  }
 
   // Helper to fix attachment URLs
   const fixAttachmentUrl = (url: string, type: 'IMAGE' | 'VIDEO' | 'DOCUMENT') => {
@@ -529,7 +546,10 @@ export default function PostCard({
         // Add subtle secondary border for lesson posts
         (post.lesson || post.module || post.course) ? 
           'border-secondary/30' : 
-          'border-gray-700'
+          'border-gray-700',
+        // Admin/Tutor veem posts bloqueados com opacidade reduzida
+        post.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && 
+          'opacity-50 bg-red-50/10 border-red-200/30'
       )}
       onClick={onClick}
     >
@@ -544,19 +564,55 @@ export default function PostCard({
       )}
 
       <div className="relative">
-        {/* Post Header */}
-        <div className="flex items-center gap-2 mb-2">
-          {post.isPinned && (
-            <Badge
-              variant="secondary"
-              className="bg-secondary/20 text-secondary border-secondary/30"
-            >
-              {t('pinned')}
-            </Badge>
-          )}
-          <h3 className="text-xl font-semibold text-white group-hover:text-secondary transition-colors line-clamp-2">
-            {post.title}
-          </h3>
+        {/* Indicador de bloqueio apenas para admin/tutor */}
+        {post.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && (
+          <div className="bg-red-900/20 text-red-400 p-2 rounded mb-2 flex items-center gap-2 border border-red-800/30">
+            <Ban size={14} />
+            <span className="text-sm font-medium">
+              Conteúdo bloqueado - Visível apenas para moderadores
+            </span>
+          </div>
+        )}
+
+        {/* Post Header com controles de moderação */}
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex items-center gap-2 flex-1">
+            {post.isPinned && (
+              <Badge
+                variant="secondary"
+                className="bg-secondary/20 text-secondary border-secondary/30"
+              >
+                {t('pinned')}
+              </Badge>
+            )}
+            <h3 className="text-xl font-semibold text-white group-hover:text-secondary transition-colors line-clamp-2">
+              {post.title}
+              {post.wasTitleEdited && (
+                <span className="ml-2 text-xs text-gray-500 font-normal italic">
+                  (título editado por moderador)
+                </span>
+              )}
+            </h3>
+          </div>
+
+          {/* Controles de Moderação - só aparecem para admin/tutor */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <ModerationControls
+              item={{
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                isBlocked: post.isBlocked,
+                wasEdited: post.wasTitleEdited
+              }}
+              type="post"
+              size="sm"
+              onUpdate={() => {
+                console.log('♻️ Atualizando post após moderação:', post.id);
+                onUpdate?.();
+              }}
+            />
+          </div>
         </div>
 
         {/* Author Info */}
@@ -799,10 +855,12 @@ export default function PostCard({
                 updatedAt: reply.updatedAt,
                 reactions: reply.reactions,
                 attachments: reply.attachments,
-                replies: reply.replies // Pass nested replies
+                replies: reply.replies, // Pass nested replies
+                isBlocked: reply.isBlocked
               }}
               onReaction={onCommentReaction || onReaction}
               onReply={onReplyToComment}
+              onUpdate={onUpdate}
               canReply={true} // Allow replies to comments
             />
           ))}

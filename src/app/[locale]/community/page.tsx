@@ -184,6 +184,7 @@ interface Reply {
   };
   parentId?: string;
   replies?: Reply[];
+  isBlocked?: boolean; // Moderation field
 }
 
 interface Topic {
@@ -238,6 +239,11 @@ interface Topic {
   }>;
   mediaType?: string;
   replies?: Reply[];
+  // Moderation fields
+  isBlocked?: boolean;
+  wasTitleEdited?: boolean;
+  titleEditedBy?: string;
+  titleEditedAt?: Date;
 }
 
 // Mock lessons data
@@ -364,8 +370,233 @@ const mockTopics: Topic[] = [
   },
 ];
 
-// Mock topics with attachments and replies for reference
+// Mock topics with attachments, moderation examples and replies for reference
 const mockTopicsWithAttachments: Topic[] = [
+  // EXEMPLO DE POST BLOQUEADO
+  {
+    id: 'mock-blocked',
+    title: '🚫 POST BLOQUEADO - Visível apenas para Admin/Tutor',
+    content: 'Este é um exemplo de post que foi bloqueado por violar as regras da comunidade. Apenas moderadores (Admin/Tutor) podem ver este conteúdo com 50% de opacidade. Usuários comuns (Students) não conseguem ver este post.',
+    author: {
+      id: '999',
+      name: 'Usuário Problemático',
+      avatar: undefined,
+      city: 'Roma',
+      country: 'Itália',
+      profession: 'Médico',
+      role: 'student' as const,
+    },
+    createdAt: new Date('2024-01-10T10:00:00'),
+    updatedAt: new Date('2024-01-10T10:00:00'),
+    viewCount: 0,
+    replyCount: 0,
+    reactions: {
+      LOVE: 0,
+      LIKE: 0,
+      SURPRISE: 0,
+      CLAP: 0,
+      SAD: 0,
+      userReactions: [],
+    },
+    tags: ['bloqueado', 'exemplo'],
+    isPinned: false,
+    isBlocked: true, // POST BLOQUEADO
+    replies: [
+      {
+        id: 'reply-blocked',
+        content: 'Este comentário também está bloqueado e só é visível para moderadores.',
+        author: {
+          id: '998',
+          name: 'Outro Usuário',
+          avatar: undefined,
+          role: 'student' as const,
+        },
+        createdAt: new Date('2024-01-10T11:00:00'),
+        updatedAt: new Date('2024-01-10T11:00:00'),
+        reactions: {
+          LOVE: 0,
+          LIKE: 0,
+          SURPRISE: 0,
+          CLAP: 0,
+          SAD: 0,
+          userReactions: [],
+        },
+        isBlocked: true, // COMENTÁRIO BLOQUEADO
+      }
+    ]
+  },
+  
+  // EXEMPLO DE POST COM TÍTULO EDITADO
+  {
+    id: 'mock-edited',
+    title: 'Dúvidas sobre o Processo de Revalidação [Título Corrigido]',
+    content: 'Este post teve seu título editado por um moderador para torná-lo mais claro e profissional. O conteúdo original permanece inalterado. Moderadores podem apenas editar títulos, nunca o conteúdo do post.',
+    author: {
+      id: '997',
+      name: 'João Santos',
+      avatar: undefined,
+      city: 'Milão',
+      country: 'Itália',
+      profession: 'Enfermeiro',
+      role: 'student' as const,
+    },
+    createdAt: new Date('2024-01-12T10:00:00'),
+    updatedAt: new Date('2024-01-12T10:00:00'),
+    viewCount: 123,
+    replyCount: 5,
+    reactions: {
+      LOVE: 3,
+      LIKE: 7,
+      SURPRISE: 1,
+      CLAP: 2,
+      SAD: 0,
+      userReactions: [],
+    },
+    tags: ['editado', 'exemplo'],
+    isPinned: false,
+    wasTitleEdited: true, // TÍTULO FOI EDITADO
+    titleEditedBy: 'admin-1',
+    titleEditedAt: new Date('2024-01-12T15:00:00'),
+    replies: [
+      {
+        id: 'reply-normal',
+        content: 'Ótima pergunta! O título ficou muito mais claro após a edição.',
+        author: {
+          id: '996',
+          name: 'Ana Costa',
+          avatar: undefined,
+          role: 'tutor' as const,
+        },
+        createdAt: new Date('2024-01-12T11:00:00'),
+        updatedAt: new Date('2024-01-12T11:00:00'),
+        reactions: {
+          LOVE: 1,
+          LIKE: 2,
+          SURPRISE: 0,
+          CLAP: 1,
+          SAD: 0,
+          userReactions: [],
+        },
+      }
+    ]
+  },
+  
+  // EXEMPLO COM COMENTÁRIO BLOQUEADO MAS POST NORMAL
+  {
+    id: 'mock-mixed',
+    title: 'Post Normal com Comentário Bloqueado',
+    content: 'Este é um post normal que todos podem ver, mas um dos comentários foi bloqueado por conteúdo inadequado.',
+    author: {
+      id: '995',
+      name: 'Pedro Lima',
+      avatar: undefined,
+      city: 'Nápoles',
+      country: 'Itália',
+      profession: 'Fisioterapeuta',
+      role: 'student' as const,
+    },
+    createdAt: new Date('2024-01-13T10:00:00'),
+    updatedAt: new Date('2024-01-13T10:00:00'),
+    viewCount: 89,
+    replyCount: 3,
+    reactions: {
+      LOVE: 4,
+      LIKE: 6,
+      SURPRISE: 0,
+      CLAP: 3,
+      SAD: 0,
+      userReactions: [],
+    },
+    tags: ['exemplo', 'moderação'],
+    isPinned: false,
+    replies: [
+      {
+        id: 'reply-ok-1',
+        content: 'Comentário normal que todos podem ver.',
+        author: {
+          id: '994',
+          name: 'Carlos Mendes',
+          avatar: undefined,
+          role: 'student' as const,
+        },
+        createdAt: new Date('2024-01-13T11:00:00'),
+        updatedAt: new Date('2024-01-13T11:00:00'),
+        reactions: {
+          LOVE: 1,
+          LIKE: 1,
+          SURPRISE: 0,
+          CLAP: 0,
+          SAD: 0,
+          userReactions: [],
+        },
+      },
+      {
+        id: 'reply-blocked-2',
+        content: 'Este comentário foi bloqueado por linguagem inadequada. Apenas moderadores podem vê-lo.',
+        author: {
+          id: '993',
+          name: 'Usuário Bloqueado',
+          avatar: undefined,
+          role: 'student' as const,
+        },
+        createdAt: new Date('2024-01-13T12:00:00'),
+        updatedAt: new Date('2024-01-13T12:00:00'),
+        reactions: {
+          LOVE: 0,
+          LIKE: 0,
+          SURPRISE: 0,
+          CLAP: 0,
+          SAD: 0,
+          userReactions: [],
+        },
+        isBlocked: true, // COMENTÁRIO BLOQUEADO
+        replies: [
+          {
+            id: 'nested-blocked',
+            content: 'Resposta também bloqueada automaticamente.',
+            author: {
+              id: '992',
+              name: 'Outro User',
+              avatar: undefined,
+              role: 'student' as const,
+            },
+            createdAt: new Date('2024-01-13T13:00:00'),
+            updatedAt: new Date('2024-01-13T13:00:00'),
+            reactions: {
+              LOVE: 0,
+              LIKE: 0,
+              SURPRISE: 0,
+              CLAP: 0,
+              SAD: 0,
+              userReactions: [],
+            },
+            isBlocked: true, // RESPOSTA ANINHADA BLOQUEADA
+          }
+        ]
+      },
+      {
+        id: 'reply-ok-2',
+        content: 'Outro comentário normal visível para todos.',
+        author: {
+          id: '991',
+          name: 'Lucia Ferreira',
+          avatar: undefined,
+          role: 'admin' as const,
+        },
+        createdAt: new Date('2024-01-13T14:00:00'),
+        updatedAt: new Date('2024-01-13T14:00:00'),
+        reactions: {
+          LOVE: 2,
+          LIKE: 3,
+          SURPRISE: 0,
+          CLAP: 1,
+          SAD: 0,
+          userReactions: [],
+        },
+      }
+    ]
+  },
+
   {
     id: 'mock-1',
     title: '📸 Post com 1 Imagem - Layout Simples',
@@ -1530,6 +1761,10 @@ export default function CommunityPage() {
                     }}
                     onReply={handleReplyToPost}
                     onReplyToComment={(commentId: string, author: Author) => handleReplyToComment(commentId, author)}
+                    onUpdate={() => {
+                      console.log('♻️ Refreshing posts after moderation');
+                      fetchPosts(currentPage);
+                    }}
                     onClick={() => console.log('Post clicked:', topic.id)}
                     compactVideo={true}
                     compactImages={true}
@@ -1570,11 +1805,17 @@ export default function CommunityPage() {
           {/* Mock Posts Section - For Reference */}
           <div className="mt-16 p-6 bg-gray-800/30 rounded-lg border-2 border-dashed border-gray-700">
             <h2 className="text-2xl font-bold text-white mb-2">
-              📋 Modelos de Referência (Exemplos de Posts)
+              🛡️ Exemplos de Moderação e Layouts
             </h2>
-            <p className="text-gray-400 mb-6">
-              Abaixo estão exemplos de todos os tipos de posts possíveis com diferentes layouts de anexos
+            <p className="text-gray-400 mb-4">
+              Demonstração de funcionalidades de moderação (visíveis apenas para Admin/Tutor):
             </p>
+            <ul className="text-sm text-gray-400 mb-6 space-y-1 list-disc list-inside">
+              <li className="text-red-400">🚫 Posts/Comentários bloqueados - Aparecem com 50% opacidade para moderadores, invisíveis para students</li>
+              <li className="text-yellow-400">✏️ Títulos editados - Indicador &quot;(título editado por moderador)&quot; visível para todos</li>
+              <li className="text-green-400">🔧 Controles de moderação - Botões de editar/bloquear visíveis apenas para Admin/Tutor</li>
+              <li className="text-blue-400">📎 Diferentes layouts de anexos - Imagens, vídeos e documentos</li>
+            </ul>
             <div className="space-y-4">
               {mockTopicsWithAttachments.map(topic => (
                 <PostCard
@@ -1591,6 +1832,9 @@ export default function CommunityPage() {
                   }}
                   onCommentReaction={(commentId, reaction) => {
                     console.log('Mock comment reaction:', commentId, reaction);
+                  }}
+                  onUpdate={() => {
+                    console.log('♻️ Mock post update');
                   }}
                   onClick={() => console.log('Mock post clicked:', topic.id)}
                   compactVideo={true}

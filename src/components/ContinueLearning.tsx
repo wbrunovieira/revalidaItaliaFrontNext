@@ -36,19 +36,89 @@ interface ContinueLearningResponse {
   lastAccessed?: ContinueLearningData;
 }
 
+interface ValidationResult {
+  isValid: boolean;
+  shouldClearLocalStorage?: boolean;
+}
+
 export default function ContinueLearning() {
   const t = useTranslations('Dashboard');
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ContinueLearningResponse | null>(null);
   const [imageError, setImageError] = useState(false);
-  const { getLastLessonAccess } = useLessonAccess();
+  const [validationAttempts, setValidationAttempts] = useState(0);
+  const { getLastLessonAccess, clearLessonAccess } = useLessonAccess();
 
-  const checkLocalStorageForLessonAccess = useCallback(() => {
+  // Valida se a lição ainda existe no backend
+  const validateLessonExists = useCallback(async (lessonId: string): Promise<ValidationResult> => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1] || '';
+      
+      if (!token) {
+        console.warn('[ContinueLearning] Cannot validate lesson without token');
+        return { isValid: false, shouldClearLocalStorage: false };
+      }
+      
+      // Tenta buscar a lição para verificar se ainda existe
+      const response = await fetch(`${apiUrl}/api/v1/lessons/${lessonId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 404) {
+        console.log(`[ContinueLearning] Lesson ${lessonId} not found (404) - will clear localStorage`);
+        return { isValid: false, shouldClearLocalStorage: true };
+      }
+      
+      if (response.status === 403) {
+        console.log(`[ContinueLearning] No access to lesson ${lessonId} (403) - will clear localStorage`);
+        return { isValid: false, shouldClearLocalStorage: true };
+      }
+      
+      if (response.ok) {
+        console.log(`[ContinueLearning] Lesson ${lessonId} validated successfully`);
+        return { isValid: true };
+      }
+      
+      // Para outros erros (500, etc), não limpa o localStorage imediatamente
+      console.warn(`[ContinueLearning] Could not validate lesson ${lessonId}, status: ${response.status}`);
+      return { isValid: false, shouldClearLocalStorage: false };
+      
+    } catch (error) {
+      console.error('[ContinueLearning] Error validating lesson:', error);
+      // Em caso de erro de rede, não limpa o localStorage
+      return { isValid: false, shouldClearLocalStorage: false };
+    }
+  }, []);
+
+  const checkLocalStorageForLessonAccess = useCallback(async () => {
     const lastAccess = getLastLessonAccess();
     
     if (lastAccess) {
       console.log('[ContinueLearning] Found lesson access in localStorage:', lastAccess);
+      
+      // Valida se a lição ainda existe antes de usar
+      const validation = await validateLessonExists(lastAccess.lessonId);
+      
+      if (validation.shouldClearLocalStorage) {
+        console.log('[ContinueLearning] Clearing invalid lesson from localStorage');
+        clearLessonAccess();
+        setData({ hasProgress: false });
+        return;
+      }
+      
+      // Se não conseguiu validar mas não deve limpar (erro de rede, etc)
+      // Ainda mostra a lição mas com retry logic
+      if (!validation.isValid && validationAttempts < 3) {
+        setValidationAttempts(prev => prev + 1);
+        console.log(`[ContinueLearning] Could not validate, attempt ${validationAttempts + 1}/3`);
+      }
       
       // Convert localStorage data to ContinueLearning format
       const localData: ContinueLearningResponse = {
@@ -65,12 +135,28 @@ export default function ContinueLearning() {
         },
       };
       
+      // Se após 3 tentativas não conseguiu validar e não há token, limpa
+      if (!validation.isValid && validationAttempts >= 2) {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+        
+        if (token) {
+          // Com token mas não validou após 3 tentativas - provavelmente lição deletada
+          console.log('[ContinueLearning] Failed to validate after 3 attempts, clearing localStorage');
+          clearLessonAccess();
+          setData({ hasProgress: false });
+          return;
+        }
+      }
+      
       setData(localData);
     } else {
       // No data from backend or localStorage
       setData({ hasProgress: false });
     }
-  }, [getLastLessonAccess]);
+  }, [getLastLessonAccess, clearLessonAccess, validateLessonExists, validationAttempts]);
 
   const fetchContinueLearning = useCallback(async () => {
     try {

@@ -19,9 +19,11 @@ interface Author {
   id: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
   city?: string;
   country?: string;
   profession?: string;
+  role?: 'student' | 'admin' | 'tutor';
 }
 
 interface ReactionCounts {
@@ -249,6 +251,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                   id: (comment.author as Record<string, unknown>).id,
                   name: (comment.author as Record<string, unknown>).fullName,
                   avatar: (comment.author as Record<string, unknown>).profileImageUrl,
+                  profileImageUrl: (comment.author as Record<string, unknown>).profileImageUrl,
                   role: (comment.author as Record<string, unknown>).role
                 },
                 createdAt: new Date(comment.createdAt as string),
@@ -269,6 +272,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                     id: (reply.author as Record<string, unknown>).id,
                     name: (reply.author as Record<string, unknown>).fullName,
                     avatar: (reply.author as Record<string, unknown>).profileImageUrl,
+                    profileImageUrl: (reply.author as Record<string, unknown>).profileImageUrl,
                     role: (reply.author as Record<string, unknown>).role
                   },
                   createdAt: new Date(reply.createdAt as string),

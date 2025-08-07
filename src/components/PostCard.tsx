@@ -33,6 +33,7 @@ interface Author {
   id: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
   city?: string;
   country?: string;
   profession?: string;
@@ -558,7 +559,7 @@ export default function PostCard({
           <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/20">
             <Image
               src={
-                post.author.avatar || '/icons/avatar.svg'
+                post.author.profileImageUrl || post.author.avatar || '/icons/avatar.svg'
               }
               alt={post.author.name}
               width={40}

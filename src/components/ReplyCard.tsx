@@ -18,6 +18,7 @@ interface Author {
   id: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
   city?: string;
   country?: string;
   profession?: string;
@@ -118,7 +119,7 @@ export default function ReplyCard({
           {/* Avatar - Smaller */}
           <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
             <Image
-              src={reply.author.avatar || '/icons/avatar.svg'}
+              src={reply.author.profileImageUrl || reply.author.avatar || '/icons/avatar.svg'}
               alt={reply.author.name}
               width={32}
               height={32}

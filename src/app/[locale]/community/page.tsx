@@ -161,6 +161,7 @@ interface Author {
   id: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
   city?: string;
   country?: string;
   profession?: string;
@@ -793,7 +794,7 @@ export default function CommunityPage() {
       }
 
       const data = await response.json();
-
+      
       // Transform API response to match our Topic interface
       const transformedPosts: Topic[] = await Promise.all(
         data.posts.map(async (post: CommunityPost) => {
@@ -819,6 +820,7 @@ export default function CommunityPage() {
                   id: comment.author.id,
                   name: comment.author.fullName,
                   avatar: comment.author.profileImageUrl,
+                  profileImageUrl: comment.author.profileImageUrl,
                   role: comment.author.role
                 },
                 createdAt: new Date(comment.createdAt),
@@ -839,6 +841,7 @@ export default function CommunityPage() {
                     id: reply.author.id,
                     name: reply.author.fullName,
                     avatar: reply.author.profileImageUrl,
+                    profileImageUrl: reply.author.profileImageUrl,
                     role: reply.author.role
                   },
                   createdAt: new Date(reply.createdAt),
@@ -867,6 +870,7 @@ export default function CommunityPage() {
               id: post.author.id,
               name: post.author.name,
               avatar: post.author.profileImageUrl || post.author.avatar,
+              profileImageUrl: post.author.profileImageUrl,
               city: post.author.city || '',
               country: post.author.country || '',
               profession: post.author.profession || '',
@@ -875,6 +879,7 @@ export default function CommunityPage() {
               id: post.authorId,
               name: 'Unknown User',
               avatar: undefined,
+              profileImageUrl: undefined,
               city: '',
               country: '',
               profession: '',

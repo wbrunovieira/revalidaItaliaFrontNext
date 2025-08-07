@@ -14,6 +14,7 @@ interface Author {
   id: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
   role?: 'student' | 'admin' | 'tutor';
 }
 
@@ -197,7 +198,7 @@ export default function CreateCommentModal({
             <div className="flex items-center gap-2 mb-1">
               <div className="relative w-6 h-6 rounded-full overflow-hidden bg-secondary/20">
                 <Image
-                  src={parentAuthor.avatar || '/icons/avatar.svg'}
+                  src={parentAuthor.profileImageUrl || parentAuthor.avatar || '/icons/avatar.svg'}
                   alt={parentAuthor.name}
                   width={24}
                   height={24}

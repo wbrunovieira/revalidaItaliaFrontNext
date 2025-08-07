@@ -1307,22 +1307,42 @@ export default function CommunityPage() {
 
         const currentReaction = topic.reactions.userReactions[0]; // User can only have one reaction
         
-        // If trying to add the same reaction that already exists, remove it
-        if (reactionType === currentReaction) {
-          reactionType = null;
+        // Determine final action
+        let actionType: 'add' | 'remove' | 'change' = 'add';
+        let reactionToSend = reactionType;
+        
+        if (reactionType === null) {
+          // Explicitly removing reaction
+          actionType = 'remove';
+          reactionToSend = currentReaction; // Send current reaction to remove
+        } else if (reactionType === currentReaction) {
+          // Clicking same reaction = remove it
+          actionType = 'remove';
+          reactionToSend = currentReaction;
+          reactionType = null; // Clear for UI update
+        } else if (currentReaction && reactionType) {
+          // Changing from one reaction to another
+          actionType = 'change';
         }
+
+        console.log(`[Reactions] ${actionType} reaction:`, {
+          postId: topicId,
+          current: currentReaction,
+          new: reactionType,
+          sending: reactionToSend
+        });
 
         // Make API call
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
           {
-            method: 'POST',
+            method: actionType === 'remove' ? 'DELETE' : 'POST', // Use DELETE for removal when backend supports it
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              type: reactionType || currentReaction, // Send current reaction if removing
+              type: reactionToSend,
             }),
           }
         );
@@ -1409,22 +1429,42 @@ export default function CommunityPage() {
           return;
         }
         
-        // If trying to add the same reaction that already exists, skip
-        if (reactionType === currentReaction) {
-          return;
+        // Determine final action
+        let actionType: 'add' | 'remove' | 'change' = 'add';
+        let reactionToSend = reactionType;
+        
+        if (reactionType === null) {
+          // Explicitly removing reaction
+          actionType = 'remove';
+          reactionToSend = currentReaction;
+        } else if (reactionType === currentReaction) {
+          // Clicking same reaction = remove it
+          actionType = 'remove';
+          reactionToSend = currentReaction;
+          reactionType = null; // Clear for UI update
+        } else if (currentReaction && reactionType) {
+          // Changing from one reaction to another
+          actionType = 'change';
         }
+
+        console.log(`[Reactions] ${actionType} comment reaction:`, {
+          commentId,
+          current: currentReaction,
+          new: reactionType,
+          sending: reactionToSend
+        });
 
         // Make API call using the new endpoint
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
           {
-            method: 'POST',
+            method: actionType === 'remove' ? 'DELETE' : 'POST', // Use DELETE for removal when backend supports it
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              reactionType: reactionType, // API expects reactionType field
+              reactionType: reactionToSend, // API expects reactionType field
             }),
           }
         );

@@ -281,7 +281,7 @@ export default function ReplyCard({
                 },
               ]}
                   postId={reply.id}
-                  onReact={(type: ReactionType) => onReaction(reply.id, type)}
+                  onReact={(type) => onReaction(reply.id, type)}
                   compact={true}
                 />
               </div>

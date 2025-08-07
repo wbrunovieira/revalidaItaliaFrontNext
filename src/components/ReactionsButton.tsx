@@ -17,7 +17,7 @@ export interface Reaction {
 
 interface ReactionsButtonProps {
   reactions: Reaction[];
-  onReact: (type: ReactionType) => void;
+  onReact: (type: ReactionType | null) => void;
   postId?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -44,6 +44,8 @@ export default function ReactionsButton({
   const [showPicker, setShowPicker] = useState(false);
   const [hoveredReaction, setHoveredReaction] = useState<ReactionType | null>(null);
   const [showReactionsModal, setShowReactionsModal] = useState(false);
+  const [animatingReaction, setAnimatingReaction] = useState<ReactionType | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,6 +70,7 @@ export default function ReactionsButton({
 
   const hasAnyReaction = reactions.some(r => r.hasReacted);
   const totalReactions = reactions.reduce((sum, r) => sum + r.count, 0);
+  const currentUserReaction = reactions.find(r => r.hasReacted)?.type;
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -83,7 +86,22 @@ export default function ReactionsButton({
   };
 
   const handleReaction = (type: ReactionType) => {
-    onReact(type);
+    // Se clicou na mesma reação que já tem, remove ela (passa null)
+    if (currentUserReaction === type) {
+      setIsRemoving(true);
+      setAnimatingReaction(type);
+      setTimeout(() => {
+        onReact(null);
+        setIsRemoving(false);
+        setAnimatingReaction(null);
+      }, 300); // Aguarda animação terminar
+    } else {
+      setAnimatingReaction(type);
+      onReact(type);
+      setTimeout(() => {
+        setAnimatingReaction(null);
+      }, 300);
+    }
     setShowPicker(false);
   };
 
@@ -134,17 +152,44 @@ export default function ReactionsButton({
         className={cn(
           'flex items-center rounded-full transition-all duration-200',
           'hover:bg-gray-800 hover:scale-105',
-          hasAnyReaction ? 'text-white bg-gray-800/50' : 'text-gray-500',
+          hasAnyReaction ? 'text-white bg-secondary/20 ring-1 ring-secondary/30' : 'text-gray-500',
           sizeClasses.button,
           className
         )}
       >
-        {/* Show all reactions with opacity based on count */}
-        {reactions.slice(0, 3).map(r => (
-          <span key={r.type} className={cn(sizeClasses.emoji, r.count === 0 && !r.hasReacted && 'opacity-40')}>
-            {reactionEmojis[r.type]}
-          </span>
-        ))}
+        {/* Se tem reação, mostra ela primeiro destacada */}
+        {currentUserReaction ? (
+          <>
+            <span className={cn(
+              sizeClasses.emoji,
+              animatingReaction === currentUserReaction && isRemoving && 'animate-reaction-remove',
+              animatingReaction === currentUserReaction && !isRemoving && 'animate-reaction-bounce',
+              !animatingReaction && 'animate-pulse'
+            )}>
+              {reactionEmojis[currentUserReaction]}
+            </span>
+            {/* Mostra outras reações populares */}
+            {reactions
+              .filter(r => r.type !== currentUserReaction && r.count > 0)
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 2)
+              .map(r => (
+                <span key={r.type} className={cn(sizeClasses.emoji, 'opacity-60')}>
+                  {reactionEmojis[r.type]}
+                </span>
+              ))}
+          </>
+        ) : (
+          /* Se não tem reação, mostra as 3 mais populares */
+          reactions
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3)
+            .map(r => (
+              <span key={r.type} className={cn(sizeClasses.emoji, r.count === 0 && 'opacity-40')}>
+                {reactionEmojis[r.type]}
+              </span>
+            ))
+        )}
         {totalReactions > 0 && (
           <span
             onClick={e => {
@@ -190,39 +235,68 @@ export default function ReactionsButton({
                 onMouseLeave={() => setHoveredReaction(null)}
                 className={cn(
                   'relative rounded-full transition-all duration-200',
-                  'hover:scale-125 hover:bg-gray-800',
-                  hasReacted && 'bg-gray-800',
+                  'hover:scale-125',
+                  hasReacted ? 'bg-secondary/20 ring-2 ring-secondary scale-110' : 'hover:bg-gray-800',
                   sizeClasses.pickerEmoji
                 )}
               >
                 <span
                   className={cn(
-                    'block transform transition-transform duration-200',
-                    reaction?.count === 0 && !hasReacted && 'opacity-50'
+                    'block transform transition-all duration-200',
+                    hasReacted && 'animate-pulse',
+                    reaction?.count === 0 && !hasReacted && 'opacity-50',
+                    isHovered && hasReacted && 'rotate-12'
                   )}
                 >
                   {reactionEmojis[type]}
                 </span>
 
+                {/* Indicador de reação ativa */}
+                {hasReacted && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full animate-pulse" />
+                )}
+
                 {/* Tooltip */}
                 {isHovered && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
-                    <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      {t(
-                        type === 'LOVE'
-                          ? 'love'
-                          : type === 'LIKE'
-                          ? 'like'
-                          : type === 'SURPRISE'
-                          ? 'wow'
-                          : type === 'CLAP'
-                          ? 'applause'
-                          : 'sad'
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none z-50">
+                    <div className={cn(
+                      "text-white text-xs px-2 py-1 rounded whitespace-nowrap",
+                      hasReacted ? "bg-red-600" : "bg-gray-800"
+                    )}>
+                      {hasReacted ? (
+                        <>Remover {t(
+                          type === 'LOVE'
+                            ? 'love'
+                            : type === 'LIKE'
+                            ? 'like'
+                            : type === 'SURPRISE'
+                            ? 'wow'
+                            : type === 'CLAP'
+                            ? 'applause'
+                            : 'sad'
+                        )}</>
+                      ) : (
+                        <>
+                          {t(
+                            type === 'LOVE'
+                              ? 'love'
+                              : type === 'LIKE'
+                              ? 'like'
+                              : type === 'SURPRISE'
+                              ? 'wow'
+                              : type === 'CLAP'
+                              ? 'applause'
+                              : 'sad'
+                          )}
+                          {reaction && reaction.count > 0 && <span className="ml-1 text-gray-400">({reaction.count})</span>}
+                        </>
                       )}
-                      {reaction && reaction.count > 0 && <span className="ml-1 text-gray-400">({reaction.count})</span>}
                     </div>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                      <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800" />
+                      <div className={cn(
+                        "w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent",
+                        hasReacted ? "border-t-red-600" : "border-t-gray-800"
+                      )} />
                     </div>
                   </div>
                 )}

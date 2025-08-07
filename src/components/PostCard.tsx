@@ -821,7 +821,7 @@ export default function PostCard({
                   },
                 ]}
                 postId={post.id}
-                onReact={(type: ReactionType) =>
+                onReact={(type) =>
                   onReaction(post.id, type)
                 }
               />

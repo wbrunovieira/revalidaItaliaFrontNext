@@ -59,6 +59,16 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Badges de identificação (admin, tutor, student) agora aparecem em todos os comentários e respostas, melhorando a credibilidade e contexto das interações
 - [Commit] fix: add role and profileImageUrl fields to support user badges in comments
 
+**Sistema de Moderação com Confirmações**
+- [Técnico] Implementação de ModerationControls component com capacidade de editar títulos (posts apenas) e bloquear/desbloquear conteúdo, adição de dialog de confirmação antes de ações de moderação, visibilidade baseada em roles (students não veem conteúdo bloqueado, moderadores veem com 50% opacidade)
+- [Benefício] Permite que administradores e tutores moderem conteúdo inadequado protegendo a comunidade, sistema de confirmação previne ações acidentais, transparência para moderadores sobre conteúdo bloqueado
+- [Commit] feat: add moderation system with confirmation dialogs
+
+**Tratamento de Lições Deletadas no Continue Learning**
+- [Técnico] Implementação de validação de existência de lição antes de exibir no card, limpeza automática do localStorage quando lição retorna 404 ou 403, retry logic com 3 tentativas antes de desistir, tratamento diferenciado para erros de rede vs lições inexistentes
+- [Benefício] Evita exibição de cards quebrados quando lições são removidas ou usuário perde acesso, melhora robustez do sistema em ambientes de desenvolvimento onde banco é limpo frequentemente, experiência suave mesmo com mudanças no conteúdo disponível
+- [Commit] fix: handle deleted lessons in continue learning component
+
 ### 08/08/2025
 
 -

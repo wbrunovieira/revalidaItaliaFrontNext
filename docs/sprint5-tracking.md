@@ -49,7 +49,15 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 
 ### 07/08/2025
 
--
+**Sistema de Respostas Aninhadas para Comentários em Lições**
+- [Técnico] Extensão do sistema de replies para páginas de lições (/lessons), implementação de handleReplyToComment no LessonComments, suporte a respostas de até 2 níveis de profundidade
+- [Benefício] Permite discussões contextualizadas dentro de cada aula específica, facilitando o esclarecimento de dúvidas entre alunos e tutores
+- [Commit] feat: implement reply functionality for lesson comments
+
+**Suporte a Badges de Role em Comentários e Respostas**
+- [Técnico] Adição dos campos role e profileImageUrl em todas as interfaces Author, atualização do mapeamento de dados da API para incluir os novos campos, priorização de profileImageUrl sobre avatar em todos os componentes
+- [Benefício] Badges de identificação (admin, tutor, student) agora aparecem em todos os comentários e respostas, melhorando a credibilidade e contexto das interações
+- [Commit] fix: add role and profileImageUrl fields to support user badges in comments
 
 ### 08/08/2025
 

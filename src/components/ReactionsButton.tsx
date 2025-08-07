@@ -86,16 +86,22 @@ export default function ReactionsButton({
   };
 
   const handleReaction = (type: ReactionType) => {
+    console.log('🔘 [ReactionsButton] handleReaction called with:', type);
+    console.log('🔘 [ReactionsButton] Current user reaction:', currentUserReaction);
+    
     // Se clicou na mesma reação que já tem, remove ela (passa null)
     if (currentUserReaction === type) {
+      console.log('🔘 [ReactionsButton] Removing reaction (same as current)');
       setIsRemoving(true);
       setAnimatingReaction(type);
       setTimeout(() => {
+        console.log('🔘 [ReactionsButton] Calling onReact with null');
         onReact(null);
         setIsRemoving(false);
         setAnimatingReaction(null);
       }, 300); // Aguarda animação terminar
     } else {
+      console.log('🔘 [ReactionsButton] Adding/changing reaction to:', type);
       setAnimatingReaction(type);
       onReact(type);
       setTimeout(() => {

@@ -1294,6 +1294,8 @@ export default function CommunityPage() {
   // Handle post reaction
   const handleReaction = useCallback(
     async (topicId: string, reactionType: ReactionType | null) => {
+      console.log('🎯 [handleReaction] Called with:', { topicId, reactionType });
+      
       try {
         if (!token || !isAuthenticated) {
           console.error('No authentication token found');
@@ -1335,33 +1337,31 @@ export default function CommunityPage() {
 
         // Make API call based on action type
         let response;
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`;
         
         if (actionType === 'remove') {
           // DELETE endpoint for removing reaction - no body needed
-          response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
-            {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          console.log(`[Reactions] Calling DELETE ${apiUrl}`);
+          response = await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log(`[Reactions] DELETE response status: ${response.status}`);
         } else {
           // POST endpoint for adding or changing reaction
-          response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                type: reactionToSend,
-              }),
-            }
-          );
+          const body = { type: reactionToSend };
+          console.log(`[Reactions] Calling POST ${apiUrl} with body:`, body);
+          response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+          });
+          console.log(`[Reactions] POST response status: ${response.status}`);
         }
 
         if (!response.ok) {
@@ -1854,14 +1854,12 @@ export default function CommunityPage() {
                       replies: topic.replies // Mantém os comentários do post
                     }}
                     onReaction={(postId, reaction) => {
-                      if (reaction) {
-                        handleReaction(postId, reaction);
-                      }
+                      // Permite null para remover reação
+                      handleReaction(postId, reaction);
                     }}
                     onCommentReaction={(commentId, reaction) => {
-                      if (reaction) {
-                        handleCommentReaction(commentId, reaction);
-                      }
+                      // Permite null para remover reação
+                      handleCommentReaction(commentId, reaction);
                     }}
                     onReply={handleReplyToPost}
                     onReplyToComment={(commentId: string, author: Author) => handleReplyToComment(commentId, author)}

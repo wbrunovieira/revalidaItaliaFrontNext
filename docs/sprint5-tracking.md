@@ -69,6 +69,16 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Evita exibição de cards quebrados quando lições são removidas ou usuário perde acesso, melhora robustez do sistema em ambientes de desenvolvimento onde banco é limpo frequentemente, experiência suave mesmo com mudanças no conteúdo disponível
 - [Commit] fix: handle deleted lessons in continue learning component
 
+**Sistema de Remoção de Reações com Toggle**
+- [Técnico] Implementação de toggle para remover reações (clicar na mesma reação remove), indicadores visuais com anel azul e animação pulse para reação ativa, tooltip "Remover" em vermelho ao hover, animações customizadas de add/remove no CSS global
+- [Benefício] UX intuitivo seguindo padrão conhecido (Facebook/LinkedIn), usuários podem facilmente mudar de opinião sobre reações, feedback visual claro sobre qual reação está ativa, menos cliques para gerenciar reações
+- [Commit] feat: implement reaction removal with toggle functionality
+
+**Integração com API DELETE para Remoção de Reações**
+- [Técnico] Implementação de chamadas DELETE para endpoints `/community/posts/:postId/reactions` e `/community/comments/:commentId/reactions`, tratamento específico de erros 404 (reaction-not-found vs post-not-found), lógica condicional para usar DELETE na remoção e POST na adição/mudança
+- [Benefício] Integração completa com backend para remoção de reações, tratamento robusto de casos de erro, logs detalhados para debug em produção, suporte tanto para posts quanto comentários
+- [Commit] feat: implement DELETE endpoint for removing reactions
+
 ### 08/08/2025
 
 -

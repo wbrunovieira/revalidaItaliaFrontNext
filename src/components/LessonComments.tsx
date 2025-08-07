@@ -356,7 +356,7 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
     fetchComments(1);
   }, [fetchComments]);
 
-  // Handle reaction
+  // Handle post reaction (lesson posts)
   const handleReaction = useCallback(async (commentId: string, reactionType: ReactionType | null) => {
     try {
       if (!token || !isAuthenticated) {
@@ -375,8 +375,6 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
         reactionType = null;
       }
 
-      console.log('Sending reaction request:', { commentId, reactionType, currentReaction });
-
       // Make API call
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${commentId}/reactions`,
@@ -393,7 +391,6 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       );
 
       const data = await response.json();
-      console.log('Reaction API response:', data);
 
       if (!response.ok) {
         console.error('Failed to update reaction:', data);
@@ -429,6 +426,149 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
       );
     } catch (error) {
       console.error('Error updating reaction:', error);
+    }
+  }, [comments, token, isAuthenticated]);
+
+  // Handle comment reaction
+  const handleCommentReaction = useCallback(async (commentId: string, reactionType: ReactionType | null) => {
+    try {
+      if (!token || !isAuthenticated) {
+        console.error('No authentication token found');
+        return;
+      }
+
+      // Find the comment in all posts
+      let currentReaction: ReactionType | null = null;
+      let foundInPost: Comment | null = null;
+      
+      for (const post of comments) {
+        if (post.replies) {
+          const reply = post.replies.find(r => r.id === commentId);
+          if (reply) {
+            currentReaction = reply.reactions.userReactions[0] || null;
+            foundInPost = post;
+            break;
+          }
+          // Check nested replies
+          for (const reply of post.replies) {
+            if (reply.replies) {
+              const nestedReply = reply.replies.find(r => r.id === commentId);
+              if (nestedReply) {
+                currentReaction = nestedReply.reactions.userReactions[0] || null;
+                foundInPost = post;
+                break;
+              }
+            }
+          }
+          if (foundInPost) break;
+        }
+      }
+
+      if (!foundInPost) {
+        console.error('Comment not found');
+        return;
+      }
+      
+      // If trying to add the same reaction that already exists, skip
+      if (reactionType === currentReaction) {
+        return;
+      }
+
+      // Make API call using the new endpoint
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            reactionType: reactionType, // API expects reactionType field
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Failed to update comment reaction:', data);
+        return;
+      }
+
+      // Update local state optimistically
+      setComments(prevComments =>
+        prevComments.map(post => {
+          if (post.id !== foundInPost.id) return post;
+          
+          // Update the replies
+          const updatedReplies = post.replies?.map(reply => {
+            if (reply.id === commentId) {
+              const newReactions = { ...reply.reactions };
+              
+              // Remove old reaction count
+              if (currentReaction) {
+                newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+              }
+              
+              // Add new reaction count
+              if (reactionType) {
+                newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+                newReactions.userReactions = [reactionType];
+              } else {
+                newReactions.userReactions = [];
+              }
+
+              return {
+                ...reply,
+                reactions: newReactions,
+              };
+            }
+            
+            // Check nested replies
+            if (reply.replies) {
+              const updatedNestedReplies = reply.replies.map(nestedReply => {
+                if (nestedReply.id === commentId) {
+                  const newReactions = { ...nestedReply.reactions };
+                  
+                  // Remove old reaction count
+                  if (currentReaction) {
+                    newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+                  }
+                  
+                  // Add new reaction count
+                  if (reactionType) {
+                    newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+                    newReactions.userReactions = [reactionType];
+                  } else {
+                    newReactions.userReactions = [];
+                  }
+
+                  return {
+                    ...nestedReply,
+                    reactions: newReactions,
+                  };
+                }
+                return nestedReply;
+              });
+              
+              return {
+                ...reply,
+                replies: updatedNestedReplies,
+              };
+            }
+            
+            return reply;
+          });
+
+          return {
+            ...post,
+            replies: updatedReplies,
+          };
+        })
+      );
+    } catch (error) {
+      console.error('Error updating comment reaction:', error);
     }
   }, [comments, token, isAuthenticated]);
 
@@ -914,6 +1054,11 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
                     onReaction={(postId, reaction) => {
                       if (reaction) {
                         handleReaction(postId, reaction);
+                      }
+                    }}
+                    onCommentReaction={(commentId, reaction) => {
+                      if (reaction) {
+                        handleCommentReaction(commentId, reaction);
                       }
                     }}
                     onReply={(postId) => {

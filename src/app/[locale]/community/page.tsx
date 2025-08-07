@@ -1060,7 +1060,7 @@ export default function CommunityPage() {
     );
   }, [commentingOnPost, replyingToComment]);
 
-  // Handle reaction
+  // Handle post reaction
   const handleReaction = useCallback(
     async (topicId: string, reactionType: ReactionType | null) => {
       try {
@@ -1081,8 +1081,6 @@ export default function CommunityPage() {
           reactionType = null;
         }
 
-        console.log('Sending reaction request:', { topicId, reactionType, currentReaction });
-
         // Make API call
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
@@ -1099,7 +1097,6 @@ export default function CommunityPage() {
         );
 
         const data = await response.json();
-        console.log('Reaction API response:', data);
 
         if (!response.ok) {
           console.error('Failed to update reaction:', data);
@@ -1135,6 +1132,152 @@ export default function CommunityPage() {
         );
       } catch (error) {
         console.error('Error updating reaction:', error);
+      }
+    },
+    [topics, isAuthenticated, token]
+  );
+
+  // Handle comment reaction
+  const handleCommentReaction = useCallback(
+    async (commentId: string, reactionType: ReactionType | null) => {
+      try {
+        if (!token || !isAuthenticated) {
+          console.error('No authentication token found');
+          return;
+        }
+
+        // Find the comment in all topics
+        let currentReaction: ReactionType | null = null;
+        let foundInTopic: Topic | null = null;
+        
+        for (const topic of topics) {
+          if (topic.replies) {
+            const comment = topic.replies.find(r => r.id === commentId);
+            if (comment) {
+              currentReaction = comment.reactions.userReactions[0] || null;
+              foundInTopic = topic;
+              break;
+            }
+            // Check nested replies
+            for (const reply of topic.replies) {
+              if (reply.replies) {
+                const nestedReply = reply.replies.find(r => r.id === commentId);
+                if (nestedReply) {
+                  currentReaction = nestedReply.reactions.userReactions[0] || null;
+                  foundInTopic = topic;
+                  break;
+                }
+              }
+            }
+            if (foundInTopic) break;
+          }
+        }
+
+        if (!foundInTopic) {
+          console.error('Comment not found');
+          return;
+        }
+        
+        // If trying to add the same reaction that already exists, skip
+        if (reactionType === currentReaction) {
+          return;
+        }
+
+        // Make API call using the new endpoint
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              reactionType: reactionType, // API expects reactionType field
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Failed to update comment reaction:', data);
+          return;
+        }
+
+        // Update local state optimistically
+        setTopics(prevTopics =>
+          prevTopics.map(topic => {
+            if (topic.id !== foundInTopic.id) return topic;
+            
+            // Update the replies
+            const updatedReplies = topic.replies?.map(reply => {
+              if (reply.id === commentId) {
+                const newReactions = { ...reply.reactions };
+                
+                // Remove old reaction count
+                if (currentReaction) {
+                  newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+                }
+                
+                // Add new reaction count
+                if (reactionType) {
+                  newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+                  newReactions.userReactions = [reactionType];
+                } else {
+                  newReactions.userReactions = [];
+                }
+
+                return {
+                  ...reply,
+                  reactions: newReactions,
+                };
+              }
+              
+              // Check nested replies
+              if (reply.replies) {
+                const updatedNestedReplies = reply.replies.map(nestedReply => {
+                  if (nestedReply.id === commentId) {
+                    const newReactions = { ...nestedReply.reactions };
+                    
+                    // Remove old reaction count
+                    if (currentReaction) {
+                      newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
+                    }
+                    
+                    // Add new reaction count
+                    if (reactionType) {
+                      newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
+                      newReactions.userReactions = [reactionType];
+                    } else {
+                      newReactions.userReactions = [];
+                    }
+
+                    return {
+                      ...nestedReply,
+                      reactions: newReactions,
+                    };
+                  }
+                  return nestedReply;
+                });
+                
+                return {
+                  ...reply,
+                  replies: updatedNestedReplies,
+                };
+              }
+              
+              return reply;
+            });
+
+            return {
+              ...topic,
+              replies: updatedReplies,
+            };
+          })
+        );
+      } catch (error) {
+        console.error('Error updating comment reaction:', error);
       }
     },
     [topics, isAuthenticated, token]
@@ -1380,6 +1523,11 @@ export default function CommunityPage() {
                         handleReaction(postId, reaction);
                       }
                     }}
+                    onCommentReaction={(commentId, reaction) => {
+                      if (reaction) {
+                        handleCommentReaction(commentId, reaction);
+                      }
+                    }}
                     onReply={handleReplyToPost}
                     onReplyToComment={(commentId: string, author: Author) => handleReplyToComment(commentId, author)}
                     onClick={() => console.log('Post clicked:', topic.id)}
@@ -1440,6 +1588,9 @@ export default function CommunityPage() {
                   }}
                   onReaction={(postId, reaction) => {
                     console.log('Mock post reaction:', postId, reaction);
+                  }}
+                  onCommentReaction={(commentId, reaction) => {
+                    console.log('Mock comment reaction:', commentId, reaction);
                   }}
                   onClick={() => console.log('Mock post clicked:', topic.id)}
                   compactVideo={true}

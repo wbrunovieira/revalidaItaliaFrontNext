@@ -126,6 +126,10 @@ interface PostCardProps {
     postId: string,
     reaction: ReactionType | null
   ) => void;
+  onCommentReaction?: (
+    commentId: string,
+    reaction: ReactionType | null
+  ) => void;
   onClick?: () => void;
   onReply?: (postId: string) => void;
   onReplyToComment?: (commentId: string, author: Author) => void;
@@ -136,6 +140,7 @@ interface PostCardProps {
 export default function PostCard({
   post,
   onReaction,
+  onCommentReaction,
   onClick,
   onReply,
   onReplyToComment,
@@ -796,7 +801,7 @@ export default function PostCard({
                 attachments: reply.attachments,
                 replies: reply.replies // Pass nested replies
               }}
-              onReaction={onReaction}
+              onReaction={onCommentReaction || onReaction}
               onReply={onReplyToComment}
               canReply={true} // Allow replies to comments
             />

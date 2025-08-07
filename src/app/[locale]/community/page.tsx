@@ -1329,29 +1329,61 @@ export default function CommunityPage() {
           postId: topicId,
           current: currentReaction,
           new: reactionType,
-          sending: reactionToSend
+          sending: reactionToSend,
+          action: actionType
         });
 
-        // Make API call
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
-          {
-            method: actionType === 'remove' ? 'DELETE' : 'POST', // Use DELETE for removal when backend supports it
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              type: reactionToSend,
-            }),
-          }
-        );
-
-        const data = await response.json();
+        // Make API call based on action type
+        let response;
+        
+        if (actionType === 'remove') {
+          // DELETE endpoint for removing reaction - no body needed
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
+            {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } else {
+          // POST endpoint for adding or changing reaction
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${topicId}/reactions`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                type: reactionToSend,
+              }),
+            }
+          );
+        }
 
         if (!response.ok) {
-          console.error('Failed to update reaction:', data);
-          return;
+          const errorData = await response.json();
+          
+          // Handle specific error cases
+          if (response.status === 404) {
+            if (errorData.type?.includes('reaction-not-found')) {
+              console.warn('Reaction not found - user had not reacted to this post');
+              // Still update UI to ensure consistency
+            } else if (errorData.type?.includes('post-not-found')) {
+              console.error('Post not found:', topicId);
+              return;
+            }
+          } else {
+            console.error('Failed to update reaction:', errorData);
+            return;
+          }
+        } else {
+          // Success response
+          const data = await response.json();
+          console.log(`[Reactions] ${actionType} successful:`, data);
         }
 
         // Update local state optimistically
@@ -1451,29 +1483,61 @@ export default function CommunityPage() {
           commentId,
           current: currentReaction,
           new: reactionType,
-          sending: reactionToSend
+          sending: reactionToSend,
+          action: actionType
         });
 
-        // Make API call using the new endpoint
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
-          {
-            method: actionType === 'remove' ? 'DELETE' : 'POST', // Use DELETE for removal when backend supports it
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              reactionType: reactionToSend, // API expects reactionType field
-            }),
-          }
-        );
-
-        const data = await response.json();
+        // Make API call based on action type
+        let response;
+        
+        if (actionType === 'remove') {
+          // DELETE endpoint for removing reaction - no body needed
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
+            {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } else {
+          // POST endpoint for adding or changing reaction
+          response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/comments/${commentId}/reactions`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                reactionType: reactionToSend, // API expects reactionType field
+              }),
+            }
+          );
+        }
 
         if (!response.ok) {
-          console.error('Failed to update comment reaction:', data);
-          return;
+          const errorData = await response.json();
+          
+          // Handle specific error cases
+          if (response.status === 404) {
+            if (errorData.type?.includes('reaction-not-found')) {
+              console.warn('Reaction not found - user had not reacted to this comment');
+              // Still update UI to ensure consistency
+            } else if (errorData.type?.includes('comment-not-found')) {
+              console.error('Comment not found:', commentId);
+              return;
+            }
+          } else {
+            console.error('Failed to update comment reaction:', errorData);
+            return;
+          }
+        } else {
+          // Success response
+          const data = await response.json();
+          console.log(`[Reactions] Comment ${actionType} successful:`, data);
         }
 
         // Update local state optimistically

@@ -28,6 +28,8 @@ import {
   Users,
   CheckCircle,
   AlertCircle,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -80,16 +82,21 @@ export default function EditProfileForm({
   const [communityConsent, setCommunityConsent] = useState(
     userData.communityProfileConsent || false
   );
+  
+  // Estados para upload de imagem
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    userData.profileImageUrl || null
+  );
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
+    userData.profileImageUrl || null
+  );
 
   // Schema de validação com Zod
   const profileSchema = z.object({
     name: z.string().min(3, { message: t('validation.nameMin') }),
     birthDate: z.string().optional(),
-    profileImageUrl: z.union([
-      z.literal(''),
-      z.string().url({ message: t('validation.urlInvalid') }),
-      z.string().regex(/^\//, { message: t('validation.urlInvalid') })
-    ]).optional(),
     bio: z.string().max(500, { message: t('validation.bioMax') }).optional(),
     profession: z.string().max(100, { message: t('validation.professionMax') }).optional(),
     specialization: z.string().max(100, { message: t('validation.specializationMax') }).optional(),
@@ -118,14 +125,93 @@ export default function EditProfileForm({
     defaultValues: {
       name: userData.name,
       birthDate: userData.birthDate ? userData.birthDate.split('T')[0] : '',
-      profileImageUrl: userData.profileImageUrl || '',
       bio: userData.bio || '',
       profession: userData.profession || '',
       specialization: userData.specialization || '',
     },
   });
 
-  const watchedProfileImageUrl = watch('profileImageUrl');
+  // Função para fazer upload da imagem
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: t('error.title'),
+        description: t('errors.invalidImageType'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validar tamanho do arquivo (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: t('error.title'),
+        description: t('errors.imageTooLarge'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      
+      // Criar preview local
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      // Fazer upload para o servidor
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', 'image');
+      formData.append('folder', 'profiles');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Salvar URL da imagem carregada
+      setUploadedImageUrl(result.url);
+      setImageFile(file);
+      
+      toast({
+        title: t('success'),
+        description: t('imageUploadSuccess'),
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: t('error.title'),
+        description: error instanceof Error ? error.message : t('errors.uploadFailed'),
+        variant: 'destructive',
+      });
+      // Reverter preview em caso de erro
+      setImagePreview(userData.profileImageUrl || null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setUploadedImageUrl(null);
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -153,8 +239,10 @@ export default function EditProfileForm({
       if (formattedBirthDate !== (userData.birthDate?.split('T')[0] || '')) {
         updateData.birthDate = formattedBirthDate;
       }
-      if (data.profileImageUrl !== (userData.profileImageUrl || '')) {
-        updateData.profileImageUrl = data.profileImageUrl;
+      
+      // Adicionar URL da imagem se foi alterada
+      if (uploadedImageUrl !== userData.profileImageUrl) {
+        updateData.profileImageUrl = uploadedImageUrl || '';
       }
       if (data.bio !== (userData.bio || '')) {
         updateData.bio = data.bio;
@@ -250,41 +338,73 @@ export default function EditProfileForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Avatar */}
-      <div className="flex justify-center mb-6">
-        <div className="relative">
-          <Image
-            src={
-              watchedProfileImageUrl ||
-              userData.profileImageUrl ||
-              '/icons/avatar.svg'
-            }
-            alt={userData.name}
-            width={120}
-            height={120}
-            className="rounded-full border-4 border-secondary object-cover"
-          />
-          <button
-            type="button"
-            className="absolute bottom-0 right-0 p-2 bg-secondary rounded-full hover:bg-secondary/90 transition-colors"
-            title={t('changePhoto')}
-          >
-            <Camera size={20} className="text-primary" />
-          </button>
+      {/* Avatar e Upload */}
+      <div className="space-y-4 mb-6">
+        <div className="flex justify-center">
+          <div className="relative">
+            <Image
+              src={
+                imagePreview ||
+                userData.profileImageUrl ||
+                '/icons/avatar.svg'
+              }
+              alt={userData.name}
+              width={120}
+              height={120}
+              className="rounded-full border-4 border-secondary object-cover bg-white"
+            />
+            {imagePreview && imagePreview !== userData.profileImageUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute -top-2 -right-2 p-1.5 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
+                title={t('removePhoto')}
+              >
+                <Trash2 size={16} className="text-white" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Campo de URL da imagem */}
-      <div>
-        <input
-          {...register('profileImageUrl')}
-          type="text"
-          placeholder={t('profileImageUrl')}
-          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
-        />
-        {errors.profileImageUrl && (
-          <p className="mt-1 text-sm text-red-400">{errors.profileImageUrl.message}</p>
-        )}
+        {/* Botão de Upload */}
+        <div className="flex justify-center">
+          <div className="relative">
+            <input
+              id="imageUpload"
+              type="file"
+              className="sr-only"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleImageUpload(file);
+                }
+              }}
+              disabled={uploadingImage}
+            />
+            <label
+              htmlFor="imageUpload"
+              className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {uploadingImage ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span>{t('uploading')}</span>
+                </>
+              ) : (
+                <>
+                  <Camera size={20} />
+                  <span>{t('changePhoto')}</span>
+                </>
+              )}
+            </label>
+          </div>
+        </div>
+        
+        {/* Informações sobre o upload */}
+        <p className="text-xs text-gray-400 text-center">
+          {t('upload.supportedFormats')}: JPG, PNG, GIF, WebP (Max 5MB)
+        </p>
       </div>
 
       {/* Campos do formulário */}

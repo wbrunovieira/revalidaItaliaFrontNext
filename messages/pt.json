@@ -155,7 +155,19 @@
     "communityBenefitsTitle": "Por que ativar o perfil da comunidade?",
     "communityBenefit1": "Conecte-se com outros profissionais da saúde",
     "communityBenefit2": "Compartilhe experiências e conhecimentos",
-    "communityBenefit3": "Participe de discussões e fóruns exclusivos"
+    "communityBenefit3": "Participe de discussões e fóruns exclusivos",
+    "removePhoto": "Remover foto",
+    "uploading": "Enviando...",
+    "imageUploadSuccess": "Imagem enviada com sucesso",
+    "errors": {
+      "invalidImageType": "Tipo de arquivo inválido. Use JPG, PNG, GIF ou WebP",
+      "imageTooLarge": "Arquivo muito grande. Tamanho máximo: 5MB",
+      "uploadFailed": "Falha ao enviar imagem"
+    },
+    "upload": {
+      "supportedFormats": "Formatos aceitos"
+    },
+    "success": "Sucesso"
   },
   "Assessments": {
     "title": "Minhas Avaliações",

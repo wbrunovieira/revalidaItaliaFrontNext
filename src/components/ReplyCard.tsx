@@ -25,6 +25,8 @@ interface Author {
   city?: string;
   country?: string;
   profession?: string;
+  specialization?: string;
+  bio?: string;
   role?: 'student' | 'admin' | 'tutor';
 }
 
@@ -141,15 +143,39 @@ export default function ReplyCard({
         {/* Reply Header - More Compact */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-start gap-3 flex-1">
-          {/* Avatar - Smaller */}
-          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
-            <Image
-              src={reply.author.profileImageUrl || reply.author.avatar || '/icons/avatar.svg'}
-              alt={reply.author.name}
-              width={32}
-              height={32}
-              className="object-cover w-full h-full"
-            />
+          {/* Avatar - Smaller with tooltip */}
+          <div className="relative group">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
+              <Image
+                src={reply.author.profileImageUrl || reply.author.avatar || '/icons/avatar.svg'}
+                alt={reply.author.name}
+                width={32}
+                height={32}
+                className="object-cover w-full h-full"
+              />
+            </div>
+            
+            {/* Tooltip with bio and specialization - positioned to the right */}
+            {(reply.author.bio || reply.author.specialization) && (
+              <div className="absolute left-full ml-2 top-0 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 pointer-events-none" style={{ zIndex: 9999 }}>
+                <div className="bg-gray-900 text-white p-3 rounded-lg shadow-2xl max-w-xs min-w-[200px] border border-gray-700">
+                  <div className="font-semibold text-white mb-1">
+                    {reply.author.name}
+                  </div>
+                  {reply.author.specialization && (
+                    <div className="text-xs text-secondary mb-2">
+                      {reply.author.specialization}
+                    </div>
+                  )}
+                  {reply.author.bio && (
+                    <div className="text-sm text-gray-300">
+                      {reply.author.bio}
+                    </div>
+                  )}
+                  <div className="absolute -left-1 top-3 w-2 h-2 bg-gray-900 rotate-45 border-l border-t border-gray-700"></div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Author Info - Inline */}
@@ -160,6 +186,26 @@ export default function ReplyCard({
               </span>
               {reply.author.role && (
                 <RoleBadge role={reply.author.role} className="scale-90" />
+              )}
+              {(reply.author.profession || reply.author.specialization) && (
+                <>
+                  <span className="text-gray-500 text-xs">·</span>
+                  <span className="text-gray-400 text-xs">
+                    {[reply.author.profession, reply.author.specialization]
+                      .filter(Boolean)
+                      .join(' - ')}
+                  </span>
+                </>
+              )}
+              {(reply.author.city || reply.author.country) && (
+                <>
+                  <span className="text-gray-500 text-xs">·</span>
+                  <span className="text-gray-400 text-xs">
+                    {[reply.author.city, reply.author.country]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                </>
               )}
               <span className="text-gray-500 text-xs">·</span>
               <span className="text-gray-500 text-xs flex items-center gap-1">

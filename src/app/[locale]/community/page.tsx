@@ -68,6 +68,8 @@ interface CommunityPost {
     city?: string;
     country?: string;
     profession?: string;
+    specialization?: string;
+    bio?: string;
     role: 'student' | 'admin' | 'tutor';
   };
   authorId: string;
@@ -116,6 +118,11 @@ interface CommunityComment {
     fullName: string;
     profileImageUrl?: string;
     role: 'student' | 'admin' | 'tutor';
+    city?: string;
+    country?: string;
+    profession?: string;
+    specialization?: string;
+    bio?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -142,6 +149,11 @@ interface CommentResponse {
     avatar?: string;
     profileImageUrl?: string;
     role: 'student' | 'admin' | 'tutor';
+    city?: string;
+    country?: string;
+    profession?: string;
+    specialization?: string;
+    bio?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -1052,6 +1064,11 @@ export default function CommunityPage() {
                   name: comment.author.fullName,
                   avatar: comment.author.profileImageUrl,
                   profileImageUrl: comment.author.profileImageUrl,
+                  city: comment.author.city || '',
+                  country: comment.author.country || '',
+                  profession: comment.author.profession || '',
+                  specialization: comment.author.specialization || '',
+                  bio: comment.author.bio || '',
                   role: comment.author.role
                 },
                 createdAt: new Date(comment.createdAt),
@@ -1073,6 +1090,11 @@ export default function CommunityPage() {
                     name: reply.author.fullName,
                     avatar: reply.author.profileImageUrl,
                     profileImageUrl: reply.author.profileImageUrl,
+                    city: reply.author.city || '',
+                    country: reply.author.country || '',
+                    profession: reply.author.profession || '',
+                    specialization: reply.author.specialization || '',
+                    bio: reply.author.bio || '',
                     role: reply.author.role
                   },
                   createdAt: new Date(reply.createdAt),
@@ -1105,6 +1127,8 @@ export default function CommunityPage() {
               city: post.author.city || '',
               country: post.author.country || '',
               profession: post.author.profession || '',
+              specialization: post.author.specialization || '', // ADICIONADO
+              bio: post.author.bio || '', // ADICIONADO
               role: post.author.role as 'student' | 'admin' | 'tutor' | undefined
             } : {
               id: post.authorId,
@@ -1114,6 +1138,8 @@ export default function CommunityPage() {
               city: '',
               country: '',
               profession: '',
+              specialization: '', // ADICIONADO
+              bio: '', // ADICIONADO
               role: undefined
             },
             createdAt: new Date(post.createdAt),
@@ -1239,9 +1265,12 @@ export default function CommunityPage() {
               id: comment.author.id,
               name: comment.author.name || ('fullName' in comment.author ? comment.author.fullName : ''),
               avatar: comment.author.avatar || ('profileImageUrl' in comment.author ? comment.author.profileImageUrl : undefined),
-              city: '',
-              country: '',
-              profession: '',
+              profileImageUrl: ('profileImageUrl' in comment.author ? comment.author.profileImageUrl : undefined),
+              city: ('city' in comment.author ? comment.author.city : ''),
+              country: ('country' in comment.author ? comment.author.country : ''),
+              profession: ('profession' in comment.author ? comment.author.profession : ''),
+              specialization: ('specialization' in comment.author ? comment.author.specialization : ''),
+              bio: ('bio' in comment.author ? comment.author.bio : ''),
               role: ('role' in comment.author ? comment.author.role : undefined)
             },
             createdAt: comment.createdAt,

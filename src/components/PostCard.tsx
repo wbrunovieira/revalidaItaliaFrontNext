@@ -40,6 +40,8 @@ interface Author {
   city?: string;
   country?: string;
   profession?: string;
+  specialization?: string;
+  bio?: string;
   role?: 'student' | 'admin' | 'tutor';
 }
 
@@ -617,17 +619,42 @@ export default function PostCard({
 
         {/* Author Info */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/20">
-            <Image
-              src={
-                post.author.profileImageUrl || post.author.avatar || '/icons/avatar.svg'
-              }
-              alt={post.author.name}
-              width={40}
-              height={40}
-              className="object-cover w-full h-full"
-            />
+          <div className="relative group">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/20">
+              <Image
+                src={
+                  post.author.profileImageUrl || post.author.avatar || '/icons/avatar.svg'
+                }
+                alt={post.author.name}
+                width={40}
+                height={40}
+                className="object-cover w-full h-full"
+              />
+            </div>
+            
+            {/* Tooltip with bio and specialization - positioned to the right */}
+            {(post.author.bio || post.author.specialization) && (
+              <div className="absolute left-full ml-2 top-0 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 pointer-events-none" style={{ zIndex: 9999 }}>
+                <div className="bg-gray-900 text-white p-3 rounded-lg shadow-2xl max-w-xs min-w-[200px] border border-gray-700">
+                  <div className="font-semibold text-white mb-1">
+                    {post.author.name}
+                  </div>
+                  {post.author.specialization && (
+                    <div className="text-xs text-secondary mb-2">
+                      {post.author.specialization}
+                    </div>
+                  )}
+                  {post.author.bio && (
+                    <div className="text-sm text-gray-300">
+                      {post.author.bio}
+                    </div>
+                  )}
+                  <div className="absolute -left-1 top-3 w-2 h-2 bg-gray-900 rotate-45 border-l border-t border-gray-700"></div>
+                </div>
+              </div>
+            )}
           </div>
+          
           <div>
             <div className="flex items-center gap-2">
               <span className="font-medium text-white">
@@ -636,11 +663,13 @@ export default function PostCard({
               {post.author.role && (
                 <RoleBadge role={post.author.role} />
               )}
-              {post.author.profession && (
+              {(post.author.profession || post.author.specialization) && (
                 <>
                   <span className="text-gray-500">·</span>
                   <span className="text-gray-500 text-sm">
-                    {post.author.profession}
+                    {[post.author.profession, post.author.specialization]
+                      .filter(Boolean)
+                      .join(' - ')}
                   </span>
                 </>
               )}
@@ -652,12 +681,13 @@ export default function PostCard({
                   ? formatDate(post.createdAt)
                   : ''}
               </span>
-              {post.author.city && post.author.country && (
+              {(post.author.city || post.author.country) && (
                 <>
                   <span>·</span>
                   <span>
-                    {post.author.city},{' '}
-                    {post.author.country}
+                    {[post.author.city, post.author.country]
+                      .filter(Boolean)
+                      .join(', ')}
                   </span>
                 </>
               )}

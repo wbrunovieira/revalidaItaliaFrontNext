@@ -18,6 +18,7 @@ export interface User {
   id: string;
   email: string;
   name: string; // ESSENCIAL - usado em 10+ componentes
+  fullName?: string; // Nome completo retornado pelo login
   role: 'admin' | 'student' | 'tutor'; // ESSENCIAL - controle de acesso
   profileImageUrl?: string;
   nationalId?: string; // CPF
@@ -25,6 +26,51 @@ export interface User {
   emailVerified?: boolean;
   createdAt?: string;
   lastLogin?: string;
+  
+  // Novos campos da API de login
+  bio?: string;
+  profession?: string;
+  specialization?: string;
+  birthDate?: string;
+  communityProfileConsent?: boolean;
+}
+
+/**
+ * Profile Completeness - Métricas de completude do perfil
+ */
+export interface ProfileCompleteness {
+  percentage: number;
+  completedSections: {
+    basicInfo: boolean;
+    documentation: boolean;
+    professional: boolean;
+    profileImage: boolean;
+    address: boolean;
+  };
+  missingFields: string[];
+  nextSteps: string[];
+  totalFields: number;
+  completedFields: number;
+}
+
+/**
+ * Community Profile - Dados públicos da comunidade
+ */
+export interface CommunityProfile {
+  communityProfileConsent: boolean;
+  profession?: string;
+  specialization?: string;
+  city?: string;
+  country?: string;
+}
+
+/**
+ * Meta Information - Informações adicionais do login
+ */
+export interface MetaInfo {
+  firstLogin: boolean;
+  requiresPasswordChange: boolean;
+  requiresProfileCompletion: boolean;
 }
 
 /**
@@ -38,6 +84,19 @@ export interface LoginCredentials {
 /**
  * Resposta da API de login
  */
+export interface LoginResponse {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+    role: 'student' | 'admin' | 'tutor';
+    profileImageUrl: string | null;
+  };
+  profileCompleteness: ProfileCompleteness;
+  communityProfile: CommunityProfile;
+  meta: MetaInfo;
+}
 
 /**
  * Estado e ações do Auth Store
@@ -49,6 +108,11 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  
+  // Novos estados do login
+  profileCompleteness: ProfileCompleteness | null;
+  communityProfile: CommunityProfile | null;
+  meta: MetaInfo | null;
 
   // Computed helpers (getters derivados)
   isAdmin: boolean;
@@ -59,6 +123,8 @@ export interface AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  updateProfileCompleteness: (data: ProfileCompleteness) => void;
+  updateCommunityProfile: (data: CommunityProfile) => void;
   refreshToken: () => Promise<void>;
   initializeAuth: () => Promise<void>;
   clearError: () => void;
@@ -87,6 +153,9 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      profileCompleteness: null,
+      communityProfile: null,
+      meta: null,
 
       // Computed getters (como funções, não propriedades)
       isAdmin: false,
@@ -124,19 +193,35 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(errorData?.message || errorData?.error || `Erro ${response.status}: ${response.statusText}`);
           }
 
-          const data = await response.json();
+          const data: LoginResponse = await response.json();
           console.log('📦 Resposta completa da API:', data);
           console.log('👤 Dados do user na resposta:', data.user);
+          console.log('📊 Profile Completeness:', data.profileCompleteness);
+          console.log('🌐 Community Profile:', data.communityProfile);
 
-          // A API pode retornar o token em diferentes formatos
-          const token = data.token || data.accessToken || data.access_token;
+          // A API retorna o token como accessToken
+          const token = data.accessToken;
           
           if (token) {
             saveAuthToken(token);
             
-            // Usar dados do usuário retornados pela API primeiro, senão extrai do token
-            const userData = data.user ? extractUserFromToken(data.user) : extractUserFromToken(token);
-            console.log('🔄 Dados extraídos para salvar:', userData);
+            // Processar dados do usuário - usar fullName como name para compatibilidade
+            const userData: User = {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.fullName, // Manter compatibilidade com componentes existentes
+              fullName: data.user.fullName,
+              role: data.user.role,
+              profileImageUrl: data.user.profileImageUrl || undefined,
+              // Adicionar campos do communityProfile se consentido
+              ...(data.communityProfile.communityProfileConsent && {
+                profession: data.communityProfile.profession,
+                specialization: data.communityProfile.specialization,
+                communityProfileConsent: true,
+              }),
+            };
+            
+            console.log('🔄 Dados processados do usuário:', userData);
             
             set({
               token: token,
@@ -144,10 +229,14 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               isLoading: false,
               error: null,
+              // Novos campos
+              profileCompleteness: data.profileCompleteness,
+              communityProfile: data.communityProfile,
+              meta: data.meta,
               // Atualizar computed properties
-              isAdmin: userData?.role === 'admin',
-              isTutor: userData?.role === 'tutor',
-              isStudent: userData?.role === 'student',
+              isAdmin: userData.role === 'admin',
+              isTutor: userData.role === 'tutor',
+              isStudent: userData.role === 'student',
             });
 
             console.log('✅ Login realizado com sucesso!', {
@@ -195,6 +284,9 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           isLoading: false,
           error: null,
+          profileCompleteness: null,
+          communityProfile: null,
+          meta: null,
           // Resetar computed properties
           isAdmin: false,
           isTutor: false,
@@ -202,6 +294,16 @@ export const useAuthStore = create<AuthState>()(
         });
         
         console.log('👋 Logout realizado - todos os dados limpos');
+      },
+
+      // Action: Update Profile Completeness
+      updateProfileCompleteness: (data) => {
+        set({ profileCompleteness: data });
+      },
+      
+      // Action: Update Community Profile
+      updateCommunityProfile: (data) => {
+        set({ communityProfile: data });
       },
 
       // Action: Update User
@@ -379,5 +481,8 @@ export const useAuth = () => {
     displayName: store.user?.name || 'Usuário',
     roleLabel: store.user?.role === 'admin' ? 'Administrador' : 
                store.user?.role === 'tutor' ? 'Tutor' : 'Estudante',
+    // Helper para verificar se o perfil precisa ser completado
+    needsProfileCompletion: store.meta?.requiresProfileCompletion || false,
+    profilePercentage: store.profileCompleteness?.percentage || 0,
   };
 };

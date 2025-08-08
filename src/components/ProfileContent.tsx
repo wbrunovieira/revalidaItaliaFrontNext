@@ -289,28 +289,37 @@ export default function ProfileContent({
           {/* Informações Pessoais */}
           <div className="lg:col-span-1">
             <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm relative border border-white/10 shadow-xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  {t('personalInfo')}
-                </h2>
-                {!isEditingProfile && (
-                  <button
-                    onClick={() => setIsEditingProfile(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
-                  >
-                    <Edit size={16} />
-                    {t('edit')}
-                  </button>
-                )}
-                {isEditingProfile && (
-                  <button
-                    onClick={() => setIsEditingProfile(false)}
-                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    title={t('close')}
-                  >
-                    <X size={20} />
-                  </button>
-                )}
+              {/* Header com melhor espaçamento */}
+              <div className="mb-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {t('personalInfo')}
+                    </h2>
+                    <p className="text-sm text-gray-400">
+                      {t('personalInfoDescription')}
+                    </p>
+                  </div>
+                  {!isEditingProfile && (
+                    <button
+                      onClick={() => setIsEditingProfile(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/20 border border-secondary/50 text-secondary font-medium rounded-lg hover:bg-secondary/30 hover:border-secondary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary min-w-fit"
+                    >
+                      <Edit size={16} />
+                      <span className="hidden sm:inline">{t('edit')}</span>
+                    </button>
+                  )}
+                  {isEditingProfile && (
+                    <button
+                      onClick={() => setIsEditingProfile(false)}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                      title={t('close')}
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
+                <div className="mt-4 h-px bg-gradient-to-r from-secondary/50 via-secondary/20 to-transparent"></div>
               </div>
 
               {isEditingProfile ? (

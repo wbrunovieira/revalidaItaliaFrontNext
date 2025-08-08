@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import ConnectionStatus from '@/components/ConnectionStatus';
 import PandaVideoErrorSuppressor from '@/components/PandaVideoErrorSuppressor';
 import DevToolsManager from '@/components/DevToolsManager';
 
@@ -43,8 +42,6 @@ export default function RootLayout({
         <PandaVideoErrorSuppressor />
         <DevToolsManager />
         {children}
-        
-        <ConnectionStatus />
         <Toaster />
       </body>
     </html>

@@ -123,6 +123,16 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Usuários podem conhecer melhor outros membros da comunidade vendo suas profissões e especializações, tooltips com bio criam conexões mais pessoais, respeita privacidade mostrando dados apenas de quem consentiu
 - [Commit] feat: add user profile data to community posts and comments
 
+**Correção do Botão de Argumento na Aba de Avaliações**
+- [Técnico] Remoção do botão "Novo Argumento" mal posicionado na aba de criar avaliações do painel admin, ajuste do grid de 3 para 2 colunas mantendo apenas botões de Nova Avaliação e Nova Questão
+- [Benefício] Interface mais limpa e organizada no painel administrativo, elimina confusão sobre onde criar argumentos, melhora a experiência de navegação dos administradores
+- [Commit] fix: remove misplaced argument button from assessments tab
+
+**Sistema de Denúncia de Posts na Comunidade**
+- [Técnico] Implementação completa do modal ReportModal com seleção de motivo via radio buttons, integração com endpoint POST /community/posts/:postId/reports, tratamento específico para cada código de erro HTTP (409, 404, 400, 401), componente radio-group criado com Radix UI, logs apropriados usando console.info/warn/error conforme o caso
+- [Benefício] Permite que usuários denunciem conteúdo inadequado mantendo a comunidade segura, denúncias anônimas protegem a privacidade do denunciante, feedback claro sobre denúncias duplicadas ou posts já removidos, modal permanece aberto em erros de validação para correção
+- [Commit] feat: implement post reporting functionality with modal
+
 ### 12/08/2025
 
 -

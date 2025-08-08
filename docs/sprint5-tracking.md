@@ -81,9 +81,32 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 
 ### 08/08/2025
 
--
+**Atualização Completa da Página de Perfil com Novos Campos da API**
+- [Técnico] Refatoração da página de perfil para suportar todos os campos do GET /users/:id incluindo bio, profession, specialization, community consent, permissions, restrictions e endereços múltiplos, reorganização visual com seções agrupadas (Informações Básicas, Documentação, Perfil Profissional, Status da Comunidade)
+- [Benefício] Interface mais profissional e organizada, visualização clara de todos os dados do usuário, indicador visual de consentimento da comunidade, suporte para múltiplos endereços com indicação de principal
+- [Commit] feat: enhance profile page with new API fields and improved UX
+
+**Sistema de Upload de Imagem no Formulário de Perfil**
+- [Técnico] Substituição do campo de URL por upload direto de arquivo usando API route /api/upload, criação de diretório public/uploads/images/profiles, preview em tempo real da imagem, validação de tipo (JPG, PNG, GIF, WebP) e tamanho (max 5MB)
+- [Benefício] Experiência mais intuitiva para atualizar foto de perfil, elimina necessidade de URLs externas, preview instantâneo antes de salvar, feedback visual durante upload
+- [Commit] feat: replace URL field with image upload in profile edit form
+
+**Atualização Automática do Avatar após Upload**
+- [Técnico] Integração do EditProfileForm com Auth Store para atualizar profileImageUrl globalmente após upload bem-sucedido
+- [Benefício] Avatar atualizado imediatamente em toda a aplicação (Nav, UserDropdown, comentários) sem necessidade de recarregar página
+- [Commit] fix: update auth store with new profile image after upload
+
+**Refatoração do Auth Store para Nova API de Login**
+- [Técnico] Adição de interfaces ProfileCompleteness, CommunityProfile e MetaInfo ao Auth Store, processamento completo da resposta do POST /auth/login incluindo profileCompleteness (percentage, completedSections, missingFields), communityProfile (profession, specialization, city, country) e meta (firstLogin, requiresPasswordChange, requiresProfileCompletion)
+- [Benefício] Sistema agora rastreia completude do perfil (0-100%), pode mostrar próximos passos para completar perfil, acesso a dados profissionais quando consentido, preparado para notificar necessidade de trocar senha
+- [Commit] feat: update auth store to support new login API response with profile completeness
 
 ### 09/08/2025
+
+**Indicador Visual de Completude do Perfil no Avatar**
+- [Técnico] Implementação de círculo SVG ao redor do avatar mostrando porcentagem de completude do perfil, com cores dinâmicas baseadas na porcentagem (vermelho <30%, amarelo 50-99%, verde 100%), animação suave de transição, tooltip mostrando porcentagem exata ao passar o mouse
+- [Benefício] Feedback visual imediato sobre o status do perfil, incentiva usuários a completar informações faltantes, melhora engajamento ao gamificar o processo de completar o perfil, indicação clara de próximos passos necessários
+- [Commit] feat: add visual profile completeness indicator around user avatar
 
 -
 
@@ -121,6 +144,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Técnico] Redução do tamanho do card de aviso quando lição não possui vídeo, adicionando max-width e centralizando com margens automáticas
 - [Benefício] Melhora a experiência visual em lições sem vídeo, evitando que o card ocupe toda a largura da tela desnecessariamente
 - [Commit] fix: reduce no video card size in lesson page
+
+### 08/08/2025
+
+**Melhorias Visuais na Página de Perfil**
+- [Técnico] Ajuste de espaçamento entre título "Informações Pessoais" e botão editar, adição de descrição subtítulo, linha divisória decorativa, botão com estilo mais sutil (borda ao invés de fundo sólido)
+- [Benefício] Interface mais limpa e profissional, melhor hierarquia visual, espaçamento adequado entre elementos
+- [Commit] Incluído nos commits de perfil acima
 
 ---
 

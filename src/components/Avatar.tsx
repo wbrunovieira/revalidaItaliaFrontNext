@@ -15,7 +15,7 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const locale = pathname.split('/')[1];
-  const { user } = useAuth();
+  const { user, profileCompleteness } = useAuth();
 
   const handleClick = () => {
     if (asButton) {
@@ -23,10 +23,56 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
     }
   };
 
+  // Obter porcentagem de completude do perfil
+  const percentage = profileCompleteness?.percentage || 0;
+  
+  // Determinar cor baseada na porcentagem
+  const getProgressColor = () => {
+    if (percentage < 30) return '#EF4444'; // red-500
+    if (percentage < 100) return '#EAB308'; // yellow-500
+    return '#10B981'; // green-500
+  };
+
+  const progressColor = getProgressColor();
+  
+  // Calcular stroke-dasharray para o círculo
+  const radius = 22;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+
   const content = (
     <>
       {/* Glow effect */}
       <div className="absolute inset-0 rounded-full bg-secondary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      {/* SVG circular progress */}
+      <svg 
+        className="absolute inset-0 w-full h-full -rotate-90"
+        viewBox="0 0 48 48"
+      >
+        {/* Background circle */}
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-white/20"
+        />
+        {/* Progress circle */}
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          fill="none"
+          stroke={progressColor}
+          strokeWidth="2.5"
+          strokeDasharray={strokeDasharray}
+          strokeLinecap="round"
+          className="transition-all duration-500 ease-out"
+        />
+      </svg>
 
       {/* Avatar container */}
       <div className="relative w-10 h-10 rounded-full overflow-hidden">
@@ -59,6 +105,7 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
         onClick={handleClick}
         className={className}
         aria-label={t('profile')}
+        title={`${t('profile')} - ${percentage}% ${t('complete')}`}
       >
         {content}
       </button>
@@ -66,7 +113,10 @@ export default function Avatar({ asButton = true }: AvatarProps = {}) {
   }
 
   return (
-    <div className={className}>
+    <div 
+      className={className}
+      title={`${t('profile')} - ${percentage}% ${t('complete')}`}
+    >
       {content}
     </div>
   );

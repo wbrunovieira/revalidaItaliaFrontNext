@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import Avatar from './Avatar';
@@ -11,6 +11,7 @@ import { RoleBadge } from '@/components/ui/role-badge';
 
 export default function UserDropdown() {
   const t = useTranslations('Nav');
+  const locale = useLocale();
   const router = useRouter();
   const { user, logout: authLogout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -34,14 +35,14 @@ export default function UserDropdown() {
       authLogout();
       
       // Redirect to login page
-      router.push('/login');
+      router.push(`/${locale}/login`);
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
   const handleProfile = () => {
-    router.push('/profile');
+    router.push(`/${locale}/profile`);
     setIsOpen(false);
   };
 

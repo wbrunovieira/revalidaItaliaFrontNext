@@ -148,12 +148,9 @@ export default async function CoursesPage({
                     className="text-gray-400"
                   />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-white">
                   {t('noCourses')}
                 </h3>
-                <p className="text-gray-500">
-                  {t('noCoursesDescription')}
-                </p>
               </div>
             )}
           </Suspense>

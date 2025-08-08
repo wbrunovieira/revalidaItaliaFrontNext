@@ -41,35 +41,9 @@ interface Course {
 }
 
 // Fallback data for offline mode
-const fallbackTracks: Track[] = [
-  {
-    id: 'offline-track-1',
-    slug: 'trilha-medicina',
-    imageUrl: '/images/track-medicine.jpg',
-    translations: [
-      {
-        locale: 'pt',
-        title: 'Trilha de Medicina',
-        description: 'Prepare-se para a revalidação do seu diploma médico'
-      }
-    ]
-  }
-];
+const fallbackTracks: Track[] = [];
 
-const fallbackCourses: Course[] = [
-  {
-    id: 'offline-course-1',
-    slug: 'anatomia-basica',
-    imageUrl: '/images/course-anatomy.jpg',
-    translations: [
-      {
-        locale: 'pt',
-        title: 'Anatomia Básica',
-        description: 'Fundamentos de anatomia humana'
-      }
-    ]
-  }
-];
+const fallbackCourses: Course[] = [];
 
 interface DashboardClientProps {
   locale: string;

@@ -1656,7 +1656,7 @@ export default function CommunityPage() {
             </p>
           </div>
 
-          {/* Create Post Button - Prominent Position */}
+          {/* Create Post Button - Prominent Position (mantém no topo também) */}
           <div className="mb-8 flex justify-center">
             <Button
               onClick={() => setShowCreateModal(true)}
@@ -1666,6 +1666,21 @@ export default function CommunityPage() {
               {t('createTopic')}
             </Button>
           </div>
+
+          {/* Floating Create Post Button - Fixed Position */}
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            className="fixed top-24 right-8 z-50 bg-secondary hover:bg-secondary/90 text-white rounded-full p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 group"
+            title={t('createTopic')}
+          >
+            <Plus size={36} className="transition-transform duration-300 group-hover:rotate-90" />
+            <span className="sr-only">{t('createTopic')}</span>
+            
+            {/* Tooltip on hover */}
+            <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+              {t('createTopic')}
+            </span>
+          </Button>
 
           {/* Search Bar */}
           <div className="mb-6">

@@ -15,24 +15,69 @@ interface Address {
   id: string;
   street: string;
   number: string;
-  complement?: string;
-  district?: string;
+  complement?: string | null;
+  district?: string | null;
   city: string;
-  state?: string;
+  state?: string | null;
   country: string;
   postalCode: string;
+  label?: string | null;
+  isPrimary: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Permission {
+  resource: string;
+  action: string;
+}
+
+interface Restriction {
+  resource: string;
+  reason: string;
 }
 
 interface UserData {
+  // Identity fields
   id: string;
-  name: string;
   email: string;
-  cpf: string;
-  phone?: string;
-  birthDate?: string;
-  lastLogin?: string;
-  profileImageUrl?: string;
-  role: string;
+  emailVerified: boolean;
+  lastLogin?: string | null;
+  failedLoginAttempts: number;
+  lockedUntil?: string | null;
+  
+  // Profile fields
+  name: string;
+  nationalId: string;
+  phone?: string | null;
+  birthDate?: string | null;
+  profileImageUrl?: string | null;
+  bio?: string | null;
+  profession?: string | null;
+  specialization?: string | null;
+  preferredLanguage: string;
+  timezone: string;
+  communityProfileConsent: boolean;
+  communityProfileConsentDate?: string | null;
+  
+  // Authorization fields
+  role: 'student' | 'tutor' | 'admin';
+  customPermissions: Permission[];
+  restrictions: Restriction[];
+  effectiveFrom: string;
+  effectiveUntil?: string | null;
+  
+  // Addresses
+  addresses: Address[];
+  
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+  
+  // Legacy field compatibility
+  cpf?: string; // Maps to nationalId
 }
 
 
@@ -91,21 +136,21 @@ export default async function ProfilePage({
   const { user: userData }: { user: UserData } =
     await resUser.json();
 
-  // Buscar endereços do usuário
-  const resAddresses = await fetch(
-    `${apiUrl}/addresses?userId=${userData.id}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
-    }
-  );
-
-  let addresses: Address[] = [];
-  if (resAddresses.ok) {
-    addresses = await resAddresses.json();
-  }
+  // Initialize default values for required fields if they don't exist
+  const userDataWithDefaults: UserData = {
+    ...userData,
+    emailVerified: userData.emailVerified ?? false,
+    failedLoginAttempts: userData.failedLoginAttempts ?? 0,
+    preferredLanguage: userData.preferredLanguage ?? locale,
+    timezone: userData.timezone ?? 'UTC',
+    communityProfileConsent: userData.communityProfileConsent ?? false,
+    customPermissions: userData.customPermissions ?? [],
+    restrictions: userData.restrictions ?? [],
+    effectiveFrom: userData.effectiveFrom ?? new Date().toISOString(),
+    addresses: userData.addresses ?? [],
+    createdAt: userData.createdAt ?? new Date().toISOString(),
+    updatedAt: userData.updatedAt ?? new Date().toISOString(),
+  };
 
   return (
     <NavSidebar>
@@ -140,10 +185,10 @@ export default async function ProfilePage({
                 <div className="relative">
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 p-0.5">
                     <div className="w-full h-full rounded-2xl bg-primary flex items-center justify-center">
-                      {userData.profileImageUrl ? (
+                      {userDataWithDefaults.profileImageUrl ? (
                         <Image
-                          src={userData.profileImageUrl}
-                          alt={userData.name}
+                          src={userDataWithDefaults.profileImageUrl}
+                          alt={userDataWithDefaults.name}
                           width={76}
                           height={76}
                           className="rounded-2xl object-cover"
@@ -170,7 +215,7 @@ export default async function ProfilePage({
                     </span>
                   </div>
                   <h1 className="text-4xl lg:text-5xl font-bold text-white">
-                    {userData.name.split(' ')[0]}
+                    {userDataWithDefaults.name.split(' ')[0]}
                   </h1>
                   <p className="text-white/60 mt-1">{t('manageYourProfile')}</p>
                 </div>
@@ -185,8 +230,8 @@ export default async function ProfilePage({
           <div className="px-6 pb-12">
             <div className="max-w-7xl mx-auto">
               <ProfileContent
-                userData={userData}
-                initialAddresses={addresses}
+                userData={userDataWithDefaults}
+                initialAddresses={userDataWithDefaults.addresses}
                 locale={locale}
               />
             </div>

@@ -18,6 +18,11 @@ import {
   X,
   Check,
   User,
+  Briefcase,
+  AlertCircle,
+  CheckCircle,
+  BookOpen,
+  Star,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -25,24 +30,69 @@ interface Address {
   id: string;
   street: string;
   number: string;
-  complement?: string;
-  district?: string;
+  complement?: string | null;
+  district?: string | null;
   city: string;
-  state?: string;
+  state?: string | null;
   country: string;
   postalCode: string;
+  label?: string | null;
+  isPrimary: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Permission {
+  resource: string;
+  action: string;
+}
+
+interface Restriction {
+  resource: string;
+  reason: string;
 }
 
 interface UserData {
+  // Identity fields
   id: string;
-  name: string;
   email: string;
-  cpf: string;
-  phone?: string;
-  birthDate?: string;
-  lastLogin?: string;
-  profileImageUrl?: string;
-  role: string;
+  emailVerified: boolean;
+  lastLogin?: string | null;
+  failedLoginAttempts: number;
+  lockedUntil?: string | null;
+  
+  // Profile fields
+  name: string;
+  nationalId: string;
+  phone?: string | null;
+  birthDate?: string | null;
+  profileImageUrl?: string | null;
+  bio?: string | null;
+  profession?: string | null;
+  specialization?: string | null;
+  preferredLanguage: string;
+  timezone: string;
+  communityProfileConsent: boolean;
+  communityProfileConsentDate?: string | null;
+  
+  // Authorization fields
+  role: 'student' | 'tutor' | 'admin';
+  customPermissions: Permission[];
+  restrictions: Restriction[];
+  effectiveFrom: string;
+  effectiveUntil?: string | null;
+  
+  // Addresses
+  addresses: Address[];
+  
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+  
+  // Legacy field compatibility
+  cpf?: string; // Maps to nationalId
 }
 
 interface ProfileContentProps {
@@ -58,7 +108,7 @@ export default function ProfileContent({
 }: ProfileContentProps) {
   const t = useTranslations('Profile');
   const [addresses, setAddresses] = useState<Address[]>(
-    initialAddresses
+    initialAddresses || []
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] =
@@ -288,118 +338,122 @@ export default function ProfileContent({
                     </div>
                   </div>
 
-                  {/* Informações */}
-                  <div className="space-y-1">
-                    <div className="py-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <User
-                          size={20}
-                          className="text-secondary"
-                        />
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('name')}
-                          </p>
-                          <p className="font-medium">
-                            {userData.name}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <SimpleDivider />
-
-                    <div className="py-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <Mail
-                          size={20}
-                          className="text-secondary"
-                        />
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('email')}
-                          </p>
-                          <p className="font-medium">
-                            {userData.email}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <SimpleDivider />
-
-                    <div className="py-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <Hash
-                          size={20}
-                          className="text-secondary"
-                        />
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('document')}
-                          </p>
-                          <p className="font-medium">
-                            {userData.cpf}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <SimpleDivider />
-
-                    <div className="py-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <Phone
-                          size={20}
-                          className="text-secondary"
-                        />
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('phone')}
-                          </p>
-                          <p className="font-medium">
-                            {userData.phone || '-'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <SimpleDivider />
-
-                    <div className="py-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <Calendar
-                          size={20}
-                          className="text-secondary"
-                        />
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('birthDate')}
-                          </p>
-                          <p className="font-medium">
-                            {userData.birthDate ? formatDate(userData.birthDate) : '-'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {userData.lastLogin && (
-                      <>
-                        <div className="border-t border-white/5"></div>
-                        <div className="py-3">
-                          <div className="flex items-center gap-3 text-white">
-                            <Calendar
-                              size={20}
-                              className="text-secondary"
-                            />
-                            <div>
-                              <p className="text-sm text-gray-400">
-                                {t('lastLogin')}
-                              </p>
-                              <p className="font-medium">
-                                {formatDate(userData.lastLogin)}
-                              </p>
-                            </div>
+                  {/* Informações Organizadas */}
+                  <div className="space-y-6">
+                    {/* Dados Básicos */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
+                        {t('basicInfo')}
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-white">
+                          <User size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('name')}</p>
+                            <p className="font-medium">{userData.name}</p>
                           </div>
                         </div>
-                      </>
-                    )}
+                        <div className="flex items-center gap-3 text-white">
+                          <Mail size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('email')}</p>
+                            <p className="font-medium text-sm">{userData.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-white">
+                          <Phone size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('phone')}</p>
+                            <p className="font-medium">{userData.phone || '-'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Documentação */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
+                        {t('documentation')}
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-white">
+                          <Hash size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('document')}</p>
+                            <p className="font-medium">{userData.nationalId || userData.cpf}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-white">
+                          <Calendar size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('birthDate')}</p>
+                            <p className="font-medium">{userData.birthDate ? formatDate(userData.birthDate) : '-'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Perfil Profissional */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
+                        {t('professionalProfile')}
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-white">
+                          <Briefcase size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('profession')}</p>
+                            <p className="font-medium">{userData.profession || '-'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-white">
+                          <BookOpen size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('specialization')}</p>
+                            <p className="font-medium">{userData.specialization || '-'}</p>
+                          </div>
+                        </div>
+                        {userData.bio && (
+                          <div className="flex items-start gap-3 text-white">
+                            <User size={18} className="text-gray-400 mt-1" />
+                            <div className="flex-1">
+                              <p className="text-xs text-gray-500">{t('bio')}</p>
+                              <p className="font-medium text-sm leading-relaxed">{userData.bio}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status da Comunidade */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
+                        {t('communityStatus')}
+                      </h3>
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-3">
+                          {userData.communityProfileConsent ? (
+                            <div className="p-2 rounded-full bg-green-500/20">
+                              <CheckCircle size={20} className="text-green-400" />
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-full bg-yellow-500/20">
+                              <AlertCircle size={20} className="text-yellow-400" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className={`font-medium ${userData.communityProfileConsent ? 'text-green-400' : 'text-yellow-400'}`}>
+                              {userData.communityProfileConsent ? t('authorized') : t('notAuthorized')}
+                            </p>
+                            {userData.communityProfileConsentDate && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {t('since')} {formatDate(userData.communityProfileConsentDate)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
@@ -434,7 +488,7 @@ export default function ProfileContent({
                   </p>
                 </div>
               ) : addresses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {addresses.map(address => (
                     <div
                       key={address.id}
@@ -482,6 +536,19 @@ export default function ProfileContent({
                       </div>
 
                       <div className="space-y-2 text-white pr-20">
+                        <div className="flex items-center gap-2">
+                          {address.isPrimary && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-secondary/20 text-secondary text-xs rounded-full border border-secondary/30">
+                              <Star size={12} />
+                              {t('primaryAddress')}
+                            </span>
+                          )}
+                          {address.label && (
+                            <span className="text-xs text-gray-400 font-medium">
+                              {address.label}
+                            </span>
+                          )}
+                        </div>
                         <p className="font-medium">
                           {address.street}, {address.number}
                         </p>

@@ -9,12 +9,18 @@ interface Address {
   id: string;
   street: string;
   number: string;
-  complement?: string;
-  district?: string;
+  complement?: string | null;
+  district?: string | null;
   city: string;
-  state?: string;
+  state?: string | null;
   country: string;
   postalCode: string;
+  label?: string | null;
+  isPrimary?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AddAddressModalProps {

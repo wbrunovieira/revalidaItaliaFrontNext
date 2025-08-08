@@ -349,20 +349,29 @@ export const useAuthStore = create<AuthState>()(
             // Token válido encontrado - primeiro tenta extrair do JWT
             let userData = extractUserFromToken(existingToken);
             
-            // Se não tiver nome, tenta buscar do localStorage do auth-storage
-            if (!userData?.name) {
-              try {
-                const authStorage = localStorage.getItem('auth-storage');
-                if (authStorage) {
-                  const parsed = JSON.parse(authStorage);
-                  if (parsed?.state?.user) {
+            // Tenta buscar dados completos do localStorage do auth-storage
+            let profileCompleteness = null;
+            let communityProfile = null;
+            let meta = null;
+            
+            try {
+              const authStorage = localStorage.getItem('auth-storage');
+              if (authStorage) {
+                const parsed = JSON.parse(authStorage);
+                if (parsed?.state) {
+                  // Se não tiver nome no userData, pega do storage
+                  if (!userData?.name && parsed.state.user) {
                     userData = parsed.state.user;
                   }
+                  // Recupera os outros dados do storage
+                  profileCompleteness = parsed.state.profileCompleteness;
+                  communityProfile = parsed.state.communityProfile;
+                  meta = parsed.state.meta;
                 }
-              } catch (e) {
-                console.log('Parse error:', e);
-                console.log('Não foi possível recuperar dados do usuário do storage');
               }
+            } catch (e) {
+              console.log('Parse error:', e);
+              console.log('Não foi possível recuperar dados do storage');
             }
             
             set({
@@ -370,6 +379,10 @@ export const useAuthStore = create<AuthState>()(
               user: userData,
               isAuthenticated: true,
               isLoading: false,
+              // Restaurar todos os dados do perfil
+              profileCompleteness,
+              communityProfile,
+              meta,
               // Atualizar computed properties
               isAdmin: userData?.role === 'admin',
               isTutor: userData?.role === 'tutor',
@@ -461,9 +474,12 @@ export const useAuthStore = create<AuthState>()(
         },
       })),
       partialize: (state) => ({
-        // Apenas persistir token e user
+        // Persistir todos os dados necessários
         token: state.token,
         user: state.user,
+        profileCompleteness: state.profileCompleteness,
+        communityProfile: state.communityProfile,
+        meta: state.meta,
       }),
     }
   )

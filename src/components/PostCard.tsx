@@ -31,6 +31,7 @@ import { RoleBadge } from '@/components/ui/role-badge';
 import ReplyCard from '@/components/ReplyCard';
 import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
+import ReportModal from '@/components/ReportModal';
 
 interface Author {
   id: string;
@@ -165,6 +166,7 @@ export default function PostCard({
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -806,7 +808,12 @@ export default function PostCard({
                 className="text-gray-500 hover:text-red-400 text-sm px-3 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('Report post:', post.id);
+                  console.log('🚩 Botão Denunciar clicado!');
+                  console.log('📌 Post ID:', post.id);
+                  console.log('📌 Post Title:', post.title);
+                  console.log('🔓 Abrindo modal de denúncia...');
+                  setShowReportModal(true);
+                  console.log('✅ Estado showReportModal definido como true');
                 }}
               >
                 <Flag size={14} />
@@ -969,6 +976,18 @@ export default function PostCard({
         )}
       </div>
     )}
+
+    {/* Report Modal */}
+    <ReportModal
+      isOpen={showReportModal}
+      onClose={() => setShowReportModal(false)}
+      postId={post.id}
+      postTitle={post.title}
+      onSuccess={() => {
+        console.log('✅ Post reported successfully');
+        // Optionally update UI or refresh data
+      }}
+    />
     </>
   );
 }

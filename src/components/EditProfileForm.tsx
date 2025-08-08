@@ -29,7 +29,6 @@ import {
   Users,
   CheckCircle,
   AlertCircle,
-  Upload,
   Trash2,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -48,7 +47,6 @@ interface UserData {
   specialization?: string | null;
   communityProfileConsent: boolean;
   role: string;
-  [key: string]: any; // Allow additional properties
 }
 
 interface EditProfileFormProps {
@@ -87,7 +85,6 @@ export default function EditProfileForm({
   
   // Estados para upload de imagem
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     userData.profileImageUrl || null
   );
@@ -121,7 +118,6 @@ export default function EditProfileForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -189,7 +185,6 @@ export default function EditProfileForm({
       
       // Salvar URL da imagem carregada
       setUploadedImageUrl(result.url);
-      setImageFile(file);
       
       toast({
         title: t('success'),
@@ -210,7 +205,6 @@ export default function EditProfileForm({
   };
 
   const handleRemoveImage = () => {
-    setImageFile(null);
     setImagePreview(null);
     setUploadedImageUrl(null);
   };

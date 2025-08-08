@@ -27,7 +27,6 @@ interface AddAddressModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddressAdded: () => void;
-  userId: string;
   editAddress?: Address | null;
   mode?: 'add' | 'edit';
 }
@@ -47,7 +46,6 @@ export default function AddAddressModal({
   isOpen,
   onClose,
   onAddressAdded,
-  userId,
   editAddress = null,
   mode = 'add',
 }: AddAddressModalProps) {

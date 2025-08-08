@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
 import EditProfileForm from '@/components/EditProfileForm';
-import { SimpleDivider } from '@/components/ui/modern-divider';
 import {
   MapPin,
   Plus,
@@ -688,7 +687,6 @@ export default function ProfileContent({
         isOpen={isModalOpen}
         onClose={closeModal}
         onAddressAdded={handleAddressAdded}
-        userId={userData.id}
         editAddress={editingAddress}
         mode={modalMode}
       />

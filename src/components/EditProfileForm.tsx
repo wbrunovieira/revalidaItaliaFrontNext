@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/stores/auth.store';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import DatePicker from 'react-datepicker';
@@ -63,6 +64,7 @@ export default function EditProfileForm({
 }: EditProfileFormProps) {
   const t = useTranslations('Profile');
   const { toast } = useToast();
+  const { updateUser } = useAuth();
   const params = useParams();
   const locale = params.locale as string;
   
@@ -319,6 +321,9 @@ export default function EditProfileForm({
         title: t('updateSuccess'),
         description: t('updateSuccessDescription'),
       });
+      
+      // Atualizar o Auth Store com os novos dados do usuário
+      updateUser(updateData);
       
       onSuccess();
       

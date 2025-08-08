@@ -172,8 +172,9 @@ export default function ProfileContent({
         .find(row => row.startsWith('token='))
         ?.split('=')[1];
 
+      // Buscar dados atualizados do usuário (que incluem os endereços)
       const response = await fetch(
-        `${apiUrl}/api/v1/addresses?userId=${userData.id}`,
+        `${apiUrl}/api/v1/users/${userData.id}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -185,13 +186,31 @@ export default function ProfileContent({
         }
       );
 
+      console.log('📍 Fetching user data response:', response.status);
+
       if (response.ok) {
-        const updatedAddresses = await response.json();
-        setAddresses(updatedAddresses);
+        const data = await response.json();
+        console.log('✅ User data fetched after address creation:', data);
+        
+        // A resposta vem com {user: {...}} então precisamos acessar data.user
+        const updatedUserData = data.user || data;
+        
+        // Atualizar apenas os endereços do estado local
+        if (updatedUserData.addresses) {
+          setAddresses(updatedUserData.addresses);
+          console.log('📍 Addresses updated:', updatedUserData.addresses);
+        }
+      } else {
+        const errorData = await response.json().catch(() => null);
+        console.error('❌ Failed to fetch user data:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
       }
     } catch (error) {
       console.error(
-        'Error fetching updated addresses:',
+        'Error fetching updated user data:',
         error
       );
     } finally {

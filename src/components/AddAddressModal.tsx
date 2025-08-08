@@ -161,7 +161,13 @@ export default function AddAddressModal({
       const body =
         mode === 'edit'
           ? formData // For PATCH, don't include userId
-          : { userId, ...formData }; // For POST, include userId
+          : formData; // For POST, send only form data
+
+      console.log('📤 Sending address request:', {
+        url,
+        method,
+        body
+      });
 
       const response = await fetch(url, {
         method,
@@ -175,10 +181,19 @@ export default function AddAddressModal({
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('❌ Address API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
         throw new Error(
-          `HTTP error! status: ${response.status}`
+          `HTTP error! status: ${response.status} - ${errorData?.message || errorData?.detail || response.statusText}`
         );
       }
+
+      const newAddress = await response.json();
+      console.log('✅ Address created successfully:', newAddress);
 
       // Reset form
       setFormData({
@@ -192,7 +207,10 @@ export default function AddAddressModal({
         postalCode: '',
       });
 
-      onAddressAdded();
+      // Call the callback to refresh addresses BEFORE closing
+      await onAddressAdded();
+      
+      // Then close the modal
       onClose();
     } catch (error) {
       console.error(

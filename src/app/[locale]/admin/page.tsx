@@ -452,7 +452,7 @@ export default function AdminPage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+                  <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
                     {/* Create Assessment Button */}
                     <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                       <div className="text-center space-y-4">
@@ -485,36 +485,6 @@ export default function AdminPage() {
                           {t(
                             'createAssessment.startButton'
                           )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Create Argument Button */}
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
-                      <div className="text-center space-y-4">
-                        <div className="p-3 bg-green-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                          <List
-                            size={24}
-                            className="text-green-400"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-semibold text-white mb-2">
-                            {t('createArgument.cardTitle')}
-                          </h4>
-                          <p className="text-gray-400 text-sm mb-4">
-                            {t(
-                              'createArgument.cardDescription'
-                            )}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() =>
-                            setShowCreateArgumentModal(true)
-                          }
-                          className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                        >
-                          {t('createArgument.startButton')}
                         </button>
                       </div>
                     </div>

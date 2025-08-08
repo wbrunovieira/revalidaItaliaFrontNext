@@ -108,7 +108,20 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Feedback visual imediato sobre o status do perfil, incentiva usuários a completar informações faltantes, melhora engajamento ao gamificar o processo de completar o perfil, indicação clara de próximos passos necessários
 - [Commit] feat: add visual profile completeness indicator around user avatar
 
--
+**Sistema de Criação e Atualização de Endereços com Refresh Automático**
+- [Técnico] Correção do mapeamento de dados do formulário de endereço, busca dados atualizados do usuário após criar endereço via GET /users/:id, remoção de parâmetros desnecessários (userId), adição de logs para debug da resposta da API
+- [Benefício] Endereços criados aparecem imediatamente na tela sem necessidade de refresh manual, melhor experiência do usuário ao gerenciar múltiplos endereços, feedback visual instantâneo após ações
+- [Commit] feat: add profile completeness indicator and fix address creation
+
+**Botão Flutuante de Novo Post na Comunidade**
+- [Técnico] Implementação de botão fixo no canto superior direito da página de comunidade com ícone Plus rotativo, z-index alto para ficar sempre visível, tooltip explicativo ao passar o mouse
+- [Benefício] Usuários podem criar posts a qualquer momento sem precisar voltar ao topo da página, melhora acessibilidade em dispositivos móveis, facilita engajamento na comunidade
+- [Commit] feat: add floating fixed create post button on community page
+
+**Exibição de Dados Profissionais em Posts e Comentários da Comunidade**
+- [Técnico] Mapeamento completo dos campos bio, specialization, profession, city e country vindos da API nos componentes PostCard e ReplyCard, tooltip interativo ao passar mouse sobre avatar mostrando bio e especialização, correção de z-index para tooltips aparecerem sobre outros elementos
+- [Benefício] Usuários podem conhecer melhor outros membros da comunidade vendo suas profissões e especializações, tooltips com bio criam conexões mais pessoais, respeita privacidade mostrando dados apenas de quem consentiu
+- [Commit] feat: add user profile data to community posts and comments
 
 ### 12/08/2025
 
@@ -167,6 +180,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Técnico] Redesign dos badges de role usando cores harmônicas do projeto - admin: dourado/amber (autoridade), tutor: gradiente azul-dourado (destaque especial), student: azul accent (#79BED9)
 - [Benefício] Melhora a consistência visual com a identidade da marca, remove conotações negativas e cria hierarquia visual clara entre os papéis
 - [Commit] feat: update role badge colors with harmonized design
+
+### 09/08/2025
+
+**Correção de Erros de Build e Linting**
+- [Problema] Build falhando com erros de TypeScript e ESLint - variáveis não utilizadas, imports desnecessários, tipos incorretos
+- [Solução] Remoção de variáveis não utilizadas (userId, imageFile, Upload, SimpleDivider), correção de tipos any para tipos específicos, limpeza de imports
+- [Commit] fix: resolve build errors and remove unused variables
 
 ---
 

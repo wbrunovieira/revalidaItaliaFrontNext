@@ -1,9 +1,9 @@
 {
-   "Tutor": {
+  "Tutor": {
     "back": "Volver",
     "dashboard": {
       "title": "Área del Tutor",
-      "subtitle": "Revisa exámenes de ensayo y proporciona retroalimentación a los estudiantes"
+      "subtitle": "Revisa exámenes disertativos y proporciona retroalimentación a los estudiantes"
     },
     "stats": {
       "pending": "Esperando revisión",
@@ -39,86 +39,62 @@
     },
     "priority": {
       "high": "Alta prioridad",
-      "medium": "Media prioridad",
+      "medium": "Prioridad media",
       "low": "Baja prioridad"
     },
     "messages": {
-      "noAttempts": "No se encontraron intentos",
+      "noAttempts": "Ningún intento encontrado",
       "noAttemptsSubtitle": "No hay exámenes pendientes de revisión en este momento",
       "attemptNotFound": "Intento no encontrado",
-      "attemptNotFoundSubtitle": "El intento que buscas no fue encontrado",
+      "attemptNotFoundSubtitle": "El intento que estás buscando no fue encontrado",
       "loadingAttempts": "Cargando intentos pendientes...",
       "loadingAttempt": "Cargando datos del intento...",
       "reviewSaved": "Revisión guardada con éxito",
       "reviewFinalized": "Revisión finalizada con éxito",
-      "errorSaving": "Error al guardar revisión",
-      "errorFinalizing": "Error al finalizar revisión",
-      "errorLoading": "Error al cargar datos"
+      "errorSaving": "Error al guardar la revisión",
+      "errorFinalizing": "Error al finalizar la revisión",
+      "errorLoading": "Error al cargar los datos"
     },
     "reports": {
       "loading": "Cargando denuncias...",
-      "noReports": "No se encontraron denuncias",
+      "noReports": "Ninguna denuncia encontrada",
       "noReportsDescription": "No hay denuncias para revisar en este momento",
       "searchPlaceholder": "Buscar por usuario, contenido o motivo...",
-      "reason": "Motivo",
+      "description": "Descripción",
       "reportedContent": "Contenido denunciado",
       "reportedBy": "Denunciado por",
-      "reportedUser": "Usuario denunciado",
-      "resolution": "Resolución",
-      "resolvedBy": "Resuelto por",
+      "author": "Autor",
+      "inPost": "En la publicación",
       "stats": {
-        "total": "Total",
-        "pending": "Pendientes",
-        "reviewing": "En análisis",
-        "resolved": "Resueltas",
-        "dismissed": "Desestimadas"
+        "total": "Total de Denuncias",
+        "posts": "Publicaciones",
+        "comments": "Comentarios"
       },
       "filter": {
-        "all": "Todas",
-        "pending": "Pendientes",
-        "reviewing": "En análisis",
-        "resolved": "Resueltas",
-        "dismissed": "Desestimadas"
+        "allReasons": "Todos los motivos"
+      },
+      "reasons": {
+        "inappropriateContent": "Contenido Inapropiado",
+        "spam": "Spam",
+        "offensiveLanguage": "Lenguaje Ofensivo",
+        "harassment": "Acoso",
+        "other": "Otro"
       },
       "type": {
         "all": "Todos los tipos",
         "post": "Publicación",
-        "comment": "Comentario",
-        "reply": "Respuesta"
-      },
-      "status": {
-        "pending": "Pendiente",
-        "reviewing": "En análisis",
-        "resolved": "Resuelta",
-        "dismissed": "Desestimada"
+        "comment": "Comentario"
       },
       "actions": {
-        "review": "Analizar",
-        "resolve": "Resolver",
-        "complete": "Completar",
-        "view": "Ver"
-      },
-      "modal": {
-        "title": "Resolver Denuncia",
-        "resolution": "Descripción de la Resolución",
-        "resolutionPlaceholder": "Describa la acción tomada y el motivo de la decisión...",
-        "resolve": "Resolver",
-        "dismiss": "Desestimar",
-        "cancel": "Cancelar",
-        "processing": "Procesando..."
+        "view": "Visualizar"
       },
       "error": {
         "fetchTitle": "Error al cargar",
-        "fetchDescription": "No se pudieron cargar las denuncias",
-        "updateTitle": "Error al actualizar",
-        "updateDescription": "No se pudo actualizar la denuncia"
-      },
-      "success": {
-        "updateTitle": "Denuncia actualizada",
-        "updateDescription": "El estado de la denuncia fue actualizado con éxito"
+        "fetchDescription": "No se pudieron cargar las denuncias"
       }
     }
   }
+
 ,
   "Profile": {
     "title": "Perfil",

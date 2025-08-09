@@ -1,5 +1,5 @@
 {
-  "Tutor": {
+ "Tutor": {
     "back": "Voltar",
     "dashboard": {
       "title": "Área do Tutor",
@@ -60,65 +60,41 @@
       "noReports": "Nenhuma denúncia encontrada",
       "noReportsDescription": "Não há denúncias para revisar no momento",
       "searchPlaceholder": "Buscar por usuário, conteúdo ou motivo...",
-      "reason": "Motivo",
+      "description": "Descrição",
       "reportedContent": "Conteúdo denunciado",
       "reportedBy": "Denunciado por",
-      "reportedUser": "Usuário denunciado",
-      "resolution": "Resolução",
-      "resolvedBy": "Resolvido por",
+      "author": "Autor",
+      "inPost": "Na postagem",
       "stats": {
-        "total": "Total",
-        "pending": "Pendentes",
-        "reviewing": "Em análise",
-        "resolved": "Resolvidas",
-        "dismissed": "Dispensadas"
+        "total": "Total de Denúncias",
+        "posts": "Postagens",
+        "comments": "Comentários"
       },
       "filter": {
-        "all": "Todas",
-        "pending": "Pendentes",
-        "reviewing": "Em análise",
-        "resolved": "Resolvidas",
-        "dismissed": "Dispensadas"
+        "allReasons": "Todos os motivos"
+      },
+      "reasons": {
+        "inappropriateContent": "Conteúdo Inapropriado",
+        "spam": "Spam",
+        "offensiveLanguage": "Linguagem Ofensiva",
+        "harassment": "Assédio",
+        "other": "Outro"
       },
       "type": {
         "all": "Todos os tipos",
         "post": "Postagem",
-        "comment": "Comentário",
-        "reply": "Resposta"
-      },
-      "status": {
-        "pending": "Pendente",
-        "reviewing": "Em análise",
-        "resolved": "Resolvida",
-        "dismissed": "Dispensada"
+        "comment": "Comentário"
       },
       "actions": {
-        "review": "Analisar",
-        "resolve": "Resolver",
-        "complete": "Concluir",
         "view": "Visualizar"
-      },
-      "modal": {
-        "title": "Resolver Denúncia",
-        "resolution": "Descrição da Resolução",
-        "resolutionPlaceholder": "Descreva a ação tomada e o motivo da decisão...",
-        "resolve": "Resolver",
-        "dismiss": "Dispensar",
-        "cancel": "Cancelar",
-        "processing": "Processando..."
       },
       "error": {
         "fetchTitle": "Erro ao carregar",
-        "fetchDescription": "Não foi possível carregar as denúncias",
-        "updateTitle": "Erro ao atualizar",
-        "updateDescription": "Não foi possível atualizar a denúncia"
-      },
-      "success": {
-        "updateTitle": "Denúncia atualizada",
-        "updateDescription": "O status da denúncia foi atualizado com sucesso"
+        "fetchDescription": "Não foi possível carregar as denúncias"
       }
     }
   }
+
 ,
   "Profile": {
     "title": "Perfil",

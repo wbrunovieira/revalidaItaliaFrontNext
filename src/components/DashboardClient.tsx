@@ -1,7 +1,7 @@
 // src/components/DashboardClient.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -77,7 +77,6 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const {
     data: tracks,
     loading: tracksLoading,
-    error: tracksError,
   } = useApi<Track[]>('/api/v1/tracks', {
     fallbackData: initialTracks.length > 0 ? initialTracks : fallbackTracks,
     showToastOnError: false,
@@ -86,7 +85,6 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const {
     data: courses,
     loading: coursesLoading,
-    error: coursesError,
   } = useApi<Course[]>('/api/v1/courses', {
     fallbackData: initialCourses.length > 0 ? initialCourses : fallbackCourses,
     showToastOnError: false,
@@ -108,7 +106,6 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       };
     }) || [];
 
-  const hasError = tracksError || coursesError;
   const isLoading = tracksLoading || coursesLoading;
 
   return (

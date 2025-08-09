@@ -198,6 +198,21 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Solução] Remoção de variáveis não utilizadas (userId, imageFile, Upload, SimpleDivider), correção de tipos any para tipos específicos, limpeza de imports
 - [Commit] fix: resolve build errors and remove unused variables
 
+**Remoção do Sistema de Monitoramento de Conexão**
+- [Problema] Faixa amarela piscando rapidamente ao trocar de páginas devido a verificação constante de conexão
+- [Solução] Remoção completa do sistema de monitoramento de conexão (isOnline, banners de status), confiando apenas em erros reais das chamadas API
+- [Commit] fix: remove connection monitoring system to prevent yellow stripe flashing
+
+**Persistência de Dados de Completude do Perfil**
+- [Problema] Círculo de progresso do perfil voltava para 0% vermelho após refresh da página
+- [Solução] Configuração do Zustand para persistir profileCompleteness, communityProfile e meta no localStorage, restauração desses dados ao inicializar a aplicação
+- [Commit] fix: persist profile completeness data to prevent loss on page refresh
+
+**Sistema de Denúncia de Comentários e Respostas**
+- [Técnico] Adaptação do ReportModal para suportar posts e comentários, integração com endpoint POST /community/comments/:commentId/reports, adição de botão de denúncia no ReplyCard, logs detalhados antes e depois das requisições para debug
+- [Benefício] Permite denunciar comentários inadequados mantendo discussões saudáveis, mesma experiência unificada para denunciar posts e comentários, rastreamento completo de denúncias para moderação
+- [Commit] feat: add comment and reply reporting system with detailed logging
+
 ---
 
 ## 📚 Documentações Criadas

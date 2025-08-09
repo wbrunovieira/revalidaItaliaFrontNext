@@ -413,6 +413,7 @@
       "title": "Segnala Post",
       "description": "Aiutaci a mantenere la comunità sicura. Le segnalazioni sono anonime e saranno revisionate dal nostro team.",
       "reportingPost": "Segnalando post",
+      "reportingComment": "Segnalando commento",
       "reasonLabel": "Perché stai segnalando questo post?",
       "detailsLabel": "Dettagli aggiuntivi",
       "detailsPlaceholder": "Fornisci maggiori informazioni sul problema (opzionale)",

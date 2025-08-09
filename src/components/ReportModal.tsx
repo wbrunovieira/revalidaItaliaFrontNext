@@ -26,16 +26,18 @@ export type ReportReason =
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  postId: string;
-  postTitle?: string;
+  itemId: string; // ID do post ou comentário
+  itemType: 'post' | 'comment';
+  itemTitle?: string; // Título do post ou preview do comentário
   onSuccess?: () => void;
 }
 
 export default function ReportModal({
   isOpen,
   onClose,
-  postId,
-  postTitle,
+  itemId,
+  itemType,
+  itemTitle,
   onSuccess,
 }: ReportModalProps) {
   const t = useTranslations('Community');
@@ -46,12 +48,17 @@ export default function ReportModal({
 
   // Log quando o modal muda de estado
   useEffect(() => {
-    console.log('🎭 ReportModal - Estado mudou:', {
-      isOpen,
-      postId,
-      postTitle
-    });
-  }, [isOpen, postId, postTitle]);
+    if (isOpen) {
+      console.log('🎭 ========== MODAL DE DENÚNCIA ABERTO ==========');
+      console.log(`📝 Tipo: ${itemType.toUpperCase()}`);
+      console.log(`🆔 ID: ${itemId}`);
+      console.log(`📄 Preview: ${itemTitle ? itemTitle.substring(0, 50) + '...' : 'Sem título'}`);
+      console.log('🕐 Aberto em:', new Date().toISOString());
+      console.log('================================================');
+    } else {
+      console.log('🎭 Modal de denúncia fechado');
+    }
+  }, [isOpen, itemId, itemType, itemTitle]);
 
   const handleSubmit = async () => {
     // Validate OTHER reason requires description
@@ -76,8 +83,9 @@ export default function ReportModal({
 
     try {
       setIsSubmitting(true);
-      console.log('📝 Iniciando denúncia do post:', { 
-        postId, 
+      console.log(`📝 Iniciando denúncia do ${itemType}:`, { 
+        itemId, 
+        itemType,
         reason, 
         hasDescription: !!description,
         descriptionLength: description.length 
@@ -99,14 +107,27 @@ export default function ReportModal({
         description: description.trim() || undefined,
       };
 
-      console.log('📤 Enviando denúncia para API:', {
-        url: `${apiUrl}/api/v1/community/posts/${postId}/reports`,
-        payload: reportPayload,
-        hasToken: !!token
+      const endpoint = itemType === 'post' 
+        ? `${apiUrl}/api/v1/community/posts/${itemId}/reports`
+        : `${apiUrl}/api/v1/community/comments/${itemId}/reports`;
+
+      // Log detalhado ANTES da requisição
+      console.log('🚀 ========== INICIANDO DENÚNCIA ==========');
+      console.log(`📝 Tipo de item: ${itemType.toUpperCase()}`);
+      console.log(`🆔 ID do ${itemType}: ${itemId}`);
+      console.log(`📍 Endpoint: ${endpoint}`);
+      console.log('📦 Payload da requisição:', {
+        reason,
+        description: description || '(vazio)',
+        descriptionLength: description.length
       });
+      console.log(`🔑 Token presente: ${!!token ? 'SIM' : 'NÃO'}`);
+      console.log(`🔑 Token (primeiros 20 chars): ${token ? token.substring(0, 20) + '...' : 'N/A'}`);
+      console.log('🕐 Timestamp:', new Date().toISOString());
+      console.log('==========================================');
 
       const response = await fetch(
-        `${apiUrl}/api/v1/community/posts/${postId}/reports`,
+        endpoint,
         {
           method: 'POST',
           headers: {
@@ -117,13 +138,26 @@ export default function ReportModal({
         }
       );
 
+      // Log detalhado da RESPOSTA
+      console.log('📥 ========== RESPOSTA DA API ==========');
+      console.log(`📊 Status HTTP: ${response.status} - ${response.statusText}`);
+      console.log(`✅ Sucesso: ${response.ok ? 'SIM' : 'NÃO'}`);
+      console.log('📋 Headers da resposta:', {
+        contentType: response.headers.get('content-type'),
+        contentLength: response.headers.get('content-length'),
+        date: response.headers.get('date'),
+        server: response.headers.get('server')
+      });
+
       let data;
       try {
         const responseText = await response.text();
-        console.log('📄 Resposta bruta do servidor:', responseText);
+        console.log('📄 Resposta bruta (texto):', responseText);
+        console.log(`📏 Tamanho da resposta: ${responseText.length} caracteres`);
         
         if (responseText) {
           data = JSON.parse(responseText);
+          console.log('✅ Parse JSON bem-sucedido');
         } else {
           data = {};
           console.warn('⚠️ Resposta vazia do servidor');
@@ -133,30 +167,27 @@ export default function ReportModal({
         data = { message: 'Erro ao processar resposta do servidor' };
       }
 
-      console.log('📨 Resposta do backend processada:', { 
-        status: response.status, 
-        statusText: response.statusText,
-        data,
-        headers: {
-          contentType: response.headers.get('content-type'),
-          date: response.headers.get('date')
-        }
-      });
+      console.log('📨 Dados da resposta processados:', JSON.stringify(data, null, 2));
+      console.log('🕐 Timestamp da resposta:', new Date().toISOString());
+      console.log('==========================================');
 
       if (!response.ok) {
-        // Log detalhado apenas em modo desenvolvimento
-        console.log('📊 Resposta da API:', {
-          status: response.status,
-          statusText: response.statusText,
-          message: data?.message || 'Sem mensagem',
-          error: data?.error || 'Sem detalhes de erro',
-          statusCode: data?.statusCode
+        // Log detalhado de ERRO
+        console.log('❌ ========== ERRO NA DENÚNCIA ==========');
+        console.log(`🚨 Código de erro: ${response.status}`);
+        console.log(`📝 Tipo de erro: ${response.statusText}`);
+        console.log('📊 Detalhes do erro:', {
+          message: data?.message || 'Sem mensagem de erro',
+          error: data?.error || 'Sem detalhes adicionais',
+          statusCode: data?.statusCode || response.status,
+          type: data?.type || 'Não especificado'
         });
+        console.log('==========================================');
         
         // Tratar erros específicos com mensagens amigáveis
         switch (response.status) {
           case 409:
-            console.info('ℹ️ Denúncia duplicada - usuário já reportou este post');
+            console.info('ℹ️ Denúncia duplicada - usuário já reportou este ' + itemType);
             toast({
               title: t('report.warning'),
               description: t('report.alreadyReported'),
@@ -221,12 +252,19 @@ export default function ReportModal({
         }
       }
 
-      console.log('✅ Denúncia enviada com sucesso!', {
-        reportId: data.report?.id,
-        postId: data.report?.postId,
-        status: data.report?.status,
-        createdAt: data.report?.createdAt
+      // Log detalhado de SUCESSO
+      console.log('✅ ========== DENÚNCIA BEM-SUCEDIDA ==========');
+      console.log(`🎯 ${itemType.charAt(0).toUpperCase() + itemType.slice(1)} denunciado com sucesso!`);
+      console.log('📋 Detalhes do report criado:', {
+        reportId: data.report?.id || 'ID não retornado',
+        itemId: data.report?.postId || data.report?.commentId || itemId,
+        reporterId: data.report?.reporterId || 'Não informado',
+        reason: data.report?.reason || reason,
+        status: data.report?.status || 'PENDING',
+        createdAt: data.report?.createdAt || new Date().toISOString()
       });
+      console.log('🕐 Timestamp do sucesso:', new Date().toISOString());
+      console.log('=============================================');
       
       toast({
         title: t('report.success'),
@@ -241,11 +279,18 @@ export default function ReportModal({
       onClose();
       console.log('🔄 Modal fechado após sucesso');
     } catch (error) {
-      // Erro de rede ou erro não tratado
-      console.error('❌ Erro de rede ou erro inesperado:', {
-        error: error instanceof Error ? error.message : error,
-        stack: error instanceof Error ? error.stack : undefined
+      // Log detalhado de ERRO DE REDE
+      console.log('🔥 ========== ERRO CRÍTICO ==========');
+      console.log('💥 Tipo de erro: ERRO DE REDE OU EXCEÇÃO');
+      console.log('🔍 Detalhes do erro:', {
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+        name: error instanceof Error ? error.name : 'N/A',
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('\n') : 'N/A'
       });
+      console.log(`🎯 Tentativa de denunciar: ${itemType} com ID ${itemId}`);
+      console.log('🕐 Timestamp do erro:', new Date().toISOString());
+      console.log('=====================================');
+      
       toast({
         title: t('report.error'),
         description: t('report.submitError'),
@@ -276,10 +321,12 @@ export default function ReportModal({
           </DialogTitle>
           <DialogDescription asChild>
             <div className="text-gray-400">
-              {postTitle && (
+              {itemTitle && (
                 <div className="mb-2 p-2 bg-gray-700/50 rounded-lg">
-                  <span className="text-xs text-gray-500">{t('report.reportingPost')}:</span>
-                  <p className="text-sm text-white mt-1 line-clamp-2">{postTitle}</p>
+                  <span className="text-xs text-gray-500">
+                    {t(itemType === 'post' ? 'report.reportingPost' : 'report.reportingComment')}:
+                  </span>
+                  <p className="text-sm text-white mt-1 line-clamp-2">{itemTitle}</p>
                 </div>
               )}
               <p className="text-sm">{t('report.description')}</p>

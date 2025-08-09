@@ -424,6 +424,7 @@
       "title": "Denunciar Post",
       "description": "Ajude-nos a manter a comunidade segura. Denúncias são anônimas e serão revisadas por nossa equipe.",
       "reportingPost": "Denunciando post",
+      "reportingComment": "Denunciando comentário",
       "reasonLabel": "Por que você está denunciando este post?",
       "detailsLabel": "Detalhes adicionais",
       "detailsPlaceholder": "Forneça mais informações sobre o problema (opcional)",

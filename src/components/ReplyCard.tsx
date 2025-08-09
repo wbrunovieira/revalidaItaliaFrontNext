@@ -16,6 +16,7 @@ import { RoleBadge } from '@/components/ui/role-badge';
 import { cn } from '@/lib/utils';
 import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
+import ReportModal from '@/components/ReportModal';
 
 interface Author {
   id: string;
@@ -75,6 +76,7 @@ export default function ReplyCard({
   const t = useTranslations('Community');
   const { user } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -116,7 +118,7 @@ export default function ReplyCard({
       {/* Reply Card */}
       <div
         className={cn(
-          'group relative rounded-lg p-2.5 overflow-hidden',
+          'group relative rounded-lg p-2.5',
           'bg-gradient-to-br from-primary-dark/30 via-primary-dark/20 to-secondary/10',
           'hover:from-primary-dark/40 hover:via-primary-dark/30 hover:to-secondary/20',
           'transition-all duration-300',
@@ -144,7 +146,7 @@ export default function ReplyCard({
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-start gap-3 flex-1">
           {/* Avatar - Smaller with tooltip */}
-          <div className="relative group">
+          <div className="relative group overflow-visible">
             <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary/20 flex-shrink-0">
               <Image
                 src={reply.author.profileImageUrl || reply.author.avatar || '/icons/avatar.svg'}
@@ -155,9 +157,9 @@ export default function ReplyCard({
               />
             </div>
             
-            {/* Tooltip with bio and specialization - positioned to the right */}
+            {/* Tooltip with bio and specialization - positioned to the left */}
             {(reply.author.bio || reply.author.specialization) && (
-              <div className="absolute left-full ml-2 top-0 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 pointer-events-none" style={{ zIndex: 9999 }}>
+              <div className="absolute right-full mr-2 top-0 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 pointer-events-none" style={{ zIndex: 999999 }}>
                 <div className="bg-gray-900 text-white p-3 rounded-lg shadow-2xl max-w-xs min-w-[200px] border border-gray-700">
                   <div className="font-semibold text-white mb-1">
                     {reply.author.name}
@@ -172,7 +174,7 @@ export default function ReplyCard({
                       {reply.author.bio}
                     </div>
                   )}
-                  <div className="absolute -left-1 top-3 w-2 h-2 bg-gray-900 rotate-45 border-l border-t border-gray-700"></div>
+                  <div className="absolute -right-1 top-3 w-2 h-2 bg-gray-900 rotate-45 border-r border-t border-gray-700"></div>
                 </div>
               </div>
             )}
@@ -282,7 +284,8 @@ export default function ReplyCard({
                 className="text-gray-500 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('Report reply:', reply.id);
+                  console.log('🚩 Opening report modal for comment:', reply.id);
+                  setShowReportModal(true);
                 }}
               >
                 <Flag size={12} />
@@ -360,6 +363,19 @@ export default function ReplyCard({
         })}
       </div>
     )}
+
+    {/* Report Modal */}
+    <ReportModal
+      isOpen={showReportModal}
+      onClose={() => setShowReportModal(false)}
+      itemId={reply.id}
+      itemType="comment"
+      itemTitle={reply.content.substring(0, 100)}
+      onSuccess={() => {
+        console.log('✅ Comment reported successfully');
+        setShowReportModal(false);
+      }}
+    />
     </div>
   );
 }

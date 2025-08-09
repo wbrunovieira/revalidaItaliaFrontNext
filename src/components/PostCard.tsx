@@ -981,8 +981,9 @@ export default function PostCard({
     <ReportModal
       isOpen={showReportModal}
       onClose={() => setShowReportModal(false)}
-      postId={post.id}
-      postTitle={post.title}
+      itemId={post.id}
+      itemType="post"
+      itemTitle={post.title}
       onSuccess={() => {
         console.log('✅ Post reported successfully');
         // Optionally update UI or refresh data

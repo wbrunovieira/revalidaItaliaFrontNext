@@ -412,6 +412,7 @@
       "title": "Denunciar Publicación",
       "description": "Ayúdanos a mantener la comunidad segura. Las denuncias son anónimas y serán revisadas por nuestro equipo.",
       "reportingPost": "Denunciando publicación",
+      "reportingComment": "Denunciando comentario",
       "reasonLabel": "¿Por qué estás denunciando esta publicación?",
       "detailsLabel": "Detalles adicionales",
       "detailsPlaceholder": "Proporciona más información sobre el problema (opcional)",

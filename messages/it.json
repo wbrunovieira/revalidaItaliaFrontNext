@@ -1,6 +1,16 @@
 {
-
-"Profile": {
+  "Tutor": {
+    "back": "Indietro",
+    "dashboard": {
+      "title": "Pannello Tutor",
+      "subtitle": "Gestisci le valutazioni in attesa di revisione"
+    },
+    "review": {
+      "title": "Revisiona Valutazione",
+      "subtitle": "Revisiona le risposte dello studente domanda per domanda"
+    }
+  },
+  "Profile": {
     "title": "Profilo",
     "welcomeBack": "Bentornato",
     "manageYourProfile": "Gestisci il tuo profilo",
@@ -211,7 +221,8 @@
     "userMenu": "Menu utente",
     "settings": "Impostazioni",
     "logout": "Esci",
-    "complete": "completato"
+    "complete": "completato",
+    "goToClasses": "Vai alle Lezioni"
   },
   "meta": {
     "title": "Revalida Italia",

@@ -210,7 +210,8 @@
     "userMenu": "Menú de usuario",
     "settings": "Configuraciones",
     "logout": "Salir",
-    "complete": "completo"
+    "complete": "completo",
+    "goToClasses": "Ir a Clases"
   },
   "meta": {
     "title": "Revalida Italia",

@@ -213,6 +213,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Permite denunciar comentários inadequados mantendo discussões saudáveis, mesma experiência unificada para denunciar posts e comentários, rastreamento completo de denúncias para moderação
 - [Commit] feat: add comment and reply reporting system with detailed logging
 
+### 10/08/2025
+
+**Sistema de Suporte Flutuante para Dúvidas de Alunos**
+- [Técnico] Implementação de botão flutuante discreto com tooltip, modal para criação de tickets de suporte com anexos (até 5 arquivos), integração com endpoint POST /api/v1/support/tickets, suporte a contextos (LESSON, ASSESSMENT, FLASHCARD, GENERAL)
+- [Benefício] Permite aos alunos tirarem dúvidas contextualizadas diretamente de qualquer página, professores recebem perguntas organizadas com contexto específico, sistema de anexos facilita envio de prints e documentos
+- [Commit] feat: add support floating button for student questions
+
 ---
 
 ## 📚 Documentações Criadas

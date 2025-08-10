@@ -7,6 +7,7 @@
     },
     "modal": {
       "title": "Invia Domanda",
+      "subtitle": "Siamo qui per aiutarti",
       "generalContext": "Domanda Generale",
       "contextTypes": {
         "lesson": "Lezione",
@@ -18,9 +19,13 @@
       "questionPlaceholder": "Descrivi la tua domanda in modo chiaro e dettagliato. Il professore riceverà il tuo messaggio e risponderà appena possibile.",
       "attachments": "Allegati",
       "addAttachment": "Aggiungi file",
+      "dragDropText": "Trascina i file qui o clicca per selezionare",
+      "dropFiles": "Rilascia i file qui",
+      "supportedFormats": "Immagini (PNG, JPG) o PDF fino a 10MB",
       "cancel": "Annulla",
       "send": "Invia",
       "sending": "Invio in corso...",
+      "infoTitle": "Risposta rapida garantita",
       "infoMessage": "La tua domanda sarà inviata a un professore specializzato che risponderà appena possibile.",
       "success": {
         "title": "Domanda inviata con successo!",

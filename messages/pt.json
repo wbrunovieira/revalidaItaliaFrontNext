@@ -7,6 +7,7 @@
     },
     "modal": {
       "title": "Enviar Dúvida",
+      "subtitle": "Estamos aqui para ajudar",
       "generalContext": "Dúvida Geral",
       "contextTypes": {
         "lesson": "Aula",
@@ -18,9 +19,13 @@
       "questionPlaceholder": "Descreva sua dúvida de forma clara e detalhada. O professor receberá sua mensagem e responderá assim que possível.",
       "attachments": "Anexos",
       "addAttachment": "Adicionar arquivo",
+      "dragDropText": "Arraste arquivos aqui ou clique para selecionar",
+      "dropFiles": "Solte os arquivos aqui",
+      "supportedFormats": "Imagens (PNG, JPG) ou PDFs até 10MB",
       "cancel": "Cancelar",
       "send": "Enviar",
       "sending": "Enviando...",
+      "infoTitle": "Resposta rápida garantida",
       "infoMessage": "Sua dúvida será enviada para um professor especializado que responderá assim que possível.",
       "success": {
         "title": "Dúvida enviada com sucesso!",

@@ -7,6 +7,7 @@
     },
     "modal": {
       "title": "Enviar Pregunta",
+      "subtitle": "Estamos aquí para ayudarte",
       "generalContext": "Pregunta General",
       "contextTypes": {
         "lesson": "Lección",
@@ -18,9 +19,13 @@
       "questionPlaceholder": "Describe tu pregunta de forma clara y detallada. El profesor recibirá tu mensaje y responderá lo antes posible.",
       "attachments": "Adjuntos",
       "addAttachment": "Agregar archivo",
+      "dragDropText": "Arrastra archivos aquí o haz clic para seleccionar",
+      "dropFiles": "Suelta los archivos aquí",
+      "supportedFormats": "Imágenes (PNG, JPG) o PDFs hasta 10MB",
       "cancel": "Cancelar",
       "send": "Enviar",
       "sending": "Enviando...",
+      "infoTitle": "Respuesta rápida garantizada",
       "infoMessage": "Tu pregunta será enviada a un profesor especializado que responderá lo antes posible.",
       "success": {
         "title": "¡Pregunta enviada con éxito!",

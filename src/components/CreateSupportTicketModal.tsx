@@ -24,6 +24,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -305,6 +306,8 @@ export function CreateSupportTicketModal({
       <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden">
         {/* Animated Header with Gradient */}
         <DialogHeader className="relative p-0">
+          {/* Hidden DialogTitle for accessibility */}
+          <DialogTitle className="sr-only">{t("modal.title")}</DialogTitle>
           <div className="relative h-32 bg-primary overflow-hidden">
             {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-10">

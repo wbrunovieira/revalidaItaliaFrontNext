@@ -11,6 +11,7 @@ import { useApi } from '@/hooks/use-api';
 import TrackCard from '@/components/TrackCard';
 import CourseCard from '@/components/CourseCard';
 import ContinueLearning from '@/components/ContinueLearning';
+import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 
 interface Translation {
   locale: string;
@@ -114,6 +115,9 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
         <h1 className="text-6xl font-bold text-white">{t('title')}</h1>
         <hr className="mt-4 border-t-2 border-secondary w-48 lg:w-96" />
       </div>
+      
+      {/* Support Floating Button */}
+      <SupportFloatingButton context={{ type: "GENERAL" }} />
 
 
 

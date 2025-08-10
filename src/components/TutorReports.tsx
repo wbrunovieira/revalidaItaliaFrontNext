@@ -13,11 +13,9 @@ import {
   Search,
   RefreshCw,
   Eye,
-  Clock,
   ChevronRight,
   ChevronLeft,
   Shield,
-  Hash,
   MessageCircle,
   Mail,
   AlertOctagon,
@@ -176,7 +174,7 @@ export default function TutorReports({ locale }: TutorReportsProps) {
 
   useEffect(() => {
     fetchReports(currentPage);
-  }, [currentPage, contentTypeFilter, reasonFilter]);
+  }, [currentPage, contentTypeFilter, reasonFilter, fetchReports]);
 
   const getReasonIcon = (reason: ReportReason) => {
     switch (reason) {

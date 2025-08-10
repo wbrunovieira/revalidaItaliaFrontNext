@@ -1,4 +1,41 @@
 {
+ "Support": {
+    "floatingButton": {
+      "helpText": "Fale com o professor se tiver dúvida",
+      "ariaLabel": "Abrir suporte",
+      "closeTooltip": "Fechar dica"
+    },
+    "modal": {
+      "title": "Enviar Dúvida",
+      "generalContext": "Dúvida Geral",
+      "contextTypes": {
+        "lesson": "Aula",
+        "assessment": "Avaliação",
+        "flashcard": "Flashcard",
+        "general": "Geral"
+      },
+      "questionLabel": "Qual é sua dúvida?",
+      "questionPlaceholder": "Descreva sua dúvida de forma clara e detalhada. O professor receberá sua mensagem e responderá assim que possível.",
+      "attachments": "Anexos",
+      "addAttachment": "Adicionar arquivo",
+      "cancel": "Cancelar",
+      "send": "Enviar",
+      "sending": "Enviando...",
+      "infoMessage": "Sua dúvida será enviada para um professor especializado que responderá assim que possível.",
+      "success": {
+        "title": "Dúvida enviada com sucesso!",
+        "description": "Um professor responderá sua dúvida em breve."
+      },
+      "errors": {
+        "tooManyFiles": "Muitos arquivos",
+        "maxFilesDescription": "Máximo de {max} arquivos permitidos",
+        "fileTooLarge": "Arquivo muito grande",
+        "fileSizeDescription": "{name} excede o tamanho máximo de {max}",
+        "submitError": "Erro ao enviar dúvida",
+        "submitDescription": "Não foi possível enviar sua dúvida. Tente novamente."
+      }
+    }
+  },
  "Tutor": {
     "back": "Voltar",
     "dashboard": {
@@ -962,6 +999,36 @@
   "title": "Painel Administrativo",
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
+
+  "Support": {
+    "title": "Suporte",
+    "description": "Gerencie tickets de suporte dos alunos",
+    "tabs": {
+      "open": "Abertos",
+      "answered": "Respondidos",
+      "resolved": "Resolvidos",
+      "all": "Todos"
+    },
+    "columns": {
+      "student": "Aluno",
+      "context": "Contexto",
+      "question": "Pergunta",
+      "status": "Status",
+      "tutor": "Tutor",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "status": {
+      "open": "Aberto",
+      "answered": "Respondido",
+      "resolved": "Resolvido"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "respond": "Responder",
+      "assign": "Atribuir"
+    }
+  },
 
   "Tutor": {
   "back": "Voltar",

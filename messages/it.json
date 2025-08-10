@@ -1,4 +1,41 @@
 {
+ "Support": {
+    "floatingButton": {
+      "helpText": "Parla con il professore se hai dubbi",
+      "ariaLabel": "Apri supporto",
+      "closeTooltip": "Chiudi suggerimento"
+    },
+    "modal": {
+      "title": "Invia Domanda",
+      "generalContext": "Domanda Generale",
+      "contextTypes": {
+        "lesson": "Lezione",
+        "assessment": "Valutazione",
+        "flashcard": "Flashcard",
+        "general": "Generale"
+      },
+      "questionLabel": "Qual è la tua domanda?",
+      "questionPlaceholder": "Descrivi la tua domanda in modo chiaro e dettagliato. Il professore riceverà il tuo messaggio e risponderà appena possibile.",
+      "attachments": "Allegati",
+      "addAttachment": "Aggiungi file",
+      "cancel": "Annulla",
+      "send": "Invia",
+      "sending": "Invio in corso...",
+      "infoMessage": "La tua domanda sarà inviata a un professore specializzato che risponderà appena possibile.",
+      "success": {
+        "title": "Domanda inviata con successo!",
+        "description": "Un professore risponderà alla tua domanda a breve."
+      },
+      "errors": {
+        "tooManyFiles": "Troppi file",
+        "maxFilesDescription": "Massimo {max} file consentiti",
+        "fileTooLarge": "File troppo grande",
+        "fileSizeDescription": "{name} supera la dimensione massima di {max}",
+        "submitError": "Errore nell'invio della domanda",
+        "submitDescription": "Non è stato possibile inviare la tua domanda. Riprova."
+      }
+    }
+  },
  "Tutor": {
     "back": "Indietro",
     "dashboard": {

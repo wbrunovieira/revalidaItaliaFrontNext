@@ -342,7 +342,7 @@ export function CreateSupportTicketModal({
                     transition={{ delay: 0.3 }}
                     className="text-white/80 text-sm mt-1"
                   >
-                    {t("modal.subtitle", "Estamos aqui para ajudar")}
+                    {t("modal.subtitle")}
                   </motion.p>
                 </div>
               </div>
@@ -478,10 +478,10 @@ export function CreateSupportTicketModal({
                       <Upload className="h-8 w-8 text-white" />
                     </motion.div>
                     <p className="text-sm font-medium text-white mb-1">
-                      {isDragging ? t("modal.dropFiles") : t("modal.dragDropText", "Arraste arquivos aqui ou clique para selecionar")}
+                      {isDragging ? t("modal.dropFiles") : t("modal.dragDropText")}
                     </p>
                     <p className="text-xs text-white/70">
-                      {t("modal.supportedFormats", "Imagens (PNG, JPG) ou PDFs até 10MB")}
+                      {t("modal.supportedFormats")}
                     </p>
                   </div>
                 </div>
@@ -556,7 +556,7 @@ export function CreateSupportTicketModal({
                   <AlertCircle className="h-5 w-5 text-white flex-shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm text-white font-medium">
-                      {t("modal.infoTitle", "Resposta rápida garantida")}
+                      {t("modal.infoTitle")}
                     </p>
                     <p className="text-xs text-white/80 leading-relaxed">
                       {t("modal.infoMessage")}

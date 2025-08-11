@@ -19,10 +19,12 @@ import {
   Activity,
   Brain,
   AlertTriangle,
+  HelpCircle,
 } from 'lucide-react';
 import TutorAnalytics from './TutorAnalytics';
 import TutorFlashcardStats from './TutorFlashcardStats';
 import TutorReports from './TutorReports';
+import TutorSupport from './TutorSupport';
 
 interface Student {
   id: string;
@@ -145,7 +147,7 @@ export default function TutorDashboard({
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'analytics' | 'flashcards' | 'reports'
+    'overview' | 'analytics' | 'flashcards' | 'reports' | 'support'
   >('overview');
   const [analyticsAttempts, setAnalyticsAttempts] =
     useState<AnalyticsAttempt[]>([]);
@@ -750,6 +752,17 @@ export default function TutorDashboard({
           >
             <AlertTriangle size={18} />
             Denúncias
+          </button>
+          <button
+            onClick={() => setActiveTab('support')}
+            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+              activeTab === 'support'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <HelpCircle size={18} />
+            Suporte
           </button>
         </div>
 
@@ -1700,9 +1713,12 @@ export default function TutorDashboard({
         ) : activeTab === 'flashcards' ? (
           /* Flashcards Tab */
           <TutorFlashcardStats locale={locale} />
-        ) : (
+        ) : activeTab === 'reports' ? (
           /* Reports Tab */
           <TutorReports locale={locale} />
+        ) : (
+          /* Support Tab */
+          <TutorSupport locale={locale} />
         )}
       </div>
     </div>

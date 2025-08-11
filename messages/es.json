@@ -1004,6 +1004,64 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "support": {
+    "title": "Soporte a Estudiantes",
+    "description": "Gestiona y responde a las preguntas de los estudiantes",
+    "loading": "Cargando tickets de soporte...",
+    "noTickets": "No se encontraron tickets",
+    "noTicketsDescription": "No hay tickets de soporte en este momento",
+    "stats": {
+      "open": "Abiertos",
+      "inProgress": "En Progreso",
+      "uniqueStudents": "Estudiantes Únicos",
+      "totalAnswers": "Total de Respuestas",
+      "withAttachments": "Con Archivos Adjuntos",
+      "totalMessages": "Total de Mensajes"
+    },
+    "status": {
+      "open": "Abierto",
+      "inProgress": "En Progreso",
+      "resolved": "Resuelto"
+    },
+    "context": {
+      "lesson": "Lección",
+      "assessment": "Evaluación",
+      "flashcard": "Flashcard",
+      "general": "General"
+    },
+    "filter": {
+      "all": "Todos",
+      "open": "Abiertos",
+      "inProgress": "En Progreso",
+      "resolved": "Resueltos"
+    },
+    "contextFilter": {
+      "all": "Todos los Contextos",
+      "lesson": "Lecciones",
+      "assessment": "Evaluaciones",
+      "flashcard": "Flashcards",
+      "general": "General"
+    },
+    "searchPlaceholder": "Buscar por estudiante, contenido o contexto...",
+    "showing": "Mostrando {count} de {total} tickets",
+    "attachments": "archivo(s) adjunto(s)",
+    "answers": "respuesta(s)",
+    "messages": "mensajes",
+    "view": "Ver",
+    "error": {
+      "fetchTitle": "Error al cargar tickets",
+      "fetchDescription": "No se pudieron cargar los tickets de soporte"
+    },
+    "pagination": {
+      "perPage": "Por página:",
+      "pageOf": "Página {current} de {total}",
+      "first": "Primera",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "last": "Última"
+    }
+  },
+  
   "flashcardTagEdit": {
     "title": "Editar Etiqueta de Flashcard",
     "currentTag": "Etiqueta actual",

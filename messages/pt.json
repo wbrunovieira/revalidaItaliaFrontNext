@@ -1004,6 +1004,64 @@
   "title": "Painel Administrativo",
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
+  
+  "support": {
+    "title": "Suporte aos Alunos",
+    "description": "Gerencie e responda às dúvidas dos alunos",
+    "loading": "Carregando tickets de suporte...",
+    "noTickets": "Nenhum ticket encontrado",
+    "noTicketsDescription": "Não há tickets de suporte no momento",
+    "stats": {
+      "open": "Abertos",
+      "inProgress": "Em Andamento",
+      "uniqueStudents": "Alunos Únicos",
+      "totalAnswers": "Total de Respostas",
+      "withAttachments": "Com Anexos",
+      "totalMessages": "Total de Mensagens"
+    },
+    "status": {
+      "open": "Aberto",
+      "inProgress": "Em Andamento",
+      "resolved": "Resolvido"
+    },
+    "context": {
+      "lesson": "Aula",
+      "assessment": "Avaliação",
+      "flashcard": "Flashcard",
+      "general": "Geral"
+    },
+    "filter": {
+      "all": "Todos",
+      "open": "Abertos",
+      "inProgress": "Em Andamento",
+      "resolved": "Resolvidos"
+    },
+    "contextFilter": {
+      "all": "Todos os Contextos",
+      "lesson": "Aulas",
+      "assessment": "Avaliações",
+      "flashcard": "Flashcards",
+      "general": "Geral"
+    },
+    "searchPlaceholder": "Buscar por aluno, conteúdo ou contexto...",
+    "showing": "Mostrando {count} de {total} tickets",
+    "attachments": "anexo(s)",
+    "answers": "resposta(s)",
+    "messages": "mensagens",
+    "view": "Visualizar",
+    "error": {
+      "fetchTitle": "Erro ao carregar tickets",
+      "fetchDescription": "Não foi possível carregar os tickets de suporte"
+    },
+    "pagination": {
+      "perPage": "Por página:",
+      "pageOf": "Página {current} de {total}",
+      "first": "Primeira",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "last": "Última"
+    }
+  },
 
   "Support": {
     "title": "Suporte",

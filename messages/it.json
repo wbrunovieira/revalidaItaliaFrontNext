@@ -1005,6 +1005,40 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "supportResponse": {
+    "title": "Rispondi al Ticket",
+    "subtitle": "Invia una risposta allo studente",
+    "responseLabel": "La Tua Risposta",
+    "responsePlaceholder": "Digita la tua risposta dettagliata per aiutare lo studente...",
+    "attachments": "Allegati (opzionale)",
+    "dragDropText": "Clicca o trascina i file qui",
+    "dropFiles": "Rilascia i file qui",
+    "supportedFormats": "Immagini, video e PDF fino a 10MB",
+    "infoTitle": "Importante",
+    "infoMessage": "La tua risposta cambierà lo stato del ticket in 'Risposto'. Lo studente sarà notificato via email.",
+    "cancel": "Annulla",
+    "send": "Invia Risposta",
+    "sending": "Invio in corso...",
+    "messages": "messaggi",
+    "contextTypes": {
+      "lesson": "Lezione",
+      "assessment": "Valutazione",
+      "flashcard": "Flashcard",
+      "general": "Generale"
+    },
+    "success": {
+      "title": "Risposta Inviata",
+      "description": "La tua risposta è stata inviata con successo allo studente"
+    },
+    "errors": {
+      "tooManyFiles": "Troppi file",
+      "maxFilesDescription": "Puoi allegare al massimo {max} file",
+      "fileTooLarge": "File troppo grande",
+      "fileSizeDescription": "Il file {name} supera la dimensione massima di {max}",
+      "submitError": "Errore nell'invio",
+      "submitDescription": "Non è stato possibile inviare la tua risposta. Riprova."
+    }
+  },
   "support": {
     "title": "Supporto Studenti",
     "description": "Gestisci e rispondi alle domande degli studenti",
@@ -1049,6 +1083,7 @@
     "answers": "risposta/e",
     "messages": "messaggi",
     "view": "Visualizza",
+    "respond": "Rispondi",
     "error": {
       "fetchTitle": "Errore nel caricamento dei ticket",
       "fetchDescription": "Impossibile caricare i ticket di supporto"

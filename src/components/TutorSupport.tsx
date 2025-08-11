@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
+import { RespondSupportTicketModal } from './RespondSupportTicketModal';
 import {
   HelpCircle,
   MessageSquare,
@@ -112,6 +113,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
   const [contextFilter, setContextFilter] = useState<ContextType | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<TicketListItem | null>(null);
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -463,11 +465,14 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
 
                 {/* Action Button */}
                 <button
-                  onClick={() => setSelectedTicket(ticket)}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setIsResponseModalOpen(true);
+                  }}
                   className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
                 >
-                  <Eye size={16} />
-                  <span>{t('view')}</span>
+                  <MessageSquare size={16} />
+                  <span>{t('respond')}</span>
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -532,6 +537,29 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
           </div>
         </div>
       )}
+
+      {/* Response Modal */}
+      <RespondSupportTicketModal
+        isOpen={isResponseModalOpen}
+        onClose={() => {
+          setIsResponseModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        ticket={selectedTicket ? {
+          id: selectedTicket.id,
+          contextType: selectedTicket.contextType,
+          contextTitle: selectedTicket.contextTitle,
+          student: {
+            fullName: selectedTicket.student.fullName,
+            email: selectedTicket.student.email,
+          },
+          messageCount: selectedTicket.messageCount,
+          createdAt: selectedTicket.createdAt,
+        } : null}
+        onSuccess={() => {
+          fetchTickets(); // Refresh the list after successful response
+        }}
+      />
     </div>
   );
 }

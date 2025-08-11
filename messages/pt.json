@@ -1005,6 +1005,40 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "supportResponse": {
+    "title": "Responder Ticket",
+    "subtitle": "Envie uma resposta para o aluno",
+    "responseLabel": "Sua Resposta",
+    "responsePlaceholder": "Digite sua resposta detalhada para ajudar o aluno...",
+    "attachments": "Anexos (opcional)",
+    "dragDropText": "Clique ou arraste arquivos aqui",
+    "dropFiles": "Solte os arquivos aqui",
+    "supportedFormats": "Imagens, vídeos e PDFs até 10MB",
+    "infoTitle": "Importante",
+    "infoMessage": "Sua resposta mudará o status do ticket para 'Respondido'. O aluno será notificado por email.",
+    "cancel": "Cancelar",
+    "send": "Enviar Resposta",
+    "sending": "Enviando...",
+    "messages": "mensagens",
+    "contextTypes": {
+      "lesson": "Aula",
+      "assessment": "Avaliação",
+      "flashcard": "Flashcard",
+      "general": "Geral"
+    },
+    "success": {
+      "title": "Resposta Enviada",
+      "description": "Sua resposta foi enviada com sucesso ao aluno"
+    },
+    "errors": {
+      "tooManyFiles": "Muitos arquivos",
+      "maxFilesDescription": "Você pode anexar no máximo {max} arquivos",
+      "fileTooLarge": "Arquivo muito grande",
+      "fileSizeDescription": "O arquivo {name} excede o tamanho máximo de {max}",
+      "submitError": "Erro ao enviar",
+      "submitDescription": "Não foi possível enviar sua resposta. Tente novamente."
+    }
+  },
   "support": {
     "title": "Suporte aos Alunos",
     "description": "Gerencie e responda às dúvidas dos alunos",
@@ -1049,6 +1083,7 @@
     "answers": "resposta(s)",
     "messages": "mensagens",
     "view": "Visualizar",
+    "respond": "Responder",
     "error": {
       "fetchTitle": "Erro ao carregar tickets",
       "fetchDescription": "Não foi possível carregar os tickets de suporte"

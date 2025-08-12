@@ -5,8 +5,11 @@
     "notFound": "Ticket no encontrado",
     "close": "Cerrar",
     "acceptAnswer": "Aceptar Respuesta",
+    "needClarification": "Necesito Aclaración",
     "ticketResolved": "Ticket Resuelto",
     "waitingResponse": "Esperando respuesta del tutor",
+    "reopenIndicator": "Reapertura",
+    "reopenMessagePrefix": "Motivo de la reapertura:",
     "resolvedAt": "Resuelto el {date}",
     "messagesCount": "{count} mensajes en la conversación",
     "acceptSuccess": "Respuesta aceptada con éxito",
@@ -45,6 +48,28 @@
     },
     "replySuccess": "Respuesta enviada con éxito",
     "replySuccessDescription": "Tu respuesta ha sido añadida al ticket"
+  },
+  "ReopenTicket": {
+    "title": "Reabrir Ticket de Soporte",
+    "description": "Usa esta opción cuando necesites más aclaraciones sobre la respuesta recibida.",
+    "warning": {
+      "title": "Importante:",
+      "description": "Reabre el ticket solo si la respuesta no aclaró tu duda. Para agradecimientos o confirmaciones, usa el botón 'Aceptar Respuesta'."
+    },
+    "reasonLabel": "Explica qué necesita ser aclarado",
+    "reasonPlaceholder": "Por ejemplo: 'Todavía no entiendo la parte sobre... ¿Podrías explicar mejor cómo...'",
+    "reasonHelp": "Mínimo 10 caracteres",
+    "cancel": "Cancelar",
+    "reopen": "Reabrir Ticket",
+    "reopening": "Reabriendo...",
+    "success": "Ticket reabierto con éxito",
+    "successDescription": "El tutor ha sido notificado y responderá pronto",
+    "error": {
+      "title": "Error al reabrir ticket",
+      "description": "No se pudo reabrir el ticket. Inténtalo de nuevo.",
+      "reasonTooShort": "Explicación muy corta",
+      "reasonTooShortDescription": "Por favor, explica mejor qué necesita ser aclarado (mínimo 10 caracteres)"
+    }
   },
     "MyTickets": {
     "title": "Mis Tickets de Soporte",

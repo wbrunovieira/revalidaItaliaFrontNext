@@ -12,6 +12,9 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { ReopenTicketModal } from './ReopenTicketModal';
+import { useAuthStore } from '@/stores/auth.store';
+import Image from 'next/image';
 import {
   MessageSquare,
   Paperclip,
@@ -52,6 +55,7 @@ interface Message {
   createdAt: string;
   author: MessageAuthor;
   attachments: Attachment[];
+  messageType?: 'REGULAR' | 'REOPEN' | 'CLOSE' | 'SYSTEM' | 'ESCALATION';
 }
 
 interface UserInfo {
@@ -92,11 +96,13 @@ export function ViewTicketModal({
 }: ViewTicketModalProps) {
   const t = useTranslations('ViewTicket');
   const { toast } = useToast();
+  const { user } = useAuthStore();
   const [ticket, setTicket] = useState<TicketDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
+  const [isReopenModalOpen, setIsReopenModalOpen] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -415,15 +421,21 @@ export function ViewTicketModal({
 
               {/* Student Info */}
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                  {ticket.student.profileImageUrl ? (
+                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center overflow-hidden">
+                  {user?.profileImageUrl ? (
                     <img
-                      src={ticket.student.profileImageUrl}
+                      src={user.profileImageUrl}
                       alt={ticket.student.fullName}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <User size={16} className="text-primary" />
+                    <Image
+                      src="/avatar.svg"
+                      alt={ticket.student.fullName}
+                      width={32}
+                      height={32}
+                      className="w-full h-full"
+                    />
                   )}
                 </div>
                 <div>
@@ -440,33 +452,62 @@ export function ViewTicketModal({
             {/* Messages */}
             <ScrollArea className="flex-1 px-6 py-4">
               <div className="space-y-4">
-                {ticket.messages.map((message, index) => (
+                {ticket.messages.map((message, index) => {
+                  // Check if message is from the ticket owner (student)
+                  const isFromStudent = message.author.id === ticket.student.id;
+                  
+                  return (
                   <div
                     key={message.id}
                     className={cn(
                       "flex gap-3",
-                      message.author.role === 'student' ? "flex-row" : "flex-row-reverse"
+                      isFromStudent ? "flex-row" : "flex-row-reverse"
                     )}
                   >
-                    {/* Avatar */}
-                    <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                      {message.author.profileImageUrl ? (
-                        <img
-                          src={message.author.profileImageUrl}
-                          alt={message.author.fullName}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <User size={20} className="text-primary" />
-                      )}
-                    </div>
+                    {/* Avatar - Only show for student messages */}
+                    {isFromStudent ? (
+                      <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {user?.profileImageUrl ? (
+                          <img
+                            src={user.profileImageUrl}
+                            alt={message.author.fullName}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <Image
+                            src="/avatar.svg"
+                            alt={message.author.fullName}
+                            width={40}
+                            height={40}
+                            className="w-full h-full"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      // For tutor/admin messages, just show initials or icon
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-semibold text-sm">
+                          {message.author.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Message Content */}
                     <div className={cn(
                       "flex-1 max-w-[70%]",
-                      message.author.role === 'student' ? "mr-auto" : "ml-auto"
+                      isFromStudent ? "mr-auto" : "ml-auto"
                     )}>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className={cn(
+                        "flex items-center gap-2 mb-1",
+                        !isFromStudent && "justify-end"
+                      )}>
+                        {/* Show reopen indicator if it's a reopen message */}
+                        {message.messageType === 'REOPEN' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                            <RefreshCw size={12} />
+                            {t('reopenIndicator')}
+                          </span>
+                        )}
                         <span className="text-sm font-medium text-white">
                           {message.author.fullName}
                         </span>
@@ -478,10 +519,17 @@ export function ViewTicketModal({
 
                       <div className={cn(
                         "p-4 rounded-lg",
-                        message.author.role === 'student'
+                        message.messageType === 'REOPEN' 
+                          ? "bg-orange-900/20 border border-orange-500/30 text-orange-100"
+                          : isFromStudent
                           ? "bg-gray-800 text-gray-100"
                           : "bg-secondary/20 text-gray-100 border border-secondary/30"
                       )}>
+                        {message.messageType === 'REOPEN' && (
+                          <p className="text-xs text-orange-400 mb-2 font-medium">
+                            {t('reopenMessagePrefix')}
+                          </p>
+                        )}
                         <p className="whitespace-pre-wrap">{message.content}</p>
 
                         {/* Attachments */}
@@ -510,7 +558,8 @@ export function ViewTicketModal({
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
 
@@ -603,13 +652,23 @@ export function ViewTicketModal({
                           {t('ticketResolved')}
                         </div>
                       ) : ticket.status === 'ANSWERED' ? (
-                        <Button
-                          onClick={handleAcceptAnswer}
-                          className="bg-green-500 text-white hover:bg-green-600"
-                        >
-                          <CheckCircle size={16} className="mr-2" />
-                          {t('acceptAnswer')}
-                        </Button>
+                        <>
+                          <Button
+                            onClick={() => setIsReopenModalOpen(true)}
+                            variant="outline"
+                            className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10"
+                          >
+                            <RefreshCw size={16} className="mr-2" />
+                            {t('needClarification')}
+                          </Button>
+                          <Button
+                            onClick={handleAcceptAnswer}
+                            className="bg-green-500 text-white hover:bg-green-600"
+                          >
+                            <CheckCircle size={16} className="mr-2" />
+                            {t('acceptAnswer')}
+                          </Button>
+                        </>
                       ) : (
                         <div className="text-sm text-gray-500">
                           {t('waitingResponse')}
@@ -636,6 +695,17 @@ export function ViewTicketModal({
           </div>
         )}
       </DialogContent>
+
+      {/* Reopen Ticket Modal */}
+      <ReopenTicketModal
+        isOpen={isReopenModalOpen}
+        onClose={() => setIsReopenModalOpen(false)}
+        ticketId={ticketId}
+        onSuccess={() => {
+          fetchTicketDetails(); // Refresh ticket details
+          onStatusChange?.(); // Notify parent to refresh list
+        }}
+      />
     </Dialog>
   );
 }

@@ -6,8 +6,11 @@
     "notFound": "Ticket non trovato",
     "close": "Chiudi",
     "acceptAnswer": "Accetta Risposta",
+    "needClarification": "Ho Bisogno di Chiarimenti",
     "ticketResolved": "Ticket Risolto",
     "waitingResponse": "In attesa di risposta dal tutor",
+    "reopenIndicator": "Riapertura",
+    "reopenMessagePrefix": "Motivo della riapertura:",
     "resolvedAt": "Risolto il {date}",
     "messagesCount": "{count} messaggi nella conversazione",
     "acceptSuccess": "Risposta accettata con successo",
@@ -46,6 +49,28 @@
     },
     "replySuccess": "Risposta inviata con successo",
     "replySuccessDescription": "La tua risposta è stata aggiunta al ticket"
+  },
+  "ReopenTicket": {
+    "title": "Riapri Ticket di Supporto",
+    "description": "Usa questa opzione quando hai bisogno di ulteriori chiarimenti sulla risposta ricevuta.",
+    "warning": {
+      "title": "Importante:",
+      "description": "Riapri il ticket solo se la risposta non ha chiarito il tuo dubbio. Per ringraziamenti o conferme, usa il pulsante 'Accetta Risposta'."
+    },
+    "reasonLabel": "Spiega cosa deve ancora essere chiarito",
+    "reasonPlaceholder": "Ad esempio: 'Non ho ancora capito la parte su... Potresti spiegare meglio come...'",
+    "reasonHelp": "Minimo 10 caratteri",
+    "cancel": "Annulla",
+    "reopen": "Riapri Ticket",
+    "reopening": "Riapertura in corso...",
+    "success": "Ticket riaperto con successo",
+    "successDescription": "Il tutor è stato notificato e risponderà presto",
+    "error": {
+      "title": "Errore nella riapertura del ticket",
+      "description": "Impossibile riaprire il ticket. Riprova.",
+      "reasonTooShort": "Spiegazione troppo breve",
+      "reasonTooShortDescription": "Per favore, spiega meglio cosa deve essere chiarito (minimo 10 caratteri)"
+    }
   },
     "MyTickets": {
     "title": "I Miei Ticket di Supporto",

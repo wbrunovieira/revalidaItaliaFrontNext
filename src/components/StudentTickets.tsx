@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
 import { CreateSupportTicketModal } from './CreateSupportTicketModal';
+import { ViewTicketModal } from './ViewTicketModal';
 import {
   HelpCircle,
   MessageSquare,
@@ -77,6 +78,8 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
   const [contextFilter, setContextFilter] = useState<ContextType | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -501,8 +504,8 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
                 {/* Action Button */}
                 <button
                   onClick={() => {
-                    // TODO: Navigate to ticket detail page
-                    console.log('View ticket:', ticket.id);
+                    setSelectedTicketId(ticket.id);
+                    setIsViewModalOpen(true);
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
                 >
@@ -580,6 +583,19 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
         onSuccess={() => {
           setIsCreateModalOpen(false);
           fetchTickets(); // Refresh the list after creating a new ticket
+        }}
+      />
+
+      {/* View Ticket Modal */}
+      <ViewTicketModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedTicketId(null);
+        }}
+        ticketId={selectedTicketId}
+        onStatusChange={() => {
+          fetchTickets(); // Refresh the list after status change
         }}
       />
     </div>

@@ -1,4 +1,40 @@
 {
+
+  "ViewTicket": {
+    "title": "Dettagli del Ticket",
+    "loading": "Caricamento dettagli...",
+    "notFound": "Ticket non trovato",
+    "close": "Chiudi",
+    "markResolved": "Segna come Risolto",
+    "reopen": "Riapri Ticket",
+    "waitingResponse": "In attesa di risposta dal tutor",
+    "resolvedAt": "Risolto il {date}",
+    "messagesCount": "{count} messaggi nella conversazione",
+    "resolveSuccess": "Ticket segnato come risolto",
+    "resolveSuccessDescription": "Il ticket è stato chiuso con successo",
+    "reopenSuccess": "Ticket riaperto",
+    "reopenSuccessDescription": "Il ticket è stato riaperto ed è in attesa di risposta",
+    "status": {
+      "open": "Aperto",
+      "answered": "Risposto",
+      "resolved": "Risolto"
+    },
+    "context": {
+      "lesson": "Lezione",
+      "assessment": "Valutazione",
+      "flashcard": "Flashcard",
+      "general": "Generale"
+    },
+    "role": {
+      "student": "Studente",
+      "tutor": "Tutor",
+      "admin": "Admin"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento del ticket",
+      "fetchDescription": "Non è stato possibile caricare i dettagli del ticket"
+    }
+  },
     "MyTickets": {
     "title": "I Miei Ticket di Supporto",
     "description": "Segui le tue domande e le risposte dei tutor",
@@ -62,6 +98,8 @@
       "last": "Ultima"
     }
   },
+
+
  "Support": {
     "floatingButton": {
       "helpText": "Parla con il professore se hai dubbi",

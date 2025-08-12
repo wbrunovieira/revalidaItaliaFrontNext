@@ -227,6 +227,18 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Tutores têm visão centralizada de todas as dúvidas pendentes com estatísticas (tickets abertos, com anexos, alunos únicos), podem responder diretamente com texto e arquivos anexados, status do ticket muda automaticamente para ANSWERED após resposta
 - [Commit] feat: add support tab to tutor dashboard + feat: implement support ticket response modal for tutors
 
+### 12/08/2025
+
+**Filtros de Status na Aba Support do Painel do Tutor**
+- [Técnico] Adição de botões de filtro para status (Pendentes, Abertos, Respondidos, Resolvidos) na aba Support, integração condicional com endpoints /pending para tickets pendentes e /api/v1/support/tickets com parâmetro status para outros filtros, atualização de badges visuais por status (azul para OPEN, amarelo para ANSWERED, verde para RESOLVED)
+- [Benefício] Tutores podem alternar rapidamente entre diferentes status de tickets para priorizar atendimentos, visão clara do pipeline de suporte com cores distintas para cada estado, botão Responder oculto automaticamente para tickets já resolvidos
+- [Commit] feat: add status filter buttons to support tab in tutor dashboard
+
+**Página Meus Tickets para Acompanhamento de Suporte pelos Alunos**
+- [Técnico] Criação de página My Tickets com layout NavSidebar, implementação do componente StudentTickets com listagem completa de tickets próprios via GET /api/v1/support/tickets/my-tickets, filtros por status e contexto, busca textual, cards de estatísticas, paginação e integração com modal de criação
+- [Benefício] Alunos têm visão centralizada de todas suas dúvidas e respostas dos tutores, podem filtrar por status para ver tickets pendentes ou resolvidos, acompanham histórico completo de interações com indicação visual de tutor responsável pela resposta
+- [Commit] feat: add My Tickets page for students to track support tickets
+
 ---
 
 ## 📚 Documentações Criadas

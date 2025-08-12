@@ -31,8 +31,20 @@
     },
     "error": {
       "fetchTitle": "Erro ao carregar ticket",
-      "fetchDescription": "Não foi possível carregar os detalhes do ticket"
-    }
+      "fetchDescription": "Não foi possível carregar os detalhes do ticket",
+      "replyTitle": "Erro ao enviar resposta",
+      "replyDescription": "Não foi possível enviar a resposta. Tente novamente."
+    },
+    "reply": {
+      "title": "Responder ao Aluno",
+      "button": "Responder",
+      "placeholder": "Digite sua resposta aqui...",
+      "send": "Enviar Resposta",
+      "sending": "Enviando...",
+      "cancel": "Cancelar"
+    },
+    "replySuccess": "Resposta enviada com sucesso",
+    "replySuccessDescription": "Sua resposta foi adicionada ao ticket"
   },
     "MyTickets": {
     "title": "Meus Tickets de Suporte",

@@ -239,6 +239,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Alunos têm visão centralizada de todas suas dúvidas e respostas dos tutores, podem filtrar por status para ver tickets pendentes ou resolvidos, acompanham histórico completo de interações com indicação visual de tutor responsável pela resposta
 - [Commit] feat: add My Tickets page for students to track support tickets
 
+**Modal de Visualização Detalhada de Tickets de Suporte**
+- [Técnico] Implementação do componente ViewTicketModal com integração ao endpoint GET /api/v1/support/tickets/:ticketId, exibição cronológica de todas as mensagens com alinhamento diferenciado (aluno à esquerda, tutor à direita), suporte a anexos com links de download, badges de role e status, preparação para ações de marcar como resolvido e reabrir ticket
+- [Benefício] Alunos podem visualizar conversa completa com tutores em formato de chat intuitivo, identificação visual clara de quem enviou cada mensagem, acesso direto a arquivos anexados, possibilidade futura de gerenciar status do ticket diretamente do modal
+- [Commit] feat: add ticket details modal for student support page
+
 ---
 
 ## 📚 Documentações Criadas

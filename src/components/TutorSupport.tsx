@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
-import { RespondSupportTicketModal } from './RespondSupportTicketModal';
+import { ViewTicketModal } from './ViewTicketModal';
 import {
   HelpCircle,
   MessageSquare,
@@ -112,8 +112,8 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
   const [statusFilter, setStatusFilter] = useState<'pending' | 'OPEN' | 'ANSWERED' | 'RESOLVED'>('pending');
   const [contextFilter, setContextFilter] = useState<ContextType | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTicket, setSelectedTicket] = useState<TicketListItem | null>(null);
-  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -533,20 +533,18 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                   </div>
                 </div>
 
-                {/* Action Button - Only show for non-resolved tickets */}
-                {ticket.status !== 'RESOLVED' && (
-                  <button
-                    onClick={() => {
-                      setSelectedTicket(ticket);
-                      setIsResponseModalOpen(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
-                  >
-                    <MessageSquare size={16} />
-                    <span>{t('respond')}</span>
-                    <ChevronRight size={16} />
-                  </button>
-                )}
+                {/* Action Button */}
+                <button
+                  onClick={() => {
+                    setSelectedTicketId(ticket.id);
+                    setIsViewModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
+                >
+                  <Eye size={16} />
+                  <span>{t('view')}</span>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             </div>
           ))
@@ -610,27 +608,18 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         </div>
       )}
 
-      {/* Response Modal */}
-      <RespondSupportTicketModal
-        isOpen={isResponseModalOpen}
+      {/* View Ticket Modal */}
+      <ViewTicketModal
+        isOpen={isViewModalOpen}
         onClose={() => {
-          setIsResponseModalOpen(false);
-          setSelectedTicket(null);
+          setIsViewModalOpen(false);
+          setSelectedTicketId(null);
         }}
-        ticket={selectedTicket ? {
-          id: selectedTicket.id,
-          contextType: selectedTicket.contextType,
-          contextTitle: selectedTicket.contextTitle,
-          student: {
-            fullName: selectedTicket.student.fullName,
-            email: selectedTicket.student.email,
-          },
-          messageCount: selectedTicket.messageCount,
-          createdAt: selectedTicket.createdAt,
-        } : null}
-        onSuccess={() => {
-          fetchTickets(); // Refresh the list after successful response
+        ticketId={selectedTicketId}
+        onStatusChange={() => {
+          fetchTickets(); // Refresh the list after status change
         }}
+        isTutor={true}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
   MessageSquare,
@@ -23,6 +24,7 @@ import {
   FileText,
   Image as ImageIcon,
   Film,
+  Send,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -78,6 +80,7 @@ interface ViewTicketModalProps {
   onClose: () => void;
   ticketId: string | null;
   onStatusChange?: () => void;
+  isTutor?: boolean;
 }
 
 export function ViewTicketModal({
@@ -85,6 +88,7 @@ export function ViewTicketModal({
   onClose,
   ticketId,
   onStatusChange,
+  isTutor = false,
 }: ViewTicketModalProps) {
   const t = useTranslations('ViewTicket');
   const { toast } = useToast();
@@ -92,6 +96,7 @@ export function ViewTicketModal({
   const [loading, setLoading] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [showReplyBox, setShowReplyBox] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -287,6 +292,61 @@ export function ViewTicketModal({
     onStatusChange?.();
   };
 
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || !ticketId) return;
+
+    try {
+      setSendingReply(true);
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(
+        `${apiUrl}/api/v1/support/tickets/${ticketId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: replyContent.trim(),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to send reply: ${response.status}`);
+      }
+
+      toast({
+        title: t('replySuccess'),
+        description: t('replySuccessDescription'),
+      });
+
+      setReplyContent('');
+      setShowReplyBox(false);
+      
+      // Refresh ticket details to show the new message
+      await fetchTicketDetails();
+      onStatusChange?.();
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast({
+        title: t('error.replyTitle'),
+        description: t('error.replyDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-gray-900 border-gray-800">
@@ -428,6 +488,71 @@ export function ViewTicketModal({
               </div>
             </ScrollArea>
 
+            {/* Reply Section for Tutors */}
+            {isTutor && ticket.status !== 'RESOLVED' && (
+              <div className="px-6 py-4 border-t border-gray-800 bg-gray-800/50">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-white">
+                      {t('reply.title')}
+                    </h4>
+                    {!showReplyBox && (
+                      <Button
+                        onClick={() => setShowReplyBox(true)}
+                        size="sm"
+                        className="bg-secondary text-primary hover:bg-secondary/90"
+                      >
+                        <MessageSquare size={16} className="mr-2" />
+                        {t('reply.button')}
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {showReplyBox && (
+                    <div className="space-y-3">
+                      <Textarea
+                        value={replyContent}
+                        onChange={(e) => setReplyContent(e.target.value)}
+                        placeholder={t('reply.placeholder')}
+                        className="min-h-[100px] bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-secondary"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          onClick={() => {
+                            setShowReplyBox(false);
+                            setReplyContent('');
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                        >
+                          {t('reply.cancel')}
+                        </Button>
+                        <Button
+                          onClick={handleSendReply}
+                          disabled={!replyContent.trim() || sendingReply}
+                          size="sm"
+                          className="bg-secondary text-primary hover:bg-secondary/90 disabled:opacity-50"
+                        >
+                          {sendingReply ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                              {t('reply.sending')}
+                            </>
+                          ) : (
+                            <>
+                              <Send size={16} className="mr-2" />
+                              {t('reply.send')}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="px-6 py-4 border-t border-gray-800 bg-gray-800/50">
               <div className="flex justify-between items-center">
@@ -443,26 +568,31 @@ export function ViewTicketModal({
                 </div>
 
                 <div className="flex gap-2">
-                  {ticket.status === 'RESOLVED' ? (
-                    <Button
-                      onClick={handleReopen}
-                      className="bg-orange-500 text-white hover:bg-orange-600"
-                    >
-                      <RefreshCw size={16} className="mr-2" />
-                      {t('reopen')}
-                    </Button>
-                  ) : ticket.status === 'ANSWERED' ? (
-                    <Button
-                      onClick={handleResolve}
-                      className="bg-green-500 text-white hover:bg-green-600"
-                    >
-                      <CheckCircle size={16} className="mr-2" />
-                      {t('markResolved')}
-                    </Button>
-                  ) : (
-                    <div className="text-sm text-gray-500">
-                      {t('waitingResponse')}
-                    </div>
+                  {/* Only show resolve/reopen buttons for students */}
+                  {!isTutor && (
+                    <>
+                      {ticket.status === 'RESOLVED' ? (
+                        <Button
+                          onClick={handleReopen}
+                          className="bg-orange-500 text-white hover:bg-orange-600"
+                        >
+                          <RefreshCw size={16} className="mr-2" />
+                          {t('reopen')}
+                        </Button>
+                      ) : ticket.status === 'ANSWERED' ? (
+                        <Button
+                          onClick={handleResolve}
+                          className="bg-green-500 text-white hover:bg-green-600"
+                        >
+                          <CheckCircle size={16} className="mr-2" />
+                          {t('markResolved')}
+                        </Button>
+                      ) : (
+                        <div className="text-sm text-gray-500">
+                          {t('waitingResponse')}
+                        </div>
+                      )}
+                    </>
                   )}
                   
                   <Button

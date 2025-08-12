@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslations } from "next-intl";
 import { 
-  X, 
+ 
   Loader2, 
   Send, 
   Paperclip, 
@@ -15,7 +15,6 @@ import {
   FileText,
   Image as ImageIcon,
   Trash2,
-  CheckCircle,
   HelpCircle,
   Sparkles,
   MessageSquareText
@@ -85,7 +84,7 @@ export function CreateSupportTicketModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadProgress] = useState<Record<string, number>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormData>({
@@ -224,7 +223,21 @@ export function CreateSupportTicketModal({
       }
 
       // Create support ticket
-      const requestBody: any = {
+      interface SupportTicketRequest {
+        contextType: string;
+        contextId?: string;
+        contextTitle: string;
+        content: string;
+        attachments: Array<{
+          url: string;
+          fileName: string;
+          mimeType: string;
+          sizeInBytes: number;
+          type: string;
+        }>;
+      }
+      
+      const requestBody: SupportTicketRequest = {
         contextType: context.type,
         contextTitle: context.title || t("modal.generalContext"),
         content: data.content,
@@ -277,12 +290,7 @@ export function CreateSupportTicketModal({
       }
 
       toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-            <span>{t("modal.success.title")}</span>
-          </div>
-        ) as any,
+        title: t("modal.success.title"),
         description: t("modal.success.description"),
       });
 

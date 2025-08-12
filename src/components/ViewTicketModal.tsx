@@ -19,7 +19,6 @@ import {
   MessageSquare,
   Paperclip,
   Calendar,
-  User,
   CheckCircle,
   AlertCircle,
   RefreshCw,
@@ -153,6 +152,7 @@ export function ViewTicketModal({
     if (isOpen && ticketId) {
       fetchTicketDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, ticketId]);
 
   const formatDate = (date: string) => {
@@ -423,9 +423,11 @@ export function ViewTicketModal({
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center overflow-hidden">
                   {user?.profileImageUrl ? (
-                    <img
+                    <Image
                       src={user.profileImageUrl}
                       alt={ticket.student.fullName}
+                      width={32}
+                      height={32}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
@@ -452,7 +454,7 @@ export function ViewTicketModal({
             {/* Messages */}
             <ScrollArea className="flex-1 px-6 py-4">
               <div className="space-y-4">
-                {ticket.messages.map((message, index) => {
+                {ticket.messages.map((message) => {
                   // Check if message is from the ticket owner (student)
                   const isFromStudent = message.author.id === ticket.student.id;
                   
@@ -468,9 +470,11 @@ export function ViewTicketModal({
                     {isFromStudent ? (
                       <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {user?.profileImageUrl ? (
-                          <img
+                          <Image
                             src={user.profileImageUrl}
                             alt={message.author.fullName}
+                            width={40}
+                            height={40}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (

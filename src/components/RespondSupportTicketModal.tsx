@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslations } from "next-intl";
 import { 
-  X, 
+ 
   Loader2, 
   Send, 
   Paperclip, 
@@ -15,7 +15,6 @@ import {
   FileText,
   Image as ImageIcon,
   Trash2,
-  CheckCircle,
   MessageSquareReply,
   User,
   Calendar,
@@ -311,12 +310,7 @@ export function RespondSupportTicketModal({
       }
 
       toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-            <span>{t("success.title")}</span>
-          </div>
-        ) as any,
+        title: t("success.title"),
         description: t("success.description"),
       });
 

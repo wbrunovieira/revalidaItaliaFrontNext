@@ -9,7 +9,6 @@ import {
   HelpCircle,
   MessageSquare,
   Calendar,
-  Filter,
   Search,
   RefreshCw,
   Eye,
@@ -251,7 +250,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
     });
   };
 
-  const filteredTickets = tickets.filter(ticket => {
+  const filteredTickets = tickets.filter(() => {
     // Context filter is already applied on the server side
     // This is just for any additional client-side filtering if needed
     return true;
@@ -396,7 +395,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
           <Tag size={20} className="text-gray-400" />
           <select
             value={contextFilter}
-            onChange={(e) => setContextFilter(e.target.value as any)}
+            onChange={(e) => setContextFilter(e.target.value as ContextType | 'all')}
             className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
           >
             <option value="all">{t('contextFilter.all')}</option>
@@ -579,8 +578,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
       {/* Create Support Ticket Modal */}
       <CreateSupportTicketModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
+        onClose={() => {
           setIsCreateModalOpen(false);
           fetchTickets(); // Refresh the list after creating a new ticket
         }}

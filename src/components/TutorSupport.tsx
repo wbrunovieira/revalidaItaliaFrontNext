@@ -4,67 +4,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
 import { ViewTicketModal } from './ViewTicketModal';
+import Image from 'next/image';
 import {
   HelpCircle,
   MessageSquare,
-  FileText,
   User,
   Calendar,
-  Filter,
   Search,
   RefreshCw,
   Eye,
   ChevronRight,
   ChevronLeft,
   Clock,
-  AlertCircle,
   Paperclip,
   Tag,
 } from 'lucide-react';
 
 // Types for Support Tickets
 type ContextType = 'LESSON' | 'ASSESSMENT' | 'FLASHCARD' | 'GENERAL';
-type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
-
-interface Student {
-  id: string;
-  fullName: string;
-  profileImageUrl: string | null;
-}
-
-interface Attachment {
-  url: string;
-  fileName: string;
-  mimeType: string;
-  sizeInBytes: number;
-  type: 'IMAGE' | 'DOCUMENT' | 'OTHER';
-}
-
-interface Answer {
-  id: string;
-  content: string;
-  createdAt: string;
-  tutor: {
-    id: string;
-    fullName: string;
-    profileImageUrl: string | null;
-  };
-  attachments: Attachment[];
-}
-
-interface SupportTicket {
-  id: string;
-  contextType: ContextType;
-  contextId: string | null;
-  contextTitle: string;
-  content: string;
-  status: TicketStatus;
-  createdAt: string;
-  updatedAt: string;
-  student: Student;
-  attachments: Attachment[];
-  answers: Answer[];
-}
 
 interface PaginationMeta {
   page: number;
@@ -269,11 +226,12 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
     });
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
+  // Unused function kept for future reference
+  // const formatFileSize = (bytes: number) => {
+  //   if (bytes < 1024) return bytes + ' B';
+  //   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  //   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  // };
 
   const filteredTickets = tickets.filter(ticket => {
     // Filter by context type
@@ -422,7 +380,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
           <Tag size={20} className="text-gray-400" />
           <select
             value={contextFilter}
-            onChange={(e) => setContextFilter(e.target.value as any)}
+            onChange={(e) => setContextFilter(e.target.value as ContextType | 'all')}
             className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
           >
             <option value="all">{t('contextFilter.all')}</option>
@@ -465,9 +423,11 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                   {/* Student Avatar */}
                   <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
                     {ticket.student.profileImageUrl ? (
-                      <img
+                      <Image
                         src={ticket.student.profileImageUrl}
                         alt={ticket.student.fullName}
+                        width={48}
+                        height={48}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (

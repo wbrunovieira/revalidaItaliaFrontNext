@@ -272,25 +272,51 @@ export function ViewTicketModal({
     }
   };
 
-  const handleResolve = async () => {
-    // TODO: Implement resolve ticket API call
-    toast({
-      title: t('resolveSuccess'),
-      description: t('resolveSuccessDescription'),
-    });
-    onClose();
-    onStatusChange?.();
+  const handleAcceptAnswer = async () => {
+    if (!ticketId) return;
+
+    try {
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(
+        `${apiUrl}/api/v1/support/tickets/${ticketId}/accept`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || `Failed to accept ticket: ${response.status}`);
+      }
+
+      toast({
+        title: t('acceptSuccess'),
+        description: t('acceptSuccessDescription'),
+      });
+      
+      onClose();
+      onStatusChange?.();
+    } catch (error) {
+      console.error('Error accepting ticket:', error);
+      toast({
+        title: t('error.acceptTitle'),
+        description: t('error.acceptDescription'),
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleReopen = async () => {
-    // TODO: Implement reopen ticket API call
-    toast({
-      title: t('reopenSuccess'),
-      description: t('reopenSuccessDescription'),
-    });
-    onClose();
-    onStatusChange?.();
-  };
 
   const handleSendReply = async () => {
     if (!replyContent.trim() || !ticketId) return;
@@ -568,24 +594,21 @@ export function ViewTicketModal({
                 </div>
 
                 <div className="flex gap-2">
-                  {/* Only show resolve/reopen buttons for students */}
+                  {/* Only show action buttons for students */}
                   {!isTutor && (
                     <>
                       {ticket.status === 'RESOLVED' ? (
-                        <Button
-                          onClick={handleReopen}
-                          className="bg-orange-500 text-white hover:bg-orange-600"
-                        >
-                          <RefreshCw size={16} className="mr-2" />
-                          {t('reopen')}
-                        </Button>
+                        <div className="text-sm text-green-400 flex items-center gap-2">
+                          <CheckCircle size={16} />
+                          {t('ticketResolved')}
+                        </div>
                       ) : ticket.status === 'ANSWERED' ? (
                         <Button
-                          onClick={handleResolve}
+                          onClick={handleAcceptAnswer}
                           className="bg-green-500 text-white hover:bg-green-600"
                         >
                           <CheckCircle size={16} className="mr-2" />
-                          {t('markResolved')}
+                          {t('acceptAnswer')}
                         </Button>
                       ) : (
                         <div className="text-sm text-gray-500">

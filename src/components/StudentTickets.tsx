@@ -597,6 +597,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
         onStatusChange={() => {
           fetchTickets(); // Refresh the list after status change
         }}
+        isTutor={false}
       />
     </div>
   );

@@ -244,6 +244,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Alunos podem visualizar conversa completa com tutores em formato de chat intuitivo, identificação visual clara de quem enviou cada mensagem, acesso direto a arquivos anexados, possibilidade futura de gerenciar status do ticket diretamente do modal
 - [Commit] feat: add ticket details modal for student support page
 
+**Sistema de Resposta de Tutores Integrado ao Modal de Visualização**
+- [Técnico] Implementação de interface de resposta dentro do ViewTicketModal exclusiva para tutores, com textarea expansível e botões de enviar/cancelar, integração com POST /api/v1/support/tickets/{id}/messages, atualização automática da conversa após envio, mudança do botão "Responder" para "Visualizar" no TutorSupport com ícone Eye, controle de permissões onde apenas alunos podem resolver/reabrir tickets
+- [Benefício] Tutores respondem diretamente dentro do modal de visualização mantendo todo o contexto da conversa visível, elimina necessidade de modal separado para respostas reduzindo cliques, interface unificada para visualização e interação, respeita hierarquia de permissões onde tutores apenas respondem e alunos gerenciam status do ticket
+- [Commit] feat: add tutor response functionality in ViewTicketModal
+
 ---
 
 ## 📚 Documentações Criadas

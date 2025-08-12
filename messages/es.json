@@ -4,15 +4,13 @@
     "loading": "Cargando detalles...",
     "notFound": "Ticket no encontrado",
     "close": "Cerrar",
-    "markResolved": "Marcar como Resuelto",
-    "reopen": "Reabrir Ticket",
+    "acceptAnswer": "Aceptar Respuesta",
+    "ticketResolved": "Ticket Resuelto",
     "waitingResponse": "Esperando respuesta del tutor",
     "resolvedAt": "Resuelto el {date}",
     "messagesCount": "{count} mensajes en la conversación",
-    "resolveSuccess": "Ticket marcado como resuelto",
-    "resolveSuccessDescription": "El ticket ha sido cerrado con éxito",
-    "reopenSuccess": "Ticket reabierto",
-    "reopenSuccessDescription": "El ticket ha sido reabierto y está esperando respuesta",
+    "acceptSuccess": "Respuesta aceptada con éxito",
+    "acceptSuccessDescription": "El ticket ha sido marcado como resuelto",
     "status": {
       "open": "Abierto",
       "answered": "Respondido",
@@ -33,7 +31,9 @@
       "fetchTitle": "Error al cargar el ticket",
       "fetchDescription": "No se pudieron cargar los detalles del ticket",
       "replyTitle": "Error al enviar respuesta",
-      "replyDescription": "No se pudo enviar la respuesta. Inténtalo de nuevo."
+      "replyDescription": "No se pudo enviar la respuesta. Inténtalo de nuevo.",
+      "acceptTitle": "Error al aceptar respuesta",
+      "acceptDescription": "No se pudo aceptar la respuesta. Inténtalo de nuevo."
     },
     "reply": {
       "title": "Responder al Estudiante",

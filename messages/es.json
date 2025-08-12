@@ -1,4 +1,67 @@
 {
+    "MyTickets": {
+    "title": "Mis Tickets de Soporte",
+    "description": "Sigue tus preguntas y las respuestas de los tutores",
+    "back": "Volver",
+    "support": "Soporte",
+    "loading": "Cargando tickets...",
+    "refresh": "Actualizar",
+    "createNew": "Nueva Pregunta",
+    "createFirst": "Crear Primera Pregunta",
+    "noTickets": "No se encontraron tickets",
+    "noTicketsDescription": "Aún no tienes ninguna pregunta registrada. Haz clic en el botón de abajo para crear tu primera.",
+    "message": "mensaje",
+    "messages": "mensajes",
+    "answeredBy": "Respondido por",
+    "hasAttachments": "Contiene archivos adjuntos",
+    "updated": "Actualizado",
+    "resolved": "Resuelto",
+    "view": "Ver",
+    "showing": "Mostrando {count} de {total} tickets",
+    "stats": {
+      "open": "Abiertos",
+      "answered": "Respondidos",
+      "resolved": "Resueltos",
+      "total": "Total"
+    },
+    "status": {
+      "open": "Abierto",
+      "answered": "Respondido",
+      "resolved": "Resuelto"
+    },
+    "context": {
+      "lesson": "Lección",
+      "assessment": "Evaluación",
+      "flashcard": "Flashcard",
+      "general": "General"
+    },
+    "filter": {
+      "all": "Todos",
+      "open": "Abiertos",
+      "answered": "Respondidos",
+      "resolved": "Resueltos"
+    },
+    "contextFilter": {
+      "all": "Todos los Contextos",
+      "lesson": "Lecciones",
+      "assessment": "Evaluaciones",
+      "flashcard": "Flashcards",
+      "general": "General"
+    },
+    "searchPlaceholder": "Buscar en títulos y contenido...",
+    "error": {
+      "fetchTitle": "Error al cargar tickets",
+      "fetchDescription": "No se pudieron cargar tus tickets. Intenta nuevamente."
+    },
+    "pagination": {
+      "perPage": "Por página:",
+      "pageOf": "Página {current} de {total}",
+      "first": "Primera",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "last": "Última"
+    }
+  },
   "Support": {
     "floatingButton": {
       "helpText": "Habla con el profesor si tienes dudas",
@@ -521,7 +584,8 @@
     "faq": "Preguntas Frecuentes",
     "expand": "Expandir menú",
     "collapse": "Cerrar menú",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "myTickets": "Mis Tickets"
   },
   "Community": {
     "title": "Comunidad",
@@ -1099,6 +1163,8 @@
       "last": "Última"
     }
   },
+
+
   
   "flashcardTagEdit": {
     "title": "Editar Etiqueta de Flashcard",

@@ -15,6 +15,7 @@ import {
   ClipboardList,
   Brain,
   HeartHandshake,
+  MessageSquare,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -254,6 +255,12 @@ export default function Sidebar({
       ),
       href: `/${locale}/profile`,
       matchPaths: [`/${locale}/profile`],
+    },
+    {
+      label: t('myTickets'),
+      icon: <MessageSquare size={24} />,
+      href: `/${locale}/my-tickets`,
+      matchPaths: [`/${locale}/my-tickets`],
     },
   ];
 

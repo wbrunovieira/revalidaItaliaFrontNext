@@ -1,4 +1,67 @@
 {
+    "MyTickets": {
+    "title": "Meus Tickets de Suporte",
+    "description": "Acompanhe suas dúvidas e respostas dos tutores",
+    "back": "Voltar",
+    "support": "Suporte",
+    "loading": "Carregando tickets...",
+    "refresh": "Atualizar",
+    "createNew": "Nova Dúvida",
+    "createFirst": "Criar Primeira Dúvida",
+    "noTickets": "Nenhum ticket encontrado",
+    "noTicketsDescription": "Você ainda não tem nenhuma dúvida registrada. Clique no botão abaixo para criar sua primeira.",
+    "message": "mensagem",
+    "messages": "mensagens",
+    "answeredBy": "Respondido por",
+    "hasAttachments": "Contém anexos",
+    "updated": "Atualizado",
+    "resolved": "Resolvido",
+    "view": "Visualizar",
+    "showing": "Mostrando {count} de {total} tickets",
+    "stats": {
+      "open": "Abertos",
+      "answered": "Respondidos",
+      "resolved": "Resolvidos",
+      "total": "Total"
+    },
+    "status": {
+      "open": "Aberto",
+      "answered": "Respondido",
+      "resolved": "Resolvido"
+    },
+    "context": {
+      "lesson": "Aula",
+      "assessment": "Avaliação",
+      "flashcard": "Flashcard",
+      "general": "Geral"
+    },
+    "filter": {
+      "all": "Todos",
+      "open": "Abertos",
+      "answered": "Respondidos",
+      "resolved": "Resolvidos"
+    },
+    "contextFilter": {
+      "all": "Todos os Contextos",
+      "lesson": "Aulas",
+      "assessment": "Avaliações",
+      "flashcard": "Flashcards",
+      "general": "Geral"
+    },
+    "searchPlaceholder": "Buscar em títulos e conteúdo...",
+    "error": {
+      "fetchTitle": "Erro ao carregar tickets",
+      "fetchDescription": "Não foi possível carregar seus tickets. Tente novamente."
+    },
+    "pagination": {
+      "perPage": "Por página:",
+      "pageOf": "Página {current} de {total}",
+      "first": "Primeira",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "last": "Última"
+    }
+  },
  "Support": {
     "floatingButton": {
       "helpText": "Fale com o professor se tiver dúvida",
@@ -522,7 +585,8 @@
     "faq": "Perguntas Frequentes",
     "expand": "Expandir menu",
     "collapse": "Recolher menu",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "myTickets": "Meus Tickets"
   },
   "Community": {
     "title": "Comunidade",
@@ -1100,6 +1164,8 @@
       "last": "Última"
     }
   },
+
+
 
   "Support": {
     "title": "Suporte",

@@ -1,4 +1,67 @@
 {
+    "MyTickets": {
+    "title": "I Miei Ticket di Supporto",
+    "description": "Segui le tue domande e le risposte dei tutor",
+    "back": "Indietro",
+    "support": "Supporto",
+    "loading": "Caricamento ticket...",
+    "refresh": "Aggiorna",
+    "createNew": "Nuova Domanda",
+    "createFirst": "Crea Prima Domanda",
+    "noTickets": "Nessun ticket trovato",
+    "noTicketsDescription": "Non hai ancora nessuna domanda registrata. Clicca sul pulsante qui sotto per creare la tua prima.",
+    "message": "messaggio",
+    "messages": "messaggi",
+    "answeredBy": "Risposto da",
+    "hasAttachments": "Contiene allegati",
+    "updated": "Aggiornato",
+    "resolved": "Risolto",
+    "view": "Visualizza",
+    "showing": "Mostrando {count} di {total} ticket",
+    "stats": {
+      "open": "Aperti",
+      "answered": "Risposti",
+      "resolved": "Risolti",
+      "total": "Totale"
+    },
+    "status": {
+      "open": "Aperto",
+      "answered": "Risposto",
+      "resolved": "Risolto"
+    },
+    "context": {
+      "lesson": "Lezione",
+      "assessment": "Valutazione",
+      "flashcard": "Flashcard",
+      "general": "Generale"
+    },
+    "filter": {
+      "all": "Tutti",
+      "open": "Aperti",
+      "answered": "Risposti",
+      "resolved": "Risolti"
+    },
+    "contextFilter": {
+      "all": "Tutti i Contesti",
+      "lesson": "Lezioni",
+      "assessment": "Valutazioni",
+      "flashcard": "Flashcards",
+      "general": "Generale"
+    },
+    "searchPlaceholder": "Cerca nei titoli e nei contenuti...",
+    "error": {
+      "fetchTitle": "Errore nel caricamento dei ticket",
+      "fetchDescription": "Non è stato possibile caricare i tuoi ticket. Riprova."
+    },
+    "pagination": {
+      "perPage": "Per pagina:",
+      "pageOf": "Pagina {current} di {total}",
+      "first": "Prima",
+      "previous": "Precedente",
+      "next": "Successiva",
+      "last": "Ultima"
+    }
+  },
  "Support": {
     "floatingButton": {
       "helpText": "Parla con il professore se hai dubbi",
@@ -521,7 +584,8 @@
     "faq": "Domande Frequenti",
     "expand": "Espandi menu",
     "collapse": "Comprimi menu",
-    "profile": "Profilo"
+    "profile": "Profilo",
+    "myTickets": "I Miei Ticket"
   },
   "Community": {
     "title": "Comunità",
@@ -1100,6 +1164,8 @@
       "last": "Ultima"
     }
   },
+
+
   
   "flashcardTagEdit": {
     "title": "Modifica Tag Flashcard",

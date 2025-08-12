@@ -220,6 +220,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Permite aos alunos tirarem dúvidas contextualizadas diretamente de qualquer página, professores recebem perguntas organizadas com contexto específico, sistema de anexos facilita envio de prints e documentos
 - [Commit] feat: add support floating button for student questions
 
+### 11/08/2025
+
+**Sistema Completo de Gerenciamento de Tickets de Suporte para Tutores**
+- [Técnico] Implementação de aba Support no dashboard do tutor com componente TutorSupport, listagem de tickets pendentes via GET /api/v1/support/tickets/pending com paginação, modal RespondSupportTicketModal para responder tickets com validação e anexos drag-and-drop, integração com POST /api/v1/support/tickets/:ticketId/messages
+- [Benefício] Tutores têm visão centralizada de todas as dúvidas pendentes com estatísticas (tickets abertos, com anexos, alunos únicos), podem responder diretamente com texto e arquivos anexados, status do ticket muda automaticamente para ANSWERED após resposta
+- [Commit] feat: add support tab to tutor dashboard + feat: implement support ticket response modal for tutors
+
 ---
 
 ## 📚 Documentações Criadas

@@ -1055,6 +1055,7 @@
     },
     "status": {
       "open": "Aperto",
+      "answered": "Risposto",
       "inProgress": "In Corso",
       "resolved": "Risolto"
     },
@@ -1065,8 +1066,10 @@
       "general": "Generale"
     },
     "filter": {
+      "pending": "In Attesa",
       "all": "Tutti",
       "open": "Aperti",
+      "answered": "Risposti",
       "inProgress": "In Corso",
       "resolved": "Risolti"
     },

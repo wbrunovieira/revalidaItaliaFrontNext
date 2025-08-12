@@ -78,7 +78,7 @@ interface TicketListItem {
   contextType: ContextType;
   contextId: string | null;
   contextTitle: string;
-  status: 'OPEN';
+  status: 'OPEN' | 'ANSWERED' | 'RESOLVED';
   student: {
     id: string;
     fullName: string;
@@ -109,7 +109,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [filter, setFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved'>('all');
+  const [statusFilter, setStatusFilter] = useState<'pending' | 'OPEN' | 'ANSWERED' | 'RESOLVED'>('pending');
   const [contextFilter, setContextFilter] = useState<ContextType | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<TicketListItem | null>(null);
@@ -134,8 +134,18 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         perPage: perPage.toString(),
       });
 
+      // Add status filter for non-pending requests
+      if (statusFilter !== 'pending') {
+        params.append('status', statusFilter);
+      }
+      
+      // Use different endpoint based on status filter
+      const endpoint = statusFilter === 'pending' 
+        ? `${apiUrl}/api/v1/support/tickets/pending?${params}`
+        : `${apiUrl}/api/v1/support/tickets?${params}`;
+
       const response = await fetch(
-        `${apiUrl}/api/v1/support/tickets/pending?${params}`,
+        endpoint,
         {
           method: 'GET',
           headers: {
@@ -187,20 +197,36 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, page, perPage, t, toast]);
+  }, [apiUrl, page, perPage, statusFilter, t, toast]);
 
   useEffect(() => {
     fetchTickets();
-  }, [fetchTickets]);
+  }, [fetchTickets, statusFilter]);
 
   const getStatusColor = (status: string) => {
-    // All tickets from this endpoint are OPEN
-    return 'text-blue-400 bg-blue-900/20';
+    switch (status) {
+      case 'OPEN':
+        return 'text-blue-400 bg-blue-900/20';
+      case 'ANSWERED':
+        return 'text-yellow-400 bg-yellow-900/20';
+      case 'RESOLVED':
+        return 'text-green-400 bg-green-900/20';
+      default:
+        return 'text-gray-400 bg-gray-900/20';
+    }
   };
 
   const getStatusText = (status: string) => {
-    // All tickets from this endpoint are OPEN
-    return t('status.open');
+    switch (status) {
+      case 'OPEN':
+        return t('status.open');
+      case 'ANSWERED':
+        return t('status.answered');
+      case 'RESOLVED':
+        return t('status.resolved');
+      default:
+        return status;
+    }
   };
 
   const getContextColor = (contextType: ContextType) => {
@@ -345,6 +371,50 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         </div>
       </div>
 
+      {/* Status Filter Buttons */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setStatusFilter('pending')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            statusFilter === 'pending'
+              ? 'bg-secondary text-primary'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+          }`}
+        >
+          {t('filter.pending')}
+        </button>
+        <button
+          onClick={() => setStatusFilter('OPEN')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            statusFilter === 'OPEN'
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+          }`}
+        >
+          {t('filter.open')}
+        </button>
+        <button
+          onClick={() => setStatusFilter('ANSWERED')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            statusFilter === 'ANSWERED'
+              ? 'bg-yellow-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+          }`}
+        >
+          {t('filter.answered')}
+        </button>
+        <button
+          onClick={() => setStatusFilter('RESOLVED')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            statusFilter === 'RESOLVED'
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+          }`}
+        >
+          {t('filter.resolved')}
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-center">
 
@@ -411,8 +481,8 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                       <h3 className="text-lg font-semibold text-white">
                         {ticket.student.fullName}
                       </h3>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                        {getStatusText(ticket.status)}
+                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ticket.status || 'OPEN')}`}>
+                        {getStatusText(ticket.status || 'OPEN')}
                       </span>
                       <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getContextColor(ticket.contextType)}`}>
                         {getContextText(ticket.contextType)}
@@ -463,18 +533,20 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                   </div>
                 </div>
 
-                {/* Action Button */}
-                <button
-                  onClick={() => {
-                    setSelectedTicket(ticket);
-                    setIsResponseModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
-                >
-                  <MessageSquare size={16} />
-                  <span>{t('respond')}</span>
-                  <ChevronRight size={16} />
-                </button>
+                {/* Action Button - Only show for non-resolved tickets */}
+                {ticket.status !== 'RESOLVED' && (
+                  <button
+                    onClick={() => {
+                      setSelectedTicket(ticket);
+                      setIsResponseModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
+                  >
+                    <MessageSquare size={16} />
+                    <span>{t('respond')}</span>
+                    <ChevronRight size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))

@@ -1054,6 +1054,7 @@
     },
     "status": {
       "open": "Abierto",
+      "answered": "Respondido",
       "inProgress": "En Progreso",
       "resolved": "Resuelto"
     },
@@ -1064,8 +1065,10 @@
       "general": "General"
     },
     "filter": {
+      "pending": "Pendientes",
       "all": "Todos",
       "open": "Abiertos",
+      "answered": "Respondidos",
       "inProgress": "En Progreso",
       "resolved": "Resueltos"
     },

@@ -24,6 +24,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 
 interface Module {
@@ -81,6 +82,9 @@ export default function Sidebar({
 
   const [currentTrack, setCurrentTrack] =
     useState<Track | null>(null);
+  
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Extract course slug from pathname
   const courseSlugMatch = pathname.match(
@@ -237,11 +241,6 @@ export default function Sidebar({
       href: `/${locale}/live-sessions`,
       matchPaths: [`/${locale}/live-sessions`],
     },
-    {
-      label: t('faq'),
-      icon: <HelpCircle size={24} />,
-      href: `/${locale}/faq`,
-    },
   ];
 
   const profileNavItems: {
@@ -268,6 +267,20 @@ export default function Sidebar({
       icon: <MessageSquare size={24} />,
       href: `/${locale}/my-tickets`,
       matchPaths: [`/${locale}/my-tickets`],
+    },
+  ];
+
+  const helpNavItems: {
+    label: string;
+    icon: JSX.Element;
+    href: string;
+    matchPaths?: string[];
+  }[] = [
+    {
+      label: t('faq'),
+      icon: <HelpCircle size={24} />,
+      href: `/${locale}/faq`,
+      matchPaths: [`/${locale}/faq`],
     },
   ];
 
@@ -303,7 +316,7 @@ export default function Sidebar({
     <aside
       className={`fixed top-16 left-0 bottom-0 bg-primary text-background-white flex flex-col transition-all duration-300 ease-in-out shadow-2xl ${
         collapsed ? 'w-20' : 'w-64'
-      } z-10`}
+      } z-10 overflow-visible`}
     >
       <div
         className={`flex p-4 ${
@@ -327,7 +340,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto pb-4">
+      <nav className="flex-1 overflow-y-auto overflow-x-visible pb-4 relative">
         {/* Seção Principal de Navegação */}
         <ul
           className={`space-y-2 ${
@@ -352,11 +365,23 @@ export default function Sidebar({
                 currentTrack;
 
               return (
-                <li key={href}>
+                <li key={href} className="relative">
                   <div>
                     {/* Always show the main navigation item */}
                     <Link
                       href={href}
+                      onMouseEnter={(e) => {
+                        if (collapsed) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
+                          setHoveredItem(label);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (collapsed) {
+                          setHoveredItem(null);
+                        }
+                      }}
                       className={`
                         group flex items-center gap-3 rounded-lg transition-all duration-300 ease-in-out
                         relative overflow-hidden
@@ -423,6 +448,7 @@ export default function Sidebar({
                     `}
                         />
                       )}
+
                     </Link>
 
                     {/* Track expansion under Tracks item */}
@@ -610,9 +636,21 @@ export default function Sidebar({
               const active = isActive(href, matchPaths);
 
               return (
-                <li key={href}>
+                <li key={href} className="relative">
                   <Link
                     href={href}
+                    onMouseEnter={(e) => {
+                      if (collapsed) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
+                        setHoveredItem(label);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (collapsed) {
+                        setHoveredItem(null);
+                      }
+                    }}
                     className={`
                     group flex items-center gap-3 rounded-lg transition-all duration-300 ease-in-out
                     relative overflow-hidden
@@ -677,6 +715,130 @@ export default function Sidebar({
                     `}
                       />
                     )}
+
+                    {/* Tooltip for collapsed state */}
+                    {collapsed && (
+                      <div className="group-hover:block hidden absolute left-full ml-2 top-1/2 -translate-y-1/2 z-[9999]">
+                        <div className="bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md whitespace-nowrap shadow-xl">
+                          {label}
+                          <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-gray-900"></div>
+                        </div>
+                      </div>
+                    )}
+                  </Link>
+                </li>
+              );
+            }
+          )}
+        </ul>
+
+        {/* Segundo Divisor */}
+        <div
+          className={`my-6 ${collapsed ? 'px-2' : 'px-3'}`}
+        >
+          <div className="border-t border-white/20"></div>
+        </div>
+
+        {/* Seção de Ajuda */}
+        <ul
+          className={`space-y-2 ${
+            collapsed ? 'px-2' : 'px-3'
+          }`}
+        >
+          {helpNavItems.map(
+            ({ label, icon, href, matchPaths }) => {
+              const active = isActive(href, matchPaths);
+
+              return (
+                <li key={href} className="relative">
+                  <Link
+                    href={href}
+                    onMouseEnter={(e) => {
+                      if (collapsed) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
+                        setHoveredItem(label);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (collapsed) {
+                        setHoveredItem(null);
+                      }
+                    }}
+                    className={`
+                    group flex items-center gap-3 rounded-lg transition-all duration-300 ease-in-out
+                    relative overflow-hidden
+                    ${
+                      collapsed
+                        ? 'p-3 justify-center'
+                        : 'p-3'
+                    }
+                    ${
+                      active
+                        ? 'bg-secondary text-white shadow-lg border-l-4 border-white translate-x-1'
+                        : 'hover:bg-secondary/50 hover:shadow-md hover:translate-x-2 hover:border-l-4 hover:border-white/60 border-l-4 border-transparent'
+                    }
+                  `}
+                  >
+                    {/* Efeito de gradiente no hover */}
+                    <div
+                      className={`
+                    absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0
+                    translate-x-[-100%] group-hover:translate-x-[100%]
+                    transition-transform duration-700 ease-in-out
+                    ${active ? 'opacity-0' : 'opacity-100'}
+                  `}
+                    />
+
+                    <span
+                      className={`
+                    relative z-10 transition-all duration-300 ease-in-out
+                    ${
+                      active
+                        ? 'scale-110 text-white'
+                        : 'group-hover:scale-110 group-hover:rotate-3'
+                    }
+                  `}
+                    >
+                      {icon}
+                    </span>
+                    {!collapsed && (
+                      <span
+                        className={`
+                      relative z-10 whitespace-nowrap font-medium transition-all duration-300
+                      ${
+                        active
+                          ? 'text-white translate-x-0'
+                          : 'group-hover:translate-x-1 group-hover:text-white'
+                      }
+                    `}
+                      >
+                        {label}
+                      </span>
+                    )}
+
+                    {active && (
+                      <div
+                        className={`
+                      absolute w-2 h-2 bg-white rounded-full animate-pulse
+                      ${
+                        collapsed
+                          ? 'right-1 top-1'
+                          : 'right-3 top-1/2 -translate-y-1/2'
+                      }
+                    `}
+                      />
+                    )}
+
+                    {/* Tooltip for collapsed state */}
+                    {collapsed && (
+                      <div className="group-hover:block hidden absolute left-full ml-2 top-1/2 -translate-y-1/2 z-[9999]">
+                        <div className="bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md whitespace-nowrap shadow-xl">
+                          {label}
+                          <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-gray-900"></div>
+                        </div>
+                      </div>
+                    )}
                   </Link>
                 </li>
               );
@@ -684,6 +846,23 @@ export default function Sidebar({
           )}
         </ul>
       </nav>
+      
+      {/* Tooltip Portal */}
+      {collapsed && hoveredItem && (
+        <div
+          className="fixed z-[10000] pointer-events-none"
+          style={{
+            left: `${mousePos.x}px`,
+            top: `${mousePos.y}px`,
+            transform: 'translateY(-50%)',
+          }}
+        >
+          <div className="bg-gray-900 text-white text-sm font-medium px-3 py-1.5 rounded-md whitespace-nowrap shadow-xl">
+            {hoveredItem}
+            <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-gray-900"></div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

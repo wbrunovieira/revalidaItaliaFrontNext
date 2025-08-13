@@ -1,4 +1,50 @@
 {
+  "Terms": {
+    "title": "Termini d'Uso - Piattaforma PROGRAMMA REVALIDA ITALIA",
+    "subtitle": "Si prega di leggere attentamente prima di continuare",
+    "commitment": {
+      "title": "Impegno di Non Condivisione",
+      "text": "Accetto e mi impegno a non condividere nessun documento, file, video e/o qualsiasi tipo di materiale condiviso con me in questa piattaforma di utilizzo per il Mentoring, pena l'esclusione dal programma senza diritto al rimborso di qualsiasi importo da me già pagato."
+    },
+    "intellectualProperty": {
+      "title": "Proprietà Intellettuale",
+      "text": "Tutti i contenuti resi disponibili su questa piattaforma, inclusi ma non limitati a video, documenti, dispense, esercizi e materiali di studio, sono di proprietà esclusiva del Programma Revalida Italia e sono protetti dalle leggi sul diritto d'autore."
+    },
+    "consequences": {
+      "title": "Conseguenze del Mancato Rispetto",
+      "text": "Il mancato rispetto di questi termini comporterà l'esclusione immediata e permanente dalla piattaforma, senza diritto al rimborso degli importi pagati, oltre a possibili azioni legali appropriate."
+    },
+    "additionalTerms": {
+      "title": "Termini Aggiuntivi",
+      "term1": "L'accesso è personale e non trasferibile",
+      "term2": "È vietato il download non autorizzato di contenuti",
+      "term3": "È vietata la registrazione di lezioni dal vivo",
+      "term4": "È vietata la condivisione delle credenziali di accesso",
+      "term5": "L'utente deve mantenere riservati i propri dati di accesso"
+    },
+    "signing": {
+      "from": "Firmando da",
+      "browser": "Browser",
+      "date": "Data e ora"
+    },
+    "acceptance": "Ho letto e accetto i Termini e Condizioni sopra esposti.",
+    "buttons": {
+      "cancel": "Annulla",
+      "signAndAccess": "Firma e Accedi al Contenuto",
+      "signing": "Firmando...",
+      "back": "Indietro"
+    },
+    "success": {
+      "title": "Termini Accettati",
+      "description": "Grazie per aver accettato i nostri termini. Reindirizzamento..."
+    },
+    "error": {
+      "title": "Errore nell'accettazione dei termini",
+      "description": "Si è verificato un errore durante l'elaborazione della tua accettazione. Riprova.",
+      "notAccepted": "Termini non accettati",
+      "mustAccept": "Devi accettare i termini per continuare"
+    }
+  },
   "FAQ": {
     "title": "Domande Frequenti",
     "description": "Trova risposte rapide su come utilizzare la piattaforma",
@@ -678,6 +724,9 @@
   "Dashboard": {
     "title": "Area Studente",
     "greeting": "Bentornato, {name}!",
+    "termsLink": "Termini d'Uso - Programma Revalida Italia",
+    "termsAccepted": "Termini d'Uso Accettati",
+    "termsPending": "Termini d'Uso - In Attesa di Firma",
     "trails": "Tracce",
     "courses": "Corsi",
     "offlineMode": "Modalità Offline",

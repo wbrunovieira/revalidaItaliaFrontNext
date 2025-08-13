@@ -1,11 +1,13 @@
 // src/components/DashboardClient.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, FileText, CheckCircle, Square, CheckSquare } from 'lucide-react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 import { useApi } from '@/hooks/use-api';
 import TrackCard from '@/components/TrackCard';
@@ -58,8 +60,9 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const t = useTranslations('Dashboard');
   const router = useRouter();
   const { user } = useAuthStore();
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
-  // Check auth token
+  // Check auth token and terms acceptance
   useEffect(() => {
     const checkAuth = () => {
       const tokenFromCookie = document.cookie
@@ -74,7 +77,23 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       }
     };
 
+    const checkTerms = () => {
+      const termsData = localStorage.getItem('termsAccepted');
+      if (termsData) {
+        try {
+          const parsed = JSON.parse(termsData);
+          // Check if terms haven't expired
+          if (parsed.expiresAt && new Date(parsed.expiresAt) > new Date()) {
+            setTermsAccepted(true);
+          }
+        } catch (error) {
+          console.error('Error parsing terms data:', error);
+        }
+      }
+    };
+
     checkAuth();
+    checkTerms();
   }, [locale, router]);
 
   const {
@@ -183,6 +202,28 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
           )) || []}
         </div>
       )}
+
+      {/* Terms of Use Link - Checkbox style */}
+      <div className="w-full max-w-6xl mt-16 mb-8 pt-8 border-t border-white/10">
+        <div className="flex justify-center">
+          {termsAccepted ? (
+            <div className="inline-flex items-center gap-2 text-green-400/80 text-sm">
+              <CheckSquare size={20} className="text-green-400" />
+              <span>{t('termsAccepted') || 'Termos de Uso Aceitos'}</span>
+            </div>
+          ) : (
+            <Link
+              href={`/${locale}/terms`}
+              className="inline-flex items-center gap-2 text-white/60 hover:text-white/80 text-sm transition-colors group"
+            >
+              <Square size={20} className="text-orange-400/80 group-hover:text-orange-400 transition-colors" />
+              <span className="group-hover:text-white transition-colors">
+                {t('termsPending') || 'Termos de Uso - Pendente de Assinatura'}
+              </span>
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

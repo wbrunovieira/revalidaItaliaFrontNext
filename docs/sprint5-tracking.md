@@ -266,6 +266,16 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Experiência mais acolhedora e personalizada ao entrar na plataforma, reforça conexão emocional do aluno com o sistema, demonstra que a plataforma reconhece e valoriza cada estudante individualmente
 - [Commit] feat: add personalized greeting with student name on dashboard
 
+**Ajuste de Ícone do Perfil no Sidebar**
+- [Técnico] Aplicação de filtros CSS (brightness-0 e invert) para garantir cor branca consistente no ícone SVG do perfil, aumento do tamanho de 24x24 para 28x28 pixels para melhor visibilidade
+- [Benefício] Interface mais consistente e profissional com todos os ícones do sidebar na mesma cor, melhor visibilidade do ícone de perfil para usuários
+- [Commit] fix: adjust profile icon size and color in sidebar
+
+**Página de FAQ com Animações Suaves e Suporte Multilíngue**
+- [Técnico] Criação de componente FAQ completo com 24 perguntas organizadas em 6 categorias (Navegação, Vídeos, Avaliações, Suporte, Comunidade, Perfil), implementação de animações Framer Motion para expand/collapse suave com height animation, sistema de busca e filtros com transições animadas, skeleton loader com shimmer effects, correção de hydration issues com renderização client-side
+- [Benefício] Alunos têm acesso rápido a respostas sobre uso da plataforma sem precisar abrir tickets, reduz carga de suporte ao responder dúvidas comuns automaticamente, experiência moderna e fluida com animações profissionais, suporte completo para três idiomas (PT, IT, ES)
+- [Commit] feat: create FAQ page with smooth animations and multi-language support
+
 ---
 
 ## 📚 Documentações Criadas

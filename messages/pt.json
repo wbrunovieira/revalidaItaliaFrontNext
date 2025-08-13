@@ -1,4 +1,50 @@
 {
+  "Terms": {
+    "title": "Termos de Uso - Plataforma PROGRAMA REVALIDA ITÁLIA",
+    "subtitle": "Por favor, leia atentamente antes de continuar",
+    "commitment": {
+      "title": "Compromisso de Não Compartilhamento",
+      "text": "Eu aceito e me comprometo em não compartilhar nenhum documento, arquivo, vídeo e/ou qualquer tipo de material compartilhado comigo nesta plataforma de utilização para a Mentoria, sob pena de ser banido do programa sem direito a reembolso de quaisquer valores por mim já pagos."
+    },
+    "intellectualProperty": {
+      "title": "Propriedade Intelectual",
+      "text": "Todo o conteúdo disponibilizado nesta plataforma, incluindo mas não limitado a vídeos, documentos, apostilas, exercícios e materiais de estudo, são propriedade exclusiva do Programa Revalida Itália e estão protegidos por leis de direitos autorais."
+    },
+    "consequences": {
+      "title": "Consequências do Descumprimento",
+      "text": "O descumprimento destes termos resultará em banimento imediato e permanente da plataforma, sem direito a reembolso de valores pagos, além de possíveis medidas legais cabíveis."
+    },
+    "additionalTerms": {
+      "title": "Termos Adicionais",
+      "term1": "O acesso é pessoal e intransferível",
+      "term2": "É proibido o download não autorizado de conteúdo",
+      "term3": "É proibida a gravação de aulas ao vivo",
+      "term4": "É proibido o compartilhamento de credenciais de acesso",
+      "term5": "O usuário deve manter seus dados de acesso em sigilo"
+    },
+    "signing": {
+      "from": "Assinando de",
+      "browser": "Navegador",
+      "date": "Data e hora"
+    },
+    "acceptance": "Eu li e aceito os Termos e Condições explanados acima.",
+    "buttons": {
+      "cancel": "Cancelar",
+      "signAndAccess": "Assinar e Acessar o Conteúdo",
+      "signing": "Assinando...",
+      "back": "Voltar"
+    },
+    "success": {
+      "title": "Termos Aceitos",
+      "description": "Obrigado por aceitar nossos termos. Redirecionando..."
+    },
+    "error": {
+      "title": "Erro ao aceitar termos",
+      "description": "Ocorreu um erro ao processar sua aceitação. Tente novamente.",
+      "notAccepted": "Termos não aceitos",
+      "mustAccept": "Você deve aceitar os termos para continuar"
+    }
+  },
   "FAQ": {
     "title": "Perguntas Frequentes",
     "description": "Encontre respostas rápidas sobre como usar a plataforma",
@@ -676,6 +722,9 @@
   "Dashboard": {
     "title": "Área do Aluno",
     "greeting": "Bem-vindo de volta, {name}!",
+    "termsLink": "Termos de Uso - Programa Revalida Italia",
+    "termsAccepted": "Termos de Uso Aceitos",
+    "termsPending": "Termos de Uso - Pendente de Assinatura",
     "trails": "Trilhas",
     "courses": "Cursos",
     "offlineMode": "Modo Offline",

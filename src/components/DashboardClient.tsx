@@ -12,6 +12,7 @@ import TrackCard from '@/components/TrackCard';
 import CourseCard from '@/components/CourseCard';
 import ContinueLearning from '@/components/ContinueLearning';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
+import { useAuthStore } from '@/stores/auth.store';
 
 interface Translation {
   locale: string;
@@ -56,6 +57,7 @@ interface DashboardClientProps {
 export default function DashboardClient({ locale, initialTracks = [], initialCourses = [] }: DashboardClientProps) {
   const t = useTranslations('Dashboard');
   const router = useRouter();
+  const { user } = useAuthStore();
 
   // Check auth token
   useEffect(() => {
@@ -113,6 +115,11 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
     <div className="flex-1 flex flex-col items-left justify-top bg-primary min-h-screen pl-4 pt-8">
       <div className="w-full flex flex-col items-center">
         <h1 className="text-6xl font-bold text-white">{t('title')}</h1>
+        {user?.name && (
+          <p className="text-xl text-secondary mt-2 font-medium">
+            {t('greeting', { name: user.name })}
+          </p>
+        )}
         <hr className="mt-4 border-t-2 border-secondary w-48 lg:w-96" />
       </div>
       

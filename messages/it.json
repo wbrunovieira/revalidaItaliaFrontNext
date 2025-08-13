@@ -604,6 +604,7 @@
   },
   "Dashboard": {
     "title": "Area Studente",
+    "greeting": "Bentornato, {name}!",
     "trails": "Tracce",
     "courses": "Corsi",
     "offlineMode": "Modalità Offline",

@@ -602,6 +602,7 @@
   },
   "Dashboard": {
     "title": "Área do Aluno",
+    "greeting": "Bem-vindo de volta, {name}!",
     "trails": "Trilhas",
     "courses": "Cursos",
     "offlineMode": "Modo Offline",

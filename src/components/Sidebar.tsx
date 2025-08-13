@@ -255,8 +255,9 @@ export default function Sidebar({
         <Image
           src="/icons/avatar.svg"
           alt={t('profile')}
-          width={24}
-          height={24}
+          width={28}
+          height={28}
+          className="brightness-0 invert"
         />
       ),
       href: `/${locale}/profile`,

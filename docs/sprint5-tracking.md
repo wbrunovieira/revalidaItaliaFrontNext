@@ -249,6 +249,23 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Tutores respondem diretamente dentro do modal de visualização mantendo todo o contexto da conversa visível, elimina necessidade de modal separado para respostas reduzindo cliques, interface unificada para visualização e interação, respeita hierarquia de permissões onde tutores apenas respondem e alunos gerenciam status do ticket
 - [Commit] feat: add tutor response functionality in ViewTicketModal
 
+### 13/08/2025
+
+**Página de Live Sessions com Integração Zoom**
+- [Técnico] Criação de página completa de sessões ao vivo com três abas (Upcoming, Live, Recorded), componente LiveSessions com mock de dados de sessões, integração simulada com Zoom (console.log), sistema de inscrição/desinscrição de sessões, filtros por tópico e busca textual
+- [Benefício] Alunos podem visualizar e se inscrever em aulas ao vivo agendadas, acompanhar sessões em andamento com indicação visual pulsante, acessar gravações de aulas anteriores, interface preparada para integração real com Zoom
+- [Commit] feat: add Live Sessions page with Zoom integration mockup
+
+**Melhorias de UX no Sidebar com Tooltips e Reorganização**
+- [Técnico] Implementação de sistema de tooltips com estado React para mostrar nome dos botões quando sidebar está colapsado, usando posicionamento fixo e cálculo de coordenadas do mouse, reorganização do sidebar em três seções (navegação principal, perfil/tickets, ajuda) com divisores visuais
+- [Benefício] Usuários entendem rapidamente a função de cada ícone mesmo com sidebar colapsado, organização visual mais clara separando diferentes tipos de navegação, melhor acessibilidade e orientação
+- [Commit] fix: implement working hover tooltips for collapsed sidebar icons
+
+**Saudação Personalizada com Nome do Aluno no Dashboard**
+- [Técnico] Adição de traduções multilíngue para saudação (pt: "Bem-vindo de volta", it: "Bentornato", es: "Bienvenido de nuevo"), integração com Auth Store do Zustand para obter nome do usuário, exibição condicional apenas quando nome está disponível
+- [Benefício] Experiência mais acolhedora e personalizada ao entrar na plataforma, reforça conexão emocional do aluno com o sistema, demonstra que a plataforma reconhece e valoriza cada estudante individualmente
+- [Commit] feat: add personalized greeting with student name on dashboard
+
 ---
 
 ## 📚 Documentações Criadas

@@ -1,4 +1,54 @@
 {
+  "LiveSessions": {
+    "title": "Sessões ao Vivo",
+    "subtitle": "Participe de aulas ao vivo com nossos tutores especializados",
+    "description": "Acompanhe as sessões agendadas, participe em tempo real e assista às gravações",
+    "upcoming": "Próximas Sessões",
+    "live": "Ao Vivo Agora",
+    "recorded": "Sessões Gravadas",
+    "noUpcoming": "Nenhuma sessão agendada",
+    "noUpcomingDescription": "Não há sessões programadas no momento. Volte mais tarde!",
+    "noLive": "Nenhuma sessão ao vivo",
+    "noLiveDescription": "Não há sessões acontecendo agora",
+    "noRecorded": "Nenhuma gravação disponível",
+    "noRecordedDescription": "As gravações das sessões anteriores aparecerão aqui",
+    "joinNow": "Entrar Agora",
+    "joining": "Entrando...",
+    "watchRecording": "Assistir Gravação",
+    "duration": "Duração",
+    "participants": "participantes",
+    "startTime": "Início",
+    "endTime": "Término",
+    "instructor": "Instrutor",
+    "topic": "Tópico",
+    "scheduledFor": "Agendado para",
+    "recordedOn": "Gravado em",
+    "viewDetails": "Ver Detalhes",
+    "register": "Inscrever-se",
+    "registered": "Inscrito",
+    "registering": "Inscrevendo...",
+    "unregister": "Cancelar Inscrição",
+    "filters": {
+      "all": "Todas",
+      "thisWeek": "Esta Semana",
+      "thisMonth": "Este Mês",
+      "topic": "Por Tópico"
+    },
+    "status": {
+      "scheduled": "Agendada",
+      "live": "Ao Vivo",
+      "ended": "Encerrada",
+      "cancelled": "Cancelada"
+    },
+    "error": {
+      "loadTitle": "Erro ao carregar sessões",
+      "loadDescription": "Não foi possível carregar as sessões. Tente novamente.",
+      "joinTitle": "Erro ao entrar na sessão",
+      "joinDescription": "Não foi possível entrar na sessão. Verifique sua conexão.",
+      "registerTitle": "Erro ao se inscrever",
+      "registerDescription": "Não foi possível realizar a inscrição. Tente novamente."
+    }
+  },
     "ViewTicket": {
     "title": "Detalhes do Ticket",
     "loading": "Carregando detalhes...",
@@ -653,6 +703,7 @@
     "assessments": "Avaliações",
     "flashcards": "Flashcards",
     "community": "Comunidade",
+    "liveSessions": "Sessões ao Vivo",
     "support": "Suporte",
     "faq": "Perguntas Frequentes",
     "expand": "Expandir menu",

@@ -16,6 +16,7 @@ import {
   Brain,
   HeartHandshake,
   MessageSquare,
+  Video,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -229,6 +230,12 @@ export default function Sidebar({
       icon: <HeartHandshake size={24} />,
       href: `/${locale}/community`,
       matchPaths: [`/${locale}/community`],
+    },
+    {
+      label: t('liveSessions'),
+      icon: <Video size={24} />,
+      href: `/${locale}/live-sessions`,
+      matchPaths: [`/${locale}/live-sessions`],
     },
     {
       label: t('faq'),

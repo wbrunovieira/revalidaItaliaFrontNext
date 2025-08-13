@@ -1,4 +1,54 @@
 {
+  "LiveSessions": {
+    "title": "Sessioni dal Vivo",
+    "subtitle": "Partecipa alle lezioni dal vivo con i nostri tutor specializzati",
+    "description": "Segui le sessioni programmate, partecipa in tempo reale e guarda le registrazioni",
+    "upcoming": "Prossime Sessioni",
+    "live": "Dal Vivo Ora",
+    "recorded": "Sessioni Registrate",
+    "noUpcoming": "Nessuna sessione programmata",
+    "noUpcomingDescription": "Non ci sono sessioni programmate al momento. Torna più tardi!",
+    "noLive": "Nessuna sessione dal vivo",
+    "noLiveDescription": "Non ci sono sessioni in corso ora",
+    "noRecorded": "Nessuna registrazione disponibile",
+    "noRecordedDescription": "Le registrazioni delle sessioni precedenti appariranno qui",
+    "joinNow": "Partecipa Ora",
+    "joining": "Collegamento...",
+    "watchRecording": "Guarda Registrazione",
+    "duration": "Durata",
+    "participants": "partecipanti",
+    "startTime": "Inizio",
+    "endTime": "Fine",
+    "instructor": "Istruttore",
+    "topic": "Argomento",
+    "scheduledFor": "Programmato per",
+    "recordedOn": "Registrato il",
+    "viewDetails": "Vedi Dettagli",
+    "register": "Iscriviti",
+    "registered": "Iscritto",
+    "registering": "Iscrizione...",
+    "unregister": "Annulla Iscrizione",
+    "filters": {
+      "all": "Tutte",
+      "thisWeek": "Questa Settimana",
+      "thisMonth": "Questo Mese",
+      "topic": "Per Argomento"
+    },
+    "status": {
+      "scheduled": "Programmata",
+      "live": "Dal Vivo",
+      "ended": "Terminata",
+      "cancelled": "Cancellata"
+    },
+    "error": {
+      "loadTitle": "Errore nel caricamento delle sessioni",
+      "loadDescription": "Impossibile caricare le sessioni. Riprova.",
+      "joinTitle": "Errore nel partecipare alla sessione",
+      "joinDescription": "Impossibile partecipare alla sessione. Verifica la connessione.",
+      "registerTitle": "Errore nell'iscrizione",
+      "registerDescription": "Impossibile completare l'iscrizione. Riprova."
+    }
+  },
 
   "ViewTicket": {
     "title": "Dettagli del Ticket",
@@ -655,6 +705,7 @@
     "assessments": "Valutazioni",
     "flashcards": "Flashcards",
     "community": "Comunità",
+    "liveSessions": "Sessioni dal Vivo",
     "support": "Supporto",
     "faq": "Domande Frequenti",
     "expand": "Espandi menu",

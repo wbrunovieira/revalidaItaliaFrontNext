@@ -153,6 +153,19 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       console.log('Number of answers in response:', data.answers?.length || 0);
       console.log('Answers array:', data.answers);
       
+      // Debug: verificar status individual de cada resposta da API
+      console.log('Raw API answers status:');
+      data.answers?.forEach((answer: any, index: number) => {
+        console.log(`API Answer ${index + 1}:`, {
+          id: answer.id,
+          questionId: answer.questionId,
+          status: answer.status,
+          isCorrect: answer.isCorrect,
+          reviewerId: answer.reviewerId,
+          currentAnswer: answer.currentAnswer
+        });
+      });
+      
       // Mapear os dados da API para o formato esperado pelo componente
       const mappedData = {
         id: data.attempt?.id || attemptId,
@@ -200,6 +213,17 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       console.log('Mapped data - answers:', mappedData.answers);
       console.log('Total questions mapped:', mappedData.questions.length);
       console.log('Total answers mapped:', mappedData.answers.length);
+      
+      // Debug: verificar status de cada resposta
+      mappedData.answers.forEach((answer, index) => {
+        console.log(`Answer ${index + 1}:`, {
+          questionId: answer.questionId,
+          status: answer.status,
+          isCorrect: answer.isCorrect,
+          reviewerId: answer.reviewerId,
+          hasTeacherComment: !!answer.teacherComment
+        });
+      });
 
       setAttemptData(mappedData);
     } catch (error) {

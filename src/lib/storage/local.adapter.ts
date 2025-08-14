@@ -27,11 +27,20 @@ export class LocalStorageAdapter implements StorageAdapter {
       const fullPath = path.join(process.cwd(), this.basePath, filePath);
       const directory = path.dirname(fullPath);
 
+      console.log('LocalStorageAdapter - Saving file:', {
+        filePath,
+        fullPath,
+        directory,
+        basePath: this.basePath
+      });
+
       // Ensure directory exists
       await this.ensureDirectory(directory);
 
       // Write file
       await writeFile(fullPath, buffer);
+      
+      console.log('LocalStorageAdapter - File saved successfully:', fullPath);
 
       // Return public URL
       return this.getUrl(filePath);

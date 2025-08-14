@@ -176,11 +176,26 @@ export default function CreateDocumentForm() {
           message: t(`errors.${fieldType}Required`),
         };
       }
-      if (fieldType !== 'url' && value.trim().length < 3) {
-        return {
-          isValid: false,
-          message: t(`errors.${fieldType}Min`),
-        };
+      
+      // Backend validation rules
+      if (fieldType === 'title') {
+        // Minimum 1 character
+        if (value.trim().length < 1) {
+          return {
+            isValid: false,
+            message: t('errors.titleMin') || 'Título deve ter pelo menos 1 caractere',
+          };
+        }
+      }
+      
+      if (fieldType === 'description') {
+        // Minimum 5 characters
+        if (value.trim().length < 5) {
+          return {
+            isValid: false,
+            message: t('errors.descriptionMin') || 'Descrição deve ter pelo menos 5 caracteres',
+          };
+        }
       }
 
       const maxLength =
@@ -198,13 +213,22 @@ export default function CreateDocumentForm() {
 
       // Validação específica para URL
       if (fieldType === 'url') {
-        if (
-          !value.startsWith('/') &&
-          !value.startsWith('http')
-        ) {
+        // Check if it's a valid URL or path starting with /
+        const isValidUrl = (() => {
+          try {
+            new URL(value);
+            return true;
+          } catch {
+            return false;
+          }
+        })();
+        
+        const isValidPath = value.startsWith('/');
+        
+        if (!isValidUrl && !isValidPath) {
           return {
             isValid: false,
-            message: t('errors.urlInvalid'),
+            message: t('errors.urlInvalid') || 'URL deve ser válida ou começar com /',
           };
         }
       }
@@ -217,33 +241,40 @@ export default function CreateDocumentForm() {
   // Validação individual de campos
   const validateField = useCallback(
     (
-      field: string
+      field: string,
+      value?: string | number
     ): ValidationResult => {
       if (field === 'courseId') {
-        if (!formData.courseId) {
+        // Use the provided value if available
+        const courseValue = value !== undefined ? value : formData.courseId;
+        if (!courseValue) {
           return {
             isValid: false,
-            message: t('errors.courseRequired'),
+            message: t('errors.courseRequired') || 'Por favor, selecione um curso',
           };
         }
         return { isValid: true };
       }
 
       if (field === 'moduleId') {
-        if (!formData.moduleId) {
+        // Use the provided value if available
+        const moduleValue = value !== undefined ? value : formData.moduleId;
+        if (!moduleValue) {
           return {
             isValid: false,
-            message: t('errors.moduleRequired'),
+            message: t('errors.moduleRequired') || 'Por favor, selecione um módulo',
           };
         }
         return { isValid: true };
       }
 
       if (field === 'lessonId') {
-        if (!formData.lessonId) {
+        // Use the provided value if available
+        const lessonValue = value !== undefined ? value : formData.lessonId;
+        if (!lessonValue) {
           return {
             isValid: false,
-            message: t('errors.lessonRequired'),
+            message: t('errors.lessonRequired') || 'Por favor, selecione uma aula',
           };
         }
         return { isValid: true };
@@ -257,16 +288,20 @@ export default function CreateDocumentForm() {
       );
       if (match) {
         const [, fieldType, locale] = match;
-        const translation =
-          formData.translations[locale as Locale];
-        if (translation) {
-          const fieldValue =
-            translation[fieldType as TranslationField];
-          return validateTextField(
-            fieldValue,
-            fieldType as TranslationField
-          );
+        
+        // Use the provided value if available, otherwise get from formData
+        let fieldValue: string;
+        if (value !== undefined) {
+          fieldValue = String(value);
+        } else {
+          const translation = formData.translations[locale as Locale];
+          fieldValue = translation ? translation[fieldType as TranslationField] : '';
         }
+        
+        return validateTextField(
+          fieldValue,
+          fieldType as TranslationField
+        );
       }
 
       return { isValid: true };
@@ -277,10 +312,11 @@ export default function CreateDocumentForm() {
   // Validação em tempo real
   const handleFieldValidation = useCallback(
     (field: string, value?: string | number) => {
-      if (touched[field as keyof FormErrors]) {
+      // Validate immediately when called with a value
+      if (value !== undefined || touched[field as keyof FormErrors]) {
         let fieldValue = value;
 
-        if (!fieldValue && field.includes('_')) {
+        if (fieldValue === undefined && field.includes('_')) {
           const match = field.match(
             /^(title|description|url)_(\w+)$/
           );
@@ -295,7 +331,7 @@ export default function CreateDocumentForm() {
           }
         }
 
-        const validation = validateField(field);
+        const validation = validateField(field, fieldValue);
         setErrors(prev => ({
           ...prev,
           [field]: validation.isValid
@@ -500,21 +536,27 @@ export default function CreateDocumentForm() {
     const newErrors: FormErrors = {};
     let isValid = true;
 
+    console.log('Validating form:', {
+      courseId: formData.courseId,
+      moduleId: formData.moduleId,
+      lessonId: formData.lessonId
+    });
+
     // Validar curso
     if (!formData.courseId) {
-      newErrors.courseId = t('errors.courseRequired');
+      newErrors.courseId = t('errors.courseRequired') || 'Por favor, selecione um curso';
       isValid = false;
     }
 
     // Validar módulo
     if (!formData.moduleId) {
-      newErrors.moduleId = t('errors.moduleRequired');
+      newErrors.moduleId = t('errors.moduleRequired') || 'Por favor, selecione um módulo';
       isValid = false;
     }
 
     // Validar aula
     if (!formData.lessonId) {
-      newErrors.lessonId = t('errors.lessonRequired');
+      newErrors.lessonId = t('errors.lessonRequired') || 'Por favor, selecione uma aula';
       isValid = false;
     }
 
@@ -595,10 +637,22 @@ export default function CreateDocumentForm() {
       );
 
       if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(
-          `Failed to create document: ${response.status} - ${responseText}`
-        );
+        const errorData = await response.json();
+        
+        // Handle specific error cases
+        switch (response.status) {
+          case 400:
+            // Validation error
+            throw new Error(errorData.message || 'Erro de validação');
+          case 404:
+            // Lesson not found
+            throw new Error('Aula não encontrada');
+          case 409:
+            // Duplicate filename
+            throw new Error(`Documento com o nome ${payload.filename} já existe`);
+          default:
+            throw new Error(errorData.message || `Erro ao criar documento: ${response.status}`);
+        }
       }
     },
     [formData.lessonId]
@@ -724,10 +778,21 @@ export default function CreateDocumentForm() {
         return;
       }
 
-      // Extract filename from Portuguese translation URL
-      const ptTranslation = formData.translations.pt;
-      const urlParts = ptTranslation.url.split('/');
-      const filename = urlParts[urlParts.length - 1] || 'document.pdf';
+      // Extract filename from the first uploaded file's URL
+      const ptUrl = formData.translations.pt.url;
+      const urlParts = ptUrl.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      
+      // Validate filename format
+      if (!filename || !/^[a-zA-Z0-9._-]+\.[a-zA-Z0-9]+$/.test(filename)) {
+        toast({
+          title: t('error.validationTitle'),
+          description: t('error.invalidFilename') || 'Formato de nome de arquivo inválido',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
 
       const payload: CreateDocumentPayload = {
         filename,
@@ -769,6 +834,8 @@ export default function CreateDocumentForm() {
       }));
 
       const fieldKey = `${field}_${locale}`;
+      // Mark field as touched and validate immediately
+      setTouched(prev => ({ ...prev, [fieldKey]: true }));
       handleFieldValidation(fieldKey, value);
     },
     [handleFieldValidation]
@@ -892,7 +959,6 @@ export default function CreateDocumentForm() {
         uploadFormData.append('file', file);
         uploadFormData.append('category', 'document');
         uploadFormData.append('folder', locale); // Use locale as folder name
-        uploadFormData.append('filename', uniqueFileName);
 
         // Upload file to server
         const response = await fetch('/api/upload', {
@@ -906,6 +972,12 @@ export default function CreateDocumentForm() {
         }
 
         const uploadResult = await response.json();
+        
+        console.log(`File uploaded successfully for locale ${locale}:`, {
+          url: uploadResult.url,
+          filename: uploadResult.filename,
+          originalFile: file.name
+        });
         
         // Save file info in state with the actual uploaded URL
         setFormData(prev => ({

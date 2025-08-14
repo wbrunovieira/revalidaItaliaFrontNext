@@ -19,6 +19,7 @@ import {
   TrendingUp,
   List,
   Grid,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Assessment {
@@ -264,8 +265,30 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
   }, [userId, fetchAttempts]);
 
   const getStatusInfo = (attempt: StudentAttempt) => {
-    if (attempt.status === 'SUBMITTED' && attempt.reviewedQuestions > 0 && attempt.pendingReview > 0) {
-      // Algumas questões foram rejeitadas - aguardando aluno
+    // GRADED com 100% = Totalmente concluída e aprovada
+    if (attempt.status === 'GRADED' && attempt.scorePercentage === 100) {
+      return {
+        text: 'Concluída',
+        color: 'text-green-400',
+        bgColor: 'bg-green-900/20 border-green-500/30',
+        icon: <CheckCircle size={16} />,
+        priority: 'low'
+      };
+    }
+    
+    // SUBMITTED com 100% = Resposta aceita, aguardando confirmação do aluno
+    if (attempt.status === 'SUBMITTED' && attempt.scorePercentage === 100) {
+      return {
+        text: 'Confirmar resposta',
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-900/20 border-yellow-500/30',
+        icon: <AlertCircle size={16} />,
+        priority: 'high'
+      };
+    }
+    
+    // GRADED mas com score < 100% = Em andamento (aguardando nova resposta do aluno)
+    if (attempt.status === 'GRADED' && attempt.scorePercentage !== undefined && attempt.scorePercentage < 100) {
       return {
         text: 'Aguardando sua resposta',
         color: 'text-orange-400',
@@ -273,23 +296,39 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
         icon: <User size={16} />,
         priority: 'high'
       };
-    } else if (attempt.status === 'SUBMITTED' && attempt.pendingReview > 0) {
-      // Primeira submissão - aguardando tutor
+    }
+    
+    // GRADING com score < 100% = aguardando resposta do aluno
+    if (attempt.status === 'GRADING' && 
+        attempt.scorePercentage !== undefined && attempt.scorePercentage < 100 && attempt.scorePercentage > 0) {
       return {
-        text: 'Aguardando revisão',
+        text: 'Aguardando sua resposta',
+        color: 'text-orange-400',
+        bgColor: 'bg-orange-900/20 border-orange-500/30',
+        icon: <User size={16} />,
+        priority: 'high'
+      };
+    }
+    
+    // SUBMITTED = aguardando revisão do professor
+    if (attempt.status === 'SUBMITTED') {
+      return {
+        text: 'Aguardando professor',
         color: 'text-blue-400',
         bgColor: 'bg-blue-900/20 border-blue-500/30',
         icon: <Eye size={16} />,
         priority: 'medium'
       };
-    } else if (attempt.status === 'GRADED' || (attempt.status === 'SUBMITTED' && attempt.pendingReview === 0)) {
-      // Todas as questões aprovadas
+    }
+    
+    // GRADING = em processo de correção
+    if (attempt.status === 'GRADING') {
       return {
-        text: 'Concluída',
-        color: 'text-green-400',
-        bgColor: 'bg-green-900/20 border-green-500/30',
-        icon: <CheckCircle size={16} />,
-        priority: 'low'
+        text: 'Em andamento',
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-900/20 border-yellow-500/30',
+        icon: <RefreshCw size={16} />,
+        priority: 'medium'
       };
     }
     
@@ -314,9 +353,9 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
     
     switch (filter) {
       case 'pending-student':
-        return status.text === 'Aguardando sua resposta';
+        return status.text === 'Aguardando sua resposta' || status.text === 'Confirmar resposta';
       case 'pending-tutor':
-        return status.text === 'Aguardando revisão';
+        return status.text === 'Aguardando professor';
       case 'approved':
         return status.text === 'Concluída' && attempt.passed;
       case 'completed':
@@ -410,13 +449,17 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg">
             <div className="flex items-center gap-3">
               <User size={24} className="text-orange-400" />
               <div>
                 <p className="text-2xl font-bold text-orange-400">
-                  {attempts.filter(a => getStatusInfo(a).text === 'Aguardando sua resposta').length}
+                  {attempts.filter(a => 
+                    getStatusInfo(a).text === 'Aguardando sua resposta' || 
+                    getStatusInfo(a).text === 'Confirmar resposta' ||
+                    (a.status === 'GRADED' && a.scorePercentage !== undefined && a.scorePercentage < 100)
+                  ).length}
                 </p>
                 <p className="text-gray-300 text-sm">Aguardando Você</p>
               </div>
@@ -428,9 +471,23 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
               <Eye size={24} className="text-blue-400" />
               <div>
                 <p className="text-2xl font-bold text-blue-400">
-                  {attempts.filter(a => getStatusInfo(a).text === 'Aguardando revisão').length}
+                  {attempts.filter(a => getStatusInfo(a).text === 'Aguardando professor').length}
                 </p>
                 <p className="text-gray-300 text-sm">Em Revisão</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg">
+            <div className="flex items-center gap-3">
+              <RefreshCw size={24} className="text-yellow-400" />
+              <div>
+                <p className="text-2xl font-bold text-yellow-400">
+                  {attempts.filter(a => 
+                    !(a.status === 'GRADED' && a.scorePercentage === 100)
+                  ).length}
+                </p>
+                <p className="text-gray-300 text-sm">Em Andamento</p>
               </div>
             </div>
           </div>
@@ -440,9 +497,9 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
               <CheckCircle size={24} className="text-green-400" />
               <div>
                 <p className="text-2xl font-bold text-green-400">
-                  {attempts.filter(a => getStatusInfo(a).text === 'Concluída' && a.passed).length}
+                  {attempts.filter(a => a.status === 'GRADED' && a.scorePercentage === 100).length}
                 </p>
-                <p className="text-gray-300 text-sm">Aprovadas</p>
+                <p className="text-gray-300 text-sm">Concluídas</p>
               </div>
             </div>
           </div>
@@ -454,7 +511,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
                 <p className="text-2xl font-bold text-secondary">
                   {attempts.length > 0 
                     ? Math.round(
-                        attempts.filter(a => a.passed).length / attempts.length * 100
+                        attempts.filter(a => a.scorePercentage === 100).length / attempts.length * 100
                       )
                     : 0}%
                 </p>

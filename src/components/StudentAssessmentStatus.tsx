@@ -305,6 +305,28 @@ export default function StudentAssessmentStatus({
               }
             );
 
+            // Calcular scorePercentage se não vier da API
+            let calculatedScore = attempt.scorePercentage;
+            if (calculatedScore === undefined && totalQuestions > 0) {
+              // Se todas as questões foram aprovadas (sem pendentes e sem rejeitadas)
+              if (pendingReview === 0 && reviewedQuestions === totalQuestions) {
+                calculatedScore = 100;
+              } else if (reviewedQuestions === 0) {
+                calculatedScore = 0;
+              } else {
+                // Calcular baseado nas questões totalmente aprovadas
+                const fullyApproved = reviewedQuestions - partiallyAccepted;
+                calculatedScore = Math.round((fullyApproved / totalQuestions) * 100);
+              }
+            }
+            
+            // Detectar quando há respostas aceitas aguardando confirmação do aluno
+            // Se status é SUBMITTED e scorePercentage = 100%, o professor aceitou mas o aluno não confirmou
+            if (attempt.status === 'SUBMITTED' && calculatedScore === 100) {
+              // Marcar como aceita aguardando confirmação do aluno
+              partiallyAccepted = reviewedQuestions || 1;
+            }
+
             return {
               id: attempt.id,
               status: attempt.status,
@@ -322,8 +344,8 @@ export default function StudentAssessmentStatus({
               reviewedQuestions,
               partiallyAcceptedQuestions: partiallyAccepted,
               correctAnswers: attempt.correctAnswers,
-              scorePercentage: attempt.scorePercentage,
-              passed: attempt.passed,
+              scorePercentage: calculatedScore,
+              passed: attempt.passed || calculatedScore === 100,
             };
           }
         );
@@ -370,20 +392,29 @@ export default function StudentAssessmentStatus({
 
   const getStatusColor = (
     status: string,
-    pendingReview: number
+    pendingReview: number,
+    scorePercentage?: number,
+    partiallyAccepted?: number
   ) => {
+    // Se tem respostas aceitas aguardando confirmação (amarelo para indicar ação necessária)
+    if (partiallyAccepted && partiallyAccepted > 0 && scorePercentage === 100) {
+      return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
+    }
+    
     switch (status) {
       case 'IN_PROGRESS':
         return 'text-blue-400 bg-blue-900/20 border-blue-500/30';
       case 'SUBMITTED':
-        if (pendingReview > 0) {
-          return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
-        }
-        return 'text-green-400 bg-green-900/20 border-green-500/30';
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
       case 'GRADING':
         return 'text-orange-400 bg-orange-900/20 border-orange-500/30';
       case 'GRADED':
-        return 'text-green-400 bg-green-900/20 border-green-500/30';
+        // Verde apenas se scorePercentage for 100%
+        if (scorePercentage === 100) {
+          return 'text-green-400 bg-green-900/20 border-green-500/30';
+        }
+        // Vermelho se reprovada (score < 100)
+        return 'text-red-400 bg-red-900/20 border-red-500/30';
       default:
         return 'text-gray-400 bg-gray-900/20 border-gray-500/30';
     }
@@ -394,25 +425,29 @@ export default function StudentAssessmentStatus({
     status: string,
     pendingReview: number,
     reviewedQuestions: number = 0,
-    totalQuestions: number = 0
+    totalQuestions: number = 0,
+    scorePercentage?: number,
+    partiallyAccepted?: number
   ) => {
+    // Se tem respostas aceitas aguardando confirmação (100% mas ainda SUBMITTED)
+    if (partiallyAccepted && partiallyAccepted > 0 && scorePercentage === 100) {
+      return 'Confirmar resposta';
+    }
+    
     switch (status) {
       case 'IN_PROGRESS':
-        return t('assessments.status.inProgress');
+        return 'Em andamento';
       case 'SUBMITTED':
-        if (pendingReview > 0) {
-          return t('assessments.status.submitted');
-        }
-        // Se não há questões pendentes mas também não há questões aprovadas,
-        // significa que está aguardando primeira revisão
-        if (reviewedQuestions === 0 && totalQuestions > 0) {
-          return t('assessments.status.submitted'); // Aguardando revisão
-        }
-        return t('assessments.status.submittedComplete');
+        return 'Aguardando professor';
       case 'GRADING':
-        return t('assessments.status.grading');
+        return 'Professor corrigindo';
       case 'GRADED':
-        return t('assessments.status.graded');
+        // Finalizada apenas se aprovada (100%)
+        if (scorePercentage === 100) {
+          return 'Aprovada';
+        }
+        // Se não é 100%, precisa de revisão do aluno
+        return 'Aguardando sua revisão';
       default:
         return status;
     }
@@ -531,7 +566,9 @@ export default function StudentAssessmentStatus({
               key={attempt.id}
               className={`p-4 rounded-lg border-2 ${getStatusColor(
                 attempt.status,
-                attempt.pendingReview
+                attempt.pendingReview,
+                attempt.scorePercentage,
+                attempt.partiallyAcceptedQuestions
               )} transition-all hover:border-opacity-60`}
             >
               <div className="flex items-start justify-between mb-3">
@@ -543,7 +580,9 @@ export default function StudentAssessmentStatus({
                     <div
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(
                         attempt.status,
-                        attempt.pendingReview
+                        attempt.pendingReview,
+                        attempt.scorePercentage,
+                        attempt.partiallyAcceptedQuestions
                       )}`}
                     >
                       {getStatusIcon(
@@ -554,7 +593,9 @@ export default function StudentAssessmentStatus({
                         attempt.status,
                         attempt.pendingReview,
                         attempt.reviewedQuestions,
-                        attempt.totalQuestions
+                        attempt.totalQuestions,
+                        attempt.scorePercentage,
+                        attempt.partiallyAcceptedQuestions
                       )}
                     </div>
                   </div>
@@ -574,20 +615,30 @@ export default function StudentAssessmentStatus({
                       </p>
                       <p
                         className={`font-medium ${
-                          attempt.pendingReview > 0
-                            ? 'text-yellow-400'
-                            : 'text-green-400'
+                          attempt.scorePercentage === 100 ? 'text-green-400' :
+                          attempt.status === 'GRADED' && attempt.scorePercentage === 0 ? 'text-red-400' :
+                          attempt.status === 'SUBMITTED' ? 'text-yellow-400' :
+                          'text-gray-400'
                         }`}
                       >
-                        {attempt.pendingReview}
+                        {attempt.scorePercentage === 100 ? 0 :
+                         attempt.status === 'GRADED' && attempt.scorePercentage === 0 ? attempt.totalQuestions :
+                         attempt.status === 'SUBMITTED' && !attempt.partiallyAcceptedQuestions ? attempt.totalQuestions :
+                         attempt.pendingReview}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-400">
                         {t('assessments.approved')}
                       </p>
-                      <p className="text-green-400 font-medium">
-                        {attempt.reviewedQuestions - (attempt.partiallyAcceptedQuestions || 0)}
+                      <p className={`font-medium ${
+                        attempt.scorePercentage === 100 ? 'text-green-400' : 
+                        attempt.scorePercentage === 0 ? 'text-red-400' : 
+                        'text-yellow-400'
+                      }`}>
+                        {attempt.scorePercentage === 100 ? attempt.totalQuestions : 
+                         attempt.scorePercentage === 0 ? 0 :
+                         attempt.reviewedQuestions - (attempt.partiallyAcceptedQuestions || 0)}
                       </p>
                     </div>
                     {attempt.partiallyAcceptedQuestions ? (
@@ -626,40 +677,74 @@ export default function StudentAssessmentStatus({
                 />
               </div>
 
+              {/* Mensagem de ação necessária */}
+              {attempt.status === 'GRADED' && attempt.scorePercentage !== undefined && attempt.scorePercentage < 100 && (
+                <div className="mt-3 p-2 bg-orange-900/30 border border-orange-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={16} className="text-orange-400" />
+                    <span className="text-orange-400 text-sm font-medium">
+                      Ação necessária: Você precisa enviar nova resposta para as questões rejeitadas
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {((attempt.status === 'GRADING' || attempt.status === 'SUBMITTED') && 
+                attempt.partiallyAcceptedQuestions && 
+                attempt.partiallyAcceptedQuestions > 0 && 
+                attempt.scorePercentage === 100) && (
+                <div className="mt-3 p-2 bg-yellow-900/30 border border-yellow-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={16} className="text-yellow-400" />
+                    <span className="text-yellow-400 text-sm font-medium">
+                      Resposta aceita! Entre na prova para ler o feedback do professor e confirmar o recebimento.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {attempt.status === 'SUBMITTED' && !attempt.partiallyAcceptedQuestions && attempt.scorePercentage !== 100 && (
+                <div className="mt-3 p-2 bg-blue-900/30 border border-blue-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-blue-400" />
+                    <span className="text-blue-400 text-sm">
+                      O professor está revisando suas respostas
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between pt-3 border-t border-white/10">
                 <div className="flex items-center gap-4 text-xs text-gray-400">
                   {attempt.submittedAt && (
                     <div className="flex items-center gap-1">
                       <Calendar size={14} />
                       <span>
-                        {t('assessments.submitted')}:{' '}
-                        {formatDate(attempt.submittedAt)}
+                        Enviada: {formatDate(attempt.submittedAt)}
                       </span>
                     </div>
                   )}
-                  {attempt.gradedAt && (
+                  {attempt.gradedAt && attempt.scorePercentage === 100 && (
                     <div className="flex items-center gap-1">
                       <CheckCircle size={14} />
                       <span>
-                        {t('assessments.graded')}:{' '}
-                        {formatDate(attempt.gradedAt)}
+                        Finalizada: {formatDate(attempt.gradedAt)}
                       </span>
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {attempt.pendingReview > 0 &&
-                    attempt.reviewedQuestions > 0 && (
-                      <button
-                        onClick={() =>
-                          (window.location.href = `/${locale}/assessments/open-exams/${attempt.id}`)
-                        }
-                        className="px-3 py-1 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors animate-pulse"
-                      >
-                        Responder Pendentes
-                      </button>
-                    )}
+                  {attempt.status === 'GRADED' && attempt.scorePercentage !== undefined && attempt.scorePercentage < 100 && (
+                    <button
+                      onClick={() =>
+                        (window.location.href = `/${locale}/assessments/open-exams/${attempt.id}`)
+                      }
+                      className="px-3 py-1 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors animate-pulse"
+                    >
+                      Enviar Nova Resposta
+                    </button>
+                  )}
                   <button
                     onClick={() =>
                       (window.location.href = `/${locale}/assessments/open-exams/${attempt.id}`)

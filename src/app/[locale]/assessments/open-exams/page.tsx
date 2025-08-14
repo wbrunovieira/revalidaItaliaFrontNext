@@ -1,6 +1,8 @@
 'use client';
 
 import StudentAssessmentsPage from '@/components/StudentAssessmentsPage';
+import NavSidebar from '@/components/NavSidebar';
+import Nav from '@/components/Nav';
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -53,16 +55,24 @@ export default function AssessmentsPage({ params }: PageProps) {
 
   if (loading || !userId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
-            <p className="text-gray-300">Carregando...</p>
+      <NavSidebar>
+        <Nav />
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+              <p className="text-gray-300">Carregando...</p>
+            </div>
           </div>
         </div>
-      </div>
+      </NavSidebar>
     );
   }
 
-  return <StudentAssessmentsPage userId={userId} locale={locale} />;
+  return (
+    <NavSidebar>
+      <Nav />
+      <StudentAssessmentsPage userId={userId} locale={locale} />
+    </NavSidebar>
+  );
 }

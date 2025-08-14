@@ -652,6 +652,32 @@ export default function AssessmentsPage({
             <p className="text-gray-300">{t('subtitle')}</p>
           </div>
 
+          {/* Botão chamativo para Provas Abertas */}
+          <div className="mb-6 bg-gradient-to-r from-secondary/20 to-accent/20 p-6 rounded-xl border border-secondary/30 hover:border-secondary/50 transition-all duration-300">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/20 rounded-xl">
+                  <PenTool size={28} className="text-secondary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-1">
+                    Central de Provas Dissertativas
+                  </h2>
+                  <p className="text-gray-300 text-sm">
+                    Gerencie todas suas provas abertas com estatísticas detalhadas e acompanhamento em tempo real
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => router.push(`/${locale}/assessments/open-exams`)}
+                className="w-full md:w-auto bg-secondary hover:bg-secondary/90 text-primary font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+              >
+                <span>Acessar Central</span>
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
           {/* Tabs */}
           <div className="flex gap-1 mb-6 bg-primary-dark/30 p-1 rounded-lg inline-flex">
             <button

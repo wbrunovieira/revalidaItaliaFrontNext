@@ -840,7 +840,32 @@ export default function AssessmentsPage({
                           {getAssessmentIcon(
                             assessment.type
                           )}
-                          {getTypeBadge(assessment.type)}
+                          {(() => {
+                            // Para PROVA_ABERTA, mudar a cor do badge baseado no status
+                            if (assessment.type === 'PROVA_ABERTA') {
+                              const status = assessmentStatuses.get(assessment.id);
+                              if (status?.status === 'GRADED' && status?.score !== undefined) {
+                                // Se tem nota mas não é 100%, mostrar badge vermelho
+                                if (status.score < 100) {
+                                  return (
+                                    <span className="px-2 py-1 text-xs rounded-full font-medium bg-red-900/30 text-red-400 border border-red-500/30">
+                                      {t(`types.${assessment.type.toLowerCase()}`)} - {status.score}%
+                                    </span>
+                                  );
+                                }
+                                // Se é 100%, mostrar badge verde
+                                else {
+                                  return (
+                                    <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-900/30 text-green-400 border border-green-500/30">
+                                      {t(`types.${assessment.type.toLowerCase()}`)} - 100%
+                                    </span>
+                                  );
+                                }
+                              }
+                            }
+                            // Para outros tipos ou quando não tem nota, usar badge padrão
+                            return getTypeBadge(assessment.type);
+                          })()}
                         </div>
                         {assessment.quizPosition && (
                           <span className="text-xs text-gray-400">
@@ -1083,6 +1108,33 @@ export default function AssessmentsPage({
                                         status.status ===
                                         'GRADED'
                                       ) {
+                                        // Para PROVA_ABERTA, mostrar cores diferentes baseado na nota
+                                        if (assessment.type === 'PROVA_ABERTA' && status.score !== undefined) {
+                                          if (status.score < 100) {
+                                            return (
+                                              <div className="flex items-center gap-2 text-red-400">
+                                                <XCircle
+                                                  size={16}
+                                                />
+                                                <span className="text-sm font-medium">
+                                                  Corrigida - Reprovada
+                                                </span>
+                                              </div>
+                                            );
+                                          } else {
+                                            return (
+                                              <div className="flex items-center gap-2 text-green-400">
+                                                <CheckCircle
+                                                  size={16}
+                                                />
+                                                <span className="text-sm font-medium">
+                                                  Corrigida - Aprovada
+                                                </span>
+                                              </div>
+                                            );
+                                          }
+                                        }
+                                        // Para outros tipos, manter como está
                                         return (
                                           <div className="flex items-center gap-2 text-green-400">
                                             <CheckCircle
@@ -1100,7 +1152,11 @@ export default function AssessmentsPage({
                                     {/* Score se disponível */}
                                     {status.score !==
                                       undefined && (
-                                      <span className="text-sm font-bold text-white">
+                                      <span className={`text-sm font-bold ${
+                                        assessment.type === 'PROVA_ABERTA' && status.score < 100
+                                          ? 'text-red-400'
+                                          : 'text-white'
+                                      }`}>
                                         {status.score}%
                                       </span>
                                     )}

@@ -38,6 +38,18 @@ interface Question {
   argumentName?: string;
 }
 
+interface AnswerVersion {
+  id: string;
+  textAnswer: string;
+  teacherComment?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
+  isCorrect?: boolean | null;
+  answeredAt: string;
+  reviewedAt?: string;
+  version: number;
+  isLatest: boolean;
+}
+
 interface Answer {
   id: string;
   questionId: string;
@@ -47,6 +59,7 @@ interface Answer {
   reviewerId?: string;
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   answeredAt: string;
+  versions?: AnswerVersion[];
 }
 
 interface AttemptData {
@@ -68,6 +81,15 @@ interface TutorReviewPageProps {
   backUrl: string;
 }
 
+interface AnswerHistoryEntry {
+  version: number;
+  textAnswer: string;
+  teacherComment?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
 interface AttemptAnswer {
   id: string;
   questionId: string;
@@ -81,6 +103,8 @@ interface AttemptAnswer {
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt?: string;
   answeredAt?: string;
+  history?: AnswerHistoryEntry[];
+  currentAnswer?: any;
   originalData?: unknown;
 }
 
@@ -157,12 +181,13 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           .map((answer: AttemptAnswer) => ({
               id: answer.id,
               questionId: answer.questionId,
-              textAnswer: answer.textAnswer || answer.answer,
-              isCorrect: answer.isCorrect,
-              teacherComment: answer.teacherComment,
+              textAnswer: answer.currentAnswer?.textAnswer || answer.textAnswer || answer.answer,
+              isCorrect: answer.currentAnswer?.isCorrect ?? answer.isCorrect,
+              teacherComment: answer.currentAnswer?.teacherComment || answer.teacherComment,
               reviewerId: answer.reviewerId,
               status: answer.status,
-              answeredAt: answer.submittedAt || answer.answeredAt,
+              answeredAt: answer.currentAnswer?.submittedAt || answer.submittedAt || answer.answeredAt,
+              versions: answer.history || [],
               // Guardar dados originais para debug
               originalData: answer,
           })),
@@ -584,10 +609,75 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
             </div>
           </div>
 
-          {/* Student Answer */}
+          {/* Student Answer with History */}
           <div className="p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-2">Resposta do Aluno</h3>
-            {currentAnswer?.textAnswer ? (
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {currentAnswer?.versions && currentAnswer.versions.length > 1 
+                ? 'Histórico de Respostas e Revisões' 
+                : 'Resposta do Aluno'}
+            </h3>
+            
+            {currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
+              <div className="space-y-4">
+                {currentAnswer.versions.map((version, index) => (
+                  <div key={index} className="border-l-2 border-gray-600 pl-4 ml-2 space-y-2">
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                      <span className="font-semibold text-secondary">
+                        Versão {version.version}
+                      </span>
+                      <span>
+                        {new Date(version.submittedAt).toLocaleString('pt-BR')}
+                      </span>
+                    </div>
+                    
+                    <div className="p-3 bg-gray-700 rounded-lg">
+                      <p className="text-gray-300 whitespace-pre-wrap">
+                        {version.textAnswer}
+                      </p>
+                    </div>
+                    
+                    {version.reviewDecision && (
+                      <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
+                        <div className="flex items-center gap-2 mb-2">
+                          {version.reviewDecision === 'FULLY_ACCEPTED' ? (
+                            <>
+                              <ThumbsUp size={16} className="text-green-400" />
+                              <span className="text-green-400 text-sm font-medium">
+                                Resposta Aceita
+                              </span>
+                            </>
+                          ) : version.reviewDecision === 'PARTIALLY_ACCEPTED' ? (
+                            <>
+                              <AlertCircle size={16} className="text-orange-400" />
+                              <span className="text-orange-400 text-sm font-medium">
+                                Parcialmente Aceita
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <ThumbsDown size={16} className="text-red-400" />
+                              <span className="text-red-400 text-sm font-medium">
+                                Precisa Revisão
+                              </span>
+                            </>
+                          )}
+                          {version.reviewedAt && (
+                            <span className="text-gray-500 text-xs ml-auto">
+                              Revisado em {new Date(version.reviewedAt).toLocaleString('pt-BR')}
+                            </span>
+                          )}
+                        </div>
+                        {version.teacherComment && (
+                          <p className="text-gray-300 text-sm">
+                            <span className="font-medium text-gray-400">Feedback do professor:</span> {version.teacherComment}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : currentAnswer?.textAnswer ? (
               <div className="p-3 bg-gray-700 rounded-lg">
                 <p className="text-gray-300 whitespace-pre-wrap">
                   {currentAnswer.textAnswer}

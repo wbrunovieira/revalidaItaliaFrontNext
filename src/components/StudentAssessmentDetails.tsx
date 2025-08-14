@@ -22,6 +22,15 @@ interface Question {
   order: number;
 }
 
+interface AnswerHistoryEntry {
+  version: number;
+  textAnswer: string;
+  teacherComment?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
 interface Answer {
   id: string;
   questionId: string;
@@ -31,11 +40,11 @@ interface Answer {
   status:
     | 'PENDING'
     | 'APPROVED'
-    | 'REJECTED'
+    | 'NEEDS_REVISION'
     | 'PARTIALLY_ACCEPTED'
     | 'GRADING'
     | 'GRADED';
-  reviewState?:
+  reviewDecision?:
     | 'FULLY_ACCEPTED'
     | 'PARTIALLY_ACCEPTED'
     | 'NEEDS_REVISION';
@@ -45,6 +54,7 @@ interface Answer {
   needsAcknowledgment?: boolean;
   isCorrect?: boolean;
   studentAcceptedAt?: string;
+  history?: AnswerHistoryEntry[];
 }
 
 interface AttemptDetails {
@@ -255,6 +265,8 @@ export function StudentAssessmentDetails({
                 answeredAt?: string;
                 reviewedAt?: string;
                 acknowledgedAt?: string;
+                history?: AnswerHistoryEntry[];
+                currentAnswer?: any;
               }
             ) => {
               console.log('Processing answer:', {
@@ -266,31 +278,31 @@ export function StudentAssessmentDetails({
                 acknowledgedAt: ans.acknowledgedAt,
               });
 
-              // Determine status based on reviewState or isCorrect field
+              // Determine status based on reviewDecision or isCorrect field
               let status: Answer['status'];
-              let reviewState: Answer['reviewState'];
+              let reviewDecision: Answer['reviewDecision'];
               let needsAcknowledgment = false;
 
-              // Check if we have reviewDecision or reviewState field
+              // Check if we have reviewDecision field
               const reviewField =
                 ans.reviewDecision || ans.reviewState;
               if (reviewField) {
-                // Map reviewDecision to reviewState for consistency
+                // Map reviewDecision to status
                 switch (reviewField) {
                   case 'ACCEPTED':
                   case 'FULLY_ACCEPTED':
                     status = 'APPROVED';
-                    reviewState = 'FULLY_ACCEPTED';
+                    reviewDecision = 'FULLY_ACCEPTED';
                     break;
                   case 'PARTIALLY_ACCEPTED':
                     status = 'PARTIALLY_ACCEPTED';
-                    reviewState = 'PARTIALLY_ACCEPTED';
+                    reviewDecision = 'PARTIALLY_ACCEPTED';
                     needsAcknowledgment =
                       !ans.acknowledgedAt; // Check if student acknowledged
                     break;
                   case 'NEEDS_REVISION':
-                    status = 'REJECTED';
-                    reviewState = 'NEEDS_REVISION';
+                    status = 'NEEDS_REVISION';
+                    reviewDecision = 'NEEDS_REVISION';
                     break;
                   default:
                     status = 'PENDING';
@@ -304,47 +316,51 @@ export function StudentAssessmentDetails({
                 if (apiStatus === 'GRADING' && ans.isCorrect === true) {
                   // GRADING + isCorrect true = parcialmente aceita (aguardando confirmação do aluno)
                   status = 'PARTIALLY_ACCEPTED';
-                  reviewState = 'PARTIALLY_ACCEPTED';
+                  reviewDecision = 'PARTIALLY_ACCEPTED';
                   needsAcknowledgment = !studentAcceptedAt; // Só precisa confirmar se não tem studentAcceptedAt
                 } else if (apiStatus === 'GRADED' && ans.isCorrect === true) {
                   // GRADED + isCorrect true = totalmente aprovada
                   status = 'APPROVED';
-                  reviewState = 'FULLY_ACCEPTED';
+                  reviewDecision = 'FULLY_ACCEPTED';
                 } else if (ans.isCorrect === false) {
-                  // isCorrect false = rejeitada
-                  status = 'REJECTED';
-                  reviewState = 'NEEDS_REVISION';
+                  // isCorrect false = precisa revisão
+                  status = 'NEEDS_REVISION';
+                  reviewDecision = 'NEEDS_REVISION';
                 } else {
                   // Outros casos = pendente
                   status = 'PENDING';
                 }
               }
 
+              // Use currentAnswer if available, otherwise fallback to direct fields
+              const currentAnswerData = ans.currentAnswer || ans;
+              
               return {
                 id: ans.id,
                 questionId: ans.questionId,
                 questionText:
-                  ans.questionText ||
+                  currentAnswerData.questionText ||
                   questions.find(
                     q => q.id === ans.questionId
                   )?.text ||
                   '',
                 studentAnswer:
-                  ans.textAnswer || ans.answer || '',
-                tutorFeedback: ans.teacherComment || '',
+                  currentAnswerData.textAnswer || currentAnswerData.answer || '',
+                tutorFeedback: currentAnswerData.teacherComment || '',
                 status: status,
-                reviewState: reviewState,
-                score: ans.score,
+                reviewDecision: reviewDecision,
+                score: currentAnswerData.score,
                 answeredAt:
-                  ans.submittedAt ||
-                  ans.answeredAt ||
+                  currentAnswerData.submittedAt ||
+                  currentAnswerData.answeredAt ||
                   attemptData.submittedAt,
                 reviewedAt:
-                  ans.reviewedAt ||
-                  (ans.isCorrect !== null
+                  currentAnswerData.reviewedAt ||
+                  (currentAnswerData.isCorrect !== null
                     ? new Date().toISOString()
                     : undefined),
                 needsAcknowledgment: needsAcknowledgment,
+                history: ans.history || [],
               };
             }
           );
@@ -388,7 +404,7 @@ export function StudentAssessmentDetails({
               }`,
               tutorFeedback:
                 'Por favor, revise sua resposta.',
-              status: 'REJECTED' as const,
+              status: 'NEEDS_REVISION' as const,
               score: 0,
               answeredAt:
                 attemptData.submittedAt ||
@@ -429,7 +445,7 @@ export function StudentAssessmentDetails({
           questions.length ||
           0,
         pendingReview: answers.filter(
-          a => a.status === 'REJECTED'
+          a => a.status === 'NEEDS_REVISION'
         ).length,
         reviewedQuestions: answers.filter(
           a => a.status === 'APPROVED'
@@ -499,9 +515,9 @@ export function StudentAssessmentDetails({
       };
     }
 
-    if (answer.status === 'REJECTED') {
+    if (answer.status === 'NEEDS_REVISION') {
       return {
-        status: 'REJECTED',
+        status: 'NEEDS_REVISION',
         color: 'text-red-400',
         bgColor: 'bg-red-900/20',
         icon: <AlertCircle size={16} />,
@@ -521,20 +537,14 @@ export function StudentAssessmentDetails({
       a => a.questionId === questionId
     );
 
-    // Only allow editing for rejected answers
-    if (answer && answer.status === 'REJECTED') {
+    // Allow editing for needs revision or partially accepted answers when score < 100%
+    if (answer && 
+        (answer.status === 'NEEDS_REVISION' || 
+         (answer.status === 'PARTIALLY_ACCEPTED' && 
+          attempt?.scorePercentage !== undefined && 
+          attempt?.scorePercentage < 100))) {
       setEditingAnswer(questionId);
       setNewAnswer(''); // Limpar o input para nova resposta
-    } else if (
-      answer &&
-      answer.status === 'PARTIALLY_ACCEPTED'
-    ) {
-      toast({
-        title: 'Atenção',
-        description:
-          'Respostas parcialmente aceitas não podem ser editadas. Por favor, confirme a leitura do feedback do tutor.',
-        variant: 'destructive',
-      });
     } else if (answer && answer.status === 'APPROVED') {
       toast({
         title: 'Atenção',
@@ -628,11 +638,13 @@ export function StudentAssessmentDetails({
     if (!editingAnswer || !newAnswer.trim()) return;
 
     // Verificar se o attempt está em um status que permite novas respostas
-    if (attempt?.status === 'GRADED') {
+    // Permitir reenvio se a nota for menor que 100%
+    if (attempt?.status === 'GRADED' && 
+        attempt?.scorePercentage === 100) {
       toast({
         title: 'Aviso',
         description:
-          'Esta prova já foi finalizada e não pode receber novas respostas.',
+          'Esta prova já foi finalizada com nota máxima e não pode receber novas respostas.',
         variant: 'destructive',
       });
       return;
@@ -830,7 +842,7 @@ export function StudentAssessmentDetails({
                   Aguardando Correção (
                   {
                     attempt.answers.filter(
-                      a => a.status === 'REJECTED'
+                      a => a.status === 'NEEDS_REVISION'
                     ).length
                   }
                   )
@@ -906,7 +918,7 @@ export function StudentAssessmentDetails({
                       ? answer?.needsAcknowledgment
                         ? 'bg-yellow-900/10 border-yellow-500/30'
                         : 'bg-orange-900/10 border-orange-500/30'
-                      : status.status === 'REJECTED'
+                      : status.status === 'NEEDS_REVISION'
                       ? 'bg-red-900/10 border-red-500/30'
                       : status.status === 'PENDING'
                       ? 'bg-blue-900/10 border-blue-500/30'
@@ -928,7 +940,7 @@ export function StudentAssessmentDetails({
                                   ? 'bg-yellow-500 text-white'
                                   : 'bg-orange-500 text-white'
                                 : status.status ===
-                                  'REJECTED'
+                                  'NEEDS_REVISION'
                                 ? 'bg-red-500 text-white'
                                 : status.status ===
                                   'PENDING'
@@ -958,7 +970,7 @@ export function StudentAssessmentDetails({
                             ? answer?.needsAcknowledgment
                               ? 'Aguardando Confirmação'
                               : 'Parcialmente Aceita'
-                            : status.status === 'REJECTED'
+                            : status.status === 'NEEDS_REVISION'
                             ? 'Requer Correção'
                             : status.status === 'PENDING'
                             ? 'Aguardando Revisão'
@@ -971,7 +983,7 @@ export function StudentAssessmentDetails({
                     {answer?.tutorFeedback && (
                       <div
                         className={`mb-4 p-4 rounded-lg ${
-                          answer.status === 'REJECTED'
+                          answer.status === 'NEEDS_REVISION'
                             ? 'bg-red-900/20 border border-red-500/30'
                             : answer.status ===
                               'PARTIALLY_ACCEPTED'
@@ -982,7 +994,7 @@ export function StudentAssessmentDetails({
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          {answer.status === 'REJECTED' ? (
+                          {answer.status === 'NEEDS_REVISION' ? (
                             <AlertCircle
                               size={20}
                               className="text-red-400 mt-0.5"
@@ -1006,7 +1018,7 @@ export function StudentAssessmentDetails({
                           <div className="flex-1">
                             <h4
                               className={`font-semibold mb-1 ${
-                                answer.status === 'REJECTED'
+                                answer.status === 'NEEDS_REVISION'
                                   ? 'text-red-400'
                                   : answer.status ===
                                     'PARTIALLY_ACCEPTED'
@@ -1016,7 +1028,7 @@ export function StudentAssessmentDetails({
                                   : 'text-green-400'
                               }`}
                             >
-                              {answer.status === 'REJECTED'
+                              {answer.status === 'NEEDS_REVISION'
                                 ? 'Resposta Precisa de Revisão:'
                                 : answer.status ===
                                   'PARTIALLY_ACCEPTED'
@@ -1027,7 +1039,7 @@ export function StudentAssessmentDetails({
                             </h4>
                             <p
                               className={`text-sm ${
-                                answer.status === 'REJECTED'
+                                answer.status === 'NEEDS_REVISION'
                                   ? 'text-red-200'
                                   : answer.status ===
                                     'PARTIALLY_ACCEPTED'
@@ -1121,20 +1133,74 @@ export function StudentAssessmentDetails({
                           <>
                             <div>
                               <h4 className="text-sm font-semibold text-gray-400 mb-2">
-                                {answer.status ===
-                                'REJECTED'
-                                  ? 'Sua Resposta Anterior:'
-                                  : 'Sua Resposta:'}
+                                {answer.history && answer.history.length > 1 
+                                  ? 'Histórico de Respostas e Revisões:'
+                                  : answer.status === 'NEEDS_REVISION'
+                                    ? 'Sua Resposta Anterior:'
+                                    : 'Sua Resposta:'}
                               </h4>
-                              <p className="text-gray-200 bg-white/5 rounded-lg p-3">
-                                {answer.studentAnswer}
-                              </p>
+                              
+                              {answer.history && answer.history.length > 0 ? (
+                                <div className="space-y-3">
+                                  {answer.history.map((version, index) => (
+                                    <div key={index} className="border-l-2 border-gray-600 pl-3 ml-1">
+                                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                                        <span className="font-medium text-secondary">
+                                          Versão {version.version}
+                                        </span>
+                                        <span>
+                                          {new Date(version.submittedAt).toLocaleString('pt-BR')}
+                                        </span>
+                                      </div>
+                                      
+                                      <p className="text-gray-200 bg-white/5 rounded-lg p-3">
+                                        {version.textAnswer}
+                                      </p>
+                                      
+                                      {version.reviewDecision && (
+                                        <div className="mt-2 p-2 bg-gray-900 rounded border border-gray-700">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            {version.reviewDecision === 'FULLY_ACCEPTED' ? (
+                                              <span className="text-green-400 text-xs font-medium">
+                                                ✓ Aceita
+                                              </span>
+                                            ) : version.reviewDecision === 'PARTIALLY_ACCEPTED' ? (
+                                              <span className="text-orange-400 text-xs font-medium">
+                                                ⚠ Parcialmente Aceita
+                                              </span>
+                                            ) : (
+                                              <span className="text-red-400 text-xs font-medium">
+                                                ✗ Precisa Revisão
+                                              </span>
+                                            )}
+                                            {version.reviewedAt && (
+                                              <span className="text-gray-600 text-xs ml-auto">
+                                                Revisado: {new Date(version.reviewedAt).toLocaleString('pt-BR')}
+                                              </span>
+                                            )}
+                                          </div>
+                                          {version.teacherComment && (
+                                            <p className="text-gray-300 text-sm">
+                                              <span className="text-gray-500">Feedback:</span> {version.teacherComment}
+                                            </p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-gray-200 bg-white/5 rounded-lg p-3">
+                                  {answer.studentAnswer}
+                                </p>
+                              )}
                             </div>
 
                             {/* Action buttons based on status */}
-                            {answer.status === 'REJECTED' &&
-                              attempt.status !==
-                                'GRADED' && (
+                            {answer.status === 'NEEDS_REVISION' &&
+                              (attempt.status !== 'GRADED' ||
+                                (attempt.scorePercentage !== undefined &&
+                                  attempt.scorePercentage < 100)) && (
                                 <button
                                   onClick={() =>
                                     handleEditAnswer(
@@ -1150,7 +1216,27 @@ export function StudentAssessmentDetails({
 
                             {answer.status ===
                               'PARTIALLY_ACCEPTED' &&
-                              !answer.needsAcknowledgment && (
+                              (attempt.status !== 'GRADED' ||
+                                (attempt.scorePercentage !== undefined &&
+                                  attempt.scorePercentage < 100)) && (
+                                <button
+                                  onClick={() =>
+                                    handleEditAnswer(
+                                      question.id
+                                    )
+                                  }
+                                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                                >
+                                  <Edit size={16} />
+                                  Responder Novamente
+                                </button>
+                              )}
+
+                            {answer.status ===
+                              'PARTIALLY_ACCEPTED' &&
+                              !answer.needsAcknowledgment &&
+                              attempt.status === 'GRADED' &&
+                              attempt.scorePercentage === 100 && (
                                 <div className="text-center text-sm text-orange-400">
                                   Resposta parcialmente
                                   aceita - Feedback do tutor
@@ -1166,15 +1252,29 @@ export function StudentAssessmentDetails({
                             )}
 
                             {(answer.status ===
-                              'REJECTED' ||
+                              'NEEDS_REVISION' ||
                               answer.status ===
                                 'PARTIALLY_ACCEPTED') &&
                               attempt.status ===
-                                'GRADED' && (
+                                'GRADED' &&
+                              attempt.scorePercentage === 100 && (
                                 <div className="text-center text-sm text-gray-400">
                                   Esta prova foi finalizada
                                   e não pode mais receber
                                   alterações
+                                </div>
+                              )}
+                            
+                            {(answer.status ===
+                              'NEEDS_REVISION' ||
+                              answer.status ===
+                                'PARTIALLY_ACCEPTED') &&
+                              attempt.status ===
+                                'GRADED' &&
+                              attempt.scorePercentage !== undefined &&
+                              attempt.scorePercentage < 100 && (
+                                <div className="text-center text-sm text-yellow-400">
+                                  Resposta precisa ser revisada
                                 </div>
                               )}
                           </>

@@ -276,6 +276,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Alunos têm acesso rápido a respostas sobre uso da plataforma sem precisar abrir tickets, reduz carga de suporte ao responder dúvidas comuns automaticamente, experiência moderna e fluida com animações profissionais, suporte completo para três idiomas (PT, IT, ES)
 - [Commit] feat: create FAQ page with smooth animations and multi-language support
 
+**Sistema de Termos de Uso com Assinatura Digital**
+- [Técnico] Implementação de página completa de Termos de Uso com captura de assinatura digital (IP, browser, timestamp), armazenamento em localStorage com expiração de 1 ano, indicador visual tipo checkbox no dashboard (laranja vazio para pendente, verde marcado para aceito), sistema de redirecionamento após aceitação
+- [Benefício] Garante conformidade legal com usuários concordando explicitamente em não compartilhar conteúdo, indicação visual clara e não-agressiva do status de aceitação, proteção da propriedade intelectual do curso
+- [Commit] feat: add terms of use with checkbox-style status display
+
 ---
 
 ## 📚 Documentações Criadas

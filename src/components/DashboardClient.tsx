@@ -5,9 +5,8 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { BookOpen, FileText, CheckCircle, Square, CheckSquare } from 'lucide-react';
+import { BookOpen, Square, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 import { useApi } from '@/hooks/use-api';
 import TrackCard from '@/components/TrackCard';

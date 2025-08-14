@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronDown, ChevronRight, Search, Compass, PlayCircle, FileText, MessageSquare, Users, User, HelpCircle } from 'lucide-react';
+import { ChevronRight, Search, Compass, PlayCircle, FileText, MessageSquare, Users, User, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

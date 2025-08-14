@@ -2029,7 +2029,8 @@
       "clickToSelect": "Haga clic para seleccionar archivo",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (máx. 10MB)",
       "success": "Archivo cargado exitosamente",
-      "uploading": "Subiendo archivo"
+      "uploading": "Subiendo archivo",
+      "fileSelected": "Archivo seleccionado"
     },
     "success": {
       "title": "¡Documento creado con éxito!",
@@ -2138,7 +2139,7 @@
         "translations": "Traducciones",
         "title": "Título",
         "description": "Descripción",
-        "url": "URL del Documento"
+        "document": "Documento"
       },
       "placeholders": {
         "title": "Ingrese el título del documento",
@@ -2146,10 +2147,10 @@
       },
       "errors": {
         "titleRequired": "El título es obligatorio",
-        "titleMin": "El título debe tener al menos 3 caracteres",
+        "titleMin": "El título debe tener al menos 1 carácter",
         "titleMax": "El título no puede exceder los 255 caracteres",
         "descriptionRequired": "La descripción es obligatoria",
-        "descriptionMin": "La descripción debe tener al menos 10 caracteres",
+        "descriptionMin": "La descripción debe tener al menos 5 caracteres",
         "descriptionMax": "La descripción no puede exceder los 1000 caracteres",
         "fetchTitle": "Error al cargar el documento",
         "fetchDescription": "No se pudieron cargar los datos del documento",
@@ -2158,7 +2159,12 @@
         "notFound": "Documento no encontrado",
         "invalidData": "Datos proporcionados no válidos",
         "validationTitle": "Error de validación",
-        "validationDescription": "Por favor, corrija los errores antes de guardar"
+        "validationDescription": "Por favor, corrija los errores antes de guardar",
+        "invalidFileType": "Tipo de archivo no válido",
+        "fileTooLarge": "Archivo demasiado grande (máx 10MB)",
+        "uploadFailed": "Error al cargar el archivo",
+        "uploadTitle": "Error de carga",
+        "uploadDescription": "No se pudo enviar el archivo"
       },
       "success": {
         "title": "Documento actualizado",
@@ -2167,7 +2173,16 @@
       "validation": {
         "titleValid": "Título válido",
         "descriptionValid": "Descripción válida"
-      }
+      },
+      "upload": {
+        "uploading": "Cargando archivo...",
+        "success": "Archivo cargado exitosamente",
+        "replace": "Reemplazar archivo",
+        "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV",
+        "fileSelected": "Archivo seleccionado"
+      },
+      "currentFile": "Archivo actual",
+      "newFile": "Archivo nuevo"
     },
   "tabs": {
     "overview": "Vista General",

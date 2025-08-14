@@ -213,6 +213,11 @@ export default function CreateDocumentForm() {
 
       // Validação específica para URL
       if (fieldType === 'url') {
+        // For pending uploads, consider it valid
+        if (value.startsWith('pending_upload_')) {
+          return { isValid: true };
+        }
+        
         // Check if it's a valid URL or path starting with /
         const isValidUrl = (() => {
           try {
@@ -659,27 +664,7 @@ export default function CreateDocumentForm() {
   );
 
   const resetForm = useCallback(async () => {
-    // Clean up any uploaded files that weren't submitted
-    const locales: Locale[] = ['pt', 'es', 'it'];
-    for (const locale of locales) {
-      const uploadedFile = formData.uploadedFiles[locale];
-      if (uploadedFile && uploadedFile.url) {
-        try {
-          const urlParts = uploadedFile.url.split('/');
-          const documentsIndex = urlParts.findIndex(part => part === 'documents');
-          
-          if (documentsIndex !== -1) {
-            const path = urlParts.slice(documentsIndex).join('/');
-            await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
-              method: 'DELETE',
-            });
-          }
-        } catch (error) {
-          console.error('Error cleaning up file:', error);
-        }
-      }
-    }
-    
+    // Don't delete files here as they were not uploaded yet
     setFormData({
       courseId: '',
       moduleId: '',
@@ -708,7 +693,18 @@ export default function CreateDocumentForm() {
     });
     setErrors({});
     setTouched({});
-  }, [formData.uploadedFiles]);
+  }, []);
+
+  // Função para gerar nome único para arquivo
+  const generateUniqueFileName = useCallback((originalName: string): string => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop();
+    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+    // Sanitiza o nome removendo caracteres especiais
+    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
+    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -748,14 +744,69 @@ export default function CreateDocumentForm() {
     setLoading(true);
 
     try {
-      // Garantir que as traduções estão no formato correto
-      const translations = Object.values(
-        formData.translations
-      ).map(translation => ({
+      // First, upload all files to get real URLs
+      const uploadedUrls: Record<string, string> = {};
+      
+      for (const [locale, fileData] of Object.entries(formData.uploadedFiles)) {
+        if (fileData && fileData.file) {
+          try {
+            // Show uploading toast
+            toast({
+              title: t('upload.uploading'),
+              description: `${fileData.file.name} - ${locale.toUpperCase()}`,
+            });
+
+            // Generate unique filename
+            const uniqueFileName = generateUniqueFileName(fileData.file.name);
+            
+            // Create FormData for upload
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', fileData.file);
+            uploadFormData.append('category', 'document');
+            uploadFormData.append('folder', locale);
+
+            // Upload file to server
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: uploadFormData,
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to upload file');
+            }
+
+            const uploadResult = await response.json();
+            uploadedUrls[locale] = uploadResult.url;
+            
+            console.log(`File uploaded for ${locale}:`, uploadResult.url);
+          } catch (uploadError) {
+            // If any upload fails, delete already uploaded files
+            for (const uploadedUrl of Object.values(uploadedUrls)) {
+              const urlParts = uploadedUrl.split('/');
+              const documentsIndex = urlParts.findIndex(part => part === 'documents');
+              if (documentsIndex !== -1) {
+                const filePath = urlParts.slice(documentsIndex).join('/');
+                try {
+                  await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                    method: 'DELETE',
+                  });
+                } catch (deleteError) {
+                  console.error('Failed to delete uploaded file:', deleteError);
+                }
+              }
+            }
+            throw uploadError;
+          }
+        }
+      }
+
+      // Now prepare translations with real URLs
+      const translations = Object.entries(formData.translations).map(([locale, translation]) => ({
         locale: translation.locale,
         title: translation.title.trim(),
         description: translation.description.trim(),
-        url: translation.url.trim()
+        url: uploadedUrls[locale] || translation.url.trim()
       })).filter(
         translation =>
           translation.title &&
@@ -765,34 +816,35 @@ export default function CreateDocumentForm() {
 
       // Verificar se temos todas as 3 traduções
       if (translations.length !== 3) {
-        console.error('Missing translations:', {
-          expected: 3,
-          got: translations.length,
-          translations
-        });
+        // Delete uploaded files if validation fails
+        for (const uploadedUrl of Object.values(uploadedUrls)) {
+          const urlParts = uploadedUrl.split('/');
+          const documentsIndex = urlParts.findIndex(part => part === 'documents');
+          if (documentsIndex !== -1) {
+            const filePath = urlParts.slice(documentsIndex).join('/');
+            try {
+              await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                method: 'DELETE',
+              });
+            } catch (deleteError) {
+              console.error('Failed to delete uploaded file:', deleteError);
+            }
+          }
+        }
+        
         toast({
           title: t('error.validationTitle'),
           description: 'All translations are required',
           variant: 'destructive',
         });
-        return;
-      }
-
-      // Extract filename from the first uploaded file's URL
-      const ptUrl = formData.translations.pt.url;
-      const urlParts = ptUrl.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      
-      // Validate filename format
-      if (!filename || !/^[a-zA-Z0-9._-]+\.[a-zA-Z0-9]+$/.test(filename)) {
-        toast({
-          title: t('error.validationTitle'),
-          description: t('error.invalidFilename') || 'Formato de nome de arquivo inválido',
-          variant: 'destructive',
-        });
         setLoading(false);
         return;
       }
+
+      // Extract filename from the first uploaded file
+      const firstUrl = translations[0].url;
+      const urlParts = firstUrl.split('/');
+      const filename = urlParts[urlParts.length - 1];
 
       const payload: CreateDocumentPayload = {
         filename,
@@ -801,7 +853,27 @@ export default function CreateDocumentForm() {
 
       console.log('Sending document payload:', JSON.stringify(payload, null, 2));
 
-      await createDocument(payload);
+      // Create document in backend - if this fails, delete uploaded files
+      try {
+        await createDocument(payload);
+      } catch (createError) {
+        // If document creation fails, delete uploaded files
+        for (const uploadedUrl of Object.values(uploadedUrls)) {
+          const urlParts = uploadedUrl.split('/');
+          const documentsIndex = urlParts.findIndex(part => part === 'documents');
+          if (documentsIndex !== -1) {
+            const filePath = urlParts.slice(documentsIndex).join('/');
+            try {
+              await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                method: 'DELETE',
+              });
+            } catch (deleteError) {
+              console.error('Failed to delete uploaded file:', deleteError);
+            }
+          }
+        }
+        throw createError;
+      }
 
       toast({
         title: t('success.title'),
@@ -900,18 +972,7 @@ export default function CreateDocumentForm() {
       .join(' ');
   }, []);
 
-  // Função para gerar nome único para arquivo
-  const generateUniqueFileName = useCallback((originalName: string): string => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const extension = originalName.split('.').pop();
-    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
-    // Sanitiza o nome removendo caracteres especiais
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
-    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
-  }, []);
-
-  // Função para fazer upload do arquivo
+  // Função para preparar arquivo para upload (sem fazer upload real)
   const handleFileUpload = useCallback(
     async (file: File, locale: Locale) => {
       if (!file) return;
@@ -944,110 +1005,52 @@ export default function CreateDocumentForm() {
         return;
       }
 
-      try {
-        // Show uploading toast
-        toast({
-          title: t('upload.uploading'),
-          description: file.name,
-        });
-
-        // Generate unique filename
-        const uniqueFileName = generateUniqueFileName(file.name);
-        
-        // Create FormData for upload
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', file);
-        uploadFormData.append('category', 'document');
-        uploadFormData.append('folder', locale); // Use locale as folder name
-
-        // Upload file to server
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: uploadFormData,
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to upload file');
-        }
-
-        const uploadResult = await response.json();
-        
-        console.log(`File uploaded successfully for locale ${locale}:`, {
-          url: uploadResult.url,
-          filename: uploadResult.filename,
-          originalFile: file.name
-        });
-        
-        // Save file info in state with the actual uploaded URL
-        setFormData(prev => ({
-          ...prev,
-          uploadedFiles: {
-            ...prev.uploadedFiles,
-            [locale]: {
-              file,
-              url: uploadResult.url,
-            },
+      // Generate temporary URL for display
+      const tempUrl = `pending_upload_${locale}_${file.name}`;
+      
+      // Save file info in state WITHOUT uploading
+      setFormData(prev => ({
+        ...prev,
+        uploadedFiles: {
+          ...prev.uploadedFiles,
+          [locale]: {
+            file,
+            url: tempUrl, // Temporary URL until actual upload
           },
-          translations: {
-            ...prev.translations,
-            [locale]: {
-              ...prev.translations[locale],
-              title: prev.translations[locale].title || fileNameToTitle(file.name),
-              url: uploadResult.url,
-            },
+        },
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            title: prev.translations[locale].title || fileNameToTitle(file.name),
+            url: tempUrl,
           },
-        }));
+        },
+      }));
 
-        // Clear error
-        setErrors(prev => ({
-          ...prev,
-          [`upload_${locale}`]: undefined,
-        }));
+      // Update URL field for this locale
+      updateTranslation(locale, 'url', tempUrl);
 
-        toast({
-          title: t('upload.success'),
-          description: file.name,
-        });
-      } catch (error) {
-        console.error('Upload error:', error);
-        setErrors(prev => ({
-          ...prev,
-          [`upload_${locale}`]: t('errors.uploadFailed'),
-        }));
-        toast({
-          title: t('error.uploadTitle'),
-          description: error instanceof Error ? error.message : t('errors.uploadFailed'),
-          variant: 'destructive',
-        });
-      }
+      // Clear any upload errors for this locale
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`upload_${locale}`];
+        delete newErrors[`url_${locale}`];
+        return newErrors;
+      });
+
+      // Success toast for file selection
+      toast({
+        title: t('upload.fileSelected') || 'Arquivo selecionado',
+        description: `${file.name} - ${locale.toUpperCase()}`,
+      });
     },
-    [t, toast, generateUniqueFileName, fileNameToTitle]
+    [t, toast, updateTranslation, fileNameToTitle]
   );
 
   // Função para remover arquivo
   const handleFileRemove = useCallback(async (locale: Locale) => {
-    const uploadedFile = formData.uploadedFiles[locale];
-    
-    if (uploadedFile && uploadedFile.url) {
-      try {
-        // Extract path from URL for deletion
-        const urlParts = uploadedFile.url.split('/');
-        const documentsIndex = urlParts.findIndex(part => part === 'documents');
-        
-        if (documentsIndex !== -1) {
-          const path = urlParts.slice(documentsIndex).join('/');
-          
-          // Delete file from server
-          await fetch(`/api/upload?path=${encodeURIComponent(path)}`, {
-            method: 'DELETE',
-          });
-        }
-      } catch (error) {
-        console.error('Error deleting file:', error);
-      }
-    }
-    
+    // Just remove from state, no need to delete from server as it wasn't uploaded yet
     setFormData(prev => {
       const newUploadedFiles = { ...prev.uploadedFiles };
       delete newUploadedFiles[locale];
@@ -1064,7 +1067,7 @@ export default function CreateDocumentForm() {
         },
       };
     });
-  }, [formData.uploadedFiles]);
+  }, []);
 
   // Verificar status de validação para cada idioma
   const getTranslationStatus = useCallback(

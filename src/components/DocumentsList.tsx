@@ -308,7 +308,7 @@ export default function DocumentsList() {
 
   // Função para deletar documento após confirmação
   const deleteDocument = useCallback(
-    async (lessonId: string, documentId: string) => {
+    async (lessonId: string, documentId: string, documentTranslations?: Translation[]) => {
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
@@ -321,6 +321,26 @@ export default function DocumentsList() {
           throw new Error(
             `Failed to delete document: ${response.status}`
           );
+        }
+
+        // Após sucesso no backend, deletar arquivos físicos
+        if (documentTranslations) {
+          for (const translation of documentTranslations) {
+            if (translation.url) {
+              const urlParts = translation.url.split('/');
+              const documentsIndex = urlParts.findIndex(part => part === 'documents');
+              if (documentsIndex !== -1) {
+                const filePath = urlParts.slice(documentsIndex).join('/');
+                try {
+                  await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                    method: 'DELETE',
+                  });
+                } catch (fileError) {
+                  console.error(`Failed to delete file: ${filePath}`, fileError);
+                }
+              }
+            }
+          }
         }
 
         toast({
@@ -451,7 +471,7 @@ export default function DocumentsList() {
           <div className="flex gap-2">
             <button
               onClick={() =>
-                deleteDocument(lessonId, documentId)
+                deleteDocument(lessonId, documentId, document.translations)
               }
               className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
             >

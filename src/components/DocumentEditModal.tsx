@@ -12,6 +12,8 @@ import {
   Check,
   AlertCircle,
   Languages,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 
 interface Translation {
@@ -38,11 +40,20 @@ interface DocumentEditModalProps {
   onSave: () => void;
 }
 
+interface UploadedFile {
+  file: File;
+  url: string;
+}
+
 interface FormData {
+  uploadedFiles: {
+    [locale: string]: UploadedFile | undefined;
+  };
   translations: {
     [locale: string]: {
       title: string;
       description: string;
+      url: string;
     };
   };
 }
@@ -52,6 +63,7 @@ interface FormErrors {
     [locale: string]: {
       title?: string;
       description?: string;
+      upload?: string;
     };
   };
 }
@@ -75,10 +87,11 @@ export default function DocumentEditModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    uploadedFiles: {},
     translations: {
-      pt: { title: '', description: '' },
-      it: { title: '', description: '' },
-      es: { title: '', description: '' },
+      pt: { title: '', description: '', url: '' },
+      it: { title: '', description: '', url: '' },
+      es: { title: '', description: '', url: '' },
     },
   });
   const [errors, setErrors] = useState<FormErrors>({
@@ -105,7 +118,7 @@ export default function DocumentEditModal({
       if (!value.trim()) {
         return { isValid: false, message: t('errors.titleRequired') };
       }
-      if (value.trim().length < 3) {
+      if (value.trim().length < 1) {
         return { isValid: false, message: t('errors.titleMin') };
       }
       if (value.trim().length > 255) {
@@ -121,7 +134,7 @@ export default function DocumentEditModal({
       if (!value.trim()) {
         return { isValid: false, message: t('errors.descriptionRequired') };
       }
-      if (value.trim().length < 10) {
+      if (value.trim().length < 5) {
         return { isValid: false, message: t('errors.descriptionMin') };
       }
       if (value.trim().length > 1000) {
@@ -237,10 +250,11 @@ export default function DocumentEditModal({
 
       // Populate form data
       const newFormData: FormData = {
+        uploadedFiles: {},
         translations: {
-          pt: { title: '', description: '' },
-          it: { title: '', description: '' },
-          es: { title: '', description: '' },
+          pt: { title: '', description: '', url: '' },
+          it: { title: '', description: '', url: '' },
+          es: { title: '', description: '', url: '' },
         },
       };
 
@@ -249,6 +263,7 @@ export default function DocumentEditModal({
           newFormData.translations[trans.locale] = {
             title: trans.title || '',
             description: trans.description || '',
+            url: trans.url || '',
           };
         }
       });
@@ -266,6 +281,107 @@ export default function DocumentEditModal({
       setLoading(false);
     }
   }, [lessonId, documentId, t, toast, onClose]);
+
+  // Generate unique filename
+  const generateUniqueFileName = useCallback((originalName: string): string => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop() || 'pdf';
+    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
+    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
+  }, []);
+
+  // Handle file selection (NO UPLOAD YET)
+  const handleFileSelection = useCallback((file: File, locale: string) => {
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/csv',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            upload: t('errors.invalidFileType') || 'Tipo de arquivo inválido',
+          },
+        },
+      }));
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setErrors(prev => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            upload: t('errors.fileTooLarge') || 'Arquivo muito grande (máx 10MB)',
+          },
+        },
+      }));
+      return;
+    }
+
+    // Generate a temporary URL for display
+    const tempUrl = `pending_upload_${locale}_${file.name}`;
+
+    // Store file info WITHOUT uploading
+    setFormData(prev => ({
+      ...prev,
+      uploadedFiles: {
+        ...prev.uploadedFiles,
+        [locale]: {
+          file,
+          url: tempUrl, // Temporary URL
+        },
+      },
+    }));
+
+    // Clear error
+    setErrors(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [locale]: {
+          ...prev.translations[locale],
+          upload: undefined,
+        },
+      },
+    }));
+
+    toast({
+      title: t('upload.fileSelected') || 'Arquivo selecionado',
+      description: `${file.name} - ${locale.toUpperCase()}`,
+    });
+  }, [t, toast]);
+
+  // Handle file removal
+  const handleFileRemove = useCallback((locale: string) => {
+    // Remove from form data
+    setFormData(prev => {
+      const newUploadedFiles = { ...prev.uploadedFiles };
+      delete newUploadedFiles[locale];
+      
+      return {
+        ...prev,
+        uploadedFiles: newUploadedFiles,
+      };
+    });
+  }, []);
 
   // Submit form
   const handleSubmit = async (e: React.FormEvent) => {
@@ -290,21 +406,78 @@ export default function DocumentEditModal({
     setSaving(true);
 
     try {
-      // Prepare translations array including the existing URL
+      // First, upload any new files
+      const uploadedUrls: Record<string, string> = {};
+      
+      for (const [locale, fileData] of Object.entries(formData.uploadedFiles)) {
+        if (fileData && fileData.file) {
+          try {
+            // Show uploading toast
+            toast({
+              title: t('upload.uploading'),
+              description: `${fileData.file.name} - ${locale.toUpperCase()}`,
+            });
+
+            // Create FormData for upload
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', fileData.file);
+            uploadFormData.append('category', 'document');
+            uploadFormData.append('folder', locale);
+
+            // Upload file to server
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: uploadFormData,
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to upload file');
+            }
+
+            const uploadResult = await response.json();
+            uploadedUrls[locale] = uploadResult.url;
+            
+            console.log(`File uploaded for ${locale}:`, uploadResult.url);
+          } catch (uploadError) {
+            // If any upload fails, delete already uploaded files
+            for (const uploadedUrl of Object.values(uploadedUrls)) {
+              const urlParts = uploadedUrl.split('/');
+              const documentsIndex = urlParts.findIndex(part => part === 'documents');
+              if (documentsIndex !== -1) {
+                const filePath = urlParts.slice(documentsIndex).join('/');
+                try {
+                  await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                    method: 'DELETE',
+                  });
+                } catch (deleteError) {
+                  console.error('Failed to delete uploaded file:', deleteError);
+                }
+              }
+            }
+            throw uploadError;
+          }
+        }
+      }
+
+      // Prepare translations array with updated URLs
       const translations = Object.entries(formData.translations).map(([locale, data]) => {
-        // Find the original translation to preserve the URL
+        // Use new uploaded file URL if available, otherwise keep original
+        const newUrl = uploadedUrls[locale];
         const originalTranslation = documentData?.translations.find(t => t.locale === locale);
+        
         return {
           locale,
           title: data.title.trim(),
           description: data.description.trim(),
-          url: originalTranslation?.url || '' // Preserve the existing URL
+          url: newUrl || originalTranslation?.url || ''
         };
       });
 
       const payload = { translations };
       console.log('Sending payload:', payload);
       
+      // Update document in backend
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
         {
@@ -317,6 +490,22 @@ export default function DocumentEditModal({
       );
 
       if (!response.ok) {
+        // If update fails, delete any uploaded files
+        for (const uploadedUrl of Object.values(uploadedUrls)) {
+          const urlParts = uploadedUrl.split('/');
+          const documentsIndex = urlParts.findIndex(part => part === 'documents');
+          if (documentsIndex !== -1) {
+            const filePath = urlParts.slice(documentsIndex).join('/');
+            try {
+              await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+                method: 'DELETE',
+              });
+            } catch (deleteError) {
+              console.error('Failed to delete uploaded file:', deleteError);
+            }
+          }
+        }
+
         // Try to get error details from response
         let errorMessage = '';
         try {
@@ -348,10 +537,29 @@ export default function DocumentEditModal({
         throw new Error('Failed to update document');
       }
 
+      // SUCCESS - Now delete old files if they were replaced
+      for (const [locale, newUrl] of Object.entries(uploadedUrls)) {
+        const originalTranslation = documentData?.translations.find(t => t.locale === locale);
+        if (originalTranslation?.url && originalTranslation.url !== newUrl) {
+          try {
+            const oldUrlParts = originalTranslation.url.split('/');
+            const documentsIndex = oldUrlParts.findIndex(part => part === 'documents');
+            if (documentsIndex !== -1) {
+              const oldPath = oldUrlParts.slice(documentsIndex).join('/');
+              await fetch(`/api/upload?path=${encodeURIComponent(oldPath)}`, {
+                method: 'DELETE',
+              });
+              console.log(`Deleted old file for locale ${locale}: ${oldPath}`);
+            }
+          } catch (error) {
+            console.error(`Error deleting old file for locale ${locale}:`, error);
+          }
+        }
+      }
+
       toast({
         title: t('success.title'),
         description: t('success.description'),
-        variant: 'success',
       });
 
       onSave();
@@ -376,10 +584,11 @@ export default function DocumentEditModal({
       // Reset state when modal closes
       setDocumentData(null);
       setFormData({
+        uploadedFiles: {},
         translations: {
-          pt: { title: '', description: '' },
-          it: { title: '', description: '' },
-          es: { title: '', description: '' },
+          pt: { title: '', description: '', url: '' },
+          it: { title: '', description: '', url: '' },
+          es: { title: '', description: '', url: '' },
         },
       });
       setErrors({
@@ -577,14 +786,75 @@ export default function DocumentEditModal({
                     </div>
                   </div>
 
-                  {/* Read-only URL */}
+                  {/* File Upload/Current File */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">
-                      {t('fields.url')}
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      {t('fields.document')}
                     </label>
-                    <div className="px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-400 text-sm break-all">
-                      {documentData.translations.find(t => t.locale === locale)?.url || t('noUrl')}
-                    </div>
+                    
+                    {formData.uploadedFiles[locale] ? (
+                      // Show newly selected file
+                      <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg border border-gray-600">
+                        <div className="flex items-center gap-3">
+                          <FileText className="text-secondary" size={20} />
+                          <div>
+                            <p className="text-white text-sm font-medium">
+                              {formData.uploadedFiles[locale].file.name}
+                            </p>
+                            <p className="text-gray-400 text-xs">
+                              {(formData.uploadedFiles[locale].file.size / 1024 / 1024).toFixed(2)} MB - {t('newFile')}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleFileRemove(locale)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2 rounded"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      // Show current file or upload button
+                      <div className="space-y-2">
+                        {documentData?.translations.find(t => t.locale === locale)?.url && (
+                          <div className="flex items-center gap-2 p-2 bg-gray-700/50 rounded text-gray-400 text-sm">
+                            <FileText size={16} />
+                            <span>{t('currentFile')}: {documentData.translations.find(t => t.locale === locale)?.url.split('/').pop()}</span>
+                          </div>
+                        )}
+                        
+                        <div>
+                          <input
+                            type="file"
+                            id={`file-upload-${locale}`}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleFileSelection(file, locale);
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`file-upload-${locale}`}
+                            className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+                          >
+                            <Upload size={24} className="text-gray-400 mb-1" />
+                            <p className="text-sm text-gray-300">{t('upload.replace') || 'Substituir arquivo'}</p>
+                            <p className="text-xs text-gray-500 mt-1">{t('upload.supportedFormats') || 'PDF, DOC, XLS, CSV'}</p>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {errors.translations[locale].upload && (
+                      <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
+                        <AlertCircle size={14} />
+                        {errors.translations[locale].upload}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -489,7 +489,7 @@ export default function FlashcardStudyPage() {
     }
   };
 
-  const resetStudy = () => {
+  const resetStudy = async () => {
     setCurrentIndex(0);
     setIsFlipped(false);
     setExitDirection(null);
@@ -497,8 +497,56 @@ export default function FlashcardStudyPage() {
     setDifficultCount(0);
     setShowResults(false);
     setCompletedCards(new Set());
-    // Reload the page to get fresh flashcards
-    window.location.reload();
+    
+    // Re-fetch flashcards without reloading the page
+    setLoading(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
+      let url: string;
+      if (argumentId) {
+        url = `${API_URL}/api/v1/flashcards/by-argument/${argumentId}`;
+      } else if (lessonId) {
+        url = `${API_URL}/api/v1/flashcards?lessonId=${lessonId}`;
+      } else {
+        throw new Error('No valid ID provided');
+      }
+      
+      const urlWithParams = new URL(url);
+      urlWithParams.searchParams.append('includeUserInteractions', 'true');
+      urlWithParams.searchParams.append('randomize', 'true');
+      
+      const response = await fetch(urlWithParams.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch flashcards');
+      }
+      
+      const data = await response.json();
+      
+      if (data.metadata) {
+        setMetadata(data.metadata);
+      }
+      
+      const flashcardsList = data.flashcards || data || [];
+      const uniqueFlashcards = flashcardsList.filter((card: FlashcardData, index: number, self: FlashcardData[]) => 
+        index === self.findIndex((c) => c.id === card.id)
+      );
+      
+      const shuffled = [...uniqueFlashcards].sort(() => Math.random() - 0.5);
+      setFlashcards(shuffled);
+      setTotalFlashcards(shuffled.length);
+    } catch (err) {
+      console.error('Error resetting flashcards:', err);
+      setError(err instanceof Error ? err.message : 'Failed to reset flashcards');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle reset flashcards
@@ -563,9 +611,9 @@ export default function FlashcardStudyPage() {
                     className: 'bg-green-500/10 border-green-500/30',
                   });
 
-                  // Recarregar a página após um breve delay
-                  setTimeout(() => {
-                    window.location.reload();
+                  // Recarregar flashcards após um breve delay
+                  setTimeout(async () => {
+                    await resetStudy();
                   }, 1500);
                   
                 } catch (error) {
@@ -647,6 +695,8 @@ export default function FlashcardStudyPage() {
               href={
                 lessonId
                   ? `/${locale}/lessons/${lessonId}`
+                  : argumentId
+                  ? `/${locale}/flashcards/progress`
                   : `/${locale}`
               }
               className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
@@ -723,6 +773,8 @@ export default function FlashcardStudyPage() {
                 href={
                   lessonId
                     ? `/${locale}/lessons/${lessonId}`
+                    : argumentId
+                    ? `/${locale}/flashcards/progress`
                     : `/${locale}`
                 }
                 className="inline-block w-full text-center py-3 px-6 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
@@ -816,7 +868,9 @@ export default function FlashcardStudyPage() {
                   href={
                     lessonId
                       ? `/${locale}/lessons/${lessonId}`
-                      : `/${locale}/flashcards`
+                      : argumentId
+                      ? `/${locale}/flashcards/progress`
+                      : `/${locale}`
                   }
                   className="block w-full py-3 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
                 >
@@ -841,7 +895,9 @@ export default function FlashcardStudyPage() {
                 href={
                   lessonId
                     ? `/${locale}/lessons/${lessonId}`
-                    : `/${locale}/flashcards`
+                    : argumentId
+                    ? `/${locale}/flashcards/progress`
+                    : `/${locale}`
                 }
                 className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
               >

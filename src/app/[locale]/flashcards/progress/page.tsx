@@ -29,8 +29,8 @@ export default function FlashcardProgressPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <div className="px-4 lg:px-8 pt-4 lg:pt-8">
-            <TabsList className="relative mb-6 h-auto w-full max-w-7xl mx-auto gap-1 bg-transparent p-0">
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-4 lg:pt-8">
+            <TabsList className="relative mb-6 h-auto w-full gap-1 bg-transparent p-0">
               <TabsTrigger
                 value="progress"
                 className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"

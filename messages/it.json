@@ -1345,6 +1345,130 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "liveSessions": {
+    "title": "Lezioni dal Vivo",
+    "description": "Crea e gestisci sessioni dal vivo con Zoom per lezioni interattive",
+    "createTitle": "Crea Lezione dal Vivo",
+    "createDescription": "Programma una nuova sessione dal vivo con integrazione Zoom",
+    "createButton": "Crea Nuova Sessione"
+  },
+  
+  "CreateLiveSession": {
+    "title": "Crea Nuova Lezione dal Vivo",
+    "description": "Configura una sessione dal vivo con integrazione Zoom",
+    "infoCard": {
+      "title": "Informazioni sulle Sessioni dal Vivo",
+      "description": "Crea sessioni interattive integrate con Zoom. Puoi associare la sessione a una lezione specifica o argomento per una migliore organizzazione."
+    },
+    "sections": {
+      "basicInfo": "Informazioni di Base",
+      "schedule": "Programmazione",
+      "associations": "Associazioni",
+      "hosts": "Co-presentatori",
+      "settings": "Impostazioni"
+    },
+    "fields": {
+      "title": {
+        "label": "Titolo della Sessione",
+        "placeholder": "Es: Revisione di Anatomia Cardiovascolare"
+      },
+      "description": {
+        "label": "Descrizione",
+        "placeholder": "Descrivi il contenuto e gli obiettivi della sessione...",
+        "helper": "Opzionale - Massimo 5000 caratteri"
+      },
+      "sessionType": {
+        "label": "Tipo di Sessione",
+        "placeholder": "Seleziona il tipo",
+        "helper": "Webinar: Presentazione per molti. Meeting: Interattivo per gruppi più piccoli",
+        "options": {
+          "webinar": "Webinar (Presentazione)",
+          "meeting": "Meeting (Interattivo)"
+        }
+      },
+      "startTime": {
+        "label": "Ora di Inizio",
+        "placeholder": "Seleziona data e ora di inizio"
+      },
+      "endTime": {
+        "label": "Ora di Fine",
+        "placeholder": "Seleziona data e ora di fine"
+      },
+      "course": {
+        "label": "Corso",
+        "placeholder": "Seleziona un corso",
+        "none": "Nessun corso"
+      },
+      "module": {
+        "label": "Modulo",
+        "placeholder": "Seleziona un modulo",
+        "none": "Nessun modulo"
+      },
+      "lesson": {
+        "label": "Lezione",
+        "placeholder": "Seleziona una lezione",
+        "none": "Nessuna lezione"
+      },
+      "argument": {
+        "label": "Argomento",
+        "placeholder": "Seleziona un argomento",
+        "none": "Nessun argomento",
+        "helper": "Associa questa sessione a un argomento specifico"
+      },
+      "coHosts": {
+        "label": "Co-presentatori",
+        "placeholder": "Seleziona co-presentatori",
+        "helper": "Aggiungi tutor o amministratori come co-presentatori"
+      },
+      "maxParticipants": {
+        "label": "Numero Massimo di Partecipanti",
+        "helper": "Tra 1 e 1000 partecipanti"
+      },
+      "recordingEnabled": {
+        "label": "Abilita Registrazione",
+        "helper": "Permetti la registrazione della sessione"
+      },
+      "autoStartRecording": {
+        "label": "Avvia Registrazione Automaticamente",
+        "helper": "Inizia a registrare quando inizia la sessione"
+      },
+      "waitingRoomEnabled": {
+        "label": "Abilita Sala d'Attesa",
+        "helper": "I partecipanti attendono l'approvazione"
+      },
+      "chatEnabled": {
+        "label": "Abilita Chat",
+        "helper": "Permetti ai partecipanti di chattare"
+      },
+      "qnaEnabled": {
+        "label": "Abilita Q&A",
+        "helper": "Permetti domande e risposte"
+      },
+      "muteParticipantsOnEntry": {
+        "label": "Silenzia Partecipanti all'Ingresso",
+        "helper": "Silenzia automaticamente i nuovi partecipanti"
+      }
+    },
+    "associations": {
+      "helper": "Opzionalmente, associa questa sessione a una lezione specifica o argomento",
+      "or": "oppure"
+    },
+    "actions": {
+      "cancel": "Annulla",
+      "create": "Crea Sessione",
+      "creating": "Creazione..."
+    },
+    "success": {
+      "title": "Sessione Creata",
+      "description": "La lezione dal vivo è stata programmata con successo"
+    },
+    "error": {
+      "title": "Errore nella Creazione",
+      "description": "Non è stato possibile creare la sessione dal vivo",
+      "createFailed": "Creazione della sessione fallita"
+    }
+  },
+  
   "supportResponse": {
     "title": "Rispondi al Ticket",
     "subtitle": "Invia una risposta allo studente",
@@ -2222,7 +2346,8 @@
     "documents": "Documenti",
     "assessments": "Valutazioni",
     "arguments": "Argomenti",
-    "flashcards": "Flashcard"
+    "flashcards": "Flashcard",
+    "liveSessions": "Lezioni dal Vivo"
   },
   "StudentQuizResults": {
     "title": "I Miei Risultati",

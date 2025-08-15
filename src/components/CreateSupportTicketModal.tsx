@@ -190,35 +190,48 @@ export function CreateSupportTicketModal({
       console.log("🔗 API URL:", apiUrl);
       console.log("🔐 Token exists:", !!token);
       console.log("🌍 process.env.NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
-      // Upload attachments if any
+      
+      // Upload attachments to local storage
       const uploadedAttachments = [];
       
       if (attachments.length > 0) {
         for (const file of attachments) {
-          const formData = new FormData();
-          formData.append("file", file);
-
-          const uploadRes = await fetch(`${apiUrl}/api/upload`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          });
-
-          if (!uploadRes.ok) {
-            throw new Error("Failed to upload attachment");
+          try {
+            // Create FormData for upload
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', file);
+            uploadFormData.append('category', 'attachment');
+            uploadFormData.append('folder', 'tickets');
+            
+            // Upload file to local storage
+            const uploadResponse = await fetch('/api/upload', {
+              method: 'POST',
+              body: uploadFormData,
+            });
+            
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Failed to upload file');
+            }
+            
+            const { url } = await uploadResponse.json();
+            
+            uploadedAttachments.push({
+              url, // Use the returned URL from the upload
+              fileName: file.name,
+              mimeType: file.type,
+              sizeInBytes: file.size,
+              type: getAttachmentType(file.type),
+            });
+          } catch (uploadError) {
+            console.error("Error uploading file:", file.name, uploadError);
+            toast({
+              title: t("modal.errors.uploadFailed", "Upload Failed"),
+              description: t("modal.errors.uploadFailedDescription", `Failed to upload ${file.name}`),
+              variant: "destructive",
+            });
+            // Continue with other files even if one fails
           }
-
-          const { url } = await uploadRes.json();
-          
-          uploadedAttachments.push({
-            url,
-            fileName: file.name,
-            mimeType: file.type,
-            sizeInBytes: file.size,
-            type: getAttachmentType(file.type),
-          });
         }
       }
 
@@ -507,9 +520,27 @@ export function CreateSupportTicketModal({
                           transition={{ delay: index * 0.05 }}
                           className="group relative flex items-center gap-3 p-3 bg-white/90 rounded-lg hover:bg-white transition-colors"
                         >
-                          {/* File Icon */}
+                          {/* File Icon or Image Preview */}
                           <div className="flex-shrink-0">
-                            {getFileIcon(file)}
+                            {file.type.startsWith("image/") ? (
+                              <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="w-full h-full object-cover"
+                                  onLoad={(e) => {
+                                    // Clean up the object URL after loading
+                                    const img = e.target as HTMLImageElement;
+                                    if (img.src.startsWith('blob:')) {
+                                      setTimeout(() => URL.revokeObjectURL(img.src), 100);
+                                    }
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                              </div>
+                            ) : (
+                              getFileIcon(file)
+                            )}
                           </div>
                           
                           {/* File Info */}
@@ -519,6 +550,7 @@ export function CreateSupportTicketModal({
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               {formatFileSize(file.size)}
+                              {file.type.startsWith("image/") && " • Image"}
                             </p>
                           </div>
                           

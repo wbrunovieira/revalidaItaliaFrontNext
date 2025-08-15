@@ -7,6 +7,7 @@ import NavSidebar from '@/components/NavSidebar';
 import QuizPage from '@/components/QuizPage';
 import SimuladoPage from '@/components/SimuladoPage';
 import ProvaAbertaPage from '@/components/ProvaAbertaPage';
+import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -177,6 +178,15 @@ export default async function AssessmentPage({
             backUrl={backUrl}
           />
         </div>
+        
+        {/* Support Floating Button with Assessment Context */}
+        <SupportFloatingButton 
+          context={{
+            type: "ASSESSMENT",
+            id: assessment.id,
+            title: `${assessment.title} (QUIZ)`
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -237,6 +247,15 @@ export default async function AssessmentPage({
             backUrl={backUrl}
           />
         </div>
+        
+        {/* Support Floating Button with Assessment Context */}
+        <SupportFloatingButton 
+          context={{
+            type: "ASSESSMENT",
+            id: assessment.id,
+            title: `${assessment.title} (SIMULADO)`
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -291,6 +310,15 @@ export default async function AssessmentPage({
             backUrl={backUrl}
           />
         </div>
+        
+        {/* Support Floating Button with Assessment Context */}
+        <SupportFloatingButton 
+          context={{
+            type: "ASSESSMENT",
+            id: assessment.id,
+            title: `${assessment.title} (PROVA ABERTA)`
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -320,6 +348,15 @@ export default async function AssessmentPage({
           </div>
         </div>
       </div>
+      
+      {/* Support Floating Button with Assessment Context (Fallback) */}
+      <SupportFloatingButton 
+        context={{
+          type: "ASSESSMENT",
+          id: assessment.id,
+          title: assessment.title
+        }}
+      />
     </NavSidebar>
   );
 }

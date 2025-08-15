@@ -205,7 +205,12 @@
       "replyTitle": "Error al enviar respuesta",
       "replyDescription": "No se pudo enviar la respuesta. Inténtalo de nuevo.",
       "acceptTitle": "Error al aceptar respuesta",
-      "acceptDescription": "No se pudo aceptar la respuesta. Inténtalo de nuevo."
+      "acceptDescription": "No se pudo aceptar la respuesta. Inténtalo de nuevo.",
+      "tooManyFiles": "Demasiados archivos",
+      "maxFilesDescription": "Máximo de {max} archivos permitidos",
+      "fileTooLarge": "Archivo demasiado grande",
+      "fileSizeDescription": "{name} excede el tamaño máximo de {max}",
+      "uploadFailed": "Error al cargar"
     },
     "reply": {
       "title": "Responder al Estudiante",
@@ -213,7 +218,11 @@
       "placeholder": "Escribe tu respuesta aquí...",
       "send": "Enviar Respuesta",
       "sending": "Enviando...",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "attachments": "archivos adjuntos",
+      "dropFiles": "Suelta los archivos aquí",
+      "dragDropText": "Haz clic o arrastra archivos aquí",
+      "supportedFormats": "Imágenes y PDFs • Máx 10MB"
     },
     "replySuccess": "Respuesta enviada con éxito",
     "replySuccessDescription": "Tu respuesta ha sido añadida al ticket"

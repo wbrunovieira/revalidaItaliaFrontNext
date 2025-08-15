@@ -206,7 +206,12 @@
       "replyTitle": "Errore nell'invio della risposta",
       "replyDescription": "Impossibile inviare la risposta. Riprova.",
       "acceptTitle": "Errore nell'accettazione della risposta",
-      "acceptDescription": "Impossibile accettare la risposta. Riprova."
+      "acceptDescription": "Impossibile accettare la risposta. Riprova.",
+      "tooManyFiles": "Troppi file",
+      "maxFilesDescription": "Massimo {max} file consentiti",
+      "fileTooLarge": "File troppo grande",
+      "fileSizeDescription": "{name} supera la dimensione massima di {max}",
+      "uploadFailed": "Caricamento fallito"
     },
     "reply": {
       "title": "Rispondi allo Studente",
@@ -214,7 +219,11 @@
       "placeholder": "Digita la tua risposta qui...",
       "send": "Invia Risposta",
       "sending": "Invio in corso...",
-      "cancel": "Annulla"
+      "cancel": "Annulla",
+      "attachments": "allegati",
+      "dropFiles": "Rilascia i file qui",
+      "dragDropText": "Clicca o trascina i file qui",
+      "supportedFormats": "Immagini e PDF • Max 10MB"
     },
     "replySuccess": "Risposta inviata con successo",
     "replySuccessDescription": "La tua risposta è stata aggiunta al ticket"

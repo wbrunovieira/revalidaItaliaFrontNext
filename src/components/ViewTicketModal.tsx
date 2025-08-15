@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Dialog,
@@ -27,6 +27,9 @@ import {
   Image as ImageIcon,
   Film,
   Send,
+  Upload,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -102,6 +105,9 @@ export function ViewTicketModal({
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
   const [isReopenModalOpen, setIsReopenModalOpen] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -324,6 +330,69 @@ export function ViewTicketModal({
   };
 
 
+  // Handle file selection
+  const handleFileSelect = useCallback((files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    const MAX_ATTACHMENTS = 5;
+    
+    if (attachments.length + fileArray.length > MAX_ATTACHMENTS) {
+      toast({
+        title: t('error.tooManyFiles'),
+        description: t('error.maxFilesDescription', { max: MAX_ATTACHMENTS }),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const validFiles = fileArray.filter(file => {
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: t('error.fileTooLarge'),
+          description: t('error.fileSizeDescription', { 
+            name: file.name,
+            max: '10MB' 
+          }),
+          variant: 'destructive',
+        });
+        return false;
+      }
+      return true;
+    });
+
+    setAttachments(prev => [...prev, ...validFiles]);
+  }, [attachments, t, toast]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files) {
+      handleFileSelect(e.dataTransfer.files);
+    }
+  }, [handleFileSelect]);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const getAttachmentType = (mimeType: string): 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'OTHER' => {
+    if (mimeType.startsWith('image/')) return 'IMAGE';
+    if (mimeType.startsWith('video/')) return 'VIDEO';
+    if (mimeType === 'application/pdf') return 'DOCUMENT';
+    return 'OTHER';
+  };
+
   const handleSendReply = async () => {
     if (!replyContent.trim() || !ticketId) return;
 
@@ -338,6 +407,52 @@ export function ViewTicketModal({
         throw new Error('Authentication required');
       }
 
+      // Upload attachments first
+      const uploadedAttachments = [];
+      
+      if (attachments.length > 0) {
+        for (const file of attachments) {
+          try {
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', file);
+            uploadFormData.append('category', 'attachment');
+            uploadFormData.append('folder', 'tickets');
+            
+            const uploadResponse = await fetch('/api/upload', {
+              method: 'POST',
+              body: uploadFormData,
+            });
+            
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Failed to upload file');
+            }
+            
+            const { url } = await uploadResponse.json();
+            
+            uploadedAttachments.push({
+              url,
+              fileName: file.name,
+              mimeType: file.type,
+              sizeInBytes: file.size,
+              type: getAttachmentType(file.type),
+            });
+          } catch (uploadError) {
+            console.error('Error uploading file:', file.name, uploadError);
+            toast({
+              title: t('error.uploadFailed'),
+              description: `Failed to upload ${file.name}`,
+              variant: 'destructive',
+            });
+          }
+        }
+      }
+
+      const requestBody = {
+        content: replyContent.trim(),
+        ...(uploadedAttachments.length > 0 && { attachments: uploadedAttachments }),
+      };
+
       const response = await fetch(
         `${apiUrl}/api/v1/support/tickets/${ticketId}/messages`,
         {
@@ -346,9 +461,7 @@ export function ViewTicketModal({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            content: replyContent.trim(),
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
@@ -362,6 +475,7 @@ export function ViewTicketModal({
       });
 
       setReplyContent('');
+      setAttachments([]);
       setShowReplyBox(false);
       
       // Refresh ticket details to show the new message
@@ -539,7 +653,54 @@ export function ViewTicketModal({
                         {/* Attachments */}
                         {message.attachments.length > 0 && (
                           <div className="mt-3 space-y-2">
-                            {message.attachments.map((attachment) => (
+                            {/* Image Previews */}
+                            {message.attachments.filter(a => a.type === 'IMAGE').length > 0 && (
+                              <div className="grid grid-cols-2 gap-2 mb-2">
+                                {message.attachments
+                                  .filter(a => a.type === 'IMAGE')
+                                  .map((attachment) => (
+                                    <a
+                                      key={attachment.id}
+                                      href={attachment.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="relative group block overflow-hidden rounded-lg bg-gray-900/50 hover:bg-gray-900/70 transition-all"
+                                    >
+                                      <img
+                                        src={attachment.url}
+                                        alt={attachment.fileName}
+                                        className="w-full h-32 object-cover"
+                                        onError={(e) => {
+                                          const img = e.target as HTMLImageElement;
+                                          img.style.display = 'none';
+                                          const parent = img.parentElement;
+                                          if (parent) {
+                                            parent.innerHTML = `
+                                              <div class="flex flex-col items-center justify-center h-32 text-gray-500">
+                                                <svg class="h-8 w-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span class="text-xs">Preview unavailable</span>
+                                              </div>
+                                            `;
+                                          }
+                                        }}
+                                      />
+                                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Download size={20} className="text-white" />
+                                      </div>
+                                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                        <p className="text-xs text-white truncate">
+                                          {attachment.fileName}
+                                        </p>
+                                      </div>
+                                    </a>
+                                  ))}
+                              </div>
+                            )}
+                            
+                            {/* Other Attachments */}
+                            {message.attachments.filter(a => a.type !== 'IMAGE').map((attachment) => (
                               <a
                                 key={attachment.id}
                                 href={attachment.url}
@@ -595,36 +756,128 @@ export function ViewTicketModal({
                         placeholder={t('reply.placeholder')}
                         className="min-h-[100px] bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus:border-secondary"
                       />
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          onClick={() => {
-                            setShowReplyBox(false);
-                            setReplyContent('');
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="border-gray-700 text-gray-300 hover:bg-gray-800"
-                        >
-                          {t('reply.cancel')}
-                        </Button>
-                        <Button
-                          onClick={handleSendReply}
-                          disabled={!replyContent.trim() || sendingReply}
-                          size="sm"
-                          className="bg-secondary text-primary hover:bg-secondary/90 disabled:opacity-50"
-                        >
-                          {sendingReply ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                              {t('reply.sending')}
-                            </>
-                          ) : (
-                            <>
-                              <Send size={16} className="mr-2" />
-                              {t('reply.send')}
-                            </>
+                      
+                      {/* Attachment Upload Area */}
+                      <div className="space-y-2">
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          onClick={() => fileInputRef.current?.click()}
+                          className={cn(
+                            "relative border-2 border-dashed border-gray-700 rounded-lg p-4",
+                            "cursor-pointer transition-all duration-200 bg-gray-900/50",
+                            "hover:border-gray-600 hover:bg-gray-900/70",
+                            isDragging && "border-secondary bg-gray-900/70",
+                            attachments.length >= 5 && "opacity-50 cursor-not-allowed"
                           )}
-                        </Button>
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            className="hidden"
+                            multiple
+                            accept="image/*,.pdf"
+                            onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                            disabled={attachments.length >= 5}
+                          />
+                          
+                          <div className="flex flex-col items-center justify-center text-center">
+                            <Upload className="h-6 w-6 text-gray-500 mb-2" />
+                            <p className="text-xs text-gray-400">
+                              {isDragging ? t('reply.dropFiles') : t('reply.dragDropText')}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {t('reply.supportedFormats', 'Images and PDFs • Max 10MB')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Attachment Preview */}
+                        {attachments.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {attachments.map((file, index) => (
+                              <div
+                                key={`${file.name}-${index}`}
+                                className="relative group"
+                              >
+                                {file.type.startsWith('image/') ? (
+                                  <div className="relative h-20 rounded-lg overflow-hidden bg-gray-800">
+                                    <img
+                                      src={URL.createObjectURL(file)}
+                                      alt={file.name}
+                                      className="w-full h-full object-cover"
+                                      onLoad={(e) => {
+                                        const img = e.target as HTMLImageElement;
+                                        if (img.src.startsWith('blob:')) {
+                                          setTimeout(() => URL.revokeObjectURL(img.src), 100);
+                                        }
+                                      }}
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                  </div>
+                                ) : (
+                                  <div className="h-20 rounded-lg bg-gray-800 flex items-center justify-center">
+                                    <FileText className="h-8 w-8 text-gray-500" />
+                                  </div>
+                                )}
+                                
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeAttachment(index);
+                                  }}
+                                  className="absolute -top-2 -right-2 p-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={12} className="text-white" />
+                                </button>
+                                
+                                <p className="text-xs text-gray-400 mt-1 truncate">
+                                  {file.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">
+                          {attachments.length}/5 {t('reply.attachments', 'attachments')}
+                        </span>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              setShowReplyBox(false);
+                              setReplyContent('');
+                              setAttachments([]);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                          >
+                            {t('reply.cancel')}
+                          </Button>
+                          <Button
+                            onClick={handleSendReply}
+                            disabled={!replyContent.trim() || sendingReply}
+                            size="sm"
+                            className="bg-secondary text-primary hover:bg-secondary/90 disabled:opacity-50"
+                          >
+                            {sendingReply ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                                {t('reply.sending')}
+                              </>
+                            ) : (
+                              <>
+                                <Send size={16} className="mr-2" />
+                                {t('reply.send')}
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}

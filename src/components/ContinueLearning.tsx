@@ -98,10 +98,17 @@ export default function ContinueLearning() {
   }, []);
 
   const checkLocalStorageForLessonAccess = useCallback(async () => {
+    console.log('[ContinueLearning] Checking localStorage for lesson access...');
     const lastAccess = getLastLessonAccess();
     
     if (lastAccess) {
-      console.log('[ContinueLearning] Found lesson access in localStorage:', lastAccess);
+      console.log('[ContinueLearning] Found lesson access in localStorage:', {
+        lessonId: lastAccess.lessonId,
+        lessonTitle: lastAccess.lessonTitle,
+        hasVideo: lastAccess.hasVideo,
+        accessedAt: lastAccess.accessedAt,
+        progress: lastAccess.progress
+      });
       
       // Valida se a lição ainda existe antes de usar
       const validation = await validateLessonExists(lastAccess.lessonId);
@@ -151,14 +158,17 @@ export default function ContinueLearning() {
         }
       }
       
+      console.log('[ContinueLearning] Setting data from localStorage:', localData);
       setData(localData);
     } else {
       // No data from backend or localStorage
+      console.log('[ContinueLearning] No data found in localStorage');
       setData({ hasProgress: false });
     }
   }, [getLastLessonAccess, clearLessonAccess, validateLessonExists, validationAttempts]);
 
   const fetchContinueLearning = useCallback(async () => {
+    console.log('[ContinueLearning] ============ Starting fetchContinueLearning ============');
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
       const token = document.cookie
@@ -166,29 +176,36 @@ export default function ContinueLearning() {
         .find(row => row.startsWith('token='))
         ?.split('=')[1] || '';
       
+      console.log('[ContinueLearning] Token found:', !!token);
+      
       if (!token) {
-        console.warn('[ContinueLearning] No token found');
+        console.warn('[ContinueLearning] No token found - checking localStorage');
         // Even without token, check localStorage
-        checkLocalStorageForLessonAccess();
+        await checkLocalStorageForLessonAccess();
         setLoading(false);
         return;
       }
       
+      console.log('[ContinueLearning] Fetching from API:', `${apiUrl}/api/v1/users/me/continue-learning`);
       const response = await fetch(`${apiUrl}/api/v1/users/me/continue-learning`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
+      console.log('[ContinueLearning] API Response status:', response.status);
+
       if (!response.ok) {
-        console.warn('[ContinueLearning] API returned status:', response.status);
+        console.warn('[ContinueLearning] API returned error status:', response.status);
         if (response.status === 404) {
           // No video progress found - check localStorage for lesson access
           console.log('[ContinueLearning] No video progress in backend (404), checking localStorage...');
           const localAccess = getLastLessonAccess();
+          console.log('[ContinueLearning] Local access data:', localAccess);
           if (localAccess) {
-            checkLocalStorageForLessonAccess();
+            await checkLocalStorageForLessonAccess();
           } else {
+            console.log('[ContinueLearning] No local data either - showing no progress');
             setData({ hasProgress: false });
           }
         } else {
@@ -226,7 +243,7 @@ export default function ContinueLearning() {
         if (localTime > backendTime) {
           // Local is more recent - use it
           console.log('[ContinueLearning] Using localStorage (more recent)');
-          checkLocalStorageForLessonAccess();
+          await checkLocalStorageForLessonAccess();
         } else {
           // Backend is more recent
           console.log('[ContinueLearning] Using backend data (more recent)');
@@ -239,7 +256,7 @@ export default function ContinueLearning() {
       } else if (localAccess) {
         // Only localStorage has data
         console.log('[ContinueLearning] Using localStorage (no backend data)');
-        checkLocalStorageForLessonAccess();
+        await checkLocalStorageForLessonAccess();
       } else {
         // No data from either source
         console.log('[ContinueLearning] No progress data available');
@@ -248,7 +265,7 @@ export default function ContinueLearning() {
     } catch (error) {
       console.error('[ContinueLearning] Error fetching data:', error);
       // On error, try localStorage as fallback
-      checkLocalStorageForLessonAccess();
+      await checkLocalStorageForLessonAccess();
     } finally {
       setLoading(false);
     }
@@ -297,7 +314,15 @@ export default function ContinueLearning() {
     );
   }
 
+  console.log('[ContinueLearning] Final render state:', {
+    hasData: !!data,
+    hasProgress: data?.hasProgress,
+    hasLastAccessed: !!data?.lastAccessed,
+    data: data
+  });
+
   if (!data?.hasProgress || !data.lastAccessed) {
+    console.log('[ContinueLearning] Not rendering - no progress or lastAccessed data');
     return null;
   }
 
@@ -309,13 +334,7 @@ export default function ContinueLearning() {
   const fixedImageUrl = lastAccessed.lessonImageUrl?.replace('https://example.com', '') || '';
 
   return (
-    <div className="w-full bg-gradient-to-br from-primary-dark via-primary to-primary-dark rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-secondary rounded-full blur-3xl" />
-        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-accent rounded-full blur-3xl" />
-      </div>
-
+    <div className="w-full bg-gradient-to-br from-primary-dark via-primary to-primary-dark rounded-2xl p-6 md:p-8 mb-8 relative overflow-visible group hover:shadow-2xl transition-all duration-500">
       <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
         {/* Thumbnail */}
         <div className="relative w-full md:w-48 h-32 md:h-36 rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-shadow duration-300">
@@ -339,7 +358,7 @@ export default function ContinueLearning() {
           {hasVideo && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
               <div 
-                className="h-full bg-gradient-to-r from-secondary to-accent shadow-glow"
+                className="h-full bg-gradient-to-r from-secondary to-accent"
                 style={{ width: `${lastAccessed.videoProgress.percentage}%` }}
               />
             </div>
@@ -364,13 +383,13 @@ export default function ContinueLearning() {
             <span className="text-sm font-medium">{t('continueWatching.title')}</span>
           </div>
           
-          <h3 className="text-xl md:text-2xl font-bold text-white mb-1 line-clamp-1">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
             {lastAccessed.lessonTitle}
           </h3>
           
-          <p className="text-white/70 text-sm mb-4">
+          <p className="text-white/70 text-sm mb-4 flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span className="font-medium">{lastAccessed.courseTitle}</span>
-            <span className="mx-2">•</span>
+            <span>•</span>
             <span>{lastAccessed.moduleTitle}</span>
           </p>
           
@@ -393,8 +412,8 @@ export default function ContinueLearning() {
         {/* Action Button */}
         <button
           onClick={handleContinue}
-          className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-secondary to-accent text-primary font-semibold rounded-xl 
-                     hover:shadow-lg transform hover:scale-105 transition-all duration-300 
+          className="w-full md:w-auto px-6 py-3 bg-secondary text-primary font-semibold rounded-xl 
+                     hover:bg-accent hover:shadow-lg transform hover:scale-105 transition-all duration-300 
                      flex items-center justify-center gap-2 group/btn"
         >
           <span>{t('continueWatching.continueButton')}</span>

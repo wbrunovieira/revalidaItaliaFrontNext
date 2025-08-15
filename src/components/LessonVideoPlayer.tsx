@@ -110,18 +110,20 @@ export default function LessonVideoPlayer({
       });
       
       // Call with correct parameters order: lessonId, progress, context
-      heartbeatService.enqueueWithContext({
+      heartbeatService.enqueueWithContext(
         lessonId,
-        progress: newProgress,
-        courseId,
-        moduleId,
-        lessonTitle: lessonTitle || title,
-        courseTitle,
-        courseSlug,
-        moduleTitle,
-        moduleSlug,
-        lessonImageUrl: imageUrl
-      });
+        newProgress,
+        {
+          courseId,
+          moduleId,
+          lessonTitle: lessonTitle || title,
+          courseTitle,
+          courseSlug,
+          moduleTitle,
+          moduleSlug,
+          lessonImageUrl: imageUrl
+        }
+      );
     }
   }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 

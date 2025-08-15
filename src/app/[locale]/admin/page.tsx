@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Layers,
   HelpCircle,
+  Radio,
 } from 'lucide-react';
 
 import {
@@ -56,6 +57,7 @@ import CreateFlashcardForm from '@/components/CreateFlashcardForm';
 import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
 import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
+import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -71,6 +73,10 @@ export default function AdminPage() {
   const [
     showCreateQuestionModal,
     setShowCreateQuestionModal,
+  ] = useState(false);
+  const [
+    showCreateLiveSessionModal,
+    setShowCreateLiveSessionModal,
   ] = useState(false);
 
   return (
@@ -212,6 +218,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.flashcards')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="liveSessions"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Radio
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.liveSessions')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
@@ -604,6 +622,43 @@ export default function AdminPage() {
               </TabsContent>
             </Tabs>
           </TabsContent>
+
+          <TabsContent value="liveSessions">
+            <div className="p-6 space-y-6">
+              <div className="text-center space-y-3">
+                <h3 className="text-xl font-semibold text-white">
+                  {t('liveSessions.title')}
+                </h3>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  {t('liveSessions.description')}
+                </p>
+              </div>
+
+              <div className="max-w-md mx-auto">
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                  <div className="text-center space-y-4">
+                    <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                      <Radio size={24} className="text-purple-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">
+                        {t('liveSessions.createTitle')}
+                      </h4>
+                      <p className="text-gray-400 text-sm mb-4">
+                        {t('liveSessions.createDescription')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowCreateLiveSessionModal(true)}
+                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      {t('liveSessions.createButton')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
         </div>
       </Tabs>
 
@@ -634,6 +689,16 @@ export default function AdminPage() {
         onQuestionCreated={() => {
           // Refresh question list if needed
           console.log('Question created');
+        }}
+      />
+
+      {/* Live Session Creation Modal */}
+      <CreateLiveSessionModal
+        open={showCreateLiveSessionModal}
+        onOpenChange={setShowCreateLiveSessionModal}
+        onSuccess={() => {
+          console.log('Live session created successfully');
+          // Could refresh a list of live sessions here if needed
         }}
       />
     </div>

@@ -1342,6 +1342,128 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "liveSessions": {
+    "title": "Aulas ao Vivo",
+    "description": "Crie e gerencie sessões ao vivo com Zoom para aulas interativas",
+    "createTitle": "Criar Aula ao Vivo",
+    "createDescription": "Agende uma nova sessão ao vivo com integração Zoom",
+    "createButton": "Criar Nova Sessão"
+  },
+  
+  "CreateLiveSession": {
+    "title": "Criar Nova Aula ao Vivo",
+    "description": "Configure uma sessão ao vivo com integração Zoom",
+    "infoCard": {
+      "title": "Sobre Sessões ao Vivo",
+      "description": "Crie sessões interativas integradas com o Zoom. Você pode associar a sessão a uma aula específica ou argumento para melhor organização."
+    },
+    "sections": {
+      "basicInfo": "Informações Básicas",
+      "schedule": "Agendamento",
+      "associations": "Associações",
+      "hosts": "Co-apresentadores",
+      "settings": "Configurações"
+    },
+    "fields": {
+      "title": {
+        "label": "Título da Sessão",
+        "placeholder": "Ex: Revisão de Anatomia Cardiovascular"
+      },
+      "description": {
+        "label": "Descrição",
+        "placeholder": "Descreva o conteúdo e objetivos da sessão...",
+        "helper": "Opcional - Máximo 5000 caracteres"
+      },
+      "sessionType": {
+        "label": "Tipo de Sessão",
+        "placeholder": "Selecione o tipo",
+        "helper": "Webinar: Apresentação para muitos. Meeting: Interativo para grupos menores",
+        "options": {
+          "webinar": "Webinar (Apresentação)",
+          "meeting": "Meeting (Interativo)"
+        }
+      },
+      "startTime": {
+        "label": "Data e Hora de Início"
+      },
+      "endTime": {
+        "label": "Data e Hora de Término"
+      },
+      "course": {
+        "label": "Curso",
+        "placeholder": "Selecione um curso",
+        "none": "Nenhum"
+      },
+      "module": {
+        "label": "Módulo",
+        "placeholder": "Selecione um módulo",
+        "none": "Nenhum"
+      },
+      "lesson": {
+        "label": "Aula",
+        "placeholder": "Selecione uma aula",
+        "none": "Nenhuma"
+      },
+      "argument": {
+        "label": "Argumento",
+        "placeholder": "Selecione um argumento",
+        "none": "Nenhum",
+        "helper": "Associe a sessão a um argumento específico"
+      },
+      "coHosts": {
+        "label": "Co-apresentadores",
+        "placeholder": "Selecione tutores como co-apresentadores",
+        "helper": "Co-apresentadores podem gerenciar a sessão"
+      },
+      "maxParticipants": {
+        "label": "Máximo de Participantes",
+        "helper": "Entre 1 e 1000 participantes"
+      },
+      "recordingEnabled": {
+        "label": "Habilitar Gravação",
+        "helper": "Permitir gravação da sessão"
+      },
+      "autoStartRecording": {
+        "label": "Iniciar Gravação Automaticamente",
+        "helper": "A gravação inicia quando a sessão começar"
+      },
+      "waitingRoomEnabled": {
+        "label": "Sala de Espera",
+        "helper": "Participantes aguardam aprovação para entrar"
+      },
+      "chatEnabled": {
+        "label": "Chat Habilitado",
+        "helper": "Permitir chat entre participantes"
+      },
+      "qnaEnabled": {
+        "label": "Q&A Habilitado",
+        "helper": "Permitir perguntas e respostas estruturadas"
+      },
+      "muteParticipantsOnEntry": {
+        "label": "Silenciar ao Entrar",
+        "helper": "Participantes entram com microfone desligado"
+      }
+    },
+    "associations": {
+      "helper": "Opcionalmente, associe esta sessão a uma aula específica ou argumento",
+      "or": "ou"
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "create": "Criar Sessão",
+      "creating": "Criando..."
+    },
+    "success": {
+      "title": "Sessão Criada",
+      "description": "A aula ao vivo foi agendada com sucesso"
+    },
+    "error": {
+      "title": "Erro ao Criar",
+      "description": "Não foi possível criar a sessão",
+      "createFailed": "Falha ao criar sessão ao vivo"
+    }
+  },
+  
   "supportResponse": {
     "title": "Responder Ticket",
     "subtitle": "Envie uma resposta para o aluno",
@@ -2397,7 +2519,8 @@
      "documents": "Documentos",
     "assessments": "Avaliações",
     "arguments": "Argumentos",
-    "flashcards": "Flashcards"
+    "flashcards": "Flashcards",
+    "liveSessions": "Aulas ao Vivo"
   },
   
   "users": {

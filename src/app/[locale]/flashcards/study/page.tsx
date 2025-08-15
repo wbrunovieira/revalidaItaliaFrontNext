@@ -76,6 +76,7 @@ export default function FlashcardStudyPage() {
   const { token, isAuthenticated } = useAuth();
   const locale = params.locale as string;
   const lessonId = searchParams.get('lessonId');
+  const argumentId = searchParams.get('argumentId');
 
   const [flashcards, setFlashcards] = useState<
     FlashcardData[]
@@ -194,15 +195,16 @@ export default function FlashcardStudyPage() {
     }
   }, [queueSize]);
 
-  // Fetch flashcards from lesson
+  // Fetch flashcards from lesson or argument
   useEffect(() => {
     const fetchFlashcards = async () => {
       console.log('Starting fetchFlashcards...');
       console.log('lessonId:', lessonId);
+      console.log('argumentId:', argumentId);
 
-      if (!lessonId) {
-        console.log('No lessonId provided');
-        setError('No lesson ID provided');
+      if (!lessonId && !argumentId) {
+        console.log('No lessonId or argumentId provided');
+        setError('No lesson or argument ID provided');
         setLoading(false);
         return;
       }
@@ -220,18 +222,31 @@ export default function FlashcardStudyPage() {
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         console.log('API_URL:', API_URL);
 
-        // Validate if lessonId is a valid UUID
+        // Validate if ID is a valid UUID
         const uuidRegex =
           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!uuidRegex.test(lessonId)) {
-          console.log('Invalid UUID format:', lessonId);
-          throw new Error('Invalid lesson ID format');
+        
+        let url: string;
+        
+        if (argumentId) {
+          if (!uuidRegex.test(argumentId)) {
+            console.log('Invalid UUID format:', argumentId);
+            throw new Error('Invalid argument ID format');
+          }
+          url = `${API_URL}/api/v1/flashcards/by-argument/${argumentId}`;
+          console.log('Fetching flashcards by argumentId from URL:', url);
+        } else if (lessonId) {
+          if (!uuidRegex.test(lessonId)) {
+            console.log('Invalid UUID format:', lessonId);
+            throw new Error('Invalid lesson ID format');
+          }
+          url = `${API_URL}/api/v1/flashcards?lessonId=${lessonId}`;
+          console.log('Fetching flashcards by lessonId from URL:', url);
+        } else {
+          throw new Error('No valid ID provided');
         }
 
-        const url = `${API_URL}/api/v1/flashcards?lessonId=${lessonId}`;
-        console.log('Fetching from URL:', url);
-
-        // Fetch flashcards by lessonId with user interactions
+        // Fetch flashcards with user interactions
         const urlWithParams = new URL(url);
         urlWithParams.searchParams.append('includeUserInteractions', 'true');
         urlWithParams.searchParams.append('randomize', 'true');
@@ -313,7 +328,7 @@ export default function FlashcardStudyPage() {
     };
 
     fetchFlashcards();
-  }, [lessonId, locale, router, token, isAuthenticated]);
+  }, [lessonId, argumentId, locale, router, token, isAuthenticated]);
 
   const currentCard = flashcards[currentIndex];
   const progress =

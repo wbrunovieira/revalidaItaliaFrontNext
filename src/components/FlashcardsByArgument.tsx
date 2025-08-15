@@ -171,9 +171,9 @@ export default function FlashcardsByArgument() {
     return 'bg-red-500';
   };
 
-  // Handle card click - navigate to practice page
+  // Handle card click - navigate to study page with argumentId
   const handleCardClick = (argumentId: string) => {
-    router.push(`/${locale}/flashcards/practice?argumentId=${argumentId}`);
+    router.push(`/${locale}/flashcards/study?argumentId=${argumentId}`);
   };
 
   if (loading) {

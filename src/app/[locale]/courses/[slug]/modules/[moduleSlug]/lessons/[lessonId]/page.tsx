@@ -11,6 +11,7 @@ import StableVideoPlayer from '@/components/StableVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
 import LessonComments from '@/components/LessonComments';
 import LessonAccessTracker from '@/components/LessonAccessTracker';
+import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -911,6 +912,15 @@ export default async function LessonPage({
         
         {/* Heartbeat Status Indicator (Development Only) */}
       </div>
+      
+      {/* Support Floating Button with Lesson Context */}
+      <SupportFloatingButton 
+        context={{
+          type: "LESSON",
+          id: lesson.id,
+          title: lt.title
+        }}
+      />
     </NavSidebar>
   );
 }

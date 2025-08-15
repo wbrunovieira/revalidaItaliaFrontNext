@@ -28,7 +28,6 @@ import {
   Film,
   Send,
   Upload,
-  Trash2,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -107,6 +106,7 @@ export function ViewTicketModal({
   const [isReopenModalOpen, setIsReopenModalOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
@@ -666,26 +666,23 @@ export function ViewTicketModal({
                                       rel="noopener noreferrer"
                                       className="relative group block overflow-hidden rounded-lg bg-gray-900/50 hover:bg-gray-900/70 transition-all"
                                     >
-                                      <img
-                                        src={attachment.url}
-                                        alt={attachment.fileName}
-                                        className="w-full h-32 object-cover"
-                                        onError={(e) => {
-                                          const img = e.target as HTMLImageElement;
-                                          img.style.display = 'none';
-                                          const parent = img.parentElement;
-                                          if (parent) {
-                                            parent.innerHTML = `
-                                              <div class="flex flex-col items-center justify-center h-32 text-gray-500">
-                                                <svg class="h-8 w-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                                <span class="text-xs">Preview unavailable</span>
-                                              </div>
-                                            `;
-                                          }
-                                        }}
-                                      />
+                                      {!brokenImages.has(attachment.id) ? (
+                                        <Image
+                                          src={attachment.url}
+                                          alt={attachment.fileName}
+                                          width={200}
+                                          height={128}
+                                          className="w-full h-32 object-cover"
+                                          onError={() => {
+                                            setBrokenImages(prev => new Set(prev).add(attachment.id));
+                                          }}
+                                        />
+                                      ) : (
+                                        <div className="flex flex-col items-center justify-center h-32 text-gray-500 bg-gray-900/50">
+                                          <ImageIcon className="h-8 w-8 mb-2" />
+                                          <span className="text-xs">Preview unavailable</span>
+                                        </div>
+                                      )}
                                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <Download size={20} className="text-white" />
                                       </div>
@@ -788,7 +785,7 @@ export function ViewTicketModal({
                               {isDragging ? t('reply.dropFiles') : t('reply.dragDropText')}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              {t('reply.supportedFormats', 'Images and PDFs • Max 10MB')}
+                              {t('reply.supportedFormats') || 'Images and PDFs • Max 10MB'}
                             </p>
                           </div>
                         </div>
@@ -803,9 +800,11 @@ export function ViewTicketModal({
                               >
                                 {file.type.startsWith('image/') ? (
                                   <div className="relative h-20 rounded-lg overflow-hidden bg-gray-800">
-                                    <img
+                                    <Image
                                       src={URL.createObjectURL(file)}
                                       alt={file.name}
+                                      width={80}
+                                      height={80}
                                       className="w-full h-full object-cover"
                                       onLoad={(e) => {
                                         const img = e.target as HTMLImageElement;
@@ -844,7 +843,7 @@ export function ViewTicketModal({
                       
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-gray-500">
-                          {attachments.length}/5 {t('reply.attachments', 'attachments')}
+                          {attachments.length}/5 {t('reply.attachments') || 'attachments'}
                         </span>
                         <div className="flex gap-2">
                           <Button

@@ -17,6 +17,7 @@ export default function AssessmentsPage({ params }: PageProps) {
   const { locale } = use(params);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -56,7 +57,7 @@ export default function AssessmentsPage({ params }: PageProps) {
   if (loading || !userId) {
     return (
       <NavSidebar>
-        <Nav />
+        <Nav collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
         <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-center py-12">
@@ -71,7 +72,7 @@ export default function AssessmentsPage({ params }: PageProps) {
 
   return (
     <NavSidebar>
-      <Nav />
+      <Nav collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <StudentAssessmentsPage userId={userId} locale={locale} />
     </NavSidebar>
   );

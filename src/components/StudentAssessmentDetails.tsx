@@ -266,7 +266,7 @@ export function StudentAssessmentDetails({
                 reviewedAt?: string;
                 acknowledgedAt?: string;
                 history?: AnswerHistoryEntry[];
-                currentAnswer?: any;
+                currentAnswer?: string | Record<string, unknown>;
               }
             ) => {
               console.log('Processing answer:', {
@@ -289,7 +289,6 @@ export function StudentAssessmentDetails({
               if (reviewField) {
                 // Map reviewDecision to status
                 switch (reviewField) {
-                  case 'ACCEPTED':
                   case 'FULLY_ACCEPTED':
                     status = 'APPROVED';
                     reviewDecision = 'FULLY_ACCEPTED';
@@ -339,24 +338,28 @@ export function StudentAssessmentDetails({
                 id: ans.id,
                 questionId: ans.questionId,
                 questionText:
-                  currentAnswerData.questionText ||
+                  (typeof currentAnswerData === 'object' && 'questionText' in currentAnswerData ? currentAnswerData.questionText : null) ||
                   questions.find(
                     q => q.id === ans.questionId
                   )?.text ||
                   '',
                 studentAnswer:
-                  currentAnswerData.textAnswer || currentAnswerData.answer || '',
-                tutorFeedback: currentAnswerData.teacherComment || '',
+                  (typeof currentAnswerData === 'object' && 'textAnswer' in currentAnswerData ? currentAnswerData.textAnswer : null) || 
+                  (typeof currentAnswerData === 'object' && 'answer' in currentAnswerData ? currentAnswerData.answer : null) || 
+                  '',
+                tutorFeedback: 
+                  (typeof currentAnswerData === 'object' && 'teacherComment' in currentAnswerData ? currentAnswerData.teacherComment : null) || 
+                  '',
                 status: status,
                 reviewDecision: reviewDecision,
-                score: currentAnswerData.score,
+                score: (typeof currentAnswerData === 'object' && 'score' in currentAnswerData ? currentAnswerData.score : null) || undefined,
                 answeredAt:
-                  currentAnswerData.submittedAt ||
-                  currentAnswerData.answeredAt ||
+                  (typeof currentAnswerData === 'object' && 'submittedAt' in currentAnswerData ? currentAnswerData.submittedAt : null) ||
+                  (typeof currentAnswerData === 'object' && 'answeredAt' in currentAnswerData ? currentAnswerData.answeredAt : null) ||
                   attemptData.submittedAt,
                 reviewedAt:
-                  currentAnswerData.reviewedAt ||
-                  (currentAnswerData.isCorrect !== null
+                  (typeof currentAnswerData === 'object' && 'reviewedAt' in currentAnswerData ? currentAnswerData.reviewedAt : null) ||
+                  (typeof currentAnswerData === 'object' && 'isCorrect' in currentAnswerData && currentAnswerData.isCorrect !== null
                     ? new Date().toISOString()
                     : undefined),
                 needsAcknowledgment: needsAcknowledgment,

@@ -282,16 +282,6 @@ export default function DocumentEditModal({
     }
   }, [lessonId, documentId, t, toast, onClose]);
 
-  // Generate unique filename
-  const generateUniqueFileName = useCallback((originalName: string): string => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const extension = originalName.split('.').pop() || 'pdf';
-    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
-    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
-  }, []);
-
   // Handle file selection (NO UPLOAD YET)
   const handleFileSelection = useCallback((file: File, locale: string) => {
     if (!file) return;

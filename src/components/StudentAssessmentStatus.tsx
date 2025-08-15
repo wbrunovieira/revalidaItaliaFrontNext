@@ -424,8 +424,6 @@ export default function StudentAssessmentStatus({
   const getStatusText = (
     status: string,
     pendingReview: number,
-    reviewedQuestions: number = 0,
-    totalQuestions: number = 0,
     scorePercentage?: number,
     partiallyAccepted?: number
   ) => {
@@ -592,8 +590,6 @@ export default function StudentAssessmentStatus({
                       {getStatusText(
                         attempt.status,
                         attempt.pendingReview,
-                        attempt.reviewedQuestions,
-                        attempt.totalQuestions,
                         attempt.scorePercentage,
                         attempt.partiallyAcceptedQuestions
                       )}

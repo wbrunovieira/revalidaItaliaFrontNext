@@ -65,8 +65,9 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
   const [joiningSession, setJoiningSession] = useState<string | null>(null);
   const [registeringSession, setRegisteringSession] = useState<string | null>(null);
 
-  // Mock data for demonstration
-  const mockSessions: LiveSession[] = [
+  const fetchSessions = useCallback(async () => {
+    // Mock data for demonstration
+    const mockSessions: LiveSession[] = [
     {
       id: '1',
       title: 'Revisão de Anatomia Cardiovascular',
@@ -146,8 +147,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
       isRegistered: false,
     },
   ];
-
-  const fetchSessions = useCallback(async () => {
     try {
       setLoading(true);
       // Simulate API call

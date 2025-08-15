@@ -99,6 +99,9 @@ interface FormErrors {
   upload_pt?: string;
   upload_es?: string;
   upload_it?: string;
+  url_pt?: string;
+  url_es?: string;
+  url_it?: string;
   title_pt?: string;
   title_es?: string;
   title_it?: string;
@@ -695,16 +698,6 @@ export default function CreateDocumentForm() {
     setTouched({});
   }, []);
 
-  // Função para gerar nome único para arquivo
-  const generateUniqueFileName = useCallback((originalName: string): string => {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const extension = originalName.split('.').pop();
-    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
-    // Sanitiza o nome removendo caracteres especiais
-    const sanitizedName = nameWithoutExt.replace(/[^a-zA-Z0-9-_]/g, '-');
-    return `${sanitizedName}-${timestamp}-${randomString}.${extension}`;
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -756,9 +749,6 @@ export default function CreateDocumentForm() {
               description: `${fileData.file.name} - ${locale.toUpperCase()}`,
             });
 
-            // Generate unique filename
-            const uniqueFileName = generateUniqueFileName(fileData.file.name);
-            
             // Create FormData for upload
             const uploadFormData = new FormData();
             uploadFormData.append('file', fileData.file);

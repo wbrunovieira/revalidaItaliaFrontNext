@@ -104,7 +104,7 @@ interface AttemptAnswer {
   submittedAt?: string;
   answeredAt?: string;
   history?: AnswerHistoryEntry[];
-  currentAnswer?: any;
+  currentAnswer?: string | Record<string, unknown>;
   originalData?: unknown;
 }
 
@@ -155,14 +155,13 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       
       // Debug: verificar status individual de cada resposta da API
       console.log('Raw API answers status:');
-      data.answers?.forEach((answer: any, index: number) => {
+      data.answers?.forEach((answer: Answer, index: number) => {
         console.log(`API Answer ${index + 1}:`, {
           id: answer.id,
           questionId: answer.questionId,
           status: answer.status,
           isCorrect: answer.isCorrect,
-          reviewerId: answer.reviewerId,
-          currentAnswer: answer.currentAnswer
+          reviewerId: answer.reviewerId
         });
       });
       
@@ -194,12 +193,12 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           .map((answer: AttemptAnswer) => ({
               id: answer.id,
               questionId: answer.questionId,
-              textAnswer: answer.currentAnswer?.textAnswer || answer.textAnswer || answer.answer,
-              isCorrect: answer.currentAnswer?.isCorrect ?? answer.isCorrect,
-              teacherComment: answer.currentAnswer?.teacherComment || answer.teacherComment,
+              textAnswer: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'textAnswer' in answer.currentAnswer ? answer.currentAnswer.textAnswer : null) || answer.textAnswer || answer.answer,
+              isCorrect: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'isCorrect' in answer.currentAnswer ? answer.currentAnswer.isCorrect : null) ?? answer.isCorrect,
+              teacherComment: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'teacherComment' in answer.currentAnswer ? answer.currentAnswer.teacherComment : null) || answer.teacherComment,
               reviewerId: answer.reviewerId,
               status: answer.status,
-              answeredAt: answer.currentAnswer?.submittedAt || answer.submittedAt || answer.answeredAt,
+              answeredAt: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'submittedAt' in answer.currentAnswer ? answer.currentAnswer.submittedAt : null) || answer.submittedAt || answer.answeredAt,
               versions: answer.history || [],
               // Guardar dados originais para debug
               originalData: answer,
@@ -215,7 +214,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
       console.log('Total answers mapped:', mappedData.answers.length);
       
       // Debug: verificar status de cada resposta
-      mappedData.answers.forEach((answer, index) => {
+      mappedData.answers.forEach((answer: Answer, index: number) => {
         console.log(`Answer ${index + 1}:`, {
           questionId: answer.questionId,
           status: answer.status,
@@ -650,7 +649,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                         Versão {version.version}
                       </span>
                       <span>
-                        {new Date(version.submittedAt).toLocaleString('pt-BR')}
+                        {new Date(version.answeredAt).toLocaleString('pt-BR')}
                       </span>
                     </div>
                     

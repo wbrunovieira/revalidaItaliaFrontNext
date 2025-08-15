@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslations } from "next-intl";
+import Image from 'next/image';
 import { 
  
   Loader2, 
@@ -226,8 +227,8 @@ export function CreateSupportTicketModal({
           } catch (uploadError) {
             console.error("Error uploading file:", file.name, uploadError);
             toast({
-              title: t("modal.errors.uploadFailed", "Upload Failed"),
-              description: t("modal.errors.uploadFailedDescription", `Failed to upload ${file.name}`),
+              title: t("modal.errors.uploadFailed") || "Upload Failed",
+              description: t("modal.errors.uploadFailedDescription") || `Failed to upload ${file.name}`,
               variant: "destructive",
             });
             // Continue with other files even if one fails
@@ -524,9 +525,11 @@ export function CreateSupportTicketModal({
                           <div className="flex-shrink-0">
                             {file.type.startsWith("image/") ? (
                               <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                <img
+                                <Image
                                   src={URL.createObjectURL(file)}
                                   alt={file.name}
+                                  width={48}
+                                  height={48}
                                   className="w-full h-full object-cover"
                                   onLoad={(e) => {
                                     // Clean up the object URL after loading

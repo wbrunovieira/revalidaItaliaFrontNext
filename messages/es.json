@@ -1111,6 +1111,24 @@
     "filters": "Filtros",
     "period": "Periodo",
     "difficulty": "Dificultad",
+    "tabs": {
+      "progress": "Progreso",
+      "byArgument": "Por Argumento"
+    },
+    "byArgument": {
+      "title": "Flashcards por Argumento",
+      "subtitle": "Explora y practica flashcards organizadas por tema",
+      "loading": "Cargando argumentos...",
+      "error": "Error al cargar argumentos",
+      "searchPlaceholder": "Buscar argumentos...",
+      "totalCards": "Total de tarjetas",
+      "progress": "Progreso",
+      "difficultCards": "Tarjetas difíciles",
+      "completed": "Completadas",
+      "practiceNow": "Practicar ahora",
+      "noArguments": "No se encontraron argumentos",
+      "tryAdjustingSearch": "Intenta ajustar tu búsqueda o verifica si hay contenido disponible"
+    },
     "periods": {
       "week": "Última semana",
       "month": "Último mes",

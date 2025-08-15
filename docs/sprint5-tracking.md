@@ -147,7 +147,25 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 
 ### 15/08/2025
 
--
+**Sistema de Tabs para Página de Progresso de Flashcards**
+- [Técnico] Implementação de tabs na página flashcards/progress usando componentes shadcn/ui, primeira tab mantém FlashcardProgressContent original intacto, segunda tab mostra flashcards organizados por argumento com componente FlashcardsByArgument
+- [Benefício] Permite aos alunos visualizarem tanto seu progresso geral quanto coleções de flashcards organizadas por tópico, facilitando escolha de qual argumento estudar baseado em dificuldade e progresso
+- [Commit] feat: add tabs to flashcard progress page with arguments view
+
+**Integração de Estudo por Argumento com Página Existente**
+- [Técnico] Modificação da página flashcards/study para aceitar tanto lessonId quanto argumentId como parâmetros, uso condicional de endpoints diferentes (/api/v1/flashcards/by-argument/{id} para argumentos, /api/v1/flashcards?lessonId={id} para lições)
+- [Benefício] Reutiliza toda a lógica de interação existente (flip, swipe, progresso, reset) evitando duplicação de código, mantém experiência consistente para o usuário independente da origem dos flashcards
+- [Commit] feat: enable flashcard study by argument using existing study page
+
+**Correção de Navegação e Reset de Flashcards**
+- [Técnico] Substituição de window.location.reload() por re-fetch assíncrono de flashcards no resetStudy, atualização de todos os botões "voltar" para considerar origem (argumentId volta para /flashcards/progress, lessonId volta para página da lição), alinhamento das tabs com conteúdo usando max-width consistente
+- [Benefício] Previne perda de autenticação ao clicar em "Estudar Novamente", navegação correta baseada no contexto de onde o usuário veio, interface mais harmoniosa com tabs alinhadas ao conteúdo
+- [Commit] fix: improve flashcard study navigation and reset functionality
+
+**Remoção de Efeitos de Fade no Card Continue Learning**
+- [Técnico] Remoção de overflow-hidden do container principal, eliminação de elementos com blur-3xl do background, substituição de gradiente do botão por cor sólida, remoção de shadow-glow da barra de progresso
+- [Benefício] Elimina efeito visual indesejado de texto/botão "apagado" no final do card, interface mais limpa e profissional sem blur interferindo na visualização
+- [Commit] fix: remove fade and blur effects from ContinueLearning card
 
 ### 16/08/2025
 

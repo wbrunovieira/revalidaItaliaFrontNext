@@ -93,7 +93,20 @@ export default function LessonVideoPlayer({
 
     // Send to heartbeat service with full context for new API
     const heartbeatService = (window as unknown as Record<string, unknown>).videoProgressHeartbeat as { 
-      enqueueWithContext?: (data: unknown) => void 
+      enqueueWithContext?: (
+        lessonId: string,
+        progress: VideoProgress,
+        context: {
+          courseId?: string;
+          moduleId?: string;
+          lessonTitle?: string;
+          courseTitle?: string;
+          courseSlug?: string;
+          moduleTitle?: string;
+          moduleSlug?: string;
+          lessonImageUrl?: string;
+        }
+      ) => void 
     } | undefined;
     
     if (!heartbeatService) {

@@ -12,14 +12,11 @@ import {
   AlertCircle,
   Loader2,
   BookOpen,
-  Hash,
-  Clock,
   TrendingUp,
   Target,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/stores/auth.store';
-import Image from 'next/image';
 
 // Types
 interface Argument {
@@ -119,7 +116,7 @@ export default function FlashcardsByArgument() {
                 ...arg,
                 flashcardCount: flashcardData.metadata?.totalFlashcards || 0,
                 completedCount: flashcardData.metadata?.completedFlashcards || 0,
-                hardCount: flashcardData.flashcards?.filter((f: any) => 
+                hardCount: flashcardData.flashcards?.filter((f: { userInteraction?: { difficultyLevel: string } }) => 
                   f.userInteraction?.difficultyLevel === 'HARD'
                 ).length || 0,
               };

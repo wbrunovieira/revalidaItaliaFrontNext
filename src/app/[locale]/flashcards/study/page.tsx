@@ -38,6 +38,7 @@ import NavSidebar from '@/components/NavSidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/stores/auth.store';
+import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 
 
 interface FlashcardData {
@@ -602,6 +603,14 @@ export default function FlashcardStudyPage() {
             <p className="text-gray-400">{t('loading')}</p>
           </div>
         </div>
+        
+        {/* Support Button for flashcard context while loading */}
+        <SupportFloatingButton 
+          context={{
+            type: lessonId ? "FLASHCARD" : "GENERAL",
+            title: `Flashcards - ${t('loading')}`
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -631,6 +640,14 @@ export default function FlashcardStudyPage() {
             </Link>
           </div>
         </div>
+        
+        {/* Support Button for flashcard error context */}
+        <SupportFloatingButton 
+          context={{
+            type: lessonId ? "FLASHCARD" : "GENERAL",
+            title: `Flashcards - ${t('error.title')}`
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -700,6 +717,14 @@ export default function FlashcardStudyPage() {
             </div>
           </div>
         </div>
+        
+        {/* Support Button for no flashcards context */}
+        <SupportFloatingButton 
+          context={{
+            type: lessonId ? "FLASHCARD" : "GENERAL",
+            title: allCompleted ? t('allCompleted.title') : t('noFlashcards.title')
+          }}
+        />
       </NavSidebar>
     );
   }
@@ -1179,6 +1204,19 @@ export default function FlashcardStudyPage() {
           </div>
         </div>
       </div>
+      
+      {/* Support Floating Button with Flashcard Context */}
+      {currentCard && (
+        <SupportFloatingButton 
+          context={{
+            type: "FLASHCARD",
+            id: currentCard.id,
+            title: currentCard.questionText 
+              ? `Flashcard: ${currentCard.questionText.substring(0, 50)}${currentCard.questionText.length > 50 ? '...' : ''}`
+              : `Flashcard ${currentIndex + 1}`
+          }}
+        />
+      )}
     </NavSidebar>
   );
 }

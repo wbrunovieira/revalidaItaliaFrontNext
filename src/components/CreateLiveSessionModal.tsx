@@ -25,20 +25,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Button from '@/components/Button';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import { 
-  Video, 
   Users, 
   Calendar, 
   BookOpen,
   FileText,
   Settings,
-  Loader2,
   X,
-  Clock,
   Check,
   RotateCcw,
   Info,

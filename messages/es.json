@@ -1349,7 +1349,50 @@
     "description": "Crea y gestiona sesiones en vivo con Zoom para clases interactivas",
     "createTitle": "Crear Clase en Vivo",
     "createDescription": "Programa una nueva sesión en vivo con integración Zoom",
-    "createButton": "Crear Nueva Sesión"
+    "createButton": "Crear Nueva Sesión",
+    "create": "Crear Sesión",
+    "list": "Listar Sesiones"
+  },
+  
+  "LiveSessionsList": {
+    "title": "Clases en Vivo",
+    "description": "Visualiza y gestiona todas las sesiones en vivo creadas",
+    "loading": "Cargando clases...",
+    "noSessions": "No se encontraron clases en vivo",
+    "noSessionsDescription": "Crea tu primera sesión en vivo para comenzar",
+    "showing": "Mostrando {count} de {total} clases",
+    "searchPlaceholder": "Buscar por título o descripción...",
+    "filterByStatus": "Filtrar por estado",
+    "allStatuses": "Todos los estados",
+    "sortBy": "Ordenar por",
+    "sortByDate": "Fecha de inicio",
+    "sortByTitle": "Título",
+    "sortByCreated": "Fecha de creación",
+    "status": {
+      "scheduled": "Programada",
+      "live": "En Vivo",
+      "ended": "Finalizada",
+      "cancelled": "Cancelada"
+    },
+    "sessionType": {
+      "meeting": "Reunión",
+      "webinar": "Webinar"
+    },
+    "coHosts": "co-presentadores",
+    "participants": "participantes",
+    "lesson": "Lección",
+    "argument": "Argumento",
+    "recording": "Grabación",
+    "actions": {
+      "view": "Ver"
+    },
+    "pageOf": "Página {current} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "error": {
+      "fetchTitle": "Error al cargar clases",
+      "fetchDescription": "No se pudieron cargar las clases en vivo"
+    }
   },
   
   "CreateLiveSession": {

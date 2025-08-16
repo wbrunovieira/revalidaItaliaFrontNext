@@ -58,6 +58,7 @@ import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
 import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
+import LiveSessionsList from '@/components/LiveSessionsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -624,40 +625,63 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="liveSessions">
-            <div className="p-6 space-y-6">
-              <div className="text-center space-y-3">
-                <h3 className="text-xl font-semibold text-white">
-                  {t('liveSessions.title')}
-                </h3>
-                <p className="text-gray-400 max-w-2xl mx-auto">
-                  {t('liveSessions.description')}
-                </p>
-              </div>
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                <TabsTrigger
+                  value="create"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <Radio className="mr-2" size={16} />
+                  {t('liveSessions.create')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <List className="mr-2" size={16} />
+                  {t('liveSessions.list')}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="create">
+                <div className="p-6 space-y-6">
+                  <div className="text-center space-y-3">
+                    <h3 className="text-xl font-semibold text-white">
+                      {t('liveSessions.title')}
+                    </h3>
+                    <p className="text-gray-400 max-w-2xl mx-auto">
+                      {t('liveSessions.description')}
+                    </p>
+                  </div>
 
-              <div className="max-w-md mx-auto">
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
-                  <div className="text-center space-y-4">
-                    <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                      <Radio size={24} className="text-purple-400" />
+                  <div className="max-w-md mx-auto">
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <Radio size={24} className="text-purple-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-2">
+                            {t('liveSessions.createTitle')}
+                          </h4>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('liveSessions.createDescription')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreateLiveSessionModal(true)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                          {t('liveSessions.createButton')}
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-2">
-                        {t('liveSessions.createTitle')}
-                      </h4>
-                      <p className="text-gray-400 text-sm mb-4">
-                        {t('liveSessions.createDescription')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowCreateLiveSessionModal(true)}
-                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                    >
-                      {t('liveSessions.createButton')}
-                    </button>
                   </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+              <TabsContent value="list">
+                <LiveSessionsList />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </div>
       </Tabs>

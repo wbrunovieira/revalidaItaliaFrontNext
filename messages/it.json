@@ -1350,7 +1350,50 @@
     "description": "Crea e gestisci sessioni dal vivo con Zoom per lezioni interattive",
     "createTitle": "Crea Lezione dal Vivo",
     "createDescription": "Programma una nuova sessione dal vivo con integrazione Zoom",
-    "createButton": "Crea Nuova Sessione"
+    "createButton": "Crea Nuova Sessione",
+    "create": "Crea Sessione",
+    "list": "Elenco Sessioni"
+  },
+  
+  "LiveSessionsList": {
+    "title": "Lezioni dal Vivo",
+    "description": "Visualizza e gestisci tutte le sessioni dal vivo create",
+    "loading": "Caricamento lezioni...",
+    "noSessions": "Nessuna lezione dal vivo trovata",
+    "noSessionsDescription": "Crea la tua prima sessione dal vivo per iniziare",
+    "showing": "Mostrando {count} di {total} lezioni",
+    "searchPlaceholder": "Cerca per titolo o descrizione...",
+    "filterByStatus": "Filtra per stato",
+    "allStatuses": "Tutti gli stati",
+    "sortBy": "Ordina per",
+    "sortByDate": "Data di inizio",
+    "sortByTitle": "Titolo",
+    "sortByCreated": "Data di creazione",
+    "status": {
+      "scheduled": "Programmata",
+      "live": "Dal Vivo",
+      "ended": "Terminata",
+      "cancelled": "Cancellata"
+    },
+    "sessionType": {
+      "meeting": "Riunione",
+      "webinar": "Webinar"
+    },
+    "coHosts": "co-presentatori",
+    "participants": "partecipanti",
+    "lesson": "Lezione",
+    "argument": "Argomento",
+    "recording": "Registrazione",
+    "actions": {
+      "view": "Visualizza"
+    },
+    "pageOf": "Pagina {current} di {total}",
+    "previous": "Precedente",
+    "next": "Successiva",
+    "error": {
+      "fetchTitle": "Errore nel caricamento delle lezioni",
+      "fetchDescription": "Non è stato possibile caricare le lezioni dal vivo"
+    }
   },
   
   "CreateLiveSession": {

@@ -1420,6 +1420,15 @@
       "startDescription": "No se pudo iniciar la sesión en vivo",
       "endTitle": "Error al finalizar sesión",
       "endDescription": "No se pudo finalizar la sesión en vivo"
+    },
+    "timeWarning": {
+      "earlyTitle": "Sesión programada para más tarde",
+      "earlyDescription": "Esta sesión está programada para comenzar en {hours} horas y {remainingMinutes} minutos.",
+      "lateTitle": "La sesión ya debería haber comenzado",
+      "lateDescription": "Esta sesión estaba programada para comenzar hace {hours} horas y {remainingMinutes} minutos.",
+      "confirmQuestion": "¿Estás seguro de que deseas iniciar la sesión ahora?",
+      "cancel": "Cancelar",
+      "startAnyway": "Iniciar de todos modos"
     }
   },
   

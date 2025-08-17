@@ -1418,6 +1418,15 @@
       "startDescription": "Não foi possível iniciar a sessão ao vivo",
       "endTitle": "Erro ao finalizar sessão",
       "endDescription": "Não foi possível finalizar a sessão ao vivo"
+    },
+    "timeWarning": {
+      "earlyTitle": "Sessão agendada para mais tarde",
+      "earlyDescription": "Esta sessão está agendada para começar em {hours} horas e {remainingMinutes} minutos.",
+      "lateTitle": "Sessão já deveria ter começado",
+      "lateDescription": "Esta sessão estava agendada para começar há {hours} horas e {remainingMinutes} minutos atrás.",
+      "confirmQuestion": "Tem certeza que deseja iniciar a sessão agora?",
+      "cancel": "Cancelar",
+      "startAnyway": "Iniciar mesmo assim"
     }
   },
   

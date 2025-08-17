@@ -1421,6 +1421,15 @@
       "startDescription": "Non è stato possibile avviare la sessione dal vivo",
       "endTitle": "Errore nel terminare la sessione",
       "endDescription": "Non è stato possibile terminare la sessione dal vivo"
+    },
+    "timeWarning": {
+      "earlyTitle": "Sessione programmata per più tardi",
+      "earlyDescription": "Questa sessione è programmata per iniziare tra {hours} ore e {remainingMinutes} minuti.",
+      "lateTitle": "La sessione doveva già essere iniziata",
+      "lateDescription": "Questa sessione era programmata per iniziare {hours} ore e {remainingMinutes} minuti fa.",
+      "confirmQuestion": "Sei sicuro di voler iniziare la sessione ora?",
+      "cancel": "Annulla",
+      "startAnyway": "Inizia comunque"
     }
   },
   

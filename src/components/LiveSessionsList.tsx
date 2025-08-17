@@ -20,6 +20,7 @@ import {
   Eye,
   Play,
   Square,
+  AlertTriangle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -115,6 +116,7 @@ export default function LiveSessionsList() {
   const [showStartConfirm, setShowStartConfirm] = useState<string | null>(null);
   const [endingSessionId, setEndingSessionId] = useState<string | null>(null);
   const [showEndConfirm, setShowEndConfirm] = useState<string | null>(null);
+  const [showTimeWarning, setShowTimeWarning] = useState<{ sessionId: string; type: 'early' | 'late'; timeDiff: number } | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -291,10 +293,50 @@ export default function LiveSessionsList() {
     return false;
   };
 
+  const checkSessionTiming = (session: LiveSession): { type: 'early' | 'late' | 'ok'; diffMinutes: number } => {
+    const now = new Date();
+    const scheduledStart = new Date(session.scheduledStartTime);
+    const diffMs = scheduledStart.getTime() - now.getTime();
+    const diffMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60));
+    
+    if (diffMs > 30 * 60 * 1000) {
+      // More than 30 minutes early
+      return { type: 'early', diffMinutes };
+    } else if (diffMs < -120 * 60 * 1000) {
+      // More than 2 hours late
+      return { type: 'late', diffMinutes };
+    }
+    
+    return { type: 'ok', diffMinutes: 0 };
+  };
+
+  const handleStartClick = (session: LiveSession) => {
+    const timing = checkSessionTiming(session);
+    
+    if (timing.type === 'early' || timing.type === 'late') {
+      setShowTimeWarning({
+        sessionId: session.id,
+        type: timing.type,
+        timeDiff: timing.diffMinutes
+      });
+    } else {
+      setShowStartConfirm(session.id);
+    }
+  };
+
   const handleStartSession = async (sessionId: string) => {
     try {
       setStartingSessionId(sessionId);
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
+      // Log da requisição para teste
+      console.log('📤 === START SESSION REQUEST ===');
+      console.log('API URL:', API_URL);
+      console.log('Endpoint:', `${API_URL}/api/v1/live-sessions/${sessionId}/start`);
+      console.log('Method:', 'PATCH');
+      console.log('Session ID:', sessionId);
+      console.log('Token (first 20 chars):', token?.substring(0, 20) + '...');
+      console.log('📤 === END REQUEST INFO ===');
       
       const response = await fetch(
         `${API_URL}/api/v1/live-sessions/${sessionId}/start`,
@@ -313,6 +355,19 @@ export default function LiveSessionsList() {
 
       const data = await response.json();
       
+      // Log detalhado do retorno da API para teste
+      console.log('🚀 === START SESSION API RESPONSE ===');
+      console.log('Session ID:', sessionId);
+      console.log('Response Status:', response.status);
+      console.log('Response Data:', JSON.stringify(data, null, 2));
+      console.log('Host URL:', data.hostUrl || 'Not provided');
+      console.log('Participant URL:', data.participantUrl || 'Not provided');
+      console.log('Session Status:', data.status);
+      console.log('Started At:', data.startedAt);
+      console.log('Current User ID:', user?.id);
+      console.log('Current User Role:', user?.role);
+      console.log('🚀 === END START SESSION RESPONSE ===');
+      
       toast({
         title: t('success.startTitle'),
         description: t('success.startDescription'),
@@ -320,16 +375,26 @@ export default function LiveSessionsList() {
       
       // Open Zoom URLs if available
       if (data.hostUrl && user?.id === sessions.find(s => s.id === sessionId)?.host.id) {
+        console.log('📹 Opening HOST URL:', data.hostUrl);
         window.open(data.hostUrl, '_blank');
       } else if (data.participantUrl) {
+        console.log('📹 Opening PARTICIPANT URL:', data.participantUrl);
         window.open(data.participantUrl, '_blank');
+      } else {
+        console.log('⚠️ No Zoom URLs provided in response');
       }
       
       // Refresh the list to show updated status
       fetchSessions();
       setShowStartConfirm(null);
     } catch (error) {
-      console.error('Error starting session:', error);
+      console.error('❌ === START SESSION ERROR ===');
+      console.error('Session ID:', sessionId);
+      console.error('Error Type:', error instanceof Error ? 'Error' : typeof error);
+      console.error('Error Message:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Full Error:', error);
+      console.error('❌ === END START SESSION ERROR ===');
+      
       toast({
         title: t('error.startTitle'),
         description: error instanceof Error ? error.message : t('error.startDescription'),
@@ -344,6 +409,15 @@ export default function LiveSessionsList() {
     try {
       setEndingSessionId(sessionId);
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
+      // Log da requisição para teste
+      console.log('📤 === END SESSION REQUEST ===');
+      console.log('API URL:', API_URL);
+      console.log('Endpoint:', `${API_URL}/api/v1/live-sessions/${sessionId}/end`);
+      console.log('Method:', 'PATCH');
+      console.log('Session ID:', sessionId);
+      console.log('Token (first 20 chars):', token?.substring(0, 20) + '...');
+      console.log('📤 === END REQUEST INFO ===');
       
       const response = await fetch(
         `${API_URL}/api/v1/live-sessions/${sessionId}/end`,
@@ -362,6 +436,19 @@ export default function LiveSessionsList() {
 
       const data = await response.json();
       
+      // Log detalhado do retorno da API para teste
+      console.log('🛑 === END SESSION API RESPONSE ===');
+      console.log('Session ID:', sessionId);
+      console.log('Response Status:', response.status);
+      console.log('Response Data:', JSON.stringify(data, null, 2));
+      console.log('Session Status:', data.status);
+      console.log('Ended At:', data.endedAt);
+      console.log('Total Participants:', data.totalParticipants);
+      console.log('Recording Status:', data.recordingStatus || 'Not provided');
+      console.log('Current User ID:', user?.id);
+      console.log('Current User Role:', user?.role);
+      console.log('🛑 === END SESSION RESPONSE ===');
+      
       toast({
         title: t('success.endTitle'),
         description: t('success.endDescription', { participants: data.totalParticipants || 0 }),
@@ -371,7 +458,13 @@ export default function LiveSessionsList() {
       fetchSessions();
       setShowEndConfirm(null);
     } catch (error) {
-      console.error('Error ending session:', error);
+      console.error('❌ === END SESSION ERROR ===');
+      console.error('Session ID:', sessionId);
+      console.error('Error Type:', error instanceof Error ? 'Error' : typeof error);
+      console.error('Error Message:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Full Error:', error);
+      console.error('❌ === END SESSION ERROR ===');
+      
       toast({
         title: t('error.endTitle'),
         description: error instanceof Error ? error.message : t('error.endDescription'),
@@ -547,7 +640,7 @@ export default function LiveSessionsList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowStartConfirm(session.id)}
+                      onClick={() => handleStartClick(session)}
                       disabled={startingSessionId === session.id}
                       className="flex items-center gap-2 bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30 hover:text-green-300"
                     >
@@ -704,6 +797,72 @@ export default function LiveSessionsList() {
                       {t('confirmEnd.confirm')}
                     </>
                   )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Time Warning Modal */}
+      {showTimeWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-500/20 rounded-full">
+                  <AlertTriangle className="h-6 w-6 text-yellow-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {showTimeWarning.type === 'early' 
+                      ? t('timeWarning.earlyTitle')
+                      : t('timeWarning.lateTitle')
+                    }
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {showTimeWarning.type === 'early'
+                      ? t('timeWarning.earlyDescription', { 
+                          minutes: showTimeWarning.timeDiff,
+                          hours: Math.floor(showTimeWarning.timeDiff / 60),
+                          remainingMinutes: showTimeWarning.timeDiff % 60
+                        })
+                      : t('timeWarning.lateDescription', {
+                          minutes: showTimeWarning.timeDiff,
+                          hours: Math.floor(showTimeWarning.timeDiff / 60),
+                          remainingMinutes: showTimeWarning.timeDiff % 60
+                        })
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <p className="text-sm text-yellow-200">
+                  {t('timeWarning.confirmQuestion')}
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTimeWarning(null)}
+                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  {t('timeWarning.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const sessionId = showTimeWarning.sessionId;
+                    setShowTimeWarning(null);
+                    setShowStartConfirm(sessionId);
+                  }}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  {t('timeWarning.startAnyway')}
                 </Button>
               </div>
             </div>

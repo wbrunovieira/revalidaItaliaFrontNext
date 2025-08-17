@@ -179,9 +179,17 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Permite que administradores e tutores iniciem sessões agendadas diretamente do painel, mudando status para LIVE e abrindo automaticamente o Zoom na URL correta (host ou participante), com feedback visual durante o processo e confirmação para evitar cliques acidentais
 - [Commit] feat: add start session functionality to live sessions list
 
+**Funcionalidade de Finalizar Transmissão ao Vivo**
+- [Técnico] Implementação de botão de finalizar sessão com integração ao endpoint PATCH /api/v1/live-sessions/:sessionId/end, mesmo controle de permissões do iniciar, modal de confirmação alertando sobre desconexão de participantes e processamento de gravação, exibição do total de participantes após finalizar
+- [Benefício] Permite que administradores e tutores finalizem transmissões ao vivo de forma controlada, desconectando todos os participantes adequadamente e iniciando processamento automático da gravação quando habilitada, com confirmação para evitar interrupções acidentais
+- [Commit] feat: add end session functionality to live sessions
+
 ### 19/08/2025
 
--
+**Sistema de Avisos de Tempo para Sessões ao Vivo**
+- [Técnico] Implementação de função checkSessionTiming para verificar se sessão está sendo iniciada muito cedo (>30min antes) ou muito tarde (>2h depois), modal de aviso com AlertTriangle mostrando tempo exato de diferença, botão de override "Iniciar mesmo assim" para casos especiais, logs detalhados para debugging de sessões
+- [Benefício] Previne início acidental de sessões no horário errado, ajuda tutores a manterem agenda organizada, permite flexibilidade com override consciente quando necessário, reduz confusão de participantes entrando em sessões fora do horário
+- [Commit] feat: add time warnings for early/late session starts
 
 ---
 

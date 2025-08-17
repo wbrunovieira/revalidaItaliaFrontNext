@@ -1502,7 +1502,8 @@
       "coHosts": {
         "label": "Co-presentadores",
         "placeholder": "Selecciona co-presentadores",
-        "helper": "Añade tutores o administradores como co-presentadores"
+        "helper": "Añade tutores o administradores como co-presentadores",
+        "noUsers": "No hay usuarios disponibles como co-presentadores"
       },
       "maxParticipants": {
         "label": "Número Máximo de Participantes",

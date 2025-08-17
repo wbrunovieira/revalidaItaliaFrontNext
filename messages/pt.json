@@ -1498,7 +1498,8 @@
       "coHosts": {
         "label": "Co-apresentadores",
         "placeholder": "Selecione tutores como co-apresentadores",
-        "helper": "Co-apresentadores podem gerenciar a sessão"
+        "helper": "Co-apresentadores podem gerenciar a sessão",
+        "noUsers": "Nenhum usuário disponível para ser co-apresentador"
       },
       "maxParticipants": {
         "label": "Máximo de Participantes",

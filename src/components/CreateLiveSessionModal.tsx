@@ -68,35 +68,30 @@ const liveSessionSchema = z.object({
   autoStartRecording: z.boolean().default(false),
   muteParticipantsOnEntry: z.boolean().default(false),
 }).refine((data) => {
-  if (!data.scheduledStartTime) return true; // Skip validation if empty
-  const start = new Date(data.scheduledStartTime);
-  const now = new Date();
-  return start > now;
-}, {
-  message: "A sessão não pode ser agendada no passado",
-  path: ["scheduledStartTime"],
-}).refine((data) => {
+  if (!data.scheduledStartTime || !data.scheduledEndTime) return true;
   const start = new Date(data.scheduledStartTime);
   const end = new Date(data.scheduledEndTime);
   return end > start;
 }, {
-  message: "Data de término deve ser após a data de início",
+  message: "A data de término deve ser posterior à data de início",
   path: ["scheduledEndTime"],
 }).refine((data) => {
+  if (!data.scheduledStartTime || !data.scheduledEndTime) return true;
   const start = new Date(data.scheduledStartTime);
   const end = new Date(data.scheduledEndTime);
   const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
   return durationMinutes >= 15;
 }, {
-  message: "Duração mínima é de 15 minutos",
+  message: "A duração mínima da sessão é de 15 minutos",
   path: ["scheduledEndTime"],
 }).refine((data) => {
+  if (!data.scheduledStartTime || !data.scheduledEndTime) return true;
   const start = new Date(data.scheduledStartTime);
   const end = new Date(data.scheduledEndTime);
   const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
   return durationMinutes <= 480;
 }, {
-  message: "Duração máxima é de 8 horas",
+  message: "A duração máxima da sessão é de 8 horas",
   path: ["scheduledEndTime"],
 }).refine((data) => {
   if (data.autoStartRecording && !data.recordingEnabled) {
@@ -147,7 +142,8 @@ interface Argument {
 }
 
 interface User {
-  id: string;
+  id?: string;
+  identityId: string;
   fullName: string;
   email: string;
   role: string;
@@ -325,11 +321,16 @@ export default function CreateLiveSessionModal({
 
       if (response.ok) {
         const data = await response.json();
-        // Filter for tutors and admins after fetching all users
-        const tutors = (data.users || data || []).filter((user: User) => 
-          user.role === 'tutor' || user.role === 'admin'
-        );
-        setUsers(tutors);
+        
+        // API returns users in data.items
+        const usersList: User[] = data.items || [];
+        
+        // Temporarily allow all users as co-hosts since there are no tutors/admins in the system
+        // TODO: Revert this when tutors/admins are added to the database
+        // const tutors = usersList.filter((user: User) => 
+        //   user.role === 'tutor' || user.role === 'admin'
+        // );
+        setUsers(usersList); // Using all users for now
       } else {
         console.warn('Failed to fetch users, status:', response.status);
       }
@@ -585,7 +586,6 @@ export default function CreateLiveSessionModal({
                           <Input 
                             type="datetime-local" 
                             className="bg-gray-700 border-gray-600 text-white"
-                            min={new Date().toISOString().slice(0, 16)}
                             {...field} 
                           />
                         </FormControl>
@@ -796,16 +796,22 @@ export default function CreateLiveSessionModal({
                             <SelectValue placeholder={t('fields.coHosts.placeholder')} />
                           </SelectTrigger>
                           <SelectContent className="bg-gray-700 border-gray-600">
-                            {users.map((user) => (
-                              <SelectItem 
-                                key={user.id} 
-                                value={user.id}
-                                disabled={field.value?.includes(user.id)}
-                                className="text-white hover:bg-gray-600 disabled:opacity-50"
-                              >
-                                {user.fullName} ({user.email})
-                              </SelectItem>
-                            ))}
+                            {users.length === 0 ? (
+                              <div className="px-3 py-2 text-gray-400 text-sm">
+                                {t('fields.coHosts.noUsers')}
+                              </div>
+                            ) : (
+                              users.map((user) => (
+                                <SelectItem 
+                                  key={user.id || user.identityId} 
+                                  value={user.id || user.identityId}
+                                  disabled={field.value?.includes(user.id || user.identityId)}
+                                  className="text-white hover:bg-gray-600 disabled:opacity-50"
+                                >
+                                  {user.fullName} ({user.email})
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -815,7 +821,7 @@ export default function CreateLiveSessionModal({
                       {field.value && field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {field.value.map((userId) => {
-                            const user = users.find(u => u.id === userId);
+                            const user = users.find(u => (u.id || u.identityId) === userId);
                             return user ? (
                               <div 
                                 key={userId}

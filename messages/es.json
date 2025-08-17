@@ -1354,6 +1354,66 @@
     "list": "Listar Sesiones"
   },
   
+  "ViewLiveSession": {
+    "title": "Detalles de la Sesión en Vivo",
+    "status": {
+      "scheduled": "Programada",
+      "live": "En Vivo",
+      "ended": "Finalizada",
+      "cancelled": "Cancelada"
+    },
+    "sessionType": {
+      "meeting": "Reunión",
+      "webinar": "Webinar"
+    },
+    "host": {
+      "title": "Presentador"
+    },
+    "coHosts": {
+      "title": "Co-presentadores"
+    },
+    "schedule": {
+      "title": "Programación",
+      "start": "Inicio",
+      "end": "Fin",
+      "actualStart": "Inicio Real",
+      "actualEnd": "Fin Real"
+    },
+    "settings": {
+      "title": "Configuración",
+      "maxParticipants": "Número Máximo de Participantes",
+      "recording": "Grabación",
+      "waitingRoom": "Sala de Espera",
+      "chat": "Chat",
+      "qna": "Preguntas y Respuestas"
+    },
+    "linkedContent": {
+      "title": "Contenido Vinculado",
+      "lesson": "Lección",
+      "argument": "Argumento"
+    },
+    "liveInfo": {
+      "title": "Información en Vivo",
+      "participants": "Participantes",
+      "joinUrl": "Enlace de Acceso",
+      "passcode": "Contraseña"
+    },
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "copy": "Copiar",
+    "copied": {
+      "title": "Copiado!",
+      "url": "Enlace copiado al portapapeles",
+      "passcode": "Contraseña copiada al portapapeles"
+    },
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "error": {
+      "fetchTitle": "Error al cargar detalles",
+      "fetchDescription": "No se pudieron cargar los detalles de la sesión"
+    }
+  },
+  
   "LiveSessionsList": {
     "title": "Clases en Vivo",
     "description": "Visualiza y gestiona todas las sesiones en vivo creadas",

@@ -191,6 +191,16 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Previne início acidental de sessões no horário errado, ajuda tutores a manterem agenda organizada, permite flexibilidade com override consciente quando necessário, reduz confusão de participantes entrando em sessões fora do horário
 - [Commit] feat: add time warnings for early/late session starts
 
+**Melhorias de UX para Integração com Webhooks do Zoom**
+- [Técnico] Adição de tooltip no botão "Finalizar" explicando que finaliza na plataforma, mensagem informativa sobre sincronização automática com Zoom, indicação de que controles manuais permanecem como backup para falhas de webhook
+- [Benefício] Esclarece fluxo de trabalho para tutores, confirma que webhooks automatizam status mas mantém controle manual, reduz confusão sobre onde finalizar sessões
+- [Commit] feat: add UX improvements for Zoom webhook integration
+
+**Correção de Validação de Horário e Busca de Usuários**
+- [Técnico] Remoção de parâmetro role=tutor que causava 400 Bad Request, adição de validação para prevenir agendamento no passado, atributo min em datetime input para desabilitar datas passadas
+- [Benefício] Permite criar sessões sem erro 400, previne agendamento acidental em horários passados, melhora experiência de criação com validação clara
+- [Commit] fix: prevent scheduling sessions in the past and fix user fetching
+
 ---
 
 ## 🔧 Melhorias e Ajustes
@@ -212,6 +222,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 ---
 
 ## 🐛 Bugs Corrigidos
+
+### 17/08/2025
+
+**Correção de Problemas na Criação de Sessões ao Vivo**
+- [Técnico] Correção do mapeamento de resposta da API (data.items), suporte ao campo identityId ao invés de id, permissão temporária para todos usuários como co-hosts (não há tutores/admins no sistema ainda), mensagem quando lista de co-hosts está vazia, melhoria nas validações de data/hora
+- [Benefício] Resolve erro de filter is not a function, elimina warnings de keys no React, permite criar sessões mesmo sem tutores no sistema, mensagens de validação mais claras e consistentes
+- [Commit] fix: resolve live session creation issues
 
 ### 06/08/2025
 

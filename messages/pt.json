@@ -1352,6 +1352,66 @@
     "list": "Listar Sessões"
   },
   
+  "ViewLiveSession": {
+    "title": "Detalhes da Sessão ao Vivo",
+    "status": {
+      "scheduled": "Agendada",
+      "live": "Ao Vivo",
+      "ended": "Finalizada",
+      "cancelled": "Cancelada"
+    },
+    "sessionType": {
+      "meeting": "Reunião",
+      "webinar": "Webinar"
+    },
+    "host": {
+      "title": "Apresentador"
+    },
+    "coHosts": {
+      "title": "Co-apresentadores"
+    },
+    "schedule": {
+      "title": "Agendamento",
+      "start": "Início",
+      "end": "Término",
+      "actualStart": "Início Real",
+      "actualEnd": "Término Real"
+    },
+    "settings": {
+      "title": "Configurações",
+      "maxParticipants": "Máximo de Participantes",
+      "recording": "Gravação",
+      "waitingRoom": "Sala de Espera",
+      "chat": "Chat",
+      "qna": "Perguntas e Respostas"
+    },
+    "linkedContent": {
+      "title": "Conteúdo Vinculado",
+      "lesson": "Aula",
+      "argument": "Argumento"
+    },
+    "liveInfo": {
+      "title": "Informações ao Vivo",
+      "participants": "Participantes",
+      "joinUrl": "Link de Acesso",
+      "passcode": "Senha"
+    },
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "copy": "Copiar",
+    "copied": {
+      "title": "Copiado!",
+      "url": "Link copiado para a área de transferência",
+      "passcode": "Senha copiada para a área de transferência"
+    },
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "error": {
+      "fetchTitle": "Erro ao carregar detalhes",
+      "fetchDescription": "Não foi possível carregar os detalhes da sessão"
+    }
+  },
+  
   "LiveSessionsList": {
     "title": "Aulas ao Vivo",
     "description": "Visualize e gerencie todas as sessões ao vivo criadas",

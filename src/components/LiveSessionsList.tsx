@@ -35,6 +35,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
+import ViewLiveSessionModal from '@/components/ViewLiveSessionModal';
 
 interface Host {
   id: string;
@@ -117,6 +118,7 @@ export default function LiveSessionsList() {
   const [endingSessionId, setEndingSessionId] = useState<string | null>(null);
   const [showEndConfirm, setShowEndConfirm] = useState<string | null>(null);
   const [showTimeWarning, setShowTimeWarning] = useState<{ sessionId: string; type: 'early' | 'late'; timeDiff: number } | null>(null);
+  const [viewSessionId, setViewSessionId] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -685,6 +687,7 @@ export default function LiveSessionsList() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => setViewSessionId(session.id)}
                     className="flex items-center gap-2 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                   >
                     <Eye className="h-4 w-4" />
@@ -945,6 +948,15 @@ export default function LiveSessionsList() {
           </div>
         </div>
       )}
+
+      {/* View Session Details Modal */}
+      <ViewLiveSessionModal
+        sessionId={viewSessionId}
+        open={!!viewSessionId}
+        onOpenChange={(open) => {
+          if (!open) setViewSessionId(null);
+        }}
+      />
     </div>
   );
 }

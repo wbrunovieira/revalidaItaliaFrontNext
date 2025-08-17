@@ -1355,6 +1355,66 @@
     "list": "Elenco Sessioni"
   },
   
+  "ViewLiveSession": {
+    "title": "Dettagli della Sessione dal Vivo",
+    "status": {
+      "scheduled": "Programmata",
+      "live": "Dal Vivo",
+      "ended": "Terminata",
+      "cancelled": "Annullata"
+    },
+    "sessionType": {
+      "meeting": "Riunione",
+      "webinar": "Webinar"
+    },
+    "host": {
+      "title": "Presentatore"
+    },
+    "coHosts": {
+      "title": "Co-presentatori"
+    },
+    "schedule": {
+      "title": "Programma",
+      "start": "Inizio",
+      "end": "Fine",
+      "actualStart": "Inizio Effettivo",
+      "actualEnd": "Fine Effettiva"
+    },
+    "settings": {
+      "title": "Impostazioni",
+      "maxParticipants": "Numero Massimo di Partecipanti",
+      "recording": "Registrazione",
+      "waitingRoom": "Sala d'Attesa",
+      "chat": "Chat",
+      "qna": "Domande e Risposte"
+    },
+    "linkedContent": {
+      "title": "Contenuto Collegato",
+      "lesson": "Lezione",
+      "argument": "Argomento"
+    },
+    "liveInfo": {
+      "title": "Informazioni dal Vivo",
+      "participants": "Partecipanti",
+      "joinUrl": "Link di Accesso",
+      "passcode": "Password"
+    },
+    "enabled": "Attivo",
+    "disabled": "Disattivo",
+    "copy": "Copia",
+    "copied": {
+      "title": "Copiato!",
+      "url": "Link copiato negli appunti",
+      "passcode": "Password copiata negli appunti"
+    },
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il",
+    "error": {
+      "fetchTitle": "Errore nel caricamento dei dettagli",
+      "fetchDescription": "Non è stato possibile caricare i dettagli della sessione"
+    }
+  },
+  
   "LiveSessionsList": {
     "title": "Lezioni dal Vivo",
     "description": "Visualizza e gestisci tutte le sessioni dal vivo create",

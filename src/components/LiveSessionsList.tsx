@@ -18,6 +18,7 @@ import {
   UserCheck,
   Clock,
   Eye,
+  Play,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -90,7 +91,7 @@ interface PaginationMeta {
 export default function LiveSessionsList() {
   const t = useTranslations('Admin.LiveSessionsList');
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const params = useParams();
   const locale = params.locale as string;
 
@@ -109,6 +110,8 @@ export default function LiveSessionsList() {
   const [sortBy, setSortBy] = useState<string>('scheduledStartTime');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [currentPage, setCurrentPage] = useState(1);
+  const [startingSessionId, setStartingSessionId] = useState<string | null>(null);
+  const [showStartConfirm, setShowStartConfirm] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -251,6 +254,71 @@ export default function LiveSessionsList() {
       setSortOrder('DESC');
     }
     setCurrentPage(1);
+  };
+
+  const canStartSession = (session: LiveSession) => {
+    if (!user) return false;
+    
+    // Admins can start any session
+    if (user.role === 'admin') return true;
+    
+    // Tutors can start their own sessions or sessions where they are co-hosts
+    if (user.role === 'tutor') {
+      const isHost = session.host.id === user.id;
+      const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
+      return isHost || isCoHost;
+    }
+    
+    return false;
+  };
+
+  const handleStartSession = async (sessionId: string) => {
+    try {
+      setStartingSessionId(sessionId);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
+      const response = await fetch(
+        `${API_URL}/api/v1/live-sessions/${sessionId}/start`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to start session');
+      }
+
+      const data = await response.json();
+      
+      toast({
+        title: t('success.startTitle'),
+        description: t('success.startDescription'),
+      });
+      
+      // Open Zoom URLs if available
+      if (data.hostUrl && user?.id === sessions.find(s => s.id === sessionId)?.host.id) {
+        window.open(data.hostUrl, '_blank');
+      } else if (data.participantUrl) {
+        window.open(data.participantUrl, '_blank');
+      }
+      
+      // Refresh the list to show updated status
+      fetchSessions();
+      setShowStartConfirm(null);
+    } catch (error) {
+      console.error('Error starting session:', error);
+      toast({
+        title: t('error.startTitle'),
+        description: error instanceof Error ? error.message : t('error.startDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setStartingSessionId(null);
+    }
   };
 
   if (loading && sessions.length === 0) {
@@ -414,6 +482,22 @@ export default function LiveSessionsList() {
                 </div>
 
                 <div className="flex lg:flex-col gap-2">
+                  {session.status === 'SCHEDULED' && canStartSession(session) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowStartConfirm(session.id)}
+                      disabled={startingSessionId === session.id}
+                      className="flex items-center gap-2 bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30 hover:text-green-300"
+                    >
+                      {startingSessionId === session.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                      {t('actions.start')}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -484,6 +568,68 @@ export default function LiveSessionsList() {
               {t('next')}
               <ChevronRight className="h-4 w-4" />
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Start Confirmation Modal */}
+      {showStartConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded-full">
+                  <Play className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {t('confirmStart.title')}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {t('confirmStart.description')}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5" />
+                  <p className="text-sm text-yellow-200">
+                    {t('confirmStart.warning')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowStartConfirm(null)}
+                  disabled={startingSessionId === showStartConfirm}
+                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  {t('confirmStart.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleStartSession(showStartConfirm)}
+                  disabled={startingSessionId === showStartConfirm}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {startingSessionId === showStartConfirm ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('confirmStart.starting')}
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      {t('confirmStart.confirm')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

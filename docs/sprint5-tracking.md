@@ -169,7 +169,10 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 
 ### 16/08/2025
 
--
+**Sistema de Listagem de Sessões ao Vivo no Painel Admin**
+- [Técnico] Implementação de sub-abas na seção Live Sessions (Criar/Listar), componente LiveSessionsList com integração completa ao endpoint GET /api/v1/live-sessions, filtros por status, busca textual, ordenação (data, título, criação) e paginação com meta dados
+- [Benefício] Administradores podem visualizar e gerenciar todas as sessões ao vivo criadas em um único local, com filtros para encontrar rapidamente sessões específicas, badges visuais indicando status (agendada, ao vivo, encerrada, cancelada) e informações de participantes
+- [Commit] feat: add live sessions list with tabs in admin panel
 
 ### 19/08/2025
 

@@ -1384,14 +1384,29 @@
     "argument": "Argumento",
     "recording": "Grabación",
     "actions": {
-      "view": "Ver"
+      "view": "Ver",
+      "start": "Iniciar"
+    },
+    "confirmStart": {
+      "title": "Iniciar Sesión en Vivo",
+      "description": "Estás a punto de iniciar esta sesión en vivo.",
+      "warning": "Después de iniciar, la sesión cambiará al estado EN VIVO y los participantes podrán entrar. Zoom se abrirá en una nueva pestaña.",
+      "cancel": "Cancelar",
+      "confirm": "Iniciar Sesión",
+      "starting": "Iniciando..."
+    },
+    "success": {
+      "startTitle": "Sesión iniciada con éxito",
+      "startDescription": "La sesión en vivo ha sido iniciada y está disponible para los participantes"
     },
     "pageOf": "Página {current} de {total}",
     "previous": "Anterior",
     "next": "Siguiente",
     "error": {
       "fetchTitle": "Error al cargar clases",
-      "fetchDescription": "No se pudieron cargar las clases en vivo"
+      "fetchDescription": "No se pudieron cargar las clases en vivo",
+      "startTitle": "Error al iniciar sesión",
+      "startDescription": "No se pudo iniciar la sesión en vivo"
     }
   },
   

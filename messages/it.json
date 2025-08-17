@@ -1385,14 +1385,29 @@
     "argument": "Argomento",
     "recording": "Registrazione",
     "actions": {
-      "view": "Visualizza"
+      "view": "Visualizza",
+      "start": "Avvia"
+    },
+    "confirmStart": {
+      "title": "Avvia Sessione dal Vivo",
+      "description": "Stai per avviare questa sessione dal vivo.",
+      "warning": "Dopo l'avvio, la sessione cambierà stato in DAL VIVO e i partecipanti potranno entrare. Zoom si aprirà in una nuova scheda.",
+      "cancel": "Annulla",
+      "confirm": "Avvia Sessione",
+      "starting": "Avvio in corso..."
+    },
+    "success": {
+      "startTitle": "Sessione avviata con successo",
+      "startDescription": "La sessione dal vivo è stata avviata ed è disponibile per i partecipanti"
     },
     "pageOf": "Pagina {current} di {total}",
     "previous": "Precedente",
     "next": "Successiva",
     "error": {
       "fetchTitle": "Errore nel caricamento delle lezioni",
-      "fetchDescription": "Non è stato possibile caricare le lezioni dal vivo"
+      "fetchDescription": "Non è stato possibile caricare le lezioni dal vivo",
+      "startTitle": "Errore nell'avvio della sessione",
+      "startDescription": "Non è stato possibile avviare la sessione dal vivo"
     }
   },
   

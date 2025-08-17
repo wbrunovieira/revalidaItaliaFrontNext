@@ -1384,7 +1384,12 @@
     "actions": {
       "view": "Visualizar",
       "start": "Iniciar",
-      "end": "Finalizar"
+      "end": "Finalizar",
+      "endTooltip": "Finalizar sessão na plataforma"
+    },
+    "syncInfo": {
+      "title": "Sincronização Automática Ativada",
+      "description": "As sessões são sincronizadas automaticamente com o Zoom. Ao encerrar no Zoom, o status será atualizado aqui. O botão manual permanece disponível como backup."
     },
     "confirmStart": {
       "title": "Iniciar Sessão ao Vivo",

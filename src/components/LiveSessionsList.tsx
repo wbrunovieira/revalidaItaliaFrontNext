@@ -556,6 +556,15 @@ export default function LiveSessionsList() {
         </Select>
       </div>
 
+      {/* Auto-sync Info Message */}
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex items-start gap-3">
+        <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="text-sm text-blue-200">
+          <p className="font-medium mb-1">{t('syncInfo.title')}</p>
+          <p className="text-blue-300/80">{t('syncInfo.description')}</p>
+        </div>
+      </div>
+
       {/* Sessions List */}
       {sessions.length === 0 ? (
         <div className="bg-gray-800/50 rounded-lg p-12 text-center">
@@ -653,20 +662,25 @@ export default function LiveSessionsList() {
                     </Button>
                   )}
                   {session.status === 'LIVE' && canEndSession(session) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowEndConfirm(session.id)}
-                      disabled={endingSessionId === session.id}
-                      className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
-                    >
-                      {endingSessionId === session.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Square className="h-4 w-4" />
-                      )}
-                      {t('actions.end')}
-                    </Button>
+                    <div className="relative group">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowEndConfirm(session.id)}
+                        disabled={endingSessionId === session.id}
+                        className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
+                      >
+                        {endingSessionId === session.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Square className="h-4 w-4" />
+                        )}
+                        {t('actions.end')}
+                      </Button>
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-xs text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                        {t('actions.endTooltip')}
+                      </div>
+                    </div>
                   )}
                   <Button
                     variant="outline"

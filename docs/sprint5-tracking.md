@@ -174,6 +174,11 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Administradores podem visualizar e gerenciar todas as sessões ao vivo criadas em um único local, com filtros para encontrar rapidamente sessões específicas, badges visuais indicando status (agendada, ao vivo, encerrada, cancelada) e informações de participantes
 - [Commit] feat: add live sessions list with tabs in admin panel
 
+**Funcionalidade de Iniciar Sessão ao Vivo**
+- [Técnico] Implementação de botão de iniciar sessão com integração ao endpoint PATCH /api/v1/live-sessions/:sessionId/start, controle de permissões (admin pode iniciar qualquer sessão, tutor apenas próprias ou onde é co-host), modal de confirmação antes de iniciar, abertura automática do Zoom após sucesso
+- [Benefício] Permite que administradores e tutores iniciem sessões agendadas diretamente do painel, mudando status para LIVE e abrindo automaticamente o Zoom na URL correta (host ou participante), com feedback visual durante o processo e confirmação para evitar cliques acidentais
+- [Commit] feat: add start session functionality to live sessions list
+
 ### 19/08/2025
 
 -

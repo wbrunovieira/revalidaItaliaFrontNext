@@ -68,6 +68,14 @@ const liveSessionSchema = z.object({
   autoStartRecording: z.boolean().default(false),
   muteParticipantsOnEntry: z.boolean().default(false),
 }).refine((data) => {
+  if (!data.scheduledStartTime) return true; // Skip validation if empty
+  const start = new Date(data.scheduledStartTime);
+  const now = new Date();
+  return start > now;
+}, {
+  message: "A sessão não pode ser agendada no passado",
+  path: ["scheduledStartTime"],
+}).refine((data) => {
   const start = new Date(data.scheduledStartTime);
   const end = new Date(data.scheduledEndTime);
   return end > start;
@@ -308,7 +316,8 @@ export default function CreateLiveSessionModal({
     setLoadingUsers(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/users?role=tutor`, {
+      // Remove role parameter as backend returns 400 Bad Request with it
+      const response = await fetch(`${API_URL}/api/v1/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -316,10 +325,13 @@ export default function CreateLiveSessionModal({
 
       if (response.ok) {
         const data = await response.json();
+        // Filter for tutors and admins after fetching all users
         const tutors = (data.users || data || []).filter((user: User) => 
           user.role === 'tutor' || user.role === 'admin'
         );
         setUsers(tutors);
+      } else {
+        console.warn('Failed to fetch users, status:', response.status);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -573,6 +585,7 @@ export default function CreateLiveSessionModal({
                           <Input 
                             type="datetime-local" 
                             className="bg-gray-700 border-gray-600 text-white"
+                            min={new Date().toISOString().slice(0, 16)}
                             {...field} 
                           />
                         </FormControl>

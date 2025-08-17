@@ -19,6 +19,7 @@ import {
   Clock,
   Eye,
   Play,
+  Square,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -112,6 +113,8 @@ export default function LiveSessionsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [startingSessionId, setStartingSessionId] = useState<string | null>(null);
   const [showStartConfirm, setShowStartConfirm] = useState<string | null>(null);
+  const [endingSessionId, setEndingSessionId] = useState<string | null>(null);
+  const [showEndConfirm, setShowEndConfirm] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -272,6 +275,22 @@ export default function LiveSessionsList() {
     return false;
   };
 
+  const canEndSession = (session: LiveSession) => {
+    if (!user) return false;
+    
+    // Admins can end any session
+    if (user.role === 'admin') return true;
+    
+    // Tutors can end their own sessions or sessions where they are co-hosts
+    if (user.role === 'tutor') {
+      const isHost = session.host.id === user.id;
+      const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
+      return isHost || isCoHost;
+    }
+    
+    return false;
+  };
+
   const handleStartSession = async (sessionId: string) => {
     try {
       setStartingSessionId(sessionId);
@@ -318,6 +337,48 @@ export default function LiveSessionsList() {
       });
     } finally {
       setStartingSessionId(null);
+    }
+  };
+
+  const handleEndSession = async (sessionId: string) => {
+    try {
+      setEndingSessionId(sessionId);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
+      const response = await fetch(
+        `${API_URL}/api/v1/live-sessions/${sessionId}/end`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to end session');
+      }
+
+      const data = await response.json();
+      
+      toast({
+        title: t('success.endTitle'),
+        description: t('success.endDescription', { participants: data.totalParticipants || 0 }),
+      });
+      
+      // Refresh the list to show updated status
+      fetchSessions();
+      setShowEndConfirm(null);
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast({
+        title: t('error.endTitle'),
+        description: error instanceof Error ? error.message : t('error.endDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setEndingSessionId(null);
     }
   };
 
@@ -498,6 +559,22 @@ export default function LiveSessionsList() {
                       {t('actions.start')}
                     </Button>
                   )}
+                  {session.status === 'LIVE' && canEndSession(session) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowEndConfirm(session.id)}
+                      disabled={endingSessionId === session.id}
+                      className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
+                    >
+                      {endingSessionId === session.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                      {t('actions.end')}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -568,6 +645,68 @@ export default function LiveSessionsList() {
               {t('next')}
               <ChevronRight className="h-4 w-4" />
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* End Confirmation Modal */}
+      {showEndConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/20 rounded-full">
+                  <Square className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {t('confirmEnd.title')}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {t('confirmEnd.description')}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5" />
+                  <p className="text-sm text-yellow-200">
+                    {t('confirmEnd.warning')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowEndConfirm(null)}
+                  disabled={endingSessionId === showEndConfirm}
+                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  {t('confirmEnd.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleEndSession(showEndConfirm)}
+                  disabled={endingSessionId === showEndConfirm}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {endingSessionId === showEndConfirm ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('confirmEnd.ending')}
+                    </>
+                  ) : (
+                    <>
+                      <Square className="h-4 w-4 mr-2" />
+                      {t('confirmEnd.confirm')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

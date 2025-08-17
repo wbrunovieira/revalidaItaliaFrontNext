@@ -1385,7 +1385,8 @@
     "recording": "Grabación",
     "actions": {
       "view": "Ver",
-      "start": "Iniciar"
+      "start": "Iniciar",
+      "end": "Finalizar"
     },
     "confirmStart": {
       "title": "Iniciar Sesión en Vivo",
@@ -1395,9 +1396,19 @@
       "confirm": "Iniciar Sesión",
       "starting": "Iniciando..."
     },
+    "confirmEnd": {
+      "title": "Finalizar Sesión en Vivo",
+      "description": "Estás a punto de finalizar esta transmisión en vivo.",
+      "warning": "Después de finalizar, todos los participantes serán desconectados y la sesión será terminada. Si la grabación está habilitada, se procesará automáticamente.",
+      "cancel": "Cancelar",
+      "confirm": "Finalizar Sesión",
+      "ending": "Finalizando..."
+    },
     "success": {
       "startTitle": "Sesión iniciada con éxito",
-      "startDescription": "La sesión en vivo ha sido iniciada y está disponible para los participantes"
+      "startDescription": "La sesión en vivo ha sido iniciada y está disponible para los participantes",
+      "endTitle": "Sesión finalizada con éxito",
+      "endDescription": "La transmisión ha sido finalizada. Total de participantes: {participants}"
     },
     "pageOf": "Página {current} de {total}",
     "previous": "Anterior",
@@ -1406,7 +1417,9 @@
       "fetchTitle": "Error al cargar clases",
       "fetchDescription": "No se pudieron cargar las clases en vivo",
       "startTitle": "Error al iniciar sesión",
-      "startDescription": "No se pudo iniciar la sesión en vivo"
+      "startDescription": "No se pudo iniciar la sesión en vivo",
+      "endTitle": "Error al finalizar sesión",
+      "endDescription": "No se pudo finalizar la sesión en vivo"
     }
   },
   

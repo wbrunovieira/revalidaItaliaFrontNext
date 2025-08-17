@@ -1386,7 +1386,8 @@
     "recording": "Registrazione",
     "actions": {
       "view": "Visualizza",
-      "start": "Avvia"
+      "start": "Avvia",
+      "end": "Termina"
     },
     "confirmStart": {
       "title": "Avvia Sessione dal Vivo",
@@ -1396,9 +1397,19 @@
       "confirm": "Avvia Sessione",
       "starting": "Avvio in corso..."
     },
+    "confirmEnd": {
+      "title": "Termina Sessione dal Vivo",
+      "description": "Stai per terminare questa trasmissione dal vivo.",
+      "warning": "Dopo la conclusione, tutti i partecipanti saranno disconnessi e la sessione sarà terminata. Se la registrazione è abilitata, verrà elaborata automaticamente.",
+      "cancel": "Annulla",
+      "confirm": "Termina Sessione",
+      "ending": "Terminando..."
+    },
     "success": {
       "startTitle": "Sessione avviata con successo",
-      "startDescription": "La sessione dal vivo è stata avviata ed è disponibile per i partecipanti"
+      "startDescription": "La sessione dal vivo è stata avviata ed è disponibile per i partecipanti",
+      "endTitle": "Sessione terminata con successo",
+      "endDescription": "La trasmissione è stata terminata. Totale partecipanti: {participants}"
     },
     "pageOf": "Pagina {current} di {total}",
     "previous": "Precedente",
@@ -1407,7 +1418,9 @@
       "fetchTitle": "Errore nel caricamento delle lezioni",
       "fetchDescription": "Non è stato possibile caricare le lezioni dal vivo",
       "startTitle": "Errore nell'avvio della sessione",
-      "startDescription": "Non è stato possibile avviare la sessione dal vivo"
+      "startDescription": "Non è stato possibile avviare la sessione dal vivo",
+      "endTitle": "Errore nel terminare la sessione",
+      "endDescription": "Non è stato possibile terminare la sessione dal vivo"
     }
   },
   

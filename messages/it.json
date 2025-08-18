@@ -1525,14 +1525,10 @@
         "placeholder": "Descrivi il contenuto e gli obiettivi della sessione...",
         "helper": "Opzionale - Massimo 5000 caratteri"
       },
-      "sessionType": {
-        "label": "Tipo di Sessione",
-        "placeholder": "Seleziona il tipo",
-        "helper": "Webinar: Presentazione per molti. Meeting: Interattivo per gruppi più piccoli",
-        "options": {
-          "webinar": "Webinar (Presentazione)",
-          "meeting": "Meeting (Interattivo)"
-        }
+      "configPreset": {
+        "label": "Tipo di Configurazione",
+        "placeholder": "Seleziona una configurazione",
+        "helper": "Scegli un modello di configurazione o personalizza le tue preferenze"
       },
       "startTime": {
         "label": "Ora di Inizio",
@@ -1614,6 +1610,20 @@
       "helper": "Opzionalmente, associa questa sessione a una lezione specifica o argomento",
       "or": "oppure"
     },
+    "presets": {
+      "aulaExpositiva": {
+        "label": "Lezione Espositiva"
+      },
+      "aulaExpositivaDesc": "Il professore presenta, gli studenti ascoltano",
+      "aulaInterativa": {
+        "label": "Lezione Interattiva"
+      },
+      "aulaInterativaDesc": "Workshop con partecipazione degli studenti",
+      "personalizado": {
+        "label": "Personalizzato"
+      },
+      "personalizadoDesc": "Configura ogni opzione manualmente"
+    },
     "actions": {
       "cancel": "Annulla",
       "create": "Crea Sessione",
@@ -1626,7 +1636,12 @@
     "error": {
       "title": "Errore nella Creazione",
       "description": "Non è stato possibile creare la sessione dal vivo",
-      "createFailed": "Creazione della sessione fallita"
+      "createFailed": "Creazione della sessione fallita",
+      "hostNotFound": "Il tuo utente non è stato trovato nel sistema. Per favore, esci e accedi di nuovo.",
+      "lessonNotFound": "La lezione selezionata non è stata trovata. Per favore, seleziona un'altra lezione.",
+      "argumentNotFound": "L'argomento selezionato non è stato trovato. Per favore, seleziona un altro argomento.",
+      "invalidDuration": "La durata della sessione deve essere tra 15 minuti e 8 ore.",
+      "pastDate": "La data di inizio deve essere nel futuro. Non è possibile programmare sessioni nel passato."
     }
   },
   

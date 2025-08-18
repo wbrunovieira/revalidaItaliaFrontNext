@@ -68,7 +68,6 @@ interface LiveSession {
   title: string;
   description?: string;
   status: 'SCHEDULED' | 'LIVE' | 'ENDED' | 'CANCELLED';
-  sessionType: 'MEETING' | 'WEBINAR';
   host: Host;
   coHosts: CoHost[];
   lesson?: Lesson;
@@ -215,21 +214,6 @@ export default function LiveSessionsList() {
     );
   };
 
-  const getSessionTypeBadge = (type: LiveSession['sessionType']) => {
-    const typeConfig = {
-      MEETING: {
-        label: t('sessionType.meeting'),
-        className: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      },
-      WEBINAR: {
-        label: t('sessionType.webinar'),
-        className: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      },
-    };
-
-    const config = typeConfig[type];
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -600,7 +584,6 @@ export default function LiveSessionsList() {
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(session.status)}
-                      {getSessionTypeBadge(session.sessionType)}
                     </div>
                   </div>
 

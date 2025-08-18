@@ -9,28 +9,29 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, onCheckedChange, onChange, ...props }, ref) => {
+  ({ className, onCheckedChange, onChange, checked, ...props }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange?.(e)
       onCheckedChange?.(e.target.checked)
     }
 
     return (
-      <div className="relative inline-block">
+      <label className="relative inline-block cursor-pointer">
         <input
           type="checkbox"
           ref={ref}
           className="sr-only peer"
           onChange={handleChange}
+          checked={checked}
           {...props}
         />
         <div
           className={cn(
-            "h-4 w-4 shrink-0 rounded-sm border border-gray-400 bg-transparent",
+            "h-4 w-4 shrink-0 rounded-sm border border-gray-400 bg-transparent cursor-pointer",
             "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2",
             "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
             "peer-checked:bg-secondary peer-checked:border-secondary",
-            "transition-colors duration-200",
+            "hover:border-secondary/70 transition-all duration-200",
             className
           )}
         >
@@ -43,7 +44,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             )}
           />
         </div>
-      </div>
+      </label>
     )
   }
 )

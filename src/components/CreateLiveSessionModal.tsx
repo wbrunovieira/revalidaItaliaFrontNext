@@ -44,7 +44,6 @@ import {
 const liveSessionSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório').max(255, 'Título muito longo'),
   description: z.string().max(5000, 'Descrição muito longa').default(''),
-  sessionType: z.enum(['MEETING', 'WEBINAR']),
   scheduledStartTime: z.string().min(1, 'Data e hora de início são obrigatórias'),
   scheduledEndTime: z.string().min(1, 'Data e hora de término são obrigatórias'),
   
@@ -178,11 +177,10 @@ export default function CreateLiveSessionModal({
     defaultValues: {
       title: '',
       description: '',
-      sessionType: 'WEBINAR',
       scheduledStartTime: '',
       scheduledEndTime: '',
       maxParticipants: 100,
-      recordingEnabled: false,
+      recordingEnabled: true,
       waitingRoomEnabled: true,
       chatEnabled: true,
       qnaEnabled: false,
@@ -357,7 +355,6 @@ export default function CreateLiveSessionModal({
       const requestBody: Record<string, unknown> = {
         title: values.title,
         description: values.description,
-        sessionType: values.sessionType,
         scheduledStartTime: new Date(values.scheduledStartTime).toISOString(),
         scheduledEndTime: new Date(values.scheduledEndTime).toISOString(),
         settings: {
@@ -425,9 +422,29 @@ export default function CreateLiveSessionModal({
       }
     } catch (error) {
       console.error('❌ Error in onSubmit:', error);
+      
+      // Tratamento específico de erros
+      let errorMessage = t('error.description');
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Host with ID') && error.message.includes('not found')) {
+          errorMessage = t('error.hostNotFound');
+        } else if (error.message.includes('Lesson with ID') && error.message.includes('not found')) {
+          errorMessage = t('error.lessonNotFound');
+        } else if (error.message.includes('Argument with ID') && error.message.includes('not found')) {
+          errorMessage = t('error.argumentNotFound');
+        } else if (error.message.includes('duration')) {
+          errorMessage = t('error.invalidDuration');
+        } else if (error.message.includes('past')) {
+          errorMessage = t('error.pastDate');
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: t('error.title'),
-        description: error instanceof Error ? error.message : t('error.description'),
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -539,37 +556,6 @@ export default function CreateLiveSessionModal({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="sessionType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-300 flex items-center gap-2">
-                        {t('fields.sessionType.label')}
-                        <span className="text-red-400">*</span>
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                            <SelectValue placeholder={t('fields.sessionType.placeholder')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-gray-700 border-gray-600">
-                          <SelectItem value="WEBINAR" className="text-white hover:bg-gray-600">
-                            {t('fields.sessionType.options.webinar')}
-                          </SelectItem>
-                          <SelectItem value="MEETING" className="text-white hover:bg-gray-600">
-                            {t('fields.sessionType.options.meeting')}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription className="text-gray-400">
-                        {t('fields.sessionType.helper')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               {/* Schedule Section */}

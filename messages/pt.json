@@ -1522,14 +1522,10 @@
         "placeholder": "Descreva o conteúdo e objetivos da sessão...",
         "helper": "Opcional - Máximo 5000 caracteres"
       },
-      "sessionType": {
-        "label": "Tipo de Sessão",
-        "placeholder": "Selecione o tipo",
-        "helper": "Webinar: Apresentação para muitos. Meeting: Interativo para grupos menores",
-        "options": {
-          "webinar": "Webinar (Apresentação)",
-          "meeting": "Meeting (Interativo)"
-        }
+      "configPreset": {
+        "label": "Tipo de Configuração",
+        "placeholder": "Selecione uma configuração",
+        "helper": "Escolha um modelo de configuração ou personalize suas preferências"
       },
       "startTime": {
         "label": "Data e Hora de Início"
@@ -1609,6 +1605,20 @@
       "helper": "Opcionalmente, associe esta sessão a uma aula específica ou argumento",
       "or": "ou"
     },
+    "presets": {
+      "aulaExpositiva": {
+        "label": "Aula Expositiva"
+      },
+      "aulaExpositivaDesc": "Professor apresenta, alunos assistem",
+      "aulaInterativa": {
+        "label": "Aula Interativa"
+      },
+      "aulaInterativaDesc": "Workshop com participação dos alunos",
+      "personalizado": {
+        "label": "Personalizado"
+      },
+      "personalizadoDesc": "Configure cada opção manualmente"
+    },
     "actions": {
       "cancel": "Cancelar",
       "create": "Criar Sessão",
@@ -1621,7 +1631,12 @@
     "error": {
       "title": "Erro ao Criar",
       "description": "Não foi possível criar a sessão",
-      "createFailed": "Falha ao criar sessão ao vivo"
+      "createFailed": "Falha ao criar sessão ao vivo",
+      "hostNotFound": "Seu usuário não foi encontrado no sistema. Por favor, faça logout e entre novamente.",
+      "lessonNotFound": "A aula selecionada não foi encontrada. Por favor, selecione outra aula.",
+      "argumentNotFound": "O argumento selecionado não foi encontrado. Por favor, selecione outro argumento.",
+      "invalidDuration": "A duração da sessão deve ser entre 15 minutos e 8 horas.",
+      "pastDate": "A data de início deve ser no futuro. Não é possível agendar sessões no passado."
     }
   },
   

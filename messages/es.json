@@ -1524,14 +1524,10 @@
         "placeholder": "Describe el contenido y objetivos de la sesión...",
         "helper": "Opcional - Máximo 5000 caracteres"
       },
-      "sessionType": {
-        "label": "Tipo de Sesión",
-        "placeholder": "Selecciona el tipo",
-        "helper": "Webinar: Presentación para muchos. Meeting: Interactivo para grupos pequeños",
-        "options": {
-          "webinar": "Webinar (Presentación)",
-          "meeting": "Meeting (Interactivo)"
-        }
+      "configPreset": {
+        "label": "Tipo de Configuración",
+        "placeholder": "Selecciona una configuración",
+        "helper": "Elige un modelo de configuración o personaliza tus preferencias"
       },
       "startTime": {
         "label": "Hora de Inicio",
@@ -1613,6 +1609,20 @@
       "helper": "Opcionalmente, asocia esta sesión a una lección específica o argumento",
       "or": "o"
     },
+    "presets": {
+      "aulaExpositiva": {
+        "label": "Clase Expositiva"
+      },
+      "aulaExpositivaDesc": "El profesor presenta, los estudiantes escuchan",
+      "aulaInterativa": {
+        "label": "Clase Interactiva"
+      },
+      "aulaInterativaDesc": "Taller con participación de los estudiantes",
+      "personalizado": {
+        "label": "Personalizado"
+      },
+      "personalizadoDesc": "Configura cada opción manualmente"
+    },
     "actions": {
       "cancel": "Cancelar",
       "create": "Crear Sesión",
@@ -1625,7 +1635,12 @@
     "error": {
       "title": "Error al Crear",
       "description": "No se pudo crear la sesión en vivo",
-      "createFailed": "Fallo en la creación de la sesión"
+      "createFailed": "Fallo en la creación de la sesión",
+      "hostNotFound": "Tu usuario no fue encontrado en el sistema. Por favor, cierra sesión y vuelve a entrar.",
+      "lessonNotFound": "La lección seleccionada no fue encontrada. Por favor, selecciona otra lección.",
+      "argumentNotFound": "El argumento seleccionado no fue encontrado. Por favor, selecciona otro argumento.",
+      "invalidDuration": "La duración de la sesión debe ser entre 15 minutos y 8 horas.",
+      "pastDate": "La fecha de inicio debe ser en el futuro. No es posible programar sesiones en el pasado."
     }
   },
   

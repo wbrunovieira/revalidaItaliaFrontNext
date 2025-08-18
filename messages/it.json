@@ -1596,6 +1596,18 @@
       "muteParticipantsOnEntry": {
         "label": "Silenzia Partecipanti all'Ingresso",
         "helper": "Silenzia automaticamente i nuovi partecipanti"
+      },
+      "allowParticipantsUnmute": {
+        "label": "Permetti di Riattivare Audio",
+        "helper": "I partecipanti possono riattivare il proprio microfono"
+      },
+      "allowRaiseHand": {
+        "label": "Alzare la Mano",
+        "helper": "I partecipanti possono segnalare che vogliono parlare"
+      },
+      "allowParticipantScreenShare": {
+        "label": "Condivisione Schermo",
+        "helper": "I partecipanti possono condividere i loro schermi"
       }
     },
     "associations": {

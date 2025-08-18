@@ -66,7 +66,10 @@ const liveSessionSchema = z.object({
   chatEnabled: z.boolean().default(true),
   qnaEnabled: z.boolean().default(false),
   autoStartRecording: z.boolean().default(false),
-  muteParticipantsOnEntry: z.boolean().default(false),
+  muteParticipantsOnEntry: z.boolean().default(true),
+  allowParticipantsUnmute: z.boolean().default(false),
+  allowRaiseHand: z.boolean().default(true),
+  allowParticipantScreenShare: z.boolean().default(false),
 }).refine((data) => {
   if (!data.scheduledStartTime || !data.scheduledEndTime) return true;
   const start = new Date(data.scheduledStartTime);
@@ -184,7 +187,10 @@ export default function CreateLiveSessionModal({
       chatEnabled: true,
       qnaEnabled: false,
       autoStartRecording: false,
-      muteParticipantsOnEntry: false,
+      muteParticipantsOnEntry: true,
+      allowParticipantsUnmute: false,
+      allowRaiseHand: true,
+      allowParticipantScreenShare: false,
       coHostIds: [],
     },
   });
@@ -362,6 +368,9 @@ export default function CreateLiveSessionModal({
           qnaEnabled: values.qnaEnabled,
           autoStartRecording: values.autoStartRecording,
           muteParticipantsOnEntry: values.muteParticipantsOnEntry,
+          allowParticipantsUnmute: values.allowParticipantsUnmute,
+          allowRaiseHand: values.allowRaiseHand,
+          allowParticipantScreenShare: values.allowParticipantScreenShare,
         },
       };
 
@@ -1011,6 +1020,75 @@ export default function CreateLiveSessionModal({
                           </FormLabel>
                           <FormDescription className="text-xs text-gray-400">
                             {t('fields.muteParticipantsOnEntry.helper')}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="allowParticipantsUnmute"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-gray-300 text-sm">
+                            {t('fields.allowParticipantsUnmute.label')}
+                          </FormLabel>
+                          <FormDescription className="text-xs text-gray-400">
+                            {t('fields.allowParticipantsUnmute.helper')}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="allowRaiseHand"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-gray-300 text-sm">
+                            {t('fields.allowRaiseHand.label')}
+                          </FormLabel>
+                          <FormDescription className="text-xs text-gray-400">
+                            {t('fields.allowRaiseHand.helper')}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="allowParticipantScreenShare"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-gray-300 text-sm">
+                            {t('fields.allowParticipantScreenShare.label')}
+                          </FormLabel>
+                          <FormDescription className="text-xs text-gray-400">
+                            {t('fields.allowParticipantScreenShare.helper')}
                           </FormDescription>
                         </div>
                         <FormControl>

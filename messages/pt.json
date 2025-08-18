@@ -1591,6 +1591,18 @@
       "muteParticipantsOnEntry": {
         "label": "Silenciar ao Entrar",
         "helper": "Participantes entram com microfone desligado"
+      },
+      "allowParticipantsUnmute": {
+        "label": "Permitir Desmutar",
+        "helper": "Participantes podem ligar seu próprio microfone"
+      },
+      "allowRaiseHand": {
+        "label": "Levantar Mão",
+        "helper": "Participantes podem sinalizar que querem falar"
+      },
+      "allowParticipantScreenShare": {
+        "label": "Compartilhar Tela",
+        "helper": "Participantes podem compartilhar suas telas"
       }
     },
     "associations": {

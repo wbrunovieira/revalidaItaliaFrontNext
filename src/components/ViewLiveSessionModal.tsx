@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Clock, Users, Video, Radio, Link, Lock, MessageSquare, HelpCircle, User } from 'lucide-react';
+import { Loader2, Calendar, Clock, Users, Video, Radio, Link, Lock, MessageSquare, HelpCircle, User, Mic, MicOff, Hand, Monitor, PlayCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
@@ -63,6 +63,11 @@ interface LiveSessionDetails {
   waitingRoomEnabled: boolean;
   chatEnabled: boolean;
   qnaEnabled: boolean;
+  autoStartRecording: boolean;
+  muteParticipantsOnEntry: boolean;
+  allowParticipantsUnmute: boolean;
+  allowRaiseHand: boolean;
+  allowParticipantScreenShare: boolean;
   joinUrl?: string;
   passcode?: string;
   participantCount?: number;
@@ -326,15 +331,15 @@ export default function ViewLiveSessionModal({
               </div>
 
               {/* Settings */}
-              <div className="bg-gray-700/50 rounded-lg p-4">
+              <div className="bg-gray-700/50 rounded-lg p-4 md:col-span-2">
                 <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
                   <Video className="h-4 w-4" />
                   {t('settings.title')}
                 </h4>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">{t('settings.maxParticipants')}:</span>
-                    <span className="text-white text-sm">{session.maxParticipants}</span>
+                    <span className="text-white text-sm font-medium">{session.maxParticipants}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm flex items-center gap-1">
@@ -343,6 +348,15 @@ export default function ViewLiveSessionModal({
                     </span>
                     <Badge className={session.recordingEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
                       {session.recordingEnabled ? t('enabled') : t('disabled')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm flex items-center gap-1">
+                      <PlayCircle className="h-3 w-3" />
+                      {t('settings.autoStartRecording')}:
+                    </span>
+                    <Badge className={session.autoStartRecording ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
+                      {session.autoStartRecording ? t('enabled') : t('disabled')}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
@@ -370,6 +384,42 @@ export default function ViewLiveSessionModal({
                     </span>
                     <Badge className={session.qnaEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
                       {session.qnaEnabled ? t('enabled') : t('disabled')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm flex items-center gap-1">
+                      <MicOff className="h-3 w-3" />
+                      {t('settings.muteOnEntry')}:
+                    </span>
+                    <Badge className={session.muteParticipantsOnEntry ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-600 text-gray-400'}>
+                      {session.muteParticipantsOnEntry ? t('enabled') : t('disabled')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm flex items-center gap-1">
+                      <Mic className="h-3 w-3" />
+                      {t('settings.allowUnmute')}:
+                    </span>
+                    <Badge className={session.allowParticipantsUnmute ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
+                      {session.allowParticipantsUnmute ? t('enabled') : t('disabled')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm flex items-center gap-1">
+                      <Hand className="h-3 w-3" />
+                      {t('settings.allowRaiseHand')}:
+                    </span>
+                    <Badge className={session.allowRaiseHand ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
+                      {session.allowRaiseHand ? t('enabled') : t('disabled')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400 text-sm flex items-center gap-1">
+                      <Monitor className="h-3 w-3" />
+                      {t('settings.allowScreenShare')}:
+                    </span>
+                    <Badge className={session.allowParticipantScreenShare ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'}>
+                      {session.allowParticipantScreenShare ? t('enabled') : t('disabled')}
                     </Badge>
                   </div>
                 </div>

@@ -1384,9 +1384,14 @@
       "title": "Configurações",
       "maxParticipants": "Máximo de Participantes",
       "recording": "Gravação",
+      "autoStartRecording": "Iniciar Gravação Automaticamente",
       "waitingRoom": "Sala de Espera",
       "chat": "Chat",
-      "qna": "Perguntas e Respostas"
+      "qna": "Perguntas e Respostas",
+      "muteOnEntry": "Silenciar ao Entrar",
+      "allowUnmute": "Permitir Ativar Microfone",
+      "allowRaiseHand": "Permitir Levantar a Mão",
+      "allowScreenShare": "Permitir Compartilhamento de Tela"
     },
     "linkedContent": {
       "title": "Conteúdo Vinculado",

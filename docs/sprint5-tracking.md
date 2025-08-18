@@ -201,6 +201,13 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Permite criar sessões sem erro 400, previne agendamento acidental em horários passados, melhora experiência de criação com validação clara
 - [Commit] fix: prevent scheduling sessions in the past and fix user fetching
 
+### 17/08/2025
+
+**Modal de Visualização de Detalhes de Sessões ao Vivo**
+- [Técnico] Criação do componente ViewLiveSessionModal com integração completa ao endpoint GET /api/v1/live-sessions/:sessionId, exibição de host, co-hosts, horários, configurações (gravação, sala de espera, chat, Q&A), informações ao vivo (participantes, URL, senha), tratamento defensivo para campos opcionais como coHosts
+- [Benefício] Permite que administradores visualizem todos os detalhes de uma sessão em modal organizado, facilita cópia de URLs e senhas de acesso com feedback visual, mostra status em tempo real com badges coloridos e animados, previne erros com validação de campos opcionais
+- [Commit] feat: add view details modal for live sessions with error handling
+
 ---
 
 ## 🔧 Melhorias e Ajustes

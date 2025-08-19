@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
+import RecordingsList from '@/components/RecordingsList';
 
 // API interfaces matching backend response
 interface Host {
@@ -544,7 +545,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-800 p-1">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-800 p-1">
           <TabsTrigger value="upcoming" className="relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
             <Calendar className="mr-2 h-4 w-4" />
             {t('upcoming')}
@@ -571,6 +572,13 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 {recordedSessions.length}
               </Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="allRecordings" className="data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
+            <PlayCircle className="mr-2 h-4 w-4" />
+            {t('allRecordings')}
+            <Badge className="ml-2 bg-purple-500 text-white">
+              API
+            </Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -784,6 +792,11 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
               ))}
             </AnimatePresence>
           )}
+        </TabsContent>
+
+        {/* All Recordings from API */}
+        <TabsContent value="allRecordings" className="space-y-4">
+          <RecordingsList locale={locale} translations={t} />
         </TabsContent>
       </Tabs>
 

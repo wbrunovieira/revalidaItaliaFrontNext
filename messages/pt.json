@@ -125,6 +125,7 @@
     "upcoming": "Próximas Sessões",
     "live": "Ao Vivo Agora",
     "recorded": "Sessões Gravadas",
+    "allRecordings": "Todas as Gravações",
     "noUpcoming": "Nenhuma sessão agendada",
     "noUpcomingDescription": "Não há sessões programadas no momento. Volte mais tarde!",
     "noLive": "Nenhuma sessão ao vivo",
@@ -165,8 +166,41 @@
       "joinTitle": "Erro ao entrar na sessão",
       "joinDescription": "Não foi possível entrar na sessão. Verifique sua conexão.",
       "registerTitle": "Erro ao se inscrever",
-      "registerDescription": "Não foi possível realizar a inscrição. Tente novamente."
-    }
+      "registerDescription": "Não foi possível realizar a inscrição. Tente novamente.",
+      "noStreamTitle": "Stream não disponível",
+      "noStreamDescription": "Esta gravação não está disponível para visualização online",
+      "noDownloadTitle": "Download não disponível",
+      "noDownloadDescription": "Esta gravação não está disponível para download"
+    },
+    "loading": "Carregando gravações...",
+    "searchPlaceholder": "Buscar gravações...",
+    "filterStatus": "Filtrar por status",
+    "sortBy": "Ordenar por",
+    "sort": {
+      "date": "Data de gravação",
+      "title": "Título",
+      "duration": "Duração",
+      "views": "Visualizações"
+    },
+    "recordingStatus": {
+      "all": "Todos",
+      "available": "Disponível",
+      "processing": "Processando",
+      "failed": "Falhou",
+      "expired": "Expirado"
+    },
+    "showing": "Mostrando {count} de {total} gravações",
+    "refresh": "Atualizar",
+    "noRecordings": "Nenhuma gravação encontrada",
+    "noRecordingsDescription": "Não há gravações disponíveis no momento",
+    "views": "visualizações",
+    "watch": "Assistir",
+    "opening": "Abrindo...",
+    "download": "Baixar",
+    "availableUntil": "Disponível até {date}",
+    "page": "Página {current} de {total}",
+    "previous": "Anterior",
+    "next": "Próxima"
   },
     "ViewTicket": {
     "title": "Detalhes do Ticket",

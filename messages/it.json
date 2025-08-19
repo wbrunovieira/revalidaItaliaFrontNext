@@ -125,6 +125,7 @@
     "upcoming": "Prossime Sessioni",
     "live": "Dal Vivo Ora",
     "recorded": "Sessioni Registrate",
+    "allRecordings": "Tutte le Registrazioni",
     "noUpcoming": "Nessuna sessione programmata",
     "noUpcomingDescription": "Non ci sono sessioni programmate al momento. Torna più tardi!",
     "noLive": "Nessuna sessione dal vivo",
@@ -165,8 +166,41 @@
       "joinTitle": "Errore nel partecipare alla sessione",
       "joinDescription": "Impossibile partecipare alla sessione. Verifica la connessione.",
       "registerTitle": "Errore nell'iscrizione",
-      "registerDescription": "Impossibile completare l'iscrizione. Riprova."
-    }
+      "registerDescription": "Impossibile completare l'iscrizione. Riprova.",
+      "noStreamTitle": "Stream non disponibile",
+      "noStreamDescription": "Questa registrazione non è disponibile per la visualizzazione online",
+      "noDownloadTitle": "Download non disponibile",
+      "noDownloadDescription": "Questa registrazione non è disponibile per il download"
+    },
+    "loading": "Caricamento registrazioni...",
+    "searchPlaceholder": "Cerca registrazioni...",
+    "filterStatus": "Filtra per stato",
+    "sortBy": "Ordina per",
+    "sort": {
+      "date": "Data di registrazione",
+      "title": "Titolo",
+      "duration": "Durata",
+      "views": "Visualizzazioni"
+    },
+    "recordingStatus": {
+      "all": "Tutti",
+      "available": "Disponibile",
+      "processing": "In elaborazione",
+      "failed": "Fallito",
+      "expired": "Scaduto"
+    },
+    "showing": "Mostrando {count} di {total} registrazioni",
+    "refresh": "Aggiorna",
+    "noRecordings": "Nessuna registrazione trovata",
+    "noRecordingsDescription": "Non ci sono registrazioni disponibili al momento",
+    "views": "visualizzazioni",
+    "watch": "Guarda",
+    "opening": "Apertura...",
+    "download": "Scarica",
+    "availableUntil": "Disponibile fino a {date}",
+    "page": "Pagina {current} di {total}",
+    "previous": "Precedente",
+    "next": "Successiva"
   },
 
   "ViewTicket": {

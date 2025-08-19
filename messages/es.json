@@ -125,6 +125,7 @@
     "upcoming": "Próximas Sesiones",
     "live": "En Vivo Ahora",
     "recorded": "Sesiones Grabadas",
+    "allRecordings": "Todas las Grabaciones",
     "noUpcoming": "Ninguna sesión programada",
     "noUpcomingDescription": "No hay sesiones programadas en este momento. ¡Vuelve más tarde!",
     "noLive": "Ninguna sesión en vivo",
@@ -165,8 +166,41 @@
       "joinTitle": "Error al unirse a la sesión",
       "joinDescription": "No se pudo unir a la sesión. Verifica tu conexión.",
       "registerTitle": "Error al inscribirse",
-      "registerDescription": "No se pudo completar la inscripción. Intenta de nuevo."
-    }
+      "registerDescription": "No se pudo completar la inscripción. Intenta de nuevo.",
+      "noStreamTitle": "Stream no disponible",
+      "noStreamDescription": "Esta grabación no está disponible para visualización en línea",
+      "noDownloadTitle": "Descarga no disponible",
+      "noDownloadDescription": "Esta grabación no está disponible para descargar"
+    },
+    "loading": "Cargando grabaciones...",
+    "searchPlaceholder": "Buscar grabaciones...",
+    "filterStatus": "Filtrar por estado",
+    "sortBy": "Ordenar por",
+    "sort": {
+      "date": "Fecha de grabación",
+      "title": "Título",
+      "duration": "Duración",
+      "views": "Visualizaciones"
+    },
+    "recordingStatus": {
+      "all": "Todos",
+      "available": "Disponible",
+      "processing": "Procesando",
+      "failed": "Falló",
+      "expired": "Expirado"
+    },
+    "showing": "Mostrando {count} de {total} grabaciones",
+    "refresh": "Actualizar",
+    "noRecordings": "No se encontraron grabaciones",
+    "noRecordingsDescription": "No hay grabaciones disponibles en este momento",
+    "views": "visualizaciones",
+    "watch": "Ver",
+    "opening": "Abriendo...",
+    "download": "Descargar",
+    "availableUntil": "Disponible hasta {date}",
+    "page": "Página {current} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente"
   },
     "ViewTicket": {
     "title": "Detalles del Ticket",

@@ -57,7 +57,7 @@ export default function ModuleCard({
                      list[0] ?? { title: '', description: '' };
 
   // Dados do módulo
-  const lessonsCount = module.lessons?.length || Math.floor(Math.random() * 5) + 3; // Mock para demonstração
+  const lessonsCount = module.lessons?.length || 4; // Valor fixo para evitar problemas de hidratação
   const estimatedMinutes = lessonsCount * 15; // Estimativa de 15 minutos por aula
   const moduleNumber = index + 1;
 

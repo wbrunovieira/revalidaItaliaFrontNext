@@ -13,9 +13,12 @@ import {
   Loader2,
   Filter,
   Search,
+  Sparkles,
   Radio,
   PlayCircle,
+  UserCheck,
   X,
+  Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,12 +26,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import RecordingsList from '@/components/RecordingsList';
+import ViewLiveSessionModal from '@/components/ViewLiveSessionModal';
 
 // API interfaces matching backend response
 interface Host {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
   avatar?: string;
 }
@@ -52,21 +55,8 @@ interface Argument {
   slug: string;
 }
 
-interface Settings {
-  maxParticipants: number;
-  recordingEnabled: boolean;
-  waitingRoomEnabled: boolean;
-  chatEnabled: boolean;
-  qnaEnabled: boolean;
-  autoStartRecording: boolean;
-  muteParticipantsOnEntry: boolean;
-  allowParticipantsUnmute: boolean;
-  allowRaiseHand: boolean;
-  allowParticipantScreenShare: boolean;
-}
-
 interface LiveSessionAPI {
-  id: string;
+  sessionId: string;
   title: string;
   description?: string;
   status: 'SCHEDULED' | 'LIVE' | 'ENDED' | 'CANCELLED';
@@ -79,11 +69,19 @@ interface LiveSessionAPI {
   scheduledEndTime: string;
   actualStartTime?: string;
   actualEndTime?: string;
-  settings: Settings;
+  maxParticipants: number;
+  recordingEnabled: boolean;
+  waitingRoomEnabled: boolean;
+  chatEnabled: boolean;
+  qnaEnabled: boolean;
+  autoStartRecording: boolean;
+  muteParticipantsOnEntry: boolean;
+  allowParticipantsUnmute: boolean;
+  allowRaiseHand: boolean;
+  allowParticipantScreenShare: boolean;
   joinUrl?: string;
   passcode?: string;
   participantCount?: number;
-  recordingAvailable: boolean;
   recordingUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -103,6 +101,31 @@ interface LiveSessionsResponse {
   meta: PaginationMeta;
 }
 
+// Mock interfaces for backwards compatibility
+interface Instructor {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  specialty: string;
+}
+
+interface LiveSessionMock {
+  id: string;
+  title: string;
+  description: string;
+  topic: string;
+  instructor: Instructor;
+  scheduledAt: string;
+  endTime: string;
+  duration: number;
+  status: 'scheduled' | 'live' | 'ended' | 'cancelled';
+  zoomMeetingId?: string;
+  zoomJoinUrl?: string;
+  recordingUrl?: string;
+  participantsCount: number;
+  maxParticipants: number;
+  isRegistered?: boolean;
+}
 
 interface LiveSessionsProps {
   locale: string;
@@ -114,15 +137,20 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<LiveSessionAPI[]>([]);
+  const [mockSessions, setMockSessions] = useState<LiveSessionMock[]>([]);
   const [selectedTab, setSelectedTab] = useState('upcoming');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTopic, setFilterTopic] = useState('all');
   const [joiningSession, setJoiningSession] = useState<string | null>(null);
+  const [registeringSession, setRegisteringSession] = useState<string | null>(null);
+  const [viewingSession, setViewingSession] = useState<string | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
 
-  // Fetch sessions from API
-  const fetchSessions = useCallback(async () => {
+  // Fetch real data from API
+  const fetchRealSessions = useCallback(async () => {
     if (!token) {
-      console.log('No token available');
+      console.log('No token available, using mock data');
+      setUseMockData(true);
       setLoading(false);
       return;
     }
@@ -131,7 +159,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
       setLoading(true);
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
       
-      // Fetch all sessions with pagination
+      // Fetch all sessions with pagination - using correct query params
       const response = await fetch(
         `${API_URL}/api/v1/live-sessions?page=1&limit=100`,
         {
@@ -144,34 +172,136 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API Error Response:', response.status, errorText);
+        
+        // If it's a 404, the endpoint might not exist yet
+        if (response.status === 404) {
+          console.log('Live sessions endpoint not found, using mock data');
+          setUseMockData(true);
+          return;
+        }
+        
         throw new Error(`Failed to fetch sessions: ${response.status}`);
       }
 
       const data: LiveSessionsResponse = await response.json();
       console.log('Fetched live sessions from API:', data);
       
-      // Set sessions from API response
+      // Check if we have sessions in the response
       if (data.sessions && Array.isArray(data.sessions)) {
         setSessions(data.sessions);
+        setUseMockData(false);
       } else {
-        setSessions([]);
+        console.log('No sessions in API response, using mock data');
+        setUseMockData(true);
       }
     } catch (error) {
       console.error('Error fetching sessions from API:', error);
-      toast({
-        title: t('error.loadTitle'),
-        description: t('error.loadDescription'),
-        variant: 'destructive',
-      });
-      setSessions([]);
+      console.log('Falling back to mock data');
+      setUseMockData(true);
+      
+      // Only show error toast if it's not a 404
+      if (error instanceof Error && !error.message.includes('404')) {
+        toast({
+          title: t('error.loadTitle'),
+          description: 'Using demonstration data. ' + t('error.loadDescription'),
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
   }, [token, t, toast]);
 
+  // Mock data for demonstration
+  const fetchMockSessions = useCallback(async () => {
+    const mockData: LiveSessionMock[] = [
+      {
+        id: '1',
+        title: 'Revisão de Anatomia Cardiovascular',
+        description: 'Sessão completa sobre anatomia e fisiologia do sistema cardiovascular para o Revalida',
+        topic: 'Anatomia',
+        instructor: {
+          id: '1',
+          name: 'Dr. Marco Rossi',
+          specialty: 'Cardiologia',
+        },
+        scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
+        duration: 60,
+        status: 'scheduled',
+        zoomMeetingId: '123456789',
+        zoomJoinUrl: 'https://zoom.us/j/123456789',
+        participantsCount: 15,
+        maxParticipants: 50,
+        isRegistered: true,
+      },
+      {
+        id: '2',
+        title: 'Farmacologia Aplicada',
+        description: 'Principais classes de medicamentos e suas aplicações clínicas',
+        topic: 'Farmacologia',
+        instructor: {
+          id: '2',
+          name: 'Dra. Giulia Bianchi',
+          specialty: 'Farmacologia Clínica',
+        },
+        scheduledAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        duration: 60,
+        status: 'live',
+        zoomMeetingId: '987654321',
+        zoomJoinUrl: 'https://zoom.us/j/987654321',
+        participantsCount: 32,
+        maxParticipants: 50,
+        isRegistered: true,
+      },
+      {
+        id: '3',
+        title: 'Casos Clínicos em Pediatria',
+        description: 'Discussão de casos clínicos comuns em pediatria',
+        topic: 'Pediatria',
+        instructor: {
+          id: '3',
+          name: 'Dr. Luigi Ferrari',
+          specialty: 'Pediatria',
+        },
+        scheduledAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(),
+        duration: 90,
+        status: 'ended',
+        recordingUrl: 'https://zoom.us/rec/123',
+        participantsCount: 45,
+        maxParticipants: 50,
+      },
+      {
+        id: '4',
+        title: 'Emergências Médicas',
+        description: 'Protocolo de atendimento em situações de emergência',
+        topic: 'Emergência',
+        instructor: {
+          id: '4',
+          name: 'Dra. Sofia Romano',
+          specialty: 'Medicina de Emergência',
+        },
+        scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 120 * 60 * 1000).toISOString(),
+        duration: 120,
+        status: 'scheduled',
+        zoomMeetingId: '456789123',
+        zoomJoinUrl: 'https://zoom.us/j/456789123',
+        participantsCount: 8,
+        maxParticipants: 50,
+        isRegistered: false,
+      },
+    ];
+
+    setMockSessions(mockData);
+  }, []);
+
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    fetchRealSessions();
+    fetchMockSessions(); // Always load mock data as fallback
+  }, [fetchRealSessions, fetchMockSessions]);
 
   const handleJoinSession = async (sessionId: string, joinUrl?: string) => {
     setJoiningSession(sessionId);
@@ -205,6 +335,41 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     window.open(recordingUrl, '_blank');
   };
 
+  const handleRegister = async (sessionId: string) => {
+    setRegisteringSession(sessionId);
+    
+    try {
+      // This would be an API call when endpoint is available
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: 'Função em desenvolvimento',
+        description: 'A inscrição em sessões estará disponível em breve',
+      });
+    } catch (error) {
+      console.error('Error registering:', error);
+      toast({
+        title: t('error.registerTitle'),
+        description: t('error.registerDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setRegisteringSession(null);
+    }
+  };
+
+  const handleUnregister = async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: 'Função em desenvolvimento',
+        description: 'O cancelamento de inscrição estará disponível em breve',
+      });
+    } catch (error) {
+      console.error('Error unregistering:', error);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(
@@ -280,27 +445,36 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     }
   };
 
+  // Filter sessions based on current data source
+  const currentSessions = useMockData ? mockSessions : sessions;
+  
   // Convert API sessions to display format
-  const displaySessions = sessions.map((session) => {
-    return {
-      id: session.id,
-      title: session.title,
-      description: session.description || '',
-      topic: session.lesson?.title || session.argument?.title || 'Geral',
-      instructor: {
-        id: session.host.id,
-        name: session.host.fullName || 'Host',
-        specialty: session.host.email,
-      },
-      scheduledAt: session.scheduledStartTime,
-      endTime: session.scheduledEndTime,
-      status: session.status.toLowerCase(),
-      joinUrl: session.joinUrl,
-      recordingUrl: session.recordingUrl || (session.recordingAvailable ? '#' : undefined),
-      participantsCount: session.participantCount || 0,
-      maxParticipants: session.settings?.maxParticipants || 100,
-      isRegistered: false, // Would need API endpoint
-    };
+  const displaySessions = currentSessions.map((session: LiveSessionAPI | LiveSessionMock) => {
+    if ('sessionId' in session) {
+      // API format
+      const apiSession = session as LiveSessionAPI;
+      return {
+        id: apiSession.sessionId,
+        title: apiSession.title,
+        description: apiSession.description || '',
+        topic: apiSession.lesson?.title || apiSession.argument?.title || 'Geral',
+        instructor: {
+          id: apiSession.host.id,
+          name: apiSession.host.name,
+          specialty: apiSession.host.email,
+        },
+        scheduledAt: apiSession.scheduledStartTime,
+        endTime: apiSession.scheduledEndTime,
+        status: apiSession.status.toLowerCase(),
+        joinUrl: apiSession.joinUrl,
+        recordingUrl: apiSession.recordingUrl,
+        participantsCount: apiSession.participantCount || 0,
+        maxParticipants: apiSession.maxParticipants,
+        isRegistered: false, // Would need API endpoint
+      };
+    }
+    // Mock format
+    return session as LiveSessionMock;
   });
 
   interface DisplaySession {
@@ -360,6 +534,16 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
   return (
     <div className="space-y-6">
+      {/* Data Source Indicator */}
+      {useMockData && (
+        <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-yellow-500" />
+          <span className="text-yellow-200 text-sm">
+            Usando dados de demonstração. Conecte-se à API para ver sessões reais.
+          </span>
+        </div>
+      )}
+
       {/* Search and Filters */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardContent className="p-4">
@@ -395,7 +579,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800 p-1">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-800 p-1">
           <TabsTrigger value="upcoming" className="relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
             <Calendar className="mr-2 h-4 w-4" />
             {t('upcoming')}
@@ -422,13 +606,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 {recordedSessions.length}
               </Badge>
             )}
-          </TabsTrigger>
-          <TabsTrigger value="allRecordings" className="data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
-            <PlayCircle className="mr-2 h-4 w-4" />
-            {t('allRecordings')}
-            <Badge className="ml-2 bg-purple-500 text-white">
-              API
-            </Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -459,6 +636,12 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                           <div className="flex items-center gap-3 mb-3">
                             {getStatusBadge(session.status)}
                             <Badge variant="outline">{session.topic}</Badge>
+                            {session.isRegistered && (
+                              <Badge className="bg-green-500 text-white">
+                                <UserCheck className="mr-1 h-3 w-3" />
+                                {t('registered')}
+                              </Badge>
+                            )}
                           </div>
                           
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
@@ -479,6 +662,12 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                                 {t('duration')}: <strong>{formatDuration(session.scheduledAt, session.endTime)}</strong>
                               </span>
                             </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                              <Users className="h-4 w-4 text-gray-400" />
+                              <span>
+                                {session.participantsCount}/{session.maxParticipants} {t('participants')}
+                              </span>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -487,6 +676,44 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                           </div>
                         </div>
 
+                        <div className="flex flex-col gap-2">
+                          {!useMockData && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingSession(session.id)}
+                              className="text-gray-300 hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {session.isRegistered ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUnregister()}
+                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            >
+                              {t('unregister')}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => handleRegister(session.id)}
+                              disabled={registeringSession === session.id}
+                              className="bg-secondary text-primary hover:bg-secondary/90"
+                            >
+                              {registeringSession === session.id ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  {t('registering')}
+                                </>
+                              ) : (
+                                t('register')
+                              )}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -523,6 +750,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                           <div className="flex items-center gap-3 mb-3">
                             {getStatusBadge(session.status)}
                             <Badge variant="outline">{session.topic}</Badge>
+                            <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />
                           </div>
                           
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
@@ -538,6 +766,12 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-300">
+                              <Users className="h-4 w-4 text-gray-400" />
+                              <span className="text-red-500 font-semibold">
+                                {session.participantsCount} {t('participants')} online
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
                               <Clock className="h-4 w-4 text-gray-400" />
                               <span>
                                 {t('endTime')}: {new Date(session.endTime).toLocaleTimeString()}
@@ -546,23 +780,35 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                           </div>
                         </div>
 
-                        <Button
-                          className="bg-red-500 hover:bg-red-600 text-white animate-pulse"
-                          onClick={() => handleJoinSession(session.id, session.joinUrl)}
-                          disabled={joiningSession === session.id || !session.joinUrl}
-                        >
-                          {joiningSession === session.id ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              {t('joining')}
-                            </>
-                          ) : (
-                            <>
-                              <Play className="mr-2 h-4 w-4" />
-                              {t('joinNow')}
-                            </>
+                        <div className="flex gap-2">
+                          {!useMockData && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingSession(session.id)}
+                              className="text-gray-300 hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           )}
-                        </Button>
+                          <Button
+                            className="bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                            onClick={() => handleJoinSession(session.id, session.joinUrl)}
+                            disabled={joiningSession === session.id || !session.joinUrl}
+                          >
+                            {joiningSession === session.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {t('joining')}
+                              </>
+                            ) : (
+                              <>
+                                <Play className="mr-2 h-4 w-4" />
+                                {t('joinNow')}
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -619,6 +865,12 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                                 {t('duration')}: <strong>{formatDuration(session.scheduledAt, session.endTime)}</strong>
                               </span>
                             </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                              <Users className="h-4 w-4 text-gray-400" />
+                              <span>
+                                {session.participantsCount} {t('participants')}
+                              </span>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -627,13 +879,25 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                           </div>
                         </div>
 
-                        <Button
-                          className="bg-secondary text-primary hover:bg-secondary/90"
-                          onClick={() => handleWatchRecording(session.recordingUrl!)}
-                        >
-                          <PlayCircle className="mr-2 h-4 w-4" />
-                          {t('watchRecording')}
-                        </Button>
+                        <div className="flex gap-2">
+                          {!useMockData && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingSession(session.id)}
+                              className="text-gray-300 hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            className="bg-secondary text-primary hover:bg-secondary/90"
+                            onClick={() => handleWatchRecording(session.recordingUrl!)}
+                          >
+                            <PlayCircle className="mr-2 h-4 w-4" />
+                            {t('watchRecording')}
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -642,13 +906,16 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
             </AnimatePresence>
           )}
         </TabsContent>
-
-        {/* All Recordings from API */}
-        <TabsContent value="allRecordings" className="space-y-4">
-          <RecordingsList locale={locale} translations={t} />
-        </TabsContent>
       </Tabs>
 
+      {/* View Session Modal */}
+      {!useMockData && (
+        <ViewLiveSessionModal
+          sessionId={viewingSession}
+          open={!!viewingSession}
+          onOpenChange={(open) => !open && setViewingSession(null)}
+        />
+      )}
     </div>
   );
 }

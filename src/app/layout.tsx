@@ -38,7 +38,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         <PandaVideoErrorSuppressor />
         <DevToolsManager />
         {children}

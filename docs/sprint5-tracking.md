@@ -339,6 +339,18 @@ _Para cada feature, incluir: [Técnico] O que foi implementado | [Benefício] Va
 - [Benefício] Garante conformidade legal com usuários concordando explicitamente em não compartilhar conteúdo, indicação visual clara e não-agressiva do status de aceitação, proteção da propriedade intelectual do curso
 - [Commit] feat: add terms of use with checkbox-style status display
 
+### 18/08/2025
+
+**Integração da Página de Live Sessions com API Real e Simplificação para Alunos**
+- [Técnico] Integração completa com endpoint GET /api/v1/live-sessions com fallback automático para dados mockados, correção de mapeamento de campos da API (id vs sessionId, fullName vs name), remoção de funcionalidades de inscrição/desinscrição (não planejadas), remoção do ViewLiveSessionModal da página do aluno (recurso apenas admin), remoção da contagem de participantes da visão do aluno
+- [Benefício] Alunos visualizam sessões ao vivo reais quando disponíveis com fallback para dados de demonstração, interface simplificada mostrando apenas informações essenciais (título, instrutor, horário, duração), botões de ação limitados ao essencial (entrar na sessão ao vivo, assistir gravação)
+- [Commit] feat: integrate live sessions page with real API and simplify student view
+
+**Atualização do ViewLiveSessionModal com Novos Campos de Controle de Participantes**
+- [Técnico] Adição de novos campos da API ao modal de visualização (autoStartRecording, muteParticipantsOnEntry, allowParticipantsUnmute, allowRaiseHand, allowParticipantScreenShare), layout em grid de 2 colunas para melhor organização visual, ícones específicos para cada configuração (PlayCircle, MicOff, Mic, Hand, Monitor), traduções completas em PT/IT/ES
+- [Benefício] Administradores têm visibilidade completa das configurações de controle de participantes em cada sessão, interface mais informativa com badges coloridos indicando status de cada configuração (verde para habilitado, cinza para desabilitado, laranja para configurações restritivas)
+- [Commit] feat: update ViewLiveSessionModal with new participant control fields
+
 ---
 
 ## 📚 Documentações Criadas

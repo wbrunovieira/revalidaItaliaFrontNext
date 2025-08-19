@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
@@ -95,13 +95,7 @@ export default function ViewLiveSessionModal({
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<LiveSessionDetails | null>(null);
 
-  useEffect(() => {
-    if (open && sessionId) {
-      fetchSessionDetails();
-    }
-  }, [open, sessionId]);
-
-  const fetchSessionDetails = async () => {
+  const fetchSessionDetails = useCallback(async () => {
     if (!sessionId) return;
     
     setLoading(true);
@@ -133,7 +127,13 @@ export default function ViewLiveSessionModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId, token, t, toast, onOpenChange]);
+
+  useEffect(() => {
+    if (open && sessionId) {
+      fetchSessionDetails();
+    }
+  }, [open, sessionId, fetchSessionDetails]);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);

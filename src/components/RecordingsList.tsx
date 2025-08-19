@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import {
   PlayCircle,
   Download,
-  Clock,
   Calendar,
   Users,
   Eye,
@@ -93,7 +92,7 @@ interface RecordingsResponse {
 
 interface RecordingsListProps {
   locale: string;
-  translations?: any;
+  translations?: ReturnType<typeof useTranslations>;
 }
 
 export default function RecordingsList({ locale, translations }: RecordingsListProps) {

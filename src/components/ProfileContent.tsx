@@ -321,7 +321,7 @@ export default function ProfileContent({
                   {!isEditingProfile && (
                     <button
                       onClick={() => setIsEditingProfile(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/20 border border-secondary/50 text-secondary font-medium rounded-lg hover:bg-secondary/30 hover:border-secondary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary min-w-fit"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
                     >
                       <Edit size={16} />
                       <span className="hidden sm:inline">{t('edit')}</span>

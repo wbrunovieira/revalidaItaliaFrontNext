@@ -33,7 +33,7 @@ export default function UserDropdown() {
     try {
       // Usar o logout do Auth Store
       authLogout();
-      
+
       // Redirect to login page
       router.push(`/${locale}/login`);
     } catch (error) {
@@ -52,42 +52,45 @@ export default function UserDropdown() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
-          "hover:bg-white/10",
-          isOpen && "bg-white/10"
+          'flex items-center px-1 md:px-3 py-1 md:py-2 rounded-lg transition-all duration-200',
+          'hover:bg-white/10',
+          isOpen && 'bg-white/10'
         )}
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label={t('userMenu')}
       >
-        <Avatar asButton={false} />
-        
-        {/* User Name and Badge - Hidden on mobile */}
-        {user && (
-          <div className="hidden md:flex flex-col items-start">
-            <span className="text-white text-sm font-medium leading-tight">
-              {user.name || user.email?.split('@')[0] || 'Usuário'}
-            </span>
-            <RoleBadge role={user.role} className="mt-0.5 scale-90 origin-left" />
-          </div>
-        )}
-        
-        <ChevronDown 
-          size={16} 
-          className={cn(
-            "text-white transition-transform duration-200 ml-auto",
-            isOpen && "rotate-180"
+        <div className="flex items-center">
+          <Avatar asButton={false} />
+
+          {/* User Name and Badge - Hidden on mobile */}
+          {user && (
+            <div className="hidden md:flex flex-col items-start ml-2">
+              <span className="text-white text-sm font-medium leading-tight">
+                {user.name || user.email?.split('@')[0] || 'Usuário'}
+              </span>
+              <RoleBadge role={user.role} className="mt-0.5 scale-90 origin-left" />
+            </div>
           )}
-        />
+
+          <ChevronDown
+            size={14}
+            className={cn(
+              'text-white transition-transform duration-200',
+              '-ml-3.5 md:ml-1.5', // bem colado no avatar no mobile
+              isOpen && 'rotate-180'
+            )}
+          />
+        </div>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
         <div
           className={cn(
-            "absolute right-0 mt-2 w-56 bg-primary-dark rounded-lg shadow-xl border border-gray-700",
-            "animate-in fade-in-0 zoom-in-95 duration-200",
-            "z-50"
+            'absolute right-0 mt-2 w-56 bg-primary-dark rounded-lg shadow-xl border border-gray-700',
+            'animate-in fade-in-0 zoom-in-95 duration-200',
+            'z-50'
           )}
         >
           <div className="p-2">
@@ -95,9 +98,9 @@ export default function UserDropdown() {
             <button
               onClick={handleProfile}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2 rounded-md",
-                "text-gray-300 hover:bg-primary/50 hover:text-white",
-                "transition-colors duration-200"
+                'w-full flex items-center gap-3 px-3 py-2 rounded-md',
+                'text-gray-300 hover:bg-primary/50 hover:text-white',
+                'transition-colors duration-200'
               )}
             >
               <User size={18} />
@@ -111,9 +114,9 @@ export default function UserDropdown() {
             <button
               onClick={handleLogout}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2 rounded-md",
-                "text-red-400 hover:bg-red-900/30 hover:text-red-300",
-                "transition-colors duration-200"
+                'w-full flex items-center gap-3 px-3 py-2 rounded-md',
+                'text-red-400 hover:bg-red-900/30 hover:text-red-300',
+                'transition-colors duration-200'
               )}
             >
               <LogOut size={18} />

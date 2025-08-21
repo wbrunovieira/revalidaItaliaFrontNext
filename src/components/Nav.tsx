@@ -23,15 +23,21 @@ function Nav({ collapsed, onToggle }: NavProps) {
 
   return (
     <>
-      {/* Mobile and Tablet Layout - 2 rows */}
+      {/* Mobile and Tablet Layouts */}
       <nav
         aria-label={t('home')}
         className="fixed top-0 left-0 right-0 bg-primary shadow-2xl z-20 xl:hidden"
         suppressHydrationWarning
       >
         <div className="flex flex-col">
-          {/* Mobile and Tablet Layout - 2 sections */}
-          <div className="xl:hidden">
+          {/* iPad Mini Layout (768px - 819px) - TODO: Implement specific layout */}
+          <div className="hidden md:hidden">
+            {/* This will be implemented based on iPad Mini requirements */}
+          </div>
+
+          {/* Tablet Layout (iPad Air/Pro - 820px to 1279px) */}
+          {/* Current layout works well for iPad Air (820px) and iPad Pro */}
+          <div className="block xl:hidden">
             {/* Row 1: Logo and User actions */}
             <div className="flex items-center justify-between px-5 py-3">
               <Logo alt={t('home')} />

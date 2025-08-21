@@ -621,8 +621,8 @@ export default function PostCard({
 
         {/* Author Info */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="relative group">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/20">
+          <div className="relative">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary/20 cursor-pointer peer">
               <Image
                 src={
                   post.author.profileImageUrl || post.author.avatar || '/icons/avatar.svg'
@@ -634,9 +634,9 @@ export default function PostCard({
               />
             </div>
             
-            {/* Tooltip with bio and specialization - positioned to the right */}
+            {/* Tooltip with bio and specialization - only on avatar hover using peer */}
             {(post.author.bio || post.author.specialization) && (
-              <div className="absolute left-full ml-2 top-0 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 pointer-events-none" style={{ zIndex: 9999 }}>
+              <div className="absolute left-full ml-2 top-0 invisible opacity-0 peer-hover:visible peer-hover:opacity-100 transition-all duration-200 pointer-events-none z-[9999]">
                 <div className="bg-gray-900 text-white p-3 rounded-lg shadow-2xl max-w-xs min-w-[200px] border border-gray-700">
                   <div className="font-semibold text-white mb-1">
                     {post.author.name}

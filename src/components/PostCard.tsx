@@ -64,6 +64,7 @@ interface Reply {
   replies?: Reply[];
   attachments?: Attachment[];
   isBlocked?: boolean;
+  blockedReason?: string;
 }
 
 interface Attachment {
@@ -127,6 +128,8 @@ interface Post {
   replies?: Reply[];
   // Moderation fields
   isBlocked?: boolean;
+  blockedAt?: string | Date | null;
+  blockedReason?: string;
   wasTitleEdited?: boolean;
   titleEditedBy?: string;
   titleEditedAt?: Date | string;
@@ -570,11 +573,31 @@ export default function PostCard({
       <div className="relative">
         {/* Indicador de bloqueio apenas para admin/tutor */}
         {post.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && (
-          <div className="bg-red-900/20 text-red-400 p-2 rounded mb-2 flex items-center gap-2 border border-red-800/30">
-            <Ban size={14} />
-            <span className="text-sm font-medium">
-              Conteúdo bloqueado - Visível apenas para moderadores
-            </span>
+          <div className="bg-red-900/20 text-red-400 p-3 rounded-lg mb-3 border border-red-800/30">
+            <div className="flex items-start gap-2">
+              <Ban size={16} className="mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="font-medium mb-1">
+                  Conteúdo bloqueado - Visível apenas para moderadores
+                </div>
+                {post.blockedReason && (
+                  <div className="text-xs text-red-300 mb-1">
+                    Razão: {post.blockedReason}
+                  </div>
+                )}
+                {post.blockedAt && (
+                  <div className="text-xs text-red-300/70">
+                    Bloqueado em: {new Date(post.blockedAt).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

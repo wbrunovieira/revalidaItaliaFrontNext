@@ -54,6 +54,7 @@ interface Reply {
   replies?: Reply[]; // Add support for nested replies
   // Moderation fields
   isBlocked?: boolean;
+  blockedReason?: string;
 }
 
 interface ReplyCardProps {
@@ -136,9 +137,18 @@ export default function ReplyCard({
       <div className="relative z-10">
         {/* Indicador de bloqueio apenas para admin/tutor */}
         {reply.isBlocked && (user?.role === 'admin' || user?.role === 'tutor') && (
-          <div className="text-xs text-red-400 mb-1 flex items-center gap-1">
-            <Ban size={10} />
-            <span>Comentário bloqueado</span>
+          <div className="bg-red-900/20 text-red-400 p-2 rounded mb-2 border border-red-800/30">
+            <div className="flex items-start gap-1.5">
+              <Ban size={12} className="mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="text-xs font-medium">Comentário bloqueado</div>
+                {reply.blockedReason && (
+                  <div className="text-xs text-red-300/80 mt-0.5">
+                    {reply.blockedReason}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

@@ -95,6 +95,8 @@ interface CommunityPost {
   lesson?: { id: string; title: string; };
   isPinned?: boolean;
   isBlocked?: boolean; // Campo para indicar se o post está bloqueado
+  blockedAt?: string | null; // Data do bloqueio
+  blockedReason?: string; // Razão do bloqueio (apenas para admin/tutor)
   attachments?: Array<{
     id: string;
     url: string;
@@ -129,6 +131,7 @@ interface CommunityComment {
   updatedAt: string;
   isTopLevelComment: boolean;
   isBlocked?: boolean; // Campo para indicar se o comentário está bloqueado
+  blockedReason?: string; // Razão do bloqueio (apenas para admin/tutor)
   reactions?: {
     heart?: number;
     thumbsUp?: number;
@@ -199,6 +202,7 @@ interface Reply {
   parentId?: string;
   replies?: Reply[];
   isBlocked?: boolean; // Moderation field
+  blockedReason?: string; // Razão do bloqueio
 }
 
 interface Topic {
@@ -255,6 +259,8 @@ interface Topic {
   replies?: Reply[];
   // Moderation fields
   isBlocked?: boolean;
+  blockedAt?: Date | string | null;
+  blockedReason?: string;
   wasTitleEdited?: boolean;
   titleEditedBy?: string;
   titleEditedAt?: Date;
@@ -1085,6 +1091,7 @@ export default function CommunityPage() {
                 },
                 parentId: comment.parentId,
                 isBlocked: comment.isBlocked || false, // Mapeando campo isBlocked do comentário
+                blockedReason: comment.blockedReason, // Razão do bloqueio
                 replies: comment.replies?.map((reply: CommunityComment) => ({
                   id: reply.id,
                   content: reply.content,
@@ -1111,7 +1118,8 @@ export default function CommunityPage() {
                     userReactions: reply.reactions?.userReactions || []
                   },
                   parentId: reply.parentId,
-                  isBlocked: reply.isBlocked || false // Mapeando campo isBlocked das respostas
+                  isBlocked: reply.isBlocked || false, // Mapeando campo isBlocked das respostas
+                  blockedReason: reply.blockedReason // Razão do bloqueio
                 }))
               }));
             }
@@ -1164,6 +1172,8 @@ export default function CommunityPage() {
             lesson: post.lesson,
             isPinned: post.isPinned || false,
             isBlocked: post.isBlocked || false, // Mapeando campo isBlocked
+            blockedAt: post.blockedAt || null, // Data do bloqueio
+            blockedReason: post.blockedReason, // Razão do bloqueio
             attachments: post.attachments || [],
             mediaType: post.mediaType,
             replies: replies

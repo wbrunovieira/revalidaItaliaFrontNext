@@ -475,11 +475,66 @@
         "comment": "Comentário"
       },
       "actions": {
-        "view": "Visualizar"
+        "view": "Visualizar",
+        "review": "Revisar"
       },
       "error": {
         "fetchTitle": "Erro ao carregar",
         "fetchDescription": "Não foi possível carregar as denúncias"
+      },
+      "reviewModal": {
+        "title": "Revisar Denúncia",
+        "reportDetails": "Detalhes da Denúncia",
+        "contentPreview": "Conteúdo Denunciado",
+        "selectAction": "Selecione uma Ação",
+        "reasonLabel": "Motivo da Decisão (opcional)",
+        "reasonPlaceholder": "Explique o motivo da sua decisão...",
+        "reportedBy": "Denunciado por",
+        "author": "Autor",
+        "reportDescription": "Descrição da denúncia",
+        "inPost": "No post",
+        "totalReports": "Total de denúncias",
+        "views": "visualizações",
+        "comments": "comentários",
+        "reactions": "reações",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "submitting": "Processando...",
+        "reasons": {
+          "inappropriateContent": "Conteúdo Inadequado",
+          "spam": "Spam",
+          "offensiveLanguage": "Linguagem Ofensiva",
+          "harassment": "Assédio",
+          "other": "Outro"
+        },
+        "actions": {
+          "block": {
+            "title": "Bloquear Conteúdo",
+            "description": "Bloqueia o conteúdo e marca a denúncia como resolvida. O conteúdo não será mais visível para os usuários."
+          },
+          "dismiss": {
+            "title": "Dispensar Denúncia",
+            "description": "Dispensa a denúncia sem bloquear o conteúdo. O conteúdo permanecerá visível."
+          },
+          "unblock": {
+            "title": "Desbloquear Conteúdo",
+            "description": "Desbloqueia conteúdo previamente bloqueado. O conteúdo voltará a ser visível para os usuários."
+          }
+        },
+        "success": {
+          "title": "Ação Realizada",
+          "blocked": "O conteúdo foi bloqueado com sucesso.",
+          "dismissed": "A denúncia foi dispensada.",
+          "unblocked": "O conteúdo foi desbloqueado com sucesso."
+        },
+        "error": {
+          "noActionTitle": "Ação Necessária",
+          "noActionDescription": "Por favor, selecione uma ação antes de confirmar.",
+          "unauthorizedTitle": "Não Autorizado",
+          "unauthorizedUnblock": "Apenas administradores podem desbloquear conteúdo.",
+          "reviewTitle": "Erro ao Revisar",
+          "defaultMessage": "Não foi possível processar a revisão. Tente novamente."
+        }
       }
     }
   }

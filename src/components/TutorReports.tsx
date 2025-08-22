@@ -19,7 +19,9 @@ import {
   MessageCircle,
   Mail,
   AlertOctagon,
+  Gavel,
 } from 'lucide-react';
+import ReviewReportModal from './ReviewReportModal';
 
 // Types according to API documentation
 type ReportReason = 'INAPPROPRIATE_CONTENT' | 'SPAM' | 'OFFENSIVE_LANGUAGE' | 'HARASSMENT' | 'OTHER';
@@ -109,6 +111,8 @@ export default function TutorReports({ locale }: TutorReportsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalReports, setTotalReports] = useState(0);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -241,6 +245,16 @@ export default function TutorReports({ locale }: TutorReportsProps) {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleReviewClick = (report: Report) => {
+    setSelectedReport(report);
+    setReviewModalOpen(true);
+  };
+
+  const handleReviewComplete = () => {
+    // Refresh the reports list after a successful review
+    fetchReports(currentPage);
   };
 
   if (loading && reports.length === 0) {
@@ -451,6 +465,13 @@ export default function TutorReports({ locale }: TutorReportsProps) {
                   {/* Actions */}
                   <div className="ml-4 flex flex-col gap-2">
                     <button
+                      onClick={() => handleReviewClick(report)}
+                      className="px-3 py-1 bg-secondary text-primary text-sm rounded hover:bg-secondary/90 transition-colors flex items-center gap-1 font-medium"
+                    >
+                      <Gavel size={14} />
+                      {t('actions.review')}
+                    </button>
+                    <button
                       onClick={() => {
                         if (isPost) {
                           const post = report.content as PostContent;
@@ -462,8 +483,8 @@ export default function TutorReports({ locale }: TutorReportsProps) {
                       }}
                       className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors flex items-center gap-1"
                     >
+                      <Eye size={14} />
                       {t('actions.view')}
-                      <ChevronRight size={14} />
                     </button>
                   </div>
                 </div>
@@ -522,6 +543,15 @@ export default function TutorReports({ locale }: TutorReportsProps) {
           </button>
         </div>
       )}
+
+      {/* Review Report Modal */}
+      <ReviewReportModal
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        report={selectedReport}
+        onReviewComplete={handleReviewComplete}
+        userRole="tutor"
+      />
     </div>
   );
 }

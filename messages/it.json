@@ -478,11 +478,66 @@
         "comment": "Commento"
       },
       "actions": {
-        "view": "Visualizza"
+        "view": "Visualizza",
+        "review": "Revisiona"
       },
       "error": {
         "fetchTitle": "Errore nel caricamento",
         "fetchDescription": "Non è stato possibile caricare le segnalazioni"
+      },
+      "reviewModal": {
+        "title": "Revisiona Segnalazione",
+        "reportDetails": "Dettagli della Segnalazione",
+        "contentPreview": "Contenuto Segnalato",
+        "selectAction": "Seleziona un'Azione",
+        "reasonLabel": "Motivo della Decisione (opzionale)",
+        "reasonPlaceholder": "Spiega il motivo della tua decisione...",
+        "reportedBy": "Segnalato da",
+        "author": "Autore",
+        "reportDescription": "Descrizione della segnalazione",
+        "inPost": "Nel post",
+        "totalReports": "Totale segnalazioni",
+        "views": "visualizzazioni",
+        "comments": "commenti",
+        "reactions": "reazioni",
+        "cancel": "Annulla",
+        "confirm": "Conferma",
+        "submitting": "Elaborazione...",
+        "reasons": {
+          "inappropriateContent": "Contenuto Inappropriato",
+          "spam": "Spam",
+          "offensiveLanguage": "Linguaggio Offensivo",
+          "harassment": "Molestie",
+          "other": "Altro"
+        },
+        "actions": {
+          "block": {
+            "title": "Blocca Contenuto",
+            "description": "Blocca il contenuto e segna la segnalazione come risolta. Il contenuto non sarà più visibile agli utenti."
+          },
+          "dismiss": {
+            "title": "Respingi Segnalazione",
+            "description": "Respinge la segnalazione senza bloccare il contenuto. Il contenuto rimarrà visibile."
+          },
+          "unblock": {
+            "title": "Sblocca Contenuto",
+            "description": "Sblocca contenuto precedentemente bloccato. Il contenuto tornerà ad essere visibile agli utenti."
+          }
+        },
+        "success": {
+          "title": "Azione Eseguita",
+          "blocked": "Il contenuto è stato bloccato con successo.",
+          "dismissed": "La segnalazione è stata respinta.",
+          "unblocked": "Il contenuto è stato sbloccato con successo."
+        },
+        "error": {
+          "noActionTitle": "Azione Necessaria",
+          "noActionDescription": "Per favore, seleziona un'azione prima di confermare.",
+          "unauthorizedTitle": "Non Autorizzato",
+          "unauthorizedUnblock": "Solo gli amministratori possono sbloccare i contenuti.",
+          "reviewTitle": "Errore nella Revisione",
+          "defaultMessage": "Non è stato possibile elaborare la revisione. Riprova."
+        }
       }
     }
   }

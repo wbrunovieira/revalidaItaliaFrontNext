@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
+import Image from 'next/image';
 import {
   PlayCircle,
   Download,
@@ -375,10 +376,12 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
                     {/* Thumbnail */}
                     <div className="relative aspect-video bg-gray-900">
                       {recording.thumbnailUrl ? (
-                        <img
+                        <Image
                           src={recording.thumbnailUrl}
                           alt={recording.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

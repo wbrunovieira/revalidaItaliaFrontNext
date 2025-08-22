@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -253,11 +254,15 @@ export default function ViewLiveSessionModal({
                 </h4>
                 <div className="flex items-center gap-3">
                   {session.host.avatar && (
-                    <img 
-                      src={session.host.avatar} 
-                      alt={session.host.name}
-                      className="w-10 h-10 rounded-full"
-                    />
+                    <div className="relative w-10 h-10">
+                      <Image 
+                        src={session.host.avatar} 
+                        alt={session.host.name}
+                        fill
+                        className="rounded-full object-cover"
+                        sizes="40px"
+                      />
+                    </div>
                   )}
                   <div>
                     <p className="text-white font-medium">{session.host.name}</p>
@@ -277,11 +282,15 @@ export default function ViewLiveSessionModal({
                     {session.coHosts.map((coHost) => (
                       <div key={coHost.id} className="flex items-center gap-2">
                         {coHost.avatar && (
-                          <img 
-                            src={coHost.avatar} 
-                            alt={coHost.name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          <div className="relative w-8 h-8">
+                            <Image 
+                              src={coHost.avatar} 
+                              alt={coHost.name}
+                              fill
+                              className="rounded-full object-cover"
+                              sizes="32px"
+                            />
+                          </div>
                         )}
                         <div>
                           <p className="text-white text-sm">{coHost.name}</p>

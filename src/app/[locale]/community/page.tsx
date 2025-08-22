@@ -94,6 +94,7 @@ interface CommunityPost {
   module?: { id: string; title: string; };
   lesson?: { id: string; title: string; };
   isPinned?: boolean;
+  isBlocked?: boolean; // Campo para indicar se o post está bloqueado
   attachments?: Array<{
     id: string;
     url: string;
@@ -127,6 +128,7 @@ interface CommunityComment {
   createdAt: string;
   updatedAt: string;
   isTopLevelComment: boolean;
+  isBlocked?: boolean; // Campo para indicar se o comentário está bloqueado
   reactions?: {
     heart?: number;
     thumbsUp?: number;
@@ -1082,6 +1084,7 @@ export default function CommunityPage() {
                   userReactions: comment.reactions?.userReactions || []
                 },
                 parentId: comment.parentId,
+                isBlocked: comment.isBlocked || false, // Mapeando campo isBlocked do comentário
                 replies: comment.replies?.map((reply: CommunityComment) => ({
                   id: reply.id,
                   content: reply.content,
@@ -1107,7 +1110,8 @@ export default function CommunityPage() {
                     SAD: reply.reactions?.sad || 0,
                     userReactions: reply.reactions?.userReactions || []
                   },
-                  parentId: reply.parentId
+                  parentId: reply.parentId,
+                  isBlocked: reply.isBlocked || false // Mapeando campo isBlocked das respostas
                 }))
               }));
             }
@@ -1159,6 +1163,7 @@ export default function CommunityPage() {
             module: post.module,
             lesson: post.lesson,
             isPinned: post.isPinned || false,
+            isBlocked: post.isBlocked || false, // Mapeando campo isBlocked
             attachments: post.attachments || [],
             mediaType: post.mediaType,
             replies: replies

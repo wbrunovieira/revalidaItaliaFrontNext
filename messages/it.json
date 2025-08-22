@@ -477,9 +477,17 @@
         "post": "Post",
         "comment": "Commento"
       },
+      "status": {
+        "all": "Tutti gli stati",
+        "pending": "In attesa",
+        "resolved": "Risolto",
+        "dismissed": "Respinto",
+        "reviewing": "In revisione"
+      },
       "actions": {
         "view": "Visualizza",
-        "review": "Revisiona"
+        "review": "Revisiona",
+        "reviewAgain": "Revisiona di Nuovo"
       },
       "error": {
         "fetchTitle": "Errore nel caricamento",

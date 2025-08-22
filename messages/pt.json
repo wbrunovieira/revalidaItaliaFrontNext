@@ -474,9 +474,17 @@
         "post": "Postagem",
         "comment": "Comentário"
       },
+      "status": {
+        "all": "Todos os status",
+        "pending": "Pendente",
+        "resolved": "Resolvido",
+        "dismissed": "Dispensado",
+        "reviewing": "Em revisão"
+      },
       "actions": {
         "view": "Visualizar",
-        "review": "Revisar"
+        "review": "Revisar",
+        "reviewAgain": "Revisar Novamente"
       },
       "error": {
         "fetchTitle": "Erro ao carregar",

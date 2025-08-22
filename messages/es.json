@@ -477,9 +477,17 @@
         "post": "Publicación",
         "comment": "Comentario"
       },
+      "status": {
+        "all": "Todos los estados",
+        "pending": "Pendiente",
+        "resolved": "Resuelto",
+        "dismissed": "Desestimado",
+        "reviewing": "En revisión"
+      },
       "actions": {
         "view": "Visualizar",
-        "review": "Revisar"
+        "review": "Revisar",
+        "reviewAgain": "Revisar Nuevamente"
       },
       "error": {
         "fetchTitle": "Error al cargar",

@@ -105,6 +105,7 @@ export default function TutorReports({ locale }: TutorReportsProps) {
   
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<ReportStatus | 'ALL'>('ALL'); // Default to ALL
   const [reasonFilter, setReasonFilter] = useState<ReportReason | 'ALL'>('ALL');
   const [contentTypeFilter, setContentTypeFilter] = useState<'POST' | 'COMMENT' | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -129,6 +130,13 @@ export default function TutorReports({ locale }: TutorReportsProps) {
         page: page.toString(),
         limit: '20',
       });
+
+      // Add status filter - always send it to the API
+      if (statusFilter === 'ALL') {
+        params.append('status', 'ALL');
+      } else {
+        params.append('status', statusFilter);
+      }
 
       // Only add contentType if it's not 'ALL'
       if (contentTypeFilter !== 'ALL') {
@@ -174,11 +182,11 @@ export default function TutorReports({ locale }: TutorReportsProps) {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, contentTypeFilter, reasonFilter, toast, t]);
+  }, [apiUrl, statusFilter, contentTypeFilter, reasonFilter, toast, t]);
 
   useEffect(() => {
     fetchReports(currentPage);
-  }, [currentPage, contentTypeFilter, reasonFilter, fetchReports]);
+  }, [currentPage, statusFilter, contentTypeFilter, reasonFilter, fetchReports]);
 
   const getReasonIcon = (reason: ReportReason) => {
     switch (reason) {
@@ -305,7 +313,26 @@ export default function TutorReports({ locale }: TutorReportsProps) {
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            <AlertOctagon size={20} className="text-gray-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as ReportStatus | 'ALL');
+                setCurrentPage(1);
+              }}
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none min-w-[150px]"
+            >
+              <option value="ALL">{t('status.all')}</option>
+              <option value="PENDING">{t('status.pending')}</option>
+              <option value="RESOLVED">{t('status.resolved')}</option>
+              <option value="DISMISSED">{t('status.dismissed')}</option>
+            </select>
+          </div>
+
+          {/* Reason Filter */}
           <div className="flex items-center gap-2">
             <Filter size={20} className="text-gray-400" />
             <select
@@ -325,6 +352,7 @@ export default function TutorReports({ locale }: TutorReportsProps) {
             </select>
           </div>
 
+          {/* Content Type Filter */}
           <div className="flex items-center gap-2">
             <Shield size={20} className="text-gray-400" />
             <select
@@ -380,6 +408,19 @@ export default function TutorReports({ locale }: TutorReportsProps) {
                   <div className="flex-1">
                     {/* Header */}
                     <div className="flex items-center gap-4 mb-3">
+                      {/* Status Badge */}
+                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        report.status === 'PENDING' 
+                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                          : report.status === 'RESOLVED'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : report.status === 'DISMISSED'
+                          ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                          : 'bg-gray-600/20 text-gray-300 border border-gray-600/30'
+                      }`}>
+                        {t(`status.${report.status.toLowerCase()}`)}
+                      </div>
+                      
                       <div className="flex items-center gap-2">
                         {getTypeIcon(report.type)}
                         <span className="text-sm text-gray-400">{t(`type.${report.type.toLowerCase()}`)}</span>
@@ -464,13 +505,15 @@ export default function TutorReports({ locale }: TutorReportsProps) {
 
                   {/* Actions */}
                   <div className="ml-4 flex flex-col gap-2">
-                    <button
-                      onClick={() => handleReviewClick(report)}
-                      className="px-3 py-1 bg-secondary text-primary text-sm rounded hover:bg-secondary/90 transition-colors flex items-center gap-1 font-medium"
-                    >
-                      <Gavel size={14} />
-                      {t('actions.review')}
-                    </button>
+                    {(report.status === 'PENDING' || report.status === 'RESOLVED') && (
+                      <button
+                        onClick={() => handleReviewClick(report)}
+                        className="px-3 py-1 bg-secondary text-primary text-sm rounded hover:bg-secondary/90 transition-colors flex items-center gap-1 font-medium"
+                      >
+                        <Gavel size={14} />
+                        {report.status === 'RESOLVED' ? t('actions.reviewAgain') : t('actions.review')}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         if (isPost) {

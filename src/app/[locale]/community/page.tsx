@@ -210,6 +210,7 @@ interface Topic {
   title: string;
   content: string;
   author: Author;
+  authorId?: string; // Adicionar authorId para verificação de permissões
   createdAt: Date;
   updatedAt: Date;
   viewCount: number;
@@ -1131,6 +1132,7 @@ export default function CommunityPage() {
             id: post.id,
             title: post.title || '',
             content: post.content,
+            authorId: post.authorId, // IMPORTANTE: Adicionar authorId para comparação de permissões
             author: post.author ? {
               id: post.author.id,
               name: post.author.name,
@@ -2031,6 +2033,7 @@ export default function CommunityPage() {
             id: createdPost.id,
             title: createdPost.title,
             content: createdPost.content,
+            authorId: createdPost.authorId || user?.id, // Adicionar authorId
             author: currentUser || {
               id: createdPost.authorId || 'current-user',
               name: 'Usuário',

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Flag,
   Ban,
+  Pencil,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ import ReplyCard from '@/components/ReplyCard';
 import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
 import ReportModal from '@/components/ReportModal';
+import EditPostModal from '@/components/EditPostModal';
 
 interface Author {
   id: string;
@@ -170,6 +172,7 @@ export default function PostCard({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -811,7 +814,20 @@ export default function PostCard({
           {/* Actions and Reactions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-            {/* Reply Button */}
+              {/* Edit Button - only for post owner */}
+              {user?.id === post.authorId && (
+                <button
+                  className="text-gray-500 hover:text-blue-400 text-sm px-3 py-1 rounded-md hover:bg-blue-400/10 transition-colors flex items-center gap-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEditModal(true);
+                  }}
+                >
+                  <Pencil size={14} />
+                  {t('editAction')}
+                </button>
+              )}
+              
               {/* Reply Button */}
               <button
                 className="text-gray-500 hover:text-secondary text-sm px-3 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
@@ -823,7 +839,7 @@ export default function PostCard({
                 }}
               >
                 <MessageSquare size={14} />
-                Responder
+                {t('replyAction')}
               </button>
               
               {/* Report Button */}
@@ -831,16 +847,11 @@ export default function PostCard({
                 className="text-gray-500 hover:text-red-400 text-sm px-3 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('🚩 Botão Denunciar clicado!');
-                  console.log('📌 Post ID:', post.id);
-                  console.log('📌 Post Title:', post.title);
-                  console.log('🔓 Abrindo modal de denúncia...');
                   setShowReportModal(true);
-                  console.log('✅ Estado showReportModal definido como true');
                 }}
               >
                 <Flag size={14} />
-                Denunciar
+                {t('reportAction')}
               </button>
             </div>
 
@@ -1010,6 +1021,22 @@ export default function PostCard({
       onSuccess={() => {
         console.log('✅ Post reported successfully');
         // Optionally update UI or refresh data
+      }}
+    />
+
+    {/* Edit Post Modal */}
+    <EditPostModal
+      open={showEditModal}
+      onClose={() => setShowEditModal(false)}
+      post={{
+        id: post.id,
+        type: post.type,
+        title: post.title,
+        content: post.content,
+        authorId: post.authorId || post.author.id,
+      }}
+      onPostUpdated={() => {
+        onUpdate?.();
       }}
     />
     </>

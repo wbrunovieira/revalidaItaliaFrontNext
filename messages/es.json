@@ -962,6 +962,55 @@
       "popular": "Populares",
       "unanswered": "Sin respuesta"
     },
+    "editAction": "Editar",
+    "replyAction": "Responder",
+    "reportAction": "Denunciar",
+    "editPost": {
+      "title": "Editar Publicación",
+      "description": {
+        "owner": "Realiza cambios en tu publicación",
+        "moderator": "Como moderador, solo puedes editar el título de esta publicación"
+      },
+      "fields": {
+        "title": "Título",
+        "content": "Contenido"
+      },
+      "placeholders": {
+        "title": "Ingresa el título de la publicación",
+        "content": "Ingresa el contenido de la publicación"
+      },
+      "characters": "caracteres",
+      "readOnly": "solo lectura",
+      "moderatorNotice": {
+        "title": "Acción de Moderación",
+        "description": "Esta edición será registrada y el autor será notificado"
+      },
+      "changesDetected": "Cambios detectados:",
+      "changes": {
+        "title": "Título modificado",
+        "content": "Contenido modificado"
+      },
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "success": {
+        "title": "Publicación actualizada",
+        "description": "Los cambios se han guardado correctamente"
+      },
+      "errors": {
+        "title": "Error al actualizar",
+        "titleRequired": "El título es obligatorio",
+        "titleTooLong": "El título no puede tener más de 200 caracteres",
+        "contentRequired": "El contenido es obligatorio",
+        "contentTooLong": "El contenido no puede tener más de 10000 caracteres",
+        "invalidTitle": "Título inválido",
+        "invalidContent": "Contenido inválido",
+        "forbidden": "No tienes permiso para editar esta publicación",
+        "postNotFound": "Publicación no encontrada",
+        "validationError": "Error de validación",
+        "updateFailed": "Error al actualizar la publicación"
+      }
+    },
     "pinned": "Fijado",
     "timeAgo": "hace {time}",
     "yesterday": "ayer",

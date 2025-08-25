@@ -960,6 +960,55 @@
       "popular": "Populares",
       "unanswered": "Sem resposta"
     },
+    "editAction": "Editar",
+    "replyAction": "Responder",
+    "reportAction": "Denunciar",
+    "editPost": {
+      "title": "Editar Post",
+      "description": {
+        "owner": "Faça alterações no seu post",
+        "moderator": "Como moderador, você pode editar apenas o título deste post"
+      },
+      "fields": {
+        "title": "Título",
+        "content": "Conteúdo"
+      },
+      "placeholders": {
+        "title": "Digite o título do post",
+        "content": "Digite o conteúdo do post"
+      },
+      "characters": "caracteres",
+      "readOnly": "somente leitura",
+      "moderatorNotice": {
+        "title": "Ação de Moderação",
+        "description": "Esta edição será registrada e o autor será notificado"
+      },
+      "changesDetected": "Alterações detectadas:",
+      "changes": {
+        "title": "Título modificado",
+        "content": "Conteúdo modificado"
+      },
+      "save": "Salvar Alterações",
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "success": {
+        "title": "Post atualizado",
+        "description": "As alterações foram salvas com sucesso"
+      },
+      "errors": {
+        "title": "Erro ao atualizar",
+        "titleRequired": "O título é obrigatório",
+        "titleTooLong": "O título não pode ter mais de 200 caracteres",
+        "contentRequired": "O conteúdo é obrigatório",
+        "contentTooLong": "O conteúdo não pode ter mais de 10000 caracteres",
+        "invalidTitle": "Título inválido",
+        "invalidContent": "Conteúdo inválido",
+        "forbidden": "Você não tem permissão para editar este post",
+        "postNotFound": "Post não encontrado",
+        "validationError": "Erro de validação",
+        "updateFailed": "Falha ao atualizar o post"
+      }
+    },
     "pinned": "Fixado",
     "timeAgo": "há {time}",
     "yesterday": "ontem",

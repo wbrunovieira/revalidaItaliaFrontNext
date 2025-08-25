@@ -962,6 +962,55 @@
       "popular": "Popolari",
       "unanswered": "Senza risposta"
     },
+    "editAction": "Modifica",
+    "replyAction": "Rispondi",
+    "reportAction": "Segnala",
+    "editPost": {
+      "title": "Modifica Post",
+      "description": {
+        "owner": "Apporta modifiche al tuo post",
+        "moderator": "Come moderatore, puoi modificare solo il titolo di questo post"
+      },
+      "fields": {
+        "title": "Titolo",
+        "content": "Contenuto"
+      },
+      "placeholders": {
+        "title": "Inserisci il titolo del post",
+        "content": "Inserisci il contenuto del post"
+      },
+      "characters": "caratteri",
+      "readOnly": "sola lettura",
+      "moderatorNotice": {
+        "title": "Azione di Moderazione",
+        "description": "Questa modifica verrà registrata e l'autore sarà notificato"
+      },
+      "changesDetected": "Modifiche rilevate:",
+      "changes": {
+        "title": "Titolo modificato",
+        "content": "Contenuto modificato"
+      },
+      "save": "Salva Modifiche",
+      "cancel": "Annulla",
+      "saving": "Salvataggio...",
+      "success": {
+        "title": "Post aggiornato",
+        "description": "Le modifiche sono state salvate con successo"
+      },
+      "errors": {
+        "title": "Errore nell'aggiornamento",
+        "titleRequired": "Il titolo è obbligatorio",
+        "titleTooLong": "Il titolo non può superare i 200 caratteri",
+        "contentRequired": "Il contenuto è obbligatorio",
+        "contentTooLong": "Il contenuto non può superare i 10000 caratteri",
+        "invalidTitle": "Titolo non valido",
+        "invalidContent": "Contenuto non valido",
+        "forbidden": "Non hai i permessi per modificare questo post",
+        "postNotFound": "Post non trovato",
+        "validationError": "Errore di validazione",
+        "updateFailed": "Impossibile aggiornare il post"
+      }
+    },
     "pinned": "In evidenza",
     "timeAgo": "{time} fa",
     "yesterday": "ieri",

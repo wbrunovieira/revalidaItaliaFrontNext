@@ -26,7 +26,7 @@ interface ModerationControlsProps {
 }
 
 export function ModerationControls({ item, type, size = 'sm', onUpdate }: ModerationControlsProps) {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { toast } = useToast();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBlockConfirmModal, setShowBlockConfirmModal] = useState(false);
@@ -53,21 +53,40 @@ export function ModerationControls({ item, type, size = 'sm', onUpdate }: Modera
 
     setIsSubmitting(true);
 
-    // TODO: Quando a API estiver pronta, substituir por:
-    // await api.patch(`/api/v1/community/posts/${item.id}`, {
-    //   title: editedTitle
-    // });
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${item.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title: editedTitle }),
+        }
+      );
 
-    // Simular delay de API
-    setTimeout(() => {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update title');
+      }
+
       toast({
         title: "✅ Título editado",
         description: "O título foi atualizado com sucesso.",
       });
-      setIsSubmitting(false);
       setShowEditModal(false);
       onUpdate?.();
-    }, 1000);
+    } catch (error) {
+      console.error('Error updating title:', error);
+      toast({
+        title: "❌ Erro ao editar título",
+        description: error instanceof Error ? error.message : "Não foi possível atualizar o título.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handler para confirmar e executar bloqueio/desbloqueio

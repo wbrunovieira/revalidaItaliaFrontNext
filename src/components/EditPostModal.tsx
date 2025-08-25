@@ -3,12 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, X, Hash } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -22,24 +23,34 @@ interface EditPostModalProps {
     title?: string;
     content: string;
     authorId: string;
+    hashtags?: (string | { id: string; name: string; slug: string })[];
   };
   onPostUpdated?: () => void;
 }
 
 export default function EditPostModal({ open, onClose, post, onPostUpdated }: EditPostModalProps) {
   const t = useTranslations('Community');
+  const tCreate = useTranslations('CreatePost');
   const { user, token } = useAuth();
   const { toast } = useToast();
   const [editedTitle, setEditedTitle] = useState(post.title || '');
   const [editedContent, setEditedContent] = useState(post.content);
+  const [hashtagInput, setHashtagInput] = useState('');
+  const [hashtags, setHashtags] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ title?: string; content?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; content?: string; hashtags?: string }>({});
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (open) {
       setEditedTitle(post.title || '');
       setEditedContent(post.content);
+      // Convert hashtags to slugs array
+      const hashtagSlugs = post.hashtags?.map(tag => 
+        typeof tag === 'string' ? tag : tag.slug
+      ) || [];
+      setHashtags(hashtagSlugs);
+      setHashtagInput('');
       setErrors({});
     }
   }, [open, post]);
@@ -50,9 +61,33 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
   const canEditTitle = isPostOwner || isModeratorOrAdmin;
   const canEditContent = isPostOwner;
 
+  // Add hashtag handler
+  const handleAddHashtag = () => {
+    if (!hashtagInput.trim()) return;
+    
+    const normalizedTag = hashtagInput.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    
+    if (normalizedTag && !hashtags.includes(normalizedTag)) {
+      setHashtags([...hashtags, normalizedTag]);
+      setHashtagInput('');
+      setErrors({ ...errors, hashtags: undefined });
+    }
+  };
+
+  const handleRemoveHashtag = (tagToRemove: string) => {
+    setHashtags(hashtags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleHashtagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddHashtag();
+    }
+  };
+
   // Validation
   const validateForm = (): boolean => {
-    const newErrors: { title?: string; content?: string } = {};
+    const newErrors: { title?: string; content?: string; hashtags?: string } = {};
 
     // Title validation for GENERAL_TOPIC posts
     if (post.type === 'GENERAL_TOPIC') {
@@ -83,7 +118,7 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
 
     try {
       // Prepare request body
-      const requestBody: { title?: string; content?: string } = {};
+      const requestBody: { title?: string; content?: string; hashtagSlugs?: string[] } = {};
 
       // Only include fields that can be edited based on permissions
       if (canEditTitle && post.type === 'GENERAL_TOPIC' && editedTitle !== post.title) {
@@ -92,6 +127,20 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
 
       if (canEditContent && editedContent !== post.content) {
         requestBody.content = editedContent;
+      }
+
+      // Only include hashtags if they've changed (for post owner only)
+      if (isPostOwner && post.type === 'GENERAL_TOPIC') {
+        const originalHashtags = post.hashtags?.map(tag => 
+          typeof tag === 'string' ? tag : tag.slug
+        ) || [];
+        
+        // Check if hashtags have changed
+        const hashtagsChanged = JSON.stringify(hashtags.sort()) !== JSON.stringify(originalHashtags.sort());
+        
+        if (hashtagsChanged) {
+          requestBody.hashtagSlugs = hashtags;
+        }
       }
 
       // If no changes, just close the modal
@@ -206,6 +255,56 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
             </div>
           )}
 
+          {/* Hashtags field - only for GENERAL_TOPIC posts and post owner */}
+          {post.type === 'GENERAL_TOPIC' && isPostOwner && (
+            <div className="space-y-2">
+              <Label htmlFor="hashtags">
+                {tCreate('hashtagsLabel')}
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="hashtags"
+                  value={hashtagInput}
+                  onChange={(e) => setHashtagInput(e.target.value)}
+                  onKeyPress={handleHashtagKeyPress}
+                  placeholder={tCreate('hashtagsPlaceholder')}
+                  className="flex-1 bg-primary/50 border-gray-600 text-white"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddHashtag}
+                  className="bg-secondary hover:bg-secondary/80"
+                  disabled={!hashtagInput.trim()}
+                >
+                  {tCreate('add')}
+                </Button>
+              </div>
+              {hashtags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {hashtags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="bg-secondary/20 text-secondary border-secondary/50 hover:bg-secondary/30"
+                    >
+                      <Hash size={12} className="mr-1" />
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveHashtag(tag)}
+                        className="ml-2 hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-gray-400">
+                {tCreate('hashtagsHelp')}
+              </p>
+            </div>
+          )}
+
           {/* Content field */}
           <div className="space-y-2">
             <Label htmlFor="content">
@@ -255,7 +354,16 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
           )}
 
           {/* Info about what changed */}
-          {(editedTitle !== post.title || editedContent !== post.content) && (
+          {(editedTitle !== post.title || 
+            editedContent !== post.content || 
+            (() => {
+              if (!isPostOwner || post.type !== 'GENERAL_TOPIC') return false;
+              const originalHashtags = post.hashtags?.map(tag => 
+                typeof tag === 'string' ? tag : tag.slug
+              ) || [];
+              return JSON.stringify(hashtags.sort()) !== JSON.stringify(originalHashtags.sort());
+            })()
+          ) && (
             <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-3">
               <p className="text-sm text-blue-400">
                 {t('editPost.changesDetected')}
@@ -266,6 +374,14 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
                 )}
                 {editedContent !== post.content && canEditContent && (
                   <li>{t('editPost.changes.content')}</li>
+                )}
+                {post.type === 'GENERAL_TOPIC' && isPostOwner && (() => {
+                  const originalHashtags = post.hashtags?.map(tag => 
+                    typeof tag === 'string' ? tag : tag.slug
+                  ) || [];
+                  return JSON.stringify(hashtags.sort()) !== JSON.stringify(originalHashtags.sort());
+                })() && (
+                  <li>{t('editPost.changes.hashtags')}</li>
                 )}
               </ul>
             </div>
@@ -286,7 +402,22 @@ export default function EditPostModal({ open, onClose, post, onPostUpdated }: Ed
             disabled={
               isSubmitting || 
               (!canEditTitle && !canEditContent) ||
-              (editedTitle === post.title && editedContent === post.content)
+              (() => {
+                // Check if nothing changed
+                const titleUnchanged = editedTitle === post.title;
+                const contentUnchanged = editedContent === post.content;
+                
+                // Check hashtags changes for post owner on GENERAL_TOPIC posts
+                const originalHashtags = post.hashtags?.map(tag => 
+                  typeof tag === 'string' ? tag : tag.slug
+                ) || [];
+                const hashtagsUnchanged = 
+                  !isPostOwner || 
+                  post.type !== 'GENERAL_TOPIC' || 
+                  JSON.stringify(hashtags.sort()) === JSON.stringify(originalHashtags.sort());
+                
+                return titleUnchanged && contentUnchanged && hashtagsUnchanged;
+              })()
             }
             className="bg-secondary hover:bg-secondary/80"
           >

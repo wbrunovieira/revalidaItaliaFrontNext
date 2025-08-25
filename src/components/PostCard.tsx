@@ -1057,6 +1057,7 @@ export default function PostCard({
         title: post.title,
         content: post.content,
         authorId: post.authorId || post.author.id,
+        hashtags: post.hashtags,
       }}
       onPostUpdated={() => {
         onUpdate?.();

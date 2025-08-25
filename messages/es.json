@@ -989,7 +989,8 @@
       "changesDetected": "Cambios detectados:",
       "changes": {
         "title": "Título modificado",
-        "content": "Contenido modificado"
+        "content": "Contenido modificado",
+        "hashtags": "Hashtags modificados"
       },
       "save": "Guardar Cambios",
       "cancel": "Cancelar",

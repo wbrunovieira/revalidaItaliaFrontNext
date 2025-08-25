@@ -961,6 +961,7 @@
       "unanswered": "Sem resposta"
     },
     "editAction": "Editar",
+    "deleteAction": "Excluir",
     "replyAction": "Responder",
     "reportAction": "Denunciar",
     "editPost": {
@@ -1036,6 +1037,33 @@
         "commentNotFound": "Comentário não encontrado",
         "validationError": "Erro de validação",
         "updateFailed": "Falha ao atualizar o comentário"
+      }
+    },
+    "deleteConfirmation": {
+      "titlePost": "Excluir Post",
+      "titleComment": "Excluir Comentário",
+      "descriptionPost": "Tem certeza que deseja excluir este post?",
+      "descriptionComment": "Tem certeza que deseja excluir este comentário?",
+      "warning": {
+        "title": "Atenção!",
+        "description": "Esta ação não pode ser desfeita.",
+        "postNote": "Se o post possui comentários, eles devem ser excluídos primeiro."
+      },
+      "delete": "Excluir",
+      "deleting": "Excluindo...",
+      "cancel": "Cancelar",
+      "success": {
+        "title": "Sucesso",
+        "postDeleted": "Post excluído com sucesso",
+        "commentDeleted": "Comentário excluído com sucesso"
+      },
+      "errors": {
+        "title": "Erro ao excluir",
+        "hasDependencies": "Este post possui comentários e não pode ser excluído. Exclua os comentários primeiro.",
+        "badRequest": "Requisição inválida",
+        "forbidden": "Você não tem permissão para excluir este item",
+        "notFound": "Item não encontrado ou já foi excluído",
+        "deleteFailed": "Falha ao excluir o item"
       }
     },
     "pinned": "Fixado",

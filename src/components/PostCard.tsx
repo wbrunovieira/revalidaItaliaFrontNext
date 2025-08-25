@@ -19,6 +19,7 @@ import {
   Flag,
   Ban,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
 import ReportModal from '@/components/ReportModal';
 import EditPostModal from '@/components/EditPostModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 interface Author {
   id: string;
@@ -173,6 +175,7 @@ export default function PostCard({
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -828,6 +831,20 @@ export default function PostCard({
                 </button>
               )}
               
+              {/* Delete Button - for post owner or admin */}
+              {(user?.id === post.authorId || user?.role === 'admin') && (
+                <button
+                  className="text-gray-500 hover:text-red-500 text-sm px-3 py-1 rounded-md hover:bg-red-500/10 transition-colors flex items-center gap-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash2 size={14} />
+                  {t('deleteAction')}
+                </button>
+              )}
+              
               {/* Reply Button */}
               <button
                 className="text-gray-500 hover:text-secondary text-sm px-3 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
@@ -1036,6 +1053,18 @@ export default function PostCard({
         authorId: post.authorId || post.author.id,
       }}
       onPostUpdated={() => {
+        onUpdate?.();
+      }}
+    />
+
+    {/* Delete Confirmation Modal */}
+    <DeleteConfirmationModal
+      open={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      itemType="post"
+      itemId={post.id}
+      itemTitle={post.title}
+      onDeleted={() => {
         onUpdate?.();
       }}
     />

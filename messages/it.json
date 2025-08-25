@@ -963,6 +963,7 @@
       "unanswered": "Senza risposta"
     },
     "editAction": "Modifica",
+    "deleteAction": "Elimina",
     "replyAction": "Rispondi",
     "reportAction": "Segnala",
     "editPost": {
@@ -1038,6 +1039,33 @@
         "commentNotFound": "Commento non trovato",
         "validationError": "Errore di validazione",
         "updateFailed": "Impossibile aggiornare il commento"
+      }
+    },
+    "deleteConfirmation": {
+      "titlePost": "Elimina Post",
+      "titleComment": "Elimina Commento",
+      "descriptionPost": "Sei sicuro di voler eliminare questo post?",
+      "descriptionComment": "Sei sicuro di voler eliminare questo commento?",
+      "warning": {
+        "title": "Attenzione!",
+        "description": "Questa azione non può essere annullata.",
+        "postNote": "Se il post ha commenti, devono essere eliminati prima."
+      },
+      "delete": "Elimina",
+      "deleting": "Eliminazione...",
+      "cancel": "Annulla",
+      "success": {
+        "title": "Successo",
+        "postDeleted": "Post eliminato con successo",
+        "commentDeleted": "Commento eliminato con successo"
+      },
+      "errors": {
+        "title": "Errore nell'eliminazione",
+        "hasDependencies": "Questo post ha commenti e non può essere eliminato. Elimina prima i commenti.",
+        "badRequest": "Richiesta non valida",
+        "forbidden": "Non hai i permessi per eliminare questo elemento",
+        "notFound": "Elemento non trovato o già eliminato",
+        "deleteFailed": "Impossibile eliminare l'elemento"
       }
     },
     "pinned": "In evidenza",

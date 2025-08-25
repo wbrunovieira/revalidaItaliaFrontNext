@@ -963,6 +963,7 @@
       "unanswered": "Sin respuesta"
     },
     "editAction": "Editar",
+    "deleteAction": "Eliminar",
     "replyAction": "Responder",
     "reportAction": "Denunciar",
     "editPost": {
@@ -1038,6 +1039,33 @@
         "commentNotFound": "Comentario no encontrado",
         "validationError": "Error de validación",
         "updateFailed": "Error al actualizar el comentario"
+      }
+    },
+    "deleteConfirmation": {
+      "titlePost": "Eliminar Publicación",
+      "titleComment": "Eliminar Comentario",
+      "descriptionPost": "¿Estás seguro de que quieres eliminar esta publicación?",
+      "descriptionComment": "¿Estás seguro de que quieres eliminar este comentario?",
+      "warning": {
+        "title": "¡Atención!",
+        "description": "Esta acción no se puede deshacer.",
+        "postNote": "Si la publicación tiene comentarios, deben eliminarse primero."
+      },
+      "delete": "Eliminar",
+      "deleting": "Eliminando...",
+      "cancel": "Cancelar",
+      "success": {
+        "title": "Éxito",
+        "postDeleted": "Publicación eliminada con éxito",
+        "commentDeleted": "Comentario eliminado con éxito"
+      },
+      "errors": {
+        "title": "Error al eliminar",
+        "hasDependencies": "Esta publicación tiene comentarios y no puede ser eliminada. Elimina los comentarios primero.",
+        "badRequest": "Solicitud inválida",
+        "forbidden": "No tienes permiso para eliminar este elemento",
+        "notFound": "Elemento no encontrado o ya eliminado",
+        "deleteFailed": "Error al eliminar el elemento"
       }
     },
     "pinned": "Fijado",

@@ -8,6 +8,7 @@ import {
   Flag,
   Ban,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import Image from 'next/image';
 import ReactionsButton, {
@@ -19,6 +20,7 @@ import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
 import ReportModal from '@/components/ReportModal';
 import EditCommentModal from '@/components/EditCommentModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 interface Author {
   id: string;
@@ -81,6 +83,7 @@ export default function ReplyCard({
   const [isHydrated, setIsHydrated] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -293,6 +296,20 @@ export default function ReplyCard({
                 </button>
               )}
               
+              {/* Delete Button - for comment author or admin */}
+              {(user?.id === reply.author.id || user?.role === 'admin') && (
+                <button
+                  className="text-gray-500 hover:text-red-500 text-xs px-2 py-1 rounded-md hover:bg-red-500/10 transition-colors flex items-center gap-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash2 size={12} />
+                  <span className="hidden sm:inline">{t('deleteAction')}</span>
+                </button>
+              )}
+              
               {canReply && (
                 <button
                   className="text-gray-500 hover:text-secondary text-xs px-2 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
@@ -413,6 +430,18 @@ export default function ReplyCard({
         authorId: reply.author.id,
       }}
       onCommentUpdated={() => {
+        onUpdate?.();
+      }}
+    />
+
+    {/* Delete Confirmation Modal */}
+    <DeleteConfirmationModal
+      open={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      itemType="comment"
+      itemId={reply.id}
+      itemTitle={reply.content.substring(0, 100)}
+      onDeleted={() => {
         onUpdate?.();
       }}
     />

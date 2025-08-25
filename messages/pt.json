@@ -943,7 +943,7 @@
   "Community": {
     "title": "Comunidade",
     "description": "Conecte-se com outros profissionais, tire dúvidas e compartilhe experiências",
-    "searchPlaceholder": "Buscar por tópicos, tags ou palavras-chave...",
+    "searchPlaceholder": "Buscar por título, conteúdo, hashtag ou autor...",
     "createTopic": "Novo Post",
     "filterBy": "Filtrar por",
     "filterByCourse": "Filtrar por curso",

@@ -1009,6 +1009,35 @@
         "updateFailed": "Falha ao atualizar o post"
       }
     },
+    "editComment": {
+      "title": "Editar Comentário",
+      "description": "Faça alterações no seu comentário",
+      "fields": {
+        "content": "Conteúdo"
+      },
+      "placeholders": {
+        "content": "Digite o conteúdo do comentário"
+      },
+      "characters": "caracteres",
+      "changesDetected": "Alterações detectadas no comentário",
+      "note": "Apenas o autor do comentário pode editá-lo. Moderadores não podem editar comentários de outros usuários.",
+      "save": "Salvar Alterações",
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "success": {
+        "title": "Comentário atualizado",
+        "description": "As alterações foram salvas com sucesso"
+      },
+      "errors": {
+        "title": "Erro ao atualizar",
+        "contentRequired": "O conteúdo é obrigatório",
+        "contentTooLong": "O conteúdo não pode ter mais de 10000 caracteres",
+        "forbidden": "Você não tem permissão para editar este comentário",
+        "commentNotFound": "Comentário não encontrado",
+        "validationError": "Erro de validação",
+        "updateFailed": "Falha ao atualizar o comentário"
+      }
+    },
     "pinned": "Fixado",
     "timeAgo": "há {time}",
     "yesterday": "ontem",

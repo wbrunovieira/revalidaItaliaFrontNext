@@ -7,6 +7,7 @@ import {
   Calendar,
   Flag,
   Ban,
+  Pencil,
 } from 'lucide-react';
 import Image from 'next/image';
 import ReactionsButton, {
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
 import ReportModal from '@/components/ReportModal';
+import EditCommentModal from '@/components/EditCommentModal';
 
 interface Author {
   id: string;
@@ -78,6 +80,7 @@ export default function ReplyCard({
   const { user } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -276,6 +279,20 @@ export default function ReplyCard({
           <div className="flex items-center justify-between">
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
+              {/* Edit Button - only for comment author */}
+              {user?.id === reply.author.id && (
+                <button
+                  className="text-gray-500 hover:text-blue-400 text-xs px-2 py-1 rounded-md hover:bg-blue-400/10 transition-colors flex items-center gap-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEditModal(true);
+                  }}
+                >
+                  <Pencil size={12} />
+                  <span className="hidden sm:inline">{t('editAction')}</span>
+                </button>
+              )}
+              
               {canReply && (
                 <button
                   className="text-gray-500 hover:text-secondary text-xs px-2 py-1 rounded-md hover:bg-primary/30 transition-colors flex items-center gap-1"
@@ -287,19 +304,18 @@ export default function ReplyCard({
                   }}
                 >
                   <MessageSquare size={12} />
-                  <span className="hidden sm:inline">Responder</span>
+                  <span className="hidden sm:inline">{t('replyAction')}</span>
                 </button>
               )}
               <button
                 className="text-gray-500 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-400/10 transition-colors flex items-center gap-1"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('🚩 Opening report modal for comment:', reply.id);
                   setShowReportModal(true);
                 }}
               >
                 <Flag size={12} />
-                <span className="hidden sm:inline">Denunciar</span>
+                <span className="hidden sm:inline">{t('reportAction')}</span>
               </button>
             </div>
 
@@ -384,6 +400,20 @@ export default function ReplyCard({
       onSuccess={() => {
         console.log('✅ Comment reported successfully');
         setShowReportModal(false);
+      }}
+    />
+
+    {/* Edit Comment Modal */}
+    <EditCommentModal
+      open={showEditModal}
+      onClose={() => setShowEditModal(false)}
+      comment={{
+        id: reply.id,
+        content: reply.content,
+        authorId: reply.author.id,
+      }}
+      onCommentUpdated={() => {
+        onUpdate?.();
       }}
     />
     </div>

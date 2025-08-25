@@ -1011,6 +1011,35 @@
         "updateFailed": "Impossibile aggiornare il post"
       }
     },
+    "editComment": {
+      "title": "Modifica Commento",
+      "description": "Apporta modifiche al tuo commento",
+      "fields": {
+        "content": "Contenuto"
+      },
+      "placeholders": {
+        "content": "Inserisci il contenuto del commento"
+      },
+      "characters": "caratteri",
+      "changesDetected": "Modifiche rilevate nel commento",
+      "note": "Solo l'autore del commento può modificarlo. I moderatori non possono modificare i commenti di altri utenti.",
+      "save": "Salva Modifiche",
+      "cancel": "Annulla",
+      "saving": "Salvataggio...",
+      "success": {
+        "title": "Commento aggiornato",
+        "description": "Le modifiche sono state salvate con successo"
+      },
+      "errors": {
+        "title": "Errore nell'aggiornamento",
+        "contentRequired": "Il contenuto è obbligatorio",
+        "contentTooLong": "Il contenuto non può superare i 10000 caratteri",
+        "forbidden": "Non hai i permessi per modificare questo commento",
+        "commentNotFound": "Commento non trovato",
+        "validationError": "Errore di validazione",
+        "updateFailed": "Impossibile aggiornare il commento"
+      }
+    },
     "pinned": "In evidenza",
     "timeAgo": "{time} fa",
     "yesterday": "ieri",

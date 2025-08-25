@@ -1011,6 +1011,35 @@
         "updateFailed": "Error al actualizar la publicación"
       }
     },
+    "editComment": {
+      "title": "Editar Comentario",
+      "description": "Realiza cambios en tu comentario",
+      "fields": {
+        "content": "Contenido"
+      },
+      "placeholders": {
+        "content": "Ingresa el contenido del comentario"
+      },
+      "characters": "caracteres",
+      "changesDetected": "Cambios detectados en el comentario",
+      "note": "Solo el autor del comentario puede editarlo. Los moderadores no pueden editar comentarios de otros usuarios.",
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "success": {
+        "title": "Comentario actualizado",
+        "description": "Los cambios se han guardado correctamente"
+      },
+      "errors": {
+        "title": "Error al actualizar",
+        "contentRequired": "El contenido es obligatorio",
+        "contentTooLong": "El contenido no puede tener más de 10000 caracteres",
+        "forbidden": "No tienes permiso para editar este comentario",
+        "commentNotFound": "Comentario no encontrado",
+        "validationError": "Error de validación",
+        "updateFailed": "Error al actualizar el comentario"
+      }
+    },
     "pinned": "Fijado",
     "timeAgo": "hace {time}",
     "yesterday": "ayer",

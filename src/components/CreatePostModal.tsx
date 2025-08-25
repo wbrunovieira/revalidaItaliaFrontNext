@@ -504,7 +504,7 @@ export default function CreatePostModal({
       }
 
       if (hashtagArray.length > 0) {
-        requestBody.hashtags = hashtagArray;
+        requestBody.hashtagSlugs = hashtagArray;
       }
 
       // Prepare attachments array

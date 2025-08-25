@@ -114,7 +114,7 @@ interface Post {
     SAD: number;
     userReactions: ReactionType[];
   };
-  hashtags?: string[];
+  hashtags?: (string | { id: string; name: string; slug: string })[];
   attachments?: Attachment[];
   course?: {
     id: string;
@@ -780,16 +780,22 @@ export default function PostCard({
         {/* Hashtags */}
         {post.hashtags && post.hashtags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {post.hashtags.map(tag => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="text-xs border-gray-600 text-gray-400 hover:border-secondary hover:text-secondary transition-colors"
-              >
-                <Hash size={10} className="mr-1" />
-                {tag}
-              </Badge>
-            ))}
+            {post.hashtags.map(tag => {
+              // Handle both string and object formats
+              const tagKey = typeof tag === 'string' ? tag : tag.id;
+              const tagDisplay = typeof tag === 'string' ? tag : tag.slug;
+              
+              return (
+                <Badge
+                  key={tagKey}
+                  variant="outline"
+                  className="text-xs border-gray-600 text-gray-400 hover:border-secondary hover:text-secondary transition-colors"
+                >
+                  <Hash size={10} className="mr-1" />
+                  {tagDisplay}
+                </Badge>
+              );
+            })}
           </div>
         )}
 

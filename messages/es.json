@@ -1069,6 +1069,26 @@
         "deleteFailed": "Error al eliminar el elemento"
       }
     },
+    "pinPost": {
+      "pin": "Fijar",
+      "unpin": "Desfijar",
+      "pinning": "Fijando...",
+      "success": {
+        "pinned": "Publicación fijada",
+        "unpinned": "Publicación desfijada",
+        "pinnedDescription": "La publicación ha sido fijada en la parte superior de la lista",
+        "unpinnedDescription": "La publicación ha sido removida de los fijados"
+      },
+      "errors": {
+        "title": "Error al fijar/desfijar",
+        "unauthorized": "No autorizado",
+        "unauthorizedDescription": "Solo administradores y tutores pueden fijar publicaciones",
+        "forbidden": "No tienes permiso para fijar publicaciones",
+        "notFound": "Publicación no encontrada",
+        "limitExceeded": "Límite de publicaciones fijadas alcanzado (máximo 3)",
+        "failed": "Error al fijar/desfijar la publicación"
+      }
+    },
     "pinned": "Fijado",
     "timeAgo": "hace {time}",
     "yesterday": "ayer",

@@ -1067,6 +1067,26 @@
         "deleteFailed": "Falha ao excluir o item"
       }
     },
+    "pinPost": {
+      "pin": "Fixar",
+      "unpin": "Desfixar",
+      "pinning": "Fixando...",
+      "success": {
+        "pinned": "Post fixado",
+        "unpinned": "Post desfixado",
+        "pinnedDescription": "O post foi fixado no topo da lista",
+        "unpinnedDescription": "O post foi removido dos fixados"
+      },
+      "errors": {
+        "title": "Erro ao fixar/desfixar",
+        "unauthorized": "Não autorizado",
+        "unauthorizedDescription": "Apenas administradores e tutores podem fixar posts",
+        "forbidden": "Você não tem permissão para fixar posts",
+        "notFound": "Post não encontrado",
+        "limitExceeded": "Limite de posts fixados atingido (máximo 3)",
+        "failed": "Falha ao fixar/desfixar o post"
+      }
+    },
     "pinned": "Fixado",
     "timeAgo": "há {time}",
     "yesterday": "ontem",

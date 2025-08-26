@@ -1183,10 +1183,29 @@ export default function CommunityPage() {
         })
       );
 
+      // Sort posts: pinned first (newest pinned first), then unpinned (newest first)
+      const sortedPosts = transformedPosts.sort((a, b) => {
+        // If both are pinned or both are not pinned, sort by date
+        if (a.isPinned === b.isPinned) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        // Pinned posts come first
+        return a.isPinned ? -1 : 1;
+      });
+
       if (append) {
-        setTopics(prev => [...prev, ...transformedPosts]);
+        // When appending, we need to re-sort the entire list to maintain pinned posts at top
+        setTopics(prev => {
+          const combined = [...prev, ...sortedPosts];
+          return combined.sort((a, b) => {
+            if (a.isPinned === b.isPinned) {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+            return a.isPinned ? -1 : 1;
+          });
+        });
       } else {
-        setTopics(transformedPosts);
+        setTopics(sortedPosts);
       }
       setCurrentPage(data.pagination.page);
       setTotalPages(data.pagination.totalPages);

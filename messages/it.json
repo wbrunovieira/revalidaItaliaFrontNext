@@ -1069,6 +1069,26 @@
         "deleteFailed": "Impossibile eliminare l'elemento"
       }
     },
+    "pinPost": {
+      "pin": "Fissa",
+      "unpin": "Rimuovi dai fissi",
+      "pinning": "Fissando...",
+      "success": {
+        "pinned": "Post fissato",
+        "unpinned": "Post rimosso dai fissi",
+        "pinnedDescription": "Il post è stato fissato in cima alla lista",
+        "unpinnedDescription": "Il post è stato rimosso dai fissi"
+      },
+      "errors": {
+        "title": "Errore nel fissare/rimuovere",
+        "unauthorized": "Non autorizzato",
+        "unauthorizedDescription": "Solo amministratori e tutor possono fissare i post",
+        "forbidden": "Non hai il permesso di fissare i post",
+        "notFound": "Post non trovato",
+        "limitExceeded": "Limite di post fissati raggiunto (massimo 3)",
+        "failed": "Impossibile fissare/rimuovere il post"
+      }
+    },
     "pinned": "In evidenza",
     "timeAgo": "{time} fa",
     "yesterday": "ieri",

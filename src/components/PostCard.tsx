@@ -20,6 +20,7 @@ import {
   Ban,
   Pencil,
   Trash2,
+  Pin,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ import { RoleBadge } from '@/components/ui/role-badge';
 import ReplyCard from '@/components/ReplyCard';
 import { ModerationControls } from '@/components/ui/moderation-controls';
 import { useAuth } from '@/stores/auth.store';
+import { useToast } from '@/hooks/use-toast';
 import ReportModal from '@/components/ReportModal';
 import EditPostModal from '@/components/EditPostModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
@@ -169,13 +171,16 @@ export default function PostCard({
   compactImages = false,
 }: PostCardProps) {
   const t = useTranslations('Community');
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const { toast } = useToast();
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isPinning, setIsPinning] = useState(false);
+  const [isPinned, setIsPinned] = useState(post.isPinned || false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -230,6 +235,69 @@ export default function PostCard({
   const documentAttachment = post.attachments?.find(
     a => a.type === 'DOCUMENT'
   );
+
+  // Handle pin/unpin
+  const handleTogglePin = async () => {
+    if (!token || (!user?.role || (user.role !== 'admin' && user.role !== 'tutor'))) {
+      toast({
+        title: t('pinPost.errors.unauthorized'),
+        description: t('pinPost.errors.unauthorizedDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsPinning(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/community/posts/${post.id}/pin`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ isPinned: !isPinned }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        if (response.status === 400 && errorData.detail?.includes('Maximum')) {
+          throw new Error(t('pinPost.errors.limitExceeded'));
+        } else if (response.status === 403) {
+          throw new Error(t('pinPost.errors.forbidden'));
+        } else if (response.status === 404) {
+          throw new Error(t('pinPost.errors.notFound'));
+        }
+        
+        throw new Error(errorData.detail || t('pinPost.errors.failed'));
+      }
+
+      const result = await response.json();
+      setIsPinned(result.post.isPinned);
+      
+      toast({
+        title: result.post.isPinned ? t('pinPost.success.pinned') : t('pinPost.success.unpinned'),
+        description: result.post.isPinned 
+          ? t('pinPost.success.pinnedDescription')
+          : t('pinPost.success.unpinnedDescription'),
+      });
+
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+      toast({
+        title: t('pinPost.errors.title'),
+        description: error instanceof Error ? error.message : t('pinPost.errors.failed'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPinning(false);
+    }
+  };
 
   // Render image gallery
   const renderImageGallery = () => {
@@ -554,8 +622,8 @@ export default function PostCard({
         'hover:bg-primary-dark/70 hover:shadow-xl hover:shadow-secondary/10',
         'transition-all duration-300',
         onClick && 'cursor-pointer',
-        post.isPinned &&
-          'border-secondary ring-2 ring-secondary/20',
+        isPinned &&
+          'border-secondary ring-2 ring-secondary/30 bg-gradient-to-br from-secondary/5 to-transparent',
         // Add subtle secondary border for lesson posts
         (post.lesson || post.module || post.course) ? 
           'border-secondary/30' : 
@@ -610,11 +678,12 @@ export default function PostCard({
         {/* Post Header com controles de moderação */}
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-2 flex-1">
-            {post.isPinned && (
+            {isPinned && (
               <Badge
                 variant="secondary"
-                className="bg-secondary/20 text-secondary border-secondary/30"
+                className="bg-gradient-to-r from-secondary/30 to-secondary/20 text-secondary border-secondary/40 flex items-center gap-1 animate-pulse"
               >
+                <Pin size={12} className="rotate-45 fill-current" />
                 {t('pinned')}
               </Badge>
             )}
@@ -823,6 +892,37 @@ export default function PostCard({
           {/* Actions and Reactions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
+              {/* Pin Button - only for admin and tutor */}
+              {(user?.role === 'admin' || user?.role === 'tutor') && (
+                <button
+                  className={cn(
+                    "text-sm px-3 py-1 rounded-md transition-colors flex items-center gap-1",
+                    isPinned 
+                      ? "text-secondary hover:text-secondary/80 hover:bg-secondary/10" 
+                      : "text-gray-500 hover:text-secondary hover:bg-secondary/10"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTogglePin();
+                  }}
+                  disabled={isPinning}
+                >
+                  <Pin 
+                    size={14} 
+                    className={cn(
+                      "transition-transform",
+                      isPinned && "rotate-45 fill-current"
+                    )}
+                  />
+                  {isPinning 
+                    ? t('pinPost.pinning')
+                    : isPinned 
+                      ? t('pinPost.unpin')
+                      : t('pinPost.pin')
+                  }
+                </button>
+              )}
+              
               {/* Edit Button - only for post owner */}
               {user?.id === post.authorId && (
                 <button

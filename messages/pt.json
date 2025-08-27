@@ -1569,6 +1569,50 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "transactions": {
+    "title": "Transações",
+    "description": "Gerencie e monitore todas as transações de pagamento",
+    "viewTransactions": "Ver Transações",
+    "refresh": "Atualizar",
+    "searchPlaceholder": "Buscar por nome, email ou ID...",
+    "filterByStatus": "Filtrar por status",
+    "filterByProvider": "Filtrar por provedor",
+    "allStatuses": "Todos os status",
+    "allProviders": "Todos os provedores",
+    "noTransactions": "Nenhuma transação encontrada",
+    "view": "Visualizar",
+    "showing": "Mostrando {from} a {to} de {total} transações",
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovada",
+      "canceled": "Cancelada",
+      "refunded": "Reembolsada",
+      "chargeback": "Chargeback",
+      "disputed": "Disputada"
+    },
+    "columns": {
+      "date": "Data",
+      "customer": "Cliente",
+      "product": "Produto",
+      "amount": "Valor",
+      "provider": "Provedor",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "stats": {
+      "approved": "Aprovadas",
+      "pending": "Pendentes",
+      "refunded": "Reembolsadas",
+      "issues": "Problemas"
+    },
+    "errors": {
+      "unauthorized": "Não autorizado",
+      "adminOnly": "Apenas administradores podem acessar esta página",
+      "fetchTitle": "Erro ao carregar transações",
+      "fetchDescription": "Não foi possível carregar as transações. Tente novamente."
+    }
+  },
+  
   "liveSessions": {
     "title": "Aulas ao Vivo",
     "description": "Crie e gerencie sessões ao vivo com Zoom para aulas interativas",
@@ -2925,7 +2969,8 @@
     "assessments": "Avaliações",
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
-    "liveSessions": "Aulas ao Vivo"
+    "liveSessions": "Aulas ao Vivo",
+    "transactions": "Transações"
   },
   
   "users": {

@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 
 import {
   Users,
@@ -19,6 +20,7 @@ import {
   Layers,
   HelpCircle,
   Radio,
+  DollarSign,
 } from 'lucide-react';
 
 import {
@@ -62,6 +64,8 @@ import LiveSessionsList from '@/components/LiveSessionsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
+  const params = useParams();
+  const locale = params?.locale || 'pt';
   const [activeTab, setActiveTab] = useState('overview');
   const [
     showCreateAssessmentModal,
@@ -231,6 +235,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.liveSessions')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="transactions"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <DollarSign
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.transactions')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
@@ -682,6 +698,27 @@ export default function AdminPage() {
                 <LiveSessionsList />
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          <TabsContent value="transactions">
+            <div className="p-6 space-y-6">
+              <div className="text-center">
+                <DollarSign className="mx-auto mb-4 text-secondary" size={48} />
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {t('transactions.title')}
+                </h2>
+                <p className="text-gray-400 mb-6">
+                  {t('transactions.description')}
+                </p>
+                <a
+                  href={`/${locale}/admin/transactions`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary-dark font-semibold rounded-lg hover:bg-secondary/80 transition-colors"
+                >
+                  <DollarSign size={20} />
+                  {t('transactions.viewTransactions')}
+                </a>
+              </div>
+            </div>
           </TabsContent>
         </div>
       </Tabs>

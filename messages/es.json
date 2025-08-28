@@ -1571,6 +1571,98 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "transactionDetails": {
+    "title": "Detalles de la Transacción",
+    "transactionId": "ID de Transacción",
+    "externalId": "ID Externo",
+    "provider": "Proveedor",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "noData": "No hay datos disponibles",
+    "tabs": {
+      "overview": "Resumen",
+      "payment": "Pago",
+      "customer": "Cliente",
+      "timeline": "Línea de Tiempo",
+      "webhooks": "Webhooks"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobado",
+      "canceled": "Cancelado",
+      "refunded": "Reembolsado",
+      "chargeback": "Contracargo",
+      "disputed": "Disputado"
+    },
+    "payment": {
+      "title": "Información de Pago",
+      "details": "Detalles del Pago",
+      "amount": "Monto",
+      "method": "Método de Pago",
+      "installments": "Cuotas",
+      "grossAmount": "Monto Bruto",
+      "refundAmount": "Monto Reembolsado",
+      "netAmount": "Monto Neto",
+      "currency": "Moneda",
+      "valueInCents": "Valor en Centavos",
+      "methods": {
+        "credit_card": "Tarjeta de Crédito",
+        "debit_card": "Tarjeta de Débito",
+        "pix": "PIX",
+        "boleto": "Boleto",
+        "paypal": "PayPal",
+        "bank_transfer": "Transferencia Bancaria"
+      }
+    },
+    "product": {
+      "title": "Información del Producto",
+      "name": "Nombre del Producto",
+      "code": "Código Interno"
+    },
+    "customer": {
+      "title": "Información del Cliente",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "document": "Documento",
+      "phone": "Teléfono",
+      "userId": "ID de Usuario"
+    },
+    "access": {
+      "title": "Información de Acceso",
+      "status": "Estado",
+      "type": "Tipo de Acceso",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Vencimiento",
+      "statuses": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      }
+    },
+    "timeline": {
+      "title": "Línea de Tiempo",
+      "purchase": "Compra Iniciada",
+      "approved": "Pago Aprobado",
+      "canceled": "Transacción Cancelada",
+      "refunded": "Reembolso Procesado"
+    },
+    "webhooks": {
+      "title": "Eventos de Webhook",
+      "processed": "Procesado",
+      "pending": "Pendiente",
+      "eventId": "ID del Evento",
+      "createdAt": "Recibido el",
+      "processedAt": "Procesado el",
+      "noEvents": "No hay eventos de webhook registrados"
+    },
+    "metadata": {
+      "title": "Metadatos"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar",
+      "fetchDescription": "No se pudieron cargar los detalles de la transación"
+    }
+  },
+  
   "liveSessions": {
     "title": "Clases en Vivo",
     "description": "Crea y gestiona sesiones en vivo con Zoom para clases interactivas",

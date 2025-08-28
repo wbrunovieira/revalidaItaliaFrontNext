@@ -36,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import TransactionDetailsModal from '@/components/TransactionDetailsModal';
 
 interface Transaction {
   id: string;
@@ -108,6 +109,8 @@ export default function TransactionsPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -258,6 +261,12 @@ export default function TransactionsPage() {
         {config.label}
       </Badge>
     );
+  };
+
+  // Handle transaction click
+  const handleTransactionClick = (transactionId: string) => {
+    setSelectedTransactionId(transactionId);
+    setDetailsModalOpen(true);
   };
 
   // Show loading while checking auth
@@ -444,7 +453,8 @@ export default function TransactionsPage() {
                     {transactions.map((transaction) => (
                       <TableRow 
                         key={transaction.id}
-                        className="border-gray-700 hover:bg-primary-dark/30 transition-colors"
+                        className="border-gray-700 hover:bg-primary-dark/30 transition-colors cursor-pointer"
+                        onClick={() => handleTransactionClick(transaction.id)}
                       >
                         <TableCell className="text-white">
                           <div className="flex items-center gap-2">
@@ -537,6 +547,19 @@ export default function TransactionsPage() {
             )}
           </Card>
         </div>
+        
+        {/* Transaction Details Modal */}
+        {selectedTransactionId && (
+          <TransactionDetailsModal
+            isOpen={detailsModalOpen}
+            onClose={() => {
+              setDetailsModalOpen(false);
+              setSelectedTransactionId(null);
+            }}
+            transactionId={selectedTransactionId}
+            token={token || ''}
+          />
+        )}
     </div>
   );
 }

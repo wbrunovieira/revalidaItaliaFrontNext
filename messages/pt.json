@@ -1569,6 +1569,98 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "transactionDetails": {
+    "title": "Detalhes da Transação",
+    "transactionId": "ID da Transação",
+    "externalId": "ID Externo",
+    "provider": "Provedor",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "noData": "Nenhum dado disponível",
+    "tabs": {
+      "overview": "Visão Geral",
+      "payment": "Pagamento",
+      "customer": "Cliente",
+      "timeline": "Linha do Tempo",
+      "webhooks": "Webhooks"
+    },
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovado",
+      "canceled": "Cancelado",
+      "refunded": "Reembolsado",
+      "chargeback": "Chargeback",
+      "disputed": "Disputado"
+    },
+    "payment": {
+      "title": "Informações de Pagamento",
+      "details": "Detalhes do Pagamento",
+      "amount": "Valor",
+      "method": "Método de Pagamento",
+      "installments": "Parcelas",
+      "grossAmount": "Valor Bruto",
+      "refundAmount": "Valor Reembolsado",
+      "netAmount": "Valor Líquido",
+      "currency": "Moeda",
+      "valueInCents": "Valor em Centavos",
+      "methods": {
+        "credit_card": "Cartão de Crédito",
+        "debit_card": "Cartão de Débito",
+        "pix": "PIX",
+        "boleto": "Boleto",
+        "paypal": "PayPal",
+        "bank_transfer": "Transferência Bancária"
+      }
+    },
+    "product": {
+      "title": "Informações do Produto",
+      "name": "Nome do Produto",
+      "code": "Código Interno"
+    },
+    "customer": {
+      "title": "Informações do Cliente",
+      "name": "Nome",
+      "email": "E-mail",
+      "document": "Documento",
+      "phone": "Telefone",
+      "userId": "ID do Usuário"
+    },
+    "access": {
+      "title": "Informações de Acesso",
+      "status": "Status",
+      "type": "Tipo de Acesso",
+      "startDate": "Data de Início",
+      "endDate": "Data de Expiração",
+      "statuses": {
+        "active": "Ativo",
+        "inactive": "Inativo"
+      }
+    },
+    "timeline": {
+      "title": "Linha do Tempo",
+      "purchase": "Compra Iniciada",
+      "approved": "Pagamento Aprovado",
+      "canceled": "Transação Cancelada",
+      "refunded": "Reembolso Processado"
+    },
+    "webhooks": {
+      "title": "Eventos de Webhook",
+      "processed": "Processado",
+      "pending": "Pendente",
+      "eventId": "ID do Evento",
+      "createdAt": "Recebido em",
+      "processedAt": "Processado em",
+      "noEvents": "Nenhum evento de webhook registrado"
+    },
+    "metadata": {
+      "title": "Metadados"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar detalhes",
+      "fetchDescription": "Não foi possível carregar os detalhes da transação"
+    }
+  },
+  
   "transactions": {
     "title": "Transações",
     "description": "Gerencie e monitore todas as transações de pagamento",

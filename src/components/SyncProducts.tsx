@@ -41,7 +41,7 @@ interface SyncResult {
     internalCode: string;
     name: string;
     action: 'created' | 'updated' | 'deactivated' | 'unchanged';
-    changes: string[];
+    changes?: string[];
   }>;
   errors: Array<{
     externalId: string;
@@ -296,7 +296,7 @@ export default function SyncProducts() {
                         <p className="text-xs text-gray-400 mb-2">
                           {t('code')}: {result.internalCode}
                         </p>
-                        {result.changes.length > 0 && (
+                        {result.changes && result.changes.length > 0 && (
                           <div className="text-sm text-gray-300">
                             {result.changes.map((change, idx) => (
                               <div key={idx} className="flex items-start gap-1">

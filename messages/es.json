@@ -1873,6 +1873,76 @@
       "syncFailedDesc": "No se pudieron sincronizar los productos. Intenta nuevamente."
     }
   },
+
+  "productsManager": {
+    "title": "Gestión de Productos",
+    "description": "Visualiza y sincroniza productos de facturación",
+    "tabs": {
+      "list": "Listar Productos",
+      "sync": "Sincronizar"
+    }
+  },
+
+  "productsList": {
+    "title": "Lista de Productos",
+    "description": "Visualiza todos los productos configurados en el sistema",
+    "totalProducts": "{count} productos",
+    "searchPlaceholder": "Buscar por nombre del producto...",
+    "includeStats": "Incluir estadísticas",
+    "applyFilters": "Aplicar Filtros",
+    "noProducts": "No se encontraron productos",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "lifetime": "Vitalicio",
+    "oneYear": "1 año",
+    "sixMonths": "6 meses",
+    "threeMonths": "3 meses",
+    "oneMonth": "1 mes",
+    "days": "{count} días",
+    "courses": "cursos",
+    "filters": {
+      "all": "Todos",
+      "active": "Solo Activos",
+      "inactive": "Solo Inactivos"
+    },
+    "columns": {
+      "expand": "",
+      "status": "Estado",
+      "name": "Nombre",
+      "code": "Código",
+      "duration": "Duración",
+      "courses": "Cursos",
+      "subscriptions": "Suscripciones",
+      "revenue": "Ingresos",
+      "createdAt": "Creado el"
+    },
+    "features": {
+      "title": "Características",
+      "hasLiveAccess": "Acceso en Vivo",
+      "hasRecordingAccess": "Grabaciones",
+      "hasCertificate": "Certificado",
+      "allowDownloads": "Descargas",
+      "maxDevices": "{count} dispositivos",
+      "support": {
+        "standard": "Soporte Estándar",
+        "priority": "Soporte Prioritario",
+        "vip": "Soporte VIP"
+      }
+    },
+    "includedCourses": "Cursos Incluidos",
+    "externalMappings": "Mapeos Externos",
+    "dripContent": "Contenido Gradual",
+    "learningPaths": "{count} rutas",
+    "lastUpdated": "Actualizado",
+    "pagination": {
+      "showing": "Mostrando {from} a {to} de {total}",
+      "page": "Página {current} de {total}"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar productos",
+      "fetchDescription": "No se pudo cargar la lista de productos"
+    }
+  },
   
   "liveSessions": {
     "title": "Clases en Vivo",

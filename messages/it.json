@@ -1875,6 +1875,76 @@
       "syncFailedDesc": "Impossibile sincronizzare i prodotti. Riprova."
     }
   },
+
+  "productsManager": {
+    "title": "Gestione Prodotti",
+    "description": "Visualizza e sincronizza i prodotti di fatturazione",
+    "tabs": {
+      "list": "Elenco Prodotti",
+      "sync": "Sincronizza"
+    }
+  },
+
+  "productsList": {
+    "title": "Elenco Prodotti",
+    "description": "Visualizza tutti i prodotti configurati nel sistema",
+    "totalProducts": "{count} prodotti",
+    "searchPlaceholder": "Cerca per nome prodotto...",
+    "includeStats": "Includi statistiche",
+    "applyFilters": "Applica Filtri",
+    "noProducts": "Nessun prodotto trovato",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "lifetime": "A vita",
+    "oneYear": "1 anno",
+    "sixMonths": "6 mesi",
+    "threeMonths": "3 mesi",
+    "oneMonth": "1 mese",
+    "days": "{count} giorni",
+    "courses": "corsi",
+    "filters": {
+      "all": "Tutti",
+      "active": "Solo Attivi",
+      "inactive": "Solo Inattivi"
+    },
+    "columns": {
+      "expand": "",
+      "status": "Stato",
+      "name": "Nome",
+      "code": "Codice",
+      "duration": "Durata",
+      "courses": "Corsi",
+      "subscriptions": "Iscrizioni",
+      "revenue": "Entrate",
+      "createdAt": "Creato il"
+    },
+    "features": {
+      "title": "Caratteristiche",
+      "hasLiveAccess": "Accesso Live",
+      "hasRecordingAccess": "Registrazioni",
+      "hasCertificate": "Certificato",
+      "allowDownloads": "Download",
+      "maxDevices": "{count} dispositivi",
+      "support": {
+        "standard": "Supporto Standard",
+        "priority": "Supporto Prioritario",
+        "vip": "Supporto VIP"
+      }
+    },
+    "includedCourses": "Corsi Inclusi",
+    "externalMappings": "Mappature Esterne",
+    "dripContent": "Contenuto a Rilascio",
+    "learningPaths": "{count} percorsi",
+    "lastUpdated": "Aggiornato",
+    "pagination": {
+      "showing": "Mostrando da {from} a {to} di {total}",
+      "page": "Pagina {current} di {total}"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento prodotti",
+      "fetchDescription": "Impossibile caricare l'elenco prodotti"
+    }
+  },
   
   "liveSessions": {
     "title": "Lezioni dal Vivo",

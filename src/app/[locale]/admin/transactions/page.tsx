@@ -9,7 +9,7 @@ import { DollarSign, Users, Package, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TransactionsList from '@/components/TransactionsList';
 import ManageUserAccesses from '@/components/ManageUserAccesses';
-import SyncProducts from '@/components/SyncProducts';
+import ProductsManager from '@/components/ProductsManager';
 
 export default function TransactionsPage() {
   const t = useTranslations('Admin.transactions');
@@ -110,7 +110,7 @@ export default function TransactionsPage() {
           </TabsContent>
 
           <TabsContent value="products" className="space-y-6">
-            <SyncProducts />
+            <ProductsManager />
           </TabsContent>
         </Tabs>
       </div>

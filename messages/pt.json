@@ -1661,10 +1661,95 @@
     }
   },
   
+  "userAccesses": {
+    "title": "Acessos do Usuário",
+    "totalAccesses": "{count} acessos",
+    "filters": {
+      "activeOnly": "Apenas ativos",
+      "includeExpired": "Incluir expirados"
+    },
+    "refresh": "Atualizar",
+    "noAccesses": "Nenhum acesso encontrado para este usuário",
+    "status": {
+      "ACTIVE": "Ativo",
+      "EXPIRED": "Expirado",
+      "SUSPENDED": "Suspenso",
+      "REVOKED": "Revogado"
+    },
+    "accessType": {
+      "FULL": "Completo",
+      "LIMITED": "Limitado",
+      "TRIAL": "Teste"
+    },
+    "lifetime": "Vitalício",
+    "startDate": "Data de Início",
+    "expirationDate": "Data de Expiração",
+    "never": "Nunca",
+    "daysRemaining": "Dias Restantes",
+    "days": "dias",
+    "transactionId": "ID da Transação",
+    "product": "Produto",
+    "billingProduct": "Produto",
+    "grantedCourses": "Cursos Concedidos",
+    "grantedPaths": "Trilhas Concedidas",
+    "grantedModules": "Módulos Concedidos",
+    "suspendedInfo": "Informações de Suspensão",
+    "suspendedAt": "Suspenso em",
+    "reason": "Motivo",
+    "createdAt": "Criado em",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "pageOf": "Página {{current}} de {{total}}",
+    "error": {
+      "fetchTitle": "Erro ao carregar acessos",
+      "fetchDescription": "Não foi possível carregar os acessos do usuário"
+    }
+  },
+  
+  "manageAccesses": {
+    "searchTitle": "Buscar Usuário",
+    "searchDescription": "Busque por nome, email ou CPF para visualizar os acessos do usuário",
+    "searchPlaceholder": "Digite o nome, email ou CPF...",
+    "search": "Buscar",
+    "searching": "Buscando...",
+    "noResults": "Nenhum resultado",
+    "tryDifferentSearch": "Tente buscar por outro termo",
+    "noUsersFound": "Nenhum usuário encontrado",
+    "foundUsers": "{count} usuários encontrados",
+    "viewAccesses": "Ver Acessos",
+    "email": "E-mail",
+    "cpf": "CPF",
+    "memberSince": "Membro desde",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "roles": {
+      "admin": "Administrador",
+      "tutor": "Tutor",
+      "student": "Estudante"
+    },
+    "instructions": {
+      "title": "Como usar",
+      "description": "Use a busca acima para encontrar um usuário e visualizar seus acessos aos produtos",
+      "tip1": "Busque por nome completo ou parcial",
+      "tip2": "Use o email completo para busca exata",
+      "tip3": "O CPF deve ser digitado sem formatação"
+    },
+    "error": {
+      "emptySearch": "Busca vazia",
+      "enterSearchTerm": "Digite um termo para buscar",
+      "searchFailed": "Erro na busca",
+      "searchFailedDesc": "Não foi possível buscar os usuários"
+    }
+  },
+  
   "transactions": {
     "title": "Transações",
     "description": "Gerencie e monitore todas as transações de pagamento",
     "viewTransactions": "Ver Transações",
+    "tabs": {
+      "transactions": "Transações",
+      "manageAccesses": "Gerenciar Acessos"
+    },
     "refresh": "Atualizar",
     "searchPlaceholder": "Buscar por nome, email ou ID...",
     "filterByStatus": "Filtrar por status",
@@ -1692,10 +1777,36 @@
       "actions": "Ações"
     },
     "stats": {
+      "total": "Total",
       "approved": "Aprovadas",
       "pending": "Pendentes",
+      "failed": "Falhas",
       "refunded": "Reembolsadas",
       "issues": "Problemas"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nome, email ou transação...",
+      "status": "Status",
+      "allStatuses": "Todos os status",
+      "provider": "Provedor",
+      "allProviders": "Todos os provedores",
+      "startDate": "Data inicial",
+      "endDate": "Data final",
+      "clear": "Limpar",
+      "search": "Buscar"
+    },
+    "actions": {
+      "view": "Visualizar"
+    },
+    "pagination": {
+      "showing": "Mostrando {from} a {to} de {total}",
+      "page": "Página {current} de {total}"
+    },
+    "error": {
+      "unauthorized": "Não autorizado",
+      "adminOnly": "Apenas administradores podem acessar esta página",
+      "fetchTitle": "Erro ao carregar transações",
+      "fetchDescription": "Não foi possível carregar as transações. Tente novamente."
     },
     "errors": {
       "unauthorized": "Não autorizado",

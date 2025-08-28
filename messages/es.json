@@ -1663,6 +1663,160 @@
     }
   },
   
+  "userAccesses": {
+    "title": "Accesos del Usuario",
+    "totalAccesses": "{count} accesos",
+    "filters": {
+      "activeOnly": "Solo activos",
+      "includeExpired": "Incluir expirados"
+    },
+    "refresh": "Actualizar",
+    "noAccesses": "No se encontraron accesos para este usuario",
+    "status": {
+      "ACTIVE": "Activo",
+      "EXPIRED": "Expirado",
+      "SUSPENDED": "Suspendido",
+      "REVOKED": "Revocado"
+    },
+    "accessType": {
+      "FULL": "Completo",
+      "LIMITED": "Limitado",
+      "TRIAL": "Prueba"
+    },
+    "lifetime": "Vitalicio",
+    "startDate": "Fecha de Inicio",
+    "expirationDate": "Fecha de Vencimiento",
+    "never": "Nunca",
+    "daysRemaining": "Días Restantes",
+    "days": "días",
+    "transactionId": "ID de Transacción",
+    "product": "Producto",
+    "billingProduct": "Producto",
+    "grantedCourses": "Cursos Concedidos",
+    "grantedPaths": "Rutas Concedidas",
+    "suspendedInfo": "Información de Suspensión",
+    "suspendedAt": "Suspendido el",
+    "reason": "Motivo",
+    "createdAt": "Creado el",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {{current}} de {{total}}",
+    "error": {
+      "fetchTitle": "Error al cargar accesos",
+      "fetchDescription": "No se pudieron cargar los accesos del usuario"
+    }
+  },
+  
+  "manageAccesses": {
+    "searchTitle": "Buscar Usuario",
+    "searchDescription": "Busca por nombre, correo electrónico o documento para ver los accesos del usuario",
+    "searchPlaceholder": "Escribe nombre, correo o documento...",
+    "search": "Buscar",
+    "searching": "Buscando...",
+    "noResults": "Sin resultados",
+    "tryDifferentSearch": "Intenta buscar con otro término",
+    "noUsersFound": "No se encontraron usuarios",
+    "foundUsers": "{count} usuarios encontrados",
+    "viewAccesses": "Ver Accesos",
+    "email": "Correo electrónico",
+    "cpf": "Documento",
+    "memberSince": "Miembro desde",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "roles": {
+      "admin": "Administrador",
+      "tutor": "Tutor",
+      "student": "Estudiante"
+    },
+    "instructions": {
+      "title": "Cómo usar",
+      "description": "Usa la búsqueda anterior para encontrar un usuario y ver sus accesos a los productos",
+      "tip1": "Busca por nombre completo o parcial",
+      "tip2": "Usa el correo completo para búsqueda exacta",
+      "tip3": "El documento debe escribirse sin formato"
+    },
+    "error": {
+      "emptySearch": "Búsqueda vacía",
+      "enterSearchTerm": "Escribe un término para buscar",
+      "searchFailed": "Error en la búsqueda",
+      "searchFailedDesc": "No se pudieron buscar los usuarios"
+    }
+  },
+  
+  "transactions": {
+    "title": "Transacciones",
+    "description": "Gestiona y monitorea todas las transacciones de pago",
+    "viewTransactions": "Ver Transacciones",
+    "tabs": {
+      "transactions": "Transacciones",
+      "manageAccesses": "Gestionar Accesos"
+    },
+    "refresh": "Actualizar",
+    "searchPlaceholder": "Buscar por nombre, correo o ID...",
+    "filterByStatus": "Filtrar por estado",
+    "filterByProvider": "Filtrar por proveedor",
+    "allStatuses": "Todos los estados",
+    "allProviders": "Todos los proveedores",
+    "noTransactions": "No se encontraron transacciones",
+    "view": "Ver",
+    "showing": "Mostrando {from} a {to} de {total} transacciones",
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "canceled": "Cancelada",
+      "refunded": "Reembolsada",
+      "chargeback": "Contracargo",
+      "disputed": "Disputada"
+    },
+    "columns": {
+      "date": "Fecha",
+      "customer": "Cliente",
+      "product": "Producto",
+      "amount": "Monto",
+      "provider": "Proveedor",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "stats": {
+      "total": "Total",
+      "approved": "Aprobadas",
+      "pending": "Pendientes",
+      "failed": "Fallidas",
+      "refunded": "Reembolsadas",
+      "issues": "Problemas"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nombre, correo o transacción...",
+      "status": "Estado",
+      "allStatuses": "Todos los estados",
+      "provider": "Proveedor",
+      "allProviders": "Todos los proveedores",
+      "startDate": "Fecha inicial",
+      "endDate": "Fecha final",
+      "clear": "Limpiar",
+      "search": "Buscar"
+    },
+    "actions": {
+      "view": "Ver"
+    },
+    "pagination": {
+      "showing": "Mostrando {from} a {to} de {total}",
+      "page": "Página {current} de {total}"
+    },
+    "error": {
+      "unauthorized": "No autorizado",
+      "adminOnly": "Solo los administradores pueden acceder a esta página",
+      "fetchTitle": "Error al cargar transacciones",
+      "fetchDescription": "No se pudieron cargar las transacciones. Intente nuevamente."
+    },
+    "errors": {
+      "unauthorized": "No autorizado",
+      "adminOnly": "Solo los administradores pueden acceder a esta página",
+      "fetchTitle": "Error al cargar transacciones",
+      "fetchDescription": "No se pudieron cargar las transacciones. Intente nuevamente."
+    }
+  },
+  
   "liveSessions": {
     "title": "Clases en Vivo",
     "description": "Crea y gestiona sesiones en vivo con Zoom para clases interactivas",

@@ -1664,6 +1664,161 @@
     }
   },
   
+  "userAccesses": {
+    "title": "Accessi Utente",
+    "totalAccesses": "{count} accessi",
+    "filters": {
+      "activeOnly": "Solo attivi",
+      "includeExpired": "Includi scaduti"
+    },
+    "refresh": "Aggiorna",
+    "noAccesses": "Nessun accesso trovato per questo utente",
+    "status": {
+      "ACTIVE": "Attivo",
+      "EXPIRED": "Scaduto",
+      "SUSPENDED": "Sospeso",
+      "REVOKED": "Revocato"
+    },
+    "accessType": {
+      "FULL": "Completo",
+      "LIMITED": "Limitato",
+      "TRIAL": "Prova"
+    },
+    "lifetime": "A vita",
+    "startDate": "Data Inizio",
+    "expirationDate": "Data Scadenza",
+    "never": "Mai",
+    "daysRemaining": "Giorni Rimanenti",
+    "days": "giorni",
+    "transactionId": "ID Transazione",
+    "product": "Prodotto",
+    "billingProduct": "Prodotto",
+    "grantedCourses": "Corsi Concessi",
+    "grantedPaths": "Percorsi Concessi",
+    "grantedModules": "Moduli Concessi",
+    "suspendedInfo": "Informazioni Sospensione",
+    "suspendedAt": "Sospeso il",
+    "reason": "Motivo",
+    "createdAt": "Creato il",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "pageOf": "Pagina {{current}} di {{total}}",
+    "error": {
+      "fetchTitle": "Errore nel caricamento accessi",
+      "fetchDescription": "Impossibile caricare gli accessi dell'utente"
+    }
+  },
+  
+  "manageAccesses": {
+    "searchTitle": "Cerca Utente",
+    "searchDescription": "Cerca per nome, email o codice fiscale per visualizzare gli accessi dell'utente",
+    "searchPlaceholder": "Digita nome, email o codice fiscale...",
+    "search": "Cerca",
+    "searching": "Ricerca...",
+    "noResults": "Nessun risultato",
+    "tryDifferentSearch": "Prova a cercare con un altro termine",
+    "noUsersFound": "Nessun utente trovato",
+    "foundUsers": "{count} utenti trovati",
+    "viewAccesses": "Vedi Accessi",
+    "email": "E-mail",
+    "cpf": "Codice Fiscale",
+    "memberSince": "Membro dal",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "roles": {
+      "admin": "Amministratore",
+      "tutor": "Tutor",
+      "student": "Studente"
+    },
+    "instructions": {
+      "title": "Come usare",
+      "description": "Usa la ricerca sopra per trovare un utente e visualizzare i suoi accessi ai prodotti",
+      "tip1": "Cerca per nome completo o parziale",
+      "tip2": "Usa l'email completa per una ricerca esatta",
+      "tip3": "Il codice fiscale deve essere digitato senza formattazione"
+    },
+    "error": {
+      "emptySearch": "Ricerca vuota",
+      "enterSearchTerm": "Digita un termine per cercare",
+      "searchFailed": "Errore nella ricerca",
+      "searchFailedDesc": "Impossibile cercare gli utenti"
+    }
+  },
+  
+  "transactions": {
+    "title": "Transazioni",
+    "description": "Gestisci e monitora tutte le transazioni di pagamento",
+    "viewTransactions": "Visualizza Transazioni",
+    "tabs": {
+      "transactions": "Transazioni",
+      "manageAccesses": "Gestisci Accessi"
+    },
+    "refresh": "Aggiorna",
+    "searchPlaceholder": "Cerca per nome, email o ID...",
+    "filterByStatus": "Filtra per stato",
+    "filterByProvider": "Filtra per fornitore",
+    "allStatuses": "Tutti gli stati",
+    "allProviders": "Tutti i fornitori",
+    "noTransactions": "Nessuna transazione trovata",
+    "view": "Visualizza",
+    "showing": "Mostrando da {from} a {to} di {total} transazioni",
+    "status": {
+      "pending": "In attesa",
+      "approved": "Approvata",
+      "canceled": "Annullata",
+      "refunded": "Rimborsata",
+      "chargeback": "Chargeback",
+      "disputed": "Contestata"
+    },
+    "columns": {
+      "date": "Data",
+      "customer": "Cliente",
+      "product": "Prodotto",
+      "amount": "Importo",
+      "provider": "Fornitore",
+      "status": "Stato",
+      "actions": "Azioni"
+    },
+    "stats": {
+      "total": "Totale",
+      "approved": "Approvate",
+      "pending": "In attesa",
+      "failed": "Fallite",
+      "refunded": "Rimborsate",
+      "issues": "Problemi"
+    },
+    "filters": {
+      "searchPlaceholder": "Cerca per nome, email o transazione...",
+      "status": "Stato",
+      "allStatuses": "Tutti gli stati",
+      "provider": "Fornitore",
+      "allProviders": "Tutti i fornitori",
+      "startDate": "Data iniziale",
+      "endDate": "Data finale",
+      "clear": "Cancella",
+      "search": "Cerca"
+    },
+    "actions": {
+      "view": "Visualizza"
+    },
+    "pagination": {
+      "showing": "Mostrando da {from} a {to} di {total}",
+      "page": "Pagina {current} di {total}"
+    },
+    "error": {
+      "unauthorized": "Non autorizzato",
+      "adminOnly": "Solo gli amministratori possono accedere a questa pagina",
+      "fetchTitle": "Errore nel caricamento delle transazioni",
+      "fetchDescription": "Impossibile caricare le transazioni. Riprova."
+    },
+    "errors": {
+      "unauthorized": "Non autorizzato",
+      "adminOnly": "Solo gli amministratori possono accedere a questa pagina",
+      "fetchTitle": "Errore nel caricamento delle transazioni",
+      "fetchDescription": "Impossibile caricare le transazioni. Riprova."
+    }
+  },
+  
   "liveSessions": {
     "title": "Lezioni dal Vivo",
     "description": "Crea e gestisci sessioni dal vivo con Zoom per lezioni interattive",

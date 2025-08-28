@@ -1749,7 +1749,8 @@
     "viewTransactions": "Ver Transacciones",
     "tabs": {
       "transactions": "Transacciones",
-      "manageAccesses": "Gestionar Accesos"
+      "manageAccesses": "Gestionar Accesos",
+      "products": "Productos"
     },
     "refresh": "Actualizar",
     "searchPlaceholder": "Buscar por nombre, correo o ID...",
@@ -1814,6 +1815,62 @@
       "adminOnly": "Solo los administradores pueden acceder a esta página",
       "fetchTitle": "Error al cargar transacciones",
       "fetchDescription": "No se pudieron cargar las transacciones. Intente nuevamente."
+    }
+  },
+
+  "syncProducts": {
+    "title": "Sincronizar Productos",
+    "description": "Sincroniza productos de los proveedores de pago con el catálogo interno",
+    "provider": "Proveedor",
+    "providers": {
+      "all": "Todos los Proveedores",
+      "hotmart": "Hotmart",
+      "stripe": "Stripe",
+      "paypal": "PayPal"
+    },
+    "dryRunMode": "Modo Simulación",
+    "enableDryRun": "Activar modo simulación",
+    "dryRunDescription": "Visualiza los cambios sin aplicarlos",
+    "dryRunInfo": "Modo simulación activado. Los cambios solo se visualizarán, no se aplicarán a la base de datos.",
+    "syncing": "Sincronizando...",
+    "syncNow": "Sincronizar Ahora",
+    "previewSync": "Vista Previa de Sincronización",
+    "noSyncYet": "Ninguna sincronización realizada",
+    "noSyncYetDesc": "Haz clic en el botón de arriba para sincronizar los productos",
+    "previewResults": "Resultados de Simulación",
+    "syncResults": "Resultados de Sincronización",
+    "detailedResults": "Resultados Detallados",
+    "code": "Código",
+    "syncErrors": "Errores de Sincronización",
+    "errorProduct": "Producto",
+    "summary": {
+      "created": "Creados",
+      "updated": "Actualizados",
+      "deactivated": "Desactivados",
+      "unchanged": "Sin cambios",
+      "errors": "Errores"
+    },
+    "actions": {
+      "created": "Creado",
+      "updated": "Actualizado",
+      "deactivated": "Desactivado",
+      "unchanged": "Sin cambios"
+    },
+    "dryRun": {
+      "hasChanges": "Simulación completada con cambios",
+      "hasChangesDesc": "{created} productos creados, {updated} actualizados, {deactivated} desactivados",
+      "noChanges": "Simulación completada sin cambios",
+      "noChangesDesc": "Todos los productos están sincronizados"
+    },
+    "success": {
+      "title": "Sincronización completada",
+      "description": "{created} productos creados, {updated} actualizados, {deactivated} desactivados"
+    },
+    "error": {
+      "unauthorized": "No autorizado",
+      "unauthorizedDesc": "Debes estar autenticado como administrador",
+      "syncFailed": "Error en la sincronización",
+      "syncFailedDesc": "No se pudieron sincronizar los productos. Intenta nuevamente."
     }
   },
   

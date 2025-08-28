@@ -5,10 +5,11 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, Users, Loader2 } from 'lucide-react';
+import { DollarSign, Users, Package, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TransactionsList from '@/components/TransactionsList';
 import ManageUserAccesses from '@/components/ManageUserAccesses';
+import SyncProducts from '@/components/SyncProducts';
 
 export default function TransactionsPage() {
   const t = useTranslations('Admin.transactions');
@@ -76,7 +77,7 @@ export default function TransactionsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-md bg-gray-800 p-1">
+          <TabsList className="grid grid-cols-3 w-full max-w-2xl bg-gray-800 p-1">
             <TabsTrigger 
               value="transactions" 
               className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark flex items-center gap-2"
@@ -91,6 +92,13 @@ export default function TransactionsPage() {
               <Users size={16} />
               {t('tabs.manageAccesses')}
             </TabsTrigger>
+            <TabsTrigger 
+              value="products" 
+              className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark flex items-center gap-2"
+            >
+              <Package size={16} />
+              {t('tabs.products')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-6">
@@ -99,6 +107,10 @@ export default function TransactionsPage() {
 
           <TabsContent value="manage-accesses" className="space-y-6">
             <ManageUserAccesses />
+          </TabsContent>
+
+          <TabsContent value="products" className="space-y-6">
+            <SyncProducts />
           </TabsContent>
         </Tabs>
       </div>

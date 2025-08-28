@@ -1751,7 +1751,8 @@
     "viewTransactions": "Visualizza Transazioni",
     "tabs": {
       "transactions": "Transazioni",
-      "manageAccesses": "Gestisci Accessi"
+      "manageAccesses": "Gestisci Accessi",
+      "products": "Prodotti"
     },
     "refresh": "Aggiorna",
     "searchPlaceholder": "Cerca per nome, email o ID...",
@@ -1816,6 +1817,62 @@
       "adminOnly": "Solo gli amministratori possono accedere a questa pagina",
       "fetchTitle": "Errore nel caricamento delle transazioni",
       "fetchDescription": "Impossibile caricare le transazioni. Riprova."
+    }
+  },
+
+  "syncProducts": {
+    "title": "Sincronizza Prodotti",
+    "description": "Sincronizza i prodotti dai fornitori di pagamento con il catalogo interno",
+    "provider": "Fornitore",
+    "providers": {
+      "all": "Tutti i Fornitori",
+      "hotmart": "Hotmart",
+      "stripe": "Stripe",
+      "paypal": "PayPal"
+    },
+    "dryRunMode": "Modalità Simulazione",
+    "enableDryRun": "Attiva modalità simulazione",
+    "dryRunDescription": "Visualizza le modifiche senza applicarle",
+    "dryRunInfo": "Modalità simulazione attiva. Le modifiche saranno solo visualizzate, non applicate al database.",
+    "syncing": "Sincronizzazione...",
+    "syncNow": "Sincronizza Ora",
+    "previewSync": "Anteprima Sincronizzazione",
+    "noSyncYet": "Nessuna sincronizzazione effettuata",
+    "noSyncYetDesc": "Clicca sul pulsante sopra per sincronizzare i prodotti",
+    "previewResults": "Risultati Simulazione",
+    "syncResults": "Risultati Sincronizzazione",
+    "detailedResults": "Risultati Dettagliati",
+    "code": "Codice",
+    "syncErrors": "Errori di Sincronizzazione",
+    "errorProduct": "Prodotto",
+    "summary": {
+      "created": "Creati",
+      "updated": "Aggiornati",
+      "deactivated": "Disattivati",
+      "unchanged": "Invariati",
+      "errors": "Errori"
+    },
+    "actions": {
+      "created": "Creato",
+      "updated": "Aggiornato",
+      "deactivated": "Disattivato",
+      "unchanged": "Invariato"
+    },
+    "dryRun": {
+      "hasChanges": "Simulazione completata con modifiche",
+      "hasChangesDesc": "{created} prodotti creati, {updated} aggiornati, {deactivated} disattivati",
+      "noChanges": "Simulazione completata senza modifiche",
+      "noChangesDesc": "Tutti i prodotti sono sincronizzati"
+    },
+    "success": {
+      "title": "Sincronizzazione completata",
+      "description": "{created} prodotti creati, {updated} aggiornati, {deactivated} disattivati"
+    },
+    "error": {
+      "unauthorized": "Non autorizzato",
+      "unauthorizedDesc": "Devi essere autenticato come amministratore",
+      "syncFailed": "Errore nella sincronizzazione",
+      "syncFailedDesc": "Impossibile sincronizzare i prodotti. Riprova."
     }
   },
   

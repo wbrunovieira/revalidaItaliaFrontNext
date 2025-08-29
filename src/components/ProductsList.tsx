@@ -19,7 +19,8 @@ import {
   XCircle,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Eye
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import ProductDetailsModal from '@/components/ProductDetailsModal';
 
 interface ProductMapping {
   provider: string;
@@ -103,6 +105,8 @@ export default function ProductsList() {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [includeStats, setIncludeStats] = useState(false);
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   const fetchProducts = useCallback(async (page = 1) => {
     if (!token) return;
@@ -189,6 +193,11 @@ export default function ProductsList() {
     if (days === 90) return t('threeMonths');
     if (days === 30) return t('oneMonth');
     return t('days', { count: days });
+  };
+
+  const handleViewDetails = (productId: string) => {
+    setSelectedProductId(productId);
+    setDetailsModalOpen(true);
   };
 
   return (
@@ -282,6 +291,7 @@ export default function ProductsList() {
                     </>
                   )}
                   <TableHead className="text-gray-300">{t('columns.createdAt')}</TableHead>
+                  <TableHead className="text-gray-300">{t('columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -366,12 +376,23 @@ export default function ProductsList() {
                           </span>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(product.id)}
+                          className="text-secondary hover:text-secondary/80"
+                        >
+                          <Eye className="mr-1" size={14} />
+                          {t('actions.view')}
+                        </Button>
+                      </TableCell>
                     </TableRow>
 
                     {/* Expanded Details */}
                     {expandedProducts.has(product.id) && (
                       <TableRow className="bg-gray-900/50">
-                        <TableCell colSpan={includeStats ? 9 : 7} className="p-4">
+                        <TableCell colSpan={includeStats ? 10 : 8} className="p-4">
                           <div className="space-y-4">
                             {/* Features */}
                             {product.features && Object.keys(product.features).length > 0 && (
@@ -519,6 +540,19 @@ export default function ProductsList() {
           </div>
         )}
       </Card>
+
+      {/* Product Details Modal */}
+      {selectedProductId && (
+        <ProductDetailsModal
+          isOpen={detailsModalOpen}
+          onClose={() => {
+            setDetailsModalOpen(false);
+            setSelectedProductId(null);
+          }}
+          productId={selectedProductId}
+          token={token || ''}
+        />
+      )}
     </div>
   );
 }

@@ -1916,7 +1916,11 @@
       "courses": "Corsi",
       "subscriptions": "Iscrizioni",
       "revenue": "Entrate",
-      "createdAt": "Creato il"
+      "createdAt": "Creato il",
+      "actions": "Azioni"
+    },
+    "actions": {
+      "view": "Visualizza"
     },
     "features": {
       "title": "Caratteristiche",
@@ -1943,6 +1947,78 @@
     "error": {
       "fetchTitle": "Errore nel caricamento prodotti",
       "fetchDescription": "Impossibile caricare l'elenco prodotti"
+    }
+  },
+
+  "productDetails": {
+    "title": "Dettagli Prodotto",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "lifetime": "A vita",
+    "year": "anno",
+    "years": "anni",
+    "month": "mese",
+    "months": "mesi",
+    "days": "giorni",
+    "dripContent": "Contenuto a Rilascio",
+    "tabs": {
+      "overview": "Panoramica",
+      "content": "Contenuto",
+      "features": "Caratteristiche",
+      "mappings": "Mappature",
+      "stats": "Statistiche"
+    },
+    "overview": {
+      "title": "Informazioni Generali",
+      "productId": "ID Prodotto",
+      "internalCode": "Codice Interno",
+      "createdAt": "Creato il",
+      "updatedAt": "Aggiornato il",
+      "accessConfig": "Configurazione Accesso",
+      "duration": "Durata Accesso",
+      "dripContent": "Contenuto a Rilascio"
+    },
+    "content": {
+      "courses": "Corsi",
+      "paths": "Percorsi",
+      "coursesInPath": "corsi",
+      "totalAccess": "Accesso Totale",
+      "totalCourses": "Totale Corsi Accessibili"
+    },
+    "features": {
+      "title": "Caratteristiche Prodotto",
+      "hasLiveAccess": "Accesso alle Lezioni Live",
+      "hasRecordingAccess": "Accesso alle Registrazioni",
+      "hasCertificate": "Certificato di Completamento",
+      "maxSimultaneousDevices": "Dispositivi Simultanei",
+      "allowDownloads": "Download Consentiti",
+      "supportPriority": "Priorità Supporto",
+      "support": {
+        "standard": "Standard",
+        "priority": "Prioritario",
+        "vip": "VIP"
+      }
+    },
+    "mappings": {
+      "active": "Attivo",
+      "inactive": "Inattivo",
+      "externalName": "Nome Esterno",
+      "externalId": "ID Esterno",
+      "createdAt": "Creato il",
+      "metadata": "Metadati",
+      "noMappings": "Nessuna mappatura configurata"
+    },
+    "stats": {
+      "activeSubscriptions": "Iscrizioni Attive",
+      "totalTransactions": "Totale Transazioni",
+      "totalRevenue": "Entrate Totali",
+      "lastPurchase": "Ultimo Acquisto",
+      "noPurchases": "Nessun acquisto",
+      "noStats": "Statistiche non disponibili"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento dettagli",
+      "fetchDescription": "Impossibile caricare i dettagli del prodotto"
     }
   },
   

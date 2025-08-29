@@ -1913,7 +1913,11 @@
       "courses": "Cursos",
       "subscriptions": "Assinaturas",
       "revenue": "Receita",
-      "createdAt": "Criado em"
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "actions": {
+      "view": "Visualizar"
     },
     "features": {
       "title": "Recursos",
@@ -1940,6 +1944,78 @@
     "error": {
       "fetchTitle": "Erro ao carregar produtos",
       "fetchDescription": "Não foi possível carregar a lista de produtos"
+    }
+  },
+
+  "productDetails": {
+    "title": "Detalhes do Produto",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "lifetime": "Vitalício",
+    "year": "ano",
+    "years": "anos",
+    "month": "mês",
+    "months": "meses",
+    "days": "dias",
+    "dripContent": "Conteúdo Gotejado",
+    "tabs": {
+      "overview": "Visão Geral",
+      "content": "Conteúdo",
+      "features": "Recursos",
+      "mappings": "Mapeamentos",
+      "stats": "Estatísticas"
+    },
+    "overview": {
+      "title": "Informações Gerais",
+      "productId": "ID do Produto",
+      "internalCode": "Código Interno",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "accessConfig": "Configuração de Acesso",
+      "duration": "Duração do Acesso",
+      "dripContent": "Conteúdo Gotejado"
+    },
+    "content": {
+      "courses": "Cursos",
+      "paths": "Trilhas",
+      "coursesInPath": "cursos",
+      "totalAccess": "Acesso Total",
+      "totalCourses": "Total de Cursos Acessíveis"
+    },
+    "features": {
+      "title": "Recursos do Produto",
+      "hasLiveAccess": "Acesso às Aulas ao Vivo",
+      "hasRecordingAccess": "Acesso às Gravações",
+      "hasCertificate": "Certificado de Conclusão",
+      "maxSimultaneousDevices": "Dispositivos Simultâneos",
+      "allowDownloads": "Downloads Permitidos",
+      "supportPriority": "Prioridade de Suporte",
+      "support": {
+        "standard": "Padrão",
+        "priority": "Prioritário",
+        "vip": "VIP"
+      }
+    },
+    "mappings": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "externalName": "Nome Externo",
+      "externalId": "ID Externo",
+      "createdAt": "Criado em",
+      "metadata": "Metadados",
+      "noMappings": "Nenhum mapeamento configurado"
+    },
+    "stats": {
+      "activeSubscriptions": "Assinaturas Ativas",
+      "totalTransactions": "Total de Transações",
+      "totalRevenue": "Receita Total",
+      "lastPurchase": "Última Compra",
+      "noPurchases": "Sem compras",
+      "noStats": "Estatísticas não disponíveis"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar detalhes",
+      "fetchDescription": "Não foi possível carregar os detalhes do produto"
     }
   },
   

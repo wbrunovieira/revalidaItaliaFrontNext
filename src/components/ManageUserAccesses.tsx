@@ -4,12 +4,13 @@ import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
-import { Search, User, Eye, Loader2, AlertCircle } from 'lucide-react';
+import { Search, User, Eye, Gift, Loader2, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import UserAccessesModal from '@/components/UserAccessesModal';
+import GrantAccessModal from '@/components/GrantAccessModal';
 
 interface User {
   id: string;
@@ -32,6 +33,8 @@ export default function ManageUserAccesses() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [accessesModalOpen, setAccessesModalOpen] = useState(false);
+  const [grantAccessModalOpen, setGrantAccessModalOpen] = useState(false);
+  const [selectedUserForGrant, setSelectedUserForGrant] = useState<User | null>(null);
 
   const searchUsers = useCallback(async () => {
     if (!searchQuery.trim()) {
@@ -129,6 +132,11 @@ export default function ManageUserAccesses() {
   const handleViewAccesses = (user: User) => {
     setSelectedUser(user);
     setAccessesModalOpen(true);
+  };
+
+  const handleGrantAccess = (user: User) => {
+    setSelectedUserForGrant(user);
+    setGrantAccessModalOpen(true);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -242,15 +250,26 @@ export default function ManageUserAccesses() {
                           </div>
                         </div>
                       </div>
-                      <Button
-                        onClick={() => handleViewAccesses(user)}
-                        size="sm"
-                        variant="outline"
-                        className="border-secondary text-secondary hover:bg-secondary/10"
-                      >
-                        <Eye className="mr-2" size={16} />
-                        {t('viewAccesses')}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleGrantAccess(user)}
+                          size="sm"
+                          variant="outline"
+                          className="border-green-500 text-green-400 hover:bg-green-500/10"
+                        >
+                          <Gift className="mr-2" size={16} />
+                          {t('grantAccess')}
+                        </Button>
+                        <Button
+                          onClick={() => handleViewAccesses(user)}
+                          size="sm"
+                          variant="outline"
+                          className="border-secondary text-secondary hover:bg-secondary/10"
+                        >
+                          <Eye className="mr-2" size={16} />
+                          {t('viewAccesses')}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -299,6 +318,29 @@ export default function ManageUserAccesses() {
           userName={selectedUser.fullName}
           userEmail={selectedUser.email}
           token={token || ''}
+        />
+      )}
+
+      {/* Grant Access Modal */}
+      {selectedUserForGrant && (
+        <GrantAccessModal
+          isOpen={grantAccessModalOpen}
+          onClose={() => {
+            setGrantAccessModalOpen(false);
+            setSelectedUserForGrant(null);
+          }}
+          user={{
+            id: selectedUserForGrant.id,
+            name: selectedUserForGrant.fullName,
+            email: selectedUserForGrant.email,
+          }}
+          onSuccess={() => {
+            // Optionally refresh or show success message
+            toast({
+              title: t('success.accessGranted'),
+              description: t('success.accessGrantedDesc'),
+            });
+          }}
         />
       )}
     </>

@@ -1571,6 +1571,47 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "grantAccess": {
+    "title": "Conceder Acceso al Producto",
+    "subtitle": "Conceder acceso manual para {userName} ({userEmail})",
+    "loading": "Cargando productos...",
+    "product": {
+      "label": "Selecciona un Producto",
+      "placeholder": "Elige un producto...",
+      "defaultDuration": "Duración predeterminada: {days} días"
+    },
+    "reason": {
+      "label": "Motivo de la Concesión",
+      "placeholder": "Ej: Acceso beta, cortesía, resolución de problema de pago...",
+      "help": "Este motivo se registrará para auditoría"
+    },
+    "duration": {
+      "title": "Duración del Acceso",
+      "lifetime": "Acceso de Por Vida",
+      "customDays": "Duración Personalizada (días)",
+      "daysPlaceholder": "Número de días",
+      "customStart": "Fecha de Inicio Personalizada",
+      "customEnd": "Fecha de Fin Personalizada"
+    },
+    "cancel": "Cancelar",
+    "grant": "Conceder Acceso",
+    "granting": "Concediendo...",
+    "success": {
+      "title": "Acceso concedido exitosamente",
+      "description": "El usuario {userName} ahora tiene acceso al producto"
+    },
+    "error": {
+      "fetchProductsTitle": "Error al cargar productos",
+      "fetchProductsDescription": "No se pudo cargar la lista de productos",
+      "noProductTitle": "Producto no seleccionado",
+      "noProductDescription": "Por favor, selecciona un producto",
+      "noReasonTitle": "Motivo no proporcionado",
+      "noReasonDescription": "Por favor, proporciona el motivo de la concesión",
+      "saveTitle": "Error al conceder acceso",
+      "saveDescription": "No se pudo conceder el acceso. Intenta nuevamente."
+    }
+  },
+  
   "productContentMapping": {
     "title": "Vincular Contenido al Producto",
     "subtitle": "Selecciona los cursos y rutas para el producto {productName}",
@@ -1820,11 +1861,16 @@
     "noUsersFound": "No se encontraron usuarios",
     "foundUsers": "{count} usuarios encontrados",
     "viewAccesses": "Ver Accesos",
+    "grantAccess": "Conceder Acceso",
     "email": "Correo electrónico",
     "cpf": "Documento",
     "memberSince": "Miembro desde",
     "active": "Activo",
     "inactive": "Inactivo",
+    "success": {
+      "accessGranted": "Acceso concedido exitosamente",
+      "accessGrantedDesc": "El usuario ahora tiene acceso al producto seleccionado"
+    },
     "roles": {
       "admin": "Administrador",
       "tutor": "Tutor",

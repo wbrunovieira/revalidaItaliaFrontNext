@@ -1569,6 +1569,47 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "grantAccess": {
+    "title": "Conceder Acesso ao Produto",
+    "subtitle": "Conceder acesso manual para {userName} ({userEmail})",
+    "loading": "Carregando produtos...",
+    "product": {
+      "label": "Selecione um Produto",
+      "placeholder": "Escolha um produto...",
+      "defaultDuration": "Duração padrão: {days} dias"
+    },
+    "reason": {
+      "label": "Motivo da Concessão",
+      "placeholder": "Ex: Acesso beta, cortesia, resolução de problema de pagamento...",
+      "help": "Este motivo será registrado para auditoria"
+    },
+    "duration": {
+      "title": "Duração do Acesso",
+      "lifetime": "Acesso Vitalício",
+      "customDays": "Duração Personalizada (dias)",
+      "daysPlaceholder": "Número de dias",
+      "customStart": "Data de Início Personalizada",
+      "customEnd": "Data de Término Personalizada"
+    },
+    "cancel": "Cancelar",
+    "grant": "Conceder Acesso",
+    "granting": "Concedendo...",
+    "success": {
+      "title": "Acesso concedido com sucesso",
+      "description": "O usuário {userName} agora tem acesso ao produto"
+    },
+    "error": {
+      "fetchProductsTitle": "Erro ao carregar produtos",
+      "fetchProductsDescription": "Não foi possível carregar a lista de produtos",
+      "noProductTitle": "Produto não selecionado",
+      "noProductDescription": "Por favor, selecione um produto",
+      "noReasonTitle": "Motivo não informado",
+      "noReasonDescription": "Por favor, informe o motivo da concessão",
+      "saveTitle": "Erro ao conceder acesso",
+      "saveDescription": "Não foi possível conceder o acesso. Tente novamente."
+    }
+  },
+  
   "productContentMapping": {
     "title": "Vincular Conteúdo ao Produto",
     "subtitle": "Selecione os cursos e trilhas para o produto {productName}",
@@ -1749,11 +1790,16 @@
     "noUsersFound": "Nenhum usuário encontrado",
     "foundUsers": "{count} usuários encontrados",
     "viewAccesses": "Ver Acessos",
+    "grantAccess": "Conceder Acesso",
     "email": "E-mail",
     "cpf": "CPF",
     "memberSince": "Membro desde",
     "active": "Ativo",
     "inactive": "Inativo",
+    "success": {
+      "accessGranted": "Acesso concedido com sucesso",
+      "accessGrantedDesc": "O usuário agora tem acesso ao produto selecionado"
+    },
     "roles": {
       "admin": "Administrador",
       "tutor": "Tutor",

@@ -1572,6 +1572,47 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "grantAccess": {
+    "title": "Concedi Accesso al Prodotto",
+    "subtitle": "Concedi accesso manuale per {userName} ({userEmail})",
+    "loading": "Caricamento prodotti...",
+    "product": {
+      "label": "Seleziona un Prodotto",
+      "placeholder": "Scegli un prodotto...",
+      "defaultDuration": "Durata predefinita: {days} giorni"
+    },
+    "reason": {
+      "label": "Motivo della Concessione",
+      "placeholder": "Es: Accesso beta, cortesia, risoluzione problema di pagamento...",
+      "help": "Questo motivo sarà registrato per l'audit"
+    },
+    "duration": {
+      "title": "Durata dell'Accesso",
+      "lifetime": "Accesso a Vita",
+      "customDays": "Durata Personalizzata (giorni)",
+      "daysPlaceholder": "Numero di giorni",
+      "customStart": "Data di Inizio Personalizzata",
+      "customEnd": "Data di Fine Personalizzata"
+    },
+    "cancel": "Annulla",
+    "grant": "Concedi Accesso",
+    "granting": "Concessione...",
+    "success": {
+      "title": "Accesso concesso con successo",
+      "description": "L'utente {userName} ora ha accesso al prodotto"
+    },
+    "error": {
+      "fetchProductsTitle": "Errore nel caricamento prodotti",
+      "fetchProductsDescription": "Impossibile caricare l'elenco prodotti",
+      "noProductTitle": "Prodotto non selezionato",
+      "noProductDescription": "Per favore, seleziona un prodotto",
+      "noReasonTitle": "Motivo non fornito",
+      "noReasonDescription": "Per favore, fornisci il motivo della concessione",
+      "saveTitle": "Errore nella concessione accesso",
+      "saveDescription": "Impossibile concedere l'accesso. Riprova."
+    }
+  },
+  
   "productContentMapping": {
     "title": "Collega Contenuto al Prodotto",
     "subtitle": "Seleziona i corsi e i percorsi per il prodotto {productName}",
@@ -1752,11 +1793,16 @@
     "noUsersFound": "Nessun utente trovato",
     "foundUsers": "{count} utenti trovati",
     "viewAccesses": "Vedi Accessi",
+    "grantAccess": "Concedi Accesso",
     "email": "E-mail",
     "cpf": "Codice Fiscale",
     "memberSince": "Membro dal",
     "active": "Attivo",
     "inactive": "Inattivo",
+    "success": {
+      "accessGranted": "Accesso concesso con successo",
+      "accessGrantedDesc": "L'utente ora ha accesso al prodotto selezionato"
+    },
     "roles": {
       "admin": "Amministratore",
       "tutor": "Tutor",

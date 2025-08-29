@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, CheckCircle, XCircle, AlertCircle, Clock, Ban } from 'lucide-react';
+import { X, CheckCircle, XCircle, AlertCircle, Clock, Ban, Settings } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { SimpleDivider } from '@/components/ui/modern-divider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import EditAccessModal from '@/components/EditAccessModal';
 import {
   Select,
   SelectContent,
@@ -27,12 +28,17 @@ interface UserAccessesModalProps {
   token: string;
 }
 
+interface GrantedItem {
+  id: string;
+  title: string | null;
+}
+
 interface Access {
   id: string;
   userId: string;
   billingProductId: string;
   transactionId: string | null;
-  accessType: 'FULL' | 'LIMITED' | 'TRIAL';
+  accessType: 'FULL' | 'LIMITED' | 'TRIAL' | 'ADMIN_GRANTED';
   status: 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'REVOKED';
   isActive: boolean;
   accessPeriod: {
@@ -42,9 +48,9 @@ interface Access {
     daysRemaining: number | null;
     isLifetime: boolean;
   };
-  grantedCourses: string[];
-  grantedPaths: string[];
-  grantedModules: string[];
+  grantedCourses: GrantedItem[];
+  grantedPaths: GrantedItem[];
+  grantedModules: GrantedItem[];
   suspendedInfo: {
     suspendedAt: string;
     suspendedReason: string;
@@ -85,6 +91,19 @@ export default function UserAccessesModal({
   });
   const [includeExpired, setIncludeExpired] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedAccessForEdit, setSelectedAccessForEdit] = useState<Access | null>(null);
+
+  const handleEditAccess = (access: Access) => {
+    setSelectedAccessForEdit(access);
+    setEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    setEditModalOpen(false);
+    setSelectedAccessForEdit(null);
+    fetchUserAccesses(currentPage);
+  };
 
   const fetchUserAccesses = useCallback(async (page = 1) => {
     setLoading(true);
@@ -105,11 +124,41 @@ export default function UserAccessesModal({
       );
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('API Error Response:', response.status, errorData);
         throw new Error('Failed to fetch user accesses');
       }
 
       const data = await response.json();
-      setAccesses(data.accesses || []);
+      console.log('User accesses response:', data);
+      
+      // Normalizar os dados para garantir compatibilidade com ambas as estruturas (antiga e nova)
+      const normalizedAccesses = (data.accesses || []).map((access: any) => ({
+        ...access,
+        grantedCourses: Array.isArray(access.grantedCourses) 
+          ? access.grantedCourses.map((course: any) => 
+              typeof course === 'string' 
+                ? { id: course, title: null } 
+                : course
+            )
+          : [],
+        grantedPaths: Array.isArray(access.grantedPaths)
+          ? access.grantedPaths.map((path: any) => 
+              typeof path === 'string' 
+                ? { id: path, title: null } 
+                : path
+            )
+          : [],
+        grantedModules: Array.isArray(access.grantedModules)
+          ? access.grantedModules.map((module: any) => 
+              typeof module === 'string' 
+                ? { id: module, title: null } 
+                : module
+            )
+          : []
+      }));
+      
+      setAccesses(normalizedAccesses);
       setPagination(data.pagination || {
         page: 1,
         pageSize: 20,
@@ -277,11 +326,27 @@ export default function UserAccessesModal({
                       </div>
                     </div>
                   </div>
-                  {access.accessPeriod.isLifetime && (
-                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                      {t('lifetime')}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {access.accessPeriod.isLifetime && (
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        {t('lifetime')}
+                      </Badge>
+                    )}
+                    {access.status !== 'REVOKED' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditAccess(access);
+                        }}
+                        className="text-gray-400 hover:text-white hover:bg-gray-700"
+                      >
+                        <Settings size={16} className="mr-1" />
+                        {t('edit')}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <SimpleDivider spacing="sm" />
@@ -348,9 +413,9 @@ export default function UserAccessesModal({
                         <div>
                           <p className="text-gray-400 text-sm mb-1">{t('grantedCourses')}</p>
                           <div className="flex flex-wrap gap-1">
-                            {access.grantedCourses.map((courseId) => (
-                              <Badge key={courseId} variant="outline" className="bg-gray-700 border-gray-600 text-gray-300 text-xs">
-                                {courseId}
+                            {access.grantedCourses.map((course) => (
+                              <Badge key={course.id} variant="outline" className="bg-gray-700 border-gray-600 text-gray-300 text-xs">
+                                {course.title || course.id}
                               </Badge>
                             ))}
                           </div>
@@ -360,9 +425,21 @@ export default function UserAccessesModal({
                         <div>
                           <p className="text-gray-400 text-sm mb-1">{t('grantedPaths')}</p>
                           <div className="flex flex-wrap gap-1">
-                            {access.grantedPaths.map((pathId) => (
-                              <Badge key={pathId} variant="outline" className="bg-gray-700 border-gray-600 text-gray-300 text-xs">
-                                {pathId}
+                            {access.grantedPaths.map((path) => (
+                              <Badge key={path.id} variant="outline" className="bg-gray-700 border-gray-600 text-gray-300 text-xs">
+                                {path.title || path.id}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {access.grantedModules.length > 0 && (
+                        <div>
+                          <p className="text-gray-400 text-sm mb-1">{t('grantedModules')}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {access.grantedModules.map((module) => (
+                              <Badge key={module.id} variant="outline" className="bg-gray-700 border-gray-600 text-gray-300 text-xs">
+                                {module.title || module.id}
                               </Badge>
                             ))}
                           </div>
@@ -423,6 +500,27 @@ export default function UserAccessesModal({
           </div>
         )}
       </DialogContent>
+
+      {selectedAccessForEdit && (
+        <EditAccessModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedAccessForEdit(null);
+          }}
+          access={{
+            id: selectedAccessForEdit.id,
+            productName: selectedAccessForEdit.metadata?.productName || selectedAccessForEdit.billingProductId || 'Product',
+            status: selectedAccessForEdit.status,
+            startDate: selectedAccessForEdit.accessPeriod.startDate,
+            expirationDate: selectedAccessForEdit.accessPeriod.expirationDate,
+            isLifetime: selectedAccessForEdit.accessPeriod.isLifetime,
+            accessType: selectedAccessForEdit.accessType
+          }}
+          userName={userName}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </Dialog>
   );
 }

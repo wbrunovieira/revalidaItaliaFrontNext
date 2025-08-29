@@ -1571,6 +1571,56 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "editAccess": {
+    "title": "Editar Acceso",
+    "subtitle": "Editando acceso de {userName} al producto {productName}",
+    "currentStatus": "Estado Actual",
+    "status": {
+      "label": "Estado",
+      "active": "Activo",
+      "suspended": "Suspendido",
+      "revoked": "Revocado",
+      "expired": "Expirado"
+    },
+    "expiration": "Vencimiento",
+    "lifetime": "Vitalicio",
+    "selectAction": "Seleccione una acción",
+    "actions": {
+      "changeStatus": "Cambiar Estado",
+      "extendAccess": "Extender Acceso",
+      "setDate": "Establecer Fecha Específica",
+      "grantLifetime": "Conceder Acceso Vitalicio"
+    },
+    "daysPlaceholder": "Número de días",
+    "extendHelp": "Los días se agregarán a la fecha de vencimiento actual",
+    "dateHelp": "Establece una nueva fecha y hora de vencimiento",
+    "lifetimeWarning": "Atención: El acceso vitalicio no se puede revertir fácilmente",
+    "revokedWarning": "Este acceso fue revocado y no puede ser editado. Para reactivarlo, cree un nuevo acceso.",
+    "irreversible": "Irreversible",
+    "reason": {
+      "label": "Motivo del Cambio",
+      "placeholder": "Describa el motivo de este cambio...",
+      "help": "Esta información se registrará en el historial de auditoría"
+    },
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "success": {
+      "title": "Acceso Actualizado",
+      "description": "El acceso de {userName} se actualizó correctamente"
+    },
+    "error": {
+      "noActionTitle": "Acción Requerida",
+      "noActionDescription": "Por favor, seleccione una acción para continuar",
+      "noReasonTitle": "Motivo Obligatorio",
+      "noReasonDescription": "Por favor, proporcione un motivo para este cambio",
+      "invalidDays": "Por favor, ingrese un número válido de días",
+      "invalidDate": "Por favor, seleccione una fecha válida",
+      "saveTitle": "Error al Guardar",
+      "saveDescription": "No se pudo actualizar el acceso. Inténtelo de nuevo."
+    }
+  },
+  
   "grantAccess": {
     "title": "Conceder Acceso al Producto",
     "subtitle": "Conceder acceso manual para {userName} ({userEmail})",
@@ -1824,7 +1874,8 @@
     "accessType": {
       "FULL": "Completo",
       "LIMITED": "Limitado",
-      "TRIAL": "Prueba"
+      "TRIAL": "Prueba",
+      "ADMIN_GRANTED": "Concedido por Admin"
     },
     "lifetime": "Vitalicio",
     "startDate": "Fecha de Inicio",
@@ -1844,6 +1895,7 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "pageOf": "Página {{current}} de {{total}}",
+    "edit": "Editar",
     "error": {
       "fetchTitle": "Error al cargar accesos",
       "fetchDescription": "No se pudieron cargar los accesos del usuario"

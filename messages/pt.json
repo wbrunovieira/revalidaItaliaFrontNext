@@ -1569,6 +1569,56 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "editAccess": {
+    "title": "Editar Acesso",
+    "subtitle": "Editando acesso de {userName} ao produto {productName}",
+    "currentStatus": "Status Atual",
+    "status": {
+      "label": "Status",
+      "active": "Ativo",
+      "suspended": "Suspenso",
+      "revoked": "Revogado",
+      "expired": "Expirado"
+    },
+    "expiration": "Expiração",
+    "lifetime": "Vitalício",
+    "selectAction": "Selecione uma ação",
+    "actions": {
+      "changeStatus": "Alterar Status",
+      "extendAccess": "Estender Acesso",
+      "setDate": "Definir Data Específica",
+      "grantLifetime": "Conceder Acesso Vitalício"
+    },
+    "daysPlaceholder": "Número de dias",
+    "extendHelp": "Os dias serão adicionados à data de expiração atual",
+    "dateHelp": "Define uma nova data e hora de expiração",
+    "lifetimeWarning": "Atenção: O acesso vitalício não pode ser revertido facilmente",
+    "revokedWarning": "Este acesso foi revogado e não pode ser editado. Para reativar, crie um novo acesso.",
+    "irreversible": "Irreversível",
+    "reason": {
+      "label": "Motivo da Alteração",
+      "placeholder": "Descreva o motivo desta alteração...",
+      "help": "Esta informação será registrada no histórico de auditoria"
+    },
+    "cancel": "Cancelar",
+    "save": "Salvar Alterações",
+    "saving": "Salvando...",
+    "success": {
+      "title": "Acesso Atualizado",
+      "description": "O acesso de {userName} foi atualizado com sucesso"
+    },
+    "error": {
+      "noActionTitle": "Ação Necessária",
+      "noActionDescription": "Por favor, selecione uma ação para continuar",
+      "noReasonTitle": "Motivo Obrigatório",
+      "noReasonDescription": "Por favor, forneça um motivo para esta alteração",
+      "invalidDays": "Por favor, insira um número válido de dias",
+      "invalidDate": "Por favor, selecione uma data válida",
+      "saveTitle": "Erro ao Salvar",
+      "saveDescription": "Não foi possível atualizar o acesso. Tente novamente."
+    }
+  },
+  
   "grantAccess": {
     "title": "Conceder Acesso ao Produto",
     "subtitle": "Conceder acesso manual para {userName} ({userEmail})",
@@ -1752,7 +1802,8 @@
     "accessType": {
       "FULL": "Completo",
       "LIMITED": "Limitado",
-      "TRIAL": "Teste"
+      "TRIAL": "Teste",
+      "ADMIN_GRANTED": "Concedido por Admin"
     },
     "lifetime": "Vitalício",
     "startDate": "Data de Início",
@@ -1773,6 +1824,7 @@
     "previous": "Anterior",
     "next": "Próximo",
     "pageOf": "Página {{current}} de {{total}}",
+    "edit": "Editar",
     "error": {
       "fetchTitle": "Erro ao carregar acessos",
       "fetchDescription": "Não foi possível carregar os acessos do usuário"

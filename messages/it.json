@@ -1572,6 +1572,56 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "editAccess": {
+    "title": "Modifica Accesso",
+    "subtitle": "Modifica dell'accesso di {userName} al prodotto {productName}",
+    "currentStatus": "Stato Attuale",
+    "status": {
+      "label": "Stato",
+      "active": "Attivo",
+      "suspended": "Sospeso",
+      "revoked": "Revocato",
+      "expired": "Scaduto"
+    },
+    "expiration": "Scadenza",
+    "lifetime": "A Vita",
+    "selectAction": "Seleziona un'azione",
+    "actions": {
+      "changeStatus": "Cambia Stato",
+      "extendAccess": "Estendi Accesso",
+      "setDate": "Imposta Data Specifica",
+      "grantLifetime": "Concedi Accesso a Vita"
+    },
+    "daysPlaceholder": "Numero di giorni",
+    "extendHelp": "I giorni saranno aggiunti alla data di scadenza attuale",
+    "dateHelp": "Imposta una nuova data e ora di scadenza",
+    "lifetimeWarning": "Attenzione: L'accesso a vita non può essere facilmente annullato",
+    "revokedWarning": "Questo accesso è stato revocato e non può essere modificato. Per riattivarlo, crea un nuovo accesso.",
+    "irreversible": "Irreversibile",
+    "reason": {
+      "label": "Motivo della Modifica",
+      "placeholder": "Descrivi il motivo di questa modifica...",
+      "help": "Questa informazione sarà registrata nel registro di controllo"
+    },
+    "cancel": "Annulla",
+    "save": "Salva Modifiche",
+    "saving": "Salvataggio...",
+    "success": {
+      "title": "Accesso Aggiornato",
+      "description": "L'accesso di {userName} è stato aggiornato con successo"
+    },
+    "error": {
+      "noActionTitle": "Azione Richiesta",
+      "noActionDescription": "Seleziona un'azione per continuare",
+      "noReasonTitle": "Motivo Obbligatorio",
+      "noReasonDescription": "Fornisci un motivo per questa modifica",
+      "invalidDays": "Inserisci un numero valido di giorni",
+      "invalidDate": "Seleziona una data valida",
+      "saveTitle": "Errore nel Salvataggio",
+      "saveDescription": "Impossibile aggiornare l'accesso. Riprova."
+    }
+  },
+  
   "grantAccess": {
     "title": "Concedi Accesso al Prodotto",
     "subtitle": "Concedi accesso manuale per {userName} ({userEmail})",
@@ -1755,7 +1805,8 @@
     "accessType": {
       "FULL": "Completo",
       "LIMITED": "Limitato",
-      "TRIAL": "Prova"
+      "TRIAL": "Prova",
+      "ADMIN_GRANTED": "Concesso da Admin"
     },
     "lifetime": "A vita",
     "startDate": "Data Inizio",
@@ -1776,6 +1827,7 @@
     "previous": "Precedente",
     "next": "Successivo",
     "pageOf": "Pagina {{current}} di {{total}}",
+    "edit": "Modifica",
     "error": {
       "fetchTitle": "Errore nel caricamento accessi",
       "fetchDescription": "Impossibile caricare gli accessi dell'utente"

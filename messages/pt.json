@@ -1569,6 +1569,38 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
   
+  "productContentMapping": {
+    "title": "Vincular Conteúdo ao Produto",
+    "subtitle": "Selecione os cursos e trilhas para o produto {productName}",
+    "loading": "Carregando conteúdo...",
+    "selected": "{courses} cursos e {tracks} trilhas selecionados",
+    "clearAll": "Limpar Tudo",
+    "tabs": {
+      "courses": "Cursos",
+      "tracks": "Trilhas"
+    },
+    "searchCourses": "Buscar cursos...",
+    "searchTracks": "Buscar trilhas...",
+    "noCourses": "Nenhum curso disponível",
+    "noTracks": "Nenhuma trilha disponível",
+    "coursesCount": "{count} cursos",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "success": {
+      "title": "Conteúdo vinculado com sucesso",
+      "description": "O produto foi atualizado com os cursos e trilhas selecionados"
+    },
+    "error": {
+      "fetchCoursesTitle": "Erro ao carregar cursos",
+      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos",
+      "fetchTracksTitle": "Erro ao carregar trilhas",
+      "fetchTracksDescription": "Não foi possível carregar a lista de trilhas",
+      "saveTitle": "Erro ao salvar",
+      "saveDescription": "Não foi possível salvar as alterações"
+    }
+  },
+  
   "transactionDetails": {
     "title": "Detalhes da Transação",
     "transactionId": "ID da Transação",
@@ -1917,7 +1949,8 @@
       "actions": "Ações"
     },
     "actions": {
-      "view": "Visualizar"
+      "view": "Visualizar",
+      "link": "Vincular"
     },
     "features": {
       "title": "Recursos",

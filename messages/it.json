@@ -1572,6 +1572,38 @@
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
   
+  "productContentMapping": {
+    "title": "Collega Contenuto al Prodotto",
+    "subtitle": "Seleziona i corsi e i percorsi per il prodotto {productName}",
+    "loading": "Caricamento contenuto...",
+    "selected": "{courses} corsi e {tracks} percorsi selezionati",
+    "clearAll": "Cancella Tutto",
+    "tabs": {
+      "courses": "Corsi",
+      "tracks": "Percorsi"
+    },
+    "searchCourses": "Cerca corsi...",
+    "searchTracks": "Cerca percorsi...",
+    "noCourses": "Nessun corso disponibile",
+    "noTracks": "Nessun percorso disponibile",
+    "coursesCount": "{count} corsi",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "success": {
+      "title": "Contenuto collegato con successo",
+      "description": "Il prodotto è stato aggiornato con i corsi e percorsi selezionati"
+    },
+    "error": {
+      "fetchCoursesTitle": "Errore nel caricamento dei corsi",
+      "fetchCoursesDescription": "Impossibile caricare l'elenco dei corsi",
+      "fetchTracksTitle": "Errore nel caricamento dei percorsi",
+      "fetchTracksDescription": "Impossibile caricare l'elenco dei percorsi",
+      "saveTitle": "Errore nel salvataggio",
+      "saveDescription": "Impossibile salvare le modifiche"
+    }
+  },
+  
   "transactionDetails": {
     "title": "Dettagli Transazione",
     "transactionId": "ID Transazione",
@@ -1920,7 +1952,8 @@
       "actions": "Azioni"
     },
     "actions": {
-      "view": "Visualizza"
+      "view": "Visualizza",
+      "link": "Collega"
     },
     "features": {
       "title": "Caratteristiche",

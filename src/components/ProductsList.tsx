@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +20,8 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
-  Eye
+  Eye,
+  Link
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ProductDetailsModal from '@/components/ProductDetailsModal';
+import ProductContentMappingModal from '@/components/ProductContentMappingModal';
 
 interface ProductMapping {
   provider: string;
@@ -107,6 +109,8 @@ export default function ProductsList() {
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [mappingModalOpen, setMappingModalOpen] = useState(false);
+  const [selectedProductForMapping, setSelectedProductForMapping] = useState<Product | null>(null);
 
   const fetchProducts = useCallback(async (page = 1) => {
     if (!token) return;
@@ -198,6 +202,15 @@ export default function ProductsList() {
   const handleViewDetails = (productId: string) => {
     setSelectedProductId(productId);
     setDetailsModalOpen(true);
+  };
+
+  const handleOpenMappingModal = (product: Product) => {
+    setSelectedProductForMapping(product);
+    setMappingModalOpen(true);
+  };
+
+  const handleMappingSuccess = () => {
+    fetchProducts(pagination.page);
   };
 
   return (
@@ -296,9 +309,8 @@ export default function ProductsList() {
               </TableHeader>
               <TableBody>
                 {products.map((product) => (
-                  <>
+                  <React.Fragment key={product.id}>
                     <TableRow 
-                      key={product.id}
                       className="border-gray-700 hover:bg-primary-dark/30 transition-colors"
                     >
                       <TableCell>
@@ -377,21 +389,32 @@ export default function ProductsList() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewDetails(product.id)}
-                          className="text-secondary hover:text-secondary/80"
-                        >
-                          <Eye className="mr-1" size={14} />
-                          {t('actions.view')}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(product.id)}
+                            className="text-secondary hover:text-secondary/80"
+                          >
+                            <Eye className="mr-1" size={14} />
+                            {t('actions.view')}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenMappingModal(product)}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            <Link className="mr-1" size={14} />
+                            {t('actions.link')}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
 
                     {/* Expanded Details */}
                     {expandedProducts.has(product.id) && (
-                      <TableRow className="bg-gray-900/50">
+                      <TableRow key={`${product.id}-expanded`} className="bg-gray-900/50">
                         <TableCell colSpan={includeStats ? 10 : 8} className="p-4">
                           <div className="space-y-4">
                             {/* Features */}
@@ -495,7 +518,7 @@ export default function ProductsList() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
@@ -551,6 +574,24 @@ export default function ProductsList() {
           }}
           productId={selectedProductId}
           token={token || ''}
+        />
+      )}
+
+      {/* Content Mapping Modal */}
+      {selectedProductForMapping && (
+        <ProductContentMappingModal
+          isOpen={mappingModalOpen}
+          onClose={() => {
+            setMappingModalOpen(false);
+            setSelectedProductForMapping(null);
+          }}
+          product={{
+            id: selectedProductForMapping.id,
+            name: selectedProductForMapping.name,
+            courseIds: selectedProductForMapping.courseIds,
+            trackIds: selectedProductForMapping.pathIds,
+          }}
+          onSuccess={handleMappingSuccess}
         />
       )}
     </div>

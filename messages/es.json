@@ -1571,6 +1571,38 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
   
+  "productContentMapping": {
+    "title": "Vincular Contenido al Producto",
+    "subtitle": "Selecciona los cursos y rutas para el producto {productName}",
+    "loading": "Cargando contenido...",
+    "selected": "{courses} cursos y {tracks} rutas seleccionados",
+    "clearAll": "Limpiar Todo",
+    "tabs": {
+      "courses": "Cursos",
+      "tracks": "Rutas"
+    },
+    "searchCourses": "Buscar cursos...",
+    "searchTracks": "Buscar rutas...",
+    "noCourses": "No hay cursos disponibles",
+    "noTracks": "No hay rutas disponibles",
+    "coursesCount": "{count} cursos",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "success": {
+      "title": "Contenido vinculado exitosamente",
+      "description": "El producto ha sido actualizado con los cursos y rutas seleccionados"
+    },
+    "error": {
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No se pudo cargar la lista de cursos",
+      "fetchTracksTitle": "Error al cargar rutas",
+      "fetchTracksDescription": "No se pudo cargar la lista de rutas",
+      "saveTitle": "Error al guardar",
+      "saveDescription": "No se pudieron guardar los cambios"
+    }
+  },
+  
   "productDetails": {
     "title": "Detalles del Producto",
     "tabs": {
@@ -1984,7 +2016,12 @@
       "courses": "Cursos",
       "subscriptions": "Suscripciones",
       "revenue": "Ingresos",
-      "createdAt": "Creado el"
+      "createdAt": "Creado el",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "link": "Vincular"
     },
     "features": {
       "title": "Características",

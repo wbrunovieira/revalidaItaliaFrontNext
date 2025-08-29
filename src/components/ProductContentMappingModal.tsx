@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, Link, Search, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Link, Search, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

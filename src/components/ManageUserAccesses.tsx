@@ -91,7 +91,19 @@ export default function ManageUserAccesses() {
       }
 
       // Map the users to ensure consistent structure
-      const mappedUsers = users.map((user: any) => ({
+      interface UserResponse {
+        id?: string;
+        identityId?: string;
+        fullName?: string;
+        name?: string;
+        email?: string;
+        nationalId?: string;
+        role?: string;
+        isActive?: boolean;
+        createdAt?: string;
+      }
+      
+      const mappedUsers = users.map((user: UserResponse) => ({
         id: user.id || user.identityId || '',
         identityId: user.identityId || user.id || '',
         fullName: user.fullName || user.name || 'Unnamed User',

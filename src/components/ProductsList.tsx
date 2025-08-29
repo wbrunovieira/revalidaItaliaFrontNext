@@ -61,7 +61,7 @@ interface ProductFeatures {
   maxSimultaneousDevices?: number;
   allowDownloads?: boolean;
   supportPriority?: string;
-  [key: string]: any;
+  [key: string]: boolean | number | string | undefined;
 }
 
 interface Product {
@@ -163,7 +163,7 @@ export default function ProductsList() {
 
   useEffect(() => {
     fetchProducts(1);
-  }, [searchQuery, activeFilter, includeStats]);
+  }, [searchQuery, activeFilter, includeStats, fetchProducts]);
 
   const toggleProductExpanded = (productId: string) => {
     const newExpanded = new Set(expandedProducts);

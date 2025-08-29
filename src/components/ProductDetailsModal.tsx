@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { 
   X, 
@@ -13,7 +13,6 @@ import {
   XCircle,
   BookOpen,
   Route,
-  Loader2,
   AlertCircle,
   Download,
   Video,
@@ -69,7 +68,7 @@ interface ProductMapping {
   externalId: string;
   externalName: string | null;
   isActive: boolean;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -121,13 +120,7 @@ export default function ProductDetailsModal({
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  useEffect(() => {
-    if (isOpen && productId) {
-      fetchProductDetails();
-    }
-  }, [isOpen, productId]);
-
-  const fetchProductDetails = async () => {
+  const fetchProductDetails = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -157,7 +150,13 @@ export default function ProductDetailsModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, token, t, toast, onClose]);
+
+  useEffect(() => {
+    if (isOpen && productId) {
+      fetchProductDetails();
+    }
+  }, [isOpen, productId, fetchProductDetails]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

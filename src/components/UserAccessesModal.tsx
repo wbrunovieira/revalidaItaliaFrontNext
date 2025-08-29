@@ -52,7 +52,7 @@ interface Access {
   metadata?: {
     productName?: string;
     productInternalCode?: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | null | undefined;
   };
   createdAt: string;
   updatedAt: string;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Gift, Calendar, Clock, Loader2, Info } from 'lucide-react';
+import { Gift, Clock, Loader2, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -121,7 +121,15 @@ export default function GrantAccessModal({
 
     setSaving(true);
     try {
-      const body: any = {
+      interface GrantAccessBody {
+        productId: string;
+        reason: string;
+        expirationDate?: string | null;
+        durationDays?: number;
+        startDate?: string;
+      }
+      
+      const body: GrantAccessBody = {
         productId: selectedProductId,
         reason: reason.trim(),
       };

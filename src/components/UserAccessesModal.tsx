@@ -133,24 +133,28 @@ export default function UserAccessesModal({
       console.log('User accesses response:', data);
       
       // Normalizar os dados para garantir compatibilidade com ambas as estruturas (antiga e nova)
-      const normalizedAccesses = (data.accesses || []).map((access: any) => ({
+      const normalizedAccesses = (data.accesses || []).map((access: Access & { 
+        grantedCourses?: (string | GrantedItem)[];
+        grantedPaths?: (string | GrantedItem)[];
+        grantedModules?: (string | GrantedItem)[];
+      }) => ({
         ...access,
         grantedCourses: Array.isArray(access.grantedCourses) 
-          ? access.grantedCourses.map((course: any) => 
+          ? access.grantedCourses.map((course: string | GrantedItem) => 
               typeof course === 'string' 
                 ? { id: course, title: null } 
                 : course
             )
           : [],
         grantedPaths: Array.isArray(access.grantedPaths)
-          ? access.grantedPaths.map((path: any) => 
+          ? access.grantedPaths.map((path: string | GrantedItem) => 
               typeof path === 'string' 
                 ? { id: path, title: null } 
                 : path
             )
           : [],
         grantedModules: Array.isArray(access.grantedModules)
-          ? access.grantedModules.map((module: any) => 
+          ? access.grantedModules.map((module: string | GrantedItem) => 
               typeof module === 'string' 
                 ? { id: module, title: null } 
                 : module

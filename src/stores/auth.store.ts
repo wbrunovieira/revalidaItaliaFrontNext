@@ -74,6 +74,18 @@ export interface MetaInfo {
 }
 
 /**
+ * Terms Acceptance - Dados de aceitação dos termos
+ */
+export interface TermsAcceptance {
+  hasAccepted: boolean;
+  acceptedAt: string | null;
+  termsVersion: string;
+  expiresAt?: string | null;
+  acceptanceId?: string;
+  syncedWithBackend: boolean;
+}
+
+/**
  * Credenciais de login
  */
 export interface LoginCredentials {
@@ -113,6 +125,7 @@ export interface AuthState {
   profileCompleteness: ProfileCompleteness | null;
   communityProfile: CommunityProfile | null;
   meta: MetaInfo | null;
+  termsAcceptance: TermsAcceptance | null;
 
   // Computed helpers (getters derivados)
   isAdmin: boolean;
@@ -128,6 +141,11 @@ export interface AuthState {
   refreshToken: () => Promise<void>;
   initializeAuth: () => Promise<void>;
   clearError: () => void;
+  
+  // Terms actions
+  acceptTerms: (termsVersion: string) => Promise<void>;
+  checkTermsStatus: () => Promise<void>;
+  migrateTermsFromLocalStorage: () => TermsAcceptance | null;
 
   // Helpers de permissão
   canAccessAdmin: () => boolean;
@@ -156,6 +174,7 @@ export const useAuthStore = create<AuthState>()(
       profileCompleteness: null,
       communityProfile: null,
       meta: null,
+      termsAcceptance: null,
 
       // Computed getters (como funções, não propriedades)
       isAdmin: false,
@@ -233,6 +252,7 @@ export const useAuthStore = create<AuthState>()(
               profileCompleteness: data.profileCompleteness,
               communityProfile: data.communityProfile,
               meta: data.meta,
+              termsAcceptance: null, // Will be checked separately
               // Atualizar computed properties
               isAdmin: userData.role === 'admin',
               isTutor: userData.role === 'tutor',
@@ -287,6 +307,7 @@ export const useAuthStore = create<AuthState>()(
           profileCompleteness: null,
           communityProfile: null,
           meta: null,
+          termsAcceptance: null,
           // Resetar computed properties
           isAdmin: false,
           isTutor: false,
@@ -353,6 +374,7 @@ export const useAuthStore = create<AuthState>()(
             let profileCompleteness = null;
             let communityProfile = null;
             let meta = null;
+            let termsAcceptance = null;
             
             try {
               const authStorage = localStorage.getItem('auth-storage');
@@ -367,6 +389,7 @@ export const useAuthStore = create<AuthState>()(
                   profileCompleteness = parsed.state.profileCompleteness;
                   communityProfile = parsed.state.communityProfile;
                   meta = parsed.state.meta;
+                  termsAcceptance = parsed.state.termsAcceptance;
                 }
               }
             } catch (e) {
@@ -383,11 +406,17 @@ export const useAuthStore = create<AuthState>()(
               profileCompleteness,
               communityProfile,
               meta,
+              termsAcceptance,
               // Atualizar computed properties
               isAdmin: userData?.role === 'admin',
               isTutor: userData?.role === 'tutor',
               isStudent: userData?.role === 'student',
             });
+
+            // Verificar se há termos para migrar do localStorage
+            if (!termsAcceptance) {
+              get().migrateTermsFromLocalStorage();
+            }
 
             console.log('🔐 Auth inicializado do token existente:', {
               userName: userData?.name,
@@ -421,6 +450,147 @@ export const useAuthStore = create<AuthState>()(
       // Action: Clear Error
       clearError: () => {
         set({ error: null });
+      },
+
+      // Action: Accept Terms
+      acceptTerms: async (termsVersion: string) => {
+        const state = get();
+        const token = state.token;
+        
+        if (!token) {
+          throw new Error('Usuário não autenticado');
+        }
+
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!apiUrl) {
+            throw new Error('API URL não configurada');
+          }
+
+          const acceptedAt = new Date().toISOString();
+          const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year
+
+          console.log('📝 Aceitando termos:', { termsVersion, acceptedAt });
+
+          const response = await fetch(`${apiUrl}/api/v1/accept-terms`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              termsVersion,
+              acceptedAt,
+              expiresAt,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error('❌ Erro ao aceitar termos:', errorData);
+            throw new Error(errorData?.detail || `Erro ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ Termos aceitos com sucesso:', data);
+
+          // Atualizar o estado com os dados retornados
+          const termsAcceptance: TermsAcceptance = {
+            hasAccepted: true,
+            acceptedAt: data.acceptedAt,
+            termsVersion: data.termsVersion,
+            expiresAt: data.expiresAt,
+            acceptanceId: data.acceptanceId,
+            syncedWithBackend: true,
+          };
+
+          set({ termsAcceptance });
+
+          // Remover do localStorage se existir (migração)
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('termsAccepted');
+          }
+
+          return data;
+        } catch (error) {
+          console.error('❌ Erro ao aceitar termos:', error);
+          throw error;
+        }
+      },
+
+      // Action: Check Terms Status
+      checkTermsStatus: async () => {
+        const state = get();
+        const token = state.token;
+        const user = state.user;
+        
+        if (!token || !user) {
+          console.log('⚠️ Não é possível verificar termos sem autenticação');
+          return;
+        }
+
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!apiUrl) {
+            throw new Error('API URL não configurada');
+          }
+
+          // Por enquanto, vamos verificar se há termos no localStorage para migrar
+          // No futuro, implementar GET /api/v1/profile para verificar acceptedTermsOfUse
+          const migratedTerms = get().migrateTermsFromLocalStorage();
+          
+          if (migratedTerms) {
+            console.log('📋 Termos migrados do localStorage');
+          } else {
+            console.log('📋 Nenhum termo encontrado para migrar');
+          }
+        } catch (error) {
+          console.error('❌ Erro ao verificar status dos termos:', error);
+        }
+      },
+
+      // Action: Migrate Terms from LocalStorage
+      migrateTermsFromLocalStorage: () => {
+        if (typeof window === 'undefined') return null;
+
+        const oldTermsData = localStorage.getItem('termsAccepted');
+        
+        if (oldTermsData && !get().termsAcceptance) {
+          try {
+            const parsed = JSON.parse(oldTermsData);
+            console.log('🔄 Migrando termos do localStorage:', parsed);
+            
+            // Criar objeto de termos com dados migrados
+            const termsAcceptance: TermsAcceptance = {
+              hasAccepted: true,
+              acceptedAt: parsed.acceptedAt || parsed.userId ? new Date().toISOString() : null,
+              termsVersion: parsed.termsVersion || '1.0',
+              expiresAt: parsed.expiresAt || null,
+              syncedWithBackend: false, // Marca para sincronizar
+            };
+            
+            set({ termsAcceptance });
+            
+            // Não remover do localStorage ainda, só após sincronizar com backend
+            console.log('✅ Termos migrados para Zustand');
+            
+            // Tentar sincronizar com backend se estiver autenticado
+            const state = get();
+            if (state.token && state.user) {
+              get().acceptTerms(termsAcceptance.termsVersion).catch(error => {
+                console.error('⚠️ Erro ao sincronizar termos com backend:', error);
+                // Manter os dados migrados mesmo se falhar a sincronização
+              });
+            }
+            
+            return termsAcceptance;
+          } catch (error) {
+            console.error('❌ Erro ao migrar termos do localStorage:', error);
+            return null;
+          }
+        }
+        
+        return null;
       },
 
       // Helper: Can Access Admin
@@ -480,6 +650,7 @@ export const useAuthStore = create<AuthState>()(
         profileCompleteness: state.profileCompleteness,
         communityProfile: state.communityProfile,
         meta: state.meta,
+        termsAcceptance: state.termsAcceptance,
       }),
     }
   )
@@ -500,5 +671,9 @@ export const useAuth = () => {
     // Helper para verificar se o perfil precisa ser completado
     needsProfileCompletion: store.meta?.requiresProfileCompletion || false,
     profilePercentage: store.profileCompleteness?.percentage || 0,
+    // Helper para termos
+    hasAcceptedTerms: store.termsAcceptance?.hasAccepted || false,
+    termsVersion: store.termsAcceptance?.termsVersion || null,
+    needsToAcceptTerms: !store.termsAcceptance?.hasAccepted,
   };
 };

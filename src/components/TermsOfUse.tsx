@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Shield, FileText, AlertTriangle, Info, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -20,12 +20,13 @@ interface TermsOfUseProps {
 export default function TermsOfUse({ locale }: TermsOfUseProps) {
   const t = useTranslations('Terms');
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { acceptTerms } = useAuth();
   const { toast } = useToast();
   const [accepted, setAccepted] = useState(false);
   const [ipAddress, setIpAddress] = useState('');
   const [userAgent, setUserAgent] = useState('');
   const [loading, setLoading] = useState(false);
+  const CURRENT_TERMS_VERSION = '1.0'; // Versão atual dos termos
 
   useEffect(() => {
     // Get user agent
@@ -59,22 +60,8 @@ export default function TermsOfUse({ locale }: TermsOfUseProps) {
     setLoading(true);
 
     try {
-      // In production, send this to your backend
-      const termsAcceptance = {
-        userId: user?.id,
-        acceptedAt: new Date().toISOString(),
-        ipAddress,
-        userAgent,
-        termsVersion: '1.0',
-      };
-
-      console.log('Terms accepted:', termsAcceptance);
-
-      // Store acceptance in localStorage
-      localStorage.setItem('termsAccepted', JSON.stringify({
-        ...termsAcceptance,
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
-      }));
+      // Chamar a nova API através do store
+      await acceptTerms(CURRENT_TERMS_VERSION);
 
       toast({
         title: t('success.title'),
@@ -87,9 +74,26 @@ export default function TermsOfUse({ locale }: TermsOfUseProps) {
       }, 1500);
     } catch (error) {
       console.error('Error accepting terms:', error);
+      
+      // Tratar diferentes tipos de erro
+      let errorMessage = t('error.description');
+      if (error instanceof Error) {
+        if (error.message.includes('profile not found')) {
+          errorMessage = 'Perfil não encontrado. Por favor, complete seu perfil primeiro.';
+        } else if (error.message.includes('Unauthorized')) {
+          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+          // Redirecionar para login após 2 segundos
+          setTimeout(() => {
+            router.push(`/${locale}/login`);
+          }, 2000);
+        } else {
+          errorMessage = error.message || errorMessage;
+        }
+      }
+      
       toast({
         title: t('error.title'),
-        description: t('error.description'),
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

@@ -1,7 +1,7 @@
 // src/components/DashboardClient.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -13,7 +13,7 @@ import TrackCard from '@/components/TrackCard';
 import CourseCard from '@/components/CourseCard';
 import ContinueLearning from '@/components/ContinueLearning';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuth } from '@/stores/auth.store';
 
 interface Translation {
   locale: string;
@@ -58,8 +58,7 @@ interface DashboardClientProps {
 export default function DashboardClient({ locale, initialTracks = [], initialCourses = [] }: DashboardClientProps) {
   const t = useTranslations('Dashboard');
   const router = useRouter();
-  const { user } = useAuthStore();
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { user, hasAcceptedTerms, checkTermsStatus, migrateTermsFromLocalStorage } = useAuth();
 
   // Check auth token and terms acceptance
   useEffect(() => {
@@ -76,24 +75,17 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       }
     };
 
-    const checkTerms = () => {
-      const termsData = localStorage.getItem('termsAccepted');
-      if (termsData) {
-        try {
-          const parsed = JSON.parse(termsData);
-          // Check if terms haven't expired
-          if (parsed.expiresAt && new Date(parsed.expiresAt) > new Date()) {
-            setTermsAccepted(true);
-          }
-        } catch (error) {
-          console.error('Error parsing terms data:', error);
-        }
-      }
+    const verifyTerms = async () => {
+      // Primeiro tenta migrar do localStorage se necessário
+      migrateTermsFromLocalStorage();
+      
+      // Depois verifica o status dos termos
+      await checkTermsStatus();
     };
 
     checkAuth();
-    checkTerms();
-  }, [locale, router]);
+    verifyTerms();
+  }, [locale, router, checkTermsStatus, migrateTermsFromLocalStorage]);
 
   const {
     data: tracks,
@@ -205,7 +197,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       {/* Terms of Use Link - Checkbox style */}
       <div className="w-full max-w-6xl mt-16 mb-8 pt-8 border-t border-white/10">
         <div className="flex justify-center">
-          {termsAccepted ? (
+          {hasAcceptedTerms ? (
             <div className="inline-flex items-center gap-2 text-green-400/80 text-sm">
               <CheckSquare size={20} className="text-green-400" />
               <span>{t('termsAccepted') || 'Termos de Uso Aceitos'}</span>

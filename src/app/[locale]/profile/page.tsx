@@ -61,6 +61,8 @@ interface UserData {
   timezone: string;
   communityProfileConsent: boolean;
   communityProfileConsentDate?: string | null;
+  curriculumUrl?: string | null;
+  hasEuropeanCitizenship?: boolean;
   
   // Authorization fields
   role: 'student' | 'tutor' | 'admin';

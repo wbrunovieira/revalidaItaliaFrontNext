@@ -30,6 +30,9 @@ import {
   CheckCircle,
   AlertCircle,
   Trash2,
+  Upload,
+  File,
+  Globe,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -46,6 +49,8 @@ interface UserData {
   profession?: string | null;
   specialization?: string | null;
   communityProfileConsent: boolean;
+  curriculumUrl?: string | null;
+  hasEuropeanCitizenship?: boolean;
   role: string;
 }
 
@@ -82,6 +87,9 @@ export default function EditProfileForm({
   const [communityConsent, setCommunityConsent] = useState(
     userData.communityProfileConsent || false
   );
+  const [hasEuropeanCitizenship, setHasEuropeanCitizenship] = useState(
+    userData.hasEuropeanCitizenship || false
+  );
   
   // Estados para upload de imagem
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -91,6 +99,13 @@ export default function EditProfileForm({
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
     userData.profileImageUrl || null
   );
+  
+  // Estados para upload de currículo
+  const [uploadingCurriculum, setUploadingCurriculum] = useState(false);
+  const [curriculumUrl, setCurriculumUrl] = useState<string | null>(
+    userData.curriculumUrl || null
+  );
+  const [curriculumFileName, setCurriculumFileName] = useState<string | null>(null);
 
   // Schema de validação com Zod
   const profileSchema = z.object({
@@ -112,6 +127,8 @@ export default function EditProfileForm({
     profession?: string;
     specialization?: string;
     communityProfileConsent?: boolean;
+    curriculumUrl?: string;
+    hasEuropeanCitizenship?: boolean;
   }
 
   const {
@@ -209,6 +226,88 @@ export default function EditProfileForm({
     setUploadedImageUrl(null);
   };
 
+  // Função para fazer upload do currículo
+  const handleCurriculumUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validar tipo de arquivo (PDF, DOC, DOCX)
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: t('error.title'),
+        description: t('errors.invalidCurriculumType') || 'Please upload a PDF or Word document',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validar tamanho do arquivo (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({
+        title: t('error.title'),
+        description: t('errors.curriculumTooLarge') || 'File size must be less than 10MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setUploadingCurriculum(true);
+      
+      // Salvar nome do arquivo
+      setCurriculumFileName(file.name);
+      
+      // Fazer upload para o servidor
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', 'document');
+      formData.append('folder', 'curriculums');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Salvar URL do currículo carregado
+      setCurriculumUrl(result.url);
+      
+      toast({
+        title: t('success'),
+        description: t('curriculumUploadSuccess') || 'Curriculum uploaded successfully',
+      });
+    } catch (error) {
+      console.error('Curriculum upload error:', error);
+      toast({
+        title: t('error.title'),
+        description: error instanceof Error ? error.message : t('errors.uploadFailed'),
+        variant: 'destructive',
+      });
+      // Reverter em caso de erro
+      setCurriculumUrl(userData.curriculumUrl || null);
+      setCurriculumFileName(null);
+    } finally {
+      setUploadingCurriculum(false);
+    }
+  };
+
+  const handleRemoveCurriculum = () => {
+    setCurriculumUrl(null);
+    setCurriculumFileName(null);
+  };
+
   const onSubmit = async (data: ProfileFormData) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
@@ -251,6 +350,16 @@ export default function EditProfileForm({
       }
       if (communityConsent !== userData.communityProfileConsent) {
         updateData.communityProfileConsent = communityConsent;
+      }
+      
+      // Adicionar URL do currículo se foi alterada
+      if (curriculumUrl !== userData.curriculumUrl) {
+        updateData.curriculumUrl = curriculumUrl || '';
+      }
+      
+      // Adicionar cidadania europeia se foi alterada
+      if (hasEuropeanCitizenship !== userData.hasEuropeanCitizenship) {
+        updateData.hasEuropeanCitizenship = hasEuropeanCitizenship;
       }
 
       // Se não há alterações
@@ -665,6 +774,134 @@ export default function EditProfileForm({
               </ul>
             </div>
           )}
+        </div>
+        
+        {/* Upload de Currículo */}
+        <div className="pt-4 border-t border-white/10">
+          <div className="space-y-3">
+            <label className="text-sm text-white/80 flex items-center gap-2">
+              <FileText size={18} className="text-secondary" />
+              {t('curriculum') || 'Curriculum Vitae'}
+            </label>
+            
+            <div className="flex flex-col gap-3">
+              {curriculumUrl ? (
+                <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <File size={20} className="text-green-400" />
+                    <div>
+                      <p className="text-sm text-green-400 font-medium">
+                        {curriculumFileName || t('curriculumUploaded') || 'Curriculum uploaded'}
+                      </p>
+                      <p className="text-xs text-green-400/60">
+                        {t('clickToDownload') || 'Click to download'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCurriculum}
+                    className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={18} className="text-red-400" />
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <input
+                    id="curriculumUpload"
+                    type="file"
+                    className="sr-only"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleCurriculumUpload(file);
+                      }
+                    }}
+                    disabled={uploadingCurriculum}
+                  />
+                  <label
+                    htmlFor="curriculumUpload"
+                    className="flex items-center justify-center gap-3 p-4 bg-white/5 border-2 border-dashed border-white/20 rounded-lg hover:border-secondary/50 hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    {uploadingCurriculum ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-white/60">
+                          {t('uploadingCurriculum') || 'Uploading...'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={20} className="text-secondary" />
+                        <span className="text-sm text-white/60">
+                          {t('uploadCurriculum') || 'Upload PDF or Word document (max 10MB)'}
+                        </span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Cidadania Europeia */}
+        <div className="pt-4 border-t border-white/10">
+          <div className={`rounded-lg border-2 transition-all duration-300 ${
+            hasEuropeanCitizenship 
+              ? 'bg-blue-500/10 border-blue-500/50 shadow-lg shadow-blue-500/20' 
+              : 'bg-white/5 border-white/20 hover:border-white/30'
+          }`}>
+            <label className="flex items-start gap-4 p-4 cursor-pointer">
+              <div className="relative flex items-center justify-center mt-1">
+                <input
+                  type="checkbox"
+                  checked={hasEuropeanCitizenship}
+                  onChange={(e) => setHasEuropeanCitizenship(e.target.checked)}
+                  className="sr-only"
+                />
+                <div className={`w-6 h-6 rounded-md transition-all duration-300 ${
+                  hasEuropeanCitizenship 
+                    ? 'bg-blue-500 shadow-lg shadow-blue-500/50' 
+                    : 'bg-white/10 border-2 border-white/30 hover:border-secondary/50'
+                }`}>
+                  {hasEuropeanCitizenship && (
+                    <Check size={16} className="text-white m-1 animate-in zoom-in-50 duration-200" />
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Globe size={20} className={hasEuropeanCitizenship ? 'text-blue-400' : 'text-white/60'} />
+                  <p className={`font-semibold text-lg ${
+                    hasEuropeanCitizenship ? 'text-blue-400' : 'text-white/80'
+                  }`}>
+                    {t('europeanCitizenship') || 'European Citizenship'}
+                  </p>
+                  {hasEuropeanCitizenship && (
+                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium animate-in fade-in-0 zoom-in-95 duration-200">
+                      {t('yes') || 'Yes'}
+                    </span>
+                  )}
+                </div>
+                
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  {t('europeanCitizenshipDescription') || 'Do you have citizenship from any European Union country?'}
+                </p>
+                
+                {hasEuropeanCitizenship && (
+                  <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-md animate-in slide-in-from-top-1 duration-300">
+                    <p className="text-xs text-blue-300">
+                      {t('europeanCitizenshipInfo') || 'This information may provide additional opportunities and benefits within the European medical system.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 

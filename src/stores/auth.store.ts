@@ -33,6 +33,10 @@ export interface User {
   specialization?: string;
   birthDate?: string;
   communityProfileConsent?: boolean;
+  
+  // Campos adicionais do perfil
+  curriculumUrl?: string; // URL ou caminho do currículo
+  hasEuropeanCitizenship?: boolean; // Cidadania europeia
 }
 
 /**

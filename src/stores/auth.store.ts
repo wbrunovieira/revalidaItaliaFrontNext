@@ -86,6 +86,29 @@ export interface TermsAcceptance {
 }
 
 /**
+ * Latest Acceptance Details from API
+ */
+export interface LatestAcceptance {
+  acceptanceId: string;
+  termsVersion: string;
+  acceptedAt: string;
+  expiresAt: string | null;
+  isExpired: boolean;
+  daysUntilExpiration: number | null;
+}
+
+/**
+ * Terms Status Response from API
+ */
+export interface TermsStatusResponse {
+  hasAcceptedTerms: boolean;
+  currentTermsVersion: string;
+  acceptedVersion: string | null;
+  isCurrentVersionAccepted: boolean;
+  latestAcceptance: LatestAcceptance | null;
+}
+
+/**
  * Credenciais de login
  */
 export interface LoginCredentials {
@@ -145,6 +168,7 @@ export interface AuthState {
   // Terms actions
   acceptTerms: (termsVersion: string) => Promise<void>;
   checkTermsStatus: () => Promise<void>;
+  getTermsStatus: () => Promise<TermsStatusResponse | null>;
   migrateTermsFromLocalStorage: () => TermsAcceptance | null;
 
   // Helpers de permissão
@@ -264,6 +288,12 @@ export const useAuthStore = create<AuthState>()(
               userName: userData?.name,
               userRole: userData?.role,
             });
+            
+            // Verificar status dos termos após login bem-sucedido
+            setTimeout(() => {
+              console.log('🔍 Verificando status dos termos após login...');
+              get().checkTermsStatus();
+            }, 100);
           } else {
             throw new Error('Token não retornado pela API');
           }
@@ -413,15 +443,22 @@ export const useAuthStore = create<AuthState>()(
               isStudent: userData?.role === 'student',
             });
 
-            // Verificar se há termos para migrar do localStorage
-            if (!termsAcceptance) {
-              get().migrateTermsFromLocalStorage();
-            }
-
             console.log('🔐 Auth inicializado do token existente:', {
               userName: userData?.name,
               userRole: userData?.role,
             });
+            
+            // Verificar status dos termos após inicialização
+            if (!termsAcceptance) {
+              // Primeiro tenta migrar do localStorage
+              get().migrateTermsFromLocalStorage();
+              
+              // Depois verifica com o backend
+              setTimeout(() => {
+                console.log('🔍 Verificando status dos termos após inicialização...');
+                get().checkTermsStatus();
+              }, 100);
+            }
 
             // TODO: Descomentar quando a API tiver endpoint de refresh
             // setTimeout(() => {
@@ -518,15 +555,14 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Action: Check Terms Status
-      checkTermsStatus: async () => {
+      // Action: Get Terms Status from API
+      getTermsStatus: async (): Promise<TermsStatusResponse | null> => {
         const state = get();
         const token = state.token;
-        const user = state.user;
         
-        if (!token || !user) {
+        if (!token) {
           console.log('⚠️ Não é possível verificar termos sem autenticação');
-          return;
+          return null;
         }
 
         try {
@@ -535,14 +571,90 @@ export const useAuthStore = create<AuthState>()(
             throw new Error('API URL não configurada');
           }
 
-          // Por enquanto, vamos verificar se há termos no localStorage para migrar
-          // No futuro, implementar GET /api/v1/profile para verificar acceptedTermsOfUse
+          console.log('🔍 Verificando status dos termos no backend...');
+          
+          const response = await fetch(`${apiUrl}/api/v1/terms-status`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            // Se der 401, o token expirou
+            if (response.status === 401) {
+              console.log('⚠️ Token expirado ao verificar termos');
+              return null;
+            }
+            
+            // Se der 400 (profile not found), retornar null
+            if (response.status === 400) {
+              console.log('⚠️ Perfil não encontrado');
+              return null;
+            }
+            
+            const errorData = await response.json().catch(() => null);
+            console.error('❌ Erro ao obter status dos termos:', errorData);
+            return null;
+          }
+
+          const data: TermsStatusResponse = await response.json();
+          console.log('✅ Status dos termos obtido:', data);
+          
+          return data;
+        } catch (error) {
+          console.error('❌ Erro ao verificar status dos termos:', error);
+          return null;
+        }
+      },
+
+      // Action: Check Terms Status and Update Store
+      checkTermsStatus: async () => {
+        const state = get();
+        const token = state.token;
+        
+        if (!token) {
+          console.log('⚠️ Não é possível verificar termos sem autenticação');
+          return;
+        }
+
+        try {
+          // Primeiro tenta migrar do localStorage se necessário
           const migratedTerms = get().migrateTermsFromLocalStorage();
           
           if (migratedTerms) {
             console.log('📋 Termos migrados do localStorage');
-          } else {
-            console.log('📋 Nenhum termo encontrado para migrar');
+          }
+          
+          // Agora busca o status atual do backend
+          const termsStatus = await get().getTermsStatus();
+          
+          if (termsStatus && termsStatus.hasAcceptedTerms && termsStatus.latestAcceptance) {
+            // Atualizar o estado com os dados do backend
+            const termsAcceptance: TermsAcceptance = {
+              hasAccepted: true,
+              acceptedAt: termsStatus.latestAcceptance.acceptedAt,
+              termsVersion: termsStatus.latestAcceptance.termsVersion,
+              expiresAt: termsStatus.latestAcceptance.expiresAt,
+              acceptanceId: termsStatus.latestAcceptance.acceptanceId,
+              syncedWithBackend: true,
+            };
+            
+            set({ termsAcceptance });
+            console.log('✅ Estado dos termos atualizado do backend');
+            
+            // Se há uma nova versão dos termos, avisar
+            if (!termsStatus.isCurrentVersionAccepted) {
+              console.log('⚠️ Nova versão dos termos disponível:', termsStatus.currentTermsVersion);
+            }
+            
+            // Se os termos expiraram, avisar
+            if (termsStatus.latestAcceptance.isExpired) {
+              console.log('⚠️ Termos expirados, necessário aceitar novamente');
+            }
+          } else if (!state.termsAcceptance) {
+            // Usuário nunca aceitou termos
+            console.log('📋 Usuário ainda não aceitou os termos');
           }
         } catch (error) {
           console.error('❌ Erro ao verificar status dos termos:', error);

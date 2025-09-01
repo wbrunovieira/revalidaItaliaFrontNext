@@ -195,7 +195,7 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
 
           {/* Título com melhorias */}
           <div className="space-y-3 relative z-10">
-            <h3 className="text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300 line-clamp-2 leading-tight tracking-tight">
+            <h3 className="text-2xl font-bold text-gray-900 line-clamp-2 leading-tight tracking-tight">
               {translation.title}
             </h3>
             
@@ -248,7 +248,7 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                     </div>
                   </div>
                   <span className={`font-medium text-xs group-hover:scale-110 transition-transform duration-300 ${
-                    isCompleted ? 'text-green-600' : 'text-accent'
+                    isCompleted ? 'text-green-600' : 'text-primary'
                   }`}>
                     {progressPercentage}%
                   </span>
@@ -261,8 +261,8 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                 isCompleted 
                   ? 'text-green-600 bg-green-100 group-hover:bg-green-200' 
                   : isStarted
-                  ? 'text-accent bg-accent/10 group-hover:bg-accent/20 group-hover:text-accent'
-                  : 'text-gray-500 bg-gray-100 group-hover:bg-accent/10 group-hover:text-accent'
+                  ? 'text-secondary bg-secondary/10 group-hover:bg-secondary/20'
+                  : 'text-gray-500 bg-gray-100 group-hover:bg-secondary/10 group-hover:text-secondary'
               }`}>
                 {isCompleted ? t('completed') : isStarted ? t('continue') : t('startTrack')}
               </div>

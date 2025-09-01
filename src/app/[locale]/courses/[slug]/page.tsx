@@ -6,6 +6,8 @@ import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import ModuleCard from '@/components/ModuleCard';
+import CourseProgressBar from '@/components/CourseProgressBar';
+import ModuleCardWithProgress from '@/components/ModuleCardWithProgress';
 import {
   ArrowLeft,
   BookOpen,
@@ -141,6 +143,14 @@ export default async function CoursePage({
           </div>
         </div>
 
+        {/* Course Progress Bar */}
+        <div className="px-6 pb-8">
+          <CourseProgressBar 
+            courseId={courseFound.id}
+            totalModules={totalModules}
+          />
+        </div>
+
         {/* Lista de módulos */}
         <div className="px-6 pb-8">
           <div className="flex items-center gap-4 mb-6">
@@ -154,14 +164,12 @@ export default async function CoursePage({
           {sortedModules.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedModules.map((moduleData, index) => (
-                <ModuleCard
+                <ModuleCardWithProgress
                   key={moduleData.id}
                   module={moduleData}
                   courseSlug={slug}
                   locale={locale}
                   index={index}
-                  totalModules={totalModules}
-                  isCompleted={false}
                 />
               ))}
             </div>
@@ -178,28 +186,6 @@ export default async function CoursePage({
           )}
         </div>
 
-        {/* Progresso do curso (opcional) */}
-        {sortedModules.length > 0 && (
-          <div className="px-6 pb-8">
-            <div className="bg-gray-800/50 rounded-lg p-4 max-w-2xl">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-400">
-                  {tCourse('progress')}
-                </span>
-                <span className="text-sm font-bold text-white">
-                  0/{totalModules}{' '}
-                  {tCourse('modulesCompleted')}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-secondary transition-all duration-500 ease-out"
-                  style={{ width: '0%' }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Iniciar curso */}
         {sortedModules.length > 0 && (

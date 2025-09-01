@@ -982,6 +982,26 @@
     "tryDifferentSearch": "Intenta buscar otro término",
     "startSearching": "Usa el campo de búsqueda arriba para encontrar cursos"
   },
+  "UserProgress": {
+    "title": "Tu Progreso",
+    "subtitle": "Sigue tu viaje de aprendizaje",
+    "level": "Nivel",
+    "currentStreak": "Racha Actual",
+    "days": "días",
+    "best": "Récord",
+    "averageProgress": "Progreso Promedio",
+    "totalTime": "Tiempo Total",
+    "thisWeek": "Esta semana",
+    "completedLessons": "Lecciones Completadas",
+    "complete": "completado",
+    "weeklyActivity": "Actividad Semanal",
+    "lessonsThisWeek": "lecciones esta semana",
+    "weeklyGoal": "Meta semanal",
+    "continueWhere": "Continúa donde lo dejaste",
+    "recentAchievements": "Logros Recientes",
+    "totalPoints": "Puntos totales",
+    "nextLevel": "Próximo nivel"
+  },
   "LogoutButton": {
     "logout": "Salir",
     "iconAlt": "Salir"

@@ -12,6 +12,7 @@ import { useApi } from '@/hooks/use-api';
 import TrackCard from '@/components/TrackCard';
 import CourseCard from '@/components/CourseCard';
 import ContinueLearning from '@/components/ContinueLearning';
+import UserProgressCard from '@/components/UserProgressCard';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import { useAuth } from '@/stores/auth.store';
 
@@ -162,8 +163,10 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       {/* Support Floating Button */}
       <SupportFloatingButton context={{ type: "GENERAL" }} />
 
-
-
+      {/* User Progress Card */}
+      <div className="w-full max-w-6xl mt-8">
+        <UserProgressCard />
+      </div>
 
       {/* Continue Learning Section */}
       <div className="w-full max-w-6xl mt-8">

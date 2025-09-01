@@ -994,6 +994,26 @@
     "tryDifferentSearch": "Tente buscar por outro termo",
     "startSearching": "Use o campo de busca acima para encontrar cursos"
   },
+  "UserProgress": {
+    "title": "Seu Progresso",
+    "subtitle": "Acompanhe sua jornada de aprendizado",
+    "level": "Nível",
+    "currentStreak": "Sequência Atual",
+    "days": "dias",
+    "best": "Recorde",
+    "averageProgress": "Progresso Médio",
+    "totalTime": "Tempo Total",
+    "thisWeek": "Esta semana",
+    "completedLessons": "Aulas Concluídas",
+    "complete": "concluído",
+    "weeklyActivity": "Atividade Semanal",
+    "lessonsThisWeek": "aulas esta semana",
+    "weeklyGoal": "Meta semanal",
+    "continueWhere": "Continue de onde parou",
+    "recentAchievements": "Conquistas Recentes",
+    "totalPoints": "Pontos totais",
+    "nextLevel": "Próximo nível"
+  },
   "LogoutButton": {
     "logout": "Sair",
     "iconAlt": "Sair"

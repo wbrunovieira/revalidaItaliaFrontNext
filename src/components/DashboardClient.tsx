@@ -21,20 +21,34 @@ interface Translation {
   description: string;
 }
 
+interface TrackProgress {
+  completedCourses: number;
+  totalCourses: number;
+  courseCompletionRate: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionRate: number;
+  overallPercentage: number;
+}
+
 interface Track {
   id: string;
   slug: string;
   imageUrl: string;
+  courseCount: number;
   courses?: Course[];
   translations?: Translation[];
+  progress?: TrackProgress;
 }
 
 interface EnrichedTrack {
   id: string;
   slug: string;
   imageUrl: string;
+  courseCount: number;
   courses?: { id: string; title: string }[];
   translations?: Translation[];
+  progress?: TrackProgress;
 }
 
 interface CourseProgress {
@@ -100,7 +114,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const {
     data: tracks,
     loading: tracksLoading,
-  } = useApi<Track[]>('/api/v1/tracks', {
+  } = useApi<Track[]>('/api/v1/tracks-progress', {
     fallbackData: initialTracks.length > 0 ? initialTracks : fallbackTracks,
     showToastOnError: false,
   });
@@ -122,10 +136,12 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
 
       return {
         ...track,
+        courseCount: track.courseCount || courseIds.length,
         courses: trackCourses.map(course => ({
           id: course.id,
           title: course.translations?.[0]?.title || course.slug || '',
         })),
+        progress: track.progress,
       };
     }) || [];
 

@@ -11,12 +11,24 @@ interface Translation {
   description: string;
 }
 
+interface TrackProgress {
+  completedCourses: number;
+  totalCourses: number;
+  courseCompletionRate: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionRate: number;
+  overallPercentage: number;
+}
+
 interface Track {
   id: string;
   slug: string;
   imageUrl: string;
+  courseCount: number;
   courses?: Course[];
   translations?: Translation[];
+  progress?: TrackProgress;
 }
 
 interface CourseProgress {
@@ -85,7 +97,7 @@ export default async function IndexPage({
 
   // Try to fetch data on server, but don't fail if API is down
   const [tracks, courses] = await Promise.all([
-    fetchDataSafely<Track[]>(`${apiUrl}/api/v1/tracks`),
+    fetchDataSafely<Track[]>(`${apiUrl}/api/v1/tracks-progress`, token),
     fetchDataSafely<Course[]>(`${apiUrl}/api/v1/courses-progress`, token)
   ]);
 

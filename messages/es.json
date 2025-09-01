@@ -1601,7 +1601,9 @@
   "totalHours": "Horas de Contenido",
   "courses": "cursos",
   "popular": "Popular",
-  "startTrack": "Iniciar ruta"
+  "startTrack": "Iniciar ruta",
+  "completed": "Completada",
+  "continue": "Continuar"
 },
 "Courses": {
   "title": "Catálogo de Cursos",

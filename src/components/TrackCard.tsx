@@ -1,7 +1,7 @@
 // src/components/TrackCard.tsx
 "use client";
 
-import { Route, BookOpen, TrendingUp } from 'lucide-react';
+import { Route, BookOpen, TrendingUp, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -13,12 +13,24 @@ interface Translation {
   description: string;
 }
 
+interface TrackProgress {
+  completedCourses: number;
+  totalCourses: number;
+  courseCompletionRate: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionRate: number;
+  overallPercentage: number;
+}
+
 interface Track {
   id: string;
   slug: string;
   imageUrl: string;
+  courseCount: number;
   courses?: { id: string; title: string; }[];
   translations?: Translation[];
+  progress?: TrackProgress;
 }
 
 interface TrackCardProps {
@@ -36,13 +48,18 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
   const translation = list.find(tr => tr.locale === locale) ?? 
                      list[0] ?? { title: '', description: '' };
 
-  // Dados da trilha
-  const coursesCount = track.courses?.length || 0; // Real data from API
+  // Real track data from API
+  const coursesCount = track.courseCount || track.courses?.length || 0;
   const isPopular = coursesCount > 5;
 
-  // Mock progress data - TODO: replace with real API data
-  const mockProgress = [10, 35, 65, 25, 75, 0][index % 6];
-  const isStarted = mockProgress > 0;
+  // Real progress data from API
+  const progressPercentage = track.progress?.overallPercentage || 0;
+  const isStarted = progressPercentage > 0;
+  const isCompleted = progressPercentage === 100;
+  const completedCourses = track.progress?.completedCourses || 0;
+  const totalCourses = track.progress?.totalCourses || coursesCount;
+  const completedLessons = track.progress?.completedLessons || 0;
+  const totalLessons = track.progress?.totalLessons || 0;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
@@ -95,12 +112,16 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
           backgroundPosition: '0 0, 12px 12px, 5px 5px'
         }}
       >
-        {/* Linha de progresso real com pulse */}
+        {/* Progress line with real data */}
         {isStarted ? (
           <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-accent to-secondary transition-all duration-1000 ease-out group-hover:animate-pulse"
-              style={{ width: `${mockProgress}%` }}
+              className={`h-full transition-all duration-1000 ease-out group-hover:animate-pulse ${
+                isCompleted 
+                  ? 'bg-gradient-to-r from-green-600 to-green-500' 
+                  : 'bg-gradient-to-r from-accent to-secondary'
+              }`}
+              style={{ width: `${progressPercentage}%` }}
             >
               <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
             </div>
@@ -109,12 +130,21 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/30 via-secondary/30 to-accent/30"></div>
         )}
         
-        {/* Badge Popular */}
-        {isPopular && (
+        {/* Badges */}
+        {isPopular && !isCompleted && (
           <div className="absolute top-4 right-4 z-20">
             <div className="bg-secondary text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg transform group-hover:scale-110 transition-transform duration-300">
               <TrendingUp size={14} />
               <span className="font-semibold">{t('popular')}</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Completion badge */}
+        {isCompleted && (
+          <div className="absolute top-4 right-4 z-20">
+            <div className="bg-green-500 rounded-full p-2 shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+              <CheckCircle className="w-5 h-5 text-white" />
             </div>
           </div>
         )}
@@ -195,7 +225,9 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                 <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
                   <BookOpen size={14} className="text-secondary" />
                 </div>
-                <span className="font-medium">{coursesCount} {t('courses')}</span>
+                <span className="font-medium">
+                  {completedCourses > 0 ? `${completedCourses}/` : ''}{totalCourses} {t('courses')}
+                </span>
               </div>
             </div>
 
@@ -205,22 +237,34 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-700 group-hover:animate-pulse"
-                      style={{ width: `${mockProgress}%` }}
+                      className={`h-full rounded-full transition-all duration-700 group-hover:animate-pulse ${
+                        isCompleted 
+                          ? 'bg-gradient-to-r from-green-600 to-green-500' 
+                          : 'bg-gradient-to-r from-accent to-secondary'
+                      }`}
+                      style={{ width: `${progressPercentage}%` }}
                     >
                       <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
                     </div>
                   </div>
-                  <span className="text-accent font-medium text-xs group-hover:scale-110 transition-transform duration-300">
-                    {mockProgress}%
+                  <span className={`font-medium text-xs group-hover:scale-110 transition-transform duration-300 ${
+                    isCompleted ? 'text-green-600' : 'text-accent'
+                  }`}>
+                    {progressPercentage}%
                   </span>
                 </div>
               ) : (
                 <div></div>
               )}
               
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full group-hover:bg-accent/10 group-hover:text-accent transition-all duration-300 font-semibold">
-                {t('startTrack')}
+              <div className={`text-xs px-3 py-1.5 rounded-full transition-all duration-300 font-semibold ${
+                isCompleted 
+                  ? 'text-green-600 bg-green-100 group-hover:bg-green-200' 
+                  : isStarted
+                  ? 'text-accent bg-accent/10 group-hover:bg-accent/20 group-hover:text-accent'
+                  : 'text-gray-500 bg-gray-100 group-hover:bg-accent/10 group-hover:text-accent'
+              }`}>
+                {isCompleted ? t('completed') : isStarted ? t('continue') : t('startTrack')}
               </div>
             </div>
           </div>

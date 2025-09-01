@@ -1601,7 +1601,9 @@
   "totalHours": "Ore di Contenuto",
   "courses": "corsi",
   "popular": "Popolare",
-  "startTrack": "Inizia percorso"
+  "startTrack": "Inizia percorso",
+  "completed": "Completato",
+  "continue": "Continua"
 },
 
 "Courses": {

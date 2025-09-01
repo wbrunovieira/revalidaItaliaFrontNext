@@ -11,6 +11,9 @@ import {
   ArrowLeft,
   BookOpen,
   GraduationCap,
+  Layers,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,11 +23,21 @@ interface Translation {
   description: string;
 }
 
+interface CourseProgress {
+  completedModules: number;
+  totalModules: number;
+  completedLessons: number;
+  totalLessons: number;
+  percentage: number;
+}
+
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  moduleCount: number;
   translations?: Translation[];
+  progress?: CourseProgress;
 }
 
 // interface Module {
@@ -57,19 +70,27 @@ export default async function CoursesPage({
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
 
-  // Buscar todos os cursos
-  const resCourses = await fetch(`${apiUrl}/api/v1/courses`, {
+  // Buscar todos os cursos com progresso
+  const resCourses = await fetch(`${apiUrl}/api/v1/courses-progress`, {
     cache: 'no-store',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 
   if (!resCourses.ok) {
-    throw new Error('Failed to fetch courses');
+    throw new Error('Failed to fetch courses with progress');
   }
 
   const courses: Course[] = await resCourses.json();
 
   // Estatísticas gerais
   const totalCourses = courses.length;
+  const totalModules = courses.reduce((sum, course) => sum + (course.moduleCount || 0), 0);
+  const completedCourses = courses.filter(course => course.progress?.percentage === 100).length;
+  const inProgressCourses = courses.filter(course => 
+    course.progress && course.progress.percentage > 0 && course.progress.percentage < 100
+  ).length;
 
   return (
     <NavSidebar>
@@ -99,8 +120,8 @@ export default async function CoursesPage({
             {t('description')}
           </p>
 
-          {/* Card de Estatísticas */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-8 max-w-md">
+          {/* Cards de Estatísticas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-4xl">
             <div className="bg-secondary/20 rounded-lg p-4 border border-secondary/30">
               <div className="flex items-center gap-3">
                 <GraduationCap
@@ -113,6 +134,57 @@ export default async function CoursesPage({
                   </p>
                   <p className="text-2xl font-bold text-white">
                     {totalCourses}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-primary/30 rounded-lg p-4 border border-primary/40">
+              <div className="flex items-center gap-3">
+                <Layers
+                  size={24}
+                  className="text-blue-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('totalModules')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {totalModules}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-green-600/20 rounded-lg p-4 border border-green-600/30">
+              <div className="flex items-center gap-3">
+                <CheckCircle
+                  size={24}
+                  className="text-green-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('completedCourses')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {completedCourses}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-yellow-600/20 rounded-lg p-4 border border-yellow-600/30">
+              <div className="flex items-center gap-3">
+                <Clock
+                  size={24}
+                  className="text-yellow-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('inProgress')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {inProgressCourses}
                   </p>
                 </div>
               </div>

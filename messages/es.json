@@ -1625,7 +1625,9 @@
   "startCourse": "Iniciar curso",
   "completed": "Completado",
   "continue": "Continuar",
-  "lessons": "lecciones"
+  "lessons": "lecciones",
+  "completedCourses": "Cursos Completados",
+  "inProgress": "En Progreso"
 },
 "Admin": {
   "title": "Panel Administrativo",

@@ -1637,7 +1637,9 @@
   "startCourse": "Iniciar curso",
   "completed": "Concluído",
   "continue": "Continuar",
-  "lessons": "aulas"
+  "lessons": "aulas",
+  "completedCourses": "Cursos Concluídos",
+  "inProgress": "Em Andamento"
 },
 "Admin": {
   "title": "Painel Administrativo",

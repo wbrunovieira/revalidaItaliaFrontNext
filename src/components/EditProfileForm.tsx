@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/stores/auth.store';
+import { useAuth, type User } from '@/stores/auth.store';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import DatePicker from 'react-datepicker';
@@ -15,7 +15,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
 import {
-  User,
+  User as UserIcon,
   Mail,
   Hash,
   Phone,
@@ -50,8 +50,8 @@ interface UserData {
   specialization?: string | null;
   communityProfileConsent: boolean;
   curriculumUrl?: string | null;
-  hasEuropeanCitizenship?: boolean;
-  role: string;
+  hasEuropeanCitizenship?: boolean | null;
+  role: 'admin' | 'student' | 'tutor';
 }
 
 interface EditProfileFormProps {
@@ -119,16 +119,18 @@ export default function EditProfileForm({
   type ProfileFormData = z.infer<typeof profileSchema>;
 
   interface UpdateData {
-    name?: string;
+    fullName?: string;
     phone?: string;
     birthDate?: string;
-    profileImageUrl?: string;
-    bio?: string;
-    profession?: string;
-    specialization?: string;
+    profileImageUrl?: string | null;
+    bio?: string | null;
+    profession?: string | null;
+    specialization?: string | null;
     communityProfileConsent?: boolean;
-    curriculumUrl?: string;
-    hasEuropeanCitizenship?: boolean;
+    curriculumUrl?: string | null;
+    hasEuropeanCitizenship?: boolean | null;
+    preferredLanguage?: string;
+    timezone?: string;
   }
 
   const {
@@ -319,7 +321,7 @@ export default function EditProfileForm({
         ?.split('=')[1];
 
       // Preparar dados para envio (apenas campos alterados)
-      const updateData: any = {};
+      const updateData: UpdateData = {};
       
       // fullName ao invés de name
       if (data.name !== userData.name)
@@ -444,18 +446,37 @@ export default function EditProfileForm({
       // Atualizar o Auth Store com os novos dados do usuário
       // A API retorna { identity: {...}, profile: {...} }
       if (responseData.profile) {
-        const updatedUserData = {
-          ...updateData,
+        const updatedUserData: Partial<User> = {
           // Mapear fullName de volta para name no store
           name: responseData.profile.fullName || updateData.fullName,
           // Adicionar outros campos retornados pela API
           email: responseData.identity?.email || userData.email,
           nationalId: responseData.profile.nationalId || userData.nationalId,
+          // Converter null para undefined para compatibilidade com o store
+          profileImageUrl: updateData.profileImageUrl === null ? undefined : updateData.profileImageUrl,
+          bio: updateData.bio === null ? undefined : updateData.bio,
+          profession: updateData.profession === null ? undefined : updateData.profession,
+          specialization: updateData.specialization === null ? undefined : updateData.specialization,
+          curriculumUrl: updateData.curriculumUrl === null ? undefined : updateData.curriculumUrl,
+          hasEuropeanCitizenship: updateData.hasEuropeanCitizenship === null ? undefined : updateData.hasEuropeanCitizenship,
         };
         updateUser(updatedUserData);
       } else {
         // Fallback caso a API não retorne os dados esperados
-        updateUser(updateData);
+        const safeUpdateData: Partial<User> = {
+          name: updateData.fullName || userData.name,
+          email: userData.email,
+          nationalId: userData.nationalId,
+          phone: updateData.phone === null ? undefined : updateData.phone,
+          birthDate: updateData.birthDate === null ? undefined : updateData.birthDate,
+          profileImageUrl: updateData.profileImageUrl === null ? undefined : updateData.profileImageUrl,
+          bio: updateData.bio === null ? undefined : updateData.bio,
+          profession: updateData.profession === null ? undefined : updateData.profession,
+          specialization: updateData.specialization === null ? undefined : updateData.specialization,
+          curriculumUrl: updateData.curriculumUrl === null ? undefined : updateData.curriculumUrl,
+          hasEuropeanCitizenship: updateData.hasEuropeanCitizenship === null ? undefined : updateData.hasEuropeanCitizenship,
+        };
+        updateUser(safeUpdateData);
       }
       
       onSuccess();
@@ -549,7 +570,7 @@ export default function EditProfileForm({
       <div className="space-y-4">
         {/* Nome */}
         <div className="flex items-start gap-3 text-white">
-          <User size={20} className="text-secondary mt-1" />
+          <UserIcon size={20} className="text-secondary mt-1" />
           <div className="flex-1">
             <p className="text-sm text-gray-400 mb-1">{t('name')}</p>
             <input

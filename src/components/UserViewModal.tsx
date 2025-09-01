@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 import {
   X,
   User,
@@ -302,9 +303,11 @@ export default function UserViewModal({
               <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center overflow-hidden">
                   {user.profileImageUrl ? (
-                    <img 
+                    <Image 
                       src={user.profileImageUrl} 
                       alt={user.fullName}
+                      width={64}
+                      height={64}
                       className="w-full h-full object-cover"
                     />
                   ) : user.role === 'admin' ? (

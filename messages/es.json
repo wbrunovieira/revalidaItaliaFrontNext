@@ -1588,7 +1588,11 @@
   "totalCourses": "Total de Cursos",
   "totalHours": "Horas de Contenido",
   "courses": "cursos",
-  "popular": "Popular"
+  "popular": "Popular",
+  "totalLessons": "Total de Lecciones",
+  "completedTracks": "Rutas Completadas",
+  "inProgress": "En Progreso",
+  "lessonsCompleted": "Lecciones Completadas"
 },
 "Tracks": {
   "title": "Rutas de Aprendizaje",

@@ -9,8 +9,10 @@ import TrackCard from '@/components/TrackCard';
 import {
   ArrowLeft,
   BookOpen,
-  Clock,
   TrendingUp,
+  CheckCircle,
+  Clock,
+  Layers,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,18 +22,23 @@ interface Translation {
   description: string;
 }
 
-interface Course {
-  id: string;
-  title: string;
-  slug?: string;
+interface TrackProgress {
+  completedCourses: number;
+  totalCourses: number;
+  courseCompletionRate: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionRate: number;
+  overallPercentage: number;
 }
 
 interface Track {
   id: string;
   slug: string;
   imageUrl: string;
-  courseIds?: string[];
+  courseCount: number;
   translations?: Translation[];
+  progress?: TrackProgress;
 }
 
 export default async function TracksPage({
@@ -57,51 +64,38 @@ export default async function TracksPage({
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
 
-  // Buscar todas as trilhas
-  const resTracks = await fetch(`${apiUrl}/api/v1/tracks`, {
+  // Buscar todas as trilhas com progresso
+  const resTracks = await fetch(`${apiUrl}/api/v1/tracks-progress`, {
     cache: 'no-store',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 
   if (!resTracks.ok) {
-    throw new Error('Failed to fetch tracks');
+    throw new Error('Failed to fetch tracks with progress');
   }
 
   const tracks: Track[] = await resTracks.json();
 
-  // Buscar cursos para cada trilha
-  const resCourses = await fetch(`${apiUrl}/api/v1/courses`, {
-    cache: 'no-store',
-  });
-
-  if (!resCourses.ok) {
-    throw new Error('Failed to fetch courses');
-  }
-
-  const allCourses = await resCourses.json();
-
-  // Enriquecer trilhas com dados dos cursos
-  const enrichedTracks = tracks.map(track => {
-    const courseIds = track.courseIds || [];
-    const courses = allCourses.filter((course: Course) => 
-      courseIds.includes(course.id)
-    );
-    
-    return {
-      ...track,
-      courses,
-      courseCount: courses.length,
-      estimatedHours: courses.length * 8, // 8 horas por curso
-    };
-  });
-
   // Estatísticas gerais
   const totalTracks = tracks.length;
-  const totalCourses = enrichedTracks.reduce(
-    (sum, track) => sum + track.courseCount,
+  const totalCourses = tracks.reduce(
+    (sum, track) => sum + (track.courseCount || 0),
     0
   );
-  const totalHours = enrichedTracks.reduce(
-    (sum, track) => sum + track.estimatedHours,
+  const completedTracks = tracks.filter(
+    track => track.progress?.overallPercentage === 100
+  ).length;
+  const inProgressTracks = tracks.filter(
+    track => track.progress && track.progress.overallPercentage > 0 && track.progress.overallPercentage < 100
+  ).length;
+  const totalLessons = tracks.reduce(
+    (sum, track) => sum + (track.progress?.totalLessons || 0),
+    0
+  );
+  const completedLessons = tracks.reduce(
+    (sum, track) => sum + (track.progress?.completedLessons || 0),
     0
   );
 
@@ -140,7 +134,7 @@ export default async function TracksPage({
           </p>
 
           {/* Cards de Estatísticas */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             <div className="bg-secondary/20 rounded-lg p-4 border border-secondary/30">
               <div className="flex items-center gap-3">
                 <TrendingUp
@@ -158,11 +152,11 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-secondary/20 rounded-lg p-4 border border-secondary/30">
+            <div className="bg-primary/30 rounded-lg p-4 border border-primary/40">
               <div className="flex items-center gap-3">
                 <BookOpen
                   size={24}
-                  className="text-secondary"
+                  className="text-blue-400"
                 />
                 <div>
                   <p className="text-sm text-gray-400">
@@ -175,18 +169,69 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-secondary/20 rounded-lg p-4 border border-secondary/30">
+            <div className="bg-blue-600/20 rounded-lg p-4 border border-blue-600/30">
               <div className="flex items-center gap-3">
-                <Clock
+                <Layers
                   size={24}
-                  className="text-secondary"
+                  className="text-blue-400"
                 />
                 <div>
                   <p className="text-sm text-gray-400">
-                    {t('totalHours')}
+                    {t('totalLessons')}
                   </p>
                   <p className="text-2xl font-bold text-white">
-                    {totalHours}h
+                    {totalLessons}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-600/20 rounded-lg p-4 border border-green-600/30">
+              <div className="flex items-center gap-3">
+                <CheckCircle
+                  size={24}
+                  className="text-green-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('completedTracks')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {completedTracks}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-600/20 rounded-lg p-4 border border-yellow-600/30">
+              <div className="flex items-center gap-3">
+                <Clock
+                  size={24}
+                  className="text-yellow-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('inProgress')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {inProgressTracks}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-purple-600/20 rounded-lg p-4 border border-purple-600/30">
+              <div className="flex items-center gap-3">
+                <CheckCircle
+                  size={24}
+                  className="text-purple-400"
+                />
+                <div>
+                  <p className="text-sm text-gray-400">
+                    {t('lessonsCompleted')}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {completedLessons}/{totalLessons}
                   </p>
                 </div>
               </div>
@@ -196,9 +241,9 @@ export default async function TracksPage({
 
         {/* Grid de Trilhas */}
         <div className="px-6 pb-8">
-          {enrichedTracks.length > 0 ? (
+          {tracks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {enrichedTracks.map((track, index) => (
+              {tracks.map((track, index) => (
                 <TrackCard
                   key={track.id}
                   track={track}

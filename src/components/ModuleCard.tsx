@@ -1,7 +1,7 @@
 // src/components/ModuleCard.tsx
 "use client";
 
-import { Layers, Clock, PlayCircle, CheckCircle } from 'lucide-react';
+import { Layers, PlayCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -58,7 +58,6 @@ export default function ModuleCard({
 
   // Dados do módulo
   const lessonsCount = module.lessons?.length || 4; // Valor fixo para evitar problemas de hidratação
-  const estimatedMinutes = lessonsCount * 15; // Estimativa de 15 minutos por aula
   const moduleNumber = index + 1;
 
   // Mock progress data - remover quando vier da API
@@ -211,12 +210,6 @@ export default function ModuleCard({
                     <span className="font-medium">{lessonsCount} {t('lessons')}</span>
                   </div>
                   
-                  <div className="flex items-center gap-1 text-gray-600 group-hover:text-secondary transition-colors duration-300">
-                    <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
-                      <Clock size={12} className="text-secondary" />
-                    </div>
-                    <span className="font-medium">{estimatedMinutes}min</span>
-                  </div>
                 </div>
               </div>
 

@@ -11,7 +11,6 @@ import ModuleCardWithProgress from '@/components/ModuleCardWithProgress';
 import {
   ArrowLeft,
   BookOpen,
-  Clock,
   PlayCircle,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -79,7 +78,6 @@ export default async function CoursePage({
 
   // Cálculos de estatísticas
   const totalModules = courseModules.length;
-  const estHours = (totalModules * 1.5).toFixed(1);
 
   // Ordenar módulos uma vez
   const sortedModules = courseModules.sort(
@@ -124,14 +122,6 @@ export default async function CoursePage({
                   <BookOpen size={20} />
                   <span>
                     {totalModules} {tCourse('modules')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={20} />
-                  <span>
-                    {tCourse('estimated', {
-                      hours: estHours,
-                    })}
                   </span>
                 </div>
               </div>

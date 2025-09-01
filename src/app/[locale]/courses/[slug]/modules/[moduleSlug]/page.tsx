@@ -10,7 +10,6 @@ import ModuleProgressBar from '@/components/ModuleProgressBar';
 import ModuleLessonsGrid from '@/components/ModuleLessonsGrid';
 import {
   ArrowLeft,
-  Clock,
   ChevronRight,
   ChevronLeft,
   PlayCircle,
@@ -120,10 +119,8 @@ export default async function ModulePage({
       tr => tr.locale === locale
     ) ?? moduleData.translations[0];
 
-  // Estimativas
+  // Total de aulas
   const totalLessons = lessons.length;
-  const estMinutes = totalLessons * 15;
-  const estHours = (estMinutes / 60).toFixed(1);
 
   // Ordenar aulas uma vez
   const sortedLessons = lessons.sort(
@@ -194,14 +191,6 @@ export default async function ModulePage({
                   <Video size={20} />
                   <span>
                     {totalLessons} {tModule('videoLessons')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={20} />
-                  <span>
-                    {tModule('estimated', {
-                      hours: estHours,
-                    })}
                   </span>
                 </div>
               </div>

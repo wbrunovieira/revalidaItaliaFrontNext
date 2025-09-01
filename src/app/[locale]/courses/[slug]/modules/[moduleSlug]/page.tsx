@@ -6,6 +6,8 @@ import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import LessonCard from '@/components/LessonCard';
+import ModuleProgressBar from '@/components/ModuleProgressBar';
+import ModuleLessonsGrid from '@/components/ModuleLessonsGrid';
 import {
   ArrowLeft,
   Clock,
@@ -207,6 +209,16 @@ export default async function ModulePage({
           </div>
         </div>
 
+        {/* Module Progress Bar */}
+        <div className="px-6 pb-8">
+          <div className="max-w-4xl">
+            <ModuleProgressBar 
+              moduleId={moduleData.id}
+              totalLessons={totalLessons}
+            />
+          </div>
+        </div>
+
         {/* Lista de aulas */}
         <div className="px-6 pb-8">
           <div className="flex items-center gap-4 mb-6">
@@ -218,20 +230,13 @@ export default async function ModulePage({
           <hr className="border-t-2 border-secondary w-32 mb-8" />
 
           {sortedLessons.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {sortedLessons.map((lesson, index) => (
-                <LessonCard
-                  key={lesson.id}
-                  lesson={lesson}
-                  courseSlug={slug}
-                  moduleSlug={moduleSlug}
-                  locale={locale}
-                  index={index}
-                  totalLessons={totalLessons}
-                  isCompleted={false}
-                />
-              ))}
-            </div>
+            <ModuleLessonsGrid
+              lessons={sortedLessons}
+              moduleId={moduleData.id}
+              courseSlug={slug}
+              moduleSlug={moduleSlug}
+              locale={locale}
+            />
           ) : (
             <div className="text-center py-12">
               <PlayCircle

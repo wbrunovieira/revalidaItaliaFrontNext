@@ -939,7 +939,19 @@
     "clickToWatch": "Clique para assistir",
     "watchFirstVideo": "Assistir Primeira Aula",
     "startLesson": "Iniciar aula",
-    "reviewLesson": "Revisar aula"
+    "reviewLesson": "Revisar aula",
+    "progress": "Progresso do Módulo",
+    "lastAccess": "Último acesso",
+    "notStarted": "Não iniciado",
+    "completedLessons": "Aulas Concluídas",
+    "remainingLessons": "Aulas Restantes",
+    "completed": "Concluído",
+    "overallProgress": "Progresso Geral",
+    "lessons": "aulas",
+    "moduleCompleted": "Módulo Concluído!",
+    "completedOn": "Concluído em",
+    "motivationSingular": "Ótimo trabalho! Falta apenas 1 aula para concluir este módulo!",
+    "motivationPlural": "Continue assim! Faltam apenas {count} aulas para concluir o módulo."
   },
   "SearchInput": {
     "placeholder": "Buscar curso",

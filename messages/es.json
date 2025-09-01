@@ -927,7 +927,19 @@
     "clickToWatch": "Haz clic para ver",
     "watchFirstVideo": "Ver Primera Lección",
     "startLesson": "Iniciar lección",
-    "reviewLesson": "Revisar lección"
+    "reviewLesson": "Revisar lección",
+    "progress": "Progreso del Módulo",
+    "lastAccess": "Último acceso",
+    "notStarted": "No iniciado",
+    "completedLessons": "Lecciones Completadas",
+    "remainingLessons": "Lecciones Restantes",
+    "completed": "Completado",
+    "overallProgress": "Progreso General",
+    "lessons": "lecciones",
+    "moduleCompleted": "¡Módulo Completado!",
+    "completedOn": "Completado el",
+    "motivationSingular": "¡Excelente trabajo! Solo falta 1 lección para completar este módulo!",
+    "motivationPlural": "¡Sigue así! Solo faltan {count} lecciones para completar el módulo."
   },
   "SearchInput": {
     "placeholder": "Buscar curso",

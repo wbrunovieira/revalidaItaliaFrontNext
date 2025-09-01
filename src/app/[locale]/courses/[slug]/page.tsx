@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   BookOpen,
   Clock,
+  PlayCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -208,7 +209,7 @@ export default async function CoursePage({
                   {/* Efeito de shine/sweep */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700" />
 
-                  <Play
+                  <PlayCircle
                     size={24}
                     className="relative z-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
                   />

@@ -1622,7 +1622,10 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzado"
   },
-  "startCourse": "Iniciar curso"
+  "startCourse": "Iniciar curso",
+  "completed": "Completado",
+  "continue": "Continuar",
+  "lessons": "lecciones"
 },
 "Admin": {
   "title": "Panel Administrativo",

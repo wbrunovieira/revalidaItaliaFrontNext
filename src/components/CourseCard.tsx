@@ -1,7 +1,7 @@
 // src/components/CourseCard.tsx
 "use client";
 
-import { BookOpen, Layers, Clock } from 'lucide-react';
+import { BookOpen, Layers, CheckCircle, PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -13,18 +13,21 @@ interface Translation {
   description: string;
 }
 
-interface Module {
-  id: string;
-  title: string;
-  description?: string;
+interface CourseProgress {
+  completedModules: number;
+  totalModules: number;
+  completedLessons: number;
+  totalLessons: number;
+  percentage: number;
 }
 
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
-  modules?: Module[];
+  moduleCount: number;
   translations?: Translation[];
+  progress?: CourseProgress;
 }
 
 interface CourseCardProps {
@@ -42,13 +45,16 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
   const translation = list.find(tr => tr.locale === locale) ?? 
                      list[0] ?? { title: '', description: '' };
 
-  // Mock progress data - remover quando vier da API
-  const mockProgress = [15, 45, 72, 28, 89, 5][index % 6];
-  const isStarted = mockProgress > 0;
+  // Real progress data from API
+  const progressPercentage = course.progress?.percentage || 0;
+  const isStarted = progressPercentage > 0;
+  const isCompleted = progressPercentage === 100;
 
-  // Dados do curso
-  const modulesCount = course.modules?.length || (3 + (index % 8)); // Mock determinístico baseado no index
-  const estimatedHours = modulesCount * 2; // Estimativa de 2 horas por módulo
+  // Real course data from API
+  const modulesCount = course.moduleCount || 0;
+  const completedModules = course.progress?.completedModules || 0;
+  const totalLessons = course.progress?.totalLessons || 0;
+  const completedLessons = course.progress?.completedLessons || 0;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
@@ -102,12 +108,16 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
           backgroundPosition: '0 0, 12px 12px, 5px 5px'
         }}
       >
-        {/* Linha de progresso real com pulse */}
+        {/* Progress line with real data */}
         {isStarted ? (
           <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-1000 ease-out group-hover:animate-pulse"
-              style={{ width: `${mockProgress}%` }}
+              className={`h-full transition-all duration-1000 ease-out group-hover:animate-pulse ${
+                isCompleted 
+                  ? 'bg-gradient-to-r from-green-600 to-green-500' 
+                  : 'bg-gradient-to-r from-primary to-secondary'
+              }`}
+              style={{ width: `${progressPercentage}%` }}
             >
               <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
             </div>
@@ -141,10 +151,17 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
             }}
           ></div>
 
-          {/* Ícone de curso no canto */}
+          {/* Course icon or completion badge */}
           <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
             <BookOpen size={20} className="text-primary" />
           </div>
+          
+          {/* Completion badge */}
+          {isCompleted && (
+            <div className="absolute top-4 right-4 z-20 bg-green-500 rounded-full p-2 shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+              <CheckCircle className="w-5 h-5 text-white" />
+            </div>
+          )}
         </div>
 
         {/* Conteúdo do card */}
@@ -186,21 +203,27 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
 
           {/* Estatísticas e progresso */}
           <div className="space-y-3 relative z-10">
-            {/* Estatísticas sempre visíveis */}
-            <div className="flex items-center gap-4">
+            {/* Real statistics */}
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-primary transition-colors duration-300">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-                  <Layers size={14} className="text-primary" />
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                  <Layers size={12} className="text-primary" />
                 </div>
-                <span className="font-medium">{modulesCount} {t('modules')}</span>
+                <span className="font-medium text-xs">
+                  {completedModules > 0 ? `${completedModules}/` : ''}{modulesCount} {t('modules')}
+                </span>
               </div>
               
-              <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-secondary transition-colors duration-300">
-                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
-                  <Clock size={14} className="text-secondary" />
+              {totalLessons > 0 && (
+                <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-secondary transition-colors duration-300">
+                  <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                    <PlayCircle size={12} className="text-secondary" />
+                  </div>
+                  <span className="font-medium text-xs">
+                    {completedLessons > 0 ? `${completedLessons}/` : ''}{totalLessons} {t('lessons')}
+                  </span>
                 </div>
-                <span className="font-medium">{estimatedHours}h</span>
-              </div>
+              )}
             </div>
 
             {/* Progresso e botão */}
@@ -209,22 +232,34 @@ export default function CourseCard({ course, locale, index }: CourseCardProps) {
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-700 group-hover:animate-pulse"
-                      style={{ width: `${mockProgress}%` }}
+                      className={`h-full rounded-full transition-all duration-700 group-hover:animate-pulse ${
+                        isCompleted 
+                          ? 'bg-gradient-to-r from-green-600 to-green-500' 
+                          : 'bg-gradient-to-r from-primary to-secondary'
+                      }`}
+                      style={{ width: `${progressPercentage}%` }}
                     >
                       <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
                     </div>
                   </div>
-                  <span className="text-primary font-medium text-xs group-hover:scale-110 transition-transform duration-300">
-                    {mockProgress}%
+                  <span className={`font-medium text-xs group-hover:scale-110 transition-transform duration-300 ${
+                    isCompleted ? 'text-green-600' : 'text-primary'
+                  }`}>
+                    {progressPercentage}%
                   </span>
                 </div>
               ) : (
                 <div></div>
               )}
               
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full group-hover:bg-secondary/10 group-hover:text-secondary transition-all duration-300 font-semibold">
-                {t('startCourse')}
+              <div className={`text-xs px-3 py-1.5 rounded-full transition-all duration-300 font-semibold ${
+                isCompleted 
+                  ? 'text-green-600 bg-green-100 group-hover:bg-green-200' 
+                  : isStarted
+                  ? 'text-secondary bg-secondary/10 group-hover:bg-secondary/20 group-hover:text-secondary'
+                  : 'text-gray-500 bg-gray-100 group-hover:bg-secondary/10 group-hover:text-secondary'
+              }`}>
+                {isCompleted ? t('completed') : isStarted ? t('continue') : t('startCourse')}
               </div>
             </div>
           </div>

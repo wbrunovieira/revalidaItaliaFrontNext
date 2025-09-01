@@ -19,11 +19,21 @@ interface Track {
   translations?: Translation[];
 }
 
+interface CourseProgress {
+  completedModules: number;
+  totalModules: number;
+  completedLessons: number;
+  totalLessons: number;
+  percentage: number;
+}
+
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  moduleCount: number;
   translations?: Translation[];
+  progress?: CourseProgress;
 }
 
 export function generateStaticParams(): {
@@ -32,11 +42,17 @@ export function generateStaticParams(): {
   return ['pt', 'it', 'es'].map(locale => ({ locale }));
 }
 
-async function fetchDataSafely<T>(url: string): Promise<T | null> {
+async function fetchDataSafely<T>(url: string, token?: string): Promise<T | null> {
   try {
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(url, {
       cache: 'no-store',
-      next: { revalidate: 0 }
+      next: { revalidate: 0 },
+      headers
     });
     
     if (!response.ok) {
@@ -70,7 +86,7 @@ export default async function IndexPage({
   // Try to fetch data on server, but don't fail if API is down
   const [tracks, courses] = await Promise.all([
     fetchDataSafely<Track[]>(`${apiUrl}/api/v1/tracks`),
-    fetchDataSafely<Course[]>(`${apiUrl}/api/v1/courses`)
+    fetchDataSafely<Course[]>(`${apiUrl}/api/v1/courses-progress`, token)
   ]);
 
   return (

@@ -1,7 +1,7 @@
 // src/components/TrackCard.tsx
 "use client";
 
-import { Route, BookOpen, Clock, TrendingUp } from 'lucide-react';
+import { Route, BookOpen, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -37,11 +37,10 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                      list[0] ?? { title: '', description: '' };
 
   // Dados da trilha
-  const coursesCount = track.courses?.length || 0;
-  const estimatedHours = coursesCount * 8; // Estimativa de horas
+  const coursesCount = track.courses?.length || 0; // Real data from API
   const isPopular = coursesCount > 5;
 
-  // Mock progress data - remover quando vier da API
+  // Mock progress data - TODO: replace with real API data
   const mockProgress = [10, 35, 65, 25, 75, 0][index % 6];
   const isStarted = mockProgress > 0;
 
@@ -197,13 +196,6 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
                   <BookOpen size={14} className="text-secondary" />
                 </div>
                 <span className="font-medium">{coursesCount} {t('courses')}</span>
-              </div>
-              
-              <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-accent transition-colors duration-300">
-                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
-                  <Clock size={14} className="text-accent" />
-                </div>
-                <span className="font-medium">{estimatedHours}h</span>
               </div>
             </div>
 

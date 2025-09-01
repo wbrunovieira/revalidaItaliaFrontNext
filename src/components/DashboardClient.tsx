@@ -37,11 +37,21 @@ interface EnrichedTrack {
   translations?: Translation[];
 }
 
+interface CourseProgress {
+  completedModules: number;
+  totalModules: number;
+  completedLessons: number;
+  totalLessons: number;
+  percentage: number;
+}
+
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  moduleCount: number;
   translations?: Translation[];
+  progress?: CourseProgress;
 }
 
 // Fallback data for offline mode
@@ -98,7 +108,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const {
     data: courses,
     loading: coursesLoading,
-  } = useApi<Course[]>('/api/v1/courses', {
+  } = useApi<Course[]>('/api/v1/courses-progress', {
     fallbackData: initialCourses.length > 0 ? initialCourses : fallbackCourses,
     showToastOnError: false,
   });

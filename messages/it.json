@@ -1623,7 +1623,10 @@
     "intermediate": "Intermedio",
     "advanced": "Avanzato"
   },
-  "startCourse": "Inizia corso"
+  "startCourse": "Inizia corso",
+  "completed": "Completato",
+  "continue": "Continua",
+  "lessons": "lezioni"
 },
 "Admin": {
   "title": "Pannello Amministrativo",

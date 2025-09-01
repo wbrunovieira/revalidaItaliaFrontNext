@@ -979,7 +979,20 @@
   },
   "SearchInput": {
     "placeholder": "Buscar curso",
-    "iconAlt": "Ícone de busca"
+    "iconAlt": "Ícone de busca",
+    "search": "Buscar"
+  },
+  "Search": {
+    "title": "Busca de Cursos",
+    "backToHome": "Voltar para Início",
+    "searchingFor": "Buscando por",
+    "foundResults": "{count, plural, =0 {Nenhum curso encontrado} =1 {1 curso encontrado} other {# cursos encontrados}}",
+    "enterSearchTerm": "Digite um termo de busca para começar",
+    "searchError": "Erro ao buscar cursos",
+    "tryAgainLater": "Por favor, tente novamente mais tarde",
+    "noResults": "Nenhum curso encontrado",
+    "tryDifferentSearch": "Tente buscar por outro termo",
+    "startSearching": "Use o campo de busca acima para encontrar cursos"
   },
   "LogoutButton": {
     "logout": "Sair",

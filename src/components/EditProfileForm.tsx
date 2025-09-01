@@ -319,10 +319,14 @@ export default function EditProfileForm({
         ?.split('=')[1];
 
       // Preparar dados para envio (apenas campos alterados)
-      const updateData: UpdateData = {};
+      const updateData: any = {};
       
+      // fullName ao invés de name
       if (data.name !== userData.name)
-        updateData.name = data.name;
+        updateData.fullName = data.name;
+      
+      // email (se foi alterado - não implementado no form ainda)
+      // nationalId (CPF) - não pode ser alterado
       
       // Formatar telefone com +
       const formattedPhone = phoneValue ? `+${phoneValue}` : '';
@@ -337,30 +341,42 @@ export default function EditProfileForm({
       
       // Adicionar URL da imagem se foi alterada
       if (uploadedImageUrl !== userData.profileImageUrl) {
-        updateData.profileImageUrl = uploadedImageUrl || '';
+        updateData.profileImageUrl = uploadedImageUrl || null;
       }
+      
+      // Bio pode ser null para limpar
       if (data.bio !== (userData.bio || '')) {
-        updateData.bio = data.bio;
+        updateData.bio = data.bio || null;
       }
+      
+      // Profession pode ser null para limpar
       if (data.profession !== (userData.profession || '')) {
-        updateData.profession = data.profession;
+        updateData.profession = data.profession || null;
       }
+      
+      // Specialization pode ser null para limpar
       if (data.specialization !== (userData.specialization || '')) {
-        updateData.specialization = data.specialization;
+        updateData.specialization = data.specialization || null;
       }
+      
+      // Community consent
       if (communityConsent !== userData.communityProfileConsent) {
         updateData.communityProfileConsent = communityConsent;
       }
       
-      // Adicionar URL do currículo se foi alterada
+      // Adicionar URL do currículo - pode ser null para limpar
       if (curriculumUrl !== userData.curriculumUrl) {
-        updateData.curriculumUrl = curriculumUrl || '';
+        updateData.curriculumUrl = curriculumUrl;
       }
       
-      // Adicionar cidadania europeia se foi alterada
+      // Adicionar cidadania europeia - preserva null se não foi definido
       if (hasEuropeanCitizenship !== userData.hasEuropeanCitizenship) {
         updateData.hasEuropeanCitizenship = hasEuropeanCitizenship;
       }
+      
+      // Adicionar idioma preferido e timezone se implementados no futuro
+      // updateData.preferredLanguage = locale;
+      // updateData.timezone = userData.timezone;
 
       // Se não há alterações
       if (Object.keys(updateData).length === 0) {
@@ -419,14 +435,28 @@ export default function EditProfileForm({
         throw new Error(responseData.message || t('error.updateFailed'));
       }
 
-      // Sucesso
+      // Sucesso - a resposta contém os dados atualizados do usuário
       toast({
         title: t('updateSuccess'),
         description: t('updateSuccessDescription'),
       });
       
       // Atualizar o Auth Store com os novos dados do usuário
-      updateUser(updateData);
+      // A API retorna { identity: {...}, profile: {...} }
+      if (responseData.profile) {
+        const updatedUserData = {
+          ...updateData,
+          // Mapear fullName de volta para name no store
+          name: responseData.profile.fullName || updateData.fullName,
+          // Adicionar outros campos retornados pela API
+          email: responseData.identity?.email || userData.email,
+          nationalId: responseData.profile.nationalId || userData.nationalId,
+        };
+        updateUser(updatedUserData);
+      } else {
+        // Fallback caso a API não retorne os dados esperados
+        updateUser(updateData);
+      }
       
       onSuccess();
       

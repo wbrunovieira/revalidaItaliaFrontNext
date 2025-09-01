@@ -15,9 +15,19 @@ import {
   Clock,
   Copy,
   Check,
+  Phone,
+  MapPin,
+  FileText,
+  Globe,
+  Languages,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Briefcase,
+  GraduationCap,
 } from 'lucide-react';
 
-// Interfaces permanecem as mesmas
+// Interface expandida com todos os campos
 interface UserDetails {
   identityId: string;
   fullName: string;
@@ -31,10 +41,43 @@ interface UserDetails {
   emailVerified?: boolean;
   lastLogin?: string | null;
   phone?: string | null;
+  birthDate?: string | null;
   profession?: string | null;
   profileImageUrl?: string | null;
   specialization?: string | null;
+  curriculumUrl?: string | null;
+  hasEuropeanCitizenship?: boolean | null;
+  preferredLanguage?: string;
+  timezone?: string;
+  communityProfileConsent?: boolean;
+  communityProfileConsentDate?: string | null;
+  failedLoginAttempts?: number;
+  lockedUntil?: string | null;
+  effectiveFrom?: string;
+  effectiveUntil?: string | null;
   isActive?: boolean;
+  // Autorização
+  customPermissions?: Array<{
+    resource: string;
+    action: string;
+  }>;
+  restrictions?: Array<{
+    resource: string;
+    reason: string;
+  }>;
+  // Endereços
+  addresses?: Array<{
+    id: string;
+    street: string;
+    number: string;
+    complement?: string | null;
+    district?: string | null;
+    city: string;
+    state?: string | null;
+    country: string;
+    postalCode: string;
+    isPrimary: boolean;
+  }>;
 }
 
 interface UserViewModalProps {
@@ -116,19 +159,33 @@ export default function UserViewModal({
             identityId: data.user.id,
             fullName: data.user.name,
             email: data.user.email,
-            nationalId: data.user.nationalId,
+            nationalId: data.user.nationalId || data.user.cpf,
             role: data.user.role,
             createdAt: data.user.createdAt,
             updatedAt: data.user.updatedAt,
-            // Campos opcionais - adicionar quando disponíveis no backend
+            // Campos opcionais expandidos
             bio: data.user.bio,
             emailVerified: data.user.emailVerified,
             lastLogin: data.user.lastLogin,
             phone: data.user.phone,
+            birthDate: data.user.birthDate,
             profession: data.user.profession,
             profileImageUrl: data.user.profileImageUrl,
             specialization: data.user.specialization,
+            curriculumUrl: data.user.curriculumUrl,
+            hasEuropeanCitizenship: data.user.hasEuropeanCitizenship,
+            preferredLanguage: data.user.preferredLanguage,
+            timezone: data.user.timezone,
+            communityProfileConsent: data.user.communityProfileConsent,
+            communityProfileConsentDate: data.user.communityProfileConsentDate,
+            failedLoginAttempts: data.user.failedLoginAttempts,
+            lockedUntil: data.user.lockedUntil,
+            effectiveFrom: data.user.effectiveFrom,
+            effectiveUntil: data.user.effectiveUntil,
             isActive: data.user.isActive,
+            customPermissions: data.user.customPermissions,
+            restrictions: data.user.restrictions,
+            addresses: data.user.addresses,
           });
         }
       } catch (error) {
@@ -243,9 +300,20 @@ export default function UserViewModal({
           ) : user ? (
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
-                  {user.role === 'admin' ? (
+                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center overflow-hidden">
+                  {user.profileImageUrl ? (
+                    <img 
+                      src={user.profileImageUrl} 
+                      alt={user.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : user.role === 'admin' ? (
                     <Shield
+                      size={28}
+                      className="text-white"
+                    />
+                  ) : user.role === 'tutor' ? (
+                    <GraduationCap
                       size={28}
                       className="text-white"
                     />
@@ -264,11 +332,15 @@ export default function UserViewModal({
                     className={`inline-flex items-center px-3 py-1 text-sm rounded-full ${
                       user.role === 'admin'
                         ? 'bg-red-900/30 text-red-400 border border-red-800'
+                        : user.role === 'tutor'
+                        ? 'bg-purple-900/30 text-purple-400 border border-purple-800'
                         : 'bg-blue-900/30 text-blue-400 border border-blue-800'
                     }`}
                   >
                     {user.role === 'admin'
                       ? t('roleAdmin')
+                      : user.role === 'tutor'
+                      ? t('roleTutor')
                       : t('roleStudent')}
                   </span>
                 </div>
@@ -418,71 +490,341 @@ export default function UserViewModal({
                   )}
                 </div>
                 
-                {/* Campos adicionais */}
-                {(user.phone || user.profession || user.specialization || user.bio) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {user.phone && (
+                {/* Seção de Informações Pessoais */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <User size={20} className="text-secondary" />
+                    {t('sections.personalInfo')}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                          <Mail size={20} className="text-secondary" />
-                        </div>
+                        <Phone size={20} className="text-secondary" />
                         <div>
-                          <p className="text-sm text-gray-400">
-                            {t('fields.phone')}
+                          <p className="text-sm text-gray-400">{t('fields.phone')}</p>
+                          <p className="text-white">{user.phone || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar size={20} className="text-secondary" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t('fields.birthDate')}</p>
+                          <p className="text-white">
+                            {user.birthDate ? new Date(user.birthDate).toLocaleDateString('pt-BR') : '-'}
                           </p>
-                          <p className="text-white">{user.phone}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <Briefcase size={20} className="text-secondary" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t('fields.profession')}</p>
+                          <p className="text-white">{user.profession || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <GraduationCap size={20} className="text-secondary" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t('fields.specialization')}</p>
+                          <p className="text-white">{user.specialization || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
+                    <p className="text-sm text-gray-400 mb-2">{t('fields.bio')}</p>
+                    <p className="text-white whitespace-pre-wrap">{user.bio || '-'}</p>
+                  </div>
+                </div>
+
+                {/* Seção de Documentos e Cidadania */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FileText size={20} className="text-secondary" />
+                    {t('sections.documents')}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText size={20} className="text-secondary" />
+                          <div>
+                            <p className="text-sm text-gray-400">{t('fields.curriculum')}</p>
+                            {user.curriculumUrl ? (
+                              <a 
+                                href={user.curriculumUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-secondary hover:text-secondary/80 underline"
+                              >
+                                {t('viewDocument')}
+                              </a>
+                            ) : (
+                              <p className="text-gray-400">-</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <Globe size={20} className="text-secondary" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t('fields.europeanCitizenship')}</p>
+                          <div className="flex items-center gap-2">
+                            {user.hasEuropeanCitizenship === true ? (
+                              <>
+                                <CheckCircle size={16} className="text-green-400" />
+                                <p className="text-green-400">{t('yes')}</p>
+                              </>
+                            ) : user.hasEuropeanCitizenship === false ? (
+                              <>
+                                <XCircle size={16} className="text-red-400" />
+                                <p className="text-red-400">{t('no')}</p>
+                              </>
+                            ) : (
+                              <p className="text-gray-400">-</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção de Configurações e Preferências */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Languages size={20} className="text-secondary" />
+                    {t('sections.preferences')}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {user.preferredLanguage && (
+                      <div className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <Languages size={20} className="text-secondary" />
+                          <div>
+                            <p className="text-sm text-gray-400">{t('fields.language')}</p>
+                            <p className="text-white">{user.preferredLanguage}</p>
+                          </div>
                         </div>
                       </div>
                     )}
                     
-                    {user.profession && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                          <User size={20} className="text-secondary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('fields.profession')}
-                          </p>
-                          <p className="text-white">{user.profession}</p>
+                    {user.timezone && (
+                      <div className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <Clock size={20} className="text-secondary" />
+                          <div>
+                            <p className="text-sm text-gray-400">{t('fields.timezone')}</p>
+                            <p className="text-white">{user.timezone}</p>
+                          </div>
                         </div>
                       </div>
                     )}
                     
-                    {user.specialization && (
+                    <div className="bg-gray-700/50 rounded-lg p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                          <Shield size={20} className="text-secondary" />
-                        </div>
+                        <Shield size={20} className="text-secondary" />
                         <div>
-                          <p className="text-sm text-gray-400">
-                            {t('fields.specialization')}
-                          </p>
-                          <p className="text-white">{user.specialization}</p>
+                          <p className="text-sm text-gray-400">{t('fields.communityConsent')}</p>
+                          <div className="flex items-center gap-2">
+                            {user.communityProfileConsent ? (
+                              <>
+                                <CheckCircle size={16} className="text-green-400" />
+                                <p className="text-green-400">{t('consented')}</p>
+                              </>
+                            ) : (
+                              <>
+                                <XCircle size={16} className="text-gray-400" />
+                                <p className="text-gray-400">{t('notConsented')}</p>
+                              </>
+                            )}
+                          </div>
+                          {user.communityProfileConsentDate && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatDate(user.communityProfileConsentDate)}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção de Segurança */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Shield size={20} className="text-secondary" />
+                    {t('sections.security')}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        {user.emailVerified ? (
+                          <CheckCircle size={20} className="text-green-400" />
+                        ) : (
+                          <AlertTriangle size={20} className="text-yellow-400" />
+                        )}
+                        <div>
+                          <p className="text-sm text-gray-400">{t('fields.emailVerified')}</p>
+                          <p className={user.emailVerified ? "text-green-400" : "text-yellow-400"}>
+                            {user.emailVerified ? t('verified') : t('notVerified')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     
                     {user.lastLogin && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                      <div className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
                           <Clock size={20} className="text-secondary" />
+                          <div>
+                            <p className="text-sm text-gray-400">{t('fields.lastLogin')}</p>
+                            <p className="text-white">{formatDate(user.lastLogin)}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-400">
-                            {t('fields.lastLogin')}
-                          </p>
-                          <p className="text-white">{formatDate(user.lastLogin)}</p>
+                      </div>
+                    )}
+                    
+                    {user.failedLoginAttempts !== undefined && user.failedLoginAttempts > 0 && (
+                      <div className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle size={20} className="text-yellow-400" />
+                          <div>
+                            <p className="text-sm text-gray-400">{t('fields.failedAttempts')}</p>
+                            <p className="text-yellow-400">{user.failedLoginAttempts}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {user.lockedUntil && (
+                      <div className="bg-red-900/30 rounded-lg p-4 border border-red-800">
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle size={20} className="text-red-400" />
+                          <div>
+                            <p className="text-sm text-red-400">{t('fields.accountLocked')}</p>
+                            <p className="text-white">{formatDate(user.lockedUntil)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Seção de Autorização */}
+                {(user.effectiveFrom || user.effectiveUntil || user.customPermissions?.length || user.restrictions?.length) && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <Shield size={20} className="text-secondary" />
+                      {t('sections.authorization')}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {user.effectiveFrom && (
+                        <div className="bg-gray-700/50 rounded-lg p-4">
+                          <div className="flex items-center gap-3">
+                            <Calendar size={20} className="text-secondary" />
+                            <div>
+                              <p className="text-sm text-gray-400">{t('fields.effectiveFrom')}</p>
+                              <p className="text-white">{formatDate(user.effectiveFrom)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {user.effectiveUntil && (
+                        <div className="bg-gray-700/50 rounded-lg p-4">
+                          <div className="flex items-center gap-3">
+                            <Calendar size={20} className="text-secondary" />
+                            <div>
+                              <p className="text-sm text-gray-400">{t('fields.effectiveUntil')}</p>
+                              <p className="text-white">{formatDate(user.effectiveUntil)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {user.customPermissions && user.customPermissions.length > 0 && (
+                      <div className="mt-4 bg-gray-700/50 rounded-lg p-4">
+                        <p className="text-sm text-gray-400 mb-2">{t('fields.customPermissions')}</p>
+                        <div className="space-y-2">
+                          {user.customPermissions.map((perm, index) => (
+                            <div key={index} className="flex items-center gap-2 text-green-400">
+                              <CheckCircle size={16} />
+                              <span className="text-sm">{perm.resource}: {perm.action}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {user.restrictions && user.restrictions.length > 0 && (
+                      <div className="mt-4 bg-red-900/30 rounded-lg p-4 border border-red-800">
+                        <p className="text-sm text-red-400 mb-2">{t('fields.restrictions')}</p>
+                        <div className="space-y-2">
+                          {user.restrictions.map((restriction, index) => (
+                            <div key={index} className="text-red-300">
+                              <div className="flex items-start gap-2">
+                                <XCircle size={16} className="text-red-400 mt-0.5" />
+                                <div>
+                                  <span className="text-sm font-medium">{restriction.resource}</span>
+                                  <p className="text-xs text-red-300/80">{restriction.reason}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
                   </div>
                 )}
-                
-                {user.bio && (
-                  <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400 mb-2">{t('fields.bio')}</p>
-                    <p className="text-white">{user.bio}</p>
+
+                {/* Seção de Endereços */}
+                {user.addresses && user.addresses.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <MapPin size={20} className="text-secondary" />
+                      {t('sections.addresses')} ({user.addresses.length})
+                    </h4>
+                    <div className="space-y-3">
+                      {user.addresses.map((address) => (
+                        <div key={address.id} className="bg-gray-700/50 rounded-lg p-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-white font-medium">
+                                {address.street}, {address.number}
+                                {address.complement && ` - ${address.complement}`}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {address.district && `${address.district}, `}
+                                {address.city}
+                                {address.state && ` - ${address.state}`}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {address.country} - {address.postalCode}
+                              </p>
+                            </div>
+                            {address.isPrimary && (
+                              <span className="px-2 py-1 text-xs bg-secondary/20 text-secondary rounded">
+                                {t('primaryAddress')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

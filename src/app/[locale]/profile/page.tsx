@@ -62,7 +62,7 @@ interface UserData {
   communityProfileConsent: boolean;
   communityProfileConsentDate?: string | null;
   curriculumUrl?: string | null;
-  hasEuropeanCitizenship?: boolean;
+  hasEuropeanCitizenship?: boolean | null;
   
   // Authorization fields
   role: 'student' | 'tutor' | 'admin';
@@ -146,6 +146,8 @@ export default async function ProfilePage({
     preferredLanguage: userData.preferredLanguage ?? locale,
     timezone: userData.timezone ?? 'UTC',
     communityProfileConsent: userData.communityProfileConsent ?? false,
+    curriculumUrl: userData.curriculumUrl ?? null,
+    hasEuropeanCitizenship: userData.hasEuropeanCitizenship ?? null,
     customPermissions: userData.customPermissions ?? [],
     restrictions: userData.restrictions ?? [],
     effectiveFrom: userData.effectiveFrom ?? new Date().toISOString(),

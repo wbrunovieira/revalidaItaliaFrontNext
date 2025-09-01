@@ -22,6 +22,9 @@ import {
   CheckCircle,
   BookOpen,
   Star,
+  FileText,
+  Globe,
+  Download,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -75,6 +78,8 @@ interface UserData {
   timezone: string;
   communityProfileConsent: boolean;
   communityProfileConsentDate?: string | null;
+  curriculumUrl?: string | null;
+  hasEuropeanCitizenship?: boolean | null;
   
   // Authorization fields
   role: 'student' | 'tutor' | 'admin';
@@ -440,6 +445,51 @@ export default function ProfileContent({
                             <p className="font-medium">{userData.specialization || '-'}</p>
                           </div>
                         </div>
+                        
+                        {/* Currículo */}
+                        <div className="flex items-center gap-3 text-white">
+                          <FileText size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('curriculum') || 'Curriculum'}</p>
+                            {userData.curriculumUrl ? (
+                              <a 
+                                href={userData.curriculumUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-secondary hover:text-secondary/80 inline-flex items-center gap-2 transition-colors"
+                              >
+                                <span>{t('viewCurriculum') || 'View CV'}</span>
+                                <Download size={14} />
+                              </a>
+                            ) : (
+                              <p className="font-medium">-</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Cidadania Europeia */}
+                        <div className="flex items-center gap-3 text-white">
+                          <Globe size={18} className="text-gray-400" />
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">{t('hasEuropeanCitizenship')}</p>
+                            <div className="flex items-center gap-2">
+                              {userData.hasEuropeanCitizenship === true ? (
+                                <>
+                                  <CheckCircle size={16} className="text-green-400" />
+                                  <p className="font-medium text-green-400">{t('yes')}</p>
+                                </>
+                              ) : userData.hasEuropeanCitizenship === false ? (
+                                <>
+                                  <X size={16} className="text-red-400" />
+                                  <p className="font-medium text-red-400">{t('no')}</p>
+                                </>
+                              ) : (
+                                <p className="font-medium text-gray-400">-</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
                         {userData.bio && (
                           <div className="flex items-start gap-3 text-white">
                             <User size={18} className="text-gray-400 mt-1" />

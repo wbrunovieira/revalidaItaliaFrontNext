@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   BookOpen,
   Clock,
-  Play,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -133,10 +132,6 @@ export default async function CoursePage({
                       hours: estHours,
                     })}
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Play size={20} />
-                  <span>{tCourse('level.beginner')}</span>
                 </div>
               </div>
             </div>

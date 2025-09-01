@@ -1214,7 +1214,19 @@
     "question": "Pregunta",
     "imageContent": "Contenido de imagen",
     "answerType": "Tipo de respuesta",
-    "studyFlashcards": "Estudiar flashcards"
+    "studyFlashcards": "Estudiar flashcards",
+    "markAsComplete": "Marcar como completada",
+    "markAsIncomplete": "Desmarcar como completada",
+    "lessonCompleted": "¡Lección completada!",
+    "lessonCompletedDescription": "Has completado esta lección con éxito.",
+    "lessonMarkedIncomplete": "Lección desmarcada",
+    "lessonMarkedIncompleteDescription": "La lección se ha marcado como no completada.",
+    "lessonCompletedStatus": "Lección completada",
+    "updating": "Actualizando...",
+    "error": "Error",
+    "notAuthenticated": "Necesitas estar autenticado",
+    "completionError": "Error al actualizar el estado de la lección",
+    "autoCompleteHint": "La lección se marcará como completada automáticamente cuando hayas visto el 90% del video ({progress}% visto)"
   },
   "LessonComments": {
     "title": "Comentarios",

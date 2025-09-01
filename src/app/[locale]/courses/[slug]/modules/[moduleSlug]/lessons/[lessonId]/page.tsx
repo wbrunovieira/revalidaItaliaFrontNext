@@ -12,6 +12,8 @@ import LessonComments from '@/components/LessonComments';
 import LessonAccessTracker from '@/components/LessonAccessTracker';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import CollapsibleAssessments from '@/components/CollapsibleAssessments';
+import LessonCompletionButton from '@/components/LessonCompletionButton';
+import ModuleLessonsList from '@/components/ModuleLessonsList';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -485,6 +487,16 @@ export default async function LessonPage({
                   {lt.description}
                 </p>
               </div>
+              
+              {/* Lesson Completion Button */}
+              <div className="mt-4">
+                <LessonCompletionButton
+                  lessonId={lesson.id}
+                  courseId={course.id}
+                  moduleId={moduleFound.id}
+                  hasVideo={!!(lesson.video?.providerVideoId || pandaData?.video_external_id)}
+                />
+              </div>
             </div>
 
             {/* Navegação Anterior/Próxima */}
@@ -583,71 +595,14 @@ export default async function LessonPage({
             )}
 
             {/* Lista de Aulas do Módulo */}
-            <div className="mt-12">
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <div className="p-2 bg-secondary/20 rounded-lg">
-                      <BookOpen
-                        size={20}
-                        className="text-secondary"
-                      />
-                    </div>
-                    {tLesson('moduleLessons')}
-                  </h4>
-                  <span className="text-xs text-gray-500">
-                    {sorted.length} {tLesson('lessons')}
-                  </span>
-                </div>
-                <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
-              </div>
-              <div className="bg-primary/20 rounded-lg p-2 max-h-80 overflow-y-auto border border-secondary/20">
-                <ul className="space-y-1">
-                  {sorted.map((l, i) => {
-                    const isCurrentLesson =
-                      l.id === lessonId;
-                    const lessonTranslation =
-                      l.translations.find(
-                        t => t.locale === locale
-                      );
-                    return (
-                      <li key={l.id}>
-                        <Link
-                          href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${l.id}`}
-                          className={`
-                            group flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200
-                            ${
-                              isCurrentLesson
-                                ? 'bg-accent-light text-white shadow-sm'
-                                : 'text-gray-400 hover:bg-primary/40 hover:text-white'
-                            }
-                          `}
-                        >
-                          <div
-                            className={`
-                            w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-                            ${
-                              isCurrentLesson
-                                ? 'bg-white/20'
-                                : 'bg-primary/50 group-hover:bg-secondary/30'
-                            }
-                          `}
-                          >
-                            {i + 1}
-                          </div>
-                          <span className="flex-1 truncate">
-                            {lessonTranslation?.title}
-                          </span>
-                          {isCurrentLesson && (
-                            <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-                          )}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
+            <ModuleLessonsList
+              lessons={sorted}
+              currentLessonId={lessonId}
+              moduleId={moduleFound.id}
+              courseSlug={slug}
+              moduleSlug={moduleSlug}
+              locale={locale}
+            />
               </aside>
             </div>
           ) : (
@@ -676,6 +631,31 @@ export default async function LessonPage({
                     <p className="text-gray-300 text-sm">
                       {tLesson('noVideo')}
                     </p>
+                  </div>
+                </div>
+
+                {/* Lesson info and completion */}
+                <div className="max-w-4xl mx-auto mb-8">
+                  <div className="bg-primary/30 rounded-lg p-6 border border-secondary/20">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="inline-flex items-center bg-accent-light text-white px-3 py-1 rounded-full text-xs font-bold">
+                        {tLesson('lessonNumber', { number: idx + 1 })}
+                      </div>
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-3">
+                      {lt.title}
+                    </h1>
+                    <p className="text-gray-400 mb-6 leading-relaxed">
+                      {lt.description}
+                    </p>
+                    
+                    {/* Lesson Completion Button */}
+                    <LessonCompletionButton
+                      lessonId={lesson.id}
+                      courseId={course.id}
+                      moduleId={moduleFound.id}
+                      hasVideo={false}
+                    />
                   </div>
                 </div>
 

@@ -138,6 +138,19 @@ export default function LessonVideoPlayer({
         }
       );
     }
+    
+    // Emit progress update event for completion button
+    window.dispatchEvent(
+      new CustomEvent('videoProgressUpdate', {
+        detail: {
+          lessonId,
+          courseId,
+          moduleId,
+          percentage: newProgress.percentage,
+          isComplete: newProgress.percentage >= 90,
+        },
+      })
+    );
   }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 
   const handleComplete = useCallback(async () => {
@@ -148,10 +161,20 @@ export default function LessonVideoPlayer({
       finalProgress: progress?.percentage || 0
     });
 
-    // Future implementation:
-    // - Send completion status to backend
-    // - Update UI to show lesson as completed
-    // - Trigger next lesson recommendation
+    // Emit event for lesson completion
+    if (progress && progress.percentage >= 90) {
+      window.dispatchEvent(
+        new CustomEvent('videoProgressUpdate', {
+          detail: {
+            lessonId,
+            courseId,
+            moduleId,
+            percentage: progress.percentage,
+            isComplete: true,
+          },
+        })
+      );
+    }
   }, [lessonId, courseId, moduleId, progress]);
 
   const handlePlay = useCallback(() => {

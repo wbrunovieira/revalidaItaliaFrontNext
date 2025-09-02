@@ -149,7 +149,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const isLoading = tracksLoading || coursesLoading;
 
   return (
-    <div className="flex-1 flex flex-col items-left justify-top bg-primary min-h-screen pl-4 pt-8">
+    <div className="flex-1 flex flex-col items-center bg-primary min-h-screen px-4 pt-8">
       <div className="w-full flex flex-col items-center">
         <h1 className="text-6xl font-bold text-white">{t('title')}</h1>
         {user?.name && (
@@ -164,24 +164,32 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       <SupportFloatingButton context={{ type: "GENERAL" }} />
 
       {/* User Progress Card */}
-      <div className="w-full max-w-6xl mt-8">
-        <UserProgressCard />
+      <div className="w-full flex justify-center mt-8 px-4">
+        <div className="w-full max-w-6xl">
+          <UserProgressCard />
+        </div>
       </div>
 
       {/* Continue Learning Section */}
-      <div className="w-full max-w-6xl mt-8">
-        <ContinueLearning />
+      <div className="w-full flex justify-center mt-8 px-4">
+        <div className="w-full max-w-6xl">
+          <ContinueLearning />
+        </div>
       </div>
 
       {/* Tracks Section */}
-      <div className="flex gap-8 items-center mt-8">
-        <Image src="/icons/trail.svg" alt={t('trails')} width={48} height={48} className="self-end" />
-        <h3 className="text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('trails')}</h3>
+      <div className="w-full flex flex-col items-center mt-8">
+        <div className="w-full max-w-6xl">
+          <div className="flex gap-4 sm:gap-8 items-center">
+            <Image src="/icons/trail.svg" alt={t('trails')} width={48} height={48} className="self-end" />
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('trails')}</h3>
+          </div>
+          <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
+        </div>
       </div>
-      <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
 
       {isLoading && !tracks ? (
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {[1, 2].map(i => (
             <div key={i} className="bg-gray-800/50 rounded-lg p-6 animate-pulse">
               <div className="h-48 bg-gray-700 rounded mb-4"></div>
@@ -191,7 +199,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
           ))}
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {enrichedTracks.map((track, index) => (
             <TrackCard key={track.id} track={track} locale={locale} index={index} />
           ))}
@@ -199,14 +207,18 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       )}
 
       {/* Courses Section */}
-      <div className="flex gap-8 items-center mt-16">
-        <BookOpen size={48} className="self-end text-white" />
-        <h3 className="text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('courses')}</h3>
+      <div className="w-full flex flex-col items-center mt-16">
+        <div className="w-full max-w-6xl">
+          <div className="flex gap-4 sm:gap-8 items-center">
+            <BookOpen size={48} className="self-end text-white" />
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('courses')}</h3>
+          </div>
+          <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
+        </div>
       </div>
-      <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
 
       {isLoading && !courses ? (
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl mb-12">
+        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="bg-gray-800/50 rounded-lg p-4 animate-pulse">
               <div className="h-32 bg-gray-700 rounded mb-4"></div>
@@ -216,7 +228,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
           ))}
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl mb-12">
+        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {courses?.map((course, index) => (
             <CourseCard key={course.id} course={course} locale={locale} index={index} />
           )) || []}

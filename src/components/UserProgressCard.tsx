@@ -5,24 +5,30 @@ import { useTranslations } from 'next-intl';
 import {
   TrendingUp,
   Target,
-  Award,
-  Flame,
   BookOpen,
-  Clock,
-  Calendar,
-  ChevronRight,
-  Zap,
-  Trophy,
+  GraduationCap,
+  PlayCircle,
+  Brain,
+  CheckCircle,
+  Activity,
 } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+
+interface CourseProgress {
+  id: string;
+  title: string;
+  slug: string;
+  progress: number;
+  completedLessons: number;
+  totalLessons: number;
+}
 
 interface UserProgress {
   overview: {
-    totalLearningTime: number;
-    currentStreak: number;
-    longestStreak: number;
-    lastActivityAt: string;
+    lastActivityAt?: string;
     memberSince: string;
+    daysActive: number;
   };
   coursesProgress: {
     totalCourses: number;
@@ -44,49 +50,81 @@ interface UserProgress {
       progress: number;
     };
   };
-  currentFocus?: {
-    continueLearning?: {
-      lessonId: string;
-      lessonTitle: string;
-      courseTitle: string;
-      moduleTitle: string;
-      videoProgress: number;
-      estimatedTimeToComplete: number;
-    };
-  };
-  weeklyActivity: {
-    targetMinutes: number;
-    completedMinutes: number;
-    daysActive: boolean[];
-    lessonsCompleted: number;
-    weeklyGoalProgress: number;
-  };
-  achievements: {
-    totalPoints: number;
-    level: number;
-    pointsToNextLevel: number;
-    recentBadges: Array<{
-      id: string;
-      title: string;
-      earnedAt: string;
-    }>;
-  };
   flashcardsStats: {
     totalAnswered: number;
     correctAnswers: number;
     accuracy: number;
-    streakDays: number;
     todayCompleted: boolean;
-    cardsToReview: number;
+    lastReviewDate?: string;
   };
+}
+
+// Componente de progresso circular
+function CircularProgress({ 
+  percentage, 
+  size = 60, 
+  strokeWidth = 4,
+  showLabel = true 
+}: { 
+  percentage: number; 
+  size?: number; 
+  strokeWidth?: number;
+  showLabel?: boolean;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          fill="none"
+          className="text-gray-700"
+        />
+        {/* Progress circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className={
+            percentage === 100 
+              ? "text-green-500 transition-all duration-500 ease-out" 
+              : percentage > 50 
+              ? "text-blue-500 transition-all duration-500 ease-out"
+              : "text-secondary transition-all duration-500 ease-out"
+          }
+          strokeLinecap="round"
+        />
+      </svg>
+      {showLabel && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-medium text-white">
+            {Math.round(percentage)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function UserProgressCard() {
   const t = useTranslations('UserProgress');
-  const router = useRouter();
   const params = useParams();
   const locale = params?.locale || 'pt';
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [enrolledCourses, setEnrolledCourses] = useState<CourseProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -103,16 +141,45 @@ export default function UserProgressCard() {
         }
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/api/v1/users/me/progress`, {
+        
+        // Fetch user progress
+        const progressResponse = await fetch(`${apiUrl}/api/v1/users/me/progress`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setProgress(data);
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          setProgress(progressData);
+        }
+
+        // Fetch courses with progress to get individual course data
+        const coursesResponse = await fetch(`${apiUrl}/api/v1/courses-progress`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (coursesResponse.ok) {
+          const coursesData = await coursesResponse.json();
+          // Filter only courses with progress > 0
+          const activeCourses = coursesData
+            .filter((course: any) => course.progress?.percentage > 0)
+            .map((course: any) => ({
+              id: course.id,
+              title: course.translations?.find((t: any) => t.locale === locale)?.title || course.slug,
+              slug: course.slug,
+              progress: course.progress?.percentage || 0,
+              completedLessons: course.progress?.completedLessons || 0,
+              totalLessons: course.progress?.totalLessons || 0,
+            }))
+            .sort((a: CourseProgress, b: CourseProgress) => b.progress - a.progress)
+            .slice(0, 4); // Show max 4 courses
+          
+          setEnrolledCourses(activeCourses);
         }
       } catch (error) {
         console.error('Error fetching user progress:', error);
@@ -122,15 +189,15 @@ export default function UserProgressCard() {
     };
 
     fetchProgress();
-  }, []);
+  }, [locale]);
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 animate-pulse">
-        <div className="h-8 bg-gray-700 rounded w-1/3 mb-4"></div>
+      <div className="bg-gray-800/50 rounded-xl p-6 animate-pulse border border-gray-700/50">
+        <div className="h-6 bg-gray-700 rounded w-1/3 mb-4"></div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-20 bg-gray-700 rounded"></div>
-          <div className="h-20 bg-gray-700 rounded"></div>
+          <div className="h-16 bg-gray-700 rounded"></div>
+          <div className="h-16 bg-gray-700 rounded"></div>
         </div>
       </div>
     );
@@ -140,237 +207,194 @@ export default function UserProgressCard() {
     return null;
   }
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
-  };
-
-  const getDayName = (index: number) => {
-    const days = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
-    return days[index];
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString(locale);
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 via-gray-850 to-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50">
-      {/* Header com gradiente */}
-      <div className="bg-gradient-to-r from-primary via-secondary to-accent p-6 relative overflow-hidden">
-        {/* Padrão decorativo */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-white/20 blur-xl"></div>
-          <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-white/20 blur-xl"></div>
-        </div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-6 h-6" />
-              {t('title')}
-            </h2>
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-              <Trophy className="w-4 h-4 text-yellow-300" />
-              <span className="text-white font-bold">
-                {t('level')} {progress.achievements.level}
-              </span>
-            </div>
-          </div>
-          <p className="text-white/80 text-sm">{t('subtitle')}</p>
+    <div className="bg-gray-800/30 rounded-xl p-4 sm:p-6 border border-gray-700/50">
+      {/* Header simples */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+        <h3 className="text-lg font-medium text-white flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-secondary" />
+          {t('title')}
+        </h3>
+        <div className="text-xs sm:text-sm text-gray-400 flex flex-col sm:flex-row gap-1 sm:gap-4">
+          <span>{t('memberSince')}: {formatDate(progress.overview.memberSince)}</span>
+          {progress.overview.lastActivityAt && (
+            <span>{t('lastActivity')}: {formatDate(progress.overview.lastActivityAt)}</span>
+          )}
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Estatísticas principais em grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Streak atual */}
-          <div className="bg-gradient-to-br from-orange-600/20 to-red-600/20 rounded-lg p-4 border border-orange-600/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Flame className="w-5 h-5 text-orange-400" />
-              <span className="text-xs text-gray-400">{t('currentStreak')}</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">
-                {progress.overview.currentStreak}
-              </span>
-              <span className="text-xs text-gray-400">{t('days')}</span>
-            </div>
-            {progress.overview.longestStreak > 0 && (
-              <div className="text-xs text-gray-500 mt-1">
-                {t('best')}: {progress.overview.longestStreak}
-              </div>
-            )}
+      {/* Estatísticas principais em grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-6">
+        {/* Dias ativos */}
+        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+            <Activity className="w-4 h-4 text-orange-400" />
+            <span className="text-xs text-gray-400">{t('daysActive')}</span>
           </div>
-
-          {/* Progresso médio */}
-          <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-lg p-4 border border-blue-600/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="w-5 h-5 text-blue-400" />
-              <span className="text-xs text-gray-400">{t('averageProgress')}</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">
-                {progress.coursesProgress.averageProgress}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-1.5 mt-2">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${progress.coursesProgress.averageProgress}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Tempo total de estudo */}
-          <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-lg p-4 border border-purple-600/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-purple-400" />
-              <span className="text-xs text-gray-400">{t('totalTime')}</span>
-            </div>
-            <div className="text-2xl font-bold text-white">
-              {formatTime(progress.overview.totalLearningTime)}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {t('thisWeek')}: {formatTime(progress.weeklyActivity.completedMinutes)}
-            </div>
-          </div>
-
-          {/* Lições completadas */}
-          <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-lg p-4 border border-green-600/30">
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="w-5 h-5 text-green-400" />
-              <span className="text-xs text-gray-400">{t('completedLessons')}</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">
-                {progress.coursesProgress.completedLessons}
-              </span>
-              <span className="text-xs text-gray-400">
-                / {progress.coursesProgress.totalLessons}
-              </span>
-            </div>
-            <div className="text-xs text-green-400 mt-1">
-              {progress.coursesProgress.lessonsCompletionRate}% {t('complete')}
-            </div>
+          <div className="text-lg sm:text-xl font-bold text-white">
+            {progress.overview.daysActive}
           </div>
         </div>
 
-        {/* Atividade semanal */}
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-secondary" />
-              <span className="text-sm font-medium text-white">{t('weeklyActivity')}</span>
-            </div>
-            <span className="text-xs text-gray-400">
-              {progress.weeklyActivity.lessonsCompleted} {t('lessonsThisWeek')}
+        {/* Cursos em progresso */}
+        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+            <PlayCircle className="w-4 h-4 text-blue-400" />
+            <span className="text-xs text-gray-400">{t('inProgress')}</span>
+          </div>
+          <div className="text-lg sm:text-xl font-bold text-white">
+            {progress.coursesProgress.coursesInProgress}
+          </div>
+        </div>
+
+        {/* Cursos completados */}
+        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+            <CheckCircle className="w-4 h-4 text-green-400" />
+            <span className="text-xs text-gray-400">{t('completed')}</span>
+          </div>
+          <div className="text-lg sm:text-xl font-bold text-white">
+            {progress.coursesProgress.completedCourses}
+          </div>
+        </div>
+
+        {/* Lições completadas */}
+        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+            <BookOpen className="w-4 h-4 text-purple-400" />
+            <span className="text-xs text-gray-400">{t('lessons')}</span>
+          </div>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-lg sm:text-xl font-bold text-white">
+              {progress.coursesProgress.completedLessons}
+            </span>
+            <span className="text-xs text-gray-500">
+              / {progress.coursesProgress.totalLessons}
             </span>
           </div>
+        </div>
+
+        {/* Progresso médio */}
+        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
+            <Target className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-gray-400">{t('average')}</span>
+          </div>
+          <div className="text-lg sm:text-xl font-bold text-white">
+            {progress.coursesProgress.averageProgress}%
+          </div>
+        </div>
+      </div>
+
+      {/* Duas colunas: Cursos e Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {/* Cursos em progresso com barras circulares */}
+        {enrolledCourses.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+              <GraduationCap className="w-4 h-4" />
+              {t('coursesInProgress')}
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              {enrolledCourses.map((course) => (
+                <Link
+                  key={course.id}
+                  href={`/${locale}/courses/${course.slug}`}
+                  className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50 hover:border-secondary/50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <CircularProgress percentage={course.progress} size={45} strokeWidth={3} />
+                    <div className="flex-1 min-w-0">
+                      <h5 className="text-sm font-medium text-white truncate group-hover:text-secondary transition-colors">
+                        {course.title}
+                      </h5>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {course.completedLessons}/{course.totalLessons} {t('lessonsSmall')}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stats combinados */}
+        <div>
+          <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            {t('statistics')}
+          </h4>
           
-          {/* Dias da semana */}
-          <div className="grid grid-cols-7 gap-2">
-            {progress.weeklyActivity.daysActive.map((active, index) => (
-              <div
-                key={index}
-                className={`relative flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
-                  active
-                    ? 'bg-gradient-to-b from-green-600 to-green-700 shadow-lg'
-                    : 'bg-gray-700/50'
-                }`}
-              >
-                <span className={`text-xs font-medium ${active ? 'text-white' : 'text-gray-500'}`}>
-                  {getDayName(index)}
-                </span>
-                {active && (
-                  <div className="absolute -top-1 -right-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <div className="space-y-3">
+            {/* Trilhas */}
+            {progress.tracksProgress.totalTracks > 0 && (
+              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-400">{t('tracks')}</span>
+                  <span className="text-sm text-white">
+                    {progress.tracksProgress.completedTracks}/{progress.tracksProgress.totalTracks}
+                  </span>
+                </div>
+                {progress.tracksProgress.mostAdvancedTrack && (
+                  <div className="mt-2 pt-2 border-t border-gray-700/50">
+                    <p className="text-xs text-gray-500">{t('mostAdvanced')}</p>
+                    <p className="text-sm text-white mt-1">
+                      {progress.tracksProgress.mostAdvancedTrack.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 bg-gray-700 rounded-full h-1.5">
+                        <div
+                          className="h-1.5 rounded-full bg-gradient-to-r from-secondary to-blue-500"
+                          style={{ width: `${progress.tracksProgress.mostAdvancedTrack.progress}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {progress.tracksProgress.mostAdvancedTrack.progress}%
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+            )}
 
-          {/* Meta semanal */}
-          <div className="mt-4">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-gray-400">{t('weeklyGoal')}</span>
-              <span className="text-white">
-                {progress.weeklyActivity.completedMinutes}/{progress.weeklyActivity.targetMinutes} min
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  progress.weeklyActivity.weeklyGoalProgress >= 100
-                    ? 'bg-gradient-to-r from-green-500 to-green-400'
-                    : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                }`}
-                style={{ width: `${Math.min(progress.weeklyActivity.weeklyGoalProgress, 100)}%` }}
-              ></div>
+            {/* Flashcards */}
+            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">{t('flashcards')}</span>
+                {progress.flashcardsStats.todayCompleted && (
+                  <span className="text-xs bg-green-600/20 text-green-400 px-2 py-1 rounded-full">
+                    {t('reviewedToday')}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                <div>
+                  <p className="text-xs text-gray-500">{t('answered')}</p>
+                  <p className="text-lg font-bold text-white">{progress.flashcardsStats.totalAnswered}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t('correct')}</p>
+                  <p className="text-lg font-bold text-green-400">{progress.flashcardsStats.correctAnswers}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t('accuracy')}</p>
+                  <p className="text-lg font-bold text-blue-400">{progress.flashcardsStats.accuracy}%</p>
+                </div>
+              </div>
+              {progress.flashcardsStats.lastReviewDate && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {t('lastReview')}: {formatDate(progress.flashcardsStats.lastReviewDate)}
+                </p>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Continue Learning */}
-        {progress.currentFocus?.continueLearning && (
-          <div className="bg-gradient-to-r from-secondary/20 to-accent/20 rounded-lg p-4 border border-secondary/30">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-5 h-5 text-yellow-400" />
-                  <span className="text-sm font-medium text-white">{t('continueWhere')}</span>
-                </div>
-                <h4 className="text-white font-semibold">
-                  {progress.currentFocus.continueLearning.lessonTitle}
-                </h4>
-                <p className="text-xs text-gray-400 mt-1">
-                  {progress.currentFocus.continueLearning.courseTitle} • {progress.currentFocus.continueLearning.moduleTitle}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 bg-gray-700 rounded-full h-1.5">
-                    <div
-                      className="bg-gradient-to-r from-secondary to-accent h-1.5 rounded-full"
-                      style={{ width: `${progress.currentFocus.continueLearning.videoProgress}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-400">
-                    {progress.currentFocus.continueLearning.estimatedTimeToComplete} min
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  // Navigate to lesson - you'll need to get the proper route
-                  console.log('Continue lesson:', progress.currentFocus?.continueLearning?.lessonId);
-                }}
-                className="p-3 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-colors group"
-              >
-                <ChevronRight className="w-5 h-5 text-secondary group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Achievements */}
-        {progress.achievements.recentBadges.length > 0 && (
-          <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-            <div className="flex items-center gap-2 mb-3">
-              <Award className="w-5 h-5 text-yellow-400" />
-              <span className="text-sm font-medium text-white">{t('recentAchievements')}</span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {progress.achievements.recentBadges.slice(0, 3).map((badge) => (
-                <div
-                  key={badge.id}
-                  className="bg-gradient-to-r from-yellow-600/20 to-amber-600/20 px-3 py-1 rounded-full border border-yellow-600/30"
-                >
-                  <span className="text-xs text-yellow-300">{badge.title}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 text-xs text-gray-400">
-              {t('totalPoints')}: {progress.achievements.totalPoints} • {t('nextLevel')}: {progress.achievements.pointsToNextLevel}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -93,6 +93,30 @@ export default function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Track if notifications were viewed
+  const [hasViewedNotifications, setHasViewedNotifications] = useState(false);
+
+  // Mark all as read when closing the modal after viewing notifications
+  useEffect(() => {
+    if (!isOpen && hasViewedNotifications && meta && meta.unreadCount > 0) {
+      console.log('[NotificationBell] Auto-marking all notifications as read after close');
+      markAllAsRead().then(success => {
+        if (success) {
+          console.log('[NotificationBell] Successfully marked all as read');
+          refetch(); // Refresh to get updated state
+        }
+      });
+      setHasViewedNotifications(false); // Reset flag
+    }
+  }, [isOpen, hasViewedNotifications, meta, markAllAsRead, refetch]);
+
+  // Set flag when modal is opened with unread notifications
+  useEffect(() => {
+    if (isOpen && !isLoading && meta && meta.unreadCount > 0) {
+      setHasViewedNotifications(true);
+    }
+  }, [isOpen, isLoading, meta]);
+
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read if not already
     if (!notification.isRead) {

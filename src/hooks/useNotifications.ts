@@ -166,9 +166,9 @@ export function useNotifications({
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(
-        `${apiUrl}/api/v1/notifications/mark-all-read`,
+        `${apiUrl}/api/v1/notifications/read-all`,
         {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -179,6 +179,9 @@ export function useNotifications({
       if (!response.ok) {
         throw new Error(`Failed to mark all notifications as read: ${response.statusText}`);
       }
+
+      const data = await response.json();
+      console.log(`[Notifications] Marked ${data.updated} notifications as read`);
 
       // Update local state
       setNotifications(prev => 

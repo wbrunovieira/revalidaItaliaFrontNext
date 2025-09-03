@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { redirect, notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
-import LessonCard from '@/components/LessonCard';
 import ModuleProgressBar from '@/components/ModuleProgressBar';
 import ModuleLessonsGrid from '@/components/ModuleLessonsGrid';
 import {

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, CheckCircle, Lock, PlayCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface Translation {

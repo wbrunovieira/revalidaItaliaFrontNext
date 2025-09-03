@@ -65,7 +65,7 @@ export default function ModuleLessonsList({
           const data = await response.json();
           const completed = new Set<string>();
           
-          data.lessons?.forEach((lesson: any) => {
+          data.lessons?.forEach((lesson: { lessonId: string; completed?: boolean }) => {
             if (lesson.completed) {
               completed.add(lesson.lessonId);
             }

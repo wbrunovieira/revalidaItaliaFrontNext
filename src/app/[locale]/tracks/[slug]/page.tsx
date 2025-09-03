@@ -163,7 +163,10 @@ export default async function TrackPage({
               {trackCourses.map((course, index) => (
                 <CourseCard
                   key={course.id}
-                  course={course}
+                  course={{
+                    ...course,
+                    moduleCount: course.modules?.length || 0
+                  }}
                   locale={locale}
                   index={index}
                 />

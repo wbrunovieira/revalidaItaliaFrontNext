@@ -167,10 +167,15 @@ export default function UserProgressCard() {
           const coursesData = await coursesResponse.json();
           // Filter only courses with progress > 0
           const activeCourses = coursesData
-            .filter((course: any) => course.progress?.percentage > 0)
-            .map((course: any) => ({
+            .filter((course: { progress?: { percentage: number } }) => (course.progress?.percentage ?? 0) > 0)
+            .map((course: { 
+              id: string; 
+              slug: string; 
+              progress?: { percentage: number; completedLessons: number; totalLessons: number };
+              translations?: Array<{ locale: string; title: string }>;
+            }) => ({
               id: course.id,
-              title: course.translations?.find((t: any) => t.locale === locale)?.title || course.slug,
+              title: course.translations?.find((t: { locale: string; title: string }) => t.locale === locale)?.title || course.slug,
               slug: course.slug,
               progress: course.progress?.percentage || 0,
               completedLessons: course.progress?.completedLessons || 0,

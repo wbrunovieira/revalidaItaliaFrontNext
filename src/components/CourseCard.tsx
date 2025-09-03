@@ -36,7 +36,7 @@ interface CourseCardProps {
   index: number;
 }
 
-export default function CourseCard({ course, locale, index }: CourseCardProps) {
+export default function CourseCard({ course, locale }: CourseCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const t = useTranslations('Courses');

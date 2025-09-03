@@ -39,7 +39,7 @@ interface TrackCardProps {
   index: number;
 }
 
-export default function TrackCard({ track, locale, index }: TrackCardProps) {
+export default function TrackCard({ track, locale }: TrackCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const t = useTranslations('Tracks');
@@ -58,8 +58,6 @@ export default function TrackCard({ track, locale, index }: TrackCardProps) {
   const isCompleted = progressPercentage === 100;
   const completedCourses = track.progress?.completedCourses || 0;
   const totalCourses = track.progress?.totalCourses || coursesCount;
-  const completedLessons = track.progress?.completedLessons || 0;
-  const totalLessons = track.progress?.totalLessons || 0;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;

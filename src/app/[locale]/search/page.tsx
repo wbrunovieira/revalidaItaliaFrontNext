@@ -131,7 +131,7 @@ export default async function SearchPage({
             <div className="mb-6">
               <p className="text-xl text-gray-300">
                 {t('searchingFor')}{' '}
-                <span className="font-bold text-secondary">"{query}"</span>
+                <span className="font-bold text-secondary">&quot;{query}&quot;</span>
               </p>
               <p className="text-lg text-gray-400 mt-2">
                 {t('foundResults', { count: courses.length })}

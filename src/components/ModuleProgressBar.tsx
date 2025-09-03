@@ -100,10 +100,11 @@ export default function ModuleProgressBar({
       }
     };
 
-    window.addEventListener('lessonCompletionChanged', handleCompletionChange as EventListener);
+    const eventListener = ((e: Event) => handleCompletionChange(e as CustomEvent)) as EventListener;
+    window.addEventListener('lessonCompletionChanged', eventListener);
     
     return () => {
-      window.removeEventListener('lessonCompletionChanged', handleCompletionChange as EventListener);
+      window.removeEventListener('lessonCompletionChanged', eventListener);
     };
   }, [moduleId]);
 

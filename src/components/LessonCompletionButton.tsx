@@ -27,7 +27,6 @@ export default function LessonCompletionButton({
   const t = useTranslations('Lesson');
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasAutoCompleted, setHasAutoCompleted] = useState(false);
   const [videoProgress, setVideoProgress] = useState(initialVideoProgress);
 
   // Listen for video progress updates
@@ -45,57 +44,7 @@ export default function LessonCompletionButton({
     };
   }, [lessonId]);
 
-  // Check if lesson is already completed on mount
-  useEffect(() => {
-    const checkCompletionStatus = async () => {
-      try {
-        const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('token='))
-          ?.split('=')[1];
-
-        if (!token) return;
-
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        
-        // For now, we'll check from module progress
-        if (moduleId) {
-          const response = await fetch(
-            `${apiUrl}/api/v1/progress/module/${moduleId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            const lessonProgress = data.lessons?.find(
-              (l: any) => l.lessonId === lessonId
-            );
-            if (lessonProgress?.completed) {
-              setIsCompleted(true);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error checking completion status:', error);
-      }
-    };
-
-    checkCompletionStatus();
-  }, [lessonId, moduleId]);
-
-  // Auto-complete when video reaches 90%
-  useEffect(() => {
-    if (hasVideo && videoProgress >= 90 && !isCompleted && !hasAutoCompleted) {
-      console.log('[LessonCompletion] 🎯 Auto-completing lesson at 90% video progress');
-      setHasAutoCompleted(true);
-      handleComplete(true);
-    }
-  }, [videoProgress, isCompleted, hasAutoCompleted, hasVideo]);
-
+  // Define handleComplete before it's used in useEffect
   const handleComplete = useCallback(async (completed: boolean = true) => {
     setIsLoading(true);
     
@@ -168,7 +117,7 @@ export default function LessonCompletionButton({
           const errorData = await response.json();
           console.error('[LessonCompletion] Error response:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (e) {
+        } catch {
           console.error('[LessonCompletion] Could not parse error response');
         }
         throw new Error(errorMessage);

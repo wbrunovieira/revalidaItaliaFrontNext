@@ -10,7 +10,7 @@ import Logo from './Logo';
 import SearchInput from './SearchInput';
 
 import LanguageButton from './LanguageButton';
-import Notifications from './Notifications';
+import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';
 
 interface NavProps {
@@ -42,7 +42,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
             <div className="flex items-center justify-between px-5 py-3">
               <Logo alt={t('home')} />
               <div className="flex items-center gap-4">
-                <Notifications />
+                <NotificationBell />
                 <UserDropdown />
               </div>
             </div>
@@ -68,7 +68,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
               </div>
               <div className="flex items-center gap-3">
                 <LanguageButton />
-                <Notifications />
+                <NotificationBell />
                 <UserDropdown />
               </div>
             </div>
@@ -106,7 +106,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
           {/* Right section - Language, Notifications, and User */}
           <div className="flex items-center gap-4 justify-end">
             <LanguageButton />
-            <Notifications />
+            <NotificationBell />
             <UserDropdown />
           </div>
         </div>

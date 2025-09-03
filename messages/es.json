@@ -1,4 +1,31 @@
 {
+  "Notifications": {
+    "title": "Notificaciones",
+    "notifications": "Notificaciones",
+    "all": "Todas",
+    "unread": "No leídas",
+    "markAllAsRead": "Marcar todas como leídas",
+    "markAsRead": "Marcar como leída",
+    "delete": "Eliminar",
+    "viewDetails": "Ver detalles",
+    "viewAll": "Ver todas",
+    "noNotifications": "Sin notificaciones",
+    "noUnreadNotifications": "Sin notificaciones no leídas",
+    "categories": {
+      "SYSTEM": "Sistema",
+      "ASSESSMENTS": "Evaluaciones",
+      "LIVE_SESSIONS": "Sesiones en vivo",
+      "COMMUNITY": "Comunidad",
+      "SUPPORT": "Soporte",
+      "BILLING": "Facturación",
+      "COURSE_CONTENT": "Contenido del curso"
+    },
+    "priorities": {
+      "HIGH": "Alta",
+      "MEDIUM": "Media",
+      "LOW": "Baja"
+    }
+  },
   "Terms": {
     "title": "Términos de Uso - Plataforma PROGRAMA REVALIDA ITALIA",
     "subtitle": "Por favor, lea atentamente antes de continuar",

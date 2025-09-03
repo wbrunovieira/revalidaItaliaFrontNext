@@ -3521,7 +3521,8 @@
     "assessments": "Evaluaciones",
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
-    "liveSessions": "Clases en Vivo"
+    "liveSessions": "Clases en Vivo",
+    "transactions": "Transacciones"
   },
   "StudentQuizResults": {
     "title": "Mis Resultados",

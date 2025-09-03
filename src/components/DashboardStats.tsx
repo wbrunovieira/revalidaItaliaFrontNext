@@ -426,7 +426,7 @@ export default function DashboardStats() {
             )}
 
             {/* Top Courses */}
-            {data.insights.topCourses && data.insights.topCourses.length > 0 ? (
+            {data.insights.topCourses && data.insights.topCourses.length > 0 && (
               <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-700">
                 <h5 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
                   <Star className="h-4 w-4 text-yellow-500" />
@@ -446,16 +446,6 @@ export default function DashboardStats() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-700">
-                <h5 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  Top Courses
-                </h5>
-                <div className="text-center py-4">
-                  <p className="text-xs text-gray-500">Course ranking coming soon</p>
                 </div>
               </div>
             )}

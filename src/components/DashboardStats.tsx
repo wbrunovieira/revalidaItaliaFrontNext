@@ -26,6 +26,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   RefreshCw,
+  ClipboardList,
+  Target,
+  Award,
 } from 'lucide-react';
 import { useDashboardOverview } from '@/hooks/useDashboardOverview';
 import { cn } from '@/lib/utils';
@@ -283,6 +286,41 @@ export default function DashboardStats() {
     },
   ];
 
+  // Add Assessment section if data exists
+  if (data.assessment) {
+    sections.push({
+      title: 'Assessments',
+      cards: [
+        {
+          title: 'Total Assessments',
+          value: formatNumber(data.assessment.totalAssessments),
+          icon: ClipboardList,
+          subtitle: `${data.assessment.assessmentsByType.quiz} quiz, ${data.assessment.assessmentsByType.simulado} simulado`,
+        },
+        {
+          title: 'Total Attempts',
+          value: formatNumber(data.assessment.totalAttempts),
+          icon: Target,
+          subtitle: `${data.assessment.attemptsInProgress} in progress`,
+        },
+        {
+          title: 'Completion Rate',
+          value: `${data.assessment.completionRate.toFixed(1)}%`,
+          icon: CheckCircle,
+          changeType: data.assessment.completionRate >= 70 ? 'positive' : data.assessment.completionRate >= 50 ? 'neutral' : 'negative',
+          subtitle: `${data.assessment.passingRate.toFixed(1)}% passing rate`,
+        },
+        {
+          title: 'Average Score',
+          value: `${data.assessment.averageScore.toFixed(1)}%`,
+          icon: Award,
+          changeType: data.assessment.averageScore >= 70 ? 'positive' : data.assessment.averageScore >= 50 ? 'neutral' : 'negative',
+          subtitle: `${data.assessment.pendingReviews} pending reviews`,
+        },
+      ],
+    });
+  }
+
   return (
     <div>
       {/* Header with refresh button */}
@@ -472,6 +510,49 @@ export default function DashboardStats() {
               </div>
             )}
           </div>
+
+          {/* Top Assessments - Second Row */}
+          {data.assessment && data.assessment.topAssessments && data.assessment.topAssessments.length > 0 && (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
+              {data.assessment.topAssessments.slice(0, 3).map((assessment, index) => (
+                <div key={index} className="bg-gray-700/30 rounded-lg p-6 border border-gray-700">
+                  <h5 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
+                    {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
+                    {index === 1 && <Award className="h-4 w-4 text-gray-400" />}
+                    {index === 2 && <Award className="h-4 w-4 text-orange-600" />}
+                    Top Assessment #{index + 1}
+                  </h5>
+                  <div className="space-y-2">
+                    <p className="text-sm text-white font-medium truncate">{assessment.title}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs px-2 py-1 bg-gray-600 rounded-full text-gray-300">
+                        {assessment.type}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {assessment.attempts} attempts
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-600">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Completion</span>
+                        <span className="text-white">{assessment.completionRate.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between text-xs mt-1">
+                        <span className="text-gray-400">Avg Score</span>
+                        <span className={cn(
+                          "font-medium",
+                          assessment.averageScore >= 70 ? "text-green-400" : 
+                          assessment.averageScore >= 50 ? "text-yellow-400" : "text-red-400"
+                        )}>
+                          {assessment.averageScore.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -135,6 +135,36 @@ interface Insights {
   topPosts: TopPost[];
 }
 
+// Interface for Top Assessment
+interface TopAssessment {
+  assessmentId: string;
+  title: string;
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  attempts: number;
+  completionRate: number;
+  averageScore: number;
+}
+
+// Interface for Assessment Metrics
+interface AssessmentMetrics {
+  totalAssessments: number;
+  assessmentsByType: {
+    quiz: number;
+    simulado: number;
+    provaAberta: number;
+  };
+  totalAttempts: number;
+  attemptsInProgress: number;
+  attemptsSubmitted: number;
+  attemptsGraded: number;
+  completionRate: number;
+  passingRate: number;
+  averageScore: number;
+  pendingReviews: number;
+  averageCompletionTimeMinutes: number;
+  topAssessments: TopAssessment[];
+}
+
 // Main Dashboard Overview Response
 export interface DashboardOverviewResponse {
   users: UserMetrics;
@@ -144,6 +174,7 @@ export interface DashboardOverviewResponse {
   support: SupportMetrics;
   system: SystemMetrics;
   insights: Insights;
+  assessment: AssessmentMetrics;
   generatedAt: string;
 }
 

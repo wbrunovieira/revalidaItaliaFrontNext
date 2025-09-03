@@ -23,7 +23,6 @@ interface EngagementMetrics {
   dailyActiveUsers: number;
   weeklyActiveUsers: number;
   monthlyActiveUsers: number;
-  averageSessionDuration: number;
   coursesInProgress: number;
   lessonsCompletedToday: number;
   averageCourseProgress: number;

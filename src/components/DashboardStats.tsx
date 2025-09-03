@@ -50,6 +50,7 @@ interface SectionData {
 
 export default function DashboardStats() {
   const t = useTranslations('Admin.dashboard');
+  const ts = useTranslations('Admin.dashboardSections');
   const { data, isLoading, error, refetch } = useDashboardOverview();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -95,7 +96,7 @@ export default function DashboardStats() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading dashboard data...</p>
+          <p className="text-gray-400">{ts('loading')}</p>
         </div>
       </div>
     );
@@ -108,13 +109,13 @@ export default function DashboardStats() {
         <div className="flex items-start space-x-3">
           <AlertCircle className="text-red-500 mt-1" size={20} />
           <div className="flex-1">
-            <h3 className="text-red-400 font-semibold mb-2">Error Loading Dashboard</h3>
+            <h3 className="text-red-400 font-semibold mb-2">{ts('error')}</h3>
             <p className="text-gray-300 text-sm">{error}</p>
             <button
               onClick={refetch}
               className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
             >
-              Try Again
+              {ts('errorRetry')}
             </button>
           </div>
         </div>
@@ -126,7 +127,7 @@ export default function DashboardStats() {
   if (!data) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400">No dashboard data available</p>
+        <p className="text-gray-400">{ts('noData')}</p>
       </div>
     );
   }
@@ -134,7 +135,7 @@ export default function DashboardStats() {
   // Prepare sections data
   const sections: SectionData[] = [
     {
-      title: 'User Metrics',
+      title: ts('userMetrics'),
       cards: [
         {
           title: t('stats.totalUsers'),
@@ -142,145 +143,145 @@ export default function DashboardStats() {
           icon: Users,
           change: calculateChange(data.users.totalUsers, data.users.growthRate),
           changeType: getChangeType(data.users.growthRate),
-          subtitle: `${data.users.activeUsers} active`,
+          subtitle: `${data.users.activeUsers} ${ts('stats.active')}`,
         },
         {
-          title: 'Online Now',
+          title: ts('stats.onlineNow'),
           value: formatNumber(data.users.onlineNow),
           icon: Activity,
-          subtitle: `${data.users.recentLogins} recent logins`,
+          subtitle: `${data.users.recentLogins} ${ts('stats.recentLogins')}`,
         },
         {
-          title: 'New Users Today',
+          title: ts('stats.newUsersToday'),
           value: formatNumber(data.users.newUsersToday),
           icon: GraduationCap,
-          subtitle: `${data.users.newUsersThisWeek} this week`,
+          subtitle: `${data.users.newUsersThisWeek} ${ts('stats.thisWeek')}`,
         },
         {
-          title: 'User Growth',
+          title: ts('stats.userGrowth'),
           value: `${data.users.growthRate.toFixed(1)}%`,
           icon: TrendingUp,
           changeType: getChangeType(data.users.growthRate),
-          subtitle: `${data.users.newUsersThisMonth} new this month`,
+          subtitle: `${data.users.newUsersThisMonth} ${ts('stats.newThisMonth')}`,
         },
       ],
     },
     {
-      title: 'Engagement',
+      title: ts('engagement'),
       cards: [
         {
-          title: 'Daily Active Users',
+          title: ts('stats.dailyActiveUsers'),
           value: formatNumber(data.engagement.dailyActiveUsers),
           icon: Activity,
-          subtitle: `${formatNumber(data.engagement.monthlyActiveUsers)} MAU`,
+          subtitle: `${formatNumber(data.engagement.monthlyActiveUsers)} ${ts('stats.mau')}`,
         },
         {
-          title: 'Courses in Progress',
+          title: ts('stats.coursesInProgress'),
           value: formatNumber(data.engagement.coursesInProgress),
           icon: BookOpen,
-          subtitle: `Avg ${data.engagement.averageCourseProgress.toFixed(0)}% complete`,
+          subtitle: `${ts('stats.avgComplete')} ${data.engagement.averageCourseProgress.toFixed(0)}% ${ts('stats.complete')}`,
         },
         {
-          title: 'Lessons Today',
+          title: ts('stats.lessonsToday'),
           value: formatNumber(data.engagement.lessonsCompletedToday),
           icon: CheckCircle,
-          subtitle: `${formatNumber(data.engagement.weeklyActiveUsers)} WAU`,
+          subtitle: `${formatNumber(data.engagement.weeklyActiveUsers)} ${ts('stats.wau')}`,
         },
         {
-          title: 'Flashcards Today',
+          title: ts('stats.flashcardsToday'),
           value: formatNumber(data.engagement.flashcardsAnsweredToday),
           icon: Layers,
-          subtitle: `${data.engagement.flashcardsAccuracyRate.toFixed(0)}% accuracy`,
+          subtitle: `${data.engagement.flashcardsAccuracyRate.toFixed(0)}% ${ts('stats.accuracy')}`,
         },
       ],
     },
     {
-      title: 'Content',
+      title: ts('content'),
       cards: [
         {
           title: t('stats.totalCourses'),
           value: formatNumber(data.content.totalCourses),
           icon: BookOpen,
-          subtitle: `${data.content.totalModules} modules`,
+          subtitle: `${data.content.totalModules} ${ts('stats.modules')}`,
         },
         {
-          title: 'Total Lessons',
+          title: ts('stats.totalLessons'),
           value: formatNumber(data.content.totalLessons),
           icon: FileText,
-          subtitle: `${data.content.totalDocuments} documents`,
+          subtitle: `${data.content.totalDocuments} ${ts('stats.documents')}`,
         },
         {
-          title: 'Video Content',
+          title: ts('stats.videoContent'),
           value: `${data.content.totalVideoDuration.toFixed(0)}h`,
           icon: Video,
-          subtitle: 'Total duration',
+          subtitle: ts('stats.totalDuration'),
         },
         {
-          title: 'Community Posts',
+          title: ts('stats.communityPosts'),
           value: formatNumber(data.content.totalPosts),
           icon: MessageSquare,
-          subtitle: `${data.content.activeDiscussions} active discussions`,
+          subtitle: `${data.content.activeDiscussions} ${ts('stats.activeDiscussions')}`,
         },
       ],
     },
     {
-      title: 'Revenue & Billing',
+      title: ts('billing'),
       cards: [
         {
-          title: 'Revenue Today',
+          title: ts('stats.revenueToday'),
           value: formatCurrency(data.billing.revenueToday),
           icon: DollarSign,
           changeType: 'positive',
-          subtitle: formatCurrency(data.billing.revenueThisMonth) + ' this month',
+          subtitle: formatCurrency(data.billing.revenueThisMonth) + ' ' + ts('stats.thisMonth'),
         },
         {
-          title: 'Active Subscriptions',
+          title: ts('stats.activeSubscriptions'),
           value: formatNumber(data.billing.activeSubscriptions),
           icon: Star,
-          subtitle: `${data.billing.newSubscriptionsToday} new today`,
+          subtitle: `${data.billing.newSubscriptionsToday} ${ts('stats.newToday')}`,
         },
         {
-          title: 'Avg Ticket Value',
+          title: ts('stats.avgTicketValue'),
           value: formatCurrency(data.billing.averageTicketValue),
           icon: Trophy,
-          subtitle: `${data.billing.conversionRate.toFixed(0)}% conversion`,
+          subtitle: `${data.billing.conversionRate.toFixed(0)}% ${ts('stats.conversion')}`,
         },
         {
-          title: 'Churn Rate',
+          title: ts('stats.churnRate'),
           value: data.billing.churnedThisMonth,
           icon: XCircle,
           changeType: 'negative',
-          subtitle: 'Canceled this month',
+          subtitle: ts('stats.canceledThisMonth'),
         },
       ],
     },
     {
-      title: 'Support & System',
+      title: ts('support'),
       cards: [
         {
-          title: 'Open Tickets',
+          title: ts('stats.openTickets'),
           value: data.support.openTickets,
           icon: HeadphonesIcon,
-          subtitle: `${data.support.pendingTickets} pending`,
+          subtitle: `${data.support.pendingTickets} ${ts('stats.pending')}`,
         },
         {
-          title: 'Response Time',
+          title: ts('stats.responseTime'),
           value: `${data.support.averageResponseTime.toFixed(1)}h`,
           icon: Clock,
-          subtitle: `${data.support.satisfactionRate.toFixed(0)}% satisfaction`,
+          subtitle: `${data.support.satisfactionRate.toFixed(0)}% ${ts('stats.satisfaction')}`,
         },
         {
-          title: 'System Health',
+          title: ts('stats.systemHealth'),
           value: data.system.systemHealth,
           icon: ServerIcon,
           changeType: data.system.systemHealth === 'healthy' ? 'positive' : data.system.systemHealth === 'critical' ? 'negative' : 'neutral',
-          subtitle: `${data.system.activeJobs} active jobs`,
+          subtitle: `${data.system.activeJobs} ${ts('stats.activeJobs')}`,
         },
         {
-          title: 'Live Sessions',
+          title: ts('stats.liveSessions'),
           value: data.system.activeLiveSessions,
           icon: Zap,
-          subtitle: `${data.system.scheduledSessions} scheduled`,
+          subtitle: `${data.system.scheduledSessions} ${ts('stats.scheduled')}`,
         },
       ],
     },
@@ -289,33 +290,33 @@ export default function DashboardStats() {
   // Add Assessment section if data exists
   if (data.assessment) {
     sections.push({
-      title: 'Assessments',
+      title: ts('assessments'),
       cards: [
         {
-          title: 'Total Assessments',
+          title: ts('stats.totalAssessments'),
           value: formatNumber(data.assessment.totalAssessments),
           icon: ClipboardList,
-          subtitle: `${data.assessment.assessmentsByType.quiz} quiz, ${data.assessment.assessmentsByType.simulado} simulado`,
+          subtitle: `${data.assessment.assessmentsByType.quiz} ${ts('stats.quiz')}, ${data.assessment.assessmentsByType.simulado} ${ts('stats.simulado')}`,
         },
         {
-          title: 'Total Attempts',
+          title: ts('stats.totalAttempts'),
           value: formatNumber(data.assessment.totalAttempts),
           icon: Target,
-          subtitle: `${data.assessment.attemptsInProgress} in progress`,
+          subtitle: `${data.assessment.attemptsInProgress} ${ts('stats.inProgress')}`,
         },
         {
-          title: 'Completion Rate',
+          title: ts('stats.completionRate'),
           value: `${data.assessment.completionRate.toFixed(1)}%`,
           icon: CheckCircle,
           changeType: data.assessment.completionRate >= 70 ? 'positive' : data.assessment.completionRate >= 50 ? 'neutral' : 'negative',
-          subtitle: `${data.assessment.passingRate.toFixed(1)}% passing rate`,
+          subtitle: `${data.assessment.passingRate.toFixed(1)}% ${ts('stats.passingRate')}`,
         },
         {
-          title: 'Average Score',
+          title: ts('stats.averageScore'),
           value: `${data.assessment.averageScore.toFixed(1)}%`,
           icon: Award,
           changeType: data.assessment.averageScore >= 70 ? 'positive' : data.assessment.averageScore >= 50 ? 'neutral' : 'negative',
-          subtitle: `${data.assessment.pendingReviews} pending reviews`,
+          subtitle: `${data.assessment.pendingReviews} ${ts('stats.pendingReviews')}`,
         },
       ],
     });
@@ -337,7 +338,7 @@ export default function DashboardStats() {
           )}
         >
           <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          {isRefreshing ? ts('refreshing') : ts('refresh')}
         </button>
       </div>
 
@@ -402,7 +403,7 @@ export default function DashboardStats() {
       {/* Insights Section */}
       {data.insights && (
         <div className="mt-8">
-          <h4 className="text-lg font-medium text-gray-300 mb-4">Insights & Alerts</h4>
+          <h4 className="text-lg font-medium text-gray-300 mb-4">{ts('insights')}</h4>
           
           {/* Alerts */}
           {data.insights.alerts && data.insights.alerts.length > 0 && (
@@ -446,7 +447,7 @@ export default function DashboardStats() {
               <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-700">
                 <h5 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-yellow-500" />
-                  Top Students
+                  {ts('topPerformers.topStudents')}
                 </h5>
                 <div className="space-y-3">
                   {data.insights.topStudents.slice(0, 3).map((student, index) => (
@@ -454,7 +455,7 @@ export default function DashboardStats() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-white truncate">{student.name}</p>
                         <p className="text-xs text-gray-500">
-                          {student.coursesCompleted} courses • {student.totalProgress}% progress
+                          {student.coursesCompleted} {ts('topPerformers.courses')} • {student.totalProgress}% {ts('topPerformers.progress')}
                         </p>
                       </div>
                     </div>
@@ -493,7 +494,7 @@ export default function DashboardStats() {
               <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-700">
                 <h5 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
                   <Eye className="h-4 w-4 text-purple-500" />
-                  Trending Posts
+                  {ts('topPerformers.trendingPosts')}
                 </h5>
                 <div className="space-y-3">
                   {data.insights.topPosts.slice(0, 3).map((post, index) => (
@@ -501,7 +502,7 @@ export default function DashboardStats() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-white truncate">{post.title}</p>
                         <p className="text-xs text-gray-500">
-                          {post.views} views • {post.comments} comments
+                          {post.views} {ts('topPerformers.views')} • {post.comments} {ts('topPerformers.comments')}
                         </p>
                       </div>
                     </div>
@@ -520,7 +521,7 @@ export default function DashboardStats() {
                     {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
                     {index === 1 && <Award className="h-4 w-4 text-gray-400" />}
                     {index === 2 && <Award className="h-4 w-4 text-orange-600" />}
-                    Top Assessment #{index + 1}
+                    {ts('topPerformers.topAssessment')} #{index + 1}
                   </h5>
                   <div className="space-y-2">
                     <p className="text-sm text-white font-medium truncate">{assessment.title}</p>
@@ -529,16 +530,16 @@ export default function DashboardStats() {
                         {assessment.type}
                       </span>
                       <span className="text-xs text-gray-400">
-                        {assessment.attempts} attempts
+                        {assessment.attempts} {ts('topPerformers.attempts')}
                       </span>
                     </div>
                     <div className="pt-2 border-t border-gray-600">
                       <div className="flex justify-between text-xs">
-                        <span className="text-gray-400">Completion</span>
+                        <span className="text-gray-400">{ts('topPerformers.completion')}</span>
                         <span className="text-white">{assessment.completionRate.toFixed(1)}%</span>
                       </div>
                       <div className="flex justify-between text-xs mt-1">
-                        <span className="text-gray-400">Avg Score</span>
+                        <span className="text-gray-400">{ts('topPerformers.avgScore')}</span>
                         <span className={cn(
                           "font-medium",
                           assessment.averageScore >= 70 ? "text-green-400" : 
@@ -561,7 +562,7 @@ export default function DashboardStats() {
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">
             <Calendar className="inline h-3 w-3 mr-1" />
-            Last updated: {new Date(data.generatedAt).toLocaleString()}
+            {ts('lastUpdated')}: {new Date(data.generatedAt).toLocaleString()}
           </p>
         </div>
       )}

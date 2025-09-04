@@ -1037,6 +1037,8 @@
     "emailRequired": "E-mail é obrigatório",
     "emailInvalid": "Formato de e-mail inválido",
     "forgotPasswordFailed": "Erro ao processar solicitação. Tente novamente.",
+    "rateLimitError": "Muitas tentativas. Por favor, aguarde um momento antes de tentar novamente.",
+    "networkError": "Erro de conexão. Verifique sua internet e tente novamente.",
     "successTitle": "E-mail enviado!",
     "successMessage": "Enviamos instruções para {email}",
     "checkSpam": "Se não encontrar o e-mail, verifique sua pasta de spam."

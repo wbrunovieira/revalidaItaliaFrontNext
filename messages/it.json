@@ -1025,6 +1025,8 @@
     "emailRequired": "Email è obbligatoria",
     "emailInvalid": "Formato email non valido",
     "forgotPasswordFailed": "Errore nell'elaborazione della richiesta. Riprova.",
+    "rateLimitError": "Troppi tentativi. Attendi un momento prima di riprovare.",
+    "networkError": "Errore di connessione. Controlla la tua connessione internet e riprova.",
     "successTitle": "Email inviata!",
     "successMessage": "Abbiamo inviato le istruzioni a {email}",
     "checkSpam": "Se non trovi l'email, controlla la cartella spam."

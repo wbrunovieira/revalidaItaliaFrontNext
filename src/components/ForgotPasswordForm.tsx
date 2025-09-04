@@ -44,30 +44,58 @@ export default function ForgotPasswordForm() {
   }, [setFocus]);
 
   const onSubmit = async (data: ForgotPasswordData) => {
+    setFormError(null); // Clear any previous errors
+    
     try {
-      // API route not implemented yet, simulating success for now
-      // In real implementation:
-      // const res = await fetch(`${API}/auth/forgot-password`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(data),
-      // });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const res = await fetch(`${apiUrl}/api/v1/auth/password/request-reset`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: data.email.trim() }),
+      });
+
+      const result = await res.json();
       
-      setSubmittedEmail(data.email);
-      setIsSuccess(true);
-    } catch (err: unknown) {
-      let message: string;
-      if (err instanceof Error) {
-        message = err.message === 'forgotPasswordFailed' 
-          ? t('forgotPasswordFailed') 
-          : err.message;
+      // According to API docs, always returns 200 with same message for security
+      // regardless of whether email exists or not
+      if (res.ok || res.status === 200) {
+        setSubmittedEmail(data.email);
+        setIsSuccess(true);
+      } else if (res.status === 400 && result.errors) {
+        // Validation error
+        const emailErrors = result.errors.email;
+        if (emailErrors && emailErrors.length > 0) {
+          setFormError(emailErrors[0]);
+        } else {
+          setFormError(t('forgotPasswordFailed'));
+        }
+      } else if (res.status === 429) {
+        // Rate limiting (Too Many Requests)
+        setFormError(t('rateLimitError'));
       } else {
-        message = t('forgotPasswordFailed');
+        // Other errors
+        setFormError(result.message || t('forgotPasswordFailed'));
       }
-      setFormError(message);
+    } catch (err: unknown) {
+      console.error('Password reset request error:', err);
+      
+      // Check if it's a network error
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setFormError(t('networkError'));
+      } else if (err instanceof Error) {
+        // Check for specific error types
+        if (err.message.toLowerCase().includes('network') || 
+            err.message.toLowerCase().includes('failed to fetch')) {
+          setFormError(t('networkError'));
+        } else {
+          setFormError(t('forgotPasswordFailed'));
+        }
+      } else {
+        setFormError(t('forgotPasswordFailed'));
+      }
     }
   };
 

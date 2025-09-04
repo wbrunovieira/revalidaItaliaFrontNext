@@ -1066,7 +1066,14 @@
     "resetPasswordFailed": "Erro ao redefinir senha. Tente novamente.",
     "successTitle": "Senha redefinida!",
     "successMessage": "Sua senha foi alterada com sucesso.",
-    "goToLogin": "Ir para login"
+    "goToLogin": "Ir para login",
+    "validatingToken": "Verificando link de redefinição...",
+    "invalidTokenTitle": "Link Inválido",
+    "invalidOrExpiredToken": "Este link de redefinição é inválido ou expirou.",
+    "requestNewLink": "Solicitar novo link",
+    "tokenVerificationError": "Erro ao verificar o link. Tente novamente.",
+    "redirectingToLogin": "Redirecionando para o login...",
+    "networkError": "Erro de conexão. Verifique sua internet e tente novamente."
   },
   "Dashboard": {
     "title": "Área do Aluno",

@@ -1054,7 +1054,14 @@
     "resetPasswordFailed": "Error al restablecer la contraseña. Inténtalo nuevamente.",
     "successTitle": "¡Contraseña restablecida!",
     "successMessage": "Tu contraseña ha sido cambiada exitosamente.",
-    "goToLogin": "Ir al inicio de sesión"
+    "goToLogin": "Ir al inicio de sesión",
+    "validatingToken": "Verificando enlace de restablecimiento...",
+    "invalidTokenTitle": "Enlace Inválido",
+    "invalidOrExpiredToken": "Este enlace de restablecimiento no es válido o ha expirado.",
+    "requestNewLink": "Solicitar nuevo enlace",
+    "tokenVerificationError": "Error al verificar el enlace. Inténtalo nuevamente.",
+    "redirectingToLogin": "Redirigiendo al inicio de sesión...",
+    "networkError": "Error de conexión. Verifica tu conexión a internet e inténtalo nuevamente."
   },
   "Dashboard": {
     "title": "Área del Estudiante",

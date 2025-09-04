@@ -24,6 +24,9 @@ export default function ResetPasswordForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isValidatingToken, setIsValidatingToken] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
+  const [tokenEmail, setTokenEmail] = useState<string>('');
 
   const resetPasswordSchema = z.object({
     password: z
@@ -57,38 +60,125 @@ export default function ResetPasswordForm() {
     reValidateMode: 'onChange',
   });
 
+  // Verify token on component mount
   useEffect(() => {
-    if (!token) {
-      setFormError(t('invalidToken'));
-    }
-    setFocus('password');
+    const verifyToken = async () => {
+      if (!token) {
+        console.log('❌ No token provided in URL');
+        setFormError(t('invalidToken'));
+        setIsValidatingToken(false);
+        return;
+      }
+
+      try {
+        console.log('🔐 Verifying password reset token:', {
+          token: token.substring(0, 10) + '...',
+          timestamp: new Date().toISOString()
+        });
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiUrl}/api/v1/auth/password/verify-token?token=${encodeURIComponent(token)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+        
+        console.log('📥 Token verification response:', {
+          status: response.status,
+          valid: result.valid,
+          email: result.email,
+          expiresAt: result.expiresAt,
+          timestamp: new Date().toISOString()
+        });
+
+        if (response.ok && result.valid) {
+          console.log('✅ Token is valid');
+          setTokenValid(true);
+          setTokenEmail(result.email);
+          setFocus('password');
+        } else {
+          console.log('❌ Token is invalid or expired');
+          setFormError(result.detail || t('invalidOrExpiredToken'));
+          setTokenValid(false);
+        }
+      } catch (error) {
+        console.error('🔥 Token verification error:', error);
+        setFormError(t('tokenVerificationError'));
+        setTokenValid(false);
+      } finally {
+        setIsValidatingToken(false);
+      }
+    };
+
+    verifyToken();
   }, [token, setFocus, t]);
 
-  const onSubmit = async () => {
-    if (!token) {
+  const onSubmit = async (data: ResetPasswordData) => {
+    if (!token || !tokenValid) {
       setFormError(t('invalidToken'));
       return;
     }
 
+    setFormError(null);
+
     try {
-      // API route not implemented yet, simulating success for now
-      // In real implementation:
-      // const res = await fetch(`${API}/auth/reset-password`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ token, password: data.password }),
-      // });
+      console.log('🔑 Submitting password reset:', {
+        token: token.substring(0, 10) + '...',
+        email: tokenEmail,
+        timestamp: new Date().toISOString()
+      });
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/auth/password/reset`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          token, 
+          password: data.password 
+        }),
+      });
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await response.json();
       
-      setIsSuccess(true);
+      console.log('📥 Password reset response:', {
+        status: response.status,
+        success: result.success,
+        message: result.message,
+        timestamp: new Date().toISOString()
+      });
+
+      if (response.ok) {
+        console.log('✅ Password reset successful');
+        setIsSuccess(true);
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.push(`/${locale}/login`);
+        }, 3000);
+      } else {
+        console.log('❌ Password reset failed:', result);
+        if (response.status === 400 && result.detail) {
+          setFormError(result.detail);
+        } else if (response.status === 401) {
+          setFormError(t('invalidOrExpiredToken'));
+        } else {
+          setFormError(result.message || t('resetPasswordFailed'));
+        }
+      }
     } catch (err: unknown) {
+      console.error('🔥 Password reset error:', err);
       let message: string;
       if (err instanceof Error) {
-        message = err.message === 'resetPasswordFailed' 
-          ? t('resetPasswordFailed') 
-          : err.message;
+        if (err.message.toLowerCase().includes('network') || 
+            err.message.toLowerCase().includes('fetch')) {
+          message = t('networkError');
+        } else {
+          message = t('resetPasswordFailed');
+        }
       } else {
         message = t('resetPasswordFailed');
       }
@@ -104,6 +194,76 @@ export default function ResetPasswordForm() {
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
   const hasMinLength = password.length >= 8;
 
+  // Show loading state while validating token
+  if (isValidatingToken) {
+    return (
+      <div className="space-y-6 text-center animate-fadeIn">
+        <div className="bg-gray-800/50 rounded-lg p-8">
+          <svg 
+            className="w-12 h-12 text-secondary mx-auto mb-4 animate-spin"
+            fill="none" 
+            viewBox="0 0 24 24" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle 
+              className="opacity-25" 
+              cx="12" 
+              cy="12" 
+              r="10" 
+              stroke="currentColor" 
+              strokeWidth="4"
+            />
+            <path 
+              className="opacity-75" 
+              fill="currentColor" 
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-300">
+            {t('validatingToken')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if token is invalid
+  if (!tokenValid && !isValidatingToken) {
+    return (
+      <div className="space-y-6 text-center animate-fadeIn">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6">
+          <svg 
+            className="w-16 h-16 text-red-500 mx-auto mb-4"
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+            />
+          </svg>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            {t('invalidTokenTitle')}
+          </h3>
+          <p className="text-gray-300 text-sm mb-4">
+            {formError || t('invalidOrExpiredToken')}
+          </p>
+        </div>
+        
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="inline-block text-secondary hover:text-accent transition-colors duration-200"
+        >
+          {t('requestNewLink')}
+        </Link>
+      </div>
+    );
+  }
+
+  // Show success message after password reset
   if (isSuccess) {
     return (
       <div className="space-y-6 text-center animate-fadeIn">
@@ -127,19 +287,15 @@ export default function ResetPasswordForm() {
           <p className="text-gray-300 text-sm mb-4">
             {t('successMessage')}
           </p>
+          <p className="text-gray-400 text-xs">
+            {t('redirectingToLogin')}
+          </p>
         </div>
-        
-        <Button
-          onClick={() => router.push(`/${locale}/login`)}
-          size="large"
-          className="w-full"
-        >
-          {t('goToLogin')}
-        </Button>
       </div>
     );
   }
 
+  // Show form if token is valid
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

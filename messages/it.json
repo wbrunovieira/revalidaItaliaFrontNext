@@ -1054,7 +1054,14 @@
     "resetPasswordFailed": "Errore nel reimpostare la password. Riprova.",
     "successTitle": "Password reimpostata!",
     "successMessage": "La tua password è stata cambiata con successo.",
-    "goToLogin": "Vai al login"
+    "goToLogin": "Vai al login",
+    "validatingToken": "Verifica link di reimpostazione...",
+    "invalidTokenTitle": "Link Non Valido",
+    "invalidOrExpiredToken": "Questo link di reimpostazione non è valido o è scaduto.",
+    "requestNewLink": "Richiedi nuovo link",
+    "tokenVerificationError": "Errore nella verifica del link. Riprova.",
+    "redirectingToLogin": "Reindirizzamento al login...",
+    "networkError": "Errore di connessione. Verifica la tua connessione internet e riprova."
   },
   "Dashboard": {
     "title": "Area Studente",

@@ -725,7 +725,14 @@
         "last7Days": "Últimos 7 días",
         "performanceByArgument": "Rendimiento por Argumento",
         "moreArguments": "+{count} argumentos",
-        "lastActivity": "Última actividad"
+        "lastActivity": "Última actividad",
+        "performanceDistribution": "Distribución de Rendimiento",
+        "performanceLevels": "Niveles de Rendimiento:"
+      },
+      "activityStatus": {
+        "active": "Activo",
+        "moderate": "Moderado",
+        "inactive": "Inactivo"
       },
       "performanceLevel": {
         "excellent": "Excelente",

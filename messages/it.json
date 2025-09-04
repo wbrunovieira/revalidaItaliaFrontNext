@@ -725,7 +725,14 @@
         "last7Days": "Ultimi 7 giorni",
         "performanceByArgument": "Performance per Argomento",
         "moreArguments": "+{count} argomenti",
-        "lastActivity": "Ultima attività"
+        "lastActivity": "Ultima attività",
+        "performanceDistribution": "Distribuzione delle Prestazioni",
+        "performanceLevels": "Livelli di Prestazione:"
+      },
+      "activityStatus": {
+        "active": "Attivo",
+        "moderate": "Moderato",
+        "inactive": "Inattivo"
       },
       "performanceLevel": {
         "excellent": "Eccellente",

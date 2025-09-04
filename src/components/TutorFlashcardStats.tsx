@@ -256,11 +256,11 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
   const getActivityText = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Ativo';
+        return t('activityStatus.active');
       case 'moderate':
-        return 'Moderado';
+        return t('activityStatus.moderate');
       case 'inactive':
-        return 'Inativo';
+        return t('activityStatus.inactive');
       default:
         return status;
     }
@@ -369,11 +369,11 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               </div>
             </div>
           </div>
-          <p className="text-gray-400 text-sm">Distribuição de Performance</p>
+          <p className="text-gray-400 text-sm">{t('stats.performanceDistribution')}</p>
           
           {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-            <div className="font-semibold mb-1">Níveis de Performance:</div>
+            <div className="font-semibold mb-1">{t('stats.performanceLevels')}</div>
             <div className="space-y-1">
               <div><span className="text-green-400">●</span> {t('legend.excellent')}</div>
               <div><span className="text-blue-400">●</span> {t('legend.good')}</div>

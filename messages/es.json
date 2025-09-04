@@ -3549,7 +3549,14 @@
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Clases en Vivo",
-    "transactions": "Transacciones"
+    "transactions": "Transacciones",
+    "tutor": "Tutor"
+  },
+  
+  "tutor": {
+    "title": "Área del Tutor",
+    "description": "Accede al panel de tutoría para gestionar evaluaciones y comentarios de los estudiantes",
+    "accessTutor": "Acceder al Área del Tutor"
   },
   "StudentQuizResults": {
     "title": "Mis Resultados",

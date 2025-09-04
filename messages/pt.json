@@ -3739,7 +3739,14 @@
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Aulas ao Vivo",
-    "transactions": "Transações"
+    "transactions": "Transações",
+    "tutor": "Tutor"
+  },
+  
+  "tutor": {
+    "title": "Área do Tutor",
+    "description": "Acesse o painel de tutoria para gerenciar avaliações e feedbacks dos alunos",
+    "accessTutor": "Acessar Área do Tutor"
   },
   
   "users": {

@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Radio,
   DollarSign,
+  GraduationCap,
 } from 'lucide-react';
 
 import {
@@ -247,6 +248,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.transactions')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="tutor"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <GraduationCap
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.tutor')}
             </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
@@ -716,6 +729,27 @@ export default function AdminPage() {
                 >
                   <DollarSign size={20} />
                   {t('transactions.viewTransactions')}
+                </a>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tutor">
+            <div className="p-6 space-y-6">
+              <div className="text-center">
+                <GraduationCap className="mx-auto mb-4 text-secondary" size={48} />
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {t('tutor.title')}
+                </h2>
+                <p className="text-gray-400 mb-6">
+                  {t('tutor.description')}
+                </p>
+                <a
+                  href={`/${locale}/tutor`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary-dark font-semibold rounded-lg hover:bg-secondary/80 transition-colors"
+                >
+                  <GraduationCap size={20} />
+                  {t('tutor.accessTutor')}
                 </a>
               </div>
             </div>

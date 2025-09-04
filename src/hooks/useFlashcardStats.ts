@@ -32,11 +32,133 @@ export interface RecentActivity {
   last30Days: number;
 }
 
+// Detailed Analytics Interfaces
+export interface TimelineAnalytics {
+  firstInteraction: string;
+  lastInteraction: string;
+  totalDaysActive: number;
+  averageSessionsPerDay: number;
+  monthlyProgress: Array<{
+    month: string;
+    interactions: number;
+    uniqueFlashcards: number;
+    masteryRate: number;
+  }>;
+}
+
+export interface ChallengeAnalysis {
+  mostChallenging: Array<{
+    flashcardId: string;
+    question: string;
+    failureRate: number;
+    attempts: number;
+  }>;
+  easiest: Array<{
+    flashcardId: string;
+    question: string;
+    successRate: number;
+    attempts: number;
+  }>;
+  improvementNeeded: Array<{
+    flashcardId: string;
+    question: string;
+    currentMastery: number;
+  }>;
+  difficultyDistribution: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
+}
+
+export interface StudyPatterns {
+  preferredTimes: {
+    morning: number;
+    afternoon: number;
+    evening: number;
+  };
+  weekdayDistribution: {
+    monday: number;
+    tuesday: number;
+    wednesday: number;
+    thursday: number;
+    friday: number;
+    saturday: number;
+    sunday: number;
+  };
+  peakHours: number[];
+}
+
+export interface PerformanceMetrics {
+  improvementRate: number;
+  averageTimePerCard: number;
+  accuracyTrend: 'improving' | 'stable' | 'declining';
+  performanceByWeek: Array<{
+    week: string;
+    masteryRate: number;
+    totalReviews: number;
+  }>;
+}
+
+export interface RetentionAnalysis {
+  shortTermRetention: number;
+  longTermRetention: number;
+  forgettingCurve: Array<{
+    day: number;
+    retention: number;
+  }>;
+  optimalReviewInterval: number;
+}
+
+export interface ConsistencyScore {
+  score: number;
+  currentStreak: number;
+  longestStreak: number;
+  missedDays: number;
+  consistency30Days: number;
+  consistency90Days: number;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  unlockedAt?: string;
+  progress?: number;
+  remaining?: number;
+}
+
+export interface AchievementSystem {
+  unlockedAchievements: Achievement[];
+  nextAchievements: Achievement[];
+  totalPoints: number;
+}
+
+export interface DetailedAnalytics {
+  timelineAnalytics?: TimelineAnalytics;
+  challengeAnalysis?: ChallengeAnalysis;
+  studyPatterns?: StudyPatterns;
+  performanceMetrics?: PerformanceMetrics;
+  retentionAnalysis?: RetentionAnalysis;
+  consistencyScore?: ConsistencyScore;
+  achievementSystem?: AchievementSystem;
+}
+
 export interface FlashcardStatsData {
   summary: FlashcardStatsSummary;
   argumentStats: ArgumentStat[];
   recentActivity: RecentActivity;
+  detailed?: DetailedAnalytics;
 }
+
+export type AnalyticsSection = 
+  | 'timelineAnalytics'
+  | 'challengeAnalysis' 
+  | 'studyPatterns'
+  | 'performanceMetrics'
+  | 'retentionAnalysis'
+  | 'consistencyScore'
+  | 'achievementSystem';
 
 interface UseFlashcardStatsParams {
   userId?: string;
@@ -48,7 +170,7 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async (options?: { detailed?: boolean; include?: AnalyticsSection[] }) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -64,11 +186,22 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
       if (userId) {
         params.append('userId', userId);
       }
+      
+      if (options?.detailed) {
+        params.append('detailed', 'true');
+      }
+      
+      if (options?.include && options.include.length > 0) {
+        params.append('include', options.include.join(','));
+      }
 
       const url = params.toString() 
         ? `${apiUrl}/api/v1/flashcards/stats/user?${params.toString()}`
         : `${apiUrl}/api/v1/flashcards/stats/user`;
 
+      console.log('Fetching flashcard stats from:', url);
+      console.log('With params:', { userId, ...options });
+      
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -76,18 +209,30 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
         },
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
+        const errorBody = await response.text();
+        console.error('Error response body:', errorBody);
+        
         if (response.status === 403) {
           throw new Error('You do not have permission to view these statistics');
         }
-        throw new Error(`Failed to fetch flashcard statistics: ${response.statusText}`);
+        throw new Error(`Failed to fetch flashcard statistics: ${response.status} - ${response.statusText}`);
       }
 
       const result = await response.json();
+      console.log('API Response:', result);
       setData(result.data || result);
       setError(null);
     } catch (err) {
       console.error('Error fetching flashcard stats:', err);
+      console.error('Full error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        url,
+        token: token ? 'Present' : 'Missing'
+      });
       setError(err instanceof Error ? err.message : 'Failed to fetch statistics');
       setData(null);
     } finally {

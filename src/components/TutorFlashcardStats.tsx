@@ -91,7 +91,7 @@ interface TutorFlashcardStatsProps {
 }
 
 
-export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
+export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps) {
   const { toast } = useToast();
   const { token, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -731,6 +731,7 @@ export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
           }}
           userId={selectedUser.id}
           userName={selectedUser.name}
+          locale={locale}
         />
       )}
     </div>

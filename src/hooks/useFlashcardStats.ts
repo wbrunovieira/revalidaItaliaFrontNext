@@ -171,6 +171,7 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
   const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(async (options?: { detailed?: boolean; include?: AnalyticsSection[] }) => {
+    let url = '';
     try {
       setIsLoading(true);
       setError(null);
@@ -195,7 +196,7 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
         params.append('include', options.include.join(','));
       }
 
-      const url = params.toString() 
+      url = params.toString() 
         ? `${apiUrl}/api/v1/flashcards/stats/user?${params.toString()}`
         : `${apiUrl}/api/v1/flashcards/stats/user`;
 
@@ -231,7 +232,7 @@ export function useFlashcardStats({ userId, autoFetch = true }: UseFlashcardStat
         message: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined,
         url,
-        token: token ? 'Present' : 'Missing'
+        token: getCookie('token') ? 'Present' : 'Missing'
       });
       setError(err instanceof Error ? err.message : 'Failed to fetch statistics');
       setData(null);

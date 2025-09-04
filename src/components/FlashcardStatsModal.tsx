@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { 
-  X, Brain, Trophy, Target, TrendingUp, Calendar, Clock, BarChart3, 
-  Loader2, ChevronRight, Activity, Award, Zap, Users, BookOpen,
-  Timer, RefreshCw, Layers
+  X, Brain, Trophy, Target, TrendingUp, Clock, BarChart3, 
+  Loader2, Activity, Award, Zap, Layers
 } from 'lucide-react';
-import { useFlashcardStats } from '@/hooks/useFlashcardStats';
+import { useFlashcardStats, type AnalyticsSection } from '@/hooks/useFlashcardStats';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
@@ -48,7 +47,7 @@ export default function FlashcardStatsModal({
     setDetailedView(true);
     refetch({
       detailed: true,
-      include: ['timelineAnalytics', 'challengeAnalysis', 'studyPatterns', 'performanceMetrics', 'achievementSystem', 'consistencyScore'] as any
+      include: ['timelineAnalytics', 'challengeAnalysis', 'studyPatterns', 'performanceMetrics', 'achievementSystem', 'consistencyScore'] as AnalyticsSection[]
     });
   };
 
@@ -738,7 +737,7 @@ export default function FlashcardStatsModal({
             <div className="p-6 text-center">
               <p className="text-red-400">{error}</p>
               <button
-                onClick={refetch}
+                onClick={() => refetch()}
                 className="mt-4 px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/80 transition-colors"
               >
                 {t('retry')}

@@ -648,6 +648,68 @@
       "noDataDescription": "Comienza a estudiar con flashcards para ver tus desafíos y progreso.",
       "noAchievementsTitle": "Ningún logro aún",
       "noAchievementsDescription": "¡Continúa estudiando para desbloquear logros y ganar puntos!"
+    },
+    "overview": {
+      "tabs": {
+        "assessmentOverview": "Evaluaciones - Visión General",
+        "assessmentAnalysis": "Evaluaciones - Análisis",
+        "flashcards": "Flashcards",
+        "reports": "Denuncias",
+        "support": "Soporte"
+      },
+      "loading": {
+        "attempts": "Cargando intentos pendientes..."
+      },
+      "filters": {
+        "all": "Todas",
+        "pending": "Esperando revisión",
+        "inProgress": "En revisión",
+        "completed": "Revisadas",
+        "groupByStudent": "Agrupar por Estudiante",
+        "groupByExam": "Agrupar por Examen"
+      },
+      "search": {
+        "placeholder": "Buscar por estudiante o examen...",
+        "results": "{count} intentos encontrados"
+      },
+      "stats": {
+        "openExams": "Exámenes Abiertos",
+        "pending": "Esperando Revisión",
+        "waitingStudent": "Esperando Estudiante",
+        "approved": "Aprobados",
+        "total": "Total",
+        "quizStats": "Estadísticas de Quiz",
+        "totalAttempts": "Intentos Totales",
+        "differentQuizzes": "Quizzes Diferentes",
+        "uniqueStudents": "Estudiantes Únicos",
+        "totalErrors": "Errores Totales",
+        "simuladoStats": "Estadísticas de Simulacro",
+        "differentSimulados": "Simulacros Diferentes"
+      },
+      "details": {
+        "students": "Estudiantes:",
+        "average": "Promedio:",
+        "lastAttempt": "Último intento:",
+        "viewDetails": "Ver detalles",
+        "status": "Estado:"
+      },
+      "priority": {
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      },
+      "empty": {
+        "noAttempts": "No se encontraron intentos",
+        "noExams": "No hay pruebas",
+        "noExamsDescription": {
+          "all": "en este momento",
+          "pending": "esperando revisión en este momento",
+          "inProgress": "en revisión en este momento",
+          "completed": "revisadas en este momento"
+        },
+        "noAnalyticsTitle": "No hay datos de análisis disponibles",
+        "noAnalyticsDescription": "Los análisis detallados estarán disponibles cuando haya intentos de Quiz o Simulacro realizados por los estudiantes."
+      }
     }
   }
 

@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslations } from 'next-intl';
 import {
   User,
   FileText,
@@ -131,6 +132,7 @@ export default function TutorDashboard({
 }: TutorDashboardProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('Tutor.overview');
 
   const [attempts, setAttempts] = useState<
     PendingAttempt[]
@@ -697,7 +699,7 @@ export default function TutorDashboard({
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
           <p className="text-gray-300">
-            Carregando tentativas pendentes...
+            {t('loading.attempts')}
           </p>
         </div>
       </div>
@@ -718,7 +720,7 @@ export default function TutorDashboard({
             }`}
           >
             <Activity size={18} />
-            Avaliações - Visão Geral
+            {t('tabs.assessmentOverview')}
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
@@ -729,7 +731,7 @@ export default function TutorDashboard({
             }`}
           >
             <BarChart3 size={18} />
-            Avaliações - Análise
+            {t('tabs.assessmentAnalysis')}
           </button>
           <button
             onClick={() => setActiveTab('flashcards')}
@@ -740,7 +742,7 @@ export default function TutorDashboard({
             }`}
           >
             <Brain size={18} />
-            Flashcards
+            {t('tabs.flashcards')}
           </button>
           <button
             onClick={() => setActiveTab('reports')}
@@ -751,7 +753,7 @@ export default function TutorDashboard({
             }`}
           >
             <AlertTriangle size={18} />
-            Denúncias
+            {t('tabs.reports')}
           </button>
           <button
             onClick={() => setActiveTab('support')}
@@ -762,7 +764,7 @@ export default function TutorDashboard({
             }`}
           >
             <HelpCircle size={18} />
-            Suporte
+            {t('tabs.support')}
           </button>
         </div>
 
@@ -788,15 +790,15 @@ export default function TutorDashboard({
                     }
                     className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
                   >
-                    <option value="all">Todas</option>
+                    <option value="all">{t('filters.all')}</option>
                     <option value="pending">
-                      Aguardando revisão
+                      {t('filters.pending')}
                     </option>
                     <option value="in-progress">
-                      Em revisão
+                      {t('filters.inProgress')}
                     </option>
                     <option value="completed">
-                      Revisadas
+                      {t('filters.completed')}
                     </option>
                   </select>
                 </div>
@@ -818,10 +820,10 @@ export default function TutorDashboard({
                     className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
                   >
                     <option value="student">
-                      Agrupar por Aluno
+                      {t('filters.groupByStudent')}
                     </option>
                     <option value="assessment">
-                      Agrupar por Prova
+                      {t('filters.groupByExam')}
                     </option>
                   </select>
                 </div>
@@ -833,7 +835,7 @@ export default function TutorDashboard({
                   />
                   <input
                     type="text"
-                    placeholder="Buscar por aluno ou prova..."
+                    placeholder={t('search.placeholder')}
                     value={searchTerm}
                     onChange={e =>
                       setSearchTerm(e.target.value)
@@ -844,15 +846,14 @@ export default function TutorDashboard({
               </div>
 
               <div className="text-sm text-gray-400">
-                {deduplicatedAttempts.length} tentativas
-                encontradas
+                {t('search.results', { count: deduplicatedAttempts.length })}
               </div>
             </div>
 
             {/* Stats Cards */}
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Provas Abertas
+                {t('stats.openExams')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-gray-800 rounded-lg">
@@ -874,7 +875,7 @@ export default function TutorDashboard({
                           )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Aguardando Revisão
+                        {t('stats.pending')}
                       </p>
                     </div>
                   </div>
@@ -897,7 +898,7 @@ export default function TutorDashboard({
                         )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Aguardando Aluno
+                        {t('stats.waitingStudent')}
                       </p>
                     </div>
                   </div>
@@ -919,7 +920,7 @@ export default function TutorDashboard({
                         )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Aprovadas
+                        {t('stats.approved')}
                       </p>
                     </div>
                   </div>
@@ -940,7 +941,7 @@ export default function TutorDashboard({
                         )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Total
+                        {t('stats.total')}
                       </p>
                     </div>
                   </div>
@@ -959,7 +960,7 @@ export default function TutorDashboard({
                         size={24}
                         className="text-green-400"
                       />
-                      Estatísticas de Quiz
+                      {t('stats.quizStats')}
                     </h2>
                     <button
                       onClick={() => fetchPendingAttempts()}
@@ -974,7 +975,7 @@ export default function TutorDashboard({
                         {quizAttempts.length}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Total de Tentativas
+                        {t('stats.totalAttempts')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -991,7 +992,7 @@ export default function TutorDashboard({
                         }
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Quizzes Diferentes
+                        {t('stats.differentQuizzes')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1008,7 +1009,7 @@ export default function TutorDashboard({
                         }
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Alunos Únicos
+                        {t('stats.uniqueStudents')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1038,7 +1039,7 @@ export default function TutorDashboard({
                         )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Total de Erros
+                        {t('stats.totalErrors')}
                       </p>
                     </div>
                   </div>
@@ -1115,7 +1116,7 @@ export default function TutorDashboard({
                             )}
                           </div>
                           <div className="mt-1 text-xs text-gray-400">
-                            Alunos:{' '}
+                            {t('details.students')}{' '}
                             {[
                               ...new Set(
                                 attempts.map(
@@ -1139,7 +1140,7 @@ export default function TutorDashboard({
                       size={24}
                       className="text-purple-400"
                     />
-                    Estatísticas de Simulado
+                    {t('stats.simuladoStats')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1147,7 +1148,7 @@ export default function TutorDashboard({
                         {simuladoAttempts.length}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Total de Tentativas
+                        {t('stats.totalAttempts')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1164,7 +1165,7 @@ export default function TutorDashboard({
                         }
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Simulados Diferentes
+                        {t('stats.differentSimulados')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1181,7 +1182,7 @@ export default function TutorDashboard({
                         }
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Alunos Únicos
+                        {t('stats.uniqueStudents')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
@@ -1211,7 +1212,7 @@ export default function TutorDashboard({
                         )}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        Total de Erros
+                        {t('stats.totalErrors')}
                       </p>
                     </div>
                   </div>
@@ -1288,7 +1289,7 @@ export default function TutorDashboard({
                             )}
                           </div>
                           <div className="mt-1 text-xs text-gray-400">
-                            Alunos:{' '}
+                            {t('details.students')}{' '}
                             {[
                               ...new Set(
                                 attempts.map(
@@ -1314,20 +1315,17 @@ export default function TutorDashboard({
                     className="text-gray-600 mx-auto mb-4"
                   />
                   <h3 className="text-lg font-semibold text-gray-400 mb-2">
-                    Nenhuma tentativa encontrada
+                    {t('empty.noAttempts')}
                   </h3>
                   <p className="text-gray-500">
-                    Não há provas{' '}
+                    {t('empty.noExams')}{' '}
                     {filter === 'all'
-                      ? ''
-                      : `${
-                          filter === 'pending'
-                            ? 'aguardando revisão'
-                            : filter === 'in-progress'
-                            ? 'em revisão'
-                            : 'revisadas'
-                        }`}{' '}
-                    no momento.
+                      ? t('empty.noExamsDescription.all')
+                      : filter === 'pending'
+                      ? t('empty.noExamsDescription.pending')
+                      : filter === 'in-progress'
+                      ? t('empty.noExamsDescription.inProgress')
+                      : t('empty.noExamsDescription.completed')}
                   </p>
                 </div>
               ) : (
@@ -1639,7 +1637,7 @@ export default function TutorDashboard({
                                         <div className="space-y-1 text-xs">
                                           <div className="flex items-center justify-between">
                                             <span className="text-gray-400">
-                                              Status:
+                                              {t('details.status')}:
                                             </span>
                                             <span
                                               className={`font-semibold ${statusColor}`}
@@ -1664,11 +1662,11 @@ export default function TutorDashboard({
                                             >
                                               {priority ===
                                               'high'
-                                                ? 'Alta'
+                                                ? t('priority.high')
                                                 : priority ===
                                                   'medium'
-                                                ? 'Média'
-                                                : 'Baixa'}
+                                                ? t('priority.medium')
+                                                : t('priority.low')}
                                             </span>
                                           </div>
                                         </div>
@@ -1702,10 +1700,10 @@ export default function TutorDashboard({
                   className="mx-auto mb-4 text-gray-400"
                 />
                 <h3 className="text-lg font-semibold text-gray-300 mb-2">
-                  Nenhum dado de análise disponível
+                  {t('empty.noAnalyticsTitle')}
                 </h3>
                 <p className="text-gray-500 max-w-md mx-auto">
-                  As análises detalhadas estarão disponíveis quando houver tentativas de Quiz ou Simulado realizadas pelos alunos.
+                  {t('empty.noAnalyticsDescription')}
                 </p>
               </div>
             )}

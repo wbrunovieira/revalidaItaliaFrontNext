@@ -32,11 +32,7 @@ export default function ResetPasswordForm() {
     password: z
       .string()
       .nonempty({ message: t('passwordRequired') })
-      .min(8, { message: t('passwordMinLength', { min: 8 }) })
-      .regex(/[A-Z]/, { message: t('passwordUppercase') })
-      .regex(/[a-z]/, { message: t('passwordLowercase') })
-      .regex(/[0-9]/, { message: t('passwordNumber') })
-      .regex(/[!@#$%^&*(),.?":{}|<>]/, { message: t('passwordSpecial') }),
+      .min(6, { message: t('passwordMinLength', { min: 6 }) }),
     confirmPassword: z
       .string()
       .nonempty({ message: t('confirmPasswordRequired') }),
@@ -139,7 +135,7 @@ export default function ResetPasswordForm() {
         },
         body: JSON.stringify({ 
           token, 
-          password: data.password 
+          newPassword: data.password 
         }),
       });
       
@@ -187,12 +183,17 @@ export default function ResetPasswordForm() {
   };
 
   const password = watch('password') ?? '';
+  const confirmPassword = watch('confirmPassword') ?? '';
   const showCriteria = Boolean(touchedFields.password) && password.length > 0;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  const hasMinLength = password.length >= 8;
+  const hasMinLength = password.length >= 6;
+  const passwordsMatch = password && confirmPassword && password === confirmPassword;
+  
+  // Validação completa da senha
+  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
 
   // Show loading state while validating token
   if (isValidatingToken) {
@@ -356,57 +357,67 @@ export default function ResetPasswordForm() {
         <div className="bg-gray-800/50 rounded-lg p-4 space-y-2 animate-fadeIn">
           <p className="text-sm font-medium text-gray-300 mb-2">{t('passwordRequirements')}</p>
           <ul className="space-y-1 text-sm">
-            <li className={`flex items-center ${hasMinLength ? 'text-green-500' : 'text-gray-400'}`}>
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <li className={`flex items-center transition-colors duration-200 ${hasMinLength ? 'text-green-500' : 'text-gray-400'}`}>
+              <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 {hasMinLength ? (
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 ) : (
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 )}
               </svg>
-              {t('passwordMinLength', { min: 8 })}
+              <span>{t('passwordMinLength', { min: 6 })}</span>
             </li>
-            <li className={`flex items-center ${hasUppercase ? 'text-green-500' : 'text-gray-400'}`}>
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <li className={`flex items-center transition-colors duration-200 ${hasUppercase ? 'text-green-500' : 'text-gray-400'}`}>
+              <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 {hasUppercase ? (
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 ) : (
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 )}
               </svg>
-              {t('passwordUppercase')}
+              <span>{t('passwordUppercase')}</span>
             </li>
-            <li className={`flex items-center ${hasLowercase ? 'text-green-500' : 'text-gray-400'}`}>
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <li className={`flex items-center transition-colors duration-200 ${hasLowercase ? 'text-green-500' : 'text-gray-400'}`}>
+              <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 {hasLowercase ? (
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 ) : (
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 )}
               </svg>
-              {t('passwordLowercase')}
+              <span>{t('passwordLowercase')}</span>
             </li>
-            <li className={`flex items-center ${hasNumber ? 'text-green-500' : 'text-gray-400'}`}>
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <li className={`flex items-center transition-colors duration-200 ${hasNumber ? 'text-green-500' : 'text-gray-400'}`}>
+              <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 {hasNumber ? (
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 ) : (
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 )}
               </svg>
-              {t('passwordNumber')}
+              <span>{t('passwordNumber')}</span>
             </li>
-            <li className={`flex items-center ${hasSpecial ? 'text-green-500' : 'text-gray-400'}`}>
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <li className={`flex items-center transition-colors duration-200 ${hasSpecial ? 'text-green-500' : 'text-gray-400'}`}>
+              <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 {hasSpecial ? (
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 ) : (
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 )}
               </svg>
-              {t('passwordSpecial')}
+              <span>{t('passwordSpecial')}</span>
             </li>
           </ul>
+          {isPasswordValid && (
+            <div className="mt-2 pt-2 border-t border-gray-700">
+              <p className="text-xs text-green-400 flex items-center">
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                {t('passwordStrong')}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -442,6 +453,22 @@ export default function ResetPasswordForm() {
         <p className="mt-1 text-sm text-red-500 animate-fadeIn">
           {errors.confirmPassword.message}
         </p>
+      )}
+      
+      {/* Indicador de correspondência das senhas */}
+      {password && confirmPassword && (
+        <div className={`text-sm flex items-center gap-2 transition-colors duration-200 ${
+          passwordsMatch ? 'text-green-500' : 'text-amber-500'
+        }`}>
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            {passwordsMatch ? (
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            ) : (
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            )}
+          </svg>
+          {passwordsMatch ? t('passwordsMatch') : t('passwordsDoNotMatch')}
+        </div>
       )}
 
       <Button

@@ -1061,7 +1061,9 @@
     "requestNewLink": "Solicitar nuevo enlace",
     "tokenVerificationError": "Error al verificar el enlace. Inténtalo nuevamente.",
     "redirectingToLogin": "Redirigiendo al inicio de sesión...",
-    "networkError": "Error de conexión. Verifica tu conexión a internet e inténtalo nuevamente."
+    "networkError": "Error de conexión. Verifica tu conexión a internet e inténtalo nuevamente.",
+    "passwordStrong": "¡Contraseña fuerte y segura!",
+    "passwordsMatch": "Las contraseñas coinciden"
   },
   "Dashboard": {
     "title": "Área del Estudiante",

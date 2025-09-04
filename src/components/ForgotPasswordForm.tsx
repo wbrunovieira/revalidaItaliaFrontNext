@@ -41,31 +41,58 @@ export default function ForgotPasswordForm() {
 
   useEffect(() => {
     setFocus('email');
-  }, [setFocus]);
+    console.log('🔑 Forgot Password Form initialized:', {
+      apiUrl: process.env.NEXT_PUBLIC_API_URL,
+      locale,
+      timestamp: new Date().toISOString()
+    });
+  }, [setFocus, locale]);
 
   const onSubmit = async (data: ForgotPasswordData) => {
     setFormError(null); // Clear any previous errors
     
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const requestUrl = `${apiUrl}/api/v1/auth/password/request-reset`;
+      const requestBody = { email: data.email.trim() };
       
-      const res = await fetch(`${apiUrl}/api/v1/auth/password/request-reset`, {
+      // Log request details
+      console.log('🔐 Password Reset Request:', {
+        url: requestUrl,
+        email: requestBody.email,
+        timestamp: new Date().toISOString()
+      });
+      
+      const res = await fetch(requestUrl, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: data.email.trim() }),
+        body: JSON.stringify(requestBody),
       });
 
       const result = await res.json();
       
+      // Log response details
+      console.log('📥 Password Reset Response:', {
+        status: res.status,
+        statusText: res.statusText,
+        success: result.success,
+        message: result.message,
+        errors: result.errors,
+        detail: result.detail,
+        timestamp: new Date().toISOString()
+      });
+      
       // According to API docs, always returns 200 with same message for security
       // regardless of whether email exists or not
       if (res.ok || res.status === 200) {
+        console.log('✅ Password reset email sent successfully');
         setSubmittedEmail(data.email);
         setIsSuccess(true);
       } else if (res.status === 400 && result.errors) {
         // Validation error
+        console.log('⚠️ Validation error:', result.errors);
         const emailErrors = result.errors.email;
         if (emailErrors && emailErrors.length > 0) {
           setFormError(emailErrors[0]);
@@ -74,26 +101,44 @@ export default function ForgotPasswordForm() {
         }
       } else if (res.status === 429) {
         // Rate limiting (Too Many Requests)
+        console.log('🚫 Rate limit exceeded:', {
+          status: res.status,
+          message: result.message || 'Too many requests'
+        });
         setFormError(t('rateLimitError'));
       } else {
         // Other errors
+        console.log('❌ Unexpected error:', {
+          status: res.status,
+          message: result.message,
+          result
+        });
         setFormError(result.message || t('forgotPasswordFailed'));
       }
     } catch (err: unknown) {
-      console.error('Password reset request error:', err);
+      console.error('🔥 Password reset request failed:', {
+        error: err,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        type: err?.constructor?.name,
+        timestamp: new Date().toISOString()
+      });
       
       // Check if it's a network error
       if (err instanceof TypeError && err.message.includes('fetch')) {
+        console.log('🌐 Network error detected');
         setFormError(t('networkError'));
       } else if (err instanceof Error) {
         // Check for specific error types
         if (err.message.toLowerCase().includes('network') || 
             err.message.toLowerCase().includes('failed to fetch')) {
+          console.log('🌐 Network/fetch error detected');
           setFormError(t('networkError'));
         } else {
+          console.log('⚠️ Generic error:', err.message);
           setFormError(t('forgotPasswordFailed'));
         }
       } else {
+        console.log('❓ Unknown error type');
         setFormError(t('forgotPasswordFailed'));
       }
     }

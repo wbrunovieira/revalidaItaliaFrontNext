@@ -15,7 +15,8 @@ import Image from 'next/image';
 export default function ResetPasswordForm() {
   const t = useTranslations('ResetPassword');
   const router = useRouter();
-  const { locale } = (useParams() as { locale?: string }) ?? 'pt';
+  const params = useParams() as { locale?: string };
+  const locale = params?.locale || 'pt';
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 

@@ -16,8 +16,8 @@ import { useAuth } from '@/stores/auth.store';
 export default function LoginForm() {
   const t = useTranslations('Login');
   const router = useRouter();
-  const { locale } =
-    (useParams() as { locale?: string }) ?? 'pt';
+  const params = useParams() as { locale?: string };
+  const locale = params?.locale || 'pt';
   const { login } = useAuth();
 
   const [formError, setFormError] = useState<string | null>(

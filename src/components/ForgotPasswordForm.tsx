@@ -13,7 +13,8 @@ import Link from 'next/link';
 
 export default function ForgotPasswordForm() {
   const t = useTranslations('ForgotPassword');
-  const { locale } = (useParams() as { locale?: string }) ?? 'pt';
+  const params = useParams() as { locale?: string };
+  const locale = params?.locale || 'pt';
 
   const [formError, setFormError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);

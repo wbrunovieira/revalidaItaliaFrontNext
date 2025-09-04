@@ -571,6 +571,28 @@
           "defaultMessage": "Não foi possível processar a revisão. Tente novamente."
         }
       }
+    },
+    "flashcardStats": {
+      "title": "Estatísticas de Flashcards",
+      "studentName": "Aluno: {name}",
+      "overallProgress": "Progresso Geral",
+      "masteryRate": "Taxa de Domínio",
+      "studyStreak": "Sequência de Estudo",
+      "days": "dias",
+      "totalResets": "{count} resets",
+      "difficultyDistribution": "Distribuição de Dificuldade",
+      "easy": "Fácil",
+      "neutral": "Neutro",
+      "hard": "Difícil",
+      "recentActivity": "Atividade Recente",
+      "today": "Hoje",
+      "last7Days": "Últimos 7 dias",
+      "last30Days": "Últimos 30 dias",
+      "argumentPerformance": "Desempenho por Argumento",
+      "reviewed": "Revisados",
+      "progress": "Progresso",
+      "totalInteractions": "{count} interações totais",
+      "retry": "Tentar novamente"
     }
   }
 
@@ -2809,127 +2831,6 @@
       "assign": "Atribuir"
     }
   },
-
-  "Tutor": {
-  "back": "Voltar",
-  "dashboard": {
-    "title": "Área do Tutor",
-    "subtitle": "Revise provas dissertativas e forneça feedback aos alunos"
-  },
-  "stats": {
-    "pending": "Aguardando revisão",
-    "inProgress": "Em revisão",
-    "completed": "Revisadas",
-    "total": "Total de provas"
-  },
-  "filters": {
-    "all": "Todas",
-    "pending": "Aguardando revisão",
-    "inProgress": "Em revisão", 
-    "completed": "Revisadas"
-  },
-  "status": {
-    "submitted": "Aguardando revisão",
-    "grading": "Em revisão",
-    "graded": "Revisada"
-  },
-  "review": {
-    "title": "Revisão de Prova",
-    "subtitle": "Avalie as respostas e forneça feedback detalhado",
-    "correct": "Correta",
-    "incorrect": "Incorreta",
-    "reviewLater": "Revisar depois",
-    "comment": "Comentário do Tutor",
-    "commentPlaceholder": "Adicione um comentário para o aluno...",
-    "save": "Salvar",
-    "saving": "Salvando...",
-    "finalize": "Finalizar Revisão",
-    "finalizing": "Finalizando...",
-    "previous": "Anterior",
-    "next": "Próxima"
-  },
-  "priority": {
-    "high": "Alta prioridade",
-    "medium": "Média prioridade",
-    "low": "Baixa prioridade"
-  },
-  "messages": {
-    "noAttempts": "Nenhuma tentativa encontrada",
-    "noAttemptsSubtitle": "Não há provas pendentes de revisão no momento",
-    "attemptNotFound": "Tentativa não encontrada",
-    "attemptNotFoundSubtitle": "A tentativa que você está procurando não foi encontrada",
-    "loadingAttempts": "Carregando tentativas pendentes...",
-    "loadingAttempt": "Carregando dados da tentativa...",
-    "reviewSaved": "Revisão salva com sucesso",
-    "reviewFinalized": "Revisão finalizada com sucesso",
-    "errorSaving": "Erro ao salvar revisão",
-    "errorFinalizing": "Erro ao finalizar revisão",
-    "errorLoading": "Erro ao carregar dados"
-  },
-  "reports": {
-    "loading": "Carregando denúncias...",
-    "noReports": "Nenhuma denúncia encontrada",
-    "noReportsDescription": "Não há denúncias para revisar no momento",
-    "searchPlaceholder": "Buscar por usuário, conteúdo ou motivo...",
-    "reason": "Motivo",
-    "reportedContent": "Conteúdo denunciado",
-    "reportedBy": "Denunciado por",
-    "reportedUser": "Usuário denunciado",
-    "resolution": "Resolução",
-    "resolvedBy": "Resolvido por",
-    "stats": {
-      "total": "Total",
-      "pending": "Pendentes",
-      "reviewing": "Em análise",
-      "resolved": "Resolvidas",
-      "dismissed": "Dispensadas"
-    },
-    "filter": {
-      "all": "Todas",
-      "pending": "Pendentes",
-      "reviewing": "Em análise",
-      "resolved": "Resolvidas",
-      "dismissed": "Dispensadas"
-    },
-    "type": {
-      "all": "Todos os tipos",
-      "post": "Postagem",
-      "comment": "Comentário",
-      "reply": "Resposta"
-    },
-    "status": {
-      "pending": "Pendente",
-      "reviewing": "Em análise",
-      "resolved": "Resolvida",
-      "dismissed": "Dispensada"
-    },
-    "actions": {
-      "review": "Analisar",
-      "resolve": "Resolver",
-      "complete": "Concluir",
-      "view": "Visualizar"
-    },
-    "modal": {
-      "title": "Resolver Denúncia",
-      "resolution": "Descrição da Resolução",
-      "resolutionPlaceholder": "Descreva a ação tomada e o motivo da decisão...",
-      "resolve": "Resolver",
-      "dismiss": "Dispensar",
-      "cancel": "Cancelar",
-      "processing": "Processando..."
-    },
-    "error": {
-      "fetchTitle": "Erro ao carregar",
-      "fetchDescription": "Não foi possível carregar as denúncias",
-      "updateTitle": "Erro ao atualizar",
-      "updateDescription": "Não foi possível atualizar a denúncia"
-    },
-    "success": {
-      "updateTitle": "Denúncia atualizada",
-      "updateDescription": "O status da denúncia foi atualizado com sucesso"
-    }
-  }
-},
   
   "Community": {
     "title": "Comunidade",

@@ -574,6 +574,28 @@
           "defaultMessage": "Non è stato possibile elaborare la revisione. Riprova."
         }
       }
+    },
+    "flashcardStats": {
+      "title": "Statistiche Flashcard",
+      "studentName": "Studente: {name}",
+      "overallProgress": "Progresso Generale",
+      "masteryRate": "Tasso di Padronanza",
+      "studyStreak": "Serie di Studio",
+      "days": "giorni",
+      "totalResets": "{count} reset totali",
+      "difficultyDistribution": "Distribuzione della Difficoltà",
+      "easy": "Facile",
+      "neutral": "Neutro",
+      "hard": "Difficile",
+      "recentActivity": "Attività Recente",
+      "today": "Oggi",
+      "last7Days": "Ultimi 7 giorni",
+      "last30Days": "Ultimi 30 giorni",
+      "argumentPerformance": "Prestazioni per Argomento",
+      "reviewed": "Revisionate",
+      "progress": "Progresso",
+      "totalInteractions": "{count} interazioni totali",
+      "retry": "Riprova"
     }
   }
 
@@ -5503,7 +5525,8 @@
     "invalidId": "ID non valido"
   }
 },
-"argumentEdit": {
+  
+  "argumentEdit": {
   "title": "Modifica Argomento",
   "currentArgument": "Argomento attuale",
   "cancel": "Annulla",
@@ -5538,126 +5561,5 @@
     "title": "Argomento aggiornato",
     "description": "L'argomento è stato aggiornato con successo"
   }
-},
-"Tutor": {
-  "back": "Indietro",
-  "dashboard": {
-    "title": "Area Tutor",
-    "subtitle": "Rivedi prove dissertative e fornisci feedback agli studenti"
-  },
-  "stats": {
-    "pending": "In attesa di revisione",
-    "inProgress": "In revisione",
-    "completed": "Revisionate",
-    "total": "Totale prove"
-  },
-  "filters": {
-    "all": "Tutte",
-    "pending": "In attesa di revisione",
-    "inProgress": "In revisione",
-    "completed": "Revisionate"
-  },
-  "status": {
-    "submitted": "In attesa di revisione",
-    "grading": "In revisione",
-    "graded": "Revisionata"
-  },
-  "review": {
-    "title": "Revisione Prova",
-    "subtitle": "Valuta le risposte e fornisci feedback dettagliato",
-    "correct": "Corretta",
-    "incorrect": "Scorretta",
-    "reviewLater": "Rivedere dopo",
-    "comment": "Commento del Tutor",
-    "commentPlaceholder": "Aggiungi un commento per lo studente...",
-    "save": "Salva",
-    "saving": "Salvando...",
-    "finalize": "Finalizza Revisione",
-    "finalizing": "Finalizzando...",
-    "previous": "Precedente",
-    "next": "Successiva"
-  },
-  "priority": {
-    "high": "Alta priorità",
-    "medium": "Media priorità",
-    "low": "Bassa priorità"
-  },
-  "messages": {
-    "noAttempts": "Nessun tentativo trovato",
-    "noAttemptsSubtitle": "Non ci sono prove in attesa di revisione al momento",
-    "attemptNotFound": "Tentativo non trovato",
-    "attemptNotFoundSubtitle": "Il tentativo che stai cercando non è stato trovato",
-    "loadingAttempts": "Caricamento tentativi in sospeso...",
-    "loadingAttempt": "Caricamento dati del tentativo...",
-    "reviewSaved": "Revisione salvata con successo",
-    "reviewFinalized": "Revisione finalizzata con successo",
-    "errorSaving": "Errore nel salvare la revisione",
-    "errorFinalizing": "Errore nel finalizzare la revisione",
-    "errorLoading": "Errore nel caricamento dati"
-  },
-  "reports": {
-    "loading": "Caricamento segnalazioni...",
-    "noReports": "Nessuna segnalazione trovata",
-    "noReportsDescription": "Non ci sono segnalazioni da rivedere al momento",
-    "searchPlaceholder": "Cerca per utente, contenuto o motivo...",
-    "reason": "Motivo",
-    "reportedContent": "Contenuto segnalato",
-    "reportedBy": "Segnalato da",
-    "reportedUser": "Utente segnalato",
-    "resolution": "Risoluzione",
-    "resolvedBy": "Risolto da",
-    "stats": {
-      "total": "Totale",
-      "pending": "In attesa",
-      "reviewing": "In analisi",
-      "resolved": "Risolte",
-      "dismissed": "Archiviate"
-    },
-    "filter": {
-      "all": "Tutte",
-      "pending": "In attesa",
-      "reviewing": "In analisi",
-      "resolved": "Risolte",
-      "dismissed": "Archiviate"
-    },
-    "type": {
-      "all": "Tutti i tipi",
-      "post": "Post",
-      "comment": "Commento",
-      "reply": "Risposta"
-    },
-    "status": {
-      "pending": "In attesa",
-      "reviewing": "In analisi",
-      "resolved": "Risolta",
-      "dismissed": "Archiviata"
-    },
-    "actions": {
-      "review": "Analizza",
-      "resolve": "Risolvi",
-      "complete": "Completa",
-      "view": "Visualizza"
-    },
-    "modal": {
-      "title": "Risolvi Segnalazione",
-      "resolution": "Descrizione della Risoluzione",
-      "resolutionPlaceholder": "Descrivi l'azione intrapresa e il motivo della decisione...",
-      "resolve": "Risolvi",
-      "dismiss": "Archivia",
-      "cancel": "Annulla",
-      "processing": "Elaborazione..."
-    },
-    "error": {
-      "fetchTitle": "Errore nel caricamento",
-      "fetchDescription": "Impossibile caricare le segnalazioni",
-      "updateTitle": "Errore nell'aggiornamento",
-      "updateDescription": "Impossibile aggiornare la segnalazione"
-    },
-    "success": {
-      "updateTitle": "Segnalazione aggiornata",
-      "updateDescription": "Lo stato della segnalazione è stato aggiornato con successo"
-    }
-  }
 }
-}
-}
+}}

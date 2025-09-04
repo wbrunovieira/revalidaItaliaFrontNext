@@ -17,10 +17,12 @@ import {
   ChevronRight,
   Loader2,
   X,
+  Eye,
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/stores/auth.store';
+import FlashcardStatsModal from './FlashcardStatsModal';
 
 // Types based on API documentation
 interface FlashcardUserStats {
@@ -102,6 +104,8 @@ export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [activePeriod, setActivePeriod] = useState<'today' | '7days' | '30days' | 'all' | 'custom'>('all');
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -585,6 +589,16 @@ export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
                     <Activity size={16} />
                     {getActivityText(user.activityStatus)}
                   </div>
+                  <button
+                    onClick={() => {
+                      setSelectedUser({ id: user.userId, name: user.name });
+                      setShowStatsModal(true);
+                    }}
+                    className="p-2 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-colors"
+                    title="Ver detalhes"
+                  >
+                    <Eye size={18} className="text-secondary" />
+                  </button>
                 </div>
               </div>
 
@@ -705,6 +719,19 @@ export default function TutorFlashcardStats({ }: TutorFlashcardStatsProps) {
             <ChevronRight size={20} />
           </button>
         </div>
+      )}
+
+      {/* Flashcard Stats Modal */}
+      {selectedUser && (
+        <FlashcardStatsModal
+          isOpen={showStatsModal}
+          onClose={() => {
+            setShowStatsModal(false);
+            setSelectedUser(null);
+          }}
+          userId={selectedUser.id}
+          userName={selectedUser.name}
+        />
       )}
     </div>
   );

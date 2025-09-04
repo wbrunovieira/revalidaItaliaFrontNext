@@ -707,6 +707,53 @@
         "noAnalyticsTitle": "Nenhum dado de análise disponível",
         "noAnalyticsDescription": "As análises detalhadas estarão disponíveis quando houver tentativas de Quiz ou Simulado realizadas pelos alunos."
       }
+    },
+    "tutorFlashcards": {
+      "loading": "Carregando estatísticas de flashcards...",
+      "stats": {
+        "totalStudents": "Total de Alunos",
+        "activeStudents": "Alunos Ativos", 
+        "averageMastery": "Taxa Média de Domínio",
+        "averageAllStudents": "Média de todos os alunos",
+        "masteryRate": "Taxa de Domínio",
+        "cardsReviewed": "Cards Revisados",
+        "studyStreak": "Dias de Sequência",
+        "easyHard": "Fácil / Difícil",
+        "last7Days": "Últimos 7 dias",
+        "performanceByArgument": "Performance por Argumento",
+        "moreArguments": "+{count} argumentos",
+        "lastActivity": "Última atividade"
+      },
+      "performanceLevel": {
+        "excellent": "Excelente",
+        "good": "Bom",
+        "needsAttention": "Precisa Atenção",
+        "critical": "Crítico"
+      },
+      "legend": {
+        "excellent": "Excelente: ≥80% domínio",
+        "good": "Bom: 60-79% domínio",
+        "attention": "Atenção: 40-59% domínio",
+        "critical": "Crítico: <40% domínio"
+      },
+      "filters": {
+        "title": "Filtros",
+        "searchPlaceholder": "Buscar aluno no sistema...",
+        "quickPeriod": "Período Rápido",
+        "last7Days": "Últimos 7 dias",
+        "last30Days": "Últimos 30 dias",
+        "allPeriods": "Todos os períodos"
+      },
+      "search": {
+        "foundSingle": "{count} aluno encontrado para \"{term}\"",
+        "foundMultiple": "{count} alunos encontrados para \"{term}\"",
+        "noStudentsActivity": "Não há alunos com atividade em flashcards para os filtros selecionados."
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Próxima",
+        "pageOf": "Página {current} de {total}"
+      }
     }
   }
 

@@ -710,6 +710,53 @@
         "noAnalyticsTitle": "No hay datos de análisis disponibles",
         "noAnalyticsDescription": "Los análisis detallados estarán disponibles cuando haya intentos de Quiz o Simulacro realizados por los estudiantes."
       }
+    },
+    "tutorFlashcards": {
+      "loading": "Cargando estadísticas de flashcards...",
+      "stats": {
+        "totalStudents": "Estudiantes Totales",
+        "activeStudents": "Estudiantes Activos", 
+        "averageMastery": "Tasa Promedio de Dominio",
+        "averageAllStudents": "Promedio de todos los estudiantes",
+        "masteryRate": "Tasa de Dominio",
+        "cardsReviewed": "Tarjetas Revisadas",
+        "studyStreak": "Días de Racha",
+        "easyHard": "Fácil / Difícil",
+        "last7Days": "Últimos 7 días",
+        "performanceByArgument": "Rendimiento por Argumento",
+        "moreArguments": "+{count} argumentos",
+        "lastActivity": "Última actividad"
+      },
+      "performanceLevel": {
+        "excellent": "Excelente",
+        "good": "Bueno",
+        "needsAttention": "Necesita Atención",
+        "critical": "Crítico"
+      },
+      "legend": {
+        "excellent": "Excelente: ≥80% dominio",
+        "good": "Bueno: 60-79% dominio",
+        "attention": "Atención: 40-59% dominio",
+        "critical": "Crítico: <40% dominio"
+      },
+      "filters": {
+        "title": "Filtros",
+        "searchPlaceholder": "Buscar estudiante en el sistema...",
+        "quickPeriod": "Período Rápido",
+        "last7Days": "Últimos 7 días",
+        "last30Days": "Últimos 30 días",
+        "allPeriods": "Todos los períodos"
+      },
+      "search": {
+        "foundSingle": "{count} estudiante encontrado para \"{term}\"",
+        "foundMultiple": "{count} estudiantes encontrados para \"{term}\"",
+        "noStudentsActivity": "No hay estudiantes con actividad en flashcards para los filtros seleccionados."
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Siguiente",
+        "pageOf": "Página {current} de {total}"
+      }
     }
   }
 

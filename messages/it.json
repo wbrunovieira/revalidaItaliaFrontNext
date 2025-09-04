@@ -710,6 +710,53 @@
         "noAnalyticsTitle": "Nessun dato di analisi disponibile",
         "noAnalyticsDescription": "Le analisi dettagliate saranno disponibili quando ci saranno tentativi di Quiz o Simulazione effettuati dagli studenti."
       }
+    },
+    "tutorFlashcards": {
+      "loading": "Caricamento statistiche flashcards...",
+      "stats": {
+        "totalStudents": "Studenti Totali",
+        "activeStudents": "Studenti Attivi", 
+        "averageMastery": "Tasso Medio di Padronanza",
+        "averageAllStudents": "Media di tutti gli studenti",
+        "masteryRate": "Tasso di Padronanza",
+        "cardsReviewed": "Carte Ripassate",
+        "studyStreak": "Giorni di Sequenza",
+        "easyHard": "Facile / Difficile",
+        "last7Days": "Ultimi 7 giorni",
+        "performanceByArgument": "Performance per Argomento",
+        "moreArguments": "+{count} argomenti",
+        "lastActivity": "Ultima attività"
+      },
+      "performanceLevel": {
+        "excellent": "Eccellente",
+        "good": "Buono",
+        "needsAttention": "Necessita Attenzione",
+        "critical": "Critico"
+      },
+      "legend": {
+        "excellent": "Eccellente: ≥80% padronanza",
+        "good": "Buono: 60-79% padronanza",
+        "attention": "Attenzione: 40-59% padronanza",
+        "critical": "Critico: <40% padronanza"
+      },
+      "filters": {
+        "title": "Filtri",
+        "searchPlaceholder": "Cerca studente nel sistema...",
+        "quickPeriod": "Periodo Rapido",
+        "last7Days": "Ultimi 7 giorni",
+        "last30Days": "Ultimi 30 giorni",
+        "allPeriods": "Tutti i periodi"
+      },
+      "search": {
+        "foundSingle": "{count} studente trovato per \"{term}\"",
+        "foundMultiple": "{count} studenti trovati per \"{term}\"",
+        "noStudentsActivity": "Non ci sono studenti con attività nei flashcards per i filtri selezionati."
+      },
+      "pagination": {
+        "previous": "Precedente",
+        "next": "Successiva",
+        "pageOf": "Pagina {current} di {total}"
+      }
     }
   }
 

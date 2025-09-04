@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslations } from 'next-intl';
 import {
   Brain,
   Users,
@@ -20,7 +21,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, it, es } from 'date-fns/locale';
 import { useAuth } from '@/stores/auth.store';
 import FlashcardStatsModal from './FlashcardStatsModal';
 
@@ -94,6 +95,15 @@ interface TutorFlashcardStatsProps {
 export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps) {
   const { toast } = useToast();
   const { token, isAuthenticated } = useAuth();
+  const t = useTranslations('Tutor.tutorFlashcards');
+  
+  const getDateLocale = () => {
+    switch(locale) {
+      case 'it': return it;
+      case 'es': return es;
+      default: return ptBR;
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse['data'] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -218,13 +228,13 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
   const getPerformanceText = (level: string) => {
     switch (level) {
       case 'excellent':
-        return 'Excelente';
+        return t('performanceLevel.excellent');
       case 'good':
-        return 'Bom';
+        return t('performanceLevel.good');
       case 'needs-attention':
-        return 'Precisa Atenção';
+        return t('performanceLevel.needsAttention');
       case 'critical':
-        return 'Crítico';
+        return t('performanceLevel.critical');
       default:
         return level;
     }
@@ -261,7 +271,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-secondary animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Carregando estatísticas de flashcards...</p>
+          <p className="text-gray-300">{t('loading')}</p>
         </div>
       </div>
     );
@@ -292,7 +302,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               {stats.summary.totalUsers}
             </span>
           </div>
-          <p className="text-gray-400 text-sm">Total de Alunos</p>
+          <p className="text-gray-400 text-sm">{t('stats.totalStudents')}</p>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-6 relative group">
@@ -302,7 +312,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               {stats.summary.activeUsers}
             </span>
           </div>
-          <p className="text-gray-400 text-sm">Alunos Ativos</p>
+          <p className="text-gray-400 text-sm">{t('stats.activeStudents')}</p>
           <p className="text-xs text-gray-500 mt-1">
             {stats.summary.totalUsers > 0
               ? `${Math.round((stats.summary.activeUsers / stats.summary.totalUsers) * 100)}% do total`
@@ -326,13 +336,13 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               {stats.summary.averageMasteryRate.toFixed(1)}%
             </span>
           </div>
-          <p className="text-gray-400 text-sm">Taxa Média de Domínio</p>
+          <p className="text-gray-400 text-sm">{t('stats.averageMastery')}</p>
           
           {/* Tooltip */}
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <div className="font-semibold mb-1">Como é calculado:</div>
             <div>% de flashcards marcados como &quot;Já sei&quot; (fácil)</div>
-            <div className="text-gray-300 mt-1">Média de todos os alunos</div>
+            <div className="text-gray-300 mt-1">{t('stats.averageAllStudents')}</div>
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
               <div className="border-4 border-transparent border-t-gray-900"></div>
             </div>
@@ -365,10 +375,10 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
             <div className="font-semibold mb-1">Níveis de Performance:</div>
             <div className="space-y-1">
-              <div><span className="text-green-400">●</span> Excelente: ≥80% domínio</div>
-              <div><span className="text-blue-400">●</span> Bom: 60-79% domínio</div>
-              <div><span className="text-yellow-400">●</span> Atenção: 40-59% domínio</div>
-              <div><span className="text-red-400">●</span> Crítico: &lt;40% domínio</div>
+              <div><span className="text-green-400">●</span> {t('legend.excellent')}</div>
+              <div><span className="text-blue-400">●</span> {t('legend.good')}</div>
+              <div><span className="text-yellow-400">●</span> {t('legend.attention')}</div>
+              <div><span className="text-red-400">●</span> {t('legend.critical')}</div>
             </div>
             <div className="absolute top-full right-4 -mt-1">
               <div className="border-4 border-transparent border-t-gray-900"></div>
@@ -385,7 +395,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
           >
             <Filter size={20} />
-            <span>Filtros</span>
+            <span>{t('filters.title')}</span>
             {(dateFrom || dateTo) && (
               <span className="ml-2 px-2 py-0.5 bg-secondary/30 text-secondary text-xs rounded-full">
                 {dateFrom && dateTo ? '2' : '1'}
@@ -398,7 +408,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Buscar aluno no sistema..."
+                placeholder={t('filters.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary w-72"
@@ -427,7 +437,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           <div className="space-y-4 pt-4 border-t border-gray-700">
             {/* Quick date filters */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Período Rápido</label>
+              <label className="block text-sm text-gray-400 mb-2">{t('filters.quickPeriod')}</label>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => {
@@ -462,7 +472,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  Últimos 7 dias
+                  {t('filters.last7Days')}
                 </button>
                 <button
                   onClick={() => {
@@ -480,7 +490,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  Últimos 30 dias
+                  {t('filters.last30Days')}
                 </button>
                 <button
                   onClick={() => {
@@ -496,7 +506,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  Todos os períodos
+                  {t('filters.allPeriods')}
                 </button>
               </div>
             </div>
@@ -546,7 +556,9 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-2">
             <Search size={16} className="text-green-400" />
             <p className="text-sm text-green-300">
-              {filteredUsers.length} {filteredUsers.length === 1 ? 'aluno encontrado' : 'alunos encontrados'} para &quot;{searchTerm}&quot;
+              {filteredUsers.length === 1 
+                ? t('search.foundSingle', { count: filteredUsers.length, term: searchTerm })
+                : t('search.foundMultiple', { count: filteredUsers.length, term: searchTerm })}
             </p>
           </div>
         )}
@@ -559,7 +571,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             <p className="text-gray-500">
               {searchTerm 
                 ? `Nenhum aluno encontrado com &quot;${searchTerm}&quot; no nome ou email.`
-                : 'Não há alunos com atividade em flashcards para os filtros selecionados.'}
+                : t('search.noStudentsActivity')}
             </p>
           </div>
         ) : (
@@ -608,14 +620,14 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                   <p className="text-2xl font-bold text-white">
                     {user.stats.overallMasteryRate.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-400">Taxa de Domínio</p>
+                  <p className="text-xs text-gray-400">{t('stats.masteryRate')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-white">
                     {user.stats.uniqueFlashcardsReviewed}/{user.stats.totalFlashcards}
                   </p>
-                  <p className="text-xs text-gray-400">Cards Revisados</p>
+                  <p className="text-xs text-gray-400">{t('stats.cardsReviewed')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
@@ -623,27 +635,27 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     <Zap className="w-4 h-4 text-yellow-400" />
                     <p className="text-2xl font-bold text-white">{user.stats.studyStreak}</p>
                   </div>
-                  <p className="text-xs text-gray-400">Dias de Sequência</p>
+                  <p className="text-xs text-gray-400">{t('stats.studyStreak')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-lg font-bold text-green-400">{user.stats.easyCount}</p>
                   <p className="text-lg font-bold text-red-400">{user.stats.hardCount}</p>
-                  <p className="text-xs text-gray-400">Fácil / Difícil</p>
+                  <p className="text-xs text-gray-400">{t('stats.easyHard')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-white">
                     {user.recentActivity.last7Days}
                   </p>
-                  <p className="text-xs text-gray-400">Últimos 7 dias</p>
+                  <p className="text-xs text-gray-400">{t('stats.last7Days')}</p>
                 </div>
               </div>
 
               {/* Argument Stats */}
               {user.argumentStats.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-700">
-                  <p className="text-sm text-gray-400 mb-2">Performance por Argumento:</p>
+                  <p className="text-sm text-gray-400 mb-2">{t('stats.performanceByArgument')}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {user.argumentStats.slice(0, 4).map((arg) => (
                       <div key={arg.argumentId} className="flex items-center justify-between bg-gray-700/30 rounded-lg px-3 py-2">
@@ -668,7 +680,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                   </div>
                   {user.argumentStats.length > 4 && (
                     <p className="text-xs text-gray-500 mt-2">
-                      +{user.argumentStats.length - 4} argumentos
+                      {t('stats.moreArguments', { count: user.argumentStats.length - 4 })}
                     </p>
                   )}
                 </div>
@@ -678,7 +690,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
               {user.stats.lastActivityDate && (
                 <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
                   <Calendar size={14} />
-                  Última atividade: {format(new Date(user.stats.lastActivityDate), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                  {t('stats.lastActivity')}: {format(new Date(user.stats.lastActivityDate), "PPP 'às' HH:mm", { locale: getDateLocale() })}
                 </div>
               )}
             </div>
@@ -699,11 +711,11 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={20} />
-            Anterior
+            {t('pagination.previous')}
           </button>
 
           <span className="text-gray-300">
-            Página {stats.pagination.page} de {stats.pagination.totalPages}
+            {t('pagination.pageOf', { current: stats.pagination.page, total: stats.pagination.totalPages })}
           </span>
 
           <button
@@ -715,7 +727,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             disabled={!stats.pagination.hasNext}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Próxima
+            {t('pagination.next')}
             <ChevronRight size={20} />
           </button>
         </div>

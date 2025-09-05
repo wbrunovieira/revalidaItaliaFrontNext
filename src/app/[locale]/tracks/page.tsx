@@ -152,11 +152,11 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-primary/30 rounded-lg p-4 border border-primary/40">
+            <div className="bg-[#3887A6]/20 rounded-lg p-4 border border-[#3887A6]/30">
               <div className="flex items-center gap-3">
                 <BookOpen
                   size={24}
-                  className="text-blue-400"
+                  className="text-[#8BCAD9]"
                 />
                 <div>
                   <p className="text-sm text-gray-400">
@@ -169,11 +169,11 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-blue-600/20 rounded-lg p-4 border border-blue-600/30">
+            <div className="bg-[#79BED9]/20 rounded-lg p-4 border border-[#79BED9]/30">
               <div className="flex items-center gap-3">
                 <Layers
                   size={24}
-                  className="text-blue-400"
+                  className="text-[#79BED9]"
                 />
                 <div>
                   <p className="text-sm text-gray-400">
@@ -203,11 +203,11 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-yellow-600/20 rounded-lg p-4 border border-yellow-600/30">
+            <div className="bg-[#8BCAD9]/20 rounded-lg p-4 border border-[#8BCAD9]/30">
               <div className="flex items-center gap-3">
                 <Clock
                   size={24}
-                  className="text-yellow-400"
+                  className="text-[#8BCAD9]"
                 />
                 <div>
                   <p className="text-sm text-gray-400">
@@ -220,11 +220,11 @@ export default async function TracksPage({
               </div>
             </div>
 
-            <div className="bg-purple-600/20 rounded-lg p-4 border border-purple-600/30">
+            <div className="bg-[#3887A6]/15 rounded-lg p-4 border border-[#3887A6]/25">
               <div className="flex items-center gap-3">
                 <CheckCircle
                   size={24}
-                  className="text-purple-400"
+                  className="text-[#3887A6]"
                 />
                 <div>
                   <p className="text-sm text-gray-400">

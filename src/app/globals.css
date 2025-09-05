@@ -369,3 +369,72 @@ body {
   box-shadow: 0 0 10px rgba(120, 190, 217, 0.5),
               0 0 20px rgba(120, 190, 217, 0.3);
 }
+
+/* Search Input Animations */
+@keyframes pulse-search {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin-search {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-search {
+  animation: spin-search 1s linear infinite;
+}
+
+@keyframes glow-pulse-search {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(139, 202, 217, 0),
+                0 0 10px rgba(139, 202, 217, 0),
+                0 0 15px rgba(139, 202, 217, 0);
+  }
+  50% {
+    box-shadow: 0 0 5px rgba(139, 202, 217, 0.3),
+                0 0 10px rgba(139, 202, 217, 0.2),
+                0 0 15px rgba(139, 202, 217, 0.1);
+  }
+}
+
+.animate-pulse-search {
+  animation: pulse-search 2s ease-in-out infinite;
+}
+
+.animate-glow-pulse-search {
+  animation: glow-pulse-search 2s ease-in-out infinite;
+}
+
+/* Search focus shimmer effect */
+@keyframes shimmer-search {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.search-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 202, 217, 0.1) 20%,
+    rgba(139, 202, 217, 0.2) 50%,
+    rgba(139, 202, 217, 0.1) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-search 2s ease-in-out infinite;
+}

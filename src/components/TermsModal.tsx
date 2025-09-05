@@ -19,7 +19,7 @@ export default function TermsModal() {
     // Check if terms were already accepted
     const storedAcceptance = localStorage.getItem(TERMS_ACCEPTANCE_KEY);
     if (storedAcceptance) {
-      const { version, timestamp } = JSON.parse(storedAcceptance);
+      const { version } = JSON.parse(storedAcceptance);
       if (version === TERMS_VERSION) {
         return; // Terms already accepted for current version
       }

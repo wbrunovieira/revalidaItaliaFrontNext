@@ -1225,7 +1225,13 @@
   "SearchInput": {
     "placeholder": "Buscar curso",
     "iconAlt": "Icono de búsqueda",
-    "search": "Buscar"
+    "search": "Buscar",
+    "clear": "Borrar búsqueda",
+    "shortcutHint": "para enfocar",
+    "searching": "Buscando",
+    "noSuggestions": "No se encontraron sugerencias",
+    "tryDifferent": "Intenta una búsqueda diferente",
+    "modules": "módulos"
   },
   "Search": {
     "title": "Búsqueda de Cursos",

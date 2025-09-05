@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, Shield, FileText, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, FileText, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 const TERMS_ACCEPTANCE_KEY = 'revalida-italia-terms-accepted';
 const TERMS_VERSION = '1.0.0'; // Increment this when terms change
@@ -175,13 +174,13 @@ export default function TermsModal() {
                   />
                   <span className="text-sm text-gray-700">
                     {t('acceptanceText')}{' '}
-                    <Link href="/terms" className="text-[#3887A6] hover:underline">
+                    <span className="font-medium text-[#3887A6]">
                       {t('termsLink')}
-                    </Link>{' '}
+                    </span>{' '}
                     {t('and')}{' '}
-                    <Link href="/privacy" className="text-[#3887A6] hover:underline">
+                    <span className="font-medium text-[#3887A6]">
                       {t('privacyLink')}
-                    </Link>
+                    </span>
                   </span>
                 </label>
               </div>

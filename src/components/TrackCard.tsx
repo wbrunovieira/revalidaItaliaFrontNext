@@ -173,13 +173,13 @@ export default function TrackCard({ track, locale }: TrackCardProps) {
           ></div>
 
           {/* Ícone de trilha no canto */}
-          <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-            <Route size={20} className="text-accent" />
+          <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+            <Route size={20} className="text-white" />
           </div>
         </div>
 
         {/* Conteúdo do card */}
-        <div className="p-6 space-y-4 relative">
+        <div className="p-5 space-y-3 relative">
           {/* Background pattern discreto no conteúdo */}
           <div 
             className="absolute inset-0 opacity-30"
@@ -193,7 +193,7 @@ export default function TrackCard({ track, locale }: TrackCardProps) {
 
           {/* Título com melhorias */}
           <div className="space-y-3 relative z-10">
-            <h3 className="text-2xl font-bold text-gray-900 line-clamp-2 leading-tight tracking-tight">
+            <h3 className="text-xl font-bold text-gray-900 line-clamp-2 leading-tight tracking-tight">
               {translation.title}
             </h3>
             
@@ -209,7 +209,7 @@ export default function TrackCard({ track, locale }: TrackCardProps) {
           {/* Descrição melhorada */}
           {translation.description && (
             <div className="overflow-hidden relative z-10">
-              <p className="text-gray-600 leading-relaxed text-sm transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 line-clamp-3 font-medium">
+              <p className="text-gray-600 leading-relaxed text-xs transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 line-clamp-2 font-medium">
                 {translation.description}
               </p>
             </div>
@@ -218,12 +218,12 @@ export default function TrackCard({ track, locale }: TrackCardProps) {
           {/* Estatísticas e progresso */}
           <div className="space-y-3 relative z-10">
             {/* Estatísticas sempre visíveis */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 text-sm text-gray-600 group-hover:text-secondary transition-colors duration-300">
-                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
-                  <BookOpen size={14} className="text-secondary" />
+                <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                  <BookOpen size={12} className="text-secondary" />
                 </div>
-                <span className="font-medium">
+                <span className="font-medium text-xs">
                   {completedCourses > 0 ? `${completedCourses}/` : ''}{totalCourses} {t('courses')}
                 </span>
               </div>

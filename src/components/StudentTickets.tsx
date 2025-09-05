@@ -174,9 +174,9 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
   const getStatusColor = (status: TicketStatus) => {
     switch (status) {
       case 'OPEN':
-        return 'text-blue-400 bg-blue-900/20';
+        return 'text-[#8BCAD9] bg-[#8BCAD9]/20';
       case 'ANSWERED':
-        return 'text-yellow-400 bg-yellow-900/20';
+        return 'text-[#79BED9] bg-[#79BED9]/20';
       case 'RESOLVED':
         return 'text-green-400 bg-green-900/20';
       default:
@@ -213,11 +213,11 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
   const getContextColor = (contextType: ContextType) => {
     switch (contextType) {
       case 'LESSON':
-        return 'text-purple-400 bg-purple-900/20';
+        return 'text-[#3887A6] bg-[#3887A6]/20';
       case 'ASSESSMENT':
-        return 'text-orange-400 bg-orange-900/20';
+        return 'text-[#79BED9] bg-[#79BED9]/20';
       case 'FLASHCARD':
-        return 'text-pink-400 bg-pink-900/20';
+        return 'text-[#8BCAD9] bg-[#8BCAD9]/20';
       case 'GENERAL':
         return 'text-gray-400 bg-gray-900/20';
       default:
@@ -298,9 +298,9 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <AlertCircle size={24} className="text-blue-400" />
+            <AlertCircle size={24} className="text-[#8BCAD9]" />
             <div>
-              <p className="text-2xl font-bold text-blue-400">
+              <p className="text-2xl font-bold text-[#8BCAD9]">
                 {openCount}
               </p>
               <p className="text-gray-400 text-sm">{t('stats.open')}</p>
@@ -310,9 +310,9 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
 
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <MessageSquare size={24} className="text-yellow-400" />
+            <MessageSquare size={24} className="text-[#79BED9]" />
             <div>
-              <p className="text-2xl font-bold text-yellow-400">
+              <p className="text-2xl font-bold text-[#79BED9]">
                 {answeredCount}
               </p>
               <p className="text-gray-400 text-sm">{t('stats.answered')}</p>
@@ -334,9 +334,9 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
 
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <HelpCircle size={24} className="text-purple-400" />
+            <HelpCircle size={24} className="text-[#3887A6]" />
             <div>
-              <p className="text-2xl font-bold text-purple-400">
+              <p className="text-2xl font-bold text-[#3887A6]">
                 {meta?.total || 0}
               </p>
               <p className="text-gray-400 text-sm">{t('stats.total')}</p>
@@ -361,7 +361,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
           onClick={() => setStatusFilter('OPEN')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === 'OPEN'
-              ? 'bg-blue-500 text-white'
+              ? 'bg-[#8BCAD9] text-primary'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
           }`}
         >
@@ -371,7 +371,7 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
           onClick={() => setStatusFilter('ANSWERED')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === 'ANSWERED'
-              ? 'bg-yellow-500 text-white'
+              ? 'bg-[#79BED9] text-primary'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
           }`}
         >

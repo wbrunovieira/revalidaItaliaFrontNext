@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { BookOpen, Square, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
 
@@ -103,7 +104,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
     const verifyTerms = async () => {
       // Primeiro tenta migrar do localStorage se necessário
       migrateTermsFromLocalStorage();
-      
+
       // Depois verifica o status dos termos
       await checkTermsStatus();
     };
@@ -112,18 +113,12 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
     verifyTerms();
   }, [locale, router, checkTermsStatus, migrateTermsFromLocalStorage]);
 
-  const {
-    data: tracks,
-    loading: tracksLoading,
-  } = useApi<Track[]>('/api/v1/tracks-progress', {
+  const { data: tracks, loading: tracksLoading } = useApi<Track[]>('/api/v1/tracks-progress', {
     fallbackData: initialTracks.length > 0 ? initialTracks : fallbackTracks,
     showToastOnError: false,
   });
 
-  const {
-    data: courses,
-    loading: coursesLoading,
-  } = useApi<Course[]>('/api/v1/courses-progress', {
+  const { data: courses, loading: coursesLoading } = useApi<Course[]>('/api/v1/courses-progress', {
     fallbackData: initialCourses.length > 0 ? initialCourses : fallbackCourses,
     showToastOnError: false,
   });
@@ -149,47 +144,89 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
   const isLoading = tracksLoading || coursesLoading;
 
   return (
-    <div className="flex-1 flex flex-col items-center bg-primary min-h-screen px-4 pt-8">
-      <div className="w-full flex flex-col items-center">
-        <h1 className="text-6xl font-bold text-white">{t('title')}</h1>
-        {user?.name && (
-          <p className="text-xl text-secondary mt-2 font-medium">
-            {t('greeting', { name: user.name })}
-          </p>
-        )}
-        <hr className="mt-4 border-t-2 border-secondary w-48 lg:w-96" />
+    <div className="flex-1 flex flex-col items-center bg-primary min-h-screen px-4 sm:px-6 lg:px-8 pt-4">
+      {/* Welcome Section with improved visual hierarchy */}
+      <div className="w-full flex flex-col items-center mt-6 sm:mt-8 lg:mt-16">
+        {/* Small badge for "Área do Aluno" with animation */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-4 sm:mb-6"
+        >
+          <span className="text-xs sm:text-sm text-white/80 font-medium uppercase tracking-wider">
+            {t('title')}
+          </span>
+        </motion.div>
+        
+        {/* Main greeting with emphasis on user name */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          {user?.name ? (
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-2">
+              {t('greeting', { name: user.name }).split(user.name)[0]}
+              <span className="inline-block text-[#8BCAD9] font-extrabold relative">
+                {user.name}
+                <span className="absolute inset-0 blur-md text-[#8BCAD9]/50 -z-10">{user.name}</span>
+              </span>
+              {t('greeting', { name: user.name }).split(user.name)[1]}
+            </h1>
+          ) : (
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-2">
+              {t('greeting', { name: '' })}
+            </h1>
+          )}
+        </motion.div>
+        
+        <motion.hr 
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="mt-6 sm:mt-8 border-t-2 border-secondary w-32 sm:w-48 lg:w-96 origin-center"
+        />
       </div>
-      
-      {/* Support Floating Button */}
-      <SupportFloatingButton context={{ type: "GENERAL" }} />
 
-      {/* User Progress Card */}
-      <div className="w-full flex justify-center mt-8 px-4">
+      {/* Support Floating Button */}
+      <SupportFloatingButton context={{ type: 'GENERAL' }} />
+
+      {/* User Progress Card - increased spacing from welcome */}
+      <div className="w-full flex justify-center mt-10 sm:mt-12 lg:mt-16">
         <div className="w-full max-w-6xl">
           <UserProgressCard />
         </div>
       </div>
 
-      {/* Continue Learning Section */}
-      <div className="w-full flex justify-center mt-8 px-4">
+      {/* Continue Learning Section - consistent spacing */}
+      <div className="w-full flex justify-center mt-8 sm:mt-10 lg:mt-12">
         <div className="w-full max-w-6xl">
           <ContinueLearning />
         </div>
       </div>
 
-      {/* Tracks Section */}
-      <div className="w-full flex flex-col items-center mt-8">
+      {/* Tracks Section - consistent spacing */}
+      <div className="w-full flex flex-col items-center mt-10 sm:mt-12 lg:mt-16">
         <div className="w-full max-w-6xl">
-          <div className="flex gap-4 sm:gap-8 items-center">
-            <Image src="/icons/trail.svg" alt={t('trails')} width={48} height={48} className="self-end" />
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('trails')}</h3>
+          <div className="flex gap-3 sm:gap-4 md:gap-6 items-center">
+            <Image
+              src="/icons/trail.svg"
+              alt={t('trails')}
+              width={48}
+              height={48}
+              className="self-end w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+            />
+            <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white font-sans">
+              {t('trails')}
+            </h3>
           </div>
-          <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
+          <hr className="mt-4 sm:mt-6 border-t-2 border-secondary w-24 sm:w-36 lg:w-60" />
         </div>
       </div>
 
       {isLoading && !tracks ? (
-        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+        <div className="mt-6 sm:mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {[1, 2].map(i => (
             <div key={i} className="bg-gray-800/50 rounded-lg p-6 animate-pulse">
               <div className="h-48 bg-gray-700 rounded mb-4"></div>
@@ -199,26 +236,28 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
           ))}
         </div>
       ) : (
-        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+        <div className="mt-6 sm:mt-8 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {enrichedTracks.map((track, index) => (
             <TrackCard key={track.id} track={track} locale={locale} index={index} />
           ))}
         </div>
       )}
 
-      {/* Courses Section */}
-      <div className="w-full flex flex-col items-center mt-16">
+      {/* Courses Section - consistent spacing */}
+      <div className="w-full flex flex-col items-center mt-12 sm:mt-14 lg:mt-20">
         <div className="w-full max-w-6xl">
-          <div className="flex gap-4 sm:gap-8 items-center">
-            <BookOpen size={48} className="self-end text-white" />
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white pt-4 mt-8 font-sans">{t('courses')}</h3>
+          <div className="flex gap-3 sm:gap-4 md:gap-6 items-center">
+            <BookOpen className="self-end text-white w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
+            <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white font-sans">
+              {t('courses')}
+            </h3>
           </div>
-          <hr className="mt-4 border-t-2 border-secondary w-24 lg:w-60" />
+          <hr className="mt-4 sm:mt-6 border-t-2 border-secondary w-24 sm:w-36 lg:w-60" />
         </div>
       </div>
 
       {isLoading && !courses ? (
-        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
+        <div className="mt-6 sm:mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12 lg:mb-16">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="bg-gray-800/50 rounded-lg p-4 animate-pulse">
               <div className="h-32 bg-gray-700 rounded mb-4"></div>
@@ -228,7 +267,7 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
           ))}
         </div>
       ) : (
-        <div className="mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
+        <div className="mt-6 sm:mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12 lg:mb-16">
           {courses?.map((course, index) => (
             <CourseCard key={course.id} course={course} locale={locale} index={index} />
           )) || []}

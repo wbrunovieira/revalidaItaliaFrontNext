@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bell, X, Check, CheckCheck, ExternalLink, Trash2, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -177,9 +178,33 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 max-h-[600px] bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 flex flex-col">
+      {/* Animated Dropdown */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            className="fixed right-4 top-24 w-96 max-h-[600px] bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 flex flex-col"
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1, 
+              y: 0,
+              transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+                duration: 0.3
+              }
+            }}
+            exit={{ 
+              opacity: 0, 
+              scale: 0.95, 
+              y: -10,
+              transition: {
+                duration: 0.2,
+                ease: "easeInOut"
+              }
+            }}
+          >
           {/* Header */}
           <div className="p-4 border-b border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -248,15 +273,47 @@ export default function NotificationBell() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-800">
-                {displayNotifications.map((notification) => (
-                  <div
+              <motion.div 
+                className="divide-y divide-gray-800"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.05,
+                      delayChildren: 0.1
+                    }
+                  }
+                }}
+              >
+                {displayNotifications.map((notification, index) => (
+                  <motion.div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={cn(
                       'p-4 hover:bg-gray-800 transition-colors cursor-pointer relative',
                       !notification.isRead && 'bg-gray-800/50'
                     )}
+                    variants={{
+                      hidden: { 
+                        opacity: 0, 
+                        x: -20 
+                      },
+                      visible: { 
+                        opacity: 1, 
+                        x: 0,
+                        transition: {
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20
+                        }
+                      }
+                    }}
+                    whileHover={{ 
+                      x: 5,
+                      backgroundColor: 'rgba(31, 41, 55, 0.8)',
+                      transition: { duration: 0.15 }
+                    }}
                   >
                     <div className="flex gap-3">
                       {/* Category Indicator */}
@@ -327,9 +384,9 @@ export default function NotificationBell() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
 
@@ -347,8 +404,9 @@ export default function NotificationBell() {
               </button>
             </div>
           )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -32,6 +32,29 @@
     "by": "da",
     "craftedWithExcellence": "Creato con eccellenza"
   },
+  "TermsModal": {
+    "title": "Termini d'Uso e Privacy",
+    "subtitle": "Si prega di leggere e accettare i nostri termini per continuare",
+    "importantNotice": "Attenzione: Questo è un documento importante",
+    "mustAccept": "È necessario accettare i termini per utilizzare la piattaforma",
+    "termsSummary": "Riepilogo dei Termini Principali",
+    "summary": {
+      "privacy": "I tuoi dati personali sono protetti e utilizzati solo per scopi educativi",
+      "usage": "L'accesso alla piattaforma è personale e non trasferibile",
+      "intellectual": "Tutti i contenuti sono proprietà intellettuale protetta",
+      "responsibilities": "Accetti di utilizzare la piattaforma in modo etico e responsabile"
+    },
+    "readFullTerms": "Leggi i termini completi",
+    "fullTermsContent": "TERMINI D'USO E POLITICA SULLA PRIVACY\n\n1. ACCETTAZIONE DEI TERMINI\nAccedendo e utilizzando questa piattaforma, accetti e acconsenti a rispettare questi termini d'uso.\n\n2. USO DELLA PIATTAFORMA\nLa piattaforma è destinata esclusivamente a scopi educativi relativi al processo di riconoscimento medico in Italia.\n\n3. PROPRIETÀ INTELLETTUALE\nTutti i contenuti forniti sono protetti da copyright.\n\n4. PRIVACY\nI tuoi dati personali sono trattati in modo sicuro e in conformità con la legislazione applicabile.\n\n5. RESPONSABILITÀ\nSei responsabile del mantenimento della riservatezza delle tue credenziali di accesso.",
+    "acceptanceText": "Ho letto e accetto i",
+    "termsLink": "Termini d'Uso",
+    "and": "e la",
+    "privacyLink": "Politica sulla Privacy",
+    "decline": "Rifiuta",
+    "accept": "Accetta e Continua",
+    "version": "Versione",
+    "lastUpdated": "Ultimo aggiornamento"
+  },
   "Terms": {
     "title": "Termini d'Uso - Piattaforma PROGRAMMA REVALIDA ITALIA",
     "subtitle": "Si prega di leggere attentamente prima di continuare",

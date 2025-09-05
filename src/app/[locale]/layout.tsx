@@ -9,6 +9,7 @@ import { normalizeLocale } from '@/lib/normalizelocale';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthInitializer } from '@/components/providers/auth-initializer';
 import Footer from '@/components/Footer';
+import TermsModal from '@/components/TermsModal';
 
 const SUPPORTED_LOCALES: Array<'pt' | 'es' | 'it'> = [
   'pt',
@@ -115,6 +116,7 @@ export default async function LocaleLayout({
             </div>
             <Footer />
           </div>
+          <TermsModal />
         </AuthInitializer>
       </QueryProvider>
     </NextIntlClientProvider>

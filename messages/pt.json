@@ -32,6 +32,29 @@
     "by": "por",
     "craftedWithExcellence": "Criado com excelência"
   },
+  "TermsModal": {
+    "title": "Termos de Uso e Privacidade",
+    "subtitle": "Por favor, leia e aceite nossos termos para continuar",
+    "importantNotice": "Atenção: Este é um documento importante",
+    "mustAccept": "Você deve aceitar os termos para usar a plataforma",
+    "termsSummary": "Resumo dos Termos Principais",
+    "summary": {
+      "privacy": "Seus dados pessoais são protegidos e usados apenas para fins educacionais",
+      "usage": "O acesso à plataforma é pessoal e intransferível",
+      "intellectual": "Todo o conteúdo é propriedade intelectual protegida",
+      "responsibilities": "Você concorda em usar a plataforma de forma ética e responsável"
+    },
+    "readFullTerms": "Ler termos completos",
+    "fullTermsContent": "TERMOS DE USO E POLÍTICA DE PRIVACIDADE\n\n1. ACEITAÇÃO DOS TERMOS\nAo acessar e usar esta plataforma, você aceita e concorda em cumprir estes termos de uso.\n\n2. USO DA PLATAFORMA\nA plataforma é destinada exclusivamente para fins educacionais relacionados ao processo de revalidação médica na Itália.\n\n3. PROPRIEDADE INTELECTUAL\nTodo o conteúdo disponibilizado é protegido por direitos autorais.\n\n4. PRIVACIDADE\nSeus dados pessoais são tratados com segurança e conforme a legislação aplicável.\n\n5. RESPONSABILIDADES\nVocê é responsável por manter a confidencialidade de suas credenciais de acesso.",
+    "acceptanceText": "Li e aceito os",
+    "termsLink": "Termos de Uso",
+    "and": "e a",
+    "privacyLink": "Política de Privacidade",
+    "decline": "Recusar",
+    "accept": "Aceitar e Continuar",
+    "version": "Versão",
+    "lastUpdated": "Última atualização"
+  },
   "Terms": {
     "title": "Termos de Uso - Plataforma PROGRAMA REVALIDA ITÁLIA",
     "subtitle": "Por favor, leia atentamente antes de continuar",

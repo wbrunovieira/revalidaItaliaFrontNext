@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import {
   TrendingUp,
   Target,
@@ -11,6 +12,8 @@ import {
   Brain,
   CheckCircle,
   Activity,
+  Calendar,
+  Award,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -100,10 +103,12 @@ function CircularProgress({
           strokeDashoffset={offset}
           className={
             percentage === 100 
-              ? "text-green-500 transition-all duration-500 ease-out" 
-              : percentage > 50 
-              ? "text-blue-500 transition-all duration-500 ease-out"
-              : "text-secondary transition-all duration-500 ease-out"
+              ? "text-green-400 transition-all duration-500 ease-out" 
+              : percentage > 70 
+              ? "text-[#8BCAD9] transition-all duration-500 ease-out"
+              : percentage > 40
+              ? "text-[#3887A6] transition-all duration-500 ease-out"
+              : "text-white/40 transition-all duration-500 ease-out"
           }
           strokeLinecap="round"
         />
@@ -218,82 +223,127 @@ export default function UserProgressCard() {
   };
 
   return (
-    <div className="bg-gray-800/30 rounded-xl p-4 sm:p-6 border border-gray-700/50">
-      {/* Header simples */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
-        <h3 className="text-lg font-medium text-white flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-secondary" />
-          {t('title')}
-        </h3>
-        <div className="text-xs sm:text-sm text-gray-400 flex flex-col sm:flex-row gap-1 sm:gap-4">
-          <span>{t('memberSince')}: {formatDate(progress.overview.memberSince)}</span>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-gradient-to-br from-[#0C2133]/50 to-[#0C2133]/30 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 border border-[#3887A6]/20 shadow-xl"
+    >
+      {/* Enhanced Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-r from-[#3887A6] to-[#8BCAD9] rounded-lg">
+            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-white">
+            {t('title')}
+          </h3>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+          <div className="flex items-center gap-1.5 text-white/70">
+            <Calendar className="w-3.5 h-3.5 text-[#8BCAD9]" />
+            <span>{t('memberSince')}: <span className="text-white font-medium">{formatDate(progress.overview.memberSince)}</span></span>
+          </div>
           {progress.overview.lastActivityAt && (
-            <span>{t('lastActivity')}: {formatDate(progress.overview.lastActivityAt)}</span>
+            <div className="flex items-center gap-1.5 text-white/70">
+              <Activity className="w-3.5 h-3.5 text-[#8BCAD9]" />
+              <span>{formatDate(progress.overview.lastActivityAt)}</span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Estatísticas principais em grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-6">
+      {/* Enhanced Statistics Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
         {/* Dias ativos */}
-        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
-            <Activity className="w-4 h-4 text-orange-400" />
-            <span className="text-xs text-gray-400">{t('daysActive')}</span>
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-[#8BCAD9]/10 to-[#8BCAD9]/5 rounded-xl p-3 sm:p-4 border border-[#8BCAD9]/20 hover:border-[#8BCAD9]/40 transition-all"
+        >
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="p-2 bg-[#8BCAD9]/20 rounded-lg">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-[#8BCAD9]" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-white/60 uppercase tracking-wider">{t('daysActive')}</span>
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              {progress.overview.daysActive}
+            </div>
           </div>
-          <div className="text-lg sm:text-xl font-bold text-white">
-            {progress.overview.daysActive}
-          </div>
-        </div>
+        </motion.div>
 
         {/* Cursos em progresso */}
-        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
-            <PlayCircle className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-gray-400">{t('inProgress')}</span>
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-[#3887A6]/15 to-[#3887A6]/8 rounded-xl p-3 sm:p-4 border border-[#3887A6]/25 hover:border-[#3887A6]/40 transition-all"
+        >
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="p-2 bg-[#3887A6]/20 rounded-lg">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#3887A6]" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-white/60 uppercase tracking-wider">{t('inProgress')}</span>
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              {progress.coursesProgress.coursesInProgress}
+            </div>
           </div>
-          <div className="text-lg sm:text-xl font-bold text-white">
-            {progress.coursesProgress.coursesInProgress}
-          </div>
-        </div>
+        </motion.div>
 
         {/* Cursos completados */}
-        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
-            <CheckCircle className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-gray-400">{t('completed')}</span>
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-[#48BB78]/10 to-[#48BB78]/5 rounded-xl p-3 sm:p-4 border border-[#48BB78]/20 hover:border-[#48BB78]/40 transition-all"
+        >
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="p-2 bg-[#48BB78]/20 rounded-lg">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#48BB78]" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-white/60 uppercase tracking-wider">{t('completed')}</span>
+            <div className="text-2xl sm:text-3xl font-bold text-white">
+              {progress.coursesProgress.completedCourses}
+            </div>
           </div>
-          <div className="text-lg sm:text-xl font-bold text-white">
-            {progress.coursesProgress.completedCourses}
-          </div>
-        </div>
+        </motion.div>
 
         {/* Lições completadas */}
-        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
-            <BookOpen className="w-4 h-4 text-purple-400" />
-            <span className="text-xs text-gray-400">{t('lessons')}</span>
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-[#0C3559]/20 to-[#0C3559]/10 rounded-xl p-3 sm:p-4 border border-[#0C3559]/30 hover:border-[#3887A6]/50 transition-all"
+        >
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="p-2 bg-[#0C3559]/30 rounded-lg">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-[#6BB8D1]" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-white/60 uppercase tracking-wider">{t('lessons')}</span>
+            <div className="flex items-baseline justify-center gap-1">
+              <span className="text-2xl sm:text-3xl font-bold text-white">
+                {progress.coursesProgress.completedLessons}
+              </span>
+              <span className="text-sm text-white/40">
+                /{progress.coursesProgress.totalLessons}
+              </span>
+            </div>
           </div>
-          <div className="flex items-baseline justify-center gap-1">
-            <span className="text-lg sm:text-xl font-bold text-white">
-              {progress.coursesProgress.completedLessons}
-            </span>
-            <span className="text-xs text-gray-500">
-              / {progress.coursesProgress.totalLessons}
-            </span>
-          </div>
-        </div>
+        </motion.div>
 
         {/* Progresso médio */}
-        <div className="bg-gray-800/50 rounded-lg p-2.5 sm:p-3 border border-gray-700/50 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mb-1">
-            <Target className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs text-gray-400">{t('average')}</span>
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-[#3887A6]/20 to-[#8BCAD9]/10 rounded-xl p-3 sm:p-4 border border-[#3887A6]/30 hover:border-[#8BCAD9]/50 transition-all"
+        >
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="p-2 bg-[#3887A6]/20 rounded-lg">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[#8BCAD9]" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-white/60 uppercase tracking-wider">{t('average')}</span>
+            <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#8BCAD9] to-[#3887A6] bg-clip-text text-transparent">
+              {progress.coursesProgress.averageProgress}%
+            </div>
           </div>
-          <div className="text-lg sm:text-xl font-bold text-white">
-            {progress.coursesProgress.averageProgress}%
-          </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Duas colunas: Cursos e Stats */}
@@ -401,6 +451,6 @@ export default function UserProgressCard() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

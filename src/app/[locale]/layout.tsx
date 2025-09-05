@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import { normalizeLocale } from '@/lib/normalizelocale';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthInitializer } from '@/components/providers/auth-initializer';
+import Footer from '@/components/Footer';
 
 const SUPPORTED_LOCALES: Array<'pt' | 'es' | 'it'> = [
   'pt',
@@ -108,7 +109,12 @@ export default async function LocaleLayout({
     >
       <QueryProvider>
         <AuthInitializer>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-grow">
+              {children}
+            </div>
+            <Footer />
+          </div>
         </AuthInitializer>
       </QueryProvider>
     </NextIntlClientProvider>

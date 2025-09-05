@@ -26,6 +26,12 @@
       "LOW": "Bassa"
     }
   },
+  "Footer": {
+    "rightsReserved": "Tutti i diritti riservati",
+    "developedWith": "Sviluppato con",
+    "by": "da",
+    "craftedWithExcellence": "Creato con eccellenza"
+  },
   "Terms": {
     "title": "Termini d'Uso - Piattaforma PROGRAMMA REVALIDA ITALIA",
     "subtitle": "Si prega di leggere attentamente prima di continuare",

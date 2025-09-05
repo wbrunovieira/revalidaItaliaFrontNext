@@ -38,7 +38,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="antialiased" suppressHydrationWarning>
+      <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <PandaVideoErrorSuppressor />
         <DevToolsManager />
         {children}

@@ -39,6 +39,34 @@
   animation: slideDown 0.3s ease-out;
 }
 
+/* Footer Shimmer Animations */
+@keyframes shimmer {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+@keyframes shimmer-reverse {
+  0% { 
+    transform: translateX(100%); 
+  }
+  100% { 
+    transform: translateX(-100%); 
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-shimmer-reverse {
+  animation: shimmer-reverse 3s linear infinite;
+  animation-delay: 1.5s;
+}
+
 :root {
   /* — Design Tokens (core palette) */
   --primary: #0C3559;

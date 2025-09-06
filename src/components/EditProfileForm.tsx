@@ -67,7 +67,7 @@ export default function EditProfileForm({
 }: EditProfileFormProps) {
   const t = useTranslations('Profile');
   const { toast } = useToast();
-  const { updateUser } = useAuth();
+  const { updateUser, fetchUserProfile } = useAuth();
   const params = useParams();
   const locale = params.locale as string;
   
@@ -479,12 +479,10 @@ export default function EditProfileForm({
         updateUser(safeUpdateData);
       }
       
-      onSuccess();
+      // Buscar dados atualizados do servidor (incluindo completude do perfil)
+      await fetchUserProfile();
       
-      // Recarregar a página para mostrar os dados atualizados
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      onSuccess();
       
     } catch (error) {
       toast({

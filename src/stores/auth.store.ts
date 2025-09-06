@@ -163,6 +163,7 @@ export interface AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  fetchUserProfile: () => Promise<void>;
   updateProfileCompleteness: (data: ProfileCompleteness) => void;
   updateCommunityProfile: (data: CommunityProfile) => void;
   refreshToken: () => Promise<void>;
@@ -374,6 +375,88 @@ export const useAuthStore = create<AuthState>()(
             isStudent: updatedUser.role === 'student',
           });
           console.log('👤 Usuário atualizado:', updatedUser);
+        }
+      },
+
+      // Action: Fetch User Profile - Busca perfil atualizado do servidor
+      fetchUserProfile: async () => {
+        const token = get().token;
+        if (!token) {
+          console.error('❌ Sem token para buscar perfil');
+          return;
+        }
+
+        set({ isLoading: true, error: null });
+
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          
+          // Buscar dados do perfil
+          const profileResponse = await fetch(`${apiUrl}/profile`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!profileResponse.ok) {
+            throw new Error('Falha ao buscar perfil');
+          }
+
+          const profileData = await profileResponse.json();
+          console.log('📊 Dados do perfil recebidos:', profileData);
+
+          // Buscar completude do perfil
+          const completenessResponse = await fetch(`${apiUrl}/profile/completeness`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (completenessResponse.ok) {
+            const completenessData = await completenessResponse.json();
+            set({ profileCompleteness: completenessData });
+            console.log('📈 Completude do perfil:', completenessData);
+          }
+
+          // Atualizar dados do usuário no store
+          const updatedUser: User = {
+            id: profileData.id,
+            email: profileData.email,
+            name: profileData.name || profileData.fullName || '',
+            fullName: profileData.fullName,
+            role: profileData.role,
+            profileImageUrl: profileData.profileImageUrl,
+            nationalId: profileData.nationalId,
+            phone: profileData.phone,
+            emailVerified: profileData.emailVerified,
+            bio: profileData.bio,
+            profession: profileData.profession,
+            specialization: profileData.specialization,
+            birthDate: profileData.birthDate,
+            communityProfileConsent: profileData.communityProfileConsent,
+            curriculumUrl: profileData.curriculumUrl,
+            hasEuropeanCitizenship: profileData.hasEuropeanCitizenship,
+            createdAt: profileData.createdAt,
+            lastLogin: profileData.lastLogin,
+          };
+
+          set({ 
+            user: updatedUser,
+            isAdmin: updatedUser.role === 'admin',
+            isTutor: updatedUser.role === 'tutor',
+            isStudent: updatedUser.role === 'student',
+            isLoading: false 
+          });
+
+          console.log('✅ Perfil atualizado com sucesso:', updatedUser);
+        } catch (error) {
+          console.error('❌ Erro ao buscar perfil:', error);
+          set({ 
+            error: error instanceof Error ? error.message : 'Erro ao buscar perfil',
+            isLoading: false 
+          });
         }
       },
 

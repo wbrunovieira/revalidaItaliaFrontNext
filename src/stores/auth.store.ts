@@ -381,8 +381,10 @@ export const useAuthStore = create<AuthState>()(
       // Action: Fetch User Profile - Busca perfil atualizado do servidor
       fetchUserProfile: async () => {
         const token = get().token;
-        if (!token) {
-          console.error('❌ Sem token para buscar perfil');
+        const currentUser = get().user;
+        
+        if (!token || !currentUser) {
+          console.error('❌ Sem token ou usuário para buscar perfil');
           return;
         }
 
@@ -391,8 +393,8 @@ export const useAuthStore = create<AuthState>()(
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
           
-          // Buscar dados do perfil
-          const profileResponse = await fetch(`${apiUrl}/profile`, {
+          // Buscar dados do perfil usando o ID do usuário
+          const profileResponse = await fetch(`${apiUrl}/api/v1/users/${currentUser.id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
@@ -406,26 +408,48 @@ export const useAuthStore = create<AuthState>()(
           const profileData = await profileResponse.json();
           console.log('📊 Dados do perfil recebidos:', profileData);
 
-          // Buscar completude do perfil
-          const completenessResponse = await fetch(`${apiUrl}/profile/completeness`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
+          // Calcular a completude baseada nos campos preenchidos
+          const fields = [
+            profileData.name,
+            profileData.email,
+            profileData.nationalId,
+            profileData.phone,
+            profileData.birthDate,
+            profileData.profileImageUrl,
+            profileData.bio,
+            profileData.profession,
+            profileData.specialization,
+            profileData.curriculumUrl,
+            profileData.hasEuropeanCitizenship !== null,
+          ];
+          
+          const filledFields = fields.filter(field => field).length;
+          const totalFields = fields.length;
+          const percentage = Math.round((filledFields / totalFields) * 100);
+          
+          const profileCompleteness = {
+            percentage,
+            completedSections: {
+              basicInfo: !!(profileData.name && profileData.email && profileData.nationalId),
+              documentation: !!profileData.curriculumUrl,
+              professional: !!(profileData.profession || profileData.specialization),
+              profileImage: !!profileData.profileImageUrl,
+              address: profileData.addresses && profileData.addresses.length > 0,
             },
-          });
-
-          if (completenessResponse.ok) {
-            const completenessData = await completenessResponse.json();
-            set({ profileCompleteness: completenessData });
-            console.log('📈 Completude do perfil:', completenessData);
-          }
+            missingFields: [],
+            nextSteps: [],
+            totalFields,
+            completedFields: filledFields,
+          };
+          
+          console.log('📈 Completude calculada:', profileCompleteness);
 
           // Atualizar dados do usuário no store
           const updatedUser: User = {
             id: profileData.id,
             email: profileData.email,
             name: profileData.name || profileData.fullName || '',
-            fullName: profileData.fullName,
+            fullName: profileData.fullName || profileData.name,
             role: profileData.role,
             profileImageUrl: profileData.profileImageUrl,
             nationalId: profileData.nationalId,
@@ -444,6 +468,7 @@ export const useAuthStore = create<AuthState>()(
 
           set({ 
             user: updatedUser,
+            profileCompleteness,
             isAdmin: updatedUser.role === 'admin',
             isTutor: updatedUser.role === 'tutor',
             isStudent: updatedUser.role === 'student',

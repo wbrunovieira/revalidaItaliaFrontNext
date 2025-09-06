@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Check, CheckCheck, ExternalLink, Trash2, Loader2 } from 'lucide-react';
+import { Bell, X, Check, CheckCheck, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { useTranslations } from 'next-intl';
@@ -122,12 +122,6 @@ export default function NotificationBell() {
     // Mark as read if not already
     if (!notification.isRead) {
       await markAsRead(notification.id);
-    }
-
-    // Navigate to action URL if provided
-    if (notification.actionUrl) {
-      router.push(notification.actionUrl);
-      setIsOpen(false);
     }
   };
 
@@ -286,7 +280,7 @@ export default function NotificationBell() {
                   }
                 }}
               >
-                {displayNotifications.map((notification, index) => (
+                {displayNotifications.map((notification) => (
                   <motion.div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
@@ -350,12 +344,6 @@ export default function NotificationBell() {
                               <span className="text-xs text-gray-600">
                                 {formatTime(notification.createdAt)}
                               </span>
-                              {notification.actionUrl && (
-                                <span className="text-xs text-secondary flex items-center gap-1">
-                                  <ExternalLink size={12} />
-                                  {notification.actionLabel || t('viewDetails')}
-                                </span>
-                              )}
                             </div>
                           </div>
 

@@ -8,12 +8,10 @@ import {
   Target,
   BookOpen,
   GraduationCap,
-  PlayCircle,
   Brain,
   CheckCircle,
   Activity,
   Calendar,
-  Award,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';

@@ -67,7 +67,7 @@ export default function EditProfileForm({
 }: EditProfileFormProps) {
   const t = useTranslations('Profile');
   const { toast } = useToast();
-  const { updateUser, fetchUserProfile } = useAuth();
+  const { updateUser, fetchUserProfile, updateProfileCompleteness } = useAuth();
   const params = useParams();
   const locale = params.locale as string;
   
@@ -87,8 +87,8 @@ export default function EditProfileForm({
   const [communityConsent, setCommunityConsent] = useState(
     userData.communityProfileConsent || false
   );
-  const [hasEuropeanCitizenship, setHasEuropeanCitizenship] = useState(
-    userData.hasEuropeanCitizenship || false
+  const [hasEuropeanCitizenship, setHasEuropeanCitizenship] = useState<boolean | null>(
+    userData.hasEuropeanCitizenship // Mantém o valor existente do usuário (null, true ou false)
   );
   
   // Estados para upload de imagem
@@ -479,8 +479,49 @@ export default function EditProfileForm({
         updateUser(safeUpdateData);
       }
       
+      // Calcular completude localmente para atualização imediata
+      const updatedFields = {
+        name: updateData.fullName || userData.name,
+        email: userData.email,
+        nationalId: userData.nationalId,
+        phone: updateData.phone,
+        birthDate: updateData.birthDate,
+        profileImageUrl: updateData.profileImageUrl || uploadedImageUrl,
+        bio: updateData.bio,
+        profession: updateData.profession,
+        specialization: updateData.specialization,
+        curriculumUrl: updateData.curriculumUrl || curriculumUrl,
+        hasEuropeanCitizenship: hasEuropeanCitizenship !== null,
+      };
+      
+      const fields = Object.values(updatedFields);
+      const filledFields = fields.filter(field => field).length;
+      const totalFields = fields.length;
+      const percentage = Math.round((filledFields / totalFields) * 100);
+      
+      // Atualizar completude imediatamente
+      updateProfileCompleteness({
+        percentage,
+        completedSections: {
+          basicInfo: !!(updatedFields.name && updatedFields.email && updatedFields.nationalId),
+          documentation: !!updatedFields.curriculumUrl,
+          professional: !!(updatedFields.profession || updatedFields.specialization),
+          profileImage: !!updatedFields.profileImageUrl,
+          address: false, // Mantém o valor atual, não temos essa info aqui
+        },
+        missingFields: [],
+        nextSteps: [],
+        totalFields,
+        completedFields: filledFields,
+      });
+      
       // Buscar dados atualizados do servidor (incluindo completude do perfil)
-      await fetchUserProfile();
+      try {
+        await fetchUserProfile();
+      } catch (fetchError) {
+        console.warn('⚠️ Não foi possível atualizar dados do perfil do servidor:', fetchError);
+        // Continua mesmo se falhar, pois o update principal já foi feito e a completude foi calculada localmente
+      }
       
       onSuccess();
       
@@ -899,57 +940,96 @@ export default function EditProfileForm({
         {/* Cidadania Europeia */}
         <div className="pt-4 border-t border-white/10">
           <div className={`rounded-lg border-2 transition-all duration-300 ${
-            hasEuropeanCitizenship 
+            hasEuropeanCitizenship === true
               ? 'bg-blue-500/10 border-blue-500/50 shadow-lg shadow-blue-500/20' 
-              : 'bg-white/5 border-white/20 hover:border-white/30'
-          }`}>
-            <label className="flex items-start gap-4 p-4 cursor-pointer">
-              <div className="relative flex items-center justify-center mt-1">
-                <input
-                  type="checkbox"
-                  checked={hasEuropeanCitizenship}
-                  onChange={(e) => setHasEuropeanCitizenship(e.target.checked)}
-                  className="sr-only"
-                />
-                <div className={`w-6 h-6 rounded-md transition-all duration-300 ${
-                  hasEuropeanCitizenship 
-                    ? 'bg-blue-500 shadow-lg shadow-blue-500/50' 
-                    : 'bg-white/10 border-2 border-white/30 hover:border-secondary/50'
-                }`}>
-                  {hasEuropeanCitizenship && (
-                    <Check size={16} className="text-white m-1 animate-in zoom-in-50 duration-200" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Globe size={20} className={hasEuropeanCitizenship ? 'text-blue-400' : 'text-white/60'} />
-                  <p className={`font-semibold text-lg ${
-                    hasEuropeanCitizenship ? 'text-blue-400' : 'text-white/80'
+              : 'bg-white/5 border-white/20'
+          } p-4`}>
+            <div className="flex items-center gap-2 mb-4">
+              <Globe size={20} className={hasEuropeanCitizenship === true ? 'text-blue-400' : 'text-white/60'} />
+              <p className={`font-semibold text-lg ${
+                hasEuropeanCitizenship === true ? 'text-blue-400' : 'text-white/80'
+              }`}>
+                {t('europeanCitizenship') || 'European Citizenship'}
+              </p>
+              {hasEuropeanCitizenship === true && (
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium animate-in fade-in-0 zoom-in-95 duration-200">
+                  {t('yes') || 'Yes'}
+                </span>
+              )}
+              {hasEuropeanCitizenship === false && (
+                <span className="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full font-medium animate-in fade-in-0 zoom-in-95 duration-200">
+                  {t('no') || 'No'}
+                </span>
+              )}
+            </div>
+            
+            <p className="text-sm text-gray-300 leading-relaxed mb-4">
+              {t('europeanCitizenshipDescription') || 'Do you have citizenship from any European Union country?'}
+            </p>
+            
+            <div className="flex gap-4">
+              {/* Radio Button - Sim */}
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="radio"
+                    name="europeanCitizenship"
+                    checked={hasEuropeanCitizenship === true}
+                    onChange={() => setHasEuropeanCitizenship(true)}
+                    className="sr-only"
+                  />
+                  <div className={`w-6 h-6 rounded-full transition-all duration-300 ${
+                    hasEuropeanCitizenship === true
+                      ? 'bg-blue-500 shadow-lg shadow-blue-500/50' 
+                      : 'bg-white/10 border-2 border-white/30 group-hover:border-blue-400/50'
                   }`}>
-                    {t('europeanCitizenship') || 'European Citizenship'}
-                  </p>
-                  {hasEuropeanCitizenship && (
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium animate-in fade-in-0 zoom-in-95 duration-200">
-                      {t('yes') || 'Yes'}
-                    </span>
-                  )}
-                </div>
-                
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  {t('europeanCitizenshipDescription') || 'Do you have citizenship from any European Union country?'}
-                </p>
-                
-                {hasEuropeanCitizenship && (
-                  <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-md animate-in slide-in-from-top-1 duration-300">
-                    <p className="text-xs text-blue-300">
-                      {t('europeanCitizenshipInfo') || 'This information may provide additional opportunities and benefits within the European medical system.'}
-                    </p>
+                    {hasEuropeanCitizenship === true && (
+                      <div className="w-3 h-3 bg-white rounded-full m-1.5 animate-in zoom-in-50 duration-200" />
+                    )}
                   </div>
-                )}
+                </div>
+                <span className={`text-sm font-medium ${
+                  hasEuropeanCitizenship === true ? 'text-blue-400' : 'text-gray-300 group-hover:text-white'
+                }`}>
+                  {t('yes') || 'Yes'}
+                </span>
+              </label>
+              
+              {/* Radio Button - Não */}
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="radio"
+                    name="europeanCitizenship"
+                    checked={hasEuropeanCitizenship === false}
+                    onChange={() => setHasEuropeanCitizenship(false)}
+                    className="sr-only"
+                  />
+                  <div className={`w-6 h-6 rounded-full transition-all duration-300 ${
+                    hasEuropeanCitizenship === false
+                      ? 'bg-gray-500 shadow-lg shadow-gray-500/50' 
+                      : 'bg-white/10 border-2 border-white/30 group-hover:border-gray-400/50'
+                  }`}>
+                    {hasEuropeanCitizenship === false && (
+                      <div className="w-3 h-3 bg-white rounded-full m-1.5 animate-in zoom-in-50 duration-200" />
+                    )}
+                  </div>
+                </div>
+                <span className={`text-sm font-medium ${
+                  hasEuropeanCitizenship === false ? 'text-gray-400' : 'text-gray-300 group-hover:text-white'
+                }`}>
+                  {t('no') || 'No'}
+                </span>
+              </label>
+            </div>
+            
+            {hasEuropeanCitizenship === true && (
+              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-md animate-in slide-in-from-top-1 duration-300">
+                <p className="text-xs text-blue-300">
+                  {t('europeanCitizenshipInfo') || 'This information may provide additional opportunities and benefits within the European medical system.'}
+                </p>
               </div>
-            </label>
+            )}
           </div>
         </div>
       </div>

@@ -79,8 +79,7 @@
   "Footer": {
     "rightsReserved": "Tutti i diritti riservati",
     "developedWith": "Sviluppato con",
-    "by": "da",
-    "craftedWithExcellence": "Creato con eccellenza"
+    "by": "da"
   },
   "TermsModal": {
     "title": "Termini d'Uso e Privacy",
@@ -852,6 +851,8 @@
     "welcomeBack": "Bentornato",
     "manageYourProfile": "Gestisci il tuo profilo",
     "back": "Indietro",
+    "yes": "Sì",
+    "no": "No",
     "personalInfo": "Informazioni Personali",
     "personalInfoDescription": "Gestisci i tuoi dati personali e preferenze",
     "addresses": "Indirizzi",
@@ -1012,6 +1013,8 @@
     "curriculumUploadSuccess": "Curriculum caricato con successo",
     "clickToDownload": "Clicca per scaricare",
     "europeanCitizenship": "Cittadinanza Europea",
+    "europeanCitizenshipDescription": "Hai la cittadinanza di qualche paese dell'Unione Europea?",
+    "europeanCitizenshipInfo": "Questa informazione può fornire opportunità aggiuntive e benefici all'interno del sistema medico europeo.",
     "errors": {
       "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
       "imageTooLarge": "File troppo grande. Dimensione massima: 5MB",

@@ -72,7 +72,9 @@ export default function UserDropdown() {
               <span className="text-white text-sm font-medium leading-tight">
                 {user.name || user.email?.split('@')[0] || 'Usuário'}
               </span>
-              <RoleBadge role={user.role} className="mt-0.5 scale-90 origin-left" />
+              {user.role && (
+                <RoleBadge role={user.role} className="mt-0.5 scale-90 origin-left" />
+              )}
             </div>
           )}
 

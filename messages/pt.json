@@ -79,8 +79,7 @@
   "Footer": {
     "rightsReserved": "Todos os direitos reservados",
     "developedWith": "Desenvolvido com",
-    "by": "por",
-    "craftedWithExcellence": "Criado com excelência"
+    "by": "por"
   },
   "TermsModal": {
     "title": "Termos de Uso e Privacidade",
@@ -849,6 +848,8 @@
     "welcomeBack": "Bem-vindo de volta",
     "manageYourProfile": "Gerencie seu perfil",
     "back": "Voltar",
+    "yes": "Sim",
+    "no": "Não",
     "personalInfo": "Informações Pessoais",
     "personalInfoDescription": "Gerencie seus dados pessoais e preferências",
     "addresses": "Endereços",

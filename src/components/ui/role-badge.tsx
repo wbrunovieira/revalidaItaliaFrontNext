@@ -30,7 +30,9 @@ const roleConfig = {
 
 export function RoleBadge({ role, className }: RoleBadgeProps) {
   const t = useTranslations('Community.roles');
-  const config = roleConfig[role];
+  
+  // Fallback para role inválida ou undefined
+  const config = roleConfig[role] || roleConfig.student;
   const Icon = config.icon;
 
   return (

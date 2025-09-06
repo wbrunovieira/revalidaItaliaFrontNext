@@ -394,6 +394,7 @@ export const useAuthStore = create<AuthState>()(
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
           
           // Buscar dados do perfil usando o ID do usuário
+          console.log('🔍 Buscando perfil:', `${apiUrl}/api/v1/users/${currentUser.id}`);
           const profileResponse = await fetch(`${apiUrl}/api/v1/users/${currentUser.id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -402,11 +403,18 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (!profileResponse.ok) {
-            throw new Error('Falha ao buscar perfil');
+            console.error('❌ Resposta da API:', profileResponse.status, profileResponse.statusText);
+            const errorText = await profileResponse.text();
+            console.error('❌ Detalhes do erro:', errorText);
+            throw new Error(`Falha ao buscar perfil: ${profileResponse.status} ${profileResponse.statusText}`);
           }
 
-          const profileData = await profileResponse.json();
-          console.log('📊 Dados do perfil recebidos:', profileData);
+          const responseData = await profileResponse.json();
+          console.log('📊 Resposta completa da API:', responseData);
+          
+          // A API retorna { user: {...} }
+          const profileData = responseData.user || responseData;
+          console.log('📊 Dados do perfil extraídos:', profileData);
 
           // Calcular a completude baseada nos campos preenchidos
           const fields = [

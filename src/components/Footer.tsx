@@ -4,7 +4,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Code2, Heart, Sparkles, ArrowUpRight } from 'lucide-react';
+import { Code2, Heart, ArrowUpRight } from 'lucide-react';
 
 export default function Footer() {
   const t = useTranslations('Footer');
@@ -79,16 +79,6 @@ export default function Footer() {
                 </Link>
               </div>
 
-              {/* Right side - Quality badge */}
-              <div className="order-3 md:order-3">
-                <div className="group relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-[#3887A6]/20 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                  <div className="relative flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-white/20 bg-gradient-to-r from-white/10 to-[#3887A6]/10">
-                    <Sparkles className="w-3 h-3 text-white/70" />
-                    <span className="font-light text-white/80">{t('craftedWithExcellence')}</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

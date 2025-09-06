@@ -28,37 +28,37 @@
     "community": {
       "post_reaction": {
         "title": "Nuova reazione al tuo post",
-        "message": "{{actorName}} ha {{reactionType}} il tuo post"
+        "message": "{actorName} ha {reactionType} il tuo post"
       },
       "comment_reaction": {
         "title": "Nuova reazione al tuo commento",
-        "message": "{{actorName}} ha {{reactionType}} il tuo commento"
+        "message": "{actorName} ha {reactionType} il tuo commento"
       },
       "reply_reaction": {
         "title": "Nuova reazione alla tua risposta",
-        "message": "{{actorName}} ha {{reactionType}} la tua risposta"
+        "message": "{actorName} ha {reactionType} la tua risposta"
       },
       "post_comment": {
         "title": "Nuova risposta al tuo post",
-        "message": "{{actorName}} ha risposto al tuo post"
+        "message": "{actorName} ha risposto al tuo post"
       },
       "comment_reply": {
         "title": "Nuova risposta al tuo commento",
-        "message": "{{actorName}} ha risposto al tuo commento"
+        "message": "{actorName} ha risposto al tuo commento"
       }
     },
     "support": {
       "new_response": {
         "title": "Nuova risposta nel supporto",
-        "message": "{{actorName}} ha risposto al tuo ticket di supporto"
+        "message": "{actorName} ha risposto al tuo ticket di supporto"
       },
       "ticket_accepted": {
         "title": "Ticket accettato",
-        "message": "Il tuo ticket di supporto è stato accettato da {{actorName}}"
+        "message": "Il tuo ticket di supporto è stato accettato da {actorName}"
       },
       "ticket_resolved": {
         "title": "Ticket risolto",
-        "message": "Il tuo ticket di supporto è stato risolto da {{actorName}}"
+        "message": "Il tuo ticket di supporto è stato risolto da {actorName}"
       }
     },
     "actions": {

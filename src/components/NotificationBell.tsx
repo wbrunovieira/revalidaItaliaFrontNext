@@ -45,7 +45,7 @@ const getPriorityIcon = (priority: Notification['priority']) => {
 };
 
 // Helper function to translate notification texts with dynamic keys
-function translateNotification(notification: Notification, t: (key: string) => string) {
+function translateNotification(notification: Notification, t: (key: string, params?: Record<string, string>) => string) {
   // Translate title
   const displayTitle = notification.titleKey 
     ? t(notification.titleKey.replace('notifications.', ''))
@@ -66,12 +66,8 @@ function translateNotification(notification: Notification, t: (key: string) => s
         params.reactionType = t(`reactions.${reactionKey}`);
       }
       
-      // Get the message template and replace parameters
-      let messageTemplate = t(key);
-      Object.entries(params).forEach(([paramKey, paramValue]) => {
-        messageTemplate = messageTemplate.replace(`{{${paramKey}}}`, paramValue);
-      });
-      displayMessage = messageTemplate;
+      // Use next-intl's built-in parameter interpolation
+      displayMessage = t(key, params);
     } catch {
       // Fallback to original message if translation fails
       displayMessage = notification.message;

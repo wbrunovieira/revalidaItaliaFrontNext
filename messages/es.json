@@ -28,37 +28,37 @@
     "community": {
       "post_reaction": {
         "title": "Nueva reacción a tu publicación",
-        "message": "{{actorName}} {{reactionType}} tu publicación"
+        "message": "{actorName} {reactionType} tu publicación"
       },
       "comment_reaction": {
         "title": "Nueva reacción a tu comentario",
-        "message": "{{actorName}} {{reactionType}} tu comentario"
+        "message": "{actorName} {reactionType} tu comentario"
       },
       "reply_reaction": {
         "title": "Nueva reacción a tu respuesta",
-        "message": "{{actorName}} {{reactionType}} tu respuesta"
+        "message": "{actorName} {reactionType} tu respuesta"
       },
       "post_comment": {
         "title": "Nueva respuesta a tu publicación",
-        "message": "{{actorName}} respondió a tu publicación"
+        "message": "{actorName} respondió a tu publicación"
       },
       "comment_reply": {
         "title": "Nueva respuesta a tu comentario",
-        "message": "{{actorName}} respondió a tu comentario"
+        "message": "{actorName} respondió a tu comentario"
       }
     },
     "support": {
       "new_response": {
         "title": "Nueva respuesta en soporte",
-        "message": "{{actorName}} respondió a tu ticket de soporte"
+        "message": "{actorName} respondió a tu ticket de soporte"
       },
       "ticket_accepted": {
         "title": "Ticket aceptado",
-        "message": "Tu ticket de soporte fue aceptado por {{actorName}}"
+        "message": "Tu ticket de soporte fue aceptado por {actorName}"
       },
       "ticket_resolved": {
         "title": "Ticket resuelto",
-        "message": "Tu ticket de soporte fue resuelto por {{actorName}}"
+        "message": "Tu ticket de soporte fue resuelto por {actorName}"
       }
     },
     "actions": {

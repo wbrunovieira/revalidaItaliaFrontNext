@@ -24,6 +24,56 @@
       "HIGH": "Alta",
       "MEDIUM": "Media",
       "LOW": "Baja"
+    },
+    "community": {
+      "post_reaction": {
+        "title": "Nueva reacción a tu publicación",
+        "message": "{{actorName}} {{reactionType}} tu publicación"
+      },
+      "comment_reaction": {
+        "title": "Nueva reacción a tu comentario",
+        "message": "{{actorName}} {{reactionType}} tu comentario"
+      },
+      "reply_reaction": {
+        "title": "Nueva reacción a tu respuesta",
+        "message": "{{actorName}} {{reactionType}} tu respuesta"
+      },
+      "post_comment": {
+        "title": "Nueva respuesta a tu publicación",
+        "message": "{{actorName}} respondió a tu publicación"
+      },
+      "comment_reply": {
+        "title": "Nueva respuesta a tu comentario",
+        "message": "{{actorName}} respondió a tu comentario"
+      }
+    },
+    "support": {
+      "new_response": {
+        "title": "Nueva respuesta en soporte",
+        "message": "{{actorName}} respondió a tu ticket de soporte"
+      },
+      "ticket_accepted": {
+        "title": "Ticket aceptado",
+        "message": "Tu ticket de soporte fue aceptado por {{actorName}}"
+      },
+      "ticket_resolved": {
+        "title": "Ticket resuelto",
+        "message": "Tu ticket de soporte fue resuelto por {{actorName}}"
+      }
+    },
+    "actions": {
+      "view_post": "Ver publicación",
+      "view_ticket": "Ver ticket",
+      "view_assessment": "Ver evaluación",
+      "join_session": "Unirse a la sesión"
+    },
+    "reactions": {
+      "liked": "le gustó",
+      "loved": "amó",
+      "surprised": "se sorprendió con",
+      "found_insightful": "encontró perspicaz",
+      "reacted": "reaccionó a",
+      "sad": "se entristeció con"
     }
   },
   "Footer": {

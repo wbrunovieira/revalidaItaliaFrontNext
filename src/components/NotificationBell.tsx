@@ -44,6 +44,48 @@ const getPriorityIcon = (priority: Notification['priority']) => {
   }
 };
 
+// Helper function to translate notification texts with dynamic keys
+function translateNotification(notification: Notification, t: (key: string) => string) {
+  // Translate title
+  const displayTitle = notification.titleKey 
+    ? t(notification.titleKey.replace('notifications.', ''))
+    : notification.title;
+
+  // Translate message with parameters
+  let displayMessage = notification.message;
+  if (notification.messageKey && notification.messageParams) {
+    try {
+      // Remove 'notifications.' prefix if present
+      const key = notification.messageKey.replace('notifications.', '');
+      
+      // Handle nested reaction type translation
+      const params = { ...notification.messageParams };
+      if (params.reactionType) {
+        // Translate the reaction type
+        const reactionKey = params.reactionType.replace('reactions.', '');
+        params.reactionType = t(`reactions.${reactionKey}`);
+      }
+      
+      // Get the message template and replace parameters
+      let messageTemplate = t(key);
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        messageTemplate = messageTemplate.replace(`{{${paramKey}}}`, paramValue);
+      });
+      displayMessage = messageTemplate;
+    } catch {
+      // Fallback to original message if translation fails
+      displayMessage = notification.message;
+    }
+  }
+
+  // Translate action label
+  const displayActionLabel = notification.actionLabelKey
+    ? t(notification.actionLabelKey.replace('notifications.', ''))
+    : notification.actionLabel;
+
+  return { displayTitle, displayMessage, displayActionLabel };
+}
+
 export default function NotificationBell() {
   const t = useTranslations('Notifications');
   const params = useParams();
@@ -309,37 +351,40 @@ export default function NotificationBell() {
                       transition: { duration: 0.15 }
                     }}
                   >
-                    <div className="flex gap-3">
-                      {/* Category Indicator */}
-                      <div className="flex-shrink-0">
-                        <div className={cn(
-                          'w-2 h-2 rounded-full mt-2',
-                          getCategoryColor(notification.category),
-                          !notification.isRead && 'animate-pulse'
-                        )} />
-                      </div>
+                    {(() => {
+                      const { displayTitle, displayMessage } = translateNotification(notification, t);
+                      return (
+                        <div className="flex gap-3">
+                          {/* Category Indicator */}
+                          <div className="flex-shrink-0">
+                            <div className={cn(
+                              'w-2 h-2 rounded-full mt-2',
+                              getCategoryColor(notification.category),
+                              !notification.isRead && 'animate-pulse'
+                            )} />
+                          </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm">
-                                {getPriorityIcon(notification.priority)}
-                              </span>
-                              <h4 className={cn(
-                                'font-medium text-sm',
-                                notification.isRead ? 'text-gray-300' : 'text-white'
-                              )}>
-                                {notification.title}
-                              </h4>
-                            </div>
-                            <p className={cn(
-                              'text-sm line-clamp-2 mb-2',
-                              notification.isRead ? 'text-gray-500' : 'text-gray-400'
-                            )}>
-                              {notification.message}
-                            </p>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-sm">
+                                    {getPriorityIcon(notification.priority)}
+                                  </span>
+                                  <h4 className={cn(
+                                    'font-medium text-sm',
+                                    notification.isRead ? 'text-gray-300' : 'text-white'
+                                  )}>
+                                    {displayTitle}
+                                  </h4>
+                                </div>
+                                <p className={cn(
+                                  'text-sm line-clamp-2 mb-2',
+                                  notification.isRead ? 'text-gray-500' : 'text-gray-400'
+                                )}>
+                                  {displayMessage}
+                                </p>
                             <div className="flex items-center gap-3">
                               <span className="text-xs text-gray-600">
                                 {formatTime(notification.createdAt)}
@@ -368,10 +413,12 @@ export default function NotificationBell() {
                             >
                               <Trash2 size={16} />
                             </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
                   </motion.div>
                 ))}
               </motion.div>

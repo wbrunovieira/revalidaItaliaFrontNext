@@ -21,6 +21,11 @@ export interface Notification {
   readAt?: string;
   createdAt: string;
   expiresAt?: string;
+  // New i18n fields
+  titleKey?: string | null;
+  messageKey?: string | null;
+  messageParams?: Record<string, string> | null;
+  actionLabelKey?: string | null;
 }
 
 export interface NotificationMeta {

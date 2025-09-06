@@ -1006,9 +1006,17 @@
     "removePhoto": "Eliminar foto",
     "uploading": "Subiendo...",
     "imageUploadSuccess": "Imagen subida con éxito",
+    "curriculum": "Currículum",
+    "viewCurriculum": "Ver CV",
+    "uploadCurriculum": "Cargar PDF o documento Word (máx. 10MB)",
+    "curriculumUploadSuccess": "Currículum cargado con éxito",
+    "clickToDownload": "Haz clic para descargar",
+    "europeanCitizenship": "Ciudadanía Europea",
     "errors": {
       "invalidImageType": "Tipo de archivo no válido. Use JPG, PNG, GIF o WebP",
       "imageTooLarge": "Archivo demasiado grande. Tamaño máximo: 5MB",
+      "invalidCurriculumType": "Por favor, carga un archivo PDF o documento Word",
+      "curriculumTooLarge": "Archivo demasiado grande. Tamaño máximo: 10MB",
       "uploadFailed": "Error al subir imagen"
     },
     "upload": {

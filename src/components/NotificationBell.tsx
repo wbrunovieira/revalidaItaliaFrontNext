@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Check, CheckCheck, Trash2, Loader2 } from 'lucide-react';
+import { Bell, X, Check, CheckCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { useTranslations } from 'next-intl';
@@ -97,7 +97,6 @@ export default function NotificationBell() {
     isLoading,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
     refetch,
   } = useNotifications({
     limit: 10,
@@ -170,13 +169,6 @@ export default function NotificationBell() {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
-    e.stopPropagation();
-    const success = await deleteNotification(notificationId);
-    if (success) {
-      refetch();
-    }
-  };
 
   const formatTime = (date: string) => {
     try {
@@ -402,13 +394,6 @@ export default function NotificationBell() {
                                 <Check size={16} />
                               </button>
                             )}
-                            <button
-                              onClick={(e) => handleDelete(e, notification.id)}
-                              className="p-1 text-gray-500 hover:text-red-500 transition-colors"
-                              title={t('delete')}
-                            >
-                              <Trash2 size={16} />
-                            </button>
                               </div>
                             </div>
                           </div>

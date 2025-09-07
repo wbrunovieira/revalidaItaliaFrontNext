@@ -18,14 +18,15 @@ import {
   Trash2,
   HelpCircle,
   Sparkles,
-  MessageSquareText
+  MessageSquareText,
+  X
 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   Form,
   FormControl,
@@ -325,7 +326,9 @@ export function CreateSupportTicketModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden">
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[700px] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg p-0 overflow-hidden">
         {/* Animated Header with Gradient */}
         <DialogHeader className="relative p-0">
           {/* Hidden DialogTitle for accessibility */}
@@ -368,6 +371,15 @@ export function CreateSupportTicketModal({
                   </motion.p>
                 </div>
               </div>
+              
+              {/* Custom Close Button */}
+              <button
+                onClick={onClose}
+                className="absolute right-4 top-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5 text-white" />
+              </button>
             </div>
           </div>
         </DialogHeader>
@@ -647,7 +659,8 @@ export function CreateSupportTicketModal({
             </form>
           </Form>
         </div>
-      </DialogContent>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
     </Dialog>
   );
 }

@@ -24,6 +24,7 @@ export default function LoginForm() {
     null
   );
   const [showPassword, setShowPassword] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const loginSchema = z.object({
     email: z
@@ -46,7 +47,6 @@ export default function LoginForm() {
     formState: {
       errors,
       isSubmitting,
-      isSubmitSuccessful,
       touchedFields,
     },
     setFocus,
@@ -62,6 +62,9 @@ export default function LoginForm() {
   }, [setFocus]);
 
   const onSubmit = async (data: LoginData) => {
+    setFormError(null); // Clear any previous errors
+    setLoginSuccess(false); // Reset success state
+    
     try {
       // Usar o Auth Store para fazer login
       await login({
@@ -69,19 +72,32 @@ export default function LoginForm() {
         password: data.password
       });
       
+      // Mark as successful
+      setLoginSuccess(true);
+      
       // Redirecionar após sucesso
       router.push(`/${locale}`);
     } catch (err: unknown) {
       let message: string;
       if (err instanceof Error) {
-        message =
-          err.message === 'loginFailed'
-            ? t('loginFailed')
-            : err.message;
+        // Check for network errors
+        if (err.message.toLowerCase().includes('failed to fetch') || 
+            err.message.toLowerCase().includes('network') ||
+            err.message.toLowerCase().includes('fetch')) {
+          message = t('networkError');
+        } else if (err.message === 'loginFailed') {
+          message = t('loginFailed');
+        } else if (err.message.includes('401') || err.message.includes('Invalid credentials')) {
+          message = t('invalidCredentials');
+        } else {
+          // Use generic error message instead of showing technical details
+          message = t('genericError');
+        }
       } else {
-        message = t('loginFailed');
+        message = t('genericError');
       }
       setFormError(message);
+      setLoginSuccess(false); // Ensure success state is false on error
     }
   };
 
@@ -195,8 +211,10 @@ export default function LoginForm() {
       <Button
         type="submit"
         text={
-          isSubmitSuccessful
+          loginSuccess
             ? t('buttonSuccess')
+            : isSubmitting
+            ? t('buttonLoading')
             : t('button')
         }
         size="large"

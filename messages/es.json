@@ -904,6 +904,14 @@
     "noChangesDescription": "No se detectaron cambios en los datos",
     "updateSuccess": "Perfil actualizado",
     "updateSuccessDescription": "Tu información ha sido actualizada exitosamente",
+    "changePassword": "Cambiar Contraseña",
+    "sending": "Enviando...",
+    "passwordResetEmailSent": "¡Correo de restablecimiento de contraseña enviado!",
+    "passwordResetEmailDescription": "Hemos enviado un enlace a {email} con instrucciones para cambiar tu contraseña. Revisa tu bandeja de entrada y spam.",
+    "confirmPasswordReset": "Confirmar cambio de contraseña",
+    "passwordResetConfirmationMessage": "Se enviará un correo a {email} con instrucciones para restablecer tu contraseña. ¿Deseas continuar?",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
     "validation": {
       "nameMin": "El nombre debe tener al menos 3 caracteres",
       "emailInvalid": "Correo electrónico no válido",
@@ -1079,6 +1087,7 @@
     "password": "Contraseña",
     "button": "Acceder",
     "buttonSuccess": "¡Éxito!",
+    "buttonLoading": "Ingresando...",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "emailRequired": "Correo electrónico es obligatorio",
     "emailInvalid": "Formato de correo electrónico inválido",
@@ -1087,7 +1096,10 @@
     "passwordUppercase": "La contraseña debe contener al menos una letra mayúscula",
     "passwordNumber": "La contraseña debe contener al menos un número",
     "passwordSpecial": "La contraseña debe contener al menos un carácter especial",
-    "loginFailed": "Usuario o contraseña inválidos"
+    "loginFailed": "Usuario o contraseña inválidos",
+    "networkError": "Error de conexión. Verifica tu internet e intenta nuevamente.",
+    "invalidCredentials": "Correo o contraseña incorrectos. Por favor, intenta nuevamente.",
+    "genericError": "Ocurrió un error al iniciar sesión. Por favor, intenta nuevamente."
   },
   "ForgotPassword": {
     "title": "¿Olvidaste tu contraseña?",

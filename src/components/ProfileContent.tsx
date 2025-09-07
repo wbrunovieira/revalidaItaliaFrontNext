@@ -25,6 +25,7 @@ import {
   FileText,
   Globe,
   Download,
+  Lock,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -132,6 +133,11 @@ export default function ProfileContent({
   
   // Estado para edição de perfil
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  
+  // Estado para change password
+  const [showPasswordResetSuccess, setShowPasswordResetSuccess] = useState(false);
+  const [isRequestingPasswordReset, setIsRequestingPasswordReset] = useState(false);
+  const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -250,6 +256,44 @@ export default function ProfileContent({
     setPendingDeleteAddress(null);
   };
 
+  const handlePasswordResetClick = () => {
+    setShowPasswordResetConfirmation(true);
+  };
+
+  const confirmPasswordReset = async () => {
+    setShowPasswordResetConfirmation(false);
+    setIsRequestingPasswordReset(true);
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      
+      const response = await fetch(`${apiUrl}/api/v1/auth/password/request-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: userData.email }),
+      });
+      
+      // API always returns 200 for security reasons
+      if (response.ok || response.status === 200) {
+        setShowPasswordResetSuccess(true);
+        // Auto-hide success message after 10 seconds
+        setTimeout(() => {
+          setShowPasswordResetSuccess(false);
+        }, 10000);
+      }
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+    } finally {
+      setIsRequestingPasswordReset(false);
+    }
+  };
+
+  const cancelPasswordReset = () => {
+    setShowPasswordResetConfirmation(false);
+  };
+
   const confirmDeleteAddress = async () => {
     if (!pendingDeleteAddress) return;
 
@@ -315,23 +359,35 @@ export default function ProfileContent({
               {/* Header com melhor espaçamento */}
               <div className="mb-8">
                 <div className="flex items-start justify-between gap-4">
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-2xl font-bold text-white mb-1">
                       {t('personalInfo')}
                     </h2>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 mb-4">
                       {t('personalInfoDescription')}
                     </p>
+                    {!isEditingProfile && (
+                      <div className="flex flex-col gap-2 items-start">
+                        <button
+                          onClick={() => setIsEditingProfile(true)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
+                        >
+                          <Edit size={16} />
+                          <span>{t('edit')}</span>
+                        </button>
+                        <button
+                          onClick={handlePasswordResetClick}
+                          disabled={isRequestingPasswordReset}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Lock size={16} />
+                          <span>
+                            {isRequestingPasswordReset ? t('sending') : t('changePassword')}
+                          </span>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  {!isEditingProfile && (
-                    <button
-                      onClick={() => setIsEditingProfile(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
-                    >
-                      <Edit size={16} />
-                      <span className="hidden sm:inline">{t('edit')}</span>
-                    </button>
-                  )}
                   {isEditingProfile && (
                     <button
                       onClick={() => setIsEditingProfile(false)}
@@ -344,6 +400,29 @@ export default function ProfileContent({
                 </div>
                 <div className="mt-4 h-px bg-gradient-to-r from-secondary/50 via-secondary/20 to-transparent"></div>
               </div>
+
+              {/* Success Message for Password Reset */}
+              {showPasswordResetSuccess && (
+                <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg animate-fadeIn">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="text-green-400 mt-0.5" size={20} />
+                    <div className="flex-1">
+                      <p className="text-green-400 font-medium">
+                        {t('passwordResetEmailSent')}
+                      </p>
+                      <p className="text-gray-300 text-sm mt-1">
+                        {t('passwordResetEmailDescription', { email: userData.email })}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowPasswordResetSuccess(false)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {isEditingProfile ? (
                 <EditProfileForm
@@ -724,6 +803,56 @@ export default function ProfileContent({
             <button
               onClick={hideDeleteConfirmation}
               disabled={isDeleting}
+              className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+            >
+              <X size={16} className="text-gray-400" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reset Confirmation Toast */}
+      {showPasswordResetConfirmation && (
+        <div className="fixed bottom-6 right-6 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-blue-100 rounded-full">
+              <Lock size={20} className="text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">
+                {t('confirmPasswordReset')}
+              </h4>
+              <p className="text-sm text-gray-600 mb-3">
+                {t('passwordResetConfirmationMessage', { email: userData.email })}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={confirmPasswordReset}
+                  disabled={isRequestingPasswordReset}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isRequestingPasswordReset ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                  ) : (
+                    <Check size={14} />
+                  )}
+                  {isRequestingPasswordReset
+                    ? t('sending')
+                    : t('confirm')}
+                </button>
+                <button
+                  onClick={cancelPasswordReset}
+                  disabled={isRequestingPasswordReset}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                >
+                  <X size={14} />
+                  {t('cancel')}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={cancelPasswordReset}
+              disabled={isRequestingPasswordReset}
               className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
             >
               <X size={16} className="text-gray-400" />

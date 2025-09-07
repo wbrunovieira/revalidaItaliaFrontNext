@@ -56,68 +56,39 @@ export default function FAQ({ locale }: FAQProps) {
       answer: t('answers.howToFindCourse'),
       tags: ['buscar', 'encontrar', 'curso'],
     },
-    {
-      id: '4',
-      category: 'navigation',
-      question: t('questions.darkMode'),
-      answer: t('answers.darkMode'),
-      tags: ['tema', 'escuro', 'claro'],
-    },
-    
     // Vídeos e Aulas
     {
-      id: '5',
+      id: '4',
       category: 'videos',
       question: t('questions.videoNotPlaying'),
       answer: t('answers.videoNotPlaying'),
       tags: ['vídeo', 'reprodução', 'erro'],
     },
     {
-      id: '6',
-      category: 'videos',
-      question: t('questions.downloadVideos'),
-      answer: t('answers.downloadVideos'),
-      tags: ['download', 'offline', 'baixar'],
-    },
-    {
-      id: '7',
+      id: '5',
       category: 'videos',
       question: t('questions.videoSpeed'),
       answer: t('answers.videoSpeed'),
       tags: ['velocidade', 'reprodução', 'controles'],
     },
-    {
-      id: '8',
-      category: 'videos',
-      question: t('questions.subtitles'),
-      answer: t('answers.subtitles'),
-      tags: ['legendas', 'idioma', 'tradução'],
-    },
     
     // Avaliações e Simulados
     {
-      id: '9',
+      id: '6',
       category: 'assessments',
       question: t('questions.howToStartAssessment'),
       answer: t('answers.howToStartAssessment'),
       tags: ['avaliação', 'iniciar', 'teste'],
     },
     {
-      id: '10',
+      id: '7',
       category: 'assessments',
       question: t('questions.assessmentTimeLimit'),
       answer: t('answers.assessmentTimeLimit'),
       tags: ['tempo', 'cronômetro', 'limite'],
     },
     {
-      id: '11',
-      category: 'assessments',
-      question: t('questions.reviewAnswers'),
-      answer: t('answers.reviewAnswers'),
-      tags: ['revisar', 'gabarito', 'respostas'],
-    },
-    {
-      id: '12',
+      id: '8',
       category: 'assessments',
       question: t('questions.retakeAssessment'),
       answer: t('answers.retakeAssessment'),
@@ -126,28 +97,28 @@ export default function FAQ({ locale }: FAQProps) {
     
     // Suporte e Tickets
     {
-      id: '13',
+      id: '9',
       category: 'support',
       question: t('questions.howToCreateTicket'),
       answer: t('answers.howToCreateTicket'),
       tags: ['ticket', 'dúvida', 'criar'],
     },
     {
-      id: '14',
+      id: '10',
       category: 'support',
       question: t('questions.ticketResponseTime'),
       answer: t('answers.ticketResponseTime'),
       tags: ['resposta', 'tempo', 'tutor'],
     },
     {
-      id: '15',
+      id: '11',
       category: 'support',
       question: t('questions.attachFiles'),
       answer: t('answers.attachFiles'),
       tags: ['anexar', 'arquivo', 'imagem'],
     },
     {
-      id: '16',
+      id: '12',
       category: 'support',
       question: t('questions.reopenTicket'),
       answer: t('answers.reopenTicket'),
@@ -156,62 +127,41 @@ export default function FAQ({ locale }: FAQProps) {
     
     // Comunidade
     {
-      id: '17',
+      id: '13',
       category: 'community',
       question: t('questions.howToPost'),
       answer: t('answers.howToPost'),
       tags: ['postar', 'comunidade', 'publicar'],
     },
     {
-      id: '18',
+      id: '14',
       category: 'community',
       question: t('questions.reportContent'),
       answer: t('answers.reportContent'),
       tags: ['denunciar', 'reportar', 'inadequado'],
     },
     {
-      id: '19',
+      id: '15',
       category: 'community',
       question: t('questions.editPost'),
       answer: t('answers.editPost'),
       tags: ['editar', 'alterar', 'post'],
     },
-    {
-      id: '20',
-      category: 'community',
-      question: t('questions.privateMessages'),
-      answer: t('answers.privateMessages'),
-      tags: ['mensagem', 'privada', 'chat'],
-    },
     
     // Perfil e Configurações
     {
-      id: '21',
+      id: '16',
       category: 'profile',
       question: t('questions.updateProfile'),
       answer: t('answers.updateProfile'),
       tags: ['perfil', 'atualizar', 'foto'],
     },
     {
-      id: '22',
+      id: '17',
       category: 'profile',
       question: t('questions.changePassword'),
       answer: t('answers.changePassword'),
       tags: ['senha', 'alterar', 'segurança'],
-    },
-    {
-      id: '23',
-      category: 'profile',
-      question: t('questions.notifications'),
-      answer: t('answers.notifications'),
-      tags: ['notificações', 'alertas', 'email'],
-    },
-    {
-      id: '24',
-      category: 'profile',
-      question: t('questions.deleteAccount'),
-      answer: t('answers.deleteAccount'),
-      tags: ['deletar', 'conta', 'cancelar'],
     },
   ];
 

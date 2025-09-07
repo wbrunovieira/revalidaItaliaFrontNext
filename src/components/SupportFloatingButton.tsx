@@ -46,9 +46,12 @@ export function SupportFloatingButton({ context = { type: 'GENERAL' }, className
             </p>
 
             {/* Close button for tooltip */}
-            {isTooltipVisible && !isHovered && (
+            {isTooltipVisible && (
               <button
-                onClick={handleClose}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClose();
+                }}
                 className="absolute -top-1 -right-1 bg-gray-100 dark:bg-gray-700 rounded-full p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 aria-label={t('floatingButton.closeTooltip')}
               >

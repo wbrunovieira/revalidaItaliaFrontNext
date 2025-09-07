@@ -88,7 +88,7 @@ export default function EditProfileForm({
     userData.communityProfileConsent || false
   );
   const [hasEuropeanCitizenship, setHasEuropeanCitizenship] = useState<boolean | null>(
-    userData.hasEuropeanCitizenship // Mantém o valor existente do usuário (null, true ou false)
+    userData.hasEuropeanCitizenship ?? null // Mantém o valor existente do usuário (null, true ou false)
   );
   
   // Estados para upload de imagem

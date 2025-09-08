@@ -20,7 +20,8 @@ variable "public_key_path" {
 }
 
 variable "frontend_instance_type" {
-  default = "t3.small"
+  description = "EC2 instance type for frontend - t3.medium for 500 students"
+  default = "t3.medium"
 }
 
 variable "frontend_ami" {

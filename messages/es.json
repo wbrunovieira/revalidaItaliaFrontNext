@@ -928,6 +928,48 @@
     "passwordResetConfirmationMessage": "Se enviará un correo a {email} con instrucciones para restablecer tu contraseña. ¿Deseas continuar?",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
+    "certificates": {
+      "title": "Mis Certificados",
+      "titleDescription": "Visualiza y descarga tus certificados de finalización",
+      "noCertificates": "No hay certificados disponibles",
+      "noCertificatesDesc": "Tus certificados aparecerán aquí cuando completes cursos, rutas o módulos.",
+      "loading": "Cargando certificados...",
+      "download": "Descargar PDF",
+      "downloading": "Descargando...",
+      "view": "Ver",
+      "verify": "Verificar",
+      "validationCode": "Código de Validación",
+      "issueDate": "Fecha de Emisión",
+      "expirationDate": "Fecha de Vencimiento",
+      "noExpiration": "Sin vencimiento",
+      "type": {
+        "COURSE_COMPLETION": "Finalización de Curso",
+        "TRACK_COMPLETION": "Finalización de Ruta",
+        "MODULE_COMPLETION": "Finalización de Módulo"
+      },
+      "status": {
+        "AVAILABLE": "Disponible",
+        "PENDING": "Pendiente",
+        "REVOKED": "Revocado"
+      },
+      "details": {
+        "courseName": "Curso",
+        "trackName": "Ruta",
+        "moduleName": "Módulo",
+        "completionDate": "Fecha de Finalización",
+        "totalHours": "Carga Horaria",
+        "hours": "{count} horas",
+        "instructor": "Instructor",
+        "organization": "Organización"
+      },
+      "downloadCount": "{count, plural, =0 {Nunca descargado} =1 {Descargado 1 vez} other {Descargado {count} veces}}",
+      "error": {
+        "fetchTitle": "Error al cargar certificados",
+        "fetchDescription": "No se pudieron cargar tus certificados. Intenta nuevamente.",
+        "downloadTitle": "Error al descargar certificado",
+        "downloadDescription": "No se pudo descargar el certificado. Intenta nuevamente."
+      }
+    },
     "validation": {
       "nameMin": "El nombre debe tener al menos 3 caracteres",
       "emailInvalid": "Correo electrónico no válido",

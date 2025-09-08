@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
 import EditProfileForm from '@/components/EditProfileForm';
+import ProfileCertificates from '@/components/ProfileCertificates';
 import {
   MapPin,
   Plus,
@@ -26,6 +27,7 @@ import {
   Globe,
   Download,
   Lock,
+  Award,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -751,6 +753,24 @@ export default function ProfileContent({
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Certificados - Full width section */}
+        <div className="lg:col-span-2 mt-6">
+          <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <Award size={24} className="text-secondary" />
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {t('certificates.title')}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  {t('certificates.titleDescription')}
+                </p>
+              </div>
+            </div>
+            <ProfileCertificates />
           </div>
         </div>
       </div>

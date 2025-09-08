@@ -926,6 +926,48 @@
     "passwordResetConfirmationMessage": "Um email será enviado para {email} com instruções para redefinir sua senha. Deseja continuar?",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
+    "certificates": {
+      "title": "Meus Certificados",
+      "titleDescription": "Visualize e baixe seus certificados de conclusão",
+      "noCertificates": "Nenhum certificado disponível",
+      "noCertificatesDesc": "Seus certificados aparecerão aqui quando você concluir cursos, trilhas ou módulos.",
+      "loading": "Carregando certificados...",
+      "download": "Baixar PDF",
+      "downloading": "Baixando...",
+      "view": "Visualizar",
+      "verify": "Verificar",
+      "validationCode": "Código de Validação",
+      "issueDate": "Data de Emissão",
+      "expirationDate": "Data de Expiração",
+      "noExpiration": "Sem expiração",
+      "type": {
+        "COURSE_COMPLETION": "Conclusão de Curso",
+        "TRACK_COMPLETION": "Conclusão de Trilha",
+        "MODULE_COMPLETION": "Conclusão de Módulo"
+      },
+      "status": {
+        "AVAILABLE": "Disponível",
+        "PENDING": "Pendente",
+        "REVOKED": "Revogado"
+      },
+      "details": {
+        "courseName": "Curso",
+        "trackName": "Trilha",
+        "moduleName": "Módulo",
+        "completionDate": "Data de Conclusão",
+        "totalHours": "Carga Horária",
+        "hours": "{count} horas",
+        "instructor": "Instrutor",
+        "organization": "Organização"
+      },
+      "downloadCount": "{count, plural, =0 {Nunca baixado} =1 {Baixado 1 vez} other {Baixado {count} vezes}}",
+      "error": {
+        "fetchTitle": "Erro ao carregar certificados",
+        "fetchDescription": "Não foi possível carregar seus certificados. Tente novamente.",
+        "downloadTitle": "Erro ao baixar certificado",
+        "downloadDescription": "Não foi possível baixar o certificado. Tente novamente."
+      }
+    },
     "validation": {
       "nameMin": "Nome deve ter pelo menos 3 caracteres",
       "emailInvalid": "E-mail inválido",

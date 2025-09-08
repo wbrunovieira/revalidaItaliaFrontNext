@@ -928,6 +928,48 @@
     "passwordResetConfirmationMessage": "Verrà inviata un'email a {email} con le istruzioni per reimpostare la password. Vuoi continuare?",
     "confirm": "Conferma",
     "cancel": "Annulla",
+    "certificates": {
+      "title": "I Miei Certificati",
+      "titleDescription": "Visualizza e scarica i tuoi certificati di completamento",
+      "noCertificates": "Nessun certificato disponibile",
+      "noCertificatesDesc": "I tuoi certificati appariranno qui quando completerai corsi, percorsi o moduli.",
+      "loading": "Caricamento certificati...",
+      "download": "Scarica PDF",
+      "downloading": "Download in corso...",
+      "view": "Visualizza",
+      "verify": "Verifica",
+      "validationCode": "Codice di Validazione",
+      "issueDate": "Data di Emissione",
+      "expirationDate": "Data di Scadenza",
+      "noExpiration": "Senza scadenza",
+      "type": {
+        "COURSE_COMPLETION": "Completamento Corso",
+        "TRACK_COMPLETION": "Completamento Percorso",
+        "MODULE_COMPLETION": "Completamento Modulo"
+      },
+      "status": {
+        "AVAILABLE": "Disponibile",
+        "PENDING": "In attesa",
+        "REVOKED": "Revocato"
+      },
+      "details": {
+        "courseName": "Corso",
+        "trackName": "Percorso",
+        "moduleName": "Modulo",
+        "completionDate": "Data di Completamento",
+        "totalHours": "Carico Orario",
+        "hours": "{count} ore",
+        "instructor": "Istruttore",
+        "organization": "Organizzazione"
+      },
+      "downloadCount": "{count, plural, =0 {Mai scaricato} =1 {Scaricato 1 volta} other {Scaricato {count} volte}}",
+      "error": {
+        "fetchTitle": "Errore nel caricamento dei certificati",
+        "fetchDescription": "Non è stato possibile caricare i tuoi certificati. Riprova.",
+        "downloadTitle": "Errore nel download del certificato",
+        "downloadDescription": "Non è stato possibile scaricare il certificato. Riprova."
+      }
+    },
     "validation": {
       "nameMin": "Il nome deve avere almeno 3 caratteri",
       "emailInvalid": "E-mail non valida",

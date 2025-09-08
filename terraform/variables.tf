@@ -40,9 +40,9 @@ variable "private_key_path" {
 }
 
 variable "NEXT_PUBLIC_API_URL" {
-
-  type    = string
-  default = "http://18.216.107.74:3333"
+  description = "URL da API backend"
+  type        = string
+  default     = "https://api.portalrevalida.com"
 }
 
 variable "storage_type" {
@@ -91,4 +91,16 @@ variable "next_public_url" {
   description = "URL pública do frontend Next.js"
   type        = string
   default     = "http://ec2-3-18-51-87.us-east-2.compute.amazonaws.com:3000"
+}
+
+# Cloudflare variables
+variable "cloudflare_api_token" {
+  description = "Cloudflare API Token"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for portalrevalida.com"
+  type        = string
 }

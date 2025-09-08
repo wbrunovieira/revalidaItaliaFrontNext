@@ -122,6 +122,189 @@
         chdir: '{{ app_dir }}'
       become_user: ubuntu
 
+    - name: Install Nginx and SSL tools
+      apt:
+        name:
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+          - openssl
+        state: present
+        update_cache: yes
+
+    - name: Create SSL directory
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+        mode: '0755'
+
+    - name: Generate self-signed SSL certificate for Cloudflare
+      command: |
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/portalrevalida.com.key \
+        -out /etc/nginx/ssl/portalrevalida.com.crt \
+        -subj "/C=BR/ST=SP/L=SaoPaulo/O=RevalidaItalia/CN=portalrevalida.com"
+      args:
+        creates: /etc/nginx/ssl/portalrevalida.com.crt
+
+    - name: Create Nginx HTTP configuration
+      copy:
+        content: |
+          server {
+              listen 80;
+              listen [::]:80;
+              server_name portalrevalida.com www.portalrevalida.com;
+              
+              # Security headers
+              add_header X-Frame-Options "SAMEORIGIN" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header X-Content-Type-Options "nosniff" always;
+              
+              # Cloudflare Real IP
+              set_real_ip_from 173.245.48.0/20;
+              set_real_ip_from 103.21.244.0/22;
+              set_real_ip_from 103.22.200.0/22;
+              set_real_ip_from 103.31.4.0/22;
+              set_real_ip_from 141.101.64.0/18;
+              set_real_ip_from 108.162.192.0/18;
+              set_real_ip_from 190.93.240.0/20;
+              set_real_ip_from 188.114.96.0/20;
+              set_real_ip_from 197.234.240.0/22;
+              set_real_ip_from 198.41.128.0/17;
+              set_real_ip_from 162.158.0.0/15;
+              set_real_ip_from 104.16.0.0/13;
+              set_real_ip_from 104.24.0.0/14;
+              set_real_ip_from 172.64.0.0/13;
+              set_real_ip_from 131.0.72.0/22;
+              real_ip_header CF-Connecting-IP;
+
+              # Proxy para Next.js
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_cache_bypass $http_upgrade;
+
+                  # Timeouts
+                  proxy_connect_timeout 60s;
+                  proxy_send_timeout 60s;
+                  proxy_read_timeout 60s;
+
+                  # Max body size
+                  client_max_body_size 50M;
+              }
+          }
+        dest: /etc/nginx/sites-available/portalrevalida.com
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Create Nginx HTTPS configuration
+      copy:
+        content: |
+          server {
+              listen 443 ssl http2;
+              listen [::]:443 ssl http2;
+              server_name portalrevalida.com www.portalrevalida.com;
+              
+              # SSL Configuration
+              ssl_certificate /etc/nginx/ssl/portalrevalida.com.crt;
+              ssl_certificate_key /etc/nginx/ssl/portalrevalida.com.key;
+              
+              # SSL Security Settings
+              ssl_protocols TLSv1.2 TLSv1.3;
+              ssl_ciphers HIGH:!aNULL:!MD5;
+              ssl_prefer_server_ciphers on;
+              
+              # Security headers
+              add_header X-Frame-Options "SAMEORIGIN" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header X-Content-Type-Options "nosniff" always;
+              add_header Referrer-Policy "no-referrer-when-downgrade" always;
+              
+              # Cloudflare Real IP
+              set_real_ip_from 173.245.48.0/20;
+              set_real_ip_from 103.21.244.0/22;
+              set_real_ip_from 103.22.200.0/22;
+              set_real_ip_from 103.31.4.0/22;
+              set_real_ip_from 141.101.64.0/18;
+              set_real_ip_from 108.162.192.0/18;
+              set_real_ip_from 190.93.240.0/20;
+              set_real_ip_from 188.114.96.0/20;
+              set_real_ip_from 197.234.240.0/22;
+              set_real_ip_from 198.41.128.0/17;
+              set_real_ip_from 162.158.0.0/15;
+              set_real_ip_from 104.16.0.0/13;
+              set_real_ip_from 104.24.0.0/14;
+              set_real_ip_from 172.64.0.0/13;
+              set_real_ip_from 131.0.72.0/22;
+              real_ip_header CF-Connecting-IP;
+
+              # Proxy para Next.js
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_cache_bypass $http_upgrade;
+
+                  # Timeouts
+                  proxy_connect_timeout 60s;
+                  proxy_send_timeout 60s;
+                  proxy_read_timeout 60s;
+
+                  # Buffer settings
+                  proxy_buffering off;
+                  proxy_buffer_size 4k;
+                  proxy_buffers 8 4k;
+                  proxy_busy_buffers_size 8k;
+
+                  # Max body size
+                  client_max_body_size 50M;
+              }
+          }
+        dest: /etc/nginx/sites-available/portalrevalida.com-ssl
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable HTTP site configuration
+      file:
+        src: /etc/nginx/sites-available/portalrevalida.com
+        dest: /etc/nginx/sites-enabled/portalrevalida.com
+        state: link
+
+    - name: Enable HTTPS site configuration
+      file:
+        src: /etc/nginx/sites-available/portalrevalida.com-ssl
+        dest: /etc/nginx/sites-enabled/portalrevalida.com-ssl
+        state: link
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Test Nginx configuration
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Reload Nginx with SSL configuration
+      systemd:
+        name: nginx
+        state: reloaded
+        enabled: yes
+
     - name: Install AWS CLI if not present
       shell: |
         if ! command -v aws &> /dev/null; then

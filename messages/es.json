@@ -1711,7 +1711,11 @@
     "add": "Agregar",
     "uploadedAttachments": "Adjuntos cargados",
     "uploading": "Subiendo...",
-    "upload": "Subir",
+    "upload": {
+      "button": "Subir",
+      "success": "Carga completada",
+      "imagesUploaded": "{count, plural, one {1 imagen subida} other {{count} imágenes subidas}}"
+    },
     "confirm": "Confirmar",
     "cancel": "Cancelar",
     "create": "Publicar",

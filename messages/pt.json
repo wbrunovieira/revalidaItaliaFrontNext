@@ -1713,7 +1713,11 @@
     "add": "Adicionar",
     "uploadedAttachments": "Anexos carregados",
     "uploading": "Enviando...",
-    "upload": "Enviar",
+    "upload": {
+      "button": "Enviar",
+      "success": "Upload concluído",
+      "imagesUploaded": "{count, plural, one {1 imagem enviada} other {{count} imagens enviadas}}"
+    },
     "confirm": "Confirmar",
     "cancel": "Cancelar",
     "create": "Publicar",

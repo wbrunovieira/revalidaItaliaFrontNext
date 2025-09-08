@@ -1708,7 +1708,11 @@
     "add": "Aggiungi",
     "uploadedAttachments": "Allegati caricati",
     "uploading": "Caricamento...",
-    "upload": "Carica",
+    "upload": {
+      "button": "Carica",
+      "success": "Caricamento completato",
+      "imagesUploaded": "{count, plural, one {1 immagine caricata} other {{count} immagini caricate}}"
+    },
     "confirm": "Conferma",
     "cancel": "Annulla",
     "create": "Pubblica",

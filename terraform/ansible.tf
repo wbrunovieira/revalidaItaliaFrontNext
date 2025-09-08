@@ -43,7 +43,9 @@ resource "null_resource" "wait_for_ssh_frontend" {
 resource "null_resource" "run_ansible" {
   depends_on = [
     null_resource.wait_for_ssh_frontend,
-    local_file.ansible_inventory_frontend
+    local_file.ansible_inventory_frontend,
+    aws_s3_bucket.public_assets,
+    aws_s3_bucket_policy.public_assets
   ]
 
   triggers = {

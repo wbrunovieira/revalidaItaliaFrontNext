@@ -5,7 +5,7 @@ resource "aws_instance" "frontend" {
   instance_type = var.frontend_instance_type
   key_name      = data.aws_key_pair.revalida.key_name
 
-  iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
+  iam_instance_profile        = aws_iam_instance_profile.frontend_combined_profile.name
   vpc_security_group_ids      = [aws_security_group.frontend_sg.id]
   associate_public_ip_address = true
 

@@ -18,3 +18,4 @@ all:
     max_file_size:       "${max_file_size}"
     allowed_file_types:  "${allowed_file_types}"
     next_public_url:     "${next_public_url}"
+    aws_region:          "${s3_region}"

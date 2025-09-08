@@ -47,7 +47,7 @@ variable "NEXT_PUBLIC_API_URL" {
 
 variable "storage_type" {
   description = "Tipo de storage p/ Next.js"
-  default     = "local"
+  default     = "s3"
 }
 
 

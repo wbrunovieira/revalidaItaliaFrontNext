@@ -69,6 +69,7 @@
         mode: '0600'
       become_user: ubuntu
 
+
     - name: Show generated .env
       command: cat {{ app_dir }}/.env
       register: env_prod
@@ -114,6 +115,35 @@
       args:
         chdir: '{{ app_dir }}'
       become_user: ubuntu
+
+    - name: Install AWS CLI if not present
+      shell: |
+        if ! command -v aws &> /dev/null; then
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install
+          rm -rf aws awscliv2.zip
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Sync public assets to S3
+      shell: |
+        aws s3 sync {{ app_dir }}/public/ s3://{{ s3_bucket_name }}/public/ \
+          --region {{ aws_region }} \
+          --delete \
+          --exclude ".git/*" \
+          --exclude "*.md" \
+          --cache-control "public, max-age=31536000" \
+          --metadata-directive REPLACE
+      environment:
+        AWS_REGION: "{{ aws_region }}"
+      become_user: ubuntu
+      register: s3_sync_result
+
+    - name: Debug S3 sync result
+      debug:
+        msg: "S3 sync completed. Files synchronized to s3://{{ s3_bucket_name }}/public/"
 
     - name: Start frontend in PM2
       shell: |

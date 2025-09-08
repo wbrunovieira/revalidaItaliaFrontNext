@@ -6,6 +6,9 @@ import Nav from '@/components/Nav';
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Force dynamic rendering to avoid SSG issues with client components and next-intl
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     locale: string;

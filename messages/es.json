@@ -74,6 +74,22 @@
       "found_insightful": "encontró perspicaz",
       "reacted": "reaccionó a",
       "sad": "se entristeció con"
+    },
+    "course": {
+      "completed": {
+        "title": "¡Felicitaciones! Curso Completado",
+        "message": "¡Has completado el 100% del curso {courseName}! Tu certificado está disponible.",
+        "action": "Ver Certificado"
+      }
+    },
+    "notification": {
+      "course": {
+        "completed": {
+          "title": "¡Felicitaciones! Curso Completado",
+          "message": "¡Has completado el 100% del curso {courseName}! Tu certificado está disponible.",
+          "action": "Ver Certificado"
+        }
+      }
     }
   },
   "Footer": {

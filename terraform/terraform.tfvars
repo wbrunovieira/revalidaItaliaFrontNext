@@ -9,5 +9,5 @@ cloudflare_api_token = "K17Quhux_RHsVBJ6o8_d_gCwWt8b1KH57Pj05H-x"
 cloudflare_zone_id   = "bb058abe9937dd30b438ba8d803c0107"
 
 # Security Alert Email
-alert_email = "security@portalrevalida.com"  # CHANGE THIS to your real email
+alert_email = "bruno@wbdigitalsolutions.com"
 

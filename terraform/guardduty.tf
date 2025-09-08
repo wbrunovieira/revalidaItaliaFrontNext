@@ -116,10 +116,21 @@ resource "aws_s3_bucket" "logs" {
   }
 }
 
+# Configuração de ownership para bucket de logs
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 # Configuração de ACL para bucket de logs
 resource "aws_s3_bucket_acl" "logs" {
   bucket = aws_s3_bucket.logs.id
   acl    = "log-delivery-write"
+  
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
 }
 
 # Bloquear acesso público ao bucket de logs
@@ -139,6 +150,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   rule {
     id     = "delete-old-logs"
     status = "Enabled"
+    
+    filter {}  # Apply to all objects
 
     expiration {
       days = 30  # Deletar logs após 30 dias
@@ -152,10 +165,6 @@ output "guardduty_detector_id" {
   description = "GuardDuty Detector ID"
 }
 
-output "guardduty_status" {
-  value       = aws_guardduty_detector.main.status
-  description = "GuardDuty Status"
-}
 
 output "sns_topic_arn" {
   value       = aws_sns_topic.guardduty_alerts.arn

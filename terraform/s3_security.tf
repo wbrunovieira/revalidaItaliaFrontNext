@@ -139,6 +139,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "public_assets" {
   rule {
     id     = "archive-old-files"
     status = "Enabled"
+    
+    filter {}  # Apply to all objects
 
     # Mover arquivos antigos para Glacier após 90 dias
     transition {

@@ -12,6 +12,14 @@ terraform {
       source  = "hashicorp/null"
       version = "~> 3.1"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
   }
   required_version = ">= 1.12.1"
 }

@@ -104,3 +104,10 @@ variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for portalrevalida.com"
   type        = string
 }
+
+# Security and Monitoring
+variable "alert_email" {
+  description = "Email address for security alerts from GuardDuty"
+  type        = string
+  default     = "security@portalrevalida.com"  # Change this to your email
+}

@@ -316,6 +316,34 @@
       args:
         executable: /bin/bash
 
+    - name: Download and install CloudWatch Agent
+      shell: |
+        if ! [ -f /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl ]; then
+          wget -q https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
+          rm amazon-cloudwatch-agent.deb
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Configure CloudWatch Agent from SSM Parameter Store
+      shell: |
+        sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+          -a fetch-config \
+          -m ec2 \
+          -s \
+          -c ssm:/cloudwatch/config/ec2
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
+
+    - name: Start CloudWatch Agent
+      systemd:
+        name: amazon-cloudwatch-agent
+        state: started
+        enabled: yes
+      ignore_errors: yes
+
     - name: Sync public directory to S3
       shell: |
         # Sync public directory (images, fonts, etc) to S3

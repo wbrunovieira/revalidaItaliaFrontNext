@@ -60,6 +60,12 @@ resource "aws_iam_role_policy_attachment" "combined_ssm_attach" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# Attach CloudWatch Agent policy to combined role
+resource "aws_iam_role_policy_attachment" "combined_cloudwatch_attach" {
+  role       = aws_iam_role.frontend_combined.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
 # Attach S3 policy to combined role
 resource "aws_iam_role_policy" "combined_s3_policy" {
   name = "frontend-s3-access-policy"

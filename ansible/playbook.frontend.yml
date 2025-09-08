@@ -6,6 +6,7 @@
   vars:
     app_dir: /home/ubuntu/frontend
     repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
+    aws_region: "{{ aws_region | default('us-east-2') }}"
 
   tasks:
     - name: Ensure {{ app_dir }} exists
@@ -315,6 +316,28 @@
         fi
       args:
         executable: /bin/bash
+
+    - name: Install jq for JSON parsing
+      apt:
+        name: jq
+        state: present
+        update_cache: yes
+
+    - name: Retrieve API keys from Secrets Manager
+      shell: |
+        aws secretsmanager get-secret-value \
+          --secret-id revalida-app-api-keys \
+          --region {{ aws_region }} \
+          --query 'SecretString' \
+          --output text
+      register: app_secrets
+      become_user: ubuntu
+      no_log: true  # Não logar secrets
+
+    - name: Parse secrets
+      set_fact:
+        parsed_secrets: "{{ app_secrets.stdout | from_json }}"
+      no_log: true
 
     - name: Download and install CloudWatch Agent
       shell: |

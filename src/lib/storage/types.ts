@@ -12,9 +12,10 @@ export interface StorageAdapter {
    * Save a file from buffer
    * @param buffer - The file buffer
    * @param path - The path where to save
+   * @param contentType - Optional MIME type for the file
    * @returns The public URL of the saved file
    */
-  saveBuffer(buffer: Buffer, path: string): Promise<string>;
+  saveBuffer(buffer: Buffer, path: string, contentType?: string): Promise<string>;
   
   /**
    * Delete a file from storage

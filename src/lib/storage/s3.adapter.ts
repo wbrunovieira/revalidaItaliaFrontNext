@@ -1,35 +1,47 @@
 import { StorageAdapter, S3StorageConfig } from './types';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 
 // S3 adapter for production use
-// Note: This requires AWS SDK to be installed in production
 export class S3StorageAdapter implements StorageAdapter {
   private bucket: string;
   private region: string;
   private cdnUrl?: string;
+  private s3Client: S3Client;
   
   constructor(config: S3StorageConfig) {
     this.bucket = config.bucket;
     this.region = config.region;
     this.cdnUrl = config.cdnUrl;
+    
+    // Initialize S3 client
+    this.s3Client = new S3Client({
+      region: this.region,
+      credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      } : undefined, // Use default credentials (IAM role) if not specified
+    });
   }
 
   async save(file: File, filePath: string): Promise<string> {
     try {
-      // In production, this would use AWS SDK v3
-      // For now, we'll implement a placeholder that shows the structure
+      // Convert File to Buffer for S3 upload
+      const buffer = Buffer.from(await file.arrayBuffer());
       
-      // Example implementation:
-      // const client = new S3Client({ region: this.region });
-      // const command = new PutObjectCommand({
-      //   Bucket: this.bucket,
-      //   Key: filePath,
-      //   Body: Buffer.from(await file.arrayBuffer()),
-      //   ContentType: file.type,
-      // });
-      // await client.send(command);
+      // Upload to S3
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: filePath,
+        Body: buffer,
+        ContentType: file.type,
+        // Add cache control for better performance
+        CacheControl: 'max-age=31536000', // 1 year for static assets
+      });
       
-      // For development, just return the expected URL
-      console.log(`[S3] Would upload file to: s3://${this.bucket}/${filePath}`);
+      await this.s3Client.send(command);
+      console.log(`[S3] Successfully uploaded file to: s3://${this.bucket}/${filePath}`);
+      
+      // Return the full URL for the uploaded file
       return this.getUrl(filePath);
     } catch (error) {
       console.error('S3 save error:', error);
@@ -37,10 +49,20 @@ export class S3StorageAdapter implements StorageAdapter {
     }
   }
 
-  async saveBuffer(buffer: Buffer, filePath: string): Promise<string> {
+  async saveBuffer(buffer: Buffer, filePath: string, contentType?: string): Promise<string> {
     try {
-      // Similar to save, but with buffer
-      console.log(`[S3] Would upload buffer to: s3://${this.bucket}/${filePath}`);
+      // Upload buffer to S3
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: filePath,
+        Body: buffer,
+        ContentType: contentType || 'application/octet-stream',
+        CacheControl: 'max-age=31536000',
+      });
+      
+      await this.s3Client.send(command);
+      console.log(`[S3] Successfully uploaded buffer to: s3://${this.bucket}/${filePath}`);
+      
       return this.getUrl(filePath);
     } catch (error) {
       console.error('S3 saveBuffer error:', error);
@@ -50,14 +72,14 @@ export class S3StorageAdapter implements StorageAdapter {
 
   async delete(filePath: string): Promise<boolean> {
     try {
-      // const client = new S3Client({ region: this.region });
-      // const command = new DeleteObjectCommand({
-      //   Bucket: this.bucket,
-      //   Key: filePath,
-      // });
-      // await client.send(command);
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: filePath,
+      });
       
-      console.log(`[S3] Would delete: s3://${this.bucket}/${filePath}`);
+      await this.s3Client.send(command);
+      console.log(`[S3] Successfully deleted: s3://${this.bucket}/${filePath}`);
+      
       return true;
     } catch (error) {
       console.error('S3 delete error:', error);
@@ -80,14 +102,14 @@ export class S3StorageAdapter implements StorageAdapter {
 
   async exists(filePath: string): Promise<boolean> {
     try {
-      // const client = new S3Client({ region: this.region });
-      // const command = new HeadObjectCommand({
-      //   Bucket: this.bucket,
-      //   Key: filePath,
-      // });
-      // await client.send(command);
+      const command = new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: filePath,
+      });
       
-      console.log(`[S3] Would check existence: s3://${this.bucket}/${filePath}`);
+      await this.s3Client.send(command);
+      console.log(`[S3] File exists: s3://${this.bucket}/${filePath}`);
+      
       return true;
     } catch {
       return false;
@@ -95,11 +117,4 @@ export class S3StorageAdapter implements StorageAdapter {
   }
 }
 
-// Helper to install AWS SDK when needed
-export const S3_SETUP_INSTRUCTIONS = `
-To use S3 storage in production, install AWS SDK:
-
-npm install @aws-sdk/client-s3
-
-Then uncomment the AWS SDK code in s3.adapter.ts
-`;
+// S3 adapter is now fully functional with AWS SDK v3

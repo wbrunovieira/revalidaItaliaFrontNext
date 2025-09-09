@@ -21,8 +21,9 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
   }
 
-  async saveBuffer(buffer: Buffer, filePath: string): Promise<string> {
+  async saveBuffer(buffer: Buffer, filePath: string, contentType?: string): Promise<string> {
     try {
+      // contentType is optional for local storage, used for compatibility with S3 adapter
       // Construct full path
       const fullPath = path.join(process.cwd(), this.basePath, filePath);
       const directory = path.dirname(fullPath);
@@ -31,7 +32,8 @@ export class LocalStorageAdapter implements StorageAdapter {
         filePath,
         fullPath,
         directory,
-        basePath: this.basePath
+        basePath: this.basePath,
+        contentType: contentType || 'not specified'
       });
 
       // Ensure directory exists

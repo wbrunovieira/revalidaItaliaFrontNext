@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import {
   Download,
   Eye,
@@ -251,11 +252,15 @@ export default function ProfileCertificates() {
           <div className="flex items-start gap-4">
             {/* Thumbnail */}
             {certificate.thumbnailUrl ? (
-              <img
-                src={certificate.thumbnailUrl}
-                alt="Certificate thumbnail"
-                className="w-24 h-24 object-cover rounded-lg border-2 border-secondary/30 shadow-md"
-              />
+              <div className="relative w-24 h-24">
+                <Image
+                  src={certificate.thumbnailUrl}
+                  alt="Certificate thumbnail"
+                  fill
+                  className="object-cover rounded-lg border-2 border-secondary/30 shadow-md"
+                  sizes="96px"
+                />
+              </div>
             ) : (
               <div className="w-24 h-24 bg-gradient-to-br from-secondary/30 to-secondary/10 rounded-lg border-2 border-secondary/30 flex items-center justify-center shadow-md">
                 <Award className="w-10 h-10 text-secondary" />

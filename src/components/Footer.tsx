@@ -30,30 +30,16 @@ export default function Footer() {
           }}
         />
         
-        <div className="relative container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center space-y-6">
+        <div className="relative container mx-auto px-4 py-6">
+          <div className="flex flex-col items-center space-y-4">
             {/* Main content row */}
-            <div className="flex flex-col md:flex-row items-center justify-between w-full gap-6 md:gap-4">
-              {/* Left side - Copyright with subtle animation */}
-              <div className="group flex items-center gap-2 order-2 md:order-1">
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-[#3887A6]/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                  <div className="relative text-white/90 text-sm flex items-center gap-2">
-                    <span className="text-[#3887A6]">©</span>
-                    <span className="font-light text-white/70">{currentYear}</span>
-                    <span className="font-medium bg-gradient-to-r from-white to-[#3887A6] bg-clip-text text-transparent">Revalida Italia</span>
-                    <span className="hidden sm:inline text-[#3887A6]/70">•</span>
-                    <span className="hidden sm:inline text-white/60">{t('rightsReserved')}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Center - Developed by with enhanced styling */}
-              <div className="flex items-center gap-3 order-1 md:order-2">
-                <div className="flex items-center gap-2 text-sm">
+            <div className="flex flex-col items-center justify-center w-full gap-4">
+              {/* Developed by - now always centered */}
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
                   <span className="text-white/70 font-light">{t('developedWith')}</span>
                   <div className="relative">
-                    <Heart className="w-3.5 h-3.5 text-white fill-white animate-pulse" />
+                    <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white fill-white animate-pulse" />
                     <div className="absolute inset-0 blur-sm bg-white/30 animate-pulse" />
                   </div>
                   <span className="text-white/70 font-light">{t('by')}</span>
@@ -65,20 +51,30 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="group/link relative"
                 >
-                  {/* Hover effect background */}
-                  <div className="absolute -inset-2 bg-gradient-to-r from-white/10 via-[#3887A6]/20 to-white/10 rounded-lg opacity-0 group-hover/link:opacity-100 blur-xl transition duration-500" />
+                  {/* Hover effect background - hidden on mobile */}
+                  <div className="hidden sm:block absolute -inset-2 bg-gradient-to-r from-white/10 via-[#3887A6]/20 to-white/10 rounded-lg opacity-0 group-hover/link:opacity-100 blur-xl transition duration-500" />
                   
                   {/* Link content */}
-                  <div className="relative flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 bg-gradient-to-r from-white/10 to-[#3887A6]/10 group-hover/link:border-white/40 group-hover/link:from-white/20 group-hover/link:to-[#3887A6]/20 transition-all duration-300">
-                    <Code2 className="w-4 h-4 text-white group-hover/link:text-white group-hover/link:rotate-12 transition-transform duration-300" />
-                    <span className="font-medium text-white group-hover/link:text-white transition-all duration-300">
+                  <div className="relative flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-white/20 bg-gradient-to-r from-white/10 to-[#3887A6]/10 group-hover/link:border-white/40 group-hover/link:from-white/20 group-hover/link:to-[#3887A6]/20 transition-all duration-300">
+                    <Code2 className="w-3 h-3 sm:w-4 sm:h-4 text-white group-hover/link:text-white group-hover/link:rotate-12 transition-transform duration-300" />
+                    <span className="text-xs sm:text-sm font-medium text-white group-hover/link:text-white transition-all duration-300">
                       WB Digital Solutions
                     </span>
-                    <ArrowUpRight className="w-3 h-3 text-white/60 group-hover/link:text-white transition-all duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+                    <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/60 group-hover/link:text-white transition-all duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
                   </div>
                 </Link>
               </div>
 
+              {/* Copyright - now below on mobile, inline on desktop */}
+              <div className="text-center">
+                <div className="text-white/90 text-xs sm:text-sm flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+                  <span className="text-[#3887A6]">©</span>
+                  <span className="font-light text-white/70">{currentYear}</span>
+                  <span className="font-medium bg-gradient-to-r from-white to-[#3887A6] bg-clip-text text-transparent">Revalida Italia</span>
+                  <span className="text-[#3887A6]/70">•</span>
+                  <span className="text-white/60">{t('rightsReserved')}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

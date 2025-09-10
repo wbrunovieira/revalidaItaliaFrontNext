@@ -148,25 +148,23 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
       {/* Welcome Section with improved visual hierarchy */}
       <div className="w-full flex flex-col items-center mt-6 sm:mt-8 lg:mt-16">
         {/* Small badge for "Área do Aluno" with animation */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
           className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-4 sm:mb-6"
         >
-          <span className="text-xs sm:text-sm text-white/80 font-medium uppercase tracking-wider">
-            {t('title')}
-          </span>
+          <span className="text-xs sm:text-sm text-white/80 font-medium uppercase tracking-wider">{t('title')}</span>
         </motion.div>
-        
+
         {/* Main greeting with emphasis on user name */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
         >
           {user?.name ? (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-16 sm:mt-2">
               {t('greeting', { name: user.name }).split(user.name)[0]}
               <span className="inline-block text-[#8BCAD9] font-extrabold relative">
                 {user.name}
@@ -175,16 +173,16 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
               {t('greeting', { name: user.name }).split(user.name)[1]}
             </h1>
           ) : (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mt-8 sm:mt-2">
               {t('greeting', { name: '' })}
             </h1>
           )}
         </motion.div>
-        
-        <motion.hr 
+
+        <motion.hr
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           className="mt-6 sm:mt-8 border-t-2 border-secondary w-32 sm:w-48 lg:w-96 origin-center"
         />
       </div>

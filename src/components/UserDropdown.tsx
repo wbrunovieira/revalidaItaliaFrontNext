@@ -97,7 +97,7 @@ export default function UserDropdown() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed right-4 top-20 w-56 bg-primary-dark rounded-lg shadow-xl border border-gray-700 z-50 overflow-hidden"
+            className="fixed right-4 top-20 w-28 bg-primary-dark rounded-lg shadow-xl border border-gray-700 z-[9998] overflow-hidden"
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ 
               opacity: 1, 
@@ -137,7 +137,7 @@ export default function UserDropdown() {
               <motion.button
                 onClick={handleProfile}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-md',
+                  'w-full flex items-center justify-end gap-3 px-3 py-2 rounded-md',
                   'text-gray-300 hover:bg-primary/50 hover:text-white',
                   'transition-colors duration-200'
                 )}
@@ -179,7 +179,7 @@ export default function UserDropdown() {
               <motion.button
                 onClick={handleLogout}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-md',
+                  'w-full flex items-center justify-end gap-3 px-3 py-2 rounded-md',
                   'text-red-400 hover:bg-red-900/30 hover:text-red-300',
                   'transition-colors duration-200'
                 )}

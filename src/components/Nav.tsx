@@ -79,7 +79,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
             {/* Row 3: Menu toggle and Language button */}
             <div className="flex items-center justify-between px-5 pb-4">
               <MenuToggle collapsed={collapsed} onToggle={onToggle} />
-              <div className="scale-75">
+              <div className="transform scale-75 origin-right">
                 <LanguageButton />
               </div>
             </div>

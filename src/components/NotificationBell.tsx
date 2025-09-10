@@ -206,7 +206,7 @@ export default function NotificationBell() {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            className="fixed right-4 top-24 w-96 max-h-[600px] bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 flex flex-col"
+            className="fixed right-4 top-24 w-96 max-h-[600px] bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-[9998] flex flex-col"
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ 
               opacity: 1, 

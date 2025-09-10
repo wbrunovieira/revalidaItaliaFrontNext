@@ -26,7 +26,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
       {/* Mobile and Tablet Layouts */}
       <nav
         aria-label={t('home')}
-        className="fixed top-0 left-0 right-0 bg-gradient-to-r from-[#0C3559] via-[#0F2940] to-[#0C3559] z-20 xl:hidden overflow-hidden"
+        className="fixed top-0 left-0 right-0 bg-gradient-to-r from-[#0C3559] via-[#0F2940] to-[#0C3559] z-20 xl:hidden"
         style={{
           boxShadow: '0 4px 20px rgba(12, 53, 89, 0.25), 0 8px 32px rgba(12, 53, 89, 0.15), 0 12px 48px rgba(139, 202, 217, 0.1)'
         }}
@@ -61,19 +61,25 @@ function Nav({ collapsed, onToggle }: NavProps) {
             {/* Row 1: Logo and User actions */}
             <div className="flex items-center justify-between px-5 py-3">
               <Logo alt={t('home')} />
-              <div className="flex items-center gap-4">
-                <NotificationBell />
+              <div className="flex items-center">
+                <div className="-mr-2">
+                  <NotificationBell />
+                </div>
                 <UserDropdown />
               </div>
             </div>
 
-            {/* Row 2: Menu toggle, Search centered, and Language button */}
-            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-5 pb-4">
-              <MenuToggle collapsed={collapsed} onToggle={onToggle} />
-              <div className="w-full max-w-md mx-auto">
+            {/* Row 2: Search full width */}
+            <div className="px-5 pb-3 relative z-50">
+              <div className="w-full">
                 <SearchInput />
               </div>
-              <div className="flex-shrink-0 scale-90">
+            </div>
+
+            {/* Row 3: Menu toggle and Language button */}
+            <div className="flex items-center justify-between px-5 pb-4">
+              <MenuToggle collapsed={collapsed} onToggle={onToggle} />
+              <div className="scale-75">
                 <LanguageButton />
               </div>
             </div>
@@ -106,7 +112,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
       {/* Desktop Layout - Single row with grid */}
       <nav
         aria-label={t('home')}
-        className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-[#0C3559] via-[#0F2940] to-[#0C3559] z-20 hidden xl:block overflow-hidden"
+        className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-[#0C3559] via-[#0F2940] to-[#0C3559] z-20 hidden xl:block"
         style={{
           boxShadow: '0 4px 20px rgba(12, 53, 89, 0.25), 0 8px 32px rgba(12, 53, 89, 0.15), 0 12px 48px rgba(139, 202, 217, 0.1)'
         }}
@@ -146,8 +152,12 @@ function Nav({ collapsed, onToggle }: NavProps) {
           {/* Right section - Language, Notifications, and User */}
           <div className="flex items-center gap-4 justify-end">
             <LanguageButton />
-            <NotificationBell />
-            <UserDropdown />
+            <div className="flex items-center">
+              <div className="-mr-2">
+                <NotificationBell />
+              </div>
+              <UserDropdown />
+            </div>
           </div>
         </div>
       </nav>

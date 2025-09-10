@@ -96,9 +96,10 @@ export default function SearchInput() {
   return (
     <div 
       className={cn(
-        "relative w-full max-w-md transition-all duration-300 ease-out",
+        "relative w-full max-w-md transition-all duration-300 ease-out z-[100]",
         isFocused && "scale-[1.02]"
       )}
+      style={{ isolation: 'isolate' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -238,7 +239,7 @@ export default function SearchInput() {
           "bg-[#0C2133] border-2 border-[#8BCAD9]/20",
           "rounded-lg shadow-xl",
           "overflow-hidden",
-          "z-50",
+          "z-[9999]", // Increased z-index to be above everything
           "animate-fadeIn"
         )}>
           {isLoading && query ? (

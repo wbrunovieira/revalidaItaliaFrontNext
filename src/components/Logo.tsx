@@ -11,15 +11,13 @@ interface LogoProps {
   alt?: string;
 }
 
-export default function Logo({
-  alt = 'Revalida Itália',
-}: LogoProps) {
+export default function Logo({ alt = 'Revalida Itália' }: LogoProps) {
   const params = useParams() as { locale?: string };
   const locale = params?.locale || 'pt';
 
   return (
-    <Link 
-      href={`/${locale}`} 
+    <Link
+      href={`/${locale}`}
       className="inline-flex items-center hover:opacity-90 transition-opacity duration-200"
       aria-label={alt}
     >
@@ -29,7 +27,7 @@ export default function Logo({
         width={300}
         height={40}
         priority
-        className="cursor-pointer"
+        className="cursor-pointer w-auto h-auto max-w-[260px] xl:max-w-[300px]"
       />
     </Link>
   );

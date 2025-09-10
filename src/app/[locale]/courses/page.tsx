@@ -96,7 +96,7 @@ export default async function CoursesPage({
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
         {/* Botão Voltar */}
-        <div className="p-6">
+        <div className="p-6 pt-24 sm:pt-6">
           <Link
             href={`/${locale}`}
             className="inline-flex items-center gap-2 text-white hover:text-secondary transition-colors"
@@ -193,7 +193,7 @@ export default async function CoursesPage({
         </div>
 
         {/* Grid de Cursos */}
-        <div className="px-6 pb-8">
+        <div className="px-6 pb-40 sm:pb-8">
           <Suspense 
             fallback={
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

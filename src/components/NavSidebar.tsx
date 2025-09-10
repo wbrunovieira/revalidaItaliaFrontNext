@@ -44,10 +44,11 @@ export default function NavSidebar({
 
       <main
         className={`
-          flex-1 transition-margin duration-300 ease-in-out
+          transition-margin duration-300 ease-in-out
           ${/* Mobile: no margin, Desktop: margin based on sidebar state */''}
           ${isMobile ? 'ml-0' : collapsed ? 'xl:ml-20' : 'xl:ml-64'}
           pt-[7rem] sm:pt-24 xl:pt-16
+          min-h-screen
         `}
       >
         {children}

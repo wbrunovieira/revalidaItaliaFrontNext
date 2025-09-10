@@ -17,6 +17,7 @@ import {
   HeartHandshake,
   MessageSquare,
   Video,
+  X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -24,7 +25,9 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Module {
   id: string;
@@ -84,6 +87,18 @@ export default function Sidebar({
   
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1280); // xl breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Extract course slug from pathname
   const courseSlugMatch = pathname.match(
@@ -312,32 +327,98 @@ export default function Sidebar({
     return false;
   };
 
+  // Auto-close sidebar on mobile when navigating
+  const previousPathname = useRef(pathname);
+  useEffect(() => {
+    // Only close if pathname actually changed and sidebar is open on mobile
+    if (previousPathname.current !== pathname && isMobile && !collapsed) {
+      onToggle(); // Close sidebar when route changes on mobile
+    }
+    previousPathname.current = pathname;
+  }, [pathname, isMobile, collapsed, onToggle]);
+
+  // Handle link click on mobile - close sidebar
+  const handleLinkClick = useCallback(() => {
+    if (isMobile && !collapsed) {
+      onToggle();
+    }
+  }, [isMobile, collapsed, onToggle]);
+
   return (
-    <aside
-      className={`fixed top-16 left-0 bottom-0 bg-primary text-background-white flex flex-col transition-all duration-300 ease-in-out shadow-2xl ${
-        collapsed ? 'w-20' : 'w-64'
-      } z-10 overflow-visible`}
-    >
+    <>
+      {/* Backdrop for mobile - only visible when sidebar is open */}
+      <AnimatePresence>
+        {isMobile && !collapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="xl:hidden fixed inset-0 bg-black/50 z-20"
+            onClick={onToggle}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        initial={isMobile ? { x: '-100%' } : false}
+        animate={isMobile ? { x: collapsed ? '-100%' : '0%' } : false}
+        transition={
+          isMobile
+            ? {
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+                mass: 0.8,
+              }
+            : undefined
+        }
+        className={`
+          fixed flex flex-col bg-primary text-background-white shadow-2xl overflow-visible
+          xl:top-16 top-0
+          xl:left-0 left-0
+          xl:bottom-0 bottom-0
+          w-64
+          xl:z-10 z-30
+          xl:transition-all xl:duration-300 xl:ease-in-out
+          ${!isMobile && collapsed ? 'xl:w-20' : 'xl:w-64'}
+        `}
+      >
       <div
         className={`flex p-4 ${
-          collapsed ? 'justify-center' : 'justify-end'
+          isMobile ? 'justify-end' : collapsed ? 'justify-center' : 'justify-end'
         }`}
       >
-        <button
-          onClick={onToggle}
-          className="group p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 hover:shadow-md"
-          aria-label={
-            collapsed ? t('expand') : t('collapse')
-          }
-        >
-          <span className="transition-all duration-300 group-hover:scale-110 inline-block">
-            {collapsed ? (
-              <ChevronRight size={20} />
-            ) : (
-              <ChevronLeft size={20} />
-            )}
-          </span>
-        </button>
+        {/* Mobile: Show only close button */}
+        {isMobile && (
+          <button
+            onClick={onToggle}
+            className="group p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 hover:shadow-md"
+            aria-label={t('collapse')}
+          >
+            <X size={24} className="transition-all duration-300 group-hover:scale-110" />
+          </button>
+        )}
+        
+        {/* Desktop: Keep original toggle button */}
+        {!isMobile && (
+          <button
+            onClick={onToggle}
+            className="group p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 hover:shadow-md"
+            aria-label={
+              collapsed ? t('expand') : t('collapse')
+            }
+          >
+            <span className="transition-all duration-300 group-hover:scale-110 inline-block">
+              {collapsed ? (
+                <ChevronRight size={20} />
+              ) : (
+                <ChevronLeft size={20} />
+              )}
+            </span>
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto overflow-x-visible pb-4 relative">
@@ -370,15 +451,16 @@ export default function Sidebar({
                     {/* Always show the main navigation item */}
                     <Link
                       href={href}
+                      onClick={handleLinkClick}
                       onMouseEnter={(e) => {
-                        if (collapsed) {
+                        if (collapsed && !isMobile) {
                           const rect = e.currentTarget.getBoundingClientRect();
                           setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
                           setHoveredItem(label);
                         }
                       }}
                       onMouseLeave={() => {
-                        if (collapsed) {
+                        if (collapsed && !isMobile) {
                           setHoveredItem(null);
                         }
                       }}
@@ -584,6 +666,7 @@ export default function Sidebar({
                                     <li key={module.id}>
                                       <Link
                                         href={`/${locale}/courses/${courseSlug}/modules/${module.slug}`}
+                                        onClick={handleLinkClick}
                                         className={`
                                     group flex items-center gap-2 p-2 rounded-lg transition-all duration-300
                                     ${
@@ -639,15 +722,16 @@ export default function Sidebar({
                 <li key={href} className="relative">
                   <Link
                     href={href}
+                    onClick={handleLinkClick}
                     onMouseEnter={(e) => {
-                      if (collapsed) {
+                      if (collapsed && !isMobile) {
                         const rect = e.currentTarget.getBoundingClientRect();
                         setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
                         setHoveredItem(label);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (collapsed) {
+                      if (collapsed && !isMobile) {
                         setHoveredItem(null);
                       }
                     }}
@@ -753,15 +837,16 @@ export default function Sidebar({
                 <li key={href} className="relative">
                   <Link
                     href={href}
+                    onClick={handleLinkClick}
                     onMouseEnter={(e) => {
-                      if (collapsed) {
+                      if (collapsed && !isMobile) {
                         const rect = e.currentTarget.getBoundingClientRect();
                         setMousePos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
                         setHoveredItem(label);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (collapsed) {
+                      if (collapsed && !isMobile) {
                         setHoveredItem(null);
                       }
                     }}
@@ -847,8 +932,8 @@ export default function Sidebar({
         </ul>
       </nav>
       
-      {/* Tooltip Portal */}
-      {collapsed && hoveredItem && (
+      {/* Tooltip Portal - only for desktop */}
+      {!isMobile && collapsed && hoveredItem && (
         <div
           className="fixed z-[10000] pointer-events-none"
           style={{
@@ -863,6 +948,7 @@ export default function Sidebar({
           </div>
         </div>
       )}
-    </aside>
+    </motion.aside>
+    </>
   );
 }

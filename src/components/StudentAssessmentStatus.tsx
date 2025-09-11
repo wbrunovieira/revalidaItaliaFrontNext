@@ -520,12 +520,12 @@ export default function StudentAssessmentStatus({
           <FileText size={24} className="text-secondary" />
           {t('assessments.title')}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <button
             onClick={() =>
               (window.location.href = `/${locale}/assessments/open-exams`)
             }
-            className="inline-flex items-center gap-2 px-3 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             <Eye size={16} />
             Ver Todas
@@ -533,7 +533,7 @@ export default function StudentAssessmentStatus({
           <button
             onClick={() => fetchAttempts(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center sm:justify-start"
           >
             <RefreshCw
               size={16}

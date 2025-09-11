@@ -57,7 +57,7 @@ function Nav({ collapsed, onToggle }: NavProps) {
 
           {/* Tablet Layout (iPad Air/Pro - 820px to 1279px) */}
           {/* Current layout works well for iPad Air (820px) and iPad Pro */}
-          <div className="block xl:hidden">
+          <div className="block xl:hidden" suppressHydrationWarning>
             {/* Row 1: Logo and User actions */}
             <div className="flex items-center justify-between px-5 py-3">
               <Logo alt={t('home')} />

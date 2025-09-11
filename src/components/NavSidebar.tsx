@@ -44,6 +44,7 @@ export default function NavSidebar({
 
       <main
         className={`
+          flex-1 w-full
           transition-margin duration-300 ease-in-out
           ${/* Mobile: no margin, Desktop: margin based on sidebar state */''}
           ${isMobile ? 'ml-0' : collapsed ? 'xl:ml-20' : 'xl:ml-64'}

@@ -886,7 +886,7 @@ export default function FlashcardStudyPage() {
 
   return (
     <NavSidebar>
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden relative">
         {/* Header */}
         <div className="absolute top-24 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
           <div className="max-w-4xl mx-auto">
@@ -1008,9 +1008,9 @@ export default function FlashcardStudyPage() {
         </div>
 
         {/* Main content */}
-        <div className="flex items-center justify-center min-h-screen p-4 pt-48 lg:pt-40">
+        <div className="flex items-center justify-center min-h-screen p-4 pt-48 lg:pt-40 relative z-20">
           <div className="relative w-full max-w-4xl mx-auto">
-            <div className="max-w-lg mx-auto">
+            <div className="max-w-lg mx-auto relative">
               {/* Swipe indicators */}
               <div className="absolute inset-0 flex items-center justify-between px-12 pointer-events-none">
                 <motion.div
@@ -1050,10 +1050,10 @@ export default function FlashcardStudyPage() {
 
               {/* Flashcard */}
               <AnimatePresence mode="wait">
-                {currentCard && !completedCards.has(currentCard.id) && (
+                {currentCard && (
                   <motion.div
                     key={currentCard.id}
-                    className="relative w-full h-[500px] cursor-grab touch-pan-y"
+                    className="relative w-full h-[500px] cursor-grab touch-pan-y z-30"
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={
                       shakeCard

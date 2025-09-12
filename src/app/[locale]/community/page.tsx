@@ -1163,7 +1163,7 @@ export default function CommunityPage() {
   return (
     <NavSidebar>
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="container mx-auto px-4 pt-28 sm:pt-24 lg:pt-12 pb-8 max-w-7xl">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -1188,7 +1188,7 @@ export default function CommunityPage() {
           {/* Floating Create Post Button - Fixed Position */}
           <Button
             onClick={() => setShowCreateModal(true)}
-            className="fixed top-24 right-8 z-50 bg-secondary hover:bg-secondary/90 text-white rounded-full p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 group"
+            className="fixed top-52 sm:top-40 lg:top-32 right-8 z-50 bg-secondary hover:bg-secondary/90 text-white rounded-full p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 group"
             title={t('createTopic')}
           >
             <Plus size={36} className="transition-transform duration-300 group-hover:rotate-90" />

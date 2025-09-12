@@ -395,42 +395,44 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800 p-1">
-          <TabsTrigger value="upcoming" className="relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
-            <Calendar className="mr-2 h-4 w-4" />
-            {t('upcoming')}
-            {upcomingSessions.length > 0 && (
-              <Badge className="ml-2 bg-blue-500 text-white">
-                {upcomingSessions.length}
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-4 bg-gray-800 p-1 gap-1 min-w-full">
+            <TabsTrigger value="upcoming" className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+              <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span>{t('upcoming')}</span>
+              {upcomingSessions.length > 0 && (
+                <Badge className="ml-1 sm:ml-2 bg-blue-500 text-white text-[10px] sm:text-xs px-1">
+                  {upcomingSessions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="live" className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+              <Radio className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span>{t('live')}</span>
+              {liveSessions.length > 0 && (
+                <Badge className="ml-1 sm:ml-2 bg-red-500 text-white animate-pulse text-[10px] sm:text-xs px-1">
+                  {liveSessions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="recorded" className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+              <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span>{t('recorded')}</span>
+              {recordedSessions.length > 0 && (
+                <Badge className="ml-1 sm:ml-2 bg-gray-600 text-white text-[10px] sm:text-xs px-1">
+                  {recordedSessions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="allRecordings" className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+              <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span>{t('allRecordings')}</span>
+              <Badge className="ml-1 sm:ml-2 bg-purple-500 text-white text-[10px] sm:text-xs px-1">
+                API
               </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="live" className="relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
-            <Radio className="mr-2 h-4 w-4" />
-            {t('live')}
-            {liveSessions.length > 0 && (
-              <Badge className="ml-2 bg-red-500 text-white animate-pulse">
-                {liveSessions.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="recorded" className="data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
-            <PlayCircle className="mr-2 h-4 w-4" />
-            {t('recorded')}
-            {recordedSessions.length > 0 && (
-              <Badge className="ml-2 bg-gray-600 text-white">
-                {recordedSessions.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="allRecordings" className="data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all">
-            <PlayCircle className="mr-2 h-4 w-4" />
-            {t('allRecordings')}
-            <Badge className="ml-2 bg-purple-500 text-white">
-              API
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Upcoming Sessions */}
         <TabsContent value="upcoming" className="space-y-4">

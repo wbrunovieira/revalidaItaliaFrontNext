@@ -346,47 +346,49 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
       </div>
 
       {/* Status Filter Buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setStatusFilter('ALL')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            statusFilter === 'ALL'
-              ? 'bg-secondary text-primary'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          {t('filter.all')}
-        </button>
-        <button
-          onClick={() => setStatusFilter('OPEN')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            statusFilter === 'OPEN'
-              ? 'bg-[#8BCAD9] text-primary'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          {t('filter.open')}
-        </button>
-        <button
-          onClick={() => setStatusFilter('ANSWERED')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            statusFilter === 'ANSWERED'
-              ? 'bg-[#79BED9] text-primary'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          {t('filter.answered')}
-        </button>
-        <button
-          onClick={() => setStatusFilter('RESOLVED')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            statusFilter === 'RESOLVED'
-              ? 'bg-green-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          {t('filter.resolved')}
-        </button>
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 min-w-max pb-2">
+          <button
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              statusFilter === 'ALL'
+                ? 'bg-secondary text-primary'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {t('filter.all')}
+          </button>
+          <button
+            onClick={() => setStatusFilter('OPEN')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              statusFilter === 'OPEN'
+                ? 'bg-[#8BCAD9] text-primary'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {t('filter.open')}
+          </button>
+          <button
+            onClick={() => setStatusFilter('ANSWERED')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              statusFilter === 'ANSWERED'
+                ? 'bg-[#79BED9] text-primary'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {t('filter.answered')}
+          </button>
+          <button
+            onClick={() => setStatusFilter('RESOLVED')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              statusFilter === 'RESOLVED'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {t('filter.resolved')}
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -438,83 +440,87 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
             </button>
           </div>
         ) : (
-          filteredTickets.map((ticket) => (
-            <div key={ticket.id} className="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${getStatusColor(ticket.status)}`}>
-                      {getStatusIcon(ticket.status)}
-                      {getStatusText(ticket.status)}
-                    </span>
-                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getContextColor(ticket.contextType)}`}>
-                      {getContextText(ticket.contextType)}
-                    </span>
-                  </div>
-
-                  {/* Context Title */}
-                  {ticket.contextTitle && (
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      {ticket.contextTitle}
-                    </h3>
-                  )}
-
-                  {/* Message Count and Tutor Info */}
-                  <div className="text-sm text-gray-400 mb-3">
-                    <p>{ticket.messageCount} {ticket.messageCount === 1 ? t('message') : t('messages')}</p>
-                    {ticket.tutor && (
-                      <p className="mt-1">
-                        {t('answeredBy')}: <span className="text-white">{ticket.tutor.fullName}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Attachments */}
-                  {ticket.hasAttachments && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <Paperclip size={16} className="text-gray-400" />
-                      <span className="text-sm text-gray-400">
-                        {t('hasAttachments')}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Meta Info */}
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={14} />
-                      <span>{formatDate(ticket.createdAt)}</span>
-                    </div>
-                    {ticket.updatedAt !== ticket.createdAt && (
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        <span>{t('updated')}: {formatDate(ticket.updatedAt)}</span>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-2 sm:pb-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex gap-4 sm:flex-col sm:gap-4 pb-2 sm:pb-0">
+              {filteredTickets.map((ticket) => (
+                <div key={ticket.id} className="bg-gray-800 rounded-lg p-4 sm:p-6 hover:bg-gray-750 transition-colors flex-shrink-0 w-[320px] sm:w-full">
+                  <div className="flex flex-col">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1 ${getStatusColor(ticket.status)}`}>
+                          {getStatusIcon(ticket.status)}
+                          {getStatusText(ticket.status)}
+                        </span>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getContextColor(ticket.contextType)}`}>
+                          {getContextText(ticket.contextType)}
+                        </span>
                       </div>
-                    )}
-                    {ticket.resolvedAt && (
-                      <div className="flex items-center gap-1">
-                        <CheckCircle size={14} className="text-green-400" />
-                        <span>{t('resolved')}: {formatDate(ticket.resolvedAt)}</span>
+
+                      {/* Context Title */}
+                      {ticket.contextTitle && (
+                        <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                          {ticket.contextTitle}
+                        </h3>
+                      )}
+
+                      {/* Message Count and Tutor Info */}
+                      <div className="text-sm text-gray-400 mb-3">
+                        <p>{ticket.messageCount} {ticket.messageCount === 1 ? t('message') : t('messages')}</p>
+                        {ticket.tutor && (
+                          <p className="mt-1 truncate">
+                            {t('answeredBy')}: <span className="text-white">{ticket.tutor.fullName}</span>
+                          </p>
+                        )}
                       </div>
-                    )}
+
+                      {/* Attachments */}
+                      {ticket.hasAttachments && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <Paperclip size={16} className="text-gray-400" />
+                          <span className="text-sm text-gray-400">
+                            {t('hasAttachments')}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Meta Info */}
+                      <div className="space-y-1 text-sm text-gray-400 mb-4">
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          <span className="text-xs">{formatDate(ticket.createdAt)}</span>
+                        </div>
+                        {ticket.updatedAt !== ticket.createdAt && (
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span className="text-xs truncate">{t('updated')}: {formatDate(ticket.updatedAt)}</span>
+                          </div>
+                        )}
+                        {ticket.resolvedAt && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle size={14} className="text-green-400" />
+                            <span className="text-xs truncate">{t('resolved')}: {formatDate(ticket.resolvedAt)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      onClick={() => {
+                        setSelectedTicketId(ticket.id);
+                        setIsViewModalOpen(true);
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors w-full"
+                    >
+                      <Eye size={16} />
+                      <span>{t('view')}</span>
+                      <ChevronRight size={16} />
+                    </button>
                   </div>
                 </div>
-
-                {/* Action Button */}
-                <button
-                  onClick={() => {
-                    setSelectedTicketId(ticket.id);
-                    setIsViewModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <Eye size={16} />
-                  <span>{t('view')}</span>
-                  <ChevronRight size={16} />
-                </button>
-              </div>
+              ))}
             </div>
-          ))
+          </div>
         )}
       </div>
 

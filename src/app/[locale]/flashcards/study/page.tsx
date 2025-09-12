@@ -888,7 +888,7 @@ export default function FlashcardStudyPage() {
     <NavSidebar>
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden relative">
         {/* Header */}
-        <div className="absolute top-24 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
+        <div className="absolute top-32 sm:top-28 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <Link
@@ -1012,14 +1012,14 @@ export default function FlashcardStudyPage() {
           <div className="relative w-full max-w-4xl mx-auto">
             <div className="max-w-lg mx-auto relative">
               {/* Swipe indicators */}
-              <div className="absolute inset-0 flex items-center justify-between px-12 pointer-events-none">
+              <div className="absolute inset-0 flex items-center justify-between px-2 sm:px-8 lg:px-0 pointer-events-none">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{
-                    opacity: dragX < -30 ? 0.8 : currentIndex < flashcards.length ? 0.3 : 0,
+                    opacity: dragX < -30 ? 0.8 : isFlipped && currentIndex < flashcards.length ? 0.3 : 0,
                     scale: dragX < -30 ? 1.2 : 1,
                   }}
-                  className="text-red-400 -rotate-12"
+                  className="text-red-400 -rotate-12 lg:-translate-x-20 -translate-y-24 sm:-translate-y-16 lg:translate-y-0"
                   transition={{ duration: 0.2 }}
                 >
                   <div className="flex flex-col items-center gap-2">
@@ -1033,10 +1033,10 @@ export default function FlashcardStudyPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{
-                    opacity: dragX > 30 ? 0.8 : currentIndex < flashcards.length ? 0.3 : 0,
+                    opacity: dragX > 30 ? 0.8 : isFlipped && currentIndex < flashcards.length ? 0.3 : 0,
                     scale: dragX > 30 ? 1.2 : 1,
                   }}
-                  className="text-green-400 rotate-12"
+                  className="text-green-400 rotate-12 lg:translate-x-20 -translate-y-24 sm:-translate-y-16 lg:translate-y-0"
                   transition={{ duration: 0.2 }}
                 >
                   <div className="flex flex-col items-center gap-2">
@@ -1212,7 +1212,7 @@ export default function FlashcardStudyPage() {
                         </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center w-full overflow-hidden">
-                          <p className="text-accent-light text-sm font-semibold mb-4 uppercase tracking-wider">
+                          <p className="text-secondary text-sm font-semibold mb-4 uppercase tracking-wider">
                             {t('answer')}
                           </p>
 

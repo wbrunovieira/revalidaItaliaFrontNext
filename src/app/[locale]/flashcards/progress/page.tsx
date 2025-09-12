@@ -29,7 +29,7 @@ export default function FlashcardProgressPage() {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-4 lg:pt-8">
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-24 sm:pt-20 lg:pt-12">
             <TabsList className="relative mb-6 h-auto w-full gap-1 bg-transparent p-0">
               <TabsTrigger
                 value="progress"

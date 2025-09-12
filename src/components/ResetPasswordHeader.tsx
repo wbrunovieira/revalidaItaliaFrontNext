@@ -2,11 +2,8 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
 
 export default function ResetPasswordHeader() {
-  const t = useTranslations('ResetPassword');
-
   return (
     <div className="text-center space-y-4 animate-fadeIn">
       <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary/10 rounded-full mb-4 animate-pulse">
@@ -26,11 +23,11 @@ export default function ResetPasswordHeader() {
       </div>
       
       <h1 className="text-3xl font-bold text-white">
-        {t('title')}
+        Redefinir Senha
       </h1>
       
       <p className="text-gray-400 text-lg">
-        {t('subtitle')}
+        Insira sua nova senha
       </p>
     </div>
   );

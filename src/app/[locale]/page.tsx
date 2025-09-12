@@ -1,9 +1,10 @@
 // src/app/[locale]/page.tsx
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import NavSidebar from '@/components/NavSidebar';
 import DashboardClient from '@/components/DashboardClient';
+import { publicRoutes } from '@/i18n/routing';
 
 interface Translation {
   locale: string;
@@ -89,7 +90,27 @@ export default async function IndexPage({
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
+  // CRITICAL: Check if this is a public route request that ended up here due to routing issues
+  // This happens when reset-password route is not found and falls back to home page
+  const headersList = await headers();
+  const referer = headersList.get('referer');
+  const xOriginalUrl = headersList.get('x-original-url') || headersList.get('x-forwarded-uri');
+  
+  console.log('[HomePage] Referer:', referer);
+  console.log('[HomePage] X-Original-URL:', xOriginalUrl);
+  
+  // Check if this request was meant for a public route
+  const isPublicRouteRequest = referer && publicRoutes.some(route => referer.includes(route));
+  
   if (!token) {
+    // If this was a public route request that fell through to home page, don't redirect
+    // Let it render and show error or handle appropriately
+    if (isPublicRouteRequest) {
+      console.log('[HomePage] Public route request detected, not redirecting to login');
+      // Return a 404 or handle appropriately for public routes
+      throw new Error('Route not found');
+    }
+    
     redirect(`/${locale}/login`);
   }
 

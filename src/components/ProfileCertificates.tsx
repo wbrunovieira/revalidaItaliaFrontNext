@@ -276,15 +276,15 @@ export default function ProfileCertificates() {
                     <span
                       className={cn(
                         'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border',
-                        getTypeColor(certificate.type.value)
+                        getTypeColor(certificate.type?.value || 'MODULE')
                       )}
                     >
-                      {getTypeIcon(certificate.type.value)}
-                      {t(`type.${certificate.type.value}`)}
+                      {getTypeIcon(certificate.type?.value || 'MODULE')}
+                      {t(`type.${certificate.type?.value || 'MODULE'}`)}
                     </span>
-                    {certificate.status.value !== 'AVAILABLE' && (
+                    {certificate.status?.value && certificate.status.value !== 'AVAILABLE' && (
                       <span className="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full">
-                        {t(`status.${certificate.status.value}`)}
+                        {t(`status.${certificate.status.value || 'pending'}`)}
                       </span>
                     )}
                   </div>

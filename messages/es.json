@@ -904,6 +904,8 @@
     "updating": "Actualizando...",
     "edit": "Editar",
     "close": "Cerrar",
+    "security": "Seguridad",
+    "securityDescription": "Gestiona tu contraseña de acceso",
     "changePhoto": "Cambiar foto",
     "profileImageUrl": "URL de la foto de perfil",
     "phonePlaceholder": "Ej: +34 666 123 456",

@@ -904,6 +904,8 @@
     "updating": "Aggiornando...",
     "edit": "Modifica",
     "close": "Chiudi",
+    "security": "Sicurezza",
+    "securityDescription": "Gestisci la tua password di accesso",
     "changePhoto": "Cambia foto",
     "profileImageUrl": "URL della foto del profilo",
     "phonePlaceholder": "Es: +39 333 1234567",

@@ -354,8 +354,9 @@ export default function ProfileContent({
     <>
       <div className="space-y-8">
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-6">
-          {/* Informações Pessoais */}
+        {/* Primeira linha: Informações Pessoais e Endereços lado a lado */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6">
+          {/* Informações Pessoais - Coluna esquerda */}
           <div className="lg:col-span-1">
             <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm relative border border-white/10 shadow-xl">
               {/* Header com melhor espaçamento */}
@@ -369,25 +370,13 @@ export default function ProfileContent({
                       {t('personalInfoDescription')}
                     </p>
                     {!isEditingProfile && (
-                      <div className="flex flex-col gap-2 items-start">
-                        <button
-                          onClick={() => setIsEditingProfile(true)}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
-                        >
-                          <Edit size={16} />
-                          <span>{t('edit')}</span>
-                        </button>
-                        <button
-                          onClick={handlePasswordResetClick}
-                          disabled={isRequestingPasswordReset}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Lock size={16} />
-                          <span>
-                            {isRequestingPasswordReset ? t('sending') : t('changePassword')}
-                          </span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setIsEditingProfile(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary"
+                      >
+                        <Edit size={16} />
+                        <span>{t('edit')}</span>
+                      </button>
                     )}
                   </div>
                   {isEditingProfile && (
@@ -612,14 +601,32 @@ export default function ProfileContent({
                         </div>
                       </div>
                     </div>
+
+                    {/* Seção de Segurança - Integrada */}
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <h3 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
+                        {t('security')}
+                      </h3>
+                      <p className="text-sm text-gray-400 mb-4">{t('securityDescription')}</p>
+                      <button
+                        onClick={handlePasswordResetClick}
+                        disabled={isRequestingPasswordReset}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Lock size={16} />
+                        <span>
+                          {isRequestingPasswordReset ? t('sending') : t('changePassword')}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
             </div>
           </div>
 
-          {/* Endereços */}
-          <div className="lg:col-span-2">
+          {/* Endereços - Coluna direita */}
+          <div className="lg:col-span-1">
             <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -756,8 +763,8 @@ export default function ProfileContent({
           </div>
         </div>
 
-        {/* Certificados - Full width section */}
-        <div className="lg:col-span-2 mt-6">
+        {/* Terceira linha: Certificados - Full width */}
+        <div className="px-6">
           <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-xl">
             <div className="flex items-center gap-3 mb-6">
               <Award size={24} className="text-secondary" />
@@ -778,9 +785,9 @@ export default function ProfileContent({
       {/* Elemento decorativo de fundo */}
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
-      {/* Delete Confirmation Toast */}
+      {/* Delete Confirmation Toast - Melhor posicionamento */}
       {showDeleteToast && pendingDeleteAddress && (
-        <div className="fixed bottom-6 right-6 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 lg:bottom-6 lg:right-6 lg:left-auto lg:transform-none z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-[90%] max-w-sm">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-red-100 rounded-full">
               <Trash2 size={20} className="text-red-600" />
@@ -831,25 +838,25 @@ export default function ProfileContent({
         </div>
       )}
 
-      {/* Password Reset Confirmation Toast */}
+      {/* Password Reset Confirmation Toast - Melhor posicionamento */}
       {showPasswordResetConfirmation && (
-        <div className="fixed bottom-6 right-6 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-sm">
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 lg:bottom-6 lg:right-6 lg:left-auto lg:transform-none z-50 bg-gradient-to-br from-primary-dark to-primary rounded-lg shadow-xl border border-secondary/30 p-4 w-[90%] max-w-sm">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-100 rounded-full">
-              <Lock size={20} className="text-blue-600" />
+            <div className="p-2 bg-secondary/20 rounded-full">
+              <Lock size={20} className="text-secondary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">
+              <h4 className="text-sm font-medium text-white mb-1">
                 {t('confirmPasswordReset')}
               </h4>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-gray-300 mb-3">
                 {t('passwordResetConfirmationMessage', { email: userData.email })}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={confirmPasswordReset}
                   disabled={isRequestingPasswordReset}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary text-primary text-sm rounded-md hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isRequestingPasswordReset ? (
                     <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
@@ -863,7 +870,7 @@ export default function ProfileContent({
                 <button
                   onClick={cancelPasswordReset}
                   disabled={isRequestingPasswordReset}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 text-white text-sm rounded-md hover:bg-white/20 disabled:opacity-50 transition-colors"
                 >
                   <X size={14} />
                   {t('cancel')}
@@ -873,9 +880,9 @@ export default function ProfileContent({
             <button
               onClick={cancelPasswordReset}
               disabled={isRequestingPasswordReset}
-              className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+              className="p-1 hover:bg-white/10 rounded transition-colors disabled:opacity-50"
             >
-              <X size={16} className="text-gray-400" />
+              <X size={16} className="text-gray-300" />
             </button>
           </div>
         </div>

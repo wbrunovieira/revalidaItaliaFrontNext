@@ -902,6 +902,8 @@
     "deleteAddressWarning": "Tem certeza que deseja excluir o endereço {street}, {number}? Esta ação não pode ser desfeita.",
     "edit": "Editar",
     "close": "Fechar",
+    "security": "Segurança",
+    "securityDescription": "Gerencie sua senha de acesso",
     "changePhoto": "Alterar foto",
     "profileImageUrl": "URL da foto de perfil",
     "phonePlaceholder": "Ex: (11) 98765-4321",

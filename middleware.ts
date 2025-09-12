@@ -1,39 +1,11 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { NextRequest, NextResponse } from 'next/server';
+import { routing } from '@/i18n/routing';
 
-const locales = ['pt', 'it', 'es'];
-const defaultLocale = 'pt';
+// Create the next-intl middleware
+const intlMiddleware = createMiddleware(routing);
 
-// Get the preferred locale from the request
-function getLocale(request: NextRequest): string {
-  // Check if there's a locale in the pathname
-  const pathname = request.nextUrl.pathname;
-  const pathnameHasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-
-  if (pathnameHasLocale) {
-    const locale = pathname.split('/')[1];
-    return locale;
-  }
-
-  // Check Accept-Language header
-  const acceptLanguage = request.headers.get('accept-language');
-  if (acceptLanguage) {
-    const detectedLocale = acceptLanguage
-      .split(',')
-      .map((lang) => lang.split(';')[0].split('-')[0].trim())
-      .find((lang) => locales.includes(lang));
-    
-    if (detectedLocale) {
-      return detectedLocale;
-    }
-  }
-
-  return defaultLocale;
-}
-
-export function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Debug logging
@@ -41,28 +13,34 @@ export function middleware(request: NextRequest) {
   console.log('[Middleware] Query params:', request.nextUrl.search);
   console.log('[Middleware] Full URL:', request.url);
 
+  // Get locales from routing config
+  const locales = routing.locales;
+  const defaultLocale = routing.defaultLocale;
+
   // Check if pathname already has a locale
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
-  
-  // If the path already has a locale, don't process it further
-  // This prevents redirect loops!
-  if (pathnameHasLocale) {
-    console.log('[Middleware] Path already has locale, skipping processing');
-    return NextResponse.next();
-  }
 
-  // Check if the pathname is missing a locale
-  const pathnameIsMissingLocale = locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-  );
-
-  // FIRST: Special handling for /reset-password to preserve query params (token)
-  // This must come before login handling to avoid conflicts
+  // Special handling for /reset-password path without locale
   if (pathname === '/reset-password') {
-    const locale = getLocale(request);
     const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
+    
+    // Get locale from accept-language header or use default
+    const acceptLanguage = request.headers.get('accept-language');
+    let locale = defaultLocale;
+    
+    if (acceptLanguage) {
+      const detectedLocale = acceptLanguage
+        .split(',')
+        .map((lang) => lang.split(';')[0].split('-')[0].trim())
+        .find((lang) => locales.includes(lang as any));
+      
+      if (detectedLocale) {
+        locale = detectedLocale;
+      }
+    }
+    
     console.log('[Middleware] Redirecting /reset-password to:', `/${locale}/reset-password${searchParams}`);
     return NextResponse.redirect(
       new URL(`/${locale}/reset-password${searchParams}`, request.url)
@@ -71,8 +49,23 @@ export function middleware(request: NextRequest) {
 
   // Prevent any malformed reset-password paths like /reset-password/login
   if (pathname.startsWith('/reset-password/')) {
-    const locale = getLocale(request);
     const searchParams = request.nextUrl.search;
+    
+    // Get locale from accept-language header or use default
+    const acceptLanguage = request.headers.get('accept-language');
+    let locale = defaultLocale;
+    
+    if (acceptLanguage) {
+      const detectedLocale = acceptLanguage
+        .split(',')
+        .map((lang) => lang.split(';')[0].split('-')[0].trim())
+        .find((lang) => locales.includes(lang as any));
+      
+      if (detectedLocale) {
+        locale = detectedLocale;
+      }
+    }
+    
     console.log('[Middleware] Cleaning malformed reset-password path:', pathname);
     console.log('[Middleware] Redirecting to:', `/${locale}/reset-password${searchParams}`);
     // Redirect to the correct reset-password page
@@ -81,55 +74,25 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // SECOND: Special handling for /login without locale
-  if (pathname === '/login' || pathname.startsWith('/login/')) {
-    const locale = getLocale(request);
-    // Remove any duplicate /login/login pattern
-    const cleanPath = pathname.replace(/^\/login\/login/, '/login');
-    console.log('[Middleware] Redirecting login path to:', `/${locale}${cleanPath}`);
-    return NextResponse.redirect(
-      new URL(`/${locale}${cleanPath}`, request.url)
-    );
-  }
-
-  // Redirect if there is no locale
-  if (pathnameIsMissingLocale) {
-    const locale = getLocale(request);
-    
-    // For the root path, redirect to the locale root
-    if (pathname === '/') {
+  // If path has locale and it's reset-password with extra segments, clean it
+  if (pathnameHasLocale) {
+    const match = pathname.match(/^\/([^\/]+)\/reset-password\/.+/);
+    if (match) {
+      const locale = match[1];
+      const searchParams = request.nextUrl.search;
+      console.log('[Middleware] Cleaning malformed localized reset-password path:', pathname);
+      console.log('[Middleware] Redirecting to:', `/${locale}/reset-password${searchParams}`);
       return NextResponse.redirect(
-        new URL(`/${locale}`, request.url)
+        new URL(`/${locale}/reset-password${searchParams}`, request.url)
       );
     }
-    
-    // For other paths, prepend the locale
-    return NextResponse.redirect(
-      new URL(`/${locale}${pathname}`, request.url)
-    );
   }
 
-  // Prevent double login path (e.g., /pt/login/login)
-  const match = pathname.match(/^\/([^\/]+)\/login\/login/);
-  if (match) {
-    const locale = match[1];
-    return NextResponse.redirect(
-      new URL(`/${locale}/login`, request.url)
-    );
-  }
+  // Use next-intl middleware for all other paths
+  return intlMiddleware(request);
 }
 
 export const config = {
-  // Skip all internal paths (_next, _vercel, etc.)
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel).*)',
-  ],
+  // Match all paths except static files and API routes
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };

@@ -42,7 +42,8 @@ export function middleware(request: NextRequest) {
   );
 
   // Special handling for /login without locale
-  if (pathname === '/login' || pathname.startsWith('/login/')) {
+  // But exclude reset-password paths
+  if ((pathname === '/login' || pathname.startsWith('/login/')) && !pathname.includes('reset-password')) {
     const locale = getLocale(request);
     // Remove any duplicate /login/login pattern
     const cleanPath = pathname.replace(/^\/login\/login/, '/login');
@@ -52,11 +53,13 @@ export function middleware(request: NextRequest) {
   }
 
   // Special handling for /reset-password to preserve query params (token)
-  if (pathname === '/reset-password') {
+  if (pathname === '/reset-password' || pathname.startsWith('/reset-password/')) {
     const locale = getLocale(request);
     const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
+    // Clean up any incorrect paths like /reset-password/login
+    const cleanPath = pathname.replace(/^\/reset-password.*/, '/reset-password');
     return NextResponse.redirect(
-      new URL(`/${locale}/reset-password${searchParams}`, request.url)
+      new URL(`/${locale}${cleanPath}${searchParams}`, request.url)
     );
   }
 

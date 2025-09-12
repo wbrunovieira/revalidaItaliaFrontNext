@@ -51,6 +51,15 @@ export function middleware(request: NextRequest) {
     );
   }
 
+  // Special handling for /reset-password to preserve query params (token)
+  if (pathname === '/reset-password' || pathname.startsWith('/reset-password')) {
+    const locale = getLocale(request);
+    const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
+    return NextResponse.redirect(
+      new URL(`/${locale}/reset-password${searchParams}`, request.url)
+    );
+  }
+
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);

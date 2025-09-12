@@ -52,18 +52,12 @@ export function middleware(request: NextRequest) {
   }
 
   // Special handling for /reset-password to preserve query params (token)
-  if (pathname === '/reset-password' || pathname.startsWith('/reset-password')) {
+  if (pathname === '/reset-password') {
     const locale = getLocale(request);
     const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
     return NextResponse.redirect(
       new URL(`/${locale}/reset-password${searchParams}`, request.url)
     );
-  }
-  
-  // Also handle reset-password WITH locale but ensure params are preserved
-  if (pathname.includes('/reset-password')) {
-    // Do nothing special - let it pass through with params intact
-    return NextResponse.next();
   }
 
   // Redirect if there is no locale

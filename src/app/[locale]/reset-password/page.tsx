@@ -1,8 +1,11 @@
 // src/app/[locale]/reset-password/page.tsx
-import React from 'react';
+import React, { Suspense } from 'react';
 import ImageSection from '@/components/ImageSection';
 import ResetPasswordPanel from '@/components/ResetPasswordPanel';
 import LanguageButton from '@/components/LanguageButton';
+
+// Force dynamic rendering to ensure query params are available
+export const dynamic = 'force-dynamic';
 
 export default function ResetPasswordPage() {
   return (
@@ -34,7 +37,9 @@ export default function ResetPasswordPage() {
         "
       >
         <div className="w-full sm:w-3/4 lg:w-full lg:h-full max-w-sm lg:max-w-none">
-          <ResetPasswordPanel />
+          <Suspense fallback={<div className="h-full bg-primary flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div></div>}>
+            <ResetPasswordPanel />
+          </Suspense>
         </div>
       </div>
     </div>

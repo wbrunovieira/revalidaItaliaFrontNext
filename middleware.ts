@@ -59,6 +59,12 @@ export function middleware(request: NextRequest) {
       new URL(`/${locale}/reset-password${searchParams}`, request.url)
     );
   }
+  
+  // Also handle reset-password WITH locale but ensure params are preserved
+  if (pathname.includes('/reset-password')) {
+    // Do nothing special - let it pass through with params intact
+    return NextResponse.next();
+  }
 
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {

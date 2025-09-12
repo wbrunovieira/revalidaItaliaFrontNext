@@ -35,6 +35,23 @@ function getLocale(request: NextRequest): string {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  
+  // Debug logging
+  console.log('[Middleware] Processing path:', pathname);
+  console.log('[Middleware] Query params:', request.nextUrl.search);
+  console.log('[Middleware] Full URL:', request.url);
+
+  // Check if pathname already has a locale
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  );
+  
+  // If the path already has a locale, don't process it further
+  // This prevents redirect loops!
+  if (pathnameHasLocale) {
+    console.log('[Middleware] Path already has locale, skipping processing');
+    return NextResponse.next();
+  }
 
   // Check if the pathname is missing a locale
   const pathnameIsMissingLocale = locales.every(
@@ -46,6 +63,7 @@ export function middleware(request: NextRequest) {
   if (pathname === '/reset-password') {
     const locale = getLocale(request);
     const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
+    console.log('[Middleware] Redirecting /reset-password to:', `/${locale}/reset-password${searchParams}`);
     return NextResponse.redirect(
       new URL(`/${locale}/reset-password${searchParams}`, request.url)
     );
@@ -55,6 +73,8 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/reset-password/')) {
     const locale = getLocale(request);
     const searchParams = request.nextUrl.search;
+    console.log('[Middleware] Cleaning malformed reset-password path:', pathname);
+    console.log('[Middleware] Redirecting to:', `/${locale}/reset-password${searchParams}`);
     // Redirect to the correct reset-password page
     return NextResponse.redirect(
       new URL(`/${locale}/reset-password${searchParams}`, request.url)
@@ -66,6 +86,7 @@ export function middleware(request: NextRequest) {
     const locale = getLocale(request);
     // Remove any duplicate /login/login pattern
     const cleanPath = pathname.replace(/^\/login\/login/, '/login');
+    console.log('[Middleware] Redirecting login path to:', `/${locale}${cleanPath}`);
     return NextResponse.redirect(
       new URL(`/${locale}${cleanPath}`, request.url)
     );

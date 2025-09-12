@@ -73,7 +73,7 @@ export default function ResetPasswordForm() {
         });
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/api/v1/auth/password/verify-token?token=${encodeURIComponent(token)}`, {
+        const response = await fetch(`${apiUrl}/auth/verify-reset-token?token=${encodeURIComponent(token)}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export default function ResetPasswordForm() {
       });
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/auth/password/reset`, {
+      const response = await fetch(`${apiUrl}/auth/reset-password`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 

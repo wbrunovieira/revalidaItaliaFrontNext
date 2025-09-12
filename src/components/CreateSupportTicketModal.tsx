@@ -328,9 +328,9 @@ export function CreateSupportTicketModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[700px] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg p-0 overflow-hidden">
-        {/* Animated Header with Gradient */}
-        <DialogHeader className="relative p-0">
+        <DialogPrimitive.Content className="fixed inset-0 sm:inset-auto sm:left-[50%] sm:top-[50%] z-50 flex flex-col w-full sm:w-[95%] sm:max-w-[700px] h-full sm:h-auto sm:max-h-[90vh] sm:translate-x-[-50%] sm:translate-y-[-50%] border-0 sm:border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg p-0 overflow-hidden">
+        {/* Animated Header with Gradient - Fixed */}
+        <DialogHeader className="relative p-0 flex-shrink-0">
           {/* Hidden DialogTitle for accessibility */}
           <DialogTitle className="sr-only">{t("modal.title")}</DialogTitle>
           <div className="relative h-32 bg-primary overflow-hidden">
@@ -384,7 +384,7 @@ export function CreateSupportTicketModal({
           </div>
         </DialogHeader>
 
-        <div className="p-6 space-y-6 bg-primary">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-primary">
           {/* Context Badge with Animation */}
           <AnimatePresence>
             {context.type !== "GENERAL" && context.title && (

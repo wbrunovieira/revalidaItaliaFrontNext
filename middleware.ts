@@ -41,25 +41,33 @@ export function middleware(request: NextRequest) {
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
 
-  // Special handling for /login without locale
-  // But exclude reset-password paths
-  if ((pathname === '/login' || pathname.startsWith('/login/')) && !pathname.includes('reset-password')) {
+  // FIRST: Special handling for /reset-password to preserve query params (token)
+  // This must come before login handling to avoid conflicts
+  if (pathname === '/reset-password') {
+    const locale = getLocale(request);
+    const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
+    return NextResponse.redirect(
+      new URL(`/${locale}/reset-password${searchParams}`, request.url)
+    );
+  }
+
+  // Prevent any malformed reset-password paths like /reset-password/login
+  if (pathname.startsWith('/reset-password/')) {
+    const locale = getLocale(request);
+    const searchParams = request.nextUrl.search;
+    // Redirect to the correct reset-password page
+    return NextResponse.redirect(
+      new URL(`/${locale}/reset-password${searchParams}`, request.url)
+    );
+  }
+
+  // SECOND: Special handling for /login without locale
+  if (pathname === '/login' || pathname.startsWith('/login/')) {
     const locale = getLocale(request);
     // Remove any duplicate /login/login pattern
     const cleanPath = pathname.replace(/^\/login\/login/, '/login');
     return NextResponse.redirect(
       new URL(`/${locale}${cleanPath}`, request.url)
-    );
-  }
-
-  // Special handling for /reset-password to preserve query params (token)
-  if (pathname === '/reset-password' || pathname.startsWith('/reset-password/')) {
-    const locale = getLocale(request);
-    const searchParams = request.nextUrl.search; // Preserve query params like ?token=...
-    // Clean up any incorrect paths like /reset-password/login
-    const cleanPath = pathname.replace(/^\/reset-password.*/, '/reset-password');
-    return NextResponse.redirect(
-      new URL(`/${locale}${cleanPath}${searchParams}`, request.url)
     );
   }
 

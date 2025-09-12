@@ -23,14 +23,14 @@ export default function ResetPasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isValidatingToken, setIsValidatingToken] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
-  const [tokenEmail, setTokenEmail] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
 
   const resetPasswordSchema = z
     .object({
       password: z
         .string()
         .nonempty({ message: 'Senha é obrigatória' })
-        .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' }),
+        .min(8, { message: 'A senha deve ter pelo menos 8 caracteres' }),
       confirmPassword: z.string().nonempty({ message: 'Confirmação de senha é obrigatória' }),
     })
     .refine(data => data.password === data.confirmPassword, {
@@ -70,42 +70,30 @@ export default function ResetPasswordForm() {
         });
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/auth/verify-reset-token?token=${encodeURIComponent(token)}`, {
+        const response = await fetch(`${apiUrl}/auth/password/verify-token?token=${encodeURIComponent(token)}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
 
-        let result;
-        try {
-          result = await response.json();
-        } catch {
-          // Se não conseguir fazer parse do JSON, provavelmente é um erro HTML (404, etc)
-          result = {};
-        }
+        const result = await response.json();
 
         console.log('📥 Token verification response:', {
           status: response.status,
           valid: result.valid,
           email: result.email,
-          expiresAt: result.expiresAt,
           timestamp: new Date().toISOString(),
         });
 
         if (response.ok && result.valid) {
           console.log('✅ Token is valid');
           setTokenValid(true);
-          setTokenEmail(result.email);
+          setUserEmail(result.email);
           setFocus('password');
         } else {
           console.log('❌ Token is invalid or expired');
-          // Não mostra mensagem técnica "Cannot GET..."
-          if (response.status === 404) {
-            setFormError('Este link de redefinição de senha expirou ou é inválido. Por favor, solicite um novo link.');
-          } else {
-            setFormError(result.detail || 'Este link de redefinição de senha expirou ou é inválido. Por favor, solicite um novo link.');
-          }
+          setFormError(result.detail || 'Este link de redefinição de senha expirou ou é inválido. Por favor, solicite um novo link.');
           setTokenValid(false);
         }
       } catch (error) {
@@ -131,12 +119,12 @@ export default function ResetPasswordForm() {
     try {
       console.log('🔑 Submitting password reset:', {
         token: token.substring(0, 10) + '...',
-        email: tokenEmail,
+        email: userEmail,
         timestamp: new Date().toISOString(),
       });
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/auth/reset-password`, {
+      const response = await fetch(`${apiUrl}/auth/password/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +184,7 @@ export default function ResetPasswordForm() {
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  const hasMinLength = password.length >= 6;
+  const hasMinLength = password.length >= 8;
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
 
   // Validação completa da senha
@@ -284,6 +272,13 @@ export default function ResetPasswordForm() {
   // Show form if token is valid
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      {userEmail && (
+        <div className="bg-gray-800/50 rounded-lg p-4 text-center">
+          <p className="text-sm text-gray-300">Redefinindo senha para:</p>
+          <p className="text-white font-medium">{userEmail}</p>
+        </div>
+      )}
+
       {!token && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 animate-shake">
           <p className="text-center text-red-500 text-sm">Token inválido</p>
@@ -350,7 +345,7 @@ export default function ResetPasswordForm() {
                   />
                 )}
               </svg>
-              <span>Mínimo de 6 caracteres</span>
+              <span>Mínimo de 8 caracteres</span>
             </li>
             <li
               className={`flex items-center transition-colors duration-200 ${

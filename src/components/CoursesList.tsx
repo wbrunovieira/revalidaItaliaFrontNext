@@ -389,12 +389,12 @@ export default function CoursesList() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold text-white">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center">
+            <p className="text-2xl sm:text-3xl font-bold text-white">
               {courses.length}
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-400">
               {t('stats.total')}
             </p>
           </div>
@@ -410,66 +410,139 @@ export default function CoursesList() {
               return (
                 <div
                   key={course.id}
-                  className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex flex-col p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
                 >
-                  <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
-                    <Image
-                      src={course.imageUrl}
-                      alt={tr.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-lg font-semibold text-white truncate">
-                      {tr.title}
-                    </h4>
-                    <p className="text-sm text-gray-400 truncate line-clamp-1">
-                      {tr.description}
-                    </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                      <span>Slug: {course.slug}</span>
-                      <span>
-                        ID: {course.id.slice(0, 8)}…
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Globe size={12} />{' '}
-                        {course.translations.length}/3{' '}
-                        {t('languages')}
-                      </span>
+                  {/* Mobile Layout - Vertical */}
+                  <div className="sm:hidden space-y-3">
+                    {/* Header with Image and Title */}
+                    <div className="flex gap-3">
+                      <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0">
+                        <Image
+                          src={course.imageUrl}
+                          alt={tr.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-base font-semibold text-white">
+                          {tr.title}
+                        </h4>
+                        <p className="text-xs text-gray-400 line-clamp-2 mt-1">
+                          {tr.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Course Details */}
+                    <div className="space-y-1 text-xs text-gray-500">
+                      <div>Slug: {course.slug}</div>
+                      <div>ID: {course.id.slice(0, 8)}…</div>
+                      <div className="flex items-center gap-1">
+                        <Globe size={12} />
+                        <span>{course.translations.length}/3 {t('languages')}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons - Bottom */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-600">
+                      <button
+                        onClick={() => handleView(course.id)}
+                        disabled={!!deletingId}
+                        title={t('actions.view')}
+                        className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Eye size={16} />
+                        <span className="text-xs">Ver</span>
+                      </button>
+                      <button
+                        onClick={() => handleEdit(course)}
+                        disabled={!!deletingId}
+                        title={t('actions.edit')}
+                        className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Edit size={16} />
+                        <span className="text-xs">Editar</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course.id)}
+                        disabled={deletingId === course.id}
+                        title={t('actions.delete')}
+                        className="flex-1 py-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingId === course.id ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-red-400 border-t-transparent rounded-full" />
+                        ) : (
+                          <>
+                            <Trash2 size={16} />
+                            <span className="text-xs">Excluir</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleView(course.id)}
-                      disabled={!!deletingId}
-                      title={t('actions.view')}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(course)}
-                      disabled={!!deletingId}
-                      title={t('actions.edit')}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDelete(course.id)
-                      }
-                      disabled={deletingId === course.id}
-                      title={t('actions.delete')}
-                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {deletingId === course.id ? (
-                        <div className="animate-spin h-[18px] w-[18px] border-2 border-red-400 border-t-transparent rounded-full" />
-                      ) : (
-                        <Trash2 size={18} />
-                      )}
-                    </button>
+
+                  {/* Desktop Layout - Horizontal */}
+                  <div className="hidden sm:flex sm:items-center sm:gap-4">
+                    <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
+                      <Image
+                        src={course.imageUrl}
+                        alt={tr.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg font-semibold text-white truncate">
+                        {tr.title}
+                      </h4>
+                      <p className="text-sm text-gray-400 truncate line-clamp-1">
+                        {tr.description}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                        <span>Slug: {course.slug}</span>
+                        <span>
+                          ID: {course.id.slice(0, 8)}…
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Globe size={12} />{' '}
+                          {course.translations.length}/3{' '}
+                          {t('languages')}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleView(course.id)}
+                        disabled={!!deletingId}
+                        title={t('actions.view')}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(course)}
+                        disabled={!!deletingId}
+                        title={t('actions.edit')}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDelete(course.id)
+                        }
+                        disabled={deletingId === course.id}
+                        title={t('actions.delete')}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingId === course.id ? (
+                          <div className="animate-spin h-[18px] w-[18px] border-2 border-red-400 border-t-transparent rounded-full" />
+                        ) : (
+                          <Trash2 size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

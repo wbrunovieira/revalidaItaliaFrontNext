@@ -710,73 +710,75 @@ export default function TutorDashboard({
     <div className="flex-1 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Tabs */}
-        <div className="bg-gray-800 rounded-lg p-1 inline-flex mb-6">
+        <div className="w-full overflow-x-auto mb-6">
+          <div className="bg-gray-800 rounded-lg p-1 inline-flex min-w-max">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
               activeTab === 'overview'
                 ? 'bg-secondary text-primary'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
             }`}
           >
-            <Activity size={18} />
-            {t('tabs.assessmentOverview')}
+            <Activity size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.assessmentOverview')}</span>
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
               activeTab === 'analytics'
                 ? 'bg-secondary text-primary'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
             }`}
           >
-            <BarChart3 size={18} />
-            {t('tabs.assessmentAnalysis')}
+            <BarChart3 size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.assessmentAnalysis')}</span>
           </button>
           <button
             onClick={() => setActiveTab('flashcards')}
-            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
               activeTab === 'flashcards'
                 ? 'bg-secondary text-primary'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
             }`}
           >
-            <Brain size={18} />
-            {t('tabs.flashcards')}
+            <Brain size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.flashcards')}</span>
           </button>
           <button
             onClick={() => setActiveTab('reports')}
-            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
               activeTab === 'reports'
                 ? 'bg-secondary text-primary'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
             }`}
           >
-            <AlertTriangle size={18} />
-            {t('tabs.reports')}
+            <AlertTriangle size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.reports')}</span>
           </button>
           <button
             onClick={() => setActiveTab('support')}
-            className={`px-6 py-3 rounded-md font-medium transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
               activeTab === 'support'
                 ? 'bg-secondary text-primary'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
             }`}
           >
-            <HelpCircle size={18} />
-            {t('tabs.support')}
+            <HelpCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.support')}</span>
           </button>
+          </div>
         </div>
 
         {activeTab === 'overview' ? (
           <>
             {/* Filters and Search */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Filter
                     size={20}
-                    className="text-gray-400"
+                    className="text-gray-400 hidden sm:block"
                   />
                   <select
                     value={filter}
@@ -788,7 +790,7 @@ export default function TutorDashboard({
                           | 'completed'
                       )
                     }
-                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
+                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none w-full sm:w-auto text-sm sm:text-base"
                   >
                     <option value="all">{t('filters.all')}</option>
                     <option value="pending">
@@ -803,10 +805,10 @@ export default function TutorDashboard({
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <BookOpen
                     size={20}
-                    className="text-gray-400"
+                    className="text-gray-400 hidden sm:block"
                   />
                   <select
                     value={groupBy}
@@ -817,7 +819,7 @@ export default function TutorDashboard({
                           | 'assessment'
                       )
                     }
-                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
+                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none w-full sm:w-auto text-sm sm:text-base"
                   >
                     <option value="student">
                       {t('filters.groupByStudent')}
@@ -828,7 +830,7 @@ export default function TutorDashboard({
                   </select>
                 </div>
 
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                   <Search
                     size={20}
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -840,12 +842,12 @@ export default function TutorDashboard({
                     onChange={e =>
                       setSearchTerm(e.target.value)
                     }
-                    className="bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:border-secondary focus:outline-none w-64"
+                    className="bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:border-secondary focus:outline-none w-full sm:w-64 text-sm sm:text-base"
                   />
                 </div>
               </div>
 
-              <div className="text-sm text-gray-400">
+              <div className="text-xs sm:text-sm text-gray-400 mt-2 lg:mt-0">
                 {t('search.results', { count: deduplicatedAttempts.length })}
               </div>
             </div>
@@ -856,14 +858,14 @@ export default function TutorDashboard({
                 {t('stats.openExams')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
                     <Eye
                       size={24}
                       className="text-blue-400"
                     />
                     <div>
-                      <p className="text-2xl font-bold text-blue-400">
+                      <p className="text-xl sm:text-2xl font-bold text-blue-400">
                         {deduplicatedAttempts
                           .filter(
                             a => a.status === 'SUBMITTED'
@@ -874,21 +876,21 @@ export default function TutorDashboard({
                             0
                           )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.pending')}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
                     <User
                       size={24}
                       className="text-orange-400"
                     />
                     <div>
-                      <p className="text-2xl font-bold text-orange-400">
+                      <p className="text-xl sm:text-2xl font-bold text-orange-400">
                         {deduplicatedAttempts.reduce(
                           (total, attempt) =>
                             total +
@@ -897,21 +899,21 @@ export default function TutorDashboard({
                           0
                         )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.waitingStudent')}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
                     <CheckCircle
                       size={24}
                       className="text-green-400"
                     />
                     <div>
-                      <p className="text-2xl font-bold text-green-400">
+                      <p className="text-xl sm:text-2xl font-bold text-green-400">
                         {deduplicatedAttempts.reduce(
                           (total, attempt) =>
                             total +
@@ -919,28 +921,28 @@ export default function TutorDashboard({
                           0
                         )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.approved')}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
                     <FileText
                       size={24}
                       className="text-blue-400"
                     />
                     <div>
-                      <p className="text-2xl font-bold text-blue-400">
+                      <p className="text-xl sm:text-2xl font-bold text-blue-400">
                         {deduplicatedAttempts.reduce(
                           (total, attempt) =>
                             total + attempt.totalQuestions,
                           0
                         )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.total')}
                       </p>
                     </div>
@@ -971,15 +973,15 @@ export default function TutorDashboard({
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-green-400">
+                      <p className="text-xl sm:text-2xl font-bold text-green-400">
                         {quizAttempts.length}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.totalAttempts')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-400">
+                      <p className="text-xl sm:text-2xl font-bold text-blue-400">
                         {
                           [
                             ...new Set(
@@ -991,12 +993,12 @@ export default function TutorDashboard({
                           ].length
                         }
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.differentQuizzes')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-yellow-400">
+                      <p className="text-xl sm:text-2xl font-bold text-yellow-400">
                         {
                           [
                             ...new Set(
@@ -1008,12 +1010,12 @@ export default function TutorDashboard({
                           ].length
                         }
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.uniqueStudents')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-red-400">
+                      <p className="text-xl sm:text-2xl font-bold text-red-400">
                         {quizAttempts.reduce(
                           (
                             total: number,
@@ -1038,7 +1040,7 @@ export default function TutorDashboard({
                           0
                         )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.totalErrors')}
                       </p>
                     </div>
@@ -1144,15 +1146,15 @@ export default function TutorDashboard({
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-purple-400">
+                      <p className="text-xl sm:text-2xl font-bold text-purple-400">
                         {simuladoAttempts.length}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.totalAttempts')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-400">
+                      <p className="text-xl sm:text-2xl font-bold text-blue-400">
                         {
                           [
                             ...new Set(
@@ -1164,12 +1166,12 @@ export default function TutorDashboard({
                           ].length
                         }
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.differentSimulados')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-yellow-400">
+                      <p className="text-xl sm:text-2xl font-bold text-yellow-400">
                         {
                           [
                             ...new Set(
@@ -1181,12 +1183,12 @@ export default function TutorDashboard({
                           ].length
                         }
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.uniqueStudents')}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-700 rounded-lg">
-                      <p className="text-2xl font-bold text-red-400">
+                      <p className="text-xl sm:text-2xl font-bold text-red-400">
                         {simuladoAttempts.reduce(
                           (
                             total: number,
@@ -1211,7 +1213,7 @@ export default function TutorDashboard({
                           0
                         )}
                       </p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         {t('stats.totalErrors')}
                       </p>
                     </div>
@@ -1362,7 +1364,7 @@ export default function TutorDashboard({
                               <h3 className="text-lg font-semibold text-white">
                                 {student.name}
                               </h3>
-                              <p className="text-gray-400 text-sm">
+                              <p className="text-gray-400 text-xs sm:text-sm">
                                 {student.email}
                               </p>
                             </>
@@ -1371,7 +1373,7 @@ export default function TutorDashboard({
                               <h3 className="text-lg font-semibold text-white">
                                 {assessment.title}
                               </h3>
-                              <p className="text-gray-400 text-sm">
+                              <p className="text-gray-400 text-xs sm:text-sm">
                                 Prova Aberta
                               </p>
                             </>

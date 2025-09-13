@@ -389,7 +389,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
 
       {/* Filters */}
       <div className="bg-gray-800 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
@@ -403,15 +403,15 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             )}
           </button>
 
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder={t('filters.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary w-72"
+                className="bg-gray-700 text-white pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary w-full sm:w-72"
               />
               {isSearching && (
                 <Loader2 className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 animate-spin" />
@@ -437,8 +437,8 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           <div className="space-y-4 pt-4 border-t border-gray-700">
             {/* Quick date filters */}
             <div>
-              <label className="block text-sm text-gray-400 mb-2">{t('filters.quickPeriod')}</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="block text-xs sm:text-sm text-gray-400 mb-2">{t('filters.quickPeriod')}</label>
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                 <button
                   onClick={() => {
                     const today = new Date();
@@ -448,7 +448,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     setPage(1);
                     fetchStats(searchTerm, 1);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                     activePeriod === 'today'
                       ? 'bg-secondary text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -466,7 +466,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     setPage(1);
                     fetchStats(searchTerm, 1);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                     activePeriod === '7days'
                       ? 'bg-secondary text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -484,7 +484,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     setPage(1);
                     fetchStats(searchTerm, 1);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                     activePeriod === '30days'
                       ? 'bg-secondary text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -500,7 +500,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     setPage(1);
                     fetchStats(searchTerm, 1);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
                     activePeriod === 'all'
                       ? 'bg-secondary text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -512,9 +512,9 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
             </div>
 
             {/* Custom date range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">
+                <label className="block text-xs sm:text-sm text-gray-400 mb-2">
                   Data Inicial
                 </label>
                 <input
@@ -530,7 +530,7 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">
+                <label className="block text-xs sm:text-sm text-gray-400 mb-2">
                   Data Final
                 </label>
                 <input
@@ -578,22 +578,63 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
           filteredUsers.map((user) => (
             <div
               key={user.userId}
-              className="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors"
+              className="bg-gray-800 rounded-lg p-4 sm:p-6 hover:bg-gray-750 transition-colors relative"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center">
-                    <span className="text-secondary font-bold text-lg">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
+              <div className="flex flex-col gap-3 mb-4">
+                {/* Header - Name and Email */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-secondary font-bold text-base sm:text-lg">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-white truncate">{user.name}</h3>
+                      <p className="text-gray-400 text-xs sm:text-sm truncate">{user.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{user.name}</h3>
-                    <p className="text-gray-400 text-sm">{user.email}</p>
-                  </div>
+
+                  {/* View button - only visible on desktop */}
+                  <button
+                    onClick={() => {
+                      setSelectedUser({ id: user.userId, name: user.name });
+                      setShowStatsModal(true);
+                    }}
+                    className="hidden sm:block p-2 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-colors"
+                    title="Ver detalhes"
+                  >
+                    <Eye size={18} className="text-secondary" />
+                  </button>
                 </div>
 
-                <div className="flex items-center gap-4">
+                {/* Status badges - mobile version */}
+                <div className="flex items-center justify-between sm:hidden">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className={`px-2 py-1 rounded-full text-[11px] font-medium ${getPerformanceColor(user.performanceLevel)}`}>
+                      {getPerformanceText(user.performanceLevel)}
+                    </div>
+                    <div className={`flex items-center gap-1 text-xs ${getActivityColor(user.activityStatus)}`}>
+                      <Activity size={14} />
+                      {getActivityText(user.activityStatus)}
+                    </div>
+                  </div>
+
+                  {/* View button - mobile version */}
+                  <button
+                    onClick={() => {
+                      setSelectedUser({ id: user.userId, name: user.name });
+                      setShowStatsModal(true);
+                    }}
+                    className="p-1.5 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-colors"
+                    title="Ver detalhes"
+                  >
+                    <Eye size={16} className="text-secondary" />
+                  </button>
+                </div>
+
+                {/* Status badges - desktop version (absolute positioned) */}
+                <div className="hidden sm:flex sm:absolute sm:top-6 sm:right-6 items-center gap-4">
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${getPerformanceColor(user.performanceLevel)}`}>
                     {getPerformanceText(user.performanceLevel)}
                   </div>
@@ -601,16 +642,6 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     <Activity size={16} />
                     {getActivityText(user.activityStatus)}
                   </div>
-                  <button
-                    onClick={() => {
-                      setSelectedUser({ id: user.userId, name: user.name });
-                      setShowStatsModal(true);
-                    }}
-                    className="p-2 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-colors"
-                    title="Ver detalhes"
-                  >
-                    <Eye size={18} className="text-secondary" />
-                  </button>
                 </div>
               </div>
 
@@ -620,14 +651,14 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                   <p className="text-2xl font-bold text-white">
                     {user.stats.overallMasteryRate.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-400">{t('stats.masteryRate')}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.masteryRate')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-white">
                     {user.stats.uniqueFlashcardsReviewed}/{user.stats.totalFlashcards}
                   </p>
-                  <p className="text-xs text-gray-400">{t('stats.cardsReviewed')}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.cardsReviewed')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
@@ -635,35 +666,35 @@ export default function TutorFlashcardStats({ locale }: TutorFlashcardStatsProps
                     <Zap className="w-4 h-4 text-yellow-400" />
                     <p className="text-2xl font-bold text-white">{user.stats.studyStreak}</p>
                   </div>
-                  <p className="text-xs text-gray-400">{t('stats.studyStreak')}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.studyStreak')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-lg font-bold text-green-400">{user.stats.easyCount}</p>
                   <p className="text-lg font-bold text-red-400">{user.stats.hardCount}</p>
-                  <p className="text-xs text-gray-400">{t('stats.easyHard')}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.easyHard')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-white">
                     {user.recentActivity.last7Days}
                   </p>
-                  <p className="text-xs text-gray-400">{t('stats.last7Days')}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.last7Days')}</p>
                 </div>
               </div>
 
               {/* Argument Stats */}
               {user.argumentStats.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-700">
-                  <p className="text-sm text-gray-400 mb-2">{t('stats.performanceByArgument')}</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <p className="text-xs sm:text-sm text-gray-400 mb-2">{t('stats.performanceByArgument')}</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                     {user.argumentStats.slice(0, 4).map((arg) => (
-                      <div key={arg.argumentId} className="flex items-center justify-between bg-gray-700/30 rounded-lg px-3 py-2">
-                        <span className="text-sm text-gray-300 truncate flex-1 mr-2">
+                      <div key={arg.argumentId} className="flex items-center justify-between bg-gray-700/30 rounded-lg px-2 sm:px-3 py-2">
+                        <span className="text-xs sm:text-sm text-gray-300 truncate flex-1 mr-2">
                           {arg.argumentTitle}
                         </span>
                         <div className="flex items-center gap-2">
-                          <div className="text-xs text-gray-400">
+                          <div className="text-[10px] sm:text-xs text-gray-400">
                             {arg.reviewedFlashcards}/{arg.totalFlashcards}
                           </div>
                           <div className={`text-xs font-medium px-2 py-1 rounded ${

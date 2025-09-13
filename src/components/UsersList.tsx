@@ -607,36 +607,36 @@ export default function UsersList() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6">
+        <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
+          <p className="text-2xl sm:text-3xl font-bold text-white">
             {userCounts.total}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-[10px] sm:text-sm text-gray-400 break-words">
             {t('stats.total')}
           </p>
         </div>
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
+        <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
+          <p className="text-2xl sm:text-3xl font-bold text-white">
             {userCounts.admins}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-[10px] sm:text-sm text-gray-400 break-words">
             {t('stats.admins')}
           </p>
         </div>
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
+        <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
+          <p className="text-2xl sm:text-3xl font-bold text-white">
             {userCounts.tutors}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-[10px] sm:text-sm text-gray-400 break-words">
             {t('stats.tutors')}
           </p>
         </div>
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">
+        <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
+          <p className="text-2xl sm:text-3xl font-bold text-white">
             {userCounts.students}
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-[10px] sm:text-sm text-gray-400 break-words">
             {t('stats.students')}
           </p>
         </div>
@@ -648,85 +648,148 @@ export default function UsersList() {
             {filteredUsers.map((user, index) => (
               <div
                 key={user.identityId || `user-${index}`}
-                className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex flex-col p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
-                  {getRoleIcon(user.role)}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-lg font-semibold text-white">
-                      {user.fullName || 'Unnamed User'}
-                    </h4>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
-                        user.role
-                      )}`}
-                    >
-                      {t(
-                        `role${
+                {/* Mobile Layout - Vertical */}
+                <div className="sm:hidden space-y-3">
+                  {/* Header with Avatar and Name */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
+                      {getRoleIcon(user.role)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base font-semibold text-white">
+                        {user.fullName || 'Unnamed User'}
+                      </h4>
+                      <span
+                        className={`inline-block mt-1 px-2 py-1 text-xs rounded-full ${getRoleStyle(
                           user.role
-                            .charAt(0)
-                            .toUpperCase() +
-                          user.role.slice(1)
-                        }`
-                      )}
-                    </span>
+                        )}`}
+                      >
+                        {t(
+                          `role${
+                            user.role
+                              .charAt(0)
+                              .toUpperCase() +
+                            user.role.slice(1)
+                          }`
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Mail size={12} />
-                      {user.email}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <CreditCard size={12} />
-                      {user.nationalId}
-                    </span>
+
+                  {/* User Details - Each on its own line */}
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Mail size={14} className="flex-shrink-0" />
+                      <span className="break-all">{user.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CreditCard size={14} className="flex-shrink-0" />
+                      <span>{user.nationalId}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <div>ID: {user.identityId ? user.identityId.slice(0, 8) + '…' : '-'}</div>
+                      <div>Criado: {new Date(user.createdAt).toLocaleDateString('pt-BR')}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                    <span>
-                      ID:{' '}
-                      {user.identityId
-                        ? user.identityId.slice(0, 8) + '…'
-                        : '-'}
-                    </span>
-                    <span>
-                      Criado:{' '}
-                      {new Date(
-                        user.createdAt
-                      ).toLocaleDateString('pt-BR')}
-                    </span>
+
+                  {/* Action Buttons - Bottom */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-600">
+                    <button
+                      onClick={() => handleViewUser(user.identityId)}
+                      title={t('actions.view')}
+                      className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2"
+                    >
+                      <Eye size={16} />
+                      <span className="text-xs">Ver</span>
+                    </button>
+                    <button
+                      onClick={() => handleEditUser(user)}
+                      title={t('actions.edit')}
+                      className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2"
+                    >
+                      <Edit size={16} />
+                      <span className="text-xs">Editar</span>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.identityId, user.fullName)}
+                      title={t('actions.delete')}
+                      className="flex-1 py-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={16} />
+                      <span className="text-xs">Excluir</span>
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      handleViewUser(user.identityId)
-                    }
-                    title={t('actions.view')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleEditUser(user)}
-                    title={t('actions.edit')}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
-                  >
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleDelete(
-                        user.identityId,
-                        user.fullName
-                      )
-                    }
-                    title={t('actions.delete')}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+
+                {/* Desktop Layout - Horizontal */}
+                <div className="hidden sm:flex sm:items-center sm:gap-4">
+                  <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center flex-shrink-0">
+                    {getRoleIcon(user.role)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-lg font-semibold text-white truncate">
+                        {user.fullName || 'Unnamed User'}
+                      </h4>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${getRoleStyle(
+                          user.role
+                        )}`}
+                      >
+                        {t(
+                          `role${
+                            user.role
+                              .charAt(0)
+                              .toUpperCase() +
+                            user.role.slice(1)
+                          }`
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Mail size={12} />
+                        <span className="truncate">{user.email}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <CreditCard size={12} />
+                        {user.nationalId}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                      <span>
+                        ID: {user.identityId ? user.identityId.slice(0, 8) + '…' : '-'}
+                      </span>
+                      <span>
+                        Criado: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleViewUser(user.identityId)}
+                      title={t('actions.view')}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleEditUser(user)}
+                      title={t('actions.edit')}
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.identityId, user.fullName)}
+                      title={t('actions.delete')}
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -734,8 +797,8 @@ export default function UsersList() {
 
           {/* Paginação */}
           {!isApiSearchActive && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-700 pt-4">
-              <div className="text-sm text-gray-400">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-700 pt-4">
+              <div className="text-xs sm:text-sm text-gray-400 text-center sm:text-left">
                 {t('pagination.showing', {
                   start: (currentPage - 1) * pageSize + 1,
                   end: Math.min(
@@ -749,13 +812,14 @@ export default function UsersList() {
                 <button
                   onClick={goToPrevPage}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeft size={16} />
-                  {t('pagination.previous')}
+                  <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{t('pagination.previous')}</span>
+                  <span className="sm:hidden">Ant</span>
                 </button>
 
-                <span className="px-3 py-2 text-sm text-gray-400">
+                <span className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-400">
                   {t('pagination.pageOf', {
                     current: currentPage,
                     total: totalPages,
@@ -765,10 +829,11 @@ export default function UsersList() {
                 <button
                   onClick={goToNextPage}
                   disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-700 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {t('pagination.next')}
-                  <ChevronRight size={16} />
+                  <span className="hidden sm:inline">{t('pagination.next')}</span>
+                  <span className="sm:hidden">Próx</span>
+                  <ChevronRight size={14} className="sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>

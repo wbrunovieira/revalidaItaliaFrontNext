@@ -1,0 +1,94 @@
+---
+- name: Update Frontend Code (Quick Deploy)
+  hosts: frontend
+  become: true
+
+  vars:
+    app_dir: /home/ubuntu/frontend
+    repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
+
+  tasks:
+    - name: "🔄 INICIANDO - Atualização do código frontend"
+      debug:
+        msg: "Iniciando processo de atualização do código em {{ app_dir }}"
+
+    - name: "📥 GIT PULL - Atualizando código do repositório"
+      git:
+        repo: '{{ repo_url }}'
+        dest: '{{ app_dir }}'
+        version: main
+        force: yes
+        update: yes
+      become_user: ubuntu
+      register: git_result
+
+    - name: "✅ GIT - Mostrar mudanças obtidas"
+      debug:
+        msg:
+          - "Git pull concluído!"
+          - "Antes: {{ git_result.before | default('unknown') }}"
+          - "Depois: {{ git_result.after | default('unknown') }}"
+
+    - name: "📦 NPM - Instalando dependências (se necessário)"
+      command: npm install
+      args:
+        chdir: '{{ app_dir }}'
+      become_user: ubuntu
+      register: npm_install
+
+    - name: "🔨 BUILD - Compilando aplicação Next.js"
+      command: npm run build
+      args:
+        chdir: '{{ app_dir }}'
+      become_user: ubuntu
+      register: build_result
+
+    - name: "✅ BUILD - Status da compilação"
+      debug:
+        msg: "Build concluído com sucesso!"
+
+    - name: "🛑 PM2 - Parando aplicação atual"
+      shell: |
+        pm2 stop frontend || true
+        sleep 2
+      args:
+        chdir: '{{ app_dir }}'
+      become_user: ubuntu
+
+    - name: "🚀 PM2 - Iniciando aplicação atualizada"
+      shell: |
+        pm2 restart frontend || pm2 start npm --name frontend -- start -- -p 3000 -H 0.0.0.0
+        pm2 save
+      args:
+        chdir: '{{ app_dir }}'
+      become_user: ubuntu
+      register: pm2_result
+
+    - name: "⏳ AGUARDANDO - Esperando aplicação iniciar (30s)"
+      pause:
+        seconds: 30
+
+    - name: "📊 PM2 - Verificando status da aplicação"
+      shell: pm2 status
+      become_user: ubuntu
+      register: pm2_status
+
+    - name: "✅ STATUS - Mostrando status do PM2"
+      debug:
+        var: pm2_status.stdout_lines
+
+    - name: "🔍 VERIFICANDO - Testando se aplicação está respondendo"
+      uri:
+        url: "http://localhost:3000"
+        method: GET
+        status_code: [200, 301, 302]
+        timeout: 10
+      register: app_test
+      ignore_errors: yes
+
+    - name: "✅ SUCESSO - Deploy concluído!"
+      debug:
+        msg:
+          - "🎉 Atualização concluída com sucesso!"
+          - "Aplicação rodando em: http://portalrevalida.com"
+          - "Status HTTP: {{ app_test.status | default('unknown') }}"

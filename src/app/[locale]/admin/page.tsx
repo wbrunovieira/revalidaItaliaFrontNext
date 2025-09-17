@@ -68,10 +68,17 @@ export default function AdminPage() {
   const t = useTranslations('Admin');
   const params = useParams();
   const locale = params?.locale || 'pt';
-  const { isAdmin } = useAuth();
+  const { isAdmin, isTutor } = useAuth();
 
-  // Se não for admin, inicia com a aba 'users' ao invés de 'overview'
-  const [activeTab, setActiveTab] = useState(isAdmin ? 'overview' : 'users');
+  // Define a aba inicial baseada no role
+  // Admin: overview, Tutor: courses, Outros: courses
+  const getInitialTab = () => {
+    if (isAdmin) return 'overview';
+    if (isTutor) return 'courses';
+    return 'courses';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [
     showCreateAssessmentModal,
     setShowCreateAssessmentModal,
@@ -91,8 +98,8 @@ export default function AdminPage() {
 
   // Garante que não-admins não fiquem nas abas restritas
   useEffect(() => {
-    if (!isAdmin && (activeTab === 'overview' || activeTab === 'transactions')) {
-      setActiveTab('users');
+    if (!isAdmin && (activeTab === 'overview' || activeTab === 'transactions' || activeTab === 'users')) {
+      setActiveTab('courses');
     }
   }, [isAdmin, activeTab]);
 
@@ -120,17 +127,20 @@ export default function AdminPage() {
               </TabsTrigger>
             )}
 
-            <TabsTrigger
-              value="users"
-              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
-            >
-              <Users
-                className="-ms-0.5 me-2 opacity-60"
-                size={18}
-                aria-hidden="true"
-              />
-              {t('tabs.users')}
-            </TabsTrigger>
+            {/* Apenas mostra a aba users para admins */}
+            {isAdmin && (
+              <TabsTrigger
+                value="users"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Users
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.users')}
+              </TabsTrigger>
+            )}
 
             <TabsTrigger
               value="courses"
@@ -290,32 +300,35 @@ export default function AdminPage() {
             </TabsContent>
           )}
 
-          <TabsContent value="users">
-            <Tabs defaultValue="create" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
-                <TabsTrigger
-                  value="create"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                >
-                  <UserPlus className="mr-2" size={16} />
-                  {t('users.create')}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="list"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                >
-                  <List className="mr-2" size={16} />
-                  {t('users.list')}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="create">
-                <CreateUserForm />
-              </TabsContent>
-              <TabsContent value="list">
-                <UsersList />
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
+          {/* Apenas renderiza o conteúdo de users para admins */}
+          {isAdmin && (
+            <TabsContent value="users">
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <UserPlus className="mr-2" size={16} />
+                    {t('users.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('users.list')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                  <CreateUserForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <UsersList />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
 
           <TabsContent value="courses">
             <Tabs defaultValue="create" className="w-full">

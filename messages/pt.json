@@ -1423,7 +1423,6 @@
     },
     "tabs": {
       "recent": "Recentes",
-      "popular": "Populares",
       "unanswered": "Sem resposta"
     },
     "editAction": "Editar",
@@ -3182,7 +3181,6 @@
     },
     "tabs": {
       "recent": "Recentes",
-      "popular": "Populares",
       "unanswered": "Sem resposta"
     },
     "pinned": "Fixado",

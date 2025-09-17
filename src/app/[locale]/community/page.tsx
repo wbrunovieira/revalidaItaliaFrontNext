@@ -10,12 +10,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
 import NavSidebar from '@/components/NavSidebar';
 import { ReactionType } from '@/components/ReactionsButton';
 import CreatePostModal from '@/components/CreatePostModal';
@@ -370,7 +364,6 @@ export default function CommunityPage() {
   const { token, user, isAuthenticated } = useAuth();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState('recent');
   const [showCreateModal, setShowCreateModal] =
     useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -1075,28 +1068,15 @@ export default function CommunityPage() {
   );
 
 
-  // Sort topics based on selected tab (API already returns sorted by recent)
-  const sortedTopics = selectedTab === 'popular' 
-    ? [...topics].sort((a, b) => {
-        const bTotal =
-          b.viewCount +
-          b.replyCount +
-          b.reactions.LOVE +
-          b.reactions.LIKE +
-          b.reactions.SURPRISE +
-          b.reactions.CLAP +
-          b.reactions.SAD;
-        const aTotal =
-          a.viewCount +
-          a.replyCount +
-          a.reactions.LOVE +
-          a.reactions.LIKE +
-          a.reactions.SURPRISE +
-          a.reactions.CLAP +
-          a.reactions.SAD;
-        return bTotal - aTotal;
-      })
-    : topics;
+  // Sort topics: 1. Pinned posts first, 2. Most recent
+  const sortedTopics = [...topics].sort((a, b) => {
+    // First, sort by pinned status
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+
+    // Then sort by date (most recent first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   return (
     <NavSidebar>
@@ -1157,31 +1137,13 @@ export default function CommunityPage() {
           </div>
 
 
-          {/* Tabs */}
-          <Tabs
-            value={selectedTab}
-            onValueChange={setSelectedTab}
-            className="mb-6"
-          >
-            <TabsList className="bg-primary-dark/50 border-gray-700">
-              <TabsTrigger
-                value="recent"
-                className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary"
-              >
+          {/* Content */}
+          <div className="mt-6">
+              {/* Section Title */}
+              <h2 className="text-xl font-semibold text-white mb-4">
                 {t('tabs.recent')}
-              </TabsTrigger>
-              <TabsTrigger
-                value="popular"
-                className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-primary"
-              >
-                {t('tabs.popular')}
-              </TabsTrigger>
-            </TabsList>
+              </h2>
 
-            <TabsContent
-              value={selectedTab}
-              className="mt-6"
-            >
               {/* Loading State */}
               {isLoading && (
                 <div className="flex justify-center items-center py-12">
@@ -1264,8 +1226,7 @@ export default function CommunityPage() {
 
               {/* Intersection Observer Target */}
               <div ref={observerTarget} className="h-1" />
-            </TabsContent>
-          </Tabs>
+          </div>
 
         </div>
       </div>

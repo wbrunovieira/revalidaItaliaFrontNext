@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { generateSlug } from '@/lib/slug';
 import {
   X,
   Video,
@@ -14,7 +13,6 @@ import {
   FileText,
   Globe,
   Clock,
-  Hash,
   Copy,
   Check,
 } from 'lucide-react';
@@ -51,7 +49,6 @@ interface FormTranslations {
 }
 
 interface FormData {
-  slug: string;
   providerVideoId: string;
   durationInSeconds: number;
   translations: FormTranslations;
@@ -73,7 +70,6 @@ export default function EditVideoModal({
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
-    slug: '',
     providerVideoId: '',
     durationInSeconds: 0,
     translations: {
@@ -87,6 +83,7 @@ export default function EditVideoModal({
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [originalSlug, setOriginalSlug] = useState<string>('');
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -178,12 +175,12 @@ export default function EditVideoModal({
       });
 
       setFormData({
-        slug: video.slug || '',
         providerVideoId: video.providerVideoId || '',
         durationInSeconds: video.durationInSeconds || 0,
         translations: translationsObj,
       });
 
+      setOriginalSlug(video.slug || '');
       setErrors({});
     } catch (error) {
       console.error('Error fetching video:', error);
@@ -200,12 +197,6 @@ export default function EditVideoModal({
   // Validar formulário
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = t('errors.slugRequired');
-    } else if (formData.slug.trim().length < 3) {
-      newErrors.slug = t('errors.slugMin');
-    }
 
     // Validar traduções
     const locales = ['pt', 'es', 'it'] as const;
@@ -249,9 +240,9 @@ export default function EditVideoModal({
         translation => translation.title.trim() && translation.description.trim()
       );
 
-      // Preparar dados para envio - removendo campos somente leitura
+      // Preparar dados para envio - mantendo o slug original
       const requestData = {
-        slug: formData.slug.trim(),
+        slug: originalSlug, // Mantém o slug original, sem permitir edição
         translations,
       };
 
@@ -294,7 +285,7 @@ export default function EditVideoModal({
     }
   };
 
-  // Gerar slug automaticamente quando o título em português muda
+  // Atualizar título da tradução
   const handleTitleChange = useCallback(
     (locale: 'pt' | 'es' | 'it', value: string) => {
       setFormData(prev => ({
@@ -306,8 +297,6 @@ export default function EditVideoModal({
             title: value,
           },
         },
-        // Atualizar slug quando título português muda
-        ...(locale === 'pt' && { slug: generateSlug(value) }),
       }));
     },
     []
@@ -377,26 +366,6 @@ export default function EditVideoModal({
             <div className="space-y-6">
               {/* Informações básicas */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Slug */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <Hash size={16} className="inline mr-2" />
-                    {t('fields.slug')}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={e => setFormData({ ...formData, slug: e.target.value })}
-                    className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
-                      errors.slug ? 'border-red-500' : 'border-gray-600'
-                    }`}
-                    placeholder={t('placeholders.slug')}
-                  />
-                  {errors.slug && (
-                    <p className="text-red-400 text-sm mt-1">{errors.slug}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">{t('hints.slug')}</p>
-                </div>
 
                 {/* Provider Video ID - Somente Leitura */}
                 <div>

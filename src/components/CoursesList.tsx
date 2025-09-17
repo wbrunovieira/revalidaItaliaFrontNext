@@ -12,6 +12,7 @@ import {
   Eye,
   Search,
   Globe,
+  Loader2,
 } from 'lucide-react';
 import Image from 'next/image';
 import CourseViewModal from './CourseViewModal';
@@ -357,7 +358,33 @@ export default function CoursesList() {
   if (loading) {
     return (
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-        {/* skeleton placeholder */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+            <BookOpen size={24} className="text-secondary" />
+            {t('title')}
+          </h3>
+          <div className="relative">
+            <Search
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              value=""
+              disabled
+              readOnly
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 opacity-50 cursor-not-allowed"
+              placeholder={t('searchPlaceholder')}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-secondary" />
+            <span className="text-gray-400">{t('loading')}</span>
+          </div>
+        </div>
       </div>
     );
   }

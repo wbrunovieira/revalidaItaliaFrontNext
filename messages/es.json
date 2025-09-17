@@ -2059,7 +2059,15 @@
   "title": "Panel Administrativo",
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
-  
+
+  "coursesList": {
+    "loading": "Cargando cursos..."
+  },
+
+  "tracksList": {
+    "loading": "Cargando rutas..."
+  },
+
   "dashboardSections": {
     "userMetrics": "Métricas de Usuarios",
     "engagement": "Compromiso",
@@ -4444,6 +4452,7 @@
   "coursesList": {
     "title": "Lista de Cursos",
     "searchPlaceholder": "Buscar cursos...",
+    "loading": "Cargando cursos...",
     "languages": "idiomas",
     "noResults": "Ningún curso encontrado con este término.",
     "noCourses": "Ningún curso registrado aún.",

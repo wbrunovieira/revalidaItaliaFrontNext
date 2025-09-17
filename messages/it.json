@@ -2057,7 +2057,15 @@
   "title": "Pannello Amministrativo",
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
-  
+
+  "coursesList": {
+    "loading": "Caricamento corsi..."
+  },
+
+  "tracksList": {
+    "loading": "Caricamento percorsi..."
+  },
+
   "dashboardSections": {
     "userMetrics": "Metriche Utenti",
     "engagement": "Coinvolgimento",
@@ -4406,6 +4414,7 @@
   "coursesList": {
     "title": "Elenco Corsi",
     "searchPlaceholder": "Cerca corsi...",
+    "loading": "Caricamento corsi...",
     "languages": "lingue",
     "noResults": "Nessun corso trovato con questo termine.",
     "noCourses": "Nessun corso registrato ancora.",

@@ -24,7 +24,6 @@ import {
   FileText,
   Globe,
   BookOpen,
-  Video,
   Hash,
   Check,
   X,
@@ -39,12 +38,6 @@ interface Translation {
   description: string;
 }
 
-interface VideoItem {
-  id: string;
-  slug: string;
-  durationInSeconds: number;
-  translations: Translation[];
-}
 
 interface ModuleItem {
   id: string;
@@ -74,7 +67,6 @@ interface FormData {
   courseId: string;
   moduleId: string;
   imageUrl: string;
-  videoId: string;
   order: number;
   translations: Record<'pt' | 'es' | 'it', Translation>;
 }
@@ -83,7 +75,6 @@ interface FormErrors {
   courseId?: string;
   moduleId?: string;
   imageUrl?: string;
-  videoId?: string;
   order?: string;
   title_pt?: string;
   title_es?: string;
@@ -101,7 +92,6 @@ interface ValidationResult {
 interface CreateLessonPayload {
   slug: string;
   imageUrl: string;
-  videoId?: string;
   order: number;
   translations: Translation[];
 }
@@ -118,11 +108,9 @@ export default function CreateLessonForm() {
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
-  const [loadingVideos, setLoadingVideos] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const [courses, setCourses] = useState<CourseItem[]>([]);
-  const [videos, setVideos] = useState<VideoItem[]>([]);
   const [existingOrders, setExistingOrders] = useState<
     number[]
   >([]);
@@ -131,7 +119,6 @@ export default function CreateLessonForm() {
     courseId: '',
     moduleId: '',
     imageUrl: '',
-    videoId: '',
     order: 1,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -424,7 +411,6 @@ export default function CreateLessonForm() {
               field as keyof Pick<
                 FormData,
                 | 'imageUrl'
-                | 'videoId'
                 | 'courseId'
                 | 'moduleId'
               >
@@ -625,72 +611,11 @@ export default function CreateLessonForm() {
     }
   }, [toast, t, handleApiError, fetchModulesForCourse]);
 
-  // Função para buscar vídeos de um módulo específico
-  const fetchVideosForModule = useCallback(
-    async (
-      courseId: string,
-      moduleId: string
-    ): Promise<VideoItem[]> => {
-      try {
-        const lessonsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
-        );
-
-        if (!lessonsResponse.ok) {
-          return [];
-        }
-
-        const { lessons } = await lessonsResponse.json();
-
-        if (!lessons?.length) {
-          return [];
-        }
-
-        const videoResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/lessons/${lessons[0].id}/videos`
-        );
-
-        if (!videoResponse.ok) {
-          return [];
-        }
-
-        return await videoResponse.json();
-      } catch (error) {
-        handleApiError(error, 'Videos fetch error');
-        return [];
-      }
-    },
-    [handleApiError]
-  );
-
-  // Função para buscar vídeos baseado no curso e módulo selecionados
-  const fetchVideos = useCallback(async () => {
-    if (!formData.courseId || !formData.moduleId) return;
-
-    setLoadingVideos(true);
-
-    try {
-      const videoList = await fetchVideosForModule(
-        formData.courseId,
-        formData.moduleId
-      );
-      setVideos(videoList);
-    } finally {
-      setLoadingVideos(false);
-    }
-  }, [
-    formData.courseId,
-    formData.moduleId,
-    fetchVideosForModule,
-  ]);
 
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 
-  useEffect(() => {
-    fetchVideos();
-  }, [fetchVideos]);
 
   // Buscar aulas existentes quando o módulo for selecionado
   useEffect(() => {
@@ -792,8 +717,7 @@ export default function CreateLessonForm() {
     setFormData(prev => ({
       ...prev,
       imageUrl: '',
-      videoId: '',
-      order: nextOrder,
+        order: nextOrder,
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
@@ -847,7 +771,6 @@ export default function CreateLessonForm() {
       'courseId',
       'moduleId',
       'imageUrl',
-      'videoId',
       'order',
       'title_pt',
       'title_es',
@@ -922,9 +845,6 @@ export default function CreateLessonForm() {
         translations: translations,
       };
 
-      if (formData.videoId) {
-        payload.videoId = formData.videoId;
-      }
 
       await createLesson(payload);
 
@@ -1013,17 +933,6 @@ export default function CreateLessonForm() {
     [handleFieldValidation]
   );
 
-  const handleVideoChange = useCallback(
-    (videoId: string) => {
-      setFormData(prev => ({
-        ...prev,
-        videoId,
-      }));
-      setTouched(prev => ({ ...prev, videoId: true }));
-      handleFieldValidation('videoId', videoId);
-    },
-    [handleFieldValidation]
-  );
 
   // Verificar status de validação para cada idioma
   const getTranslationStatus = useCallback(
@@ -1388,53 +1297,6 @@ export default function CreateLessonForm() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <Video size={16} /> {t('fields.video')}
-            </Label>
-            <Select
-              value={formData.videoId || 'none'}
-              onValueChange={value =>
-                handleVideoChange(
-                  value === 'none' ? '' : value
-                )
-              }
-              disabled={loadingVideos || !formData.moduleId}
-            >
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
-                <SelectValue
-                  placeholder={t('placeholders.video')}
-                />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                <SelectItem
-                  value="none"
-                  className="text-gray-400 hover:bg-gray-600"
-                >
-                  {t('placeholders.noVideo')}
-                </SelectItem>
-                {videos.map(video => {
-                  const videoTranslation =
-                    getTranslationByLocale(
-                      video.translations,
-                      locale
-                    );
-                  return (
-                    <SelectItem
-                      key={video.id}
-                      value={video.id}
-                      className="text-white hover:bg-gray-600"
-                    >
-                      {videoTranslation.title || video.slug}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500">
-              {t('hints.video')}
-            </p>
-          </div>
         </div>
 
         {/* Traduções */}

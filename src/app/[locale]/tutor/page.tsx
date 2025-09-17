@@ -10,6 +10,7 @@ import Logo from '@/components/Logo';
 import LanguageButton from '@/components/LanguageButton';
 import Notifications from '@/components/Notifications';
 import UserDropdown from '@/components/UserDropdown';
+import { getUserRole } from '@/lib/auth-server';
 
 export default async function TutorPage({
   params,
@@ -20,8 +21,16 @@ export default async function TutorPage({
 }) {
   const { locale } = await params;
 
+  // Verificar autenticação
   const token = (await cookies()).get('token')?.value;
   if (!token) redirect(`/${locale}/login`);
+
+  // Verificar se é admin ou tutor
+  const role = await getUserRole();
+  if (role !== 'admin' && role !== 'tutor') {
+    // Estudantes não podem acessar a área de tutor
+    redirect(`/${locale}/courses`);
+  }
 
   const t = await getTranslations({
     locale,

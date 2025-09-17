@@ -7,19 +7,9 @@ import {
   Search,
   Plus,
   MessageSquare,
-  Filter,
-  BookOpen,
-  GraduationCap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Tabs,
   TabsContent,
@@ -267,23 +257,6 @@ interface Topic {
   titleEditedAt?: Date;
 }
 
-// Mock lessons data
-const mockLessons = [
-  {
-    id: '1',
-    title: 'Processo de Equivalência',
-    courseId: '1',
-  },
-  {
-    id: '2',
-    title: 'Sistema Cardiovascular',
-    courseId: '1',
-  },
-  { id: '3', title: 'Sistema Respiratório', courseId: '1' },
-  { id: '4', title: 'Anatomia Básica', courseId: '2' },
-  { id: '5', title: 'Técnicas Cirúrgicas', courseId: '2' },
-];
-
 // Mock data
 const mockTopics: Topic[] = [
   {
@@ -397,12 +370,6 @@ export default function CommunityPage() {
   const { token, user, isAuthenticated } = useAuth();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] =
-    useState('all');
-  const [selectedCourse, setSelectedCourse] =
-    useState('all');
-  const [selectedLesson, setSelectedLesson] =
-    useState('all');
   const [selectedTab, setSelectedTab] = useState('recent');
   const [showCreateModal, setShowCreateModal] =
     useState(false);
@@ -466,23 +433,6 @@ export default function CommunityPage() {
       // Add search parameter
       if (searchQuery.trim()) {
         params.append('search', searchQuery.trim());
-      }
-
-      // Add course filter
-      if (selectedCourse !== 'all') {
-        params.append('courseId', selectedCourse);
-      }
-
-      // Add lesson filter
-      if (selectedLesson !== 'all') {
-        params.append('lessonId', selectedLesson);
-      }
-
-      // Add type filter based on selectedFilter
-      if (selectedFilter === 'lesson-comments') {
-        params.append('type', 'LESSON_COMMENT');
-      } else if (selectedFilter === 'general-topics') {
-        params.append('type', 'GENERAL_TOPIC');
       }
 
       const response = await fetch(
@@ -674,7 +624,7 @@ export default function CommunityPage() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchQuery, selectedCourse, selectedLesson, selectedFilter, isAuthenticated, token]);
+  }, [searchQuery, isAuthenticated, token]);
 
   // Fetch posts on component mount and when filters change
   useEffect(() => {
@@ -684,18 +634,6 @@ export default function CommunityPage() {
     }
   }, [isHydrated, fetchPosts]);
 
-  // Get filtered lessons based on selected course
-  const filteredLessons =
-    selectedCourse === 'all'
-      ? mockLessons
-      : mockLessons.filter(
-          lesson => lesson.courseId === selectedCourse
-        );
-
-  // Reset lesson filter when course changes
-  useEffect(() => {
-    setSelectedLesson('all');
-  }, [selectedCourse]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -1218,114 +1156,6 @@ export default function CommunityPage() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4 mb-6">
-            <Select
-              value={selectedFilter}
-              onValueChange={setSelectedFilter}
-            >
-              <SelectTrigger className="w-[180px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <Filter
-                  size={16}
-                  className="mr-2 text-gray-400"
-                />
-                <SelectValue placeholder={t('filterBy')} />
-              </SelectTrigger>
-              <SelectContent className="bg-primary-dark border-gray-700">
-                <SelectItem
-                  value="all"
-                  className="text-white hover:bg-primary/50"
-                >
-                  {t('filters.all')}
-                </SelectItem>
-                <SelectItem
-                  value="pinned"
-                  className="text-white hover:bg-primary/50"
-                >
-                  {t('filters.pinned')}
-                </SelectItem>
-                <SelectItem
-                  value="my-posts"
-                  className="text-white hover:bg-primary/50"
-                >
-                  {t('filters.myPosts')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={selectedCourse}
-              onValueChange={setSelectedCourse}
-            >
-              <SelectTrigger className="w-[200px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <BookOpen
-                  size={16}
-                  className="mr-2 text-gray-400"
-                />
-                <SelectValue
-                  placeholder={t('filterByCourse')}
-                />
-              </SelectTrigger>
-              <SelectContent className="bg-primary-dark border-gray-700">
-                <SelectItem
-                  value="all"
-                  className="text-white hover:bg-primary/50"
-                >
-                  {t('allCourses')}
-                </SelectItem>
-                <SelectItem
-                  value="1"
-                  className="text-white hover:bg-primary/50"
-                >
-                  Medicina Interna
-                </SelectItem>
-                <SelectItem
-                  value="2"
-                  className="text-white hover:bg-primary/50"
-                >
-                  Cirurgia Geral
-                </SelectItem>
-                <SelectItem
-                  value="3"
-                  className="text-white hover:bg-primary/50"
-                >
-                  Pediatria
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={selectedLesson}
-              onValueChange={setSelectedLesson}
-            >
-              <SelectTrigger className="w-[250px] bg-primary-dark/50 border-gray-700 text-white hover:bg-primary-dark/70 focus:ring-secondary">
-                <GraduationCap
-                  size={16}
-                  className="mr-2 text-gray-400"
-                />
-                <SelectValue
-                  placeholder={t('filterByLesson')}
-                />
-              </SelectTrigger>
-              <SelectContent className="bg-primary-dark border-gray-700 max-h-[300px]">
-                <SelectItem
-                  value="all"
-                  className="text-white hover:bg-primary/50"
-                >
-                  {t('allLessons')}
-                </SelectItem>
-                {filteredLessons.map(lesson => (
-                  <SelectItem
-                    key={lesson.id}
-                    value={lesson.id}
-                    className="text-white hover:bg-primary/50"
-                  >
-                    {lesson.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           {/* Tabs */}
           <Tabs

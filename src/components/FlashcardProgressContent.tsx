@@ -16,7 +16,6 @@ import {
   Award,
   BarChart3,
   Zap,
-  BookOpen,
   AlertCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -676,41 +675,6 @@ export default function FlashcardProgressContent() {
                     )}
                   </>
                 )}
-              </div>
-            </motion.div>
-
-            {/* Study Recommendations */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-secondary/20 to-accent-light/20 backdrop-blur-lg rounded-xl p-6 border border-secondary/30"
-            >
-              <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-secondary" />
-                {t('recommendations.title')}
-              </h2>
-
-              <div className="space-y-3">
-                {stats && stats.hardCount > 5 && (
-                  <button
-                    onClick={() => router.push(`/${locale}/flashcards/review?difficulty=HARD`)}
-                    className="w-full text-left p-3 bg-primary-dark/50 rounded-lg hover:bg-primary-dark/70 transition-colors"
-                  >
-                    <p className="text-white text-sm">{t('recommendations.reviewHard')}</p>
-                    <p className="text-gray-400 text-xs">
-                      {stats.hardCount} {t('recommendations.difficultCards')}
-                    </p>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => router.push(`/${locale}/flashcards/study`)}
-                  className="w-full text-left p-3 bg-primary-dark/50 rounded-lg hover:bg-primary-dark/70 transition-colors"
-                >
-                  <p className="text-white text-sm">{t('recommendations.continueStudying')}</p>
-                  <p className="text-gray-400 text-xs">{t('recommendations.maintainStreak')}</p>
-                </button>
               </div>
             </motion.div>
           </div>

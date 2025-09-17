@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   X,
   Route,
-  Link,
   Image as ImageIcon,
   Type,
   FileText,
@@ -267,12 +266,6 @@ export default function TrackEditModal({
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.slug.trim()) {
-      newErrors.slug = t('errors.slugRequired');
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = t('errors.slugInvalid');
-    }
-
     // Image is required (either original or new)
     if (!formData.imageUrl.trim() && !formData.newImageUrl.trim()) {
       newErrors.imageUrl = t('errors.imageRequired');
@@ -399,7 +392,7 @@ export default function TrackEditModal({
           method: 'PUT',
           headers,
           body: JSON.stringify({
-            slug: formData.slug.trim(),
+            slug: track.slug, // Mantém o slug original, sem permitir edição
             imageUrl: finalImageUrl.trim(),
             courseIds: formData.courseIds,
             translations,
@@ -627,45 +620,6 @@ export default function TrackEditModal({
           className="flex-1 overflow-y-auto p-6"
         >
           <div className="space-y-6">
-            {/* Informações básicas */}
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Slug */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <Link size={16} className="inline mr-2" />
-                  {t('fields.slug')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={e =>
-                    setFormData({
-                      ...formData,
-                      slug: e.target.value
-                        .toLowerCase()
-                        .replace(/\s/g, '-'),
-                    })
-                  }
-                  className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
-                    errors.slug
-                      ? 'border-red-500'
-                      : 'border-gray-600'
-                  }`}
-                  placeholder={t('placeholders.slug')}
-                />
-                {errors.slug && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.slug}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {t('hints.slug')}
-                </p>
-              </div>
-
-              {/* Placeholder para manter grid 2 colunas */}
-              <div></div>
-            </div>
 
             {/* Seção de Upload de Imagem */}
             <div className="space-y-4">

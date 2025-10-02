@@ -100,12 +100,12 @@ export default async function ModulePage({
     notFound();
 
   const lessonsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons?page=1&limit=10`,
     { cache: 'no-store' }
   );
   if (!lessonsRes.ok)
     throw new Error('Failed to fetch lessons');
-  const { lessons }: LessonsResponse =
+  const { lessons, pagination }: LessonsResponse =
     await lessonsRes.json();
 
   // Traduções
@@ -118,8 +118,8 @@ export default async function ModulePage({
       tr => tr.locale === locale
     ) ?? moduleData.translations[0];
 
-  // Total de aulas
-  const totalLessons = lessons.length;
+  // Total de aulas (usar o total da paginação, não apenas as da página atual)
+  const totalLessons = pagination.total;
 
   // Ordenar aulas uma vez
   const sortedLessons = lessons.sort(
@@ -129,8 +129,10 @@ export default async function ModulePage({
   return (
     <NavSidebar>
       <div className="flex-1 flex flex-col bg-primary min-h-screen">
+        {/* Container com padding lateral para desktop */}
+        <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8 lg:px-12 xl:px-16">
         {/* Cabeçalho com breadcrumbs */}
-        <div className="p-6">
+        <div className="py-6">
           <div className="flex items-center gap-2 text-sm text-gray-300 mb-4">
             <Link
               href={`/${locale}`}
@@ -159,7 +161,7 @@ export default async function ModulePage({
         </div>
 
         {/* Detalhes do módulo */}
-        <div className="px-6 pb-8">
+        <div className="pb-8">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             <div className="relative w-full lg:w-96 h-64 rounded-lg overflow-hidden shadow-xl border-l-[10px] border-neutral">
               <Image
@@ -198,7 +200,7 @@ export default async function ModulePage({
         </div>
 
         {/* Module Progress Bar */}
-        <div className="px-6 pb-8">
+        <div className="pb-8">
           <div className="max-w-4xl">
             <ModuleProgressBar 
               moduleId={moduleData.id}
@@ -208,7 +210,7 @@ export default async function ModulePage({
         </div>
 
         {/* Lista de aulas */}
-        <div className="px-6 pb-8">
+        <div className="pb-8">
           <div className="flex items-center gap-4 mb-6">
             <PlayCircle size={32} className="text-white" />
             <h2 className="text-3xl font-bold text-white">
@@ -224,6 +226,10 @@ export default async function ModulePage({
               courseSlug={slug}
               moduleSlug={moduleSlug}
               locale={locale}
+              courseId={courseFound.id}
+              initialPage={pagination.page}
+              initialTotalPages={pagination.totalPages}
+              initialTotal={pagination.total}
             />
           ) : (
             <div className="text-center py-12">
@@ -240,7 +246,7 @@ export default async function ModulePage({
 
         {/* Iniciar primeira aula */}
         {sortedLessons.length > 0 && (
-          <div className="px-6 pb-8">
+          <div className="pb-8">
             <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-8 max-w-4xl shadow-xl border border-gray-700 relative overflow-hidden">
               {/* Padrão decorativo */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl" />
@@ -277,7 +283,7 @@ export default async function ModulePage({
         )}
 
         {/* Navegação entre módulos */}
-        <div className="px-6 pb-8">
+        <div className="pb-8">
           <div className="bg-gray-800 rounded-lg p-6 max-w-4xl">
             <h3 className="text-lg font-bold text-white mb-4">
               {tModule('moduleNavigation')}
@@ -374,6 +380,7 @@ export default async function ModulePage({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </NavSidebar>

@@ -1336,7 +1336,15 @@
     "moduleCompleted": "Modulo Completato!",
     "completedOn": "Completato il",
     "motivationSingular": "Ottimo lavoro! Manca solo 1 lezione per completare questo modulo!",
-    "motivationPlural": "Continua così! Mancano solo {count} lezioni per completare il modulo."
+    "motivationPlural": "Continua così! Mancano solo {count} lezioni per completare il modulo.",
+    "pagination": {
+      "showing": "Mostrando",
+      "of": "di",
+      "lessons": "lezioni",
+      "page": "Pagina",
+      "previous": "Precedente",
+      "next": "Successiva"
+    }
   },
   "SearchInput": {
     "placeholder": "Cerca corso",
@@ -1674,7 +1682,13 @@
     "error": "Errore",
     "notAuthenticated": "Devi essere autenticato",
     "completionError": "Errore nell'aggiornamento dello stato della lezione",
-    "autoCompleteHint": "La lezione verrà segnata come completata automaticamente quando avrai guardato il 90% del video ({progress}% guardato)"
+    "autoCompleteHint": "La lezione verrà segnata come completata automaticamente quando avrai guardato il 90% del video ({progress}% guardato)",
+    "pagination": {
+      "page": "Pagina",
+      "of": "di",
+      "previous": "Precedente",
+      "next": "Successiva"
+    }
   },
   "LessonComments": {
     "title": "Commenti",
@@ -4956,7 +4970,16 @@
         "fetchTitle": "Errore nel caricamento delle lezioni",
         "fetchDescription": "Non è stato possibile caricare l'elenco delle lezioni.",
         "deleteTitle": "Errore nell'eliminazione",
-        "deleteDescription": "Non è stato possibile eliminare la lezione."
+        "deleteDescription": "Non è stato possibile eliminare la lezione.",
+        "editLoadTitle": "Errore nel caricamento della lezione",
+        "editLoadDescription": "Non è stato possibile caricare i dati della lezione per la modifica."
+      },
+      "pagination": {
+        "showing": "Mostrando",
+        "of": "di",
+        "page": "Pagina",
+        "previous": "Precedente",
+        "next": "Successiva"
       }
     },
 "lessonView": {

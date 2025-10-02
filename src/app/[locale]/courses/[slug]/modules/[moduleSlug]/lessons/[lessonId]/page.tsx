@@ -73,6 +73,14 @@ interface Lesson {
 
 interface LessonsResponse {
   lessons: Lesson[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
 }
 
 interface Assessment {
@@ -221,7 +229,7 @@ export default async function LessonPage({
     Document[]
   ] = await Promise.all([
     fetch(
-      `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons`,
+      `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons?page=1&limit=10`,
       { cache: 'no-store' }
     ).then(r => (r.ok ? r.json() : Promise.reject())),
     fetch(
@@ -602,6 +610,10 @@ export default async function LessonPage({
               courseSlug={slug}
               moduleSlug={moduleSlug}
               locale={locale}
+              courseId={course.id}
+              initialPage={allLessons.pagination.page}
+              initialTotalPages={allLessons.pagination.totalPages}
+              initialTotal={allLessons.pagination.total}
             />
               </aside>
             </div>

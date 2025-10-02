@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Translation {
   locale: string;
@@ -27,18 +27,31 @@ interface ModuleLessonsListProps {
   courseSlug: string;
   moduleSlug: string;
   locale: string;
+  courseId: string;
+  initialPage?: number;
+  initialTotalPages?: number;
+  initialTotal?: number;
 }
 
 export default function ModuleLessonsList({
-  lessons,
+  lessons: initialLessons,
   currentLessonId,
   moduleId,
   courseSlug,
   moduleSlug,
   locale,
+  courseId,
+  initialPage = 1,
+  initialTotalPages = 1,
+  initialTotal = 0,
 }: ModuleLessonsListProps) {
   const t = useTranslations('Lesson');
+  const [lessons, setLessons] = useState<Lesson[]>(initialLessons);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [total, setTotal] = useState(initialTotal);
+  const [loadingPage, setLoadingPage] = useState(false);
 
   // Fetch completion status for all lessons
   useEffect(() => {
@@ -96,11 +109,43 @@ export default function ModuleLessonsList({
     };
 
     window.addEventListener('lessonCompletionChanged', handleCompletionChange as EventListener);
-    
+
     return () => {
       window.removeEventListener('lessonCompletionChanged', handleCompletionChange as EventListener);
     };
   }, []);
+
+  // Função para buscar aulas de uma página específica
+  const fetchLessonsPage = useCallback(async (page: number) => {
+    setLoadingPage(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(
+        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch lessons');
+      }
+
+      const data = await response.json();
+
+      setLessons(data.lessons || []);
+      setCurrentPage(data.pagination.page);
+      setTotalPages(data.pagination.totalPages);
+      setTotal(data.pagination.total);
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+    } finally {
+      setLoadingPage(false);
+    }
+  }, [courseId, moduleId]);
+
+  // Handler para mudança de página
+  const handlePageChange = useCallback((newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    fetchLessonsPage(newPage);
+  }, [currentPage, totalPages, fetchLessonsPage]);
 
   // Sort lessons by creation date
   const sortedLessons = [...lessons].sort(
@@ -130,13 +175,13 @@ export default function ModuleLessonsList({
             {t('moduleLessons')}
           </h4>
           <span className="text-xs text-gray-500">
-            {completedLessons.size}/{sortedLessons.length} {t('completed').toLowerCase()}
+            {completedLessons.size}/{total} {t('completed').toLowerCase()}
           </span>
         </div>
         <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
       </div>
-      
-      <div className="bg-primary/20 rounded-lg p-2 max-h-80 overflow-y-auto border border-secondary/20">
+
+      <div className={`bg-primary/20 rounded-lg p-2 max-h-80 overflow-y-auto border border-secondary/20 ${loadingPage ? 'opacity-50 pointer-events-none' : ''}`}>
         <ul className="space-y-1">
           {sortedLessons.map((lesson, index) => {
             const isCurrentLesson = lesson.id === currentLessonId;
@@ -173,7 +218,7 @@ export default function ModuleLessonsList({
                     {isCompleted ? (
                       <CheckCircle size={14} className="text-green-400" />
                     ) : (
-                      index + 1
+                      index + 1 + ((currentPage - 1) * 10)
                     )}
                   </div>
                   <span className="flex-1 truncate">
@@ -191,20 +236,69 @@ export default function ModuleLessonsList({
           })}
         </ul>
       </div>
-      
+
+      {/* Controles de Paginação */}
+      {totalPages > 1 && (
+        <div className="mt-3 flex items-center justify-between bg-primary/10 rounded-lg p-2 border border-secondary/20">
+          <div className="text-xs text-gray-400">
+            {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Botão Anterior */}
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || loadingPage}
+              className="p-1 text-gray-400 hover:text-white hover:bg-primary/40 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              title={t('pagination.previous')}
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {/* Input de Página */}
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              value={currentPage}
+              onChange={(e) => {
+                const page = parseInt(e.target.value);
+                if (page >= 1 && page <= totalPages) {
+                  handlePageChange(page);
+                }
+              }}
+              disabled={loadingPage}
+              className="w-12 px-2 py-1 bg-primary/30 border border-secondary/20 rounded text-center text-white text-xs focus:outline-none focus:ring-1 focus:ring-secondary disabled:opacity-50"
+            />
+
+            {/* Botão Próximo */}
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loadingPage}
+              className="p-1 text-gray-400 hover:text-white hover:bg-primary/40 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              title={t('pagination.next')}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Progress bar */}
-      {sortedLessons.length > 0 && (
+      {total > 0 && (
         <div className="mt-3">
           <div className="h-2 bg-primary/30 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-500"
               style={{
-                width: `${(completedLessons.size / sortedLessons.length) * 100}%`,
+                width: `${(completedLessons.size / total) * 100}%`,
               }}
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 text-center">
-            {Math.round((completedLessons.size / sortedLessons.length) * 100)}% {t('completed').toLowerCase()}
+            {Math.round((completedLessons.size / total) * 100)}% {t('completed').toLowerCase()}
           </p>
         </div>
       )}

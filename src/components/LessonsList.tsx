@@ -13,6 +13,7 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Package,
   Video,
   Clock,
@@ -105,6 +106,11 @@ export default function LessonsList() {
     Set<string>
   >(new Set());
 
+  // Estados para paginação de aulas por módulo
+  const [modulePagination, setModulePagination] = useState<
+    Record<string, { page: number; totalPages: number; total: number }>
+  >({});
+
   // Estados para o modal de visualização
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<
@@ -159,11 +165,12 @@ export default function LessonsList() {
   const fetchLessonsForModule = useCallback(
     async (
       courseId: string,
-      moduleId: string
+      moduleId: string,
+      page: number = 1
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
         );
 
         if (!response.ok) {
@@ -171,6 +178,19 @@ export default function LessonsList() {
         }
 
         const lessonsData = await response.json();
+
+        // Atualizar informações de paginação para este módulo
+        if (lessonsData.pagination) {
+          setModulePagination(prev => ({
+            ...prev,
+            [moduleId]: {
+              page: lessonsData.pagination.page,
+              totalPages: lessonsData.pagination.totalPages,
+              total: lessonsData.pagination.total,
+            }
+          }));
+        }
+
         // Garantir que as aulas estejam ordenadas por order
         const lessons = lessonsData.lessons || [];
         return lessons.sort(
@@ -680,6 +700,36 @@ export default function LessonsList() {
     });
   }, []);
 
+  // 12. Função para navegar entre páginas de aulas
+  const handlePageChange = useCallback(
+    async (courseId: string, moduleId: string, newPage: number) => {
+      const paginationInfo = modulePagination[moduleId];
+      if (!paginationInfo) return;
+
+      // Validar página
+      if (newPage < 1 || newPage > paginationInfo.totalPages) return;
+
+      // Buscar aulas da nova página
+      const lessons = await fetchLessonsForModule(courseId, moduleId, newPage);
+
+      // Atualizar o módulo com as novas aulas
+      setCoursesWithLessons(prev =>
+        prev.map(course => {
+          if (course.id !== courseId) return course;
+
+          return {
+            ...course,
+            modules: course.modules?.map(module => {
+              if (module.id !== moduleId) return module;
+              return { ...module, lessons };
+            }),
+          };
+        })
+      );
+    },
+    [modulePagination, fetchLessonsForModule]
+  );
+
   // Filtrar baseado na busca
   const filteredCourses = coursesWithLessons.filter(
     course => {
@@ -966,6 +1016,7 @@ export default function LessonsList() {
                               {isModuleExpanded && (
                                 <div className="bg-gray-800/30 p-4">
                                   {lessonCount > 0 ? (
+                                    <>
                                     <div className="space-y-3">
                                       {module.lessons?.map(
                                         lesson => {
@@ -1119,6 +1170,67 @@ export default function LessonsList() {
                                         }
                                       )}
                                     </div>
+
+                                    {/* Controles de paginação */}
+                                    {modulePagination[module.id] && modulePagination[module.id].totalPages > 1 && (
+                                      <div className="mt-4 flex items-center justify-between border-t border-gray-700 pt-4">
+                                        <div className="text-xs text-gray-400">
+                                          {t('pagination.showing')} {module.lessons?.length || 0} {t('pagination.of')} {modulePagination[module.id].total} {t('lessons')}
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                          {/* Botão anterior */}
+                                          <button
+                                            type="button"
+                                            onClick={() => handlePageChange(
+                                              course.id,
+                                              module.id,
+                                              modulePagination[module.id].page - 1
+                                            )}
+                                            disabled={modulePagination[module.id].page === 1}
+                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t('pagination.previous')}
+                                          >
+                                            <ChevronLeft size={16} />
+                                          </button>
+
+                                          {/* Input de página */}
+                                          <div className="flex items-center gap-1 text-xs">
+                                            <span className="text-gray-400">{t('pagination.page')}</span>
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              max={modulePagination[module.id].totalPages}
+                                              value={modulePagination[module.id].page}
+                                              onChange={(e) => {
+                                                const page = parseInt(e.target.value);
+                                                if (page >= 1 && page <= modulePagination[module.id].totalPages) {
+                                                  handlePageChange(course.id, module.id, page);
+                                                }
+                                              }}
+                                              className="w-12 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-center text-white focus:outline-none focus:ring-1 focus:ring-secondary"
+                                            />
+                                            <span className="text-gray-400">{t('pagination.of')} {modulePagination[module.id].totalPages}</span>
+                                          </div>
+
+                                          {/* Botão próximo */}
+                                          <button
+                                            type="button"
+                                            onClick={() => handlePageChange(
+                                              course.id,
+                                              module.id,
+                                              modulePagination[module.id].page + 1
+                                            )}
+                                            disabled={modulePagination[module.id].page === modulePagination[module.id].totalPages}
+                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t('pagination.next')}
+                                          >
+                                            <ChevronRight size={16} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                    </>
                                   ) : (
                                     <div className="text-center py-4">
                                       <Play

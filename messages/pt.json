@@ -1341,7 +1341,15 @@
     "moduleCompleted": "Módulo Concluído!",
     "completedOn": "Concluído em",
     "motivationSingular": "Ótimo trabalho! Falta apenas 1 aula para concluir este módulo!",
-    "motivationPlural": "Continue assim! Faltam apenas {count} aulas para concluir o módulo."
+    "motivationPlural": "Continue assim! Faltam apenas {count} aulas para concluir o módulo.",
+    "pagination": {
+      "showing": "Mostrando",
+      "of": "de",
+      "lessons": "aulas",
+      "page": "Página",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   },
   "SearchInput": {
     "placeholder": "Buscar curso",
@@ -1679,7 +1687,13 @@
     "error": "Erro",
     "notAuthenticated": "Você precisa estar autenticado",
     "completionError": "Erro ao atualizar status da aula",
-    "autoCompleteHint": "A aula será marcada como concluída automaticamente quando você assistir 90% do vídeo ({progress}% assistido)"
+    "autoCompleteHint": "A aula será marcada como concluída automaticamente quando você assistir 90% do vídeo ({progress}% assistido)",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   },
   "LessonComments": {
     "title": "Comentários",
@@ -5008,7 +5022,16 @@
     "deleteDescription": "Não foi possível excluir a aula.",
     "deleteDependencyTitle": "Não é possível excluir a aula",
     "deleteDependencyMessage": "Esta aula possui conteúdos associados que devem ser removidos primeiro:",
-    "deleteDependencyWarning": "Remova todas as dependências antes de excluir a aula."
+    "deleteDependencyWarning": "Remova todas as dependências antes de excluir a aula.",
+    "editLoadTitle": "Erro ao carregar aula",
+    "editLoadDescription": "Não foi possível carregar os dados da aula para edição."
+  },
+  "pagination": {
+    "showing": "Mostrando",
+    "of": "de",
+    "page": "Página",
+    "previous": "Anterior",
+    "next": "Próxima"
   }
 },
 "lessonView": {

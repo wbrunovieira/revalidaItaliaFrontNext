@@ -1339,7 +1339,15 @@
     "moduleCompleted": "¡Módulo Completado!",
     "completedOn": "Completado el",
     "motivationSingular": "¡Excelente trabajo! Solo falta 1 lección para completar este módulo!",
-    "motivationPlural": "¡Sigue así! Solo faltan {count} lecciones para completar el módulo."
+    "motivationPlural": "¡Sigue así! Solo faltan {count} lecciones para completar el módulo.",
+    "pagination": {
+      "showing": "Mostrando",
+      "of": "de",
+      "lessons": "lecciones",
+      "page": "Página",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
   },
   "SearchInput": {
     "placeholder": "Buscar curso",
@@ -1677,7 +1685,13 @@
     "error": "Error",
     "notAuthenticated": "Necesitas estar autenticado",
     "completionError": "Error al actualizar el estado de la lección",
-    "autoCompleteHint": "La lección se marcará como completada automáticamente cuando hayas visto el 90% del video ({progress}% visto)"
+    "autoCompleteHint": "La lección se marcará como completada automáticamente cuando hayas visto el 90% del video ({progress}% visto)",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
   },
   "LessonComments": {
     "title": "Comentarios",
@@ -4989,7 +5003,16 @@
         "fetchTitle": "Error al cargar lecciones",
         "fetchDescription": "No fue posible cargar la lista de lecciones.",
         "deleteTitle": "Error al eliminar",
-        "deleteDescription": "No fue posible eliminar la lección."
+        "deleteDescription": "No fue posible eliminar la lección.",
+        "editLoadTitle": "Error al cargar lección",
+        "editLoadDescription": "No fue posible cargar los datos de la lección para edición."
+      },
+      "pagination": {
+        "showing": "Mostrando",
+        "of": "de",
+        "page": "Página",
+        "previous": "Anterior",
+        "next": "Siguiente"
       }
     },
 "lessonView": {

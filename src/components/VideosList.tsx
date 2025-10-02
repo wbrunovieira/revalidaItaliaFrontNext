@@ -103,7 +103,7 @@ export default function VideosList() {
   >(new Set());
 
   // Estados para paginação de aulas
-  const [lessonPagination, setLessonPagination] = useState<Record<string, { page: number; totalPages: number; total: number }>>({});
+  const [lessonPagination, setLessonPagination] = useState<Record<string, { page: number; totalPages: number; total: number; totalVideos?: number }>>({});
   const [loadingLessons, setLoadingLessons] = useState<Record<string, boolean>>({});
 
   // Estados para controlar o modal de vídeo
@@ -193,7 +193,8 @@ export default function VideosList() {
             [moduleId]: {
               page: lessonsData.pagination.page,
               totalPages: lessonsData.pagination.totalPages,
-              total: lessonsData.pagination.total
+              total: lessonsData.pagination.total,
+              totalVideos: lessonsData.pagination.totalVideos
             }
           }));
         }
@@ -658,17 +659,21 @@ export default function VideosList() {
   // Função para calcular estatísticas de um módulo
   const getModuleStats = useCallback(
     (module: Module): ModuleStats => {
-      const lessonCount = module.lessons?.length || 0;
-      const videoCount =
-        module.lessons?.reduce(
+      // Usar o total da paginação se disponível, senão usar o length do array
+      const lessonCount = lessonPagination[module.id]?.total || module.lessons?.length || 0;
+
+      // Usar totalVideos da paginação (retornado pelo backend) se disponível
+      // Caso contrário, calcular com base nas aulas carregadas (página atual)
+      const videoCount = lessonPagination[module.id]?.totalVideos ??
+        (module.lessons?.reduce(
           (sum, lesson) =>
             sum + (lesson.videos?.length || 0),
           0
-        ) || 0;
+        ) || 0);
 
       return { lessonCount, videoCount };
     },
-    []
+    [lessonPagination]
   );
 
   // Filtrar baseado na busca

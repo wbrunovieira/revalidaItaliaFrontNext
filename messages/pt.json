@@ -5370,13 +5370,19 @@
     "message": "Você tem certeza que deseja excluir o vídeo \"{videoName}\"?",
     "video": "Vídeo",
     "lesson": "Aula",
-    "module": "Módulo", 
+    "module": "Módulo",
     "course": "Curso",
     "duration": "Duração",
     "providerId": "ID do Provedor",
     "warning": "Esta ação não pode ser desfeita!",
     "confirm": "Excluir vídeo"
-  }
+  },
+      "pagination": {
+        "page": "Página",
+        "of": "de",
+        "previous": "Anterior",
+        "next": "Próxima"
+      }
     },
     "videoView": {
       "title": "Detalhes do Vídeo",

@@ -5227,11 +5227,17 @@
       "video": "Video",
       "lesson": "Lezione",
       "module": "Modulo",
-      "course": "Corso", 
+      "course": "Corso",
       "duration": "Durata",
       "providerId": "ID Provider",
       "warning": "Questa azione non può essere annullata!",
       "confirm": "Elimina video"
+    },
+    "pagination": {
+      "page": "Pagina",
+      "of": "di",
+      "previous": "Precedente",
+      "next": "Successiva"
     }
   },
    "userView": {

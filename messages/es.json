@@ -5257,11 +5257,17 @@
     "lesson": "Lección",
     "module": "Módulo",
     "course": "Curso",
-    "duration": "Duración", 
+    "duration": "Duración",
     "providerId": "ID del Proveedor",
     "warning": "¡Esta acción no se puede deshacer!",
     "confirm": "Eliminar video"
-  }
+  },
+      "pagination": {
+        "page": "Página",
+        "of": "de",
+        "previous": "Anterior",
+        "next": "Siguiente"
+      }
     }
   ,
     "userView": {

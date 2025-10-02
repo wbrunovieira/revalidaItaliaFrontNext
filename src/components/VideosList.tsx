@@ -18,6 +18,7 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Package,
   Play,
   Clock,
@@ -101,6 +102,10 @@ export default function VideosList() {
     Set<string>
   >(new Set());
 
+  // Estados para paginação de aulas
+  const [lessonPagination, setLessonPagination] = useState<Record<string, { page: number; totalPages: number; total: number }>>({});
+  const [loadingLessons, setLoadingLessons] = useState<Record<string, boolean>>({});
+
   // Estados para controlar o modal de vídeo
   const [isVideoModalOpen, setIsVideoModalOpen] =
     useState(false);
@@ -143,7 +148,7 @@ export default function VideosList() {
     ): Promise<VideoItem[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos`
+          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos?limit=100`
         );
 
         if (!response.ok) {
@@ -166,11 +171,12 @@ export default function VideosList() {
   const fetchLessonsForModule = useCallback(
     async (
       courseId: string,
-      moduleId: string
+      moduleId: string,
+      page: number = 1
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
         );
 
         if (!response.ok) {
@@ -179,6 +185,18 @@ export default function VideosList() {
 
         const lessonsData = await response.json();
         const lessons = lessonsData.lessons || [];
+
+        // Armazenar dados de paginação
+        if (lessonsData.pagination) {
+          setLessonPagination(prev => ({
+            ...prev,
+            [moduleId]: {
+              page: lessonsData.pagination.page,
+              totalPages: lessonsData.pagination.totalPages,
+              total: lessonsData.pagination.total
+            }
+          }));
+        }
 
         // Buscar vídeos para cada aula
         const lessonsWithVideos = await Promise.all(
@@ -206,12 +224,45 @@ export default function VideosList() {
     [handleApiError, fetchVideosForLesson, apiUrl]
   );
 
+  // Função para mudar de página de aulas
+  const handleLessonPageChange = useCallback(
+    async (courseId: string, moduleId: string, newPage: number) => {
+      const pagination = lessonPagination[moduleId];
+      if (!pagination || newPage < 1 || newPage > pagination.totalPages) {
+        return;
+      }
+
+      setLoadingLessons(prev => ({ ...prev, [moduleId]: true }));
+
+      try {
+        const lessons = await fetchLessonsForModule(courseId, moduleId, newPage);
+
+        // Atualizar o módulo específico com as novas aulas
+        setCoursesWithVideos(prevCourses =>
+          prevCourses.map(course =>
+            course.id === courseId
+              ? {
+                  ...course,
+                  modules: course.modules?.map(mod =>
+                    mod.id === moduleId ? { ...mod, lessons } : mod
+                  )
+                }
+              : course
+          )
+        );
+      } finally {
+        setLoadingLessons(prev => ({ ...prev, [moduleId]: false }));
+      }
+    },
+    [lessonPagination, fetchLessonsForModule]
+  );
+
   // Função para buscar módulos de um curso específico
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules?limit=100`
         );
 
         if (!response.ok) {
@@ -1274,6 +1325,55 @@ export default function VideosList() {
                                       <p className="text-gray-400 text-sm">
                                         {t('noLessons')}
                                       </p>
+                                    </div>
+                                  )}
+
+                                  {/* Paginação de aulas */}
+                                  {lessonPagination[moduleItem.id] && lessonPagination[moduleItem.id].totalPages > 1 && (
+                                    <div className="mt-4 flex items-center justify-between border-t border-gray-700 pt-4">
+                                      <div className="text-xs text-gray-400">
+                                        {t('pagination.page')} {lessonPagination[moduleItem.id].page} {t('pagination.of')} {lessonPagination[moduleItem.id].totalPages}
+                                      </div>
+
+                                      <div className="flex items-center gap-2">
+                                        {/* Botão Anterior */}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleLessonPageChange(course.id, moduleItem.id, lessonPagination[moduleItem.id].page - 1)}
+                                          disabled={lessonPagination[moduleItem.id].page === 1 || loadingLessons[moduleItem.id]}
+                                          className="p-1 text-gray-400 hover:text-white hover:bg-primary/40 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                          title={t('pagination.previous')}
+                                        >
+                                          <ChevronLeft size={16} />
+                                        </button>
+
+                                        {/* Input de Página */}
+                                        <input
+                                          type="number"
+                                          min="1"
+                                          max={lessonPagination[moduleItem.id].totalPages}
+                                          value={lessonPagination[moduleItem.id].page}
+                                          onChange={(e) => {
+                                            const page = parseInt(e.target.value);
+                                            if (page >= 1 && page <= lessonPagination[moduleItem.id].totalPages) {
+                                              handleLessonPageChange(course.id, moduleItem.id, page);
+                                            }
+                                          }}
+                                          disabled={loadingLessons[moduleItem.id]}
+                                          className="w-12 px-2 py-1 bg-primary/30 border border-secondary/20 rounded text-center text-white text-xs focus:outline-none focus:ring-1 focus:ring-secondary disabled:opacity-50"
+                                        />
+
+                                        {/* Botão Próximo */}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleLessonPageChange(course.id, moduleItem.id, lessonPagination[moduleItem.id].page + 1)}
+                                          disabled={lessonPagination[moduleItem.id].page === lessonPagination[moduleItem.id].totalPages || loadingLessons[moduleItem.id]}
+                                          className="p-1 text-gray-400 hover:text-white hover:bg-primary/40 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                          title={t('pagination.next')}
+                                        >
+                                          <ChevronRight size={16} />
+                                        </button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>

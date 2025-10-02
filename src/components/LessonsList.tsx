@@ -940,7 +940,7 @@ export default function LessonsList() {
                           const isModuleExpanded =
                             expandedModules.has(module.id);
                           const lessonCount =
-                            module.lessons?.length || 0;
+                            modulePagination[module.id]?.total || module.lessons?.length || 0;
 
                           return (
                             <div

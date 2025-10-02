@@ -5248,6 +5248,13 @@
         "deleteDependencyWarning": "Remova as dependências antes de excluir a aula.",
         "editLoadTitle": "Erro ao carregar aula",
         "editLoadDescription": "Não foi possível carregar os dados da aula para edição"
+      },
+      "pagination": {
+        "showing": "Mostrando",
+        "of": "de",
+        "page": "Página",
+        "previous": "Anterior",
+        "next": "Próxima"
       }},  
   "videos": {
     "create": "Criar Vídeo",

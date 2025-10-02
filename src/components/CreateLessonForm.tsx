@@ -489,7 +489,7 @@ export default function CreateLessonForm() {
 
   // Função para gerar lista de ordens disponíveis
   const getAvailableOrders = useCallback(() => {
-    const maxOrder = 50; // Limite máximo de ordem
+    const maxOrder = 100; // Limite máximo de ordem
     const availableOrders = [];
 
     for (let i = 1; i <= maxOrder; i++) {
@@ -507,7 +507,7 @@ export default function CreateLessonForm() {
       setLoadingOrders(true);
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
         );
 
         if (!response.ok) {

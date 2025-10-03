@@ -34,6 +34,15 @@ interface ModuleData {
   order: number;
   translations: Translation[];
 }
+interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  providerVideoId: string;
+  durationInSeconds: number;
+  isSeen: boolean;
+}
+
 interface Lesson {
   id: string;
   slug: string;
@@ -44,6 +53,7 @@ interface Lesson {
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
+  video?: Video;
 }
 interface LessonsResponse {
   lessons: Lesson[];
@@ -100,7 +110,7 @@ export default async function ModulePage({
     notFound();
 
   const lessonsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons?page=1&limit=10`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons?page=1&limit=10&includeVideo=true`,
     { cache: 'no-store' }
   );
   if (!lessonsRes.ok)

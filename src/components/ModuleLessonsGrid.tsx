@@ -11,6 +11,15 @@ interface Translation {
   description: string;
 }
 
+interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  providerVideoId: string;
+  durationInSeconds: number;
+  isSeen: boolean;
+}
+
 interface Lesson {
   id: string;
   slug: string;
@@ -21,6 +30,7 @@ interface Lesson {
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
+  video?: Video;
 }
 
 interface ModuleLessonsGridProps {
@@ -128,7 +138,7 @@ export default function ModuleLessonsGrid({
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(
-        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
+        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10&includeVideo=true`
       );
 
       if (!response.ok) {

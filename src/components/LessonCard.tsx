@@ -13,6 +13,15 @@ interface Translation {
   description: string;
 }
 
+interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  providerVideoId: string;
+  durationInSeconds: number;
+  isSeen: boolean;
+}
+
 interface Lesson {
   id: string;
   slug: string;
@@ -20,6 +29,7 @@ interface Lesson {
   order: number;
   videoId?: string;
   translations?: Translation[];
+  video?: Video;
 }
 
 interface LessonCardProps {
@@ -46,12 +56,15 @@ export default function LessonCard({
   const t = useTranslations('Module');
 
   const list = lesson.translations ?? [];
-  const translation = list.find(tr => tr.locale === locale) ?? 
+  const translation = list.find(tr => tr.locale === locale) ??
                      list[0] ?? { title: '', description: '' };
 
-  // Dados da aula - usar index para valores determinísticos
-  const estimatedMinutes = 10 + (index % 21); // Mock: 10-30 minutos baseado no index
-  const hasVideo = !!lesson.videoId || (index % 10) < 7; // Mock: 70% tem vídeo baseado no index
+  // Dados da aula - usar dados reais do vídeo quando disponível
+  const durationInSeconds = lesson.video?.durationInSeconds ?? 0;
+  const estimatedMinutes = durationInSeconds > 0
+    ? Math.ceil(durationInSeconds / 60)
+    : 0;
+  const hasVideo = !!lesson.video || !!lesson.videoId;
   const lessonNumber = index + 1;
 
   // Mock completed data - remover quando vier da API
@@ -191,12 +204,14 @@ export default function LessonCard({
               {/* Estatísticas sempre visíveis */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs">
-                  <div className="flex items-center gap-1 text-gray-600 group-hover:text-accent transition-colors duration-300">
-                    <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
-                      <Clock size={10} className="text-accent" />
+                  {estimatedMinutes > 0 && (
+                    <div className="flex items-center gap-1 text-gray-600 group-hover:text-accent transition-colors duration-300">
+                      <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors duration-300">
+                        <Clock size={10} className="text-accent" />
+                      </div>
+                      <span className="font-medium">{estimatedMinutes}min</span>
                     </div>
-                    <span className="font-medium">{estimatedMinutes}min</span>
-                  </div>
+                  )}
                 </div>
 
                 <div className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full group-hover:bg-accent-light/10 group-hover:text-accent-light transition-all duration-300 font-semibold whitespace-nowrap">

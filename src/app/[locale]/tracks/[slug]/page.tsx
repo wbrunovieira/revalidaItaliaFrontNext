@@ -23,18 +23,21 @@ interface Track {
   translations: Translation[];
 }
 
-interface Module {
-  id: string;
-  title: string;
-  description?: string;
+interface CourseProgress {
+  completedModules: number;
+  totalModules: number;
+  completedLessons: number;
+  totalLessons: number;
+  percentage: number;
 }
 
 interface Course {
   id: string;
   slug: string;
   imageUrl: string;
-  modules?: Module[];
+  moduleCount: number;
   translations: Translation[];
+  progress?: CourseProgress;
 }
 
 export default async function TrackPage({
@@ -65,26 +68,19 @@ export default async function TrackPage({
   const track =
     allTracks.find(t => t.slug === slug) ?? notFound();
 
-  // Buscar detalhes da trilha (inclui courseIds)
-  const resTrack = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks/${track.id}`,
-    { cache: 'no-store' }
+  // Buscar cursos da trilha com progresso usando o endpoint específico
+  const resTrackCourses = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks-progress/${track.id}/courses-progress`,
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
-  if (!resTrack.ok)
-    throw new Error('Failed to fetch track details');
-  const trackDetail: Track = await resTrack.json();
-
-  // Buscar todos os cursos e filtrar pelos IDs da trilha
-  const resCourses = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
-    { cache: 'no-store' }
-  );
-  if (!resCourses.ok)
-    throw new Error('Failed to fetch courses');
-  const allCourses: Course[] = await resCourses.json();
-  const trackCourses = allCourses.filter(course =>
-    trackDetail.courseIds.includes(course.id)
-  );
+  if (!resTrackCourses.ok)
+    throw new Error('Failed to fetch track courses with progress');
+  const trackCourses: Course[] = await resTrackCourses.json();
 
   // Tradução da trilha
   const tr = track.translations.find(
@@ -163,10 +159,7 @@ export default async function TrackPage({
               {trackCourses.map((course, index) => (
                 <CourseCard
                   key={course.id}
-                  course={{
-                    ...course,
-                    moduleCount: course.modules?.length || 0
-                  }}
+                  course={course}
                   locale={locale}
                   index={index}
                 />

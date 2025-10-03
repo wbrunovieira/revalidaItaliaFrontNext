@@ -439,7 +439,7 @@ export default function CreateDocumentForm() {
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
         );
 
         if (!response.ok) {

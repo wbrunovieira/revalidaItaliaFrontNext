@@ -1096,7 +1096,10 @@ export default function FlashcardStudyPage() {
                           }
                         : {}
                     }
-                    style={{ perspective: 1000 }}
+                    style={{
+                      perspective: '1000px',
+                      WebkitPerspective: '1000px',
+                    }}
                   >
                     <motion.div
                       className="absolute inset-0 w-full h-full"
@@ -1110,6 +1113,7 @@ export default function FlashcardStudyPage() {
                       }}
                       style={{
                         transformStyle: 'preserve-3d',
+                        WebkitTransformStyle: 'preserve-3d',
                       }}
                       onClick={() =>
                         setIsFlipped(!isFlipped)
@@ -1120,6 +1124,10 @@ export default function FlashcardStudyPage() {
                         className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary-dark to-primary rounded-2xl shadow-2xl border border-secondary/30 p-6 md:p-8 flex flex-col"
                         style={{
                           backfaceVisibility: 'hidden',
+                          WebkitBackfaceVisibility: 'hidden',
+                          MozBackfaceVisibility: 'hidden',
+                          opacity: isFlipped ? 0 : 1,
+                          pointerEvents: isFlipped ? 'none' : 'auto',
                         }}
                         drag={false}
                       >
@@ -1200,7 +1208,13 @@ export default function FlashcardStudyPage() {
                         className="absolute inset-0 w-full h-full bg-gradient-to-br from-secondary/20 to-accent-light/20 rounded-2xl shadow-2xl border border-secondary/30 p-6 md:p-8 flex flex-col"
                         style={{
                           backfaceVisibility: 'hidden',
+                          WebkitBackfaceVisibility: 'hidden',
+                          MozBackfaceVisibility: 'hidden',
                           transform: 'rotateY(180deg)',
+                          WebkitTransform: 'rotateY(180deg)',
+                          MozTransform: 'rotateY(180deg)',
+                          opacity: isFlipped ? 1 : 0,
+                          pointerEvents: isFlipped ? 'auto' : 'none',
                         }}
                         drag={false}
                       >

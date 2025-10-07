@@ -283,3 +283,158 @@ interface ListItem {
 3. **Error Handling**: Always handle API errors with try-catch
 4. **Loading States**: Use loading UI components for async operations
 5. **Type Safety**: Define TypeScript types for all API responses and props
+
+---
+
+## Project Management & Issue Creation
+
+### WB Project Manager Integration
+
+This project uses **WB Project Manager** (running on `http://localhost:3000`) for task tracking and issue management.
+
+#### API Configuration
+- **Base URL**: `http://localhost:3000/api`
+- **Authentication**: Bearer token in Authorization header
+- **Token**: `7ee69b9c6c4e74c7988b5ef7440dc3a78485b077c59eeb74f9e0485da6aa12f6`
+
+#### Project IDs
+- **Workspace ID**: `cmge96f200001wa7ouziczg0w`
+- **Project ID (Frontend/Backend)**: `cmgfjhyh50005waqglsynsz1d`
+- **Milestone ID (Current Sprint)**: `cmggc1uqk0001wakb3no9xhb7`
+- **Assignee ID (Bruno Vieira)**: `cmge96f1y0000wa7olxm69prv`
+
+#### Status IDs
+- **Todo**: `cmge9i3pv0007walqv7is970v`
+
+#### Label IDs
+- **Frontend**: `cmgf21xvb0003watfaqi1ynw7`
+- **Backend**: `cmgf23zl50009watfyq73olpr`
+
+### Creating Issues via API
+
+#### Single Issue Creation
+
+```bash
+curl -X POST "http://localhost:3000/api/issues" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer 7ee69b9c6c4e74c7988b5ef7440dc3a78485b077c59eeb74f9e0485da6aa12f6" \
+  -d '{
+    "workspaceId": "cmge96f200001wa7ouziczg0w",
+    "title": "Issue Title Here",
+    "description": "Detailed description with implementation steps, files affected, and acceptance criteria",
+    "statusId": "cmge9i3pv0007walqv7is970v",
+    "projectId": "cmgfjhyh50005waqglsynsz1d",
+    "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+    "assigneeId": "cmge96f1y0000wa7olxm69prv",
+    "priority": "HIGH",
+    "type": "FEATURE",
+    "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+  }'
+```
+
+#### Issue Types
+- `FEATURE` - New functionality
+- `BUG` - Bug fix
+- `REFACTOR` - Code refactoring
+- `TEST` - Test implementation
+- `DOCUMENTATION` - Documentation updates
+- `CHORE` - Maintenance tasks
+
+#### Priority Levels
+- `LOW` - Nice to have, no urgency
+- `MEDIUM` - Important but not urgent
+- `HIGH` - Critical, needs attention soon
+- `URGENT` - Blocking, needs immediate attention
+
+### Bulk Issue Creation Workflow
+
+When creating multiple related issues for a feature:
+
+1. **Create JSON file** with all issues:
+
+```json
+{
+  "workspaceId": "cmge96f200001wa7ouziczg0w",
+  "issues": [
+    {
+      "title": "Frontend: Create component X",
+      "description": "Detailed description...",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    }
+  ]
+}
+```
+
+2. **Create issues individually** (bulk endpoint may have validation issues):
+
+```bash
+# Loop through and create each issue
+curl -s -X POST "http://localhost:3000/api/issues" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer 7ee69b9c6c4e74c7988b5ef7440dc3a78485b077c59eeb74f9e0485da6aa12f6" \
+  -d '{"workspaceId":"...","title":"...","description":"...","statusId":"...","projectId":"...","milestoneId":"...","assigneeId":"...","priority":"HIGH","type":"FEATURE","labelIds":["cmgf21xvb0003watfaqi1ynw7"]}' \
+  | jq -r '.identifier + " - " + .title'
+```
+
+### Issue Description Best Practices
+
+When writing issue descriptions:
+
+1. **Start with action verb**: "Criar", "Implementar", "Refatorar", "Adicionar"
+2. **Specify file paths**: "Arquivo: src/components/X.tsx"
+3. **List technical requirements**:
+   - Props/interfaces needed
+   - Dependencies to use
+   - API endpoints to call
+4. **Include acceptance criteria**:
+   - What should work
+   - Edge cases to handle
+   - Expected behavior
+5. **Reference related files**: Line numbers when refactoring
+
+#### Example Issue Description Template
+
+```
+Criar componente JoinButton.tsx em src/components/LiveSession/ para entrada segura em sessões ao vivo.
+
+Props:
+- sessionId: string
+- sessionStatus: 'SCHEDULED' | 'LIVE' | 'ENDED'
+- disabled?: boolean
+
+Implementação:
+1. Usar hook useLiveSessionJoin para geração de token
+2. Mostrar loading state durante geração (Loader2 icon)
+3. Auto-join após receber token
+4. Mostrar ExpirationTimer quando token gerado
+5. Disabled quando sessionStatus === 'ENDED'
+
+Dependências:
+- Hook: useLiveSessionJoin
+- Componentes: Button, Badge, Loader2 (lucide-react)
+- i18n: useTranslations('LiveSessions')
+
+Acceptance Criteria:
+- Botão clicável apenas quando sessão SCHEDULED ou LIVE
+- Loading state visível durante requisição
+- Timer aparece após gerar token
+- Redireciona para Zoom após validação
+
+Arquivo: src/components/LiveSession/JoinButton.tsx
+```
+
+### Checking Created Issues
+
+After creating issues, verify in the WB Project Manager UI:
+- Navigate to `http://localhost:3000`
+- Check project: "Features Zoom link unico, pdf protegidos, login unico e flashcard em lotes"
+- Filter by label: Frontend or Backend
+- Verify all issues appear with correct details
+
+---

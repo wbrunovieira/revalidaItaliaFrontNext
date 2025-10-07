@@ -1,0 +1,137 @@
+{
+  "workspaceId": "cmge96f200001wa7ouziczg0w",
+  "issues": [
+    {
+      "title": "Frontend Fase 5: Criar hook useLiveSessionJoin para gerenciamento de tokens",
+      "description": "Criar custom hook useLiveSessionJoin.ts em src/hooks/ para gerenciar fluxo de geracao e validacao de tokens JWT. Funcoes: generateToken(sessionId) - POST /live-sessions/:id/join-token, joinWithToken(joinUrl) - GET com token, estados isGenerating e isJoining, tratamento de erros (401, 403, 404, 400). Retornar JoinTokenResponse com joinToken, joinUrl, expiresAt, expiresIn. Interface: UseLiveSessionJoinReturn. Usar useAuth para authToken, useToast para notificacoes. Tipagem completa com TypeScript. Arquivo: src/hooks/useLiveSessionJoin.ts",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Criar componente JoinButton para entrada segura em sessoes",
+      "description": "Criar componente JoinButton.tsx em src/components/LiveSession/ para botao Entrar na Sessao Ao Vivo. Props: sessionId, sessionStatus (SCHEDULED|LIVE|ENDED), disabled. Usar hook useLiveSessionJoin. Ao clicar: gerar token via generateToken, mostrar loading (Gerando link...), receber joinUrl e expiresAt, fazer auto-join via joinWithToken. Estados: isGenerating, isJoining. Disabled se ENDED ou loading. Mostrar ExpirationTimer apos gerar token. Icones: Loader2 (loading), Play (normal). Classe: bg-red-500 animate-pulse. Usar next-intl para traducoes. Arquivo: src/components/LiveSession/JoinButton.tsx",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Criar componente ExpirationTimer para countdown de token",
+      "description": "Criar componente ExpirationTimer.tsx em src/components/LiveSession/ para mostrar countdown do token JWT. Props: expiresAt (ISO string), onExpire (callback). Calcular tempo restante em segundos usando Date. Atualizar a cada 1 segundo via setInterval. Formato: MM:SS (ex: 14:32). Alert visual quando < 2 minutos (bg-yellow animate-pulse). Badge com icone Clock (normal) ou AlertTriangle (low time). Limpar interval no unmount. Chamar onExpire() quando timeLeft === 0. Classes: bg-blue-500/20 (normal), bg-yellow-500/20 (low time). Arquivo: src/components/LiveSession/ExpirationTimer.tsx",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "MEDIUM",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Criar interfaces TypeScript para tokens de sessao",
+      "description": "Criar arquivo de tipos live-session-token.ts em src/types/ com interfaces TypeScript. JoinTokenResponse: joinToken (string), joinUrl (string), expiresAt (string ISO), expiresIn (number segundos). ZoomRedirectResponse: redirectUrl (string), metadata (participantName, sessionTitle, hostName). TokenError: code (INVALID_TOKEN | EXPIRED_TOKEN | USED_TOKEN | SESSION_NOT_AVAILABLE | ACCESS_DENIED), message (string). Exportar todas as interfaces. Usar em hooks e componentes. Arquivo: src/types/live-session-token.ts",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Refatorar LiveSessions.tsx para usar JoinButton",
+      "description": "Refatorar componente LiveSessions.tsx (linha 176-201, 551-567). REMOVER: funcao handleJoinSession antiga, estado joiningSession. ADICIONAR: importar JoinButton de src/components/LiveSession/JoinButton. Substituir botao manual por <JoinButton sessionId={session.id} sessionStatus={session.status} disabled={!session.joinUrl} />. Remover logica de simulacao de API call (linha 189-190). Remover window.open direto. Manter estrutura de grid de sessoes. Testar em tabs: Proximas Sessoes, Ao Vivo Agora. Arquivo: src/components/LiveSessions.tsx",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "REFACTOR",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Adicionar traducoes i18n para sistema de tokens",
+      "description": "Adicionar novas chaves de traducao em messages/pt.json, it.json, es.json. Namespace: LiveSessions. Chaves: generating (Gerando link...), tokenExpired (Link expirado. Clique novamente para gerar novo.), tokenInvalid (Link invalido. Por favor, tente novamente.), tokenUsed (Este link ja foi utilizado. Gere um novo.), sessionNotAvailable (A sessao nao esta disponivel no momento.), accessDenied (Voce nao tem acesso a esta sessao.). Traduzir para italiano e espanhol. Manter consistencia de tom. Usar em componentes JoinButton e ExpirationTimer. Arquivos: messages/pt.json, messages/it.json, messages/es.json",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "MEDIUM",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Criar componente ErrorHandler para erros de token",
+      "description": "Criar componente ErrorHandler.tsx em src/components/LiveSession/ para tratamento visual de erros. Props: error (TokenError | null), onRetry (callback), onDismiss (callback). Tipos de erro: token invalido, token expirado, token usado, sessao indisponivel, acesso negado. Renderizar modal ou toast apropriado para cada erro. Incluir botao Tentar Novamente (gera novo token). Icones: AlertCircle, XCircle, RefreshCw. Design: modal centered com bg-gray-800, bordas vermelhas para erros criticos. Mensagens amigaveis ao usuario. Usar useTranslations para i18n. Arquivo: src/components/LiveSession/ErrorHandler.tsx",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 5: Integrar ErrorHandler no hook useLiveSessionJoin",
+      "description": "Integrar componente ErrorHandler no hook useLiveSessionJoin. Adicionar estado error: TokenError | null no hook. Mapear erros HTTP para TokenError codes: 401 Unauthorized -> ACCESS_DENIED, 403 Forbidden -> ACCESS_DENIED, 404 Not Found -> SESSION_NOT_AVAILABLE, 400 Bad Request (token expirado) -> EXPIRED_TOKEN, 400 (token usado) -> USED_TOKEN, 400 (token invalido) -> INVALID_TOKEN. Parse error response body para extrair mensagem. Retornar error no return do hook. Componente JoinButton deve renderizar <ErrorHandler error={error} onRetry={handleRetry} />. Arquivo: src/hooks/useLiveSessionJoin.ts",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 6: Criar testes E2E para fluxo de join com token",
+      "description": "Criar suite de testes E2E em e2e/live-session-join.spec.ts usando Cypress ou Playwright. Cenarios: 1) Sucesso - usuario clica Entrar, gera token, redireciona Zoom. 2) Token expira antes de join - mostra mensagem e gera novo. 3) Usuario nao autenticado (401) - redireciona login. 4) Usuario sem acesso (403) - modal acesso negado. 5) Sessao nao disponivel (404) - mensagem erro. 6) Sessao ENDED - botao disabled. 7) Token ja usado (400) - mensagem e opcao gerar novo. 8) Network error - retry automatico. Mock endpoints: POST /live-sessions/:id/join-token, GET joinUrl. Mock redirectUrl do Zoom. Validar estados de loading. Validar countdown timer. Arquivo: e2e/live-session-join.spec.ts",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "HIGH",
+      "type": "TEST",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 6: Criar testes unitarios para hook useLiveSessionJoin",
+      "description": "Criar testes unitarios em src/hooks/__tests__/useLiveSessionJoin.test.ts usando Jest e React Testing Library. Testar: 1) generateToken retorna JoinTokenResponse correto. 2) generateToken trata erro 401. 3) generateToken trata erro 403. 4) joinWithToken redireciona com redirectUrl. 5) joinWithToken trata token expirado. 6) joinWithToken trata token invalido. 7) Estados isGenerating e isJoining atualizados. 8) Error state populado corretamente. Mock fetch com jest.fn(). Mock useAuth e useToast. Validar calls de API com parametros corretos. Coverage minimo: 80%. Arquivo: src/hooks/__tests__/useLiveSessionJoin.test.ts",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "MEDIUM",
+      "type": "TEST",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 6: Criar testes unitarios para componente JoinButton",
+      "description": "Criar testes unitarios em src/components/LiveSession/__tests__/JoinButton.test.tsx usando Jest e React Testing Library. Testar: 1) Renderiza botao Entrar corretamente. 2) Botao disabled quando sessionStatus ENDED. 3) Botao disabled quando loading. 4) Click chama generateToken com sessionId. 5) Apos gerar token, mostra ExpirationTimer. 6) Loading state mostra Gerando link... e Loader2. 7) Erro renderiza ErrorHandler. 8) Token expirado: onExpire reseta tokenData. 9) Auto-join apos gerar token. Mock useLiveSessionJoin hook. Mock ExpirationTimer e ErrorHandler. Validar props passadas. Coverage minimo: 85%. Arquivo: src/components/LiveSession/__tests__/JoinButton.test.tsx",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "MEDIUM",
+      "type": "TEST",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    },
+    {
+      "title": "Frontend Fase 7: Documentacao tecnica da feature de tokens",
+      "description": "Criar documentacao tecnica em docs/zoom-token-feature.md. Secoes: 1) Visao Geral (objetivo, problema resolvido). 2) Arquitetura (diagrama de fluxo, componentes envolvidos). 3) API Endpoints (POST /join-token, GET /join). 4) Estrutura de Componentes (JoinButton, ExpirationTimer, ErrorHandler). 5) Hooks (useLiveSessionJoin, useTokenExpiration). 6) Tipos TypeScript (interfaces e enums). 7) Fluxo de Usuario (passo a passo com screenshots). 8) Tratamento de Erros (tabela de codigos e acoes). 9) Testes (como rodar, coverage). 10) Deploy e Configuracao (env vars, flags). Incluir exemplos de codigo. Diagramas em Mermaid. Screenshots da UI. Arquivo: docs/zoom-token-feature.md",
+      "statusId": "cmge9i3pv0007walqv7is970v",
+      "projectId": "cmgfjhyh50005waqglsynsz1d",
+      "milestoneId": "cmggc1uqk0001wakb3no9xhb7",
+      "assigneeId": "cmge96f1y0000wa7olxm69prv",
+      "priority": "LOW",
+      "type": "DOCUMENTATION",
+      "labelIds": ["cmgf21xvb0003watfaqi1ynw7"]
+    }
+  ]
+}

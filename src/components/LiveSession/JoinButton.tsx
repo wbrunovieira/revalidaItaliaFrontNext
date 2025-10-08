@@ -22,9 +22,10 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
+import { ExpirationTimer } from './ExpirationTimer';
 import Button from '@/components/Button';
 import { Radio, Loader2, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -62,42 +63,15 @@ export function JoinButton({
   const { generateToken, joinWithToken, isGenerating, isJoining, error } = useLiveSessionJoin();
 
   const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [hasExpired, setHasExpired] = useState(false);
 
   /**
-   * Countdown timer - atualiza a cada segundo
+   * Handler chamado quando token expira
    */
-  useEffect(() => {
-    if (!tokenExpiresAt) {
-      setTimeRemaining(0);
-      setHasExpired(false);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const expiresAt = new Date(tokenExpiresAt).getTime();
-      const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
-
-      setTimeRemaining(remaining);
-
-      if (remaining === 0) {
-        setHasExpired(true);
-        setTokenExpiresAt(null);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [tokenExpiresAt]);
-
-  /**
-   * Formata tempo restante em MM:SS
-   */
-  const formatTimeRemaining = useCallback((seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  const handleTokenExpire = useCallback(() => {
+    console.log('⏰ Token expirou');
+    setHasExpired(true);
+    setTokenExpiresAt(null);
   }, []);
 
   /**
@@ -211,12 +185,9 @@ export function JoinButton({
       </Button>
 
       {/* Timer de expiração do token */}
-      {tokenExpiresAt && !hasExpired && timeRemaining > 0 && (
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-          <Clock className="w-3 h-3" />
-          <span>
-            {t('joinButton.expiresIn') || 'Link expira em'}: {formatTimeRemaining(timeRemaining)}
-          </span>
+      {tokenExpiresAt && !hasExpired && (
+        <div className="flex justify-center">
+          <ExpirationTimer expiresAt={tokenExpiresAt} onExpire={handleTokenExpire} />
         </div>
       )}
 

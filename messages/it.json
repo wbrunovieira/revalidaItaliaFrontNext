@@ -326,6 +326,22 @@
       "retry": "Riprova",
       "dismiss": "Chiudi"
     },
+    "waitingRoom": {
+      "title": "Preparando la Tua Aula",
+      "subtitle": "Aspetta un attimo mentre prepariamo uno spazio speciale per te",
+      "messages": [
+        "Regolando le sedie virtuali...",
+        "Lucidando la lavagna digitale...",
+        "Organizzando i tuoi materiali di studio...",
+        "Verificando la temperatura ideale dell'aula...",
+        "Preparando il caffè virtuale... ☕",
+        "Testando l'acustica perfetta...",
+        "Connettendoti con il tuo professore...",
+        "Quasi fatto! Solo un altro secondo..."
+      ],
+      "validating": "Convalidando il tuo accesso...",
+      "redirecting": "Tutto pronto! Ti stiamo reindirizzando alla lezione..."
+    },
     "page": "Pagina {current} di {total}",
     "previous": "Precedente",
     "next": "Successiva"

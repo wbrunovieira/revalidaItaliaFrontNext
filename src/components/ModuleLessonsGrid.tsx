@@ -90,14 +90,18 @@ export default function ModuleLessonsGrid({
         );
 
         const progressResults = await Promise.all(progressPromises);
-        
+
+        console.log('📊 [ModuleLessonsGrid] Progress results da API:', progressResults);
+
         const completed = new Set<string>();
         progressResults.forEach((progress, index) => {
           if (progress?.completed) {
+            console.log(`✅ [ModuleLessonsGrid] Aula ${index + 1} (${lessons[index].id}) marcada como COMPLETA`);
             completed.add(lessons[index].id);
           }
         });
-        
+
+        console.log('🎯 [ModuleLessonsGrid] Total de aulas completadas:', completed.size);
         setCompletedLessons(completed);
       } catch (error) {
         console.error('Error fetching lesson completion status:', error);

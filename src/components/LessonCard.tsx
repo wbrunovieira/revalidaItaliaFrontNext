@@ -67,9 +67,10 @@ export default function LessonCard({
   const hasVideo = !!lesson.video || !!lesson.videoId;
   const lessonNumber = index + 1;
 
-  // Mock completed data - remover quando vier da API
-  const isMockCompleted = index % 3 === 0; // Mock: 33% das aulas concluídas
-  const isLessonCompleted = isCompleted || isMockCompleted;
+  // Verificar se aula foi completada:
+  // 1. Props isCompleted (vem de ModuleLessonsGrid via API de progresso)
+  // 2. video.isSeen (vem do backend quando includeVideo=true)
+  const isLessonCompleted = isCompleted || lesson.video?.isSeen || false;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;

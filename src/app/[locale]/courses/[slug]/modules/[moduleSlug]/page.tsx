@@ -118,6 +118,8 @@ export default async function ModulePage({
   const { lessons, pagination }: LessonsResponse =
     await lessonsRes.json();
 
+  console.log('📚 [Module Page] Lista de aulas recebida do backend:', JSON.stringify(lessons, null, 2));
+
   // Traduções
   const courseTrans =
     courseFound.translations.find(

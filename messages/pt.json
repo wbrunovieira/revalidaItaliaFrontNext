@@ -305,6 +305,17 @@
     "opening": "Abrindo...",
     "download": "Baixar",
     "availableUntil": "Disponível até {date}",
+    "joinButton": {
+      "generating": "Gerando token...",
+      "joining": "Entrando na sessão...",
+      "joinLive": "Entrar ao Vivo",
+      "scheduled": "Sessão Agendada",
+      "ended": "Sessão Encerrada",
+      "cancelled": "Sessão Cancelada",
+      "unavailable": "Indisponível",
+      "expiresIn": "Link expira em",
+      "expired": "Link expirado. Clique novamente para gerar novo."
+    },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
     "next": "Próxima"

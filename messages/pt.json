@@ -316,6 +316,16 @@
       "expiresIn": "Link expira em",
       "expired": "Link expirado. Clique novamente para gerar novo."
     },
+    "errorHandler": {
+      "title": "Erro ao Entrar na Sessão",
+      "tokenInvalid": "O link de acesso é inválido ou expirou. Por favor, gere um novo link.",
+      "tokenUsed": "Este link já foi usado anteriormente. Para sua segurança, cada link pode ser usado apenas uma vez.",
+      "sessionUnavailable": "A sessão não está disponível no momento. Ela pode ter sido encerrada, cancelada ou ainda não iniciou.",
+      "accessDenied": "Você não tem permissão para acessar esta sessão. Verifique se está matriculado no curso ou entre em contato com o suporte.",
+      "unknownError": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+      "retry": "Tentar Novamente",
+      "dismiss": "Fechar"
+    },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
     "next": "Próxima"

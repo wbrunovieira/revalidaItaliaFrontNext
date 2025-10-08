@@ -316,6 +316,16 @@
       "expiresIn": "Il link scade tra",
       "expired": "Link scaduto. Clicca di nuovo per generarne uno nuovo."
     },
+    "errorHandler": {
+      "title": "Errore nell'Accesso alla Sessione",
+      "tokenInvalid": "Il link di accesso non è valido o è scaduto. Si prega di generare un nuovo link.",
+      "tokenUsed": "Questo link è già stato utilizzato in precedenza. Per la tua sicurezza, ogni link può essere utilizzato una sola volta.",
+      "sessionUnavailable": "La sessione non è disponibile al momento. Potrebbe essere terminata, cancellata o non ancora iniziata.",
+      "accessDenied": "Non hai il permesso di accedere a questa sessione. Verifica di essere iscritto al corso o contatta il supporto.",
+      "unknownError": "Si è verificato un errore imprevisto. Si prega di riprovare.",
+      "retry": "Riprova",
+      "dismiss": "Chiudi"
+    },
     "page": "Pagina {current} di {total}",
     "previous": "Precedente",
     "next": "Successiva"

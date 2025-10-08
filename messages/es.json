@@ -316,6 +316,16 @@
       "expiresIn": "El enlace expira en",
       "expired": "Enlace expirado. Haz clic de nuevo para generar uno nuevo."
     },
+    "errorHandler": {
+      "title": "Error al Acceder a la Sesión",
+      "tokenInvalid": "El enlace de acceso no es válido o ha expirado. Por favor, genera un nuevo enlace.",
+      "tokenUsed": "Este enlace ya se ha utilizado anteriormente. Por tu seguridad, cada enlace solo puede usarse una vez.",
+      "sessionUnavailable": "La sesión no está disponible en este momento. Puede haber terminado, cancelado o aún no ha comenzado.",
+      "accessDenied": "No tienes permiso para acceder a esta sesión. Verifica que estés inscrito en el curso o contacta con soporte.",
+      "unknownError": "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.",
+      "retry": "Intentar de Nuevo",
+      "dismiss": "Cerrar"
+    },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
     "next": "Siguiente"

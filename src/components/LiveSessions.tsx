@@ -4,19 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
-import {
-  Users,
-  Clock,
-  Calendar,
-  Play,
-  CheckCircle,
-  Loader2,
-  Filter,
-  Search,
-  Radio,
-  PlayCircle,
-  X,
-} from 'lucide-react';
+import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
+import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Filter, Search, Radio, PlayCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -103,7 +92,6 @@ interface LiveSessionsResponse {
   meta: PaginationMeta;
 }
 
-
 interface LiveSessionsProps {
   locale: string;
 }
@@ -112,12 +100,16 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
   const t = useTranslations('LiveSessions');
   const { toast } = useToast();
   const { token } = useAuth();
+  const { generateToken, joinWithToken, isGenerating, isJoining } = useLiveSessionJoin();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<LiveSessionAPI[]>([]);
   const [selectedTab, setSelectedTab] = useState('upcoming');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTopic, setFilterTopic] = useState('all');
   const [joiningSession, setJoiningSession] = useState<string | null>(null);
+
+  // Debug: Log environment variables
+  console.log('🌍 [LiveSessions] NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
 
   // Fetch sessions from API
   const fetchSessions = useCallback(async () => {
@@ -130,16 +122,13 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     try {
       setLoading(true);
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      
+
       // Fetch all sessions with pagination
-      const response = await fetch(
-        `${API_URL}/api/v1/live-sessions?page=1&limit=100`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/api/v1/live-sessions?page=1&limit=100`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -149,7 +138,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
       const data: LiveSessionsResponse = await response.json();
       console.log('Fetched live sessions from API:', data);
-      
+
       // Set sessions from API response
       if (data.sessions && Array.isArray(data.sessions)) {
         setSessions(data.sessions);
@@ -173,30 +162,37 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     fetchSessions();
   }, [fetchSessions]);
 
-  const handleJoinSession = async (sessionId: string, joinUrl?: string) => {
+  const handleJoinSession = async (sessionId: string) => {
     setJoiningSession(sessionId);
-    
-    if (!joinUrl) {
-      toast({
-        title: t('error.joinTitle'),
-        description: t('error.joinDescription'),
-        variant: 'destructive',
-      });
+
+    // Debug: Log session details
+    const session = sessions.find(s => s.id === sessionId);
+    console.log('🔐 [LiveSessions] Iniciando fluxo de entrada na sessão:', sessionId);
+    console.log('📋 [LiveSessions] Detalhes da sessão:', {
+      id: session?.id,
+      title: session?.title,
+      status: session?.status,
+      lesson: session?.lesson,
+      argument: session?.argument,
+    });
+
+    // Step 1: Generate JWT token
+    const tokenResponse = await generateToken(sessionId);
+    console.log('🔐 [LiveSessions] Token gerado:', tokenResponse);
+
+    if (!tokenResponse) {
+      console.error('❌ [LiveSessions] Falha ao gerar token');
+      console.error('❌ [LiveSessions] SessionId enviado:', sessionId);
+      console.error('❌ [LiveSessions] Sessão existe na lista?', !!session);
       setJoiningSession(null);
       return;
     }
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Open Zoom meeting
-    window.open(joinUrl, '_blank');
-    
-    toast({
-      title: 'Entrando na sessão',
-      description: 'Você está sendo redirecionado para a sessão ao vivo',
-    });
-    
+    console.log('✅ [LiveSessions] Token gerado, iniciando validação e redirecionamento');
+
+    // Step 2: Validate token and redirect to Zoom
+    await joinWithToken(tokenResponse.joinUrl);
+
     setJoiningSession(null);
   };
 
@@ -205,18 +201,14 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     window.open(recordingUrl, '_blank');
   };
 
-
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      locale === 'pt' ? 'pt-BR' : locale === 'it' ? 'it-IT' : 'es-ES',
-      {
-        weekday: 'long',
-        day: '2-digit',
-        month: 'long',
-        hour: '2-digit',
-        minute: '2-digit',
-      }
-    );
+    return new Date(dateString).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'it' ? 'it-IT' : 'es-ES', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const formatDuration = (startTime: string, endTime: string) => {
@@ -234,18 +226,18 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      'LIVE': 'live',
-      'SCHEDULED': 'scheduled',
-      'ENDED': 'ended',
-      'CANCELLED': 'cancelled',
-      'live': 'live',
-      'scheduled': 'scheduled',
-      'ended': 'ended',
-      'cancelled': 'cancelled',
+      LIVE: 'live',
+      SCHEDULED: 'scheduled',
+      ENDED: 'ended',
+      CANCELLED: 'cancelled',
+      live: 'live',
+      scheduled: 'scheduled',
+      ended: 'ended',
+      cancelled: 'cancelled',
     };
-    
+
     const mappedStatus = statusMap[status as keyof typeof statusMap] || status;
-    
+
     switch (mappedStatus) {
       case 'live':
         return (
@@ -281,7 +273,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
   };
 
   // Convert API sessions to display format
-  const displaySessions = sessions.map((session) => {
+  const displaySessions = sessions.map(session => {
     return {
       id: session.id,
       title: session.title,
@@ -326,9 +318,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
   const upcomingSessions = displaySessions.filter(
     (s: DisplaySession) => s.status === 'scheduled' || s.status === 'SCHEDULED'
   );
-  const liveSessions = displaySessions.filter(
-    (s: DisplaySession) => s.status === 'live' || s.status === 'LIVE'
-  );
+  const liveSessions = displaySessions.filter((s: DisplaySession) => s.status === 'live' || s.status === 'LIVE');
   const recordedSessions = displaySessions.filter(
     (s: DisplaySession) => (s.status === 'ended' || s.status === 'ENDED') && s.recordingUrl
   );
@@ -370,7 +360,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 type="text"
                 placeholder="Buscar sessões..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -378,7 +368,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
               <Filter className="h-4 w-4 text-gray-400" />
               <select
                 value={filterTopic}
-                onChange={(e) => setFilterTopic(e.target.value)}
+                onChange={e => setFilterTopic(e.target.value)}
                 className="px-3 py-2 border rounded-lg bg-background"
               >
                 <option value="all">{t('filters.all')}</option>
@@ -397,7 +387,10 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-4 bg-gray-800 p-1 gap-1 min-w-full">
-            <TabsTrigger value="upcoming" className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+            <TabsTrigger
+              value="upcoming"
+              className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
+            >
               <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('upcoming')}</span>
               {upcomingSessions.length > 0 && (
@@ -406,7 +399,10 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="live" className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+            <TabsTrigger
+              value="live"
+              className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
+            >
               <Radio className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('live')}</span>
               {liveSessions.length > 0 && (
@@ -415,7 +411,10 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="recorded" className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+            <TabsTrigger
+              value="recorded"
+              className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
+            >
               <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('recorded')}</span>
               {recordedSessions.length > 0 && (
@@ -424,12 +423,13 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="allRecordings" className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap">
+            <TabsTrigger
+              value="allRecordings"
+              className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
+            >
               <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('allRecordings')}</span>
-              <Badge className="ml-1 sm:ml-2 bg-purple-500 text-white text-[10px] sm:text-xs px-1">
-                API
-              </Badge>
+              <Badge className="ml-1 sm:ml-2 bg-purple-500 text-white text-[10px] sm:text-xs px-1">API</Badge>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -462,11 +462,9 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                             {getStatusBadge(session.status)}
                             <Badge variant="outline">{session.topic}</Badge>
                           </div>
-                          
+
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">
-                            {session.description}
-                          </p>
+                          <p className="text-gray-400 mb-4">{session.description}</p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div className="flex items-center gap-2 text-sm text-gray-300">
@@ -485,10 +483,11 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
                           <div className="flex items-center gap-2 text-sm text-gray-400">
                             <Calendar className="h-4 w-4" />
-                            <span>{t('scheduledFor')}: {formatDate(session.scheduledAt)}</span>
+                            <span>
+                              {t('scheduledFor')}: {formatDate(session.scheduledAt)}
+                            </span>
                           </div>
                         </div>
-
                       </div>
                     </CardContent>
                   </Card>
@@ -526,11 +525,9 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                             {getStatusBadge(session.status)}
                             <Badge variant="outline">{session.topic}</Badge>
                           </div>
-                          
+
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">
-                            {session.description}
-                          </p>
+                          <p className="text-gray-400 mb-4">{session.description}</p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div className="flex items-center gap-2 text-sm text-gray-300">
@@ -550,10 +547,10 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
                         <Button
                           className="bg-red-500 hover:bg-red-600 text-white animate-pulse"
-                          onClick={() => handleJoinSession(session.id, session.joinUrl)}
-                          disabled={joiningSession === session.id || !session.joinUrl}
+                          onClick={() => handleJoinSession(session.id)}
+                          disabled={joiningSession === session.id || isGenerating || isJoining}
                         >
-                          {joiningSession === session.id ? (
+                          {joiningSession === session.id || isGenerating || isJoining ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               {t('joining')}
@@ -602,11 +599,9 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                             {getStatusBadge(session.status)}
                             <Badge variant="outline">{session.topic}</Badge>
                           </div>
-                          
+
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">
-                            {session.description}
-                          </p>
+                          <p className="text-gray-400 mb-4">{session.description}</p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div className="flex items-center gap-2 text-sm text-gray-300">
@@ -625,7 +620,9 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
                           <div className="flex items-center gap-2 text-sm text-gray-400">
                             <Calendar className="h-4 w-4" />
-                            <span>{t('recordedOn')}: {formatDate(session.scheduledAt)}</span>
+                            <span>
+                              {t('recordedOn')}: {formatDate(session.scheduledAt)}
+                            </span>
                           </div>
                         </div>
 
@@ -650,7 +647,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
           <RecordingsList locale={locale} translations={t} />
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }

@@ -319,9 +319,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     (s: DisplaySession) => s.status === 'scheduled' || s.status === 'SCHEDULED'
   );
   const liveSessions = displaySessions.filter((s: DisplaySession) => s.status === 'live' || s.status === 'LIVE');
-  const recordedSessions = displaySessions.filter(
-    (s: DisplaySession) => (s.status === 'ended' || s.status === 'ENDED') && s.recordingUrl
-  );
 
   const getFilteredSessions = (sessionList: DisplaySession[]) => {
     return sessionList.filter(session => {
@@ -386,7 +383,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-4 bg-gray-800 p-1 gap-1 min-w-full">
+          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-3 bg-gray-800 p-1 gap-1 min-w-full">
             <TabsTrigger
               value="upcoming"
               className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
@@ -408,18 +405,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
               {liveSessions.length > 0 && (
                 <Badge className="ml-1 sm:ml-2 bg-red-500 text-white animate-pulse text-[10px] sm:text-xs px-1">
                   {liveSessions.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="recorded"
-              className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
-            >
-              <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>{t('recorded')}</span>
-              {recordedSessions.length > 0 && (
-                <Badge className="ml-1 sm:ml-2 bg-gray-600 text-white text-[10px] sm:text-xs px-1">
-                  {recordedSessions.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -561,77 +546,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
                               {t('joinNow')}
                             </>
                           )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          )}
-        </TabsContent>
-
-        {/* Recorded Sessions */}
-        <TabsContent value="recorded" className="space-y-4">
-          {getFilteredSessions(recordedSessions).length === 0 ? (
-            <Card className="bg-gray-800 border-gray-700">
-              <CardContent className="text-center py-12">
-                <PlayCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-white">{t('noRecorded')}</h3>
-                <p className="text-gray-400">{t('noRecordedDescription')}</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <AnimatePresence>
-              {getFilteredSessions(recordedSessions).map((session: DisplaySession, index: number) => (
-                <motion.div
-                  key={session.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-secondary/20 transition-all">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            {getStatusBadge(session.status)}
-                            <Badge variant="outline">{session.topic}</Badge>
-                          </div>
-
-                          <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">{session.description}</p>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Users className="h-4 w-4 text-gray-400" />
-                              <span>
-                                {t('instructor')}: <strong>{session.instructor.name}</strong>
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Clock className="h-4 w-4 text-gray-400" />
-                              <span>
-                                {t('duration')}: <strong>{formatDuration(session.scheduledAt, session.endTime)}</strong>
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-sm text-gray-400">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {t('recordedOn')}: {formatDate(session.scheduledAt)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <Button
-                          className="bg-secondary text-primary hover:bg-secondary/90"
-                          onClick={() => handleWatchRecording(session.recordingUrl!)}
-                        >
-                          <PlayCircle className="mr-2 h-4 w-4" />
-                          {t('watchRecording')}
                         </Button>
                       </div>
                     </CardContent>

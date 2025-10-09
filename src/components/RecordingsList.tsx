@@ -115,7 +115,7 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
 
   const fetchRecordings = useCallback(async () => {
     if (!token) {
-      console.log('No token available');
+      console.log('❌ [RecordingsList] No token available');
       setLoading(false);
       return;
     }
@@ -123,7 +123,7 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
     try {
       setLoading(true);
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      
+
       // Build query params
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -140,15 +140,19 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(
-        `${API_URL}/api/v1/recordings?${params}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const url = `${API_URL}/api/v1/recordings?${params}`;
+
+      console.log('🔐 [RecordingsList] Fetching recordings with auth');
+      console.log('📍 URL:', url);
+      console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...');
+      console.log('📊 Params:', { page: currentPage, limit: 12, orderBy: sortBy, order: sortOrder });
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();

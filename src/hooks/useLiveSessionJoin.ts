@@ -107,6 +107,8 @@ export function useLiveSessionJoin(): UseLiveSessionJoinReturn {
         }
 
         console.log('🔐 [useLiveSessionJoin] Gerando token para sessão:', sessionId);
+        console.log('📍 [useLiveSessionJoin] API_URL:', API_URL);
+        console.log('🔗 [useLiveSessionJoin] URL completa:', `${API_URL}/api/v1/live-sessions/${sessionId}/join-token`);
 
         const response = await fetch(
           `${API_URL}/api/v1/live-sessions/${sessionId}/join-token`,
@@ -119,11 +121,25 @@ export function useLiveSessionJoin(): UseLiveSessionJoinReturn {
           }
         );
 
+        console.log('📡 [useLiveSessionJoin] Response status:', response.status);
+        console.log('📡 [useLiveSessionJoin] Response ok:', response.ok);
+
         if (!response.ok) {
-          const errorData: ApiProblemDetails = await response.json().catch(() => ({
-            status: response.status,
-            detail: `Erro ${response.status}: ${response.statusText}`,
-          }));
+          // Clone response to read body multiple times
+          const responseClone = response.clone();
+          const rawText = await responseClone.text();
+          console.log('📡 [useLiveSessionJoin] Raw response body:', rawText);
+
+          let errorData: ApiProblemDetails;
+          try {
+            errorData = await response.json();
+          } catch (parseError) {
+            console.error('❌ [useLiveSessionJoin] Failed to parse error response:', parseError);
+            errorData = {
+              status: response.status,
+              detail: `Erro ${response.status}: ${response.statusText}`,
+            };
+          }
 
           console.error('❌ [useLiveSessionJoin] Erro ao gerar token:', errorData);
           throw errorData;
@@ -169,9 +185,10 @@ export function useLiveSessionJoin(): UseLiveSessionJoinReturn {
             });
             break;
           case 404:
+            console.error('❌ [useLiveSessionJoin] Erro 404 completo:', apiError);
             toast({
               title: 'Sessão não encontrada',
-              description: 'Esta sessão não existe ou foi removida',
+              description: apiError.detail || 'Esta sessão não existe ou foi removida',
               variant: 'destructive',
             });
             break;
@@ -228,11 +245,23 @@ export function useLiveSessionJoin(): UseLiveSessionJoinReturn {
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
         console.log('🚪 [useLiveSessionJoin] Validando token e entrando na sessão...');
+        console.log('🔗 [useLiveSessionJoin] joinUrl recebido:', joinUrl);
 
-        // Construir URL completa (joinUrl é um path relativo: /live-sessions/:id/join?token=xxx)
-        const fullUrl = `${API_URL}${joinUrl.startsWith('/') ? joinUrl : `/${joinUrl}`}`;
+        // Construir URL completa
+        // Se joinUrl já é uma URL completa (http:// ou https://), usar diretamente
+        // Se é um path relativo, concatenar com API_URL
+        let fullUrl: string;
+        if (joinUrl.startsWith('http://') || joinUrl.startsWith('https://')) {
+          // URL absoluta - usar diretamente
+          fullUrl = joinUrl;
+        } else {
+          // Path relativo - concatenar com API_URL
+          // Garantir que joinUrl começa com / e que não há duplicação de /
+          const path = joinUrl.startsWith('/') ? joinUrl : `/${joinUrl}`;
+          fullUrl = `${API_URL}${path}`;
+        }
 
-        console.log('🔗 [useLiveSessionJoin] URL completa:', fullUrl);
+        console.log('🔗 [useLiveSessionJoin] URL final construída:', fullUrl);
 
         // NOTA: Este endpoint é PÚBLICO (não precisa de Authorization header)
         const response = await fetch(fullUrl, {

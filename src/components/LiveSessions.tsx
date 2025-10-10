@@ -414,7 +414,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
             >
               <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('allRecordings')}</span>
-              <Badge className="ml-1 sm:ml-2 bg-purple-500 text-white text-[10px] sm:text-xs px-1">API</Badge>
             </TabsTrigger>
           </TabsList>
         </div>

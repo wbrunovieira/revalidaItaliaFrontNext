@@ -5521,7 +5521,8 @@
     "uploading": "Enviando imagen",
     "clickToSelect": "Haga clic para seleccionar una imagen",
     "supportedFormats": "Formatos soportados",
-    "savedAs": "Guardado como"
+    "savedAs": "Guardado como",
+    "change": "Cambiar imagen"
   },
   "validation": {
     "newImageReady": "Nueva imagen lista para guardar"

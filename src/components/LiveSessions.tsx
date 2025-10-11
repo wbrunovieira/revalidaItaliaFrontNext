@@ -196,11 +196,6 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
     setJoiningSession(null);
   };
 
-  const handleWatchRecording = (recordingUrl: string) => {
-    console.log(`Opening recording: ${recordingUrl}`);
-    window.open(recordingUrl, '_blank');
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'it' ? 'it-IT' : 'es-ES', {
       weekday: 'long',

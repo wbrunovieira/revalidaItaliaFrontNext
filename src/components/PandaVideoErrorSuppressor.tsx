@@ -18,7 +18,7 @@ export default function PandaVideoErrorSuppressor() {
           const response = await originalFetch(...args);
           // Silently handle all Panda Video errors
           return response;
-        } catch (error) {
+        } catch {
           // Return empty mock response for any Panda Video error
           return new Response('{}', {
             status: 200,

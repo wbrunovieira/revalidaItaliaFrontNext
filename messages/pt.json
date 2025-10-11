@@ -5830,7 +5830,8 @@
     "uploading": "Enviando imagem",
     "clickToSelect": "Clique para selecionar uma imagem",
     "supportedFormats": "Formatos suportados",
-    "savedAs": "Salvo como"
+    "savedAs": "Salvo como",
+    "change": "Trocar imagem"
   },
   "validation": {
     "newImageReady": "Nova imagem pronta para ser salva"

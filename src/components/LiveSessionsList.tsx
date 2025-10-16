@@ -542,15 +542,6 @@ export default function LiveSessionsList() {
         </Select>
       </div>
 
-      {/* Auto-sync Info Message */}
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-        <div className="text-sm text-blue-200">
-          <p className="font-medium mb-1">{t('syncInfo.title')}</p>
-          <p className="text-blue-300/80">{t('syncInfo.description')}</p>
-        </div>
-      </div>
-
       {/* Sessions List */}
       {sessions.length === 0 ? (
         <div className="bg-gray-800/50 rounded-lg p-12 text-center">

@@ -2928,12 +2928,18 @@
       "title": "Sobre Sessões ao Vivo",
       "description": "Crie sessões interativas integradas com o Zoom. Você pode associar a sessão a uma aula específica ou argumento para melhor organização."
     },
+    "required": "Obrigatório",
+    "optional": "Opcional",
     "sections": {
       "basicInfo": "Informações Básicas",
+      "courseInfo": "Informações do Curso",
       "schedule": "Agendamento",
-      "associations": "Associações",
+      "lessonAssociation": "Associar a uma Aula",
       "hosts": "Co-apresentadores",
       "settings": "Configurações"
+    },
+    "lessonAssociation": {
+      "helper": "Se desejar que os alunos vejam que existe uma sessão ao vivo relacionada a uma aula específica, selecione a aula aqui. Isso criará um vínculo visível na página da aula."
     },
     "fields": {
       "title": {
@@ -2970,6 +2976,11 @@
         "label": "Aula",
         "placeholder": "Selecione uma aula",
         "none": "Nenhuma"
+      },
+      "lessonModule": {
+        "label": "Módulo da Aula",
+        "placeholder": "Selecione um módulo",
+        "none": "Nenhum"
       },
       "argument": {
         "label": "Argumento",

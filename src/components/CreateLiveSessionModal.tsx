@@ -28,9 +28,9 @@ import Button from '@/components/Button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
-import { 
-  Users, 
-  Calendar, 
+import {
+  Users,
+  Calendar,
   BookOpen,
   FileText,
   Settings,
@@ -38,7 +38,8 @@ import {
   Check,
   RotateCcw,
   Info,
-  Radio
+  Radio,
+  GraduationCap
 } from 'lucide-react';
 
 const liveSessionSchema = z.object({
@@ -46,18 +47,18 @@ const liveSessionSchema = z.object({
   description: z.string().max(5000, 'Descrição muito longa').default(''),
   scheduledStartTime: z.string().min(1, 'Data e hora de início são obrigatórias'),
   scheduledEndTime: z.string().min(1, 'Data e hora de término são obrigatórias'),
-  
-  // Optional lesson association
-  courseId: z.string().default(''),
-  moduleId: z.string().default(''),
-  lessonId: z.string().default(''),
-  
-  // Optional argument association
-  argumentId: z.string().default(''),
-  
+
+  // REQUIRED: Course and Module (NEW API v2.0)
+  courseId: z.string().min(1, 'Curso é obrigatório'),
+  moduleId: z.string().min(1, 'Módulo é obrigatório'),
+
+  // OPTIONAL: Lesson association (to show this live session is related to a lesson)
+  lessonModuleId: z.string().default(''), // Module for lesson selection
+  lessonId: z.string().default(''),       // Lesson to associate with this live session
+
   // Co-hosts
   coHostIds: z.array(z.string()).default([]),
-  
+
   // Settings
   maxParticipants: z.number().min(1).max(1000).default(100),
   recordingEnabled: z.boolean().default(false),
@@ -138,11 +139,6 @@ interface Lesson {
   }>;
 }
 
-interface Argument {
-  id: string;
-  title: string;
-}
-
 interface User {
   id?: string;
   identityId: string;
@@ -159,17 +155,17 @@ export default function CreateLiveSessionModal({
   const t = useTranslations('Admin.CreateLiveSession');
   const { toast } = useToast();
   const { token } = useAuth();
-  
+
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
+  const [lessonModules, setLessonModules] = useState<Module[]>([]); // Modules for lesson selection
   const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [, setLoadingCourses] = useState(false);
   const [loadingModules, setLoadingModules] = useState(false);
+  const [loadingLessonModules, setLoadingLessonModules] = useState(false);
   const [loadingLessons, setLoadingLessons] = useState(false);
-  const [loadingArguments, setLoadingArguments] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const form = useForm<z.input<typeof liveSessionSchema>>({
@@ -179,6 +175,10 @@ export default function CreateLiveSessionModal({
       description: '',
       scheduledStartTime: '',
       scheduledEndTime: '',
+      courseId: '',
+      moduleId: '',
+      lessonModuleId: '',
+      lessonId: '',
       maxParticipants: 100,
       recordingEnabled: true,
       waitingRoomEnabled: true,
@@ -194,39 +194,47 @@ export default function CreateLiveSessionModal({
   });
 
   const selectedCourseId = form.watch('courseId');
-  const selectedModuleId = form.watch('moduleId');
+  const selectedLessonModuleId = form.watch('lessonModuleId');
 
   // Load initial data
   useEffect(() => {
     if (open) {
       fetchCourses();
-      fetchArguments();
       fetchUsers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Load modules when course is selected
+  // Load modules when course is selected (required section)
   useEffect(() => {
     if (selectedCourseId) {
       fetchModules(selectedCourseId);
-      // Reset module and lesson when course changes
+      // Reset all dependent fields
       form.setValue('moduleId', '');
+      form.setValue('lessonModuleId', '');
       form.setValue('lessonId', '');
+      setLessonModules([]);
       setLessons([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCourseId]);
 
-  // Load lessons when module is selected
+  // Load lesson modules when course is selected (for optional lesson association)
   useEffect(() => {
-    if (selectedModuleId && selectedCourseId) {
-      fetchLessons(selectedCourseId, selectedModuleId);
-      // Reset lesson when module changes
+    if (selectedCourseId) {
+      fetchLessonModules(selectedCourseId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCourseId]);
+
+  // Load lessons when lesson module is selected
+  useEffect(() => {
+    if (selectedLessonModuleId && selectedCourseId) {
+      fetchLessons(selectedCourseId, selectedLessonModuleId);
       form.setValue('lessonId', '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedModuleId, selectedCourseId]);
+  }, [selectedLessonModuleId, selectedCourseId]);
 
   const fetchCourses = async () => {
     setLoadingCourses(true);
@@ -270,6 +278,27 @@ export default function CreateLiveSessionModal({
     }
   };
 
+  const fetchLessonModules = async (courseId: string) => {
+    setLoadingLessonModules(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLessonModules(data.modules || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching lesson modules:', error);
+    } finally {
+      setLoadingLessonModules(false);
+    }
+  };
+
   const fetchLessons = async (courseId: string, moduleId: string) => {
     setLoadingLessons(true);
     try {
@@ -291,32 +320,10 @@ export default function CreateLiveSessionModal({
     }
   };
 
-  const fetchArguments = async () => {
-    setLoadingArguments(true);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/arguments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setArgumentsList(data.arguments || data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching arguments:', error);
-    } finally {
-      setLoadingArguments(false);
-    }
-  };
-
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      // Remove role parameter as backend returns 400 Bad Request with it
       const response = await fetch(`${API_URL}/api/v1/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -325,16 +332,8 @@ export default function CreateLiveSessionModal({
 
       if (response.ok) {
         const data = await response.json();
-        
-        // API returns users in data.items
         const usersList: User[] = data.items || [];
-        
-        // Temporarily allow all users as co-hosts since there are no tutors/admins in the system
-        // TODO: Revert this when tutors/admins are added to the database
-        // const tutors = usersList.filter((user: User) => 
-        //   user.role === 'tutor' || user.role === 'admin'
-        // );
-        setUsers(usersList); // Using all users for now
+        setUsers(usersList);
       } else {
         console.warn('Failed to fetch users, status:', response.status);
       }
@@ -348,13 +347,15 @@ export default function CreateLiveSessionModal({
   const onSubmit = async (values: z.input<typeof liveSessionSchema>) => {
     try {
       setLoading(true);
-      
+
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      
-      // Prepare the request body
+
+      // Prepare the request body (NEW API v2.0)
       const requestBody: Record<string, unknown> = {
         title: values.title,
         description: values.description,
+        courseId: values.courseId, // REQUIRED
+        moduleId: values.moduleId, // REQUIRED
         scheduledStartTime: new Date(values.scheduledStartTime).toISOString(),
         scheduledEndTime: new Date(values.scheduledEndTime).toISOString(),
         settings: {
@@ -375,9 +376,6 @@ export default function CreateLiveSessionModal({
       if (values.lessonId) {
         requestBody.lessonId = values.lessonId;
       }
-      if (values.argumentId) {
-        requestBody.argumentId = values.argumentId;
-      }
       if (values.coHostIds && values.coHostIds.length > 0) {
         requestBody.coHostIds = values.coHostIds;
       }
@@ -394,12 +392,16 @@ export default function CreateLiveSessionModal({
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         console.log('✅ Live session created successfully:', data);
         console.log('📊 Live session details:', {
           sessionId: data.sessionId,
           title: data.title,
+          courseId: data.courseId,
+          moduleId: data.moduleId,
+          lessonId: data.lessonId,
+          relatedLessonId: data.relatedLessonId,
           zoomMeetingId: data.zoomMeetingId,
           hostJoinUrl: data.hostJoinUrl,
           participantJoinUrl: data.participantJoinUrl,
@@ -407,12 +409,12 @@ export default function CreateLiveSessionModal({
           scheduledStartTime: data.scheduledStartTime,
           scheduledEndTime: data.scheduledEndTime,
         });
-        
+
         toast({
           title: t('success.title'),
           description: t('success.description'),
         });
-        
+
         form.reset();
         onOpenChange(false);
         onSuccess?.();
@@ -422,17 +424,22 @@ export default function CreateLiveSessionModal({
       }
     } catch (error) {
       console.error('❌ Error in onSubmit:', error);
-      
-      // Tratamento específico de erros
+
       let errorMessage = t('error.description');
-      
+
       if (error instanceof Error) {
-        if (error.message.includes('Host with ID') && error.message.includes('not found')) {
+        if (error.message.includes('Module') && error.message.includes('does not belong to course')) {
+          errorMessage = 'Módulo não pertence ao curso selecionado';
+        } else if (error.message.includes('Lesson') && error.message.includes('does not belong to course')) {
+          errorMessage = 'Aula não pertence ao curso selecionado';
+        } else if (error.message.includes('Related lesson') && error.message.includes('belongs to course')) {
+          errorMessage = 'Aula relacionada deve pertencer ao mesmo curso';
+        } else if (error.message.includes('Host with ID') && error.message.includes('not found')) {
           errorMessage = t('error.hostNotFound');
-        } else if (error.message.includes('Lesson with ID') && error.message.includes('not found')) {
-          errorMessage = t('error.lessonNotFound');
-        } else if (error.message.includes('Argument with ID') && error.message.includes('not found')) {
-          errorMessage = t('error.argumentNotFound');
+        } else if (error.message.includes('Course with ID') && error.message.includes('not found')) {
+          errorMessage = 'Curso não encontrado';
+        } else if (error.message.includes('Module with ID') && error.message.includes('not found')) {
+          errorMessage = 'Módulo não encontrado';
         } else if (error.message.includes('duration')) {
           errorMessage = t('error.invalidDuration');
         } else if (error.message.includes('past')) {
@@ -441,7 +448,7 @@ export default function CreateLiveSessionModal({
           errorMessage = error.message;
         }
       }
-      
+
       toast({
         title: t('error.title'),
         description: errorMessage,
@@ -510,7 +517,7 @@ export default function CreateLiveSessionModal({
                     {t('sections.basicInfo')}
                   </h3>
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="title"
@@ -521,10 +528,10 @@ export default function CreateLiveSessionModal({
                         <span className="text-red-400">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder={t('fields.title.placeholder')} 
+                        <Input
+                          placeholder={t('fields.title.placeholder')}
                           className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -541,11 +548,11 @@ export default function CreateLiveSessionModal({
                         {t('fields.description.label')}
                       </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder={t('fields.description.placeholder')} 
+                        <Textarea
+                          placeholder={t('fields.description.placeholder')}
                           rows={3}
                           className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormDescription className="text-gray-400">
@@ -555,7 +562,83 @@ export default function CreateLiveSessionModal({
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* REQUIRED: Course and Module Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-gray-300 mb-4">
+                  <GraduationCap className="h-5 w-5 text-indigo-400" />
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    {t('sections.courseInfo')}
+                    <span className="text-xs text-red-400 font-normal">({t('required')})</span>
+                  </h3>
+                </div>
+
+                <div className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/20 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="courseId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-300 flex items-center gap-2">
+                          {t('fields.course.label')}
+                          <span className="text-red-400">*</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                              <SelectValue placeholder={t('fields.course.placeholder')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-gray-700 border-gray-600">
+                            {courses.map((course) => (
+                              <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-600">
+                                {course.translations.find(t => t.locale === 'pt')?.title || course.slug}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {selectedCourseId && (
+                    <FormField
+                      control={form.control}
+                      name="moduleId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300 flex items-center gap-2">
+                            {t('fields.module.label')}
+                            <span className="text-red-400">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger disabled={loadingModules} className="bg-gray-700 border-gray-600 text-white">
+                                <SelectValue placeholder={t('fields.module.placeholder')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-gray-700 border-gray-600">
+                              {modules.map((module) => (
+                                <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
+                                  {module.translations.find(t => t.locale === 'pt')?.title || module.slug}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Schedule Section */}
@@ -566,7 +649,7 @@ export default function CreateLiveSessionModal({
                     {t('sections.schedule')}
                   </h3>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -578,10 +661,10 @@ export default function CreateLiveSessionModal({
                           <span className="text-red-400">*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            type="datetime-local" 
+                          <Input
+                            type="datetime-local"
                             className="bg-gray-700 border-gray-600 text-white"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -599,10 +682,10 @@ export default function CreateLiveSessionModal({
                           <span className="text-red-400">*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            type="datetime-local" 
+                          <Input
+                            type="datetime-local"
                             className="bg-gray-700 border-gray-600 text-white"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -612,41 +695,44 @@ export default function CreateLiveSessionModal({
                 </div>
               </div>
 
-              {/* Optional Associations Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-gray-300 mb-4">
-                  <BookOpen className="h-5 w-5 text-orange-400" />
-                  <h3 className="text-lg font-semibold">
-                    {t('sections.associations')}
-                  </h3>
-                </div>
-                
-                <div className="p-4 bg-gray-700/30 rounded-lg border border-gray-600 space-y-4">
-                  <p className="text-sm text-gray-400">{t('associations.helper')}</p>
-                  
-                  {/* Course -> Module -> Lesson selection */}
-                  <div className="space-y-4">
+              {/* OPTIONAL: Associate with a Lesson */}
+              {selectedCourseId && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-gray-300 mb-4">
+                    <BookOpen className="h-5 w-5 text-orange-400" />
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      {t('sections.lessonAssociation')}
+                      <span className="text-xs text-gray-400 font-normal">({t('optional')})</span>
+                    </h3>
+                  </div>
+
+                  <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20 space-y-4">
+                    <p className="text-sm text-gray-400">{t('lessonAssociation.helper')}</p>
+
                     <FormField
                       control={form.control}
-                      name="courseId"
+                      name="lessonModuleId"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-gray-300">
-                            {t('fields.course.label')}
+                            {t('fields.lessonModule.label')}
                           </FormLabel>
-                          <Select onValueChange={(value) => field.onChange(value === 'none' ? '' : value)} value={field.value || 'none'}>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || 'none'}
+                          >
                             <FormControl>
-                              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                                <SelectValue placeholder={t('fields.course.placeholder')} />
+                              <SelectTrigger disabled={loadingLessonModules} className="bg-gray-700 border-gray-600 text-white">
+                                <SelectValue placeholder={t('fields.lessonModule.placeholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-gray-700 border-gray-600">
                               <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
-                                {t('fields.course.none')}
+                                {t('fields.lessonModule.none')}
                               </SelectItem>
-                              {courses.map((course) => (
-                                <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-600">
-                                  {course.translations.find(t => t.locale === 'pt')?.title || course.slug}
+                              {lessonModules.map((module) => (
+                                <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
+                                  {module.translations.find(t => t.locale === 'pt')?.title || module.slug}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -656,39 +742,7 @@ export default function CreateLiveSessionModal({
                       )}
                     />
 
-                    {selectedCourseId && (
-                      <FormField
-                        control={form.control}
-                        name="moduleId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">
-                              {t('fields.module.label')}
-                            </FormLabel>
-                            <Select onValueChange={(value) => field.onChange(value === 'none' ? '' : value)} value={field.value || 'none'}>
-                              <FormControl>
-                                <SelectTrigger disabled={loadingModules} className="bg-gray-700 border-gray-600 text-white">
-                                  <SelectValue placeholder={t('fields.module.placeholder')} />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="bg-gray-700 border-gray-600">
-                                <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
-                                  {t('fields.module.none')}
-                                </SelectItem>
-                                {modules.map((module) => (
-                                  <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                                    {module.translations.find(t => t.locale === 'pt')?.title || module.slug}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
-                    {selectedModuleId && (
+                    {selectedLessonModuleId && (
                       <FormField
                         control={form.control}
                         name="lessonId"
@@ -697,7 +751,10 @@ export default function CreateLiveSessionModal({
                             <FormLabel className="text-gray-300">
                               {t('fields.lesson.label')}
                             </FormLabel>
-                            <Select onValueChange={(value) => field.onChange(value === 'none' ? '' : value)} value={field.value || 'none'}>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value || 'none'}
+                            >
                               <FormControl>
                                 <SelectTrigger disabled={loadingLessons} className="bg-gray-700 border-gray-600 text-white">
                                   <SelectValue placeholder={t('fields.lesson.placeholder')} />
@@ -720,46 +777,8 @@ export default function CreateLiveSessionModal({
                       />
                     )}
                   </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <span>{t('associations.or')}</span>
-                  </div>
-
-                  {/* Argument selection */}
-                  <FormField
-                    control={form.control}
-                    name="argumentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">
-                          {t('fields.argument.label')}
-                        </FormLabel>
-                        <Select onValueChange={(value) => field.onChange(value === 'none' ? '' : value)} value={field.value || 'none'}>
-                          <FormControl>
-                            <SelectTrigger disabled={loadingArguments} className="bg-gray-700 border-gray-600 text-white">
-                              <SelectValue placeholder={t('fields.argument.placeholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-gray-700 border-gray-600">
-                            <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
-                              {t('fields.argument.none')}
-                            </SelectItem>
-                            {argumentsList.map((argument) => (
-                              <SelectItem key={argument.id} value={argument.id} className="text-white hover:bg-gray-600">
-                                {argument.title}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription className="text-gray-400">
-                          {t('fields.argument.helper')}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-              </div>
+              )}
 
               {/* Co-hosts Section */}
               <div className="space-y-4">
@@ -769,7 +788,7 @@ export default function CreateLiveSessionModal({
                     {t('sections.hosts')}
                   </h3>
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="coHostIds"
@@ -779,7 +798,7 @@ export default function CreateLiveSessionModal({
                         {t('fields.coHosts.label')}
                       </FormLabel>
                       <FormControl>
-                        <Select 
+                        <Select
                           onValueChange={(value) => {
                             const currentValues = field.value || [];
                             if (!currentValues.includes(value)) {
@@ -797,8 +816,8 @@ export default function CreateLiveSessionModal({
                               </div>
                             ) : (
                               users.map((user) => (
-                                <SelectItem 
-                                  key={user.id || user.identityId} 
+                                <SelectItem
+                                  key={user.id || user.identityId}
                                   value={user.id || user.identityId}
                                   disabled={field.value?.includes(user.id || user.identityId)}
                                   className="text-white hover:bg-gray-600 disabled:opacity-50"
@@ -818,7 +837,7 @@ export default function CreateLiveSessionModal({
                           {field.value.map((userId) => {
                             const user = users.find(u => (u.id || u.identityId) === userId);
                             return user ? (
-                              <div 
+                              <div
                                 key={userId}
                                 className="bg-cyan-500/20 px-3 py-1 rounded-full text-sm flex items-center gap-2 border border-cyan-500/30"
                               >
@@ -851,7 +870,7 @@ export default function CreateLiveSessionModal({
                     {t('sections.settings')}
                   </h3>
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="maxParticipants"
@@ -861,9 +880,9 @@ export default function CreateLiveSessionModal({
                         {t('fields.maxParticipants.label')}
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          min={1} 
+                        <Input
+                          type="number"
+                          min={1}
                           max={1000}
                           className="bg-gray-700 border-gray-600 text-white"
                           {...field}
@@ -1099,8 +1118,8 @@ export default function CreateLiveSessionModal({
                 >
                   {t('actions.cancel')}
                 </button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={loading}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
                 >

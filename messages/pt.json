@@ -2813,6 +2813,7 @@
     },
     "linkedContent": {
       "title": "Conteúdo Vinculado",
+      "module": "Módulo",
       "lesson": "Aula",
       "argument": "Argumento"
     },

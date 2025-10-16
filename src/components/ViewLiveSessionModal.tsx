@@ -33,6 +33,12 @@ interface CoHost {
   avatar?: string;
 }
 
+interface Module {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 interface Lesson {
   id: string;
   title: string;
@@ -53,6 +59,7 @@ interface LiveSessionDetails {
   sessionType: 'MEETING' | 'WEBINAR';
   host: Host;
   coHosts?: CoHost[];
+  module?: Module; // Optional field (may not be present in all responses)
   lesson?: Lesson;
   argument?: Argument;
   scheduledStartTime: string;
@@ -116,6 +123,10 @@ export default function ViewLiveSessionModal({
       }
 
       const data = await response.json();
+      console.log('📊 Detalhes da sessão recebidos:', JSON.stringify(data, null, 2));
+      console.log('📦 Estrutura do module:', data.module);
+      console.log('📦 Estrutura do lesson:', data.lesson);
+      console.log('📦 Estrutura do argument:', data.argument);
       setSession(data);
     } catch (error) {
       console.error('Error fetching session details:', error);
@@ -436,23 +447,33 @@ export default function ViewLiveSessionModal({
             </div>
 
             {/* Linked Content */}
-            {(session.lesson || session.argument) && (
-              <div className="bg-gray-700/50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-300 mb-3">
-                  {t('linkedContent.title')}
-                </h4>
+            <div className="bg-gray-700/50 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-300 mb-3">
+                {t('linkedContent.title')}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {/* Module - Optional */}
+                {session.module && (
+                  <Badge className="bg-indigo-500/20 text-indigo-400 border-indigo-500/30">
+                    {t('linkedContent.module')}: {session.module.title}
+                  </Badge>
+                )}
+
+                {/* Lesson - Optional */}
                 {session.lesson && (
                   <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                     {t('linkedContent.lesson')}: {session.lesson.title}
                   </Badge>
                 )}
+
+                {/* Argument - Optional */}
                 {session.argument && (
                   <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
                     {t('linkedContent.argument')}: {session.argument.title}
                   </Badge>
                 )}
               </div>
-            )}
+            </div>
 
             {/* Live Session Info */}
             {session.status === 'LIVE' && (

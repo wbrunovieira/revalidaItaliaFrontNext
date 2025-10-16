@@ -25,7 +25,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Button from '@/components/Button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import {
@@ -33,7 +32,6 @@ import {
   Calendar,
   BookOpen,
   FileText,
-  Settings,
   X,
   Check,
   RotateCcw,
@@ -59,17 +57,17 @@ const liveSessionSchema = z.object({
   // Co-hosts
   coHostIds: z.array(z.string()).default([]),
 
-  // Settings
+  // Settings (hidden from UI, sent with default values enabled)
   maxParticipants: z.number().min(1).max(1000).default(100),
-  recordingEnabled: z.boolean().default(false),
+  recordingEnabled: z.boolean().default(true),
   waitingRoomEnabled: z.boolean().default(true),
   chatEnabled: z.boolean().default(true),
-  qnaEnabled: z.boolean().default(false),
-  autoStartRecording: z.boolean().default(false),
+  qnaEnabled: z.boolean().default(true),
+  autoStartRecording: z.boolean().default(true),
   muteParticipantsOnEntry: z.boolean().default(true),
-  allowParticipantsUnmute: z.boolean().default(false),
+  allowParticipantsUnmute: z.boolean().default(true),
   allowRaiseHand: z.boolean().default(true),
-  allowParticipantScreenShare: z.boolean().default(false),
+  allowParticipantScreenShare: z.boolean().default(true),
 }).refine((data) => {
   if (!data.scheduledStartTime || !data.scheduledEndTime) return true;
   const start = new Date(data.scheduledStartTime);
@@ -96,14 +94,6 @@ const liveSessionSchema = z.object({
 }, {
   message: "A duração máxima da sessão é de 8 horas",
   path: ["scheduledEndTime"],
-}).refine((data) => {
-  if (data.autoStartRecording && !data.recordingEnabled) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Para auto-iniciar gravação, a gravação deve estar habilitada",
-  path: ["autoStartRecording"],
 });
 
 interface CreateLiveSessionModalProps {
@@ -183,12 +173,12 @@ export default function CreateLiveSessionModal({
       recordingEnabled: true,
       waitingRoomEnabled: true,
       chatEnabled: true,
-      qnaEnabled: false,
-      autoStartRecording: false,
+      qnaEnabled: true,
+      autoStartRecording: true,
       muteParticipantsOnEntry: true,
-      allowParticipantsUnmute: false,
+      allowParticipantsUnmute: true,
       allowRaiseHand: true,
-      allowParticipantScreenShare: false,
+      allowParticipantScreenShare: true,
       coHostIds: [],
     },
   });
@@ -860,252 +850,6 @@ export default function CreateLiveSessionModal({
                     </FormItem>
                   )}
                 />
-              </div>
-
-              {/* Settings Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-gray-300 mb-4">
-                  <Settings className="h-5 w-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold">
-                    {t('sections.settings')}
-                  </h3>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="maxParticipants"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-300">
-                        {t('fields.maxParticipants.label')}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={1000}
-                          className="bg-gray-700 border-gray-600 text-white"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription className="text-gray-400">
-                        {t('fields.maxParticipants.helper')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="recordingEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.recordingEnabled.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.recordingEnabled.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="autoStartRecording"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.autoStartRecording.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.autoStartRecording.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={!form.watch('recordingEnabled')}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="waitingRoomEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.waitingRoomEnabled.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.waitingRoomEnabled.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="chatEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.chatEnabled.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.chatEnabled.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="qnaEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.qnaEnabled.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.qnaEnabled.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="muteParticipantsOnEntry"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.muteParticipantsOnEntry.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.muteParticipantsOnEntry.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="allowParticipantsUnmute"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.allowParticipantsUnmute.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.allowParticipantsUnmute.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="allowRaiseHand"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.allowRaiseHand.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.allowRaiseHand.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="allowParticipantScreenShare"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border border-gray-600 p-3 bg-gray-700/30">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-gray-300 text-sm">
-                            {t('fields.allowParticipantScreenShare.label')}
-                          </FormLabel>
-                          <FormDescription className="text-xs text-gray-400">
-                            {t('fields.allowParticipantScreenShare.helper')}
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
               </div>
 
               {/* Submit Button */}

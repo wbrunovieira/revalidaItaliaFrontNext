@@ -3711,6 +3711,7 @@
     "title": "Crea Documento",
     "create": "Crea Documento",
     "creating": "Creando...",
+    "noCourses": "Nessun corso registrato. Registra prima un corso.",
     "fields": {
       "course": "Corso",
       "module": "Modulo",
@@ -3722,7 +3723,8 @@
       "title": "Titolo",
       "description": "Descrizione",
       "url": "URL del Documento",
-      "document": "Documento"
+      "document": "Documento",
+      "protectionLevel": "Livello di Protezione"
     },
     "placeholders": {
       "course": "Seleziona un corso",
@@ -3770,7 +3772,10 @@
       "descriptionMax": "La descrizione deve avere massimo 500 caratteri",
       "urlRequired": "L'URL è obbligatorio",
       "urlMax": "L'URL deve avere massimo 1000 caratteri",
-      "urlInvalid": "L'URL deve iniziare con / o http"
+      "urlInvalid": "L'URL deve iniziare con / o http",
+      "fileRequired": "Per favore, seleziona un file PDF",
+      "onlyPDF": "Solo file PDF sono consentiti",
+      "protectionLevelRequired": "Per favore, seleziona il livello di protezione"
     },
     "error": {
       "title": "Errore nella creazione del documento",
@@ -3789,6 +3794,8 @@
       "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi. Per favore, ricarica la pagina.",
       "invalidFileType": "Tipo di file non valido. Usa PDF, Word, Excel o CSV.",
       "fileTooLarge": "File troppo grande. La dimensione massima è 10MB.",
+      "fileTooLargeTitle": "File troppo grande",
+      "fileTooLargeDescription": "Il file supera la dimensione massima consentita (100MB)",
       "uploadFailed": "Errore nel caricamento del file. Riprova.",
       "documentRequired": "Per favore, seleziona un documento da caricare",
       "fileRequired": "È necessario caricare un file per questa lingua",
@@ -3804,7 +3811,14 @@
     },
     "success": {
       "title": "Documento creato con successo!",
-      "description": "Il documento è stato aggiunto alla lezione."
+      "description": "Il documento è stato aggiunto alla lezione.",
+      "processingTitle": "Caricamento completato con successo!",
+      "processingDescription": "Il documento è in elaborazione in background. Potrebbero volerci alcuni minuti."
+    },
+    "protectionLevel": {
+      "none": "Nessuna protezione, download diretto consentito",
+      "watermark": "Filigrana con dati dello studente",
+      "full": "Massima protezione (filigrana + URL firmato)"
     }
   },
   "documentsList": {

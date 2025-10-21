@@ -3710,6 +3710,7 @@
     "title": "Crear Documento",
     "create": "Crear Documento",
     "creating": "Creando...",
+    "noCourses": "Ningún curso registrado. Registre un curso primero.",
     "fields": {
       "course": "Curso",
       "module": "Módulo",
@@ -3721,7 +3722,8 @@
       "title": "Título",
       "description": "Descripción",
       "url": "URL del Documento",
-      "document": "Documento"
+      "document": "Documento",
+      "protectionLevel": "Nivel de Protección"
     },
     "placeholders": {
       "course": "Seleccione un curso",
@@ -3769,7 +3771,10 @@
       "descriptionMax": "La descripción debe tener máximo 500 caracteres",
       "urlRequired": "La URL es obligatoria",
       "urlMax": "La URL debe tener máximo 1000 caracteres",
-      "urlInvalid": "La URL debe comenzar con / o http"
+      "urlInvalid": "La URL debe comenzar con / o http",
+      "fileRequired": "Por favor, seleccione un archivo PDF",
+      "onlyPDF": "Solo se permiten archivos PDF",
+      "protectionLevelRequired": "Por favor, seleccione el nivel de protección"
     },
     "error": {
       "title": "Error al crear documento",
@@ -3788,6 +3793,8 @@
       "fetchCoursesDescription": "No se pudo cargar la lista de cursos. Por favor, recargue la página.",
       "invalidFileType": "Tipo de archivo inválido. Use PDF, Word, Excel o CSV.",
       "fileTooLarge": "Archivo demasiado grande. El tamaño máximo es 10MB.",
+      "fileTooLargeTitle": "Archivo demasiado grande",
+      "fileTooLargeDescription": "El archivo excede el tamaño máximo permitido (100MB)",
       "uploadFailed": "Error al cargar el archivo. Intente nuevamente.",
       "documentRequired": "Por favor, seleccione un documento para cargar",
       "fileRequired": "Es necesario cargar un archivo para este idioma",
@@ -3803,7 +3810,14 @@
     },
     "success": {
       "title": "¡Documento creado con éxito!",
-      "description": "El documento fue agregado a la lección."
+      "description": "El documento fue agregado a la lección.",
+      "processingTitle": "¡Carga realizada con éxito!",
+      "processingDescription": "El documento está siendo procesado en segundo plano. Esto puede tardar algunos minutos."
+    },
+    "protectionLevel": {
+      "none": "Sin protección, descarga directa permitida",
+      "watermark": "Marca de agua con datos del estudiante",
+      "full": "Máxima protección (marca de agua + URL firmada)"
     }
   },
   "documentsList": {

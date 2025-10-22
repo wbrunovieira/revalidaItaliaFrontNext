@@ -1,7 +1,7 @@
 // /src/components/PDFViewerModal.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   X,
@@ -53,8 +53,8 @@ export default function PDFViewerModal({
   const [error, setError] = useState<string | null>(null);
   const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
 
-  const containerRef = useState<HTMLDivElement | null>(null)[0];
-  const pageRefs = useState<Map<number, HTMLCanvasElement>>(new Map())[0];
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const pageRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
 
   // Load PDF.js from CDN to avoid webpack issues
   useEffect(() => {
@@ -177,14 +177,14 @@ export default function PDFViewerModal({
     );
 
     // Observe all canvas elements
-    pageRefs.forEach((canvas, pageNum) => {
+    pageRefs.current.forEach((canvas, pageNum) => {
       if (canvas) observer.observe(canvas);
     });
 
     return () => {
       observer.disconnect();
     };
-  }, [pdf, numPages, pageRefs, renderPage]);
+  }, [pdf, numPages, renderPage]);
 
   // Re-render all pages when scale changes
   useEffect(() => {
@@ -265,9 +265,9 @@ export default function PDFViewerModal({
       setError(null);
       setPdf(null);
       setRenderedPages(new Set());
-      pageRefs.clear();
+      pageRefs.current.clear();
     }
-  }, [isOpen, pageRefs]);
+  }, [isOpen]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -383,9 +383,7 @@ export default function PDFViewerModal({
 
         {/* PDF Content */}
         <div
-          ref={(el) => {
-            if (el) containerRef = el;
-          }}
+          ref={containerRef}
           className="flex-1 overflow-auto bg-gray-900 p-4"
           onContextMenu={handleContextMenu}
           style={selectionStyle}
@@ -420,7 +418,7 @@ export default function PDFViewerModal({
                 >
                   <canvas
                     ref={(el) => {
-                      if (el) pageRefs.set(pageNum, el);
+                      if (el) pageRefs.current.set(pageNum, el);
                     }}
                     data-page={pageNum}
                     className="max-w-full h-auto"

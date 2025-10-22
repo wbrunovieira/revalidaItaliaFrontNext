@@ -13,6 +13,9 @@ import {
   Globe,
   Hash,
   Copy,
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface Translation {
@@ -22,9 +25,12 @@ interface Translation {
   url: string;
 }
 
+type ProtectionLevel = 'NONE' | 'WATERMARK' | 'FULL';
+
 interface DocumentViewData {
   id: string;
   filename: string;
+  protectionLevel?: ProtectionLevel;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -167,6 +173,44 @@ export default function DocumentViewModal({
     return filename.split('.').pop()?.toUpperCase() || '';
   };
 
+  // Obter propriedades de estilo do nível de proteção
+  const getProtectionLevelStyle = (level?: ProtectionLevel) => {
+    switch (level) {
+      case 'NONE':
+        return {
+          icon: ShieldAlert,
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-700/50',
+          borderColor: 'border-gray-600',
+          label: t('protectionLevel.none'),
+        };
+      case 'WATERMARK':
+        return {
+          icon: Shield,
+          color: 'text-blue-400',
+          bgColor: 'bg-blue-500/10',
+          borderColor: 'border-blue-500/50',
+          label: t('protectionLevel.watermark'),
+        };
+      case 'FULL':
+        return {
+          icon: ShieldCheck,
+          color: 'text-green-400',
+          bgColor: 'bg-green-500/10',
+          borderColor: 'border-green-500/50',
+          label: t('protectionLevel.full'),
+        };
+      default:
+        return {
+          icon: Shield,
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-700/50',
+          borderColor: 'border-gray-600',
+          label: t('protectionLevel.unknown') || 'Desconhecido',
+        };
+    }
+  };
+
   if (!isOpen) {
     console.log(
       'DocumentViewModal: isOpen is false, returning null'
@@ -297,6 +341,37 @@ export default function DocumentViewModal({
                   </div>
                 </div>
 
+                {/* Nível de Proteção */}
+                {documentData.protectionLevel && (
+                  <div className={`p-4 rounded-lg border ${getProtectionLevelStyle(documentData.protectionLevel).bgColor} ${getProtectionLevelStyle(documentData.protectionLevel).borderColor}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const ProtectionIcon = getProtectionLevelStyle(documentData.protectionLevel).icon;
+                          return (
+                            <ProtectionIcon
+                              size={20}
+                              className={getProtectionLevelStyle(documentData.protectionLevel).color}
+                            />
+                          );
+                        })()}
+                        <div>
+                          <p className="text-sm font-medium text-gray-300">
+                            {t('fields.protectionLevel')}
+                          </p>
+                          <p className={`text-base font-semibold ${getProtectionLevelStyle(documentData.protectionLevel).color}`}>
+                            {documentData.protectionLevel}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400 max-w-xs">
+                          {getProtectionLevelStyle(documentData.protectionLevel).label}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Data de Criação */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">

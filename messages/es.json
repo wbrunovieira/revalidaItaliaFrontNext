@@ -3895,7 +3895,8 @@
           "updatedAt": "Actualizado el",
           "title": "Título",
           "description": "Descripción",
-          "url": "URL"
+          "url": "URL",
+          "protectionLevel": "Nivel de Protección"
         },
         "translations": {
           "title": "Traducciones",
@@ -3906,6 +3907,12 @@
         "error": {
           "fetchTitle": "Error al cargar",
           "fetchDescription": "No se pudieron cargar los detalles del documento"
+        },
+        "protectionLevel": {
+          "none": "Sin protección, descarga directa permitida",
+          "watermark": "Marca de agua con datos del estudiante",
+          "full": "Máxima protección (marca de agua + URL firmada)",
+          "unknown": "Nivel desconocido"
         }
       }
     ,

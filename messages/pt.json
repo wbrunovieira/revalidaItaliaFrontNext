@@ -3954,7 +3954,8 @@
           "updatedAt": "Atualizado em",
           "title": "Título",
           "description": "Descrição",
-          "url": "URL"
+          "url": "URL",
+          "protectionLevel": "Nível de Proteção"
         },
         "translations": {
           "title": "Traduções",
@@ -3965,6 +3966,12 @@
         "error": {
           "fetchTitle": "Erro ao carregar",
           "fetchDescription": "Não foi possível carregar os detalhes do documento"
+        },
+        "protectionLevel": {
+          "none": "Sem proteção, download direto permitido",
+          "watermark": "Marca d'água com dados do aluno",
+          "full": "Máxima proteção (watermark + URL assinada)",
+          "unknown": "Nível desconhecido"
         }
       },
       "documentEdit": {

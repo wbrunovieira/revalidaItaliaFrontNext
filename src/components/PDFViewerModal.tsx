@@ -55,6 +55,7 @@ export default function PDFViewerModal({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pageRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const renderingPages = useRef<Set<number>>(new Set());
 
   // Load PDF.js from CDN to avoid webpack issues
   useEffect(() => {
@@ -123,14 +124,23 @@ export default function PDFViewerModal({
 
   // Render a single page
   const renderPage = useCallback(async (pageNum: number, canvas: HTMLCanvasElement) => {
-    if (!pdf || renderedPages.has(pageNum)) return;
+    // Skip if already rendered or currently rendering
+    if (!pdf || renderedPages.has(pageNum) || renderingPages.current.has(pageNum)) {
+      return;
+    }
+
+    // Mark as rendering
+    renderingPages.current.add(pageNum);
 
     try {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
 
       const context = canvas.getContext('2d');
-      if (!context) return;
+      if (!context) {
+        renderingPages.current.delete(pageNum);
+        return;
+      }
 
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -145,6 +155,9 @@ export default function PDFViewerModal({
       console.log(`Page ${pageNum} rendered`);
     } catch (err) {
       console.error(`Error rendering page ${pageNum}:`, err);
+    } finally {
+      // Always remove from rendering list
+      renderingPages.current.delete(pageNum);
     }
   }, [pdf, scale, renderedPages]);
 
@@ -189,6 +202,7 @@ export default function PDFViewerModal({
   // Re-render all pages when scale changes
   useEffect(() => {
     setRenderedPages(new Set());
+    renderingPages.current.clear();
   }, [scale]);
 
   // Zoom
@@ -266,6 +280,7 @@ export default function PDFViewerModal({
       setPdf(null);
       setRenderedPages(new Set());
       pageRefs.current.clear();
+      renderingPages.current.clear();
     }
   }, [isOpen]);
 

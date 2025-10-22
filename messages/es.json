@@ -3922,7 +3922,10 @@
         "translations": "Traducciones",
         "title": "Título",
         "description": "Descripción",
-        "document": "Documento"
+        "document": "Documento",
+        "currentFile": "Archivo actual",
+        "replaceFile": "Reemplazar archivo PDF",
+        "protectionLevel": "Nivel de Protección"
       },
       "placeholders": {
         "title": "Ingrese el título del documento",
@@ -3944,7 +3947,8 @@
         "validationTitle": "Error de validación",
         "validationDescription": "Por favor, corrija los errores antes de guardar",
         "invalidFileType": "Tipo de archivo no válido",
-        "fileTooLarge": "Archivo demasiado grande (máx 10MB)",
+        "onlyPDF": "Solo se permiten archivos PDF",
+        "fileTooLarge": "Archivo demasiado grande (máximo 100MB)",
         "uploadFailed": "Error al cargar el archivo",
         "uploadTitle": "Error de carga",
         "uploadDescription": "No se pudo enviar el archivo"
@@ -3962,10 +3966,16 @@
         "success": "Archivo cargado exitosamente",
         "replace": "Reemplazar archivo",
         "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV",
-        "fileSelected": "Archivo seleccionado"
+        "fileSelected": "Archivo seleccionado",
+        "clickToSelect": "Haga clic para seleccionar nuevo PDF"
       },
       "currentFile": "Archivo actual",
-      "newFile": "Archivo nuevo"
+      "newFile": "Archivo nuevo",
+      "protectionLevel": {
+        "none": "Sin protección, descarga directa permitida",
+        "watermark": "Marca de agua con datos del estudiante",
+        "full": "Máxima protección (marca de agua + URL firmada)"
+      }
     },
   "tabs": {
     "overview": "Vista General",

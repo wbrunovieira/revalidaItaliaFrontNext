@@ -3922,7 +3922,10 @@
       "translations": "Traduzioni",
       "title": "Titolo",
       "description": "Descrizione",
-      "document": "Documento"
+      "document": "Documento",
+      "currentFile": "File attuale",
+      "replaceFile": "Sostituisci file PDF",
+      "protectionLevel": "Livello di Protezione"
     },
     "placeholders": {
       "title": "Inserisci il titolo del documento",
@@ -3944,7 +3947,8 @@
       "validationTitle": "Errore di validazione",
       "validationDescription": "Correggi gli errori prima di salvare",
       "invalidFileType": "Tipo di file non valido",
-      "fileTooLarge": "File troppo grande (max 10MB)",
+      "onlyPDF": "Solo file PDF sono consentiti",
+      "fileTooLarge": "File troppo grande (massimo 100MB)",
       "uploadFailed": "Errore nel caricamento del file",
       "uploadTitle": "Errore nel caricamento",
       "uploadDescription": "Non è stato possibile inviare il file"
@@ -3962,10 +3966,16 @@
       "success": "File caricato con successo",
       "replace": "Sostituisci file",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV",
-      "fileSelected": "File selezionato"
+      "fileSelected": "File selezionato",
+      "clickToSelect": "Clicca per selezionare nuovo PDF"
     },
     "currentFile": "File attuale",
-    "newFile": "Nuovo file"
+    "newFile": "Nuovo file",
+    "protectionLevel": {
+      "none": "Nessuna protezione, download diretto consentito",
+      "watermark": "Filigrana con dati dello studente",
+      "full": "Massima protezione (filigrana + URL firmato)"
+    }
   },
   "tabs": {
     "overview": "Panoramica",

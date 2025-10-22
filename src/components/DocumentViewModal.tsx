@@ -72,9 +72,12 @@ export default function DocumentViewModal({
 
       setLoading(true);
       try {
-        const documentResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`
-        );
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`;
+        console.log('🔍 [DocumentViewModal] Fetching document from:', apiUrl);
+
+        const documentResponse = await fetch(apiUrl);
+
+        console.log('📡 [DocumentViewModal] Response status:', documentResponse.status, documentResponse.statusText);
 
         if (!documentResponse.ok) {
           throw new Error('Erro ao buscar documento');
@@ -82,6 +85,10 @@ export default function DocumentViewModal({
 
         const documentData: DocumentViewData =
           await documentResponse.json();
+
+        console.log('📦 [DocumentViewModal] RAW RESPONSE FROM BACKEND:', JSON.stringify(documentData, null, 2));
+        console.log('🔐 [DocumentViewModal] protectionLevel field:', documentData.protectionLevel);
+
         setDocumentData(documentData);
       } catch (error) {
         console.error(

@@ -46,12 +46,15 @@ export default function PDFViewerModal({
   const [pdfjs, setPdfjs] = useState<any>(null);
   const [pdf, setPdf] = useState<any>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
+  const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
+
+  const containerRef = useState<HTMLDivElement | null>(null)[0];
+  const pageRefs = useState<Map<number, HTMLCanvasElement>>(new Map())[0];
 
   // Load PDF.js from CDN to avoid webpack issues
   useEffect(() => {
@@ -96,7 +99,13 @@ export default function PDFViewerModal({
       setError(null);
 
       try {
-        const loadingTask = pdfjs.getDocument(pdfUrl);
+        const loadingTask = pdfjs.getDocument({
+          url: pdfUrl,
+          withCredentials: false,
+          isEvalSupported: false,
+          disableStream: true,
+          disableAutoFetch: true,
+        });
         const pdfDoc = await loadingTask.promise;
         console.log('PDF loaded successfully:', { numPages: pdfDoc.numPages });
         setPdf(pdfDoc);
@@ -112,54 +121,75 @@ export default function PDFViewerModal({
     loadPDF();
   }, [pdfjs, isOpen, pdfUrl, t]);
 
-  // Render current page
-  useEffect(() => {
-    if (!pdf || !canvasRef) {
-      console.log('Render skipped:', { pdf: !!pdf, canvasRef: !!canvasRef });
-      return;
+  // Render a single page
+  const renderPage = useCallback(async (pageNum: number, canvas: HTMLCanvasElement) => {
+    if (!pdf || renderedPages.has(pageNum)) return;
+
+    try {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
+
+      const context = canvas.getContext('2d');
+      if (!context) return;
+
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport,
+        canvas: canvas,
+      }).promise;
+
+      setRenderedPages((prev) => new Set(prev).add(pageNum));
+      console.log(`Page ${pageNum} rendered`);
+    } catch (err) {
+      console.error(`Error rendering page ${pageNum}:`, err);
     }
+  }, [pdf, scale, renderedPages]);
 
-    const renderPage = async () => {
-      try {
-        console.log('Rendering page:', pageNumber, 'scale:', scale);
-        const page = await pdf.getPage(pageNumber);
-        const viewport = page.getViewport({ scale });
+  // Intersection Observer for lazy loading pages
+  useEffect(() => {
+    if (!pdf || numPages === 0) return;
 
-        const canvas = canvasRef;
-        const context = canvas.getContext('2d');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageNum = parseInt(entry.target.getAttribute('data-page') || '0');
+            const canvas = entry.target as HTMLCanvasElement;
+            if (pageNum > 0) {
+              renderPage(pageNum, canvas);
+            }
 
-        if (!context) {
-          console.error('Canvas context is null');
-          return;
-        }
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-          canvas: canvas,
-        };
-
-        await page.render(renderContext).promise;
-        console.log('Page rendered successfully');
-      } catch (err) {
-        console.error('Error rendering page:', err);
+            // Update current page indicator
+            if (entry.intersectionRatio > 0.5) {
+              setCurrentPage(pageNum);
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: [0, 0.5, 1],
       }
+    );
+
+    // Observe all canvas elements
+    pageRefs.forEach((canvas, pageNum) => {
+      if (canvas) observer.observe(canvas);
+    });
+
+    return () => {
+      observer.disconnect();
     };
+  }, [pdf, numPages, pageRefs, renderPage]);
 
-    renderPage();
-  }, [pdf, pageNumber, scale, canvasRef]);
-
-  // Navigation
-  const goToPreviousPage = useCallback(() => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
-  }, []);
-
-  const goToNextPage = useCallback(() => {
-    setPageNumber((prev) => Math.min(prev + 1, numPages));
-  }, [numPages]);
+  // Re-render all pages when scale changes
+  useEffect(() => {
+    setRenderedPages(new Set());
+  }, [scale]);
 
   // Zoom
   const zoomIn = useCallback(() => {
@@ -192,12 +222,6 @@ export default function PDFViewerModal({
             onClose();
           }
           break;
-        case 'ArrowLeft':
-          goToPreviousPage();
-          break;
-        case 'ArrowRight':
-          goToNextPage();
-          break;
         case '+':
         case '=':
           e.preventDefault();
@@ -217,7 +241,7 @@ export default function PDFViewerModal({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isFullscreen, onClose, goToPreviousPage, goToNextPage, zoomIn, zoomOut, resetZoom]);
+  }, [isOpen, isFullscreen, onClose, zoomIn, zoomOut, resetZoom]);
 
   // Prevent context menu (right-click)
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
@@ -234,14 +258,16 @@ export default function PDFViewerModal({
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setPageNumber(1);
+      setCurrentPage(1);
       setScale(1.0);
       setIsFullscreen(false);
       setLoading(true);
       setError(null);
       setPdf(null);
+      setRenderedPages(new Set());
+      pageRefs.clear();
     }
-  }, [isOpen]);
+  }, [isOpen, pageRefs]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -317,27 +343,11 @@ export default function PDFViewerModal({
 
         {/* Controls Bar */}
         <div className="flex items-center justify-between p-3 border-b border-gray-700 bg-gray-800/50 flex-shrink-0">
-          {/* Navigation */}
+          {/* Page Indicator */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={goToPreviousPage}
-              disabled={pageNumber <= 1}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title={t('previousPage')}
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <span className="text-sm text-gray-300 min-w-[100px] text-center">
-              {t('pageInfo', { current: pageNumber, total: numPages })}
+            <span className="text-sm text-gray-300">
+              {t('pageInfo', { current: currentPage, total: numPages })}
             </span>
-            <button
-              onClick={goToNextPage}
-              disabled={pageNumber >= numPages}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title={t('nextPage')}
-            >
-              <ChevronRight size={20} />
-            </button>
           </div>
 
           {/* Zoom Controls */}
@@ -373,19 +383,22 @@ export default function PDFViewerModal({
 
         {/* PDF Content */}
         <div
-          className="flex-1 overflow-auto bg-gray-900 flex items-center justify-center p-4"
+          ref={(el) => {
+            if (el) containerRef = el;
+          }}
+          className="flex-1 overflow-auto bg-gray-900 p-4"
           onContextMenu={handleContextMenu}
           style={selectionStyle}
         >
           {loading && (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 justify-center h-full">
               <Loader2 size={48} className="animate-spin text-secondary" />
               <p className="text-gray-400">{t('loading')}</p>
             </div>
           )}
 
           {error && (
-            <div className="flex flex-col items-center gap-3 max-w-md text-center">
+            <div className="flex flex-col items-center gap-3 max-w-md text-center mx-auto justify-center h-full">
               <FileText size={48} className="text-red-400" />
               <p className="text-red-400 font-medium">{error}</p>
               <button
@@ -397,12 +410,29 @@ export default function PDFViewerModal({
             </div>
           )}
 
-          {!loading && !error && (
-            <canvas
-              ref={setCanvasRef}
-              className="shadow-2xl max-w-full"
-              style={selectionStyle}
-            />
+          {!loading && !error && numPages > 0 && (
+            <div className="flex flex-col items-center gap-4">
+              {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+                <div
+                  key={pageNum}
+                  className="relative shadow-2xl bg-white"
+                  style={{ marginBottom: pageNum < numPages ? '16px' : '0' }}
+                >
+                  <canvas
+                    ref={(el) => {
+                      if (el) pageRefs.set(pageNum, el);
+                    }}
+                    data-page={pageNum}
+                    className="max-w-full h-auto"
+                    style={selectionStyle}
+                  />
+                  {/* Page number badge */}
+                  <div className="absolute top-2 right-2 bg-gray-900/80 text-white px-2 py-1 rounded text-xs">
+                    {pageNum}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 

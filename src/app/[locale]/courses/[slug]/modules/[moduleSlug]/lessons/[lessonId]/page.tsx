@@ -564,6 +564,7 @@ export default async function LessonPage({
             <DocumentsSection
               documents={documents}
               locale={locale}
+              lessonId={lessonId}
             />
 
             {/* Flashcards section */}
@@ -719,6 +720,7 @@ export default async function LessonPage({
                         <DocumentsSection
                           documents={documents}
                           locale={locale}
+                          lessonId={lessonId}
                         />
                       </div>
                     )}

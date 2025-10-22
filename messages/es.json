@@ -1700,6 +1700,8 @@
     "totalAssessments": "Total de {total} evaluaciones disponibles",
     "documents": "Documentos",
     "openDocument": "Abrir",
+    "loadingDocument": "Solicitando acceso al documento...",
+    "rateLimitInfo": "Control de Acceso",
     "completed": "Completada",
     "current": "Actual",
     "locked": "Bloqueada",
@@ -1788,7 +1790,7 @@
     "resetZoom": "Restablecer zoom",
     "reset": "Restablecer",
     "backToLesson": "Volver a la lección",
-    "keyboardShortcuts": "← → para navegar | +/- para zoom | 0 para restablecer | ESC para cerrar",
+    "keyboardShortcuts": "Scroll para navegar | +/- para zoom | 0 para restablecer | ESC para cerrar",
     "errors": {
       "loadFailed": "Error al cargar el documento. Inténtalo de nuevo."
     }

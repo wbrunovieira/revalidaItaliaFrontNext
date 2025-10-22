@@ -1771,6 +1771,25 @@
     "timeAgo": "{time} fa",
     "yesterday": "ieri"
   },
+  "PDFViewer": {
+    "protected": "Protetto",
+    "close": "Chiudi",
+    "loading": "Caricamento documento...",
+    "enterFullscreen": "Schermo intero",
+    "exitFullscreen": "Esci da schermo intero",
+    "previousPage": "Pagina precedente",
+    "nextPage": "Pagina successiva",
+    "pageInfo": "Pagina {current} di {total}",
+    "zoomIn": "Aumenta zoom",
+    "zoomOut": "Riduci zoom",
+    "resetZoom": "Ripristina zoom",
+    "reset": "Ripristina",
+    "backToLesson": "Torna alla lezione",
+    "keyboardShortcuts": "← → per navigare | +/- per zoom | 0 per ripristinare | ESC per chiudere",
+    "errors": {
+      "loadFailed": "Errore nel caricamento del documento. Riprova."
+    }
+  },
   "CreatePost": {
     "title": "Crea Nuovo Post",
     "type": "Tipo di Post",

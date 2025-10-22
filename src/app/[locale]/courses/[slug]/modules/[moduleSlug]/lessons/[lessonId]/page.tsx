@@ -121,6 +121,7 @@ interface DocumentTranslation {
 interface Document {
   id: string;
   filename: string;
+  protectionLevel?: 'NONE' | 'WATERMARK' | 'FULL';
   translations: DocumentTranslation[];
   createdAt: string;
   updatedAt: string;

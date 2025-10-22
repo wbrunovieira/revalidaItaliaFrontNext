@@ -43,6 +43,23 @@ interface DocumentViewModalProps {
   onClose: () => void;
 }
 
+// Function to normalize document URL by adding /api/v1/ prefix if needed
+function normalizeDocumentUrl(url: string): string {
+  if (!url) return url;
+
+  // Check if URL already has /api/v1/ prefix
+  if (url.includes('/api/v1/')) {
+    return url;
+  }
+
+  // Check if URL starts with /uploads/
+  if (url.includes('/uploads/')) {
+    return url.replace('/uploads/', '/api/v1/uploads/');
+  }
+
+  return url;
+}
+
 export default function DocumentViewModal({
   lessonId,
   documentId,
@@ -465,13 +482,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'pt'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>
@@ -518,13 +535,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'es'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>
@@ -571,13 +588,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'it'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>

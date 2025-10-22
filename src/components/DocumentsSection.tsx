@@ -34,6 +34,23 @@ interface DocumentsSectionProps {
   locale: string;
 }
 
+// Function to normalize document URL by adding /api/v1/ prefix if needed
+function normalizeDocumentUrl(url: string): string {
+  if (!url) return url;
+
+  // Check if URL already has /api/v1/ prefix
+  if (url.includes('/api/v1/')) {
+    return url;
+  }
+
+  // Check if URL starts with /uploads/
+  if (url.includes('/uploads/')) {
+    return url.replace('/uploads/', '/api/v1/uploads/');
+  }
+
+  return url;
+}
+
 // Function to get file icon based on filename
 function getFileIcon(filename: string): React.ReactElement {
   const extension = filename?.split('.').pop()?.toLowerCase();
@@ -147,7 +164,7 @@ export default function DocumentsSection({ documents, locale }: DocumentsSection
               <div
                 className="relative flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 transition-all duration-300 cursor-pointer overflow-hidden
                   hover:bg-primary/60 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-x-1 hover:py-4"
-                onClick={() => window.open(docTranslation?.url, '_blank')}
+                onClick={() => window.open(normalizeDocumentUrl(docTranslation?.url), '_blank')}
               >
                 {/* Animated background gradient on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/10 to-secondary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />

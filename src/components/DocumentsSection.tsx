@@ -3,24 +3,18 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useDocumentStatus } from '@/hooks/useDocumentStatus';
-import { useDocumentAccess } from '@/hooks/useDocumentAccess';
+import { useDocumentStatus, getStatusMessage } from '@/hooks/queries/useDocumentStatus';
+import { useDocumentAccess, useCachedDocumentUrl } from '@/hooks/queries/useDocumentAccess';
+import DocumentItem from './DocumentItem';
 import {
   FileText,
-  File,
-  Archive,
-  ExternalLink,
-  Presentation,
-  FileImage,
-  FileVideo,
-  FileAudio,
   Loader2,
   Shield,
   AlertCircle,
 } from 'lucide-react';
-import type { ProcessingStatus, ProtectionLevel } from '@/hooks/useDocumentStatus';
+import type { ProtectionLevel } from '@/hooks/queries/useDocumentStatus';
 
 // Import PDFViewerModal only on client-side to avoid SSR issues with PDF.js
 const PDFViewerModal = dynamic(() => import('./PDFViewerModal'), {
@@ -50,102 +44,9 @@ interface DocumentsSectionProps {
   lessonId: string;
 }
 
-// Function to get file icon based on filename
-function getFileIcon(filename: string): React.ReactElement {
-  const extension = filename?.split('.').pop()?.toLowerCase();
-
-  // Check if it's a PDF file
-  if (extension === 'pdf') {
-    return (
-      <Image
-        src="/icons/pdf.svg"
-        alt="PDF"
-        width={32}
-        height={32}
-        className="w-8 h-8"
-      />
-    );
-  }
-
-  // Check if it's a Word file
-  if (extension === 'doc' || extension === 'docx') {
-    return (
-      <Image
-        src="/icons/word.svg"
-        alt="Word"
-        width={32}
-        height={32}
-        className="w-8 h-8"
-      />
-    );
-  }
-
-  // Check if it's an Excel file
-  if (extension === 'xls' || extension === 'xlsx') {
-    return (
-      <Image
-        src="/icons/excel.svg"
-        alt="Excel"
-        width={32}
-        height={32}
-        className="w-8 h-8"
-      />
-    );
-  }
-
-  // Check if it's a PowerPoint file
-  if (extension === 'ppt' || extension === 'pptx') {
-    return (
-      <Image
-        src="/icons/powerpoint.svg"
-        alt="PowerPoint"
-        width={32}
-        height={32}
-        className="w-8 h-8"
-      />
-    );
-  }
-
-  // Fallback to lucide icons
-  switch (extension) {
-    case 'ppt':
-    case 'pptx':
-      return <Presentation size={24} className="text-orange-400" />;
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'gif':
-    case 'svg':
-    case 'webp':
-      return <FileImage size={24} className="text-blue-400" />;
-    case 'mp4':
-    case 'avi':
-    case 'mkv':
-    case 'mov':
-    case 'webm':
-      return <FileVideo size={24} className="text-purple-400" />;
-    case 'mp3':
-    case 'wav':
-    case 'ogg':
-    case 'flac':
-    case 'aac':
-      return <FileAudio size={24} className="text-yellow-400" />;
-    case 'zip':
-    case 'rar':
-    case '7z':
-    case 'tar':
-    case 'gz':
-      return <Archive size={24} className="text-gray-400" />;
-    case 'txt':
-      return <FileText size={24} className="text-gray-300" />;
-    default:
-      return <File size={24} className="text-gray-400" />;
-  }
-}
-
-
 export default function DocumentsSection({ documents, locale, lessonId }: DocumentsSectionProps) {
   const tLesson = useTranslations('Lesson');
+  const queryClient = useQueryClient();
 
   const [isMounted, setIsMounted] = useState(false);
   const [pdfViewerState, setPdfViewerState] = useState<{
@@ -160,136 +61,99 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
     protectionLevel: 'NONE',
   });
 
-  const [activeDocument, setActiveDocument] = useState<{
-    id: string;
-    title: string;
-    protectionLevel: ProtectionLevel;
+  const [processingDocumentId, setProcessingDocumentId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentRateLimitInfo, setCurrentRateLimitInfo] = useState<{
+    limit: number;
+    remaining: number;
+    resetAt: number;
   } | null>(null);
-
-  const [processingMessage, setProcessingMessage] = useState<string | null>(null);
-  const [accessError, setAccessError] = useState<string | null>(null);
-
-  // Hook to check document status (only when activeDocument is set and not NONE)
-  const documentStatus = useDocumentStatus({
-    lessonId,
-    documentId: activeDocument?.id || '',
-    onStatusChange: (status: ProcessingStatus) => {
-      console.log('Document status changed:', status);
-    },
-  });
-
-  // Hook for WATERMARK documents
-  const watermarkAccess = useDocumentAccess({
-    lessonId,
-    documentId: activeDocument?.protectionLevel === 'WATERMARK' ? activeDocument.id : '',
-    protectionLevel: 'WATERMARK',
-    onSuccess: (url) => {
-      setPdfViewerState({
-        isOpen: true,
-        url,
-        title: activeDocument?.title || '',
-        protectionLevel: 'WATERMARK',
-      });
-      setActiveDocument(null);
-      setProcessingMessage(null);
-      setAccessError(null);
-    },
-    onError: (error) => {
-      setAccessError(error);
-      setActiveDocument(null);
-      setProcessingMessage(null);
-    },
-  });
-
-  // Hook for FULL documents
-  const fullAccess = useDocumentAccess({
-    lessonId,
-    documentId: activeDocument?.protectionLevel === 'FULL' ? activeDocument.id : '',
-    protectionLevel: 'FULL',
-    onSuccess: (url) => {
-      setPdfViewerState({
-        isOpen: true,
-        url,
-        title: activeDocument?.title || '',
-        protectionLevel: 'FULL',
-      });
-      setActiveDocument(null);
-      setProcessingMessage(null);
-      setAccessError(null);
-    },
-    onError: (error) => {
-      setAccessError(error);
-      setActiveDocument(null);
-      setProcessingMessage(null);
-    },
-  });
 
   // Only render modal on client-side
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Handle protected document access flow
-  useEffect(() => {
-    if (!activeDocument) return;
-    if (activeDocument.protectionLevel === 'NONE') return;
-    if (!activeDocument.id) return; // Safety check
+  // Hook for document status (only enabled when processing a document)
+  const documentStatus = useDocumentStatus({
+    lessonId,
+    documentId: processingDocumentId || '',
+    enabled: !!processingDocumentId,
+    onStatusChange: (status) => {
+      console.log('[DocumentsSection] Status changed:', status);
+    },
+  });
 
-    const handleProtectedAccess = async () => {
-      try {
-        console.log('[DocumentsSection] Starting protected access flow for:', activeDocument.id, activeDocument.protectionLevel);
-        setAccessError(null);
-        setProcessingMessage('Verificando status do documento...');
+  // Hook for document access mutation
+  const documentAccess = useDocumentAccess({
+    onSuccess: (url, rateLimitInfo) => {
+      console.log('[DocumentsSection] Access granted:', { url, rateLimitInfo });
 
-        // Step 1: Check document status
-        console.log('[DocumentsSection] Step 1: Checking document status...');
-        const doc = await documentStatus.checkAndWait();
-        console.log('[DocumentsSection] checkAndWait returned:', doc);
+      const document = documents.find(d => d.id === processingDocumentId);
+      if (!document) return;
 
-        if (!doc) {
-          // Failed or timeout
-          console.log('[DocumentsSection] No document returned (failed or timeout)');
-          setProcessingMessage(null);
-          return;
-        }
+      const translation = document.translations.find(t => t.locale === locale) || document.translations[0];
 
-        // Safety check: activeDocument might have changed during async operation
-        if (!activeDocument || !activeDocument.id) {
-          console.log('[DocumentsSection] activeDocument became null during async operation');
-          setProcessingMessage(null);
-          return;
-        }
-
-        // Step 2: Document is COMPLETED, request access
-        console.log('[DocumentsSection] Step 2: Document is COMPLETED, requesting access...');
-        setProcessingMessage('Solicitando acesso ao documento...');
-
-        if (activeDocument.protectionLevel === 'WATERMARK') {
-          console.log('[DocumentsSection] Calling watermarkAccess.accessDocument()');
-          await watermarkAccess.accessDocument();
-        } else if (activeDocument.protectionLevel === 'FULL') {
-          console.log('[DocumentsSection] Calling fullAccess.accessDocument()');
-          await fullAccess.accessDocument();
-        }
-
-        console.log('[DocumentsSection] Access flow completed successfully');
-      } catch (error) {
-        console.error('[DocumentsSection] Error in protected access flow:', error);
-        setProcessingMessage(null);
+      // Store rate limit info if available (FULL documents)
+      if (rateLimitInfo) {
+        setCurrentRateLimitInfo(rateLimitInfo);
       }
-    };
 
-    handleProtectedAccess();
-  }, [activeDocument, documentStatus, watermarkAccess, fullAccess]);
+      setPdfViewerState({
+        isOpen: true,
+        url,
+        title: translation?.title || document.filename,
+        protectionLevel: document.protectionLevel || 'NONE',
+      });
 
-  const handleDocumentClick = (document: Document, translation: DocumentTranslation) => {
+      setProcessingDocumentId(null);
+      setErrorMessage(null);
+    },
+    onError: (error) => {
+      console.error('[DocumentsSection] Access error:', error);
+      setErrorMessage(error);
+      setProcessingDocumentId(null);
+    },
+  });
+
+  // Get cached URL for the document being processed
+  const cachedUrl = useCachedDocumentUrl(lessonId, processingDocumentId || '');
+
+  // Auto-trigger access when status becomes COMPLETED
+  useEffect(() => {
+    if (!processingDocumentId) return;
+    if (!documentStatus.data) return;
+
+    const { processingStatus, protectionLevel } = documentStatus.data;
+
+    // If document is completed and we don't have a cached URL, request access
+    if (processingStatus === 'COMPLETED' && !cachedUrl.hasCachedUrl) {
+      console.log('[DocumentsSection] Document COMPLETED, requesting access...');
+
+      documentAccess.accessDocument({
+        lessonId,
+        documentId: processingDocumentId,
+        protectionLevel,
+      });
+    }
+
+    // If document failed, show error
+    if (processingStatus === 'FAILED') {
+      setErrorMessage(documentStatus.data.processingError || 'Falha no processamento do documento');
+      setProcessingDocumentId(null);
+    }
+  }, [documentStatus.data, processingDocumentId, cachedUrl.hasCachedUrl, lessonId, documentAccess]);
+
+  const handleDocumentClick = async (document: Document, translation: DocumentTranslation) => {
     const protectionLevel = document.protectionLevel || 'NONE';
 
-    console.log('Document clicked:', {
+    console.log('[DocumentsSection] Document clicked:', {
       documentId: document.id,
       protectionLevel,
       translationUrl: translation.url,
     });
+
+    setErrorMessage(null);
 
     // NONE: Use URL directly from translations, open in new tab
     if (protectionLevel === 'NONE') {
@@ -297,12 +161,36 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       return;
     }
 
-    // WATERMARK or FULL: Start protected access flow
-    setActiveDocument({
-      id: document.id,
-      title: translation.title || document.filename,
-      protectionLevel,
-    });
+    // For WATERMARK or FULL: Check if we have a cached URL using queryClient directly
+    const cachedData = queryClient.getQueryData<{
+      url: string;
+      rateLimitInfo?: {
+        limit: number;
+        remaining: number;
+        resetAt: number;
+      };
+    }>(['document-access', lessonId, document.id]);
+
+    if (cachedData?.url) {
+      console.log('[DocumentsSection] Using cached URL! ⚡');
+
+      // Update rate limit info if available
+      if (cachedData.rateLimitInfo) {
+        setCurrentRateLimitInfo(cachedData.rateLimitInfo);
+      }
+
+      setPdfViewerState({
+        isOpen: true,
+        url: cachedData.url,
+        title: translation.title || document.filename,
+        protectionLevel,
+      });
+      return;
+    }
+
+    // No cache - need to check status and request access
+    console.log('[DocumentsSection] No cache, checking status...');
+    setProcessingDocumentId(document.id);
   };
 
   const closePdfViewer = () => {
@@ -318,8 +206,8 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
     return null;
   }
 
-  const isLoading = documentStatus.loading || watermarkAccess.loading || fullAccess.loading || documentStatus.isPolling;
-  const currentError = accessError || documentStatus.error || watermarkAccess.error || fullAccess.error;
+  const isLoading = documentStatus.isLoading || documentAccess.isLoading || documentStatus.isPolling;
+  const currentError = errorMessage || documentStatus.error || documentAccess.error;
 
   return (
     <>
@@ -340,7 +228,11 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
           <Loader2 size={20} className="animate-spin text-blue-400" />
           <div className="flex-1">
             <span className="text-sm text-blue-400">
-              {processingMessage || tLesson('loadingDocument')}
+              {documentStatus.isPolling
+                ? `Processando documento... ${documentStatus.data ? getStatusMessage(documentStatus.data.processingStatus) : ''}`
+                : documentAccess.isLoading
+                ? 'Solicitando acesso ao documento...'
+                : 'Verificando status do documento...'}
             </span>
             {documentStatus.isPolling && (
               <p className="text-xs text-blue-300 mt-1">
@@ -360,12 +252,12 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       )}
 
       {/* Rate limit info for FULL documents */}
-      {fullAccess.rateLimitInfo && (
+      {currentRateLimitInfo && (
         <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <Shield size={16} className="text-yellow-400" />
             <span className="text-sm text-yellow-400 font-medium">
-              {tLesson('rateLimitInfo')}
+              Limite de acessos
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -373,12 +265,12 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
               <div
                 className="bg-yellow-400 h-full transition-all duration-300"
                 style={{
-                  width: `${(fullAccess.rateLimitInfo.remaining / fullAccess.rateLimitInfo.limit) * 100}%`,
+                  width: `${(currentRateLimitInfo.remaining / currentRateLimitInfo.limit) * 100}%`,
                 }}
               />
             </div>
             <span className="text-xs text-gray-400">
-              {fullAccess.rateLimitInfo.remaining}/{fullAccess.rateLimitInfo.limit}
+              {currentRateLimitInfo.remaining}/{currentRateLimitInfo.limit}
             </span>
           </div>
         </div>
@@ -390,70 +282,19 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
             document.translations.find(t => t.locale === locale) ||
             document.translations[0];
 
-          const isCurrentLoading = isLoading && activeDocument?.id === document.id;
-          const protectionLevel = document.protectionLevel || 'NONE';
+          const isCurrentLoading = isLoading && processingDocumentId === document.id;
 
           return (
-            <div
+            <DocumentItem
               key={document.id}
-              className="group relative"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div
-                className={`relative flex items-center gap-3 p-3 bg-primary/40 rounded-lg border border-secondary/30 transition-all duration-300 overflow-hidden
-                  ${isCurrentLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer hover:bg-primary/60 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-x-1 hover:py-4'}`}
-                onClick={() => !isCurrentLoading && handleDocumentClick(document, docTranslation)}
-              >
-                {/* Animated background gradient on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/10 to-secondary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
-
-                {/* Icon with rotation animation */}
-                <div className="relative flex-shrink-0 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-                  {isCurrentLoading ? (
-                    <Loader2 size={24} className="animate-spin text-secondary" />
-                  ) : (
-                    getFileIcon(document.filename)
-                  )}
-                </div>
-
-                {/* Title with underline animation and description */}
-                <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300 truncate">
-                      {docTranslation?.title || document.filename}
-                    </h5>
-                    {protectionLevel === 'FULL' && (
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/20 rounded text-xs text-red-400 border border-red-500/30">
-                        <Shield size={10} />
-                        <span>FULL</span>
-                      </div>
-                    )}
-                    {protectionLevel === 'WATERMARK' && (
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/20 rounded text-xs text-blue-400 border border-blue-500/30">
-                        <Shield size={10} />
-                        <span>WATERMARK</span>
-                      </div>
-                    )}
-                  </div>
-                  {/* Description that appears on hover */}
-                  <p className="text-xs text-gray-400 mt-0.5 truncate max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 transition-all duration-300 ease-out">
-                    {docTranslation?.description}
-                  </p>
-                  <div className="absolute bottom-0 left-0 h-0.5 bg-secondary w-0 group-hover:w-full transition-all duration-300 ease-out" />
-                </div>
-
-                {/* Arrow icon with slide animation */}
-                <div className="relative flex items-center gap-2">
-                  <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {tLesson('openDocument')}
-                  </span>
-                  <ExternalLink
-                    size={16}
-                    className="text-gray-400 group-hover:text-secondary transform transition-all duration-300 group-hover:translate-x-1"
-                  />
-                </div>
-              </div>
-            </div>
+              document={document}
+              translation={docTranslation}
+              lessonId={lessonId}
+              isLoading={isCurrentLoading}
+              onDocumentClick={handleDocumentClick}
+              openDocumentText={tLesson('openDocument')}
+              index={index}
+            />
           );
         })}
       </div>

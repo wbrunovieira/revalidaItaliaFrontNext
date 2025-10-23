@@ -279,22 +279,9 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
                     : 'Verificando disponibilidade do documento...'}
                 </p>
 
-                {/* Progress bar */}
-                {documentStatus.isPolling && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-blue-300/70">
-                      <span>Progresso estimado</span>
-                      <span className="font-mono">Processando...</span>
-                    </div>
-                    <div className="h-1.5 bg-blue-950/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 rounded-full animate-pulse" style={{width: '60%'}}></div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Additional info */}
                 {documentStatus.isPolling && (
-                  <div className="mt-3 flex items-start gap-2 text-xs text-blue-300/60">
+                  <div className="flex items-start gap-2 text-xs text-blue-300/60">
                     <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
                     <span>
                       Tempo estimado: 1-3 minutos. Você pode navegar pela página enquanto aguarda.

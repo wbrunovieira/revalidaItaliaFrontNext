@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { getCookie } from '@/lib/auth-utils';
 
-type ProcessingStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
-type ProtectionLevel = 'NONE' | 'WATERMARK' | 'FULL';
+interface WatermarkAccessResponse {
+  url: string;
+}
 
-interface SignedUrlResponse {
+interface FullAccessResponse {
   signedUrl: string;
   expiresAt: string;
   rateLimitInfo: {
@@ -14,34 +15,31 @@ interface SignedUrlResponse {
   };
 }
 
-interface DocumentStatusResponse {
-  documentId: string;
-  processingStatus: ProcessingStatus;
-  protectionLevel: ProtectionLevel;
-  processingStartedAt: string | null;
-  processingCompletedAt: string | null;
-  processingError: string | null;
-  processingAttempts: number;
-  estimatedCompletionTime: string | null;
-}
-
 interface UseDocumentAccessOptions {
   lessonId: string;
   documentId: string;
-  onSuccess?: (url: string) => void;
+  protectionLevel: 'WATERMARK' | 'FULL';
+  onSuccess?: (url: string, rateLimitInfo?: FullAccessResponse['rateLimitInfo']) => void;
   onError?: (error: string) => void;
 }
 
+/**
+ * Hook to request access to WATERMARK or FULL protection documents
+ * Calls POST /api/v1/lessons/:lessonId/documents/:documentId/access
+ *
+ * IMPORTANT: Document must be processingStatus === 'COMPLETED' before calling this!
+ * Use GET /api/v1/lessons/:lessonId/documents/:documentId to check status first.
+ */
 export function useDocumentAccess({
   lessonId,
   documentId,
+  protectionLevel,
   onSuccess,
   onError,
 }: UseDocumentAccessOptions) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rateLimitInfo, setRateLimitInfo] = useState<SignedUrlResponse['rateLimitInfo'] | null>(null);
-  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus | null>(null);
+  const [rateLimitInfo, setRateLimitInfo] = useState<FullAccessResponse['rateLimitInfo'] | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
@@ -49,20 +47,30 @@ export function useDocumentAccess({
     return getCookie('token');
   };
 
-  const requestSignedUrl = useCallback(async (): Promise<string> => {
+  /**
+   * Request access URL for WATERMARK or FULL protection document
+   * Returns processed URL (WATERMARK) or signed URL (FULL)
+   */
+  const requestAccess = useCallback(async (): Promise<string> => {
     const token = getAuthToken();
 
     if (!token) {
       throw new Error('Unauthorized');
     }
 
+    if (!lessonId || !documentId) {
+      throw new Error('Missing lessonId or documentId');
+    }
+
     const url = `${apiUrl}/api/v1/lessons/${lessonId}/documents/${documentId}/access`;
-    console.log('Requesting signed URL:', {
-      url,
-      lessonId,
-      documentId,
-      hasToken: !!token,
-    });
+    console.log('========================================');
+    console.log('[requestAccess] POST /access');
+    console.log('[requestAccess] URL:', url);
+    console.log('[requestAccess] lessonId:', lessonId);
+    console.log('[requestAccess] documentId:', documentId);
+    console.log('[requestAccess] protectionLevel:', protectionLevel);
+    console.log('[requestAccess] hasToken:', !!token);
+    console.log('========================================');
 
     const response = await fetch(url, {
       method: 'POST',
@@ -71,6 +79,8 @@ export function useDocumentAccess({
         'Content-Type': 'application/json',
       },
     });
+
+    console.log('[requestAccess] Response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -88,10 +98,6 @@ export function useDocumentAccess({
           throw new Error('Você não tem acesso a este documento. Faça upgrade do seu plano.');
         case 404:
           throw new Error('Documento não encontrado.');
-        case 409:
-          const status = errorData.processingStatus || 'PROCESSING';
-          setProcessingStatus(status);
-          throw new Error(`PROCESSING:${status}`);
         case 429:
           const resetAt = new Date(errorData.resetAt);
           const now = new Date();
@@ -102,135 +108,69 @@ export function useDocumentAccess({
       }
     }
 
-    const data: SignedUrlResponse = await response.json();
-    setRateLimitInfo(data.rateLimitInfo);
+    const data = await response.json();
 
-    console.log('Signed URL received successfully:', {
-      hasSignedUrl: !!data.signedUrl,
-      expiresAt: data.expiresAt,
-      rateLimitRemaining: data.rateLimitInfo.remaining,
-    });
-
-    return data.signedUrl;
-  }, [apiUrl, lessonId, documentId]);
-
-  const checkDocumentStatus = useCallback(async (): Promise<DocumentStatusResponse> => {
-    const token = getAuthToken();
-
-    if (!token) {
-      throw new Error('Unauthorized');
+    // Handle response based on protection level
+    if (protectionLevel === 'FULL' && data.signedUrl) {
+      // FULL protection - has rate limit info
+      const fullResponse = data as FullAccessResponse;
+      setRateLimitInfo(fullResponse.rateLimitInfo);
+      console.log('Signed URL received:', {
+        expiresAt: fullResponse.expiresAt,
+        rateLimitRemaining: fullResponse.rateLimitInfo?.remaining,
+      });
+      return fullResponse.signedUrl;
+    } else if (protectionLevel === 'WATERMARK' && data.url) {
+      // WATERMARK - direct URL with watermark
+      const watermarkResponse = data as WatermarkAccessResponse;
+      console.log('Watermark URL received:', { url: watermarkResponse.url });
+      return watermarkResponse.url;
     }
 
-    const response = await fetch(
-      `${apiUrl}/api/v1/lessons/${lessonId}/documents/${documentId}/status`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
+    throw new Error('Resposta inválida do servidor');
+  }, [apiUrl, lessonId, documentId, protectionLevel]);
 
-    if (!response.ok) {
-      throw new Error('Erro ao verificar status do documento');
-    }
-
-    const data: DocumentStatusResponse = await response.json();
-    setProcessingStatus(data.processingStatus);
-
-    return data;
-  }, [apiUrl, lessonId, documentId]);
-
-  const pollDocumentStatus = useCallback(async (): Promise<boolean> => {
-    const maxAttempts = 30; // 30 tentativas = 5 minutos (10s cada)
-    let attempts = 0;
-
-    return new Promise((resolve) => {
-      const interval = setInterval(async () => {
-        try {
-          const status = await checkDocumentStatus();
-
-          if (status.processingStatus === 'COMPLETED') {
-            clearInterval(interval);
-            setError(null);
-            resolve(true);
-          } else if (status.processingStatus === 'FAILED') {
-            clearInterval(interval);
-            setError('Falha no processamento do documento');
-            resolve(false);
-          }
-
-          attempts++;
-          if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            setError('Tempo limite excedido. Tente novamente mais tarde.');
-            resolve(false);
-          }
-        } catch (err) {
-          console.error('Erro ao verificar status:', err);
-          clearInterval(interval);
-          resolve(false);
-        }
-      }, 10000); // 10 segundos
-    });
-  }, [checkDocumentStatus]);
-
+  /**
+   * Main method to access document
+   * Will call POST /access and return the URL
+   */
   const accessDocument = useCallback(async () => {
+    console.log('[accessDocument] Starting access request for', protectionLevel, 'document:', documentId);
     setLoading(true);
     setError(null);
 
     try {
-      const signedUrl = await requestSignedUrl();
+      console.log('[accessDocument] Calling POST /access...');
+      const url = await requestAccess();
+      console.log('[accessDocument] Received URL:', url);
 
       if (onSuccess) {
-        onSuccess(signedUrl);
+        console.log('[accessDocument] Calling onSuccess callback');
+        onSuccess(url, rateLimitInfo || undefined);
       }
 
-      return signedUrl;
-    } catch (err: any) {
-      const errorMessage = err.message;
+      return url;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      console.error('[accessDocument] Error:', errorMessage);
+      setError(errorMessage);
 
-      // Se for erro de processamento, iniciar polling
-      if (errorMessage.startsWith('PROCESSING:')) {
-        const status = errorMessage.split(':')[1];
-        setError(`Documento ${getStatusMessage(status as ProcessingStatus)}. Aguarde...`);
-
-        // Iniciar polling
-        const completed = await pollDocumentStatus();
-
-        if (completed && onError) {
-          setError('Documento pronto! Clique novamente para abrir.');
-        }
-      } else {
-        setError(errorMessage);
-        if (onError) {
-          onError(errorMessage);
-        }
+      if (onError) {
+        console.log('[accessDocument] Calling onError callback');
+        onError(errorMessage);
       }
 
       throw err;
     } finally {
       setLoading(false);
+      console.log('[accessDocument] Finished');
     }
-  }, [requestSignedUrl, pollDocumentStatus, onSuccess, onError]);
-
-  const getStatusMessage = (status: ProcessingStatus): string => {
-    const messages = {
-      PENDING: 'aguardando processamento',
-      PROCESSING: 'sendo processado',
-      FAILED: 'com erro no processamento',
-      COMPLETED: 'pronto',
-    };
-    return messages[status] || 'em status desconhecido';
-  };
+  }, [requestAccess, rateLimitInfo, onSuccess, onError, protectionLevel, documentId]);
 
   return {
     loading,
     error,
     rateLimitInfo,
-    processingStatus,
     accessDocument,
-    checkDocumentStatus,
-    getStatusMessage,
   };
 }

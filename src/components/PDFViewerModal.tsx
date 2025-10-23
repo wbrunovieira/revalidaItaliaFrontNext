@@ -5,8 +5,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   X,
-  ChevronLeft,
-  ChevronRight,
   ZoomIn,
   ZoomOut,
   Maximize2,
@@ -28,9 +26,31 @@ interface PDFViewerModalProps {
 }
 
 // Declare global pdfjsLib type
+interface PDFDocumentProxy {
+  numPages: number;
+  getPage: (pageNumber: number) => Promise<PDFPageProxy>;
+}
+
+interface PDFPageProxy {
+  getViewport: (params: { scale: number }) => PDFPageViewport;
+  render: (params: { canvasContext: CanvasRenderingContext2D; viewport: PDFPageViewport; canvas: HTMLCanvasElement }) => { promise: Promise<void> };
+}
+
+interface PDFPageViewport {
+  width: number;
+  height: number;
+}
+
+interface PDFJSLib {
+  getDocument: (params: { url: string; withCredentials: boolean; isEvalSupported: boolean; disableStream: boolean; disableAutoFetch: boolean }) => { promise: Promise<PDFDocumentProxy> };
+  GlobalWorkerOptions: {
+    workerSrc: string;
+  };
+}
+
 declare global {
   interface Window {
-    pdfjsLib?: any;
+    pdfjsLib?: PDFJSLib;
   }
 }
 
@@ -43,19 +63,19 @@ export default function PDFViewerModal({
 }: PDFViewerModalProps) {
   const t = useTranslations('PDFViewer');
 
-  const [pdfjs, setPdfjs] = useState<any>(null);
-  const [pdf, setPdf] = useState<any>(null);
+  const [pdfjs, setPdfjs] = useState<PDFJSLib | null>(null);
+  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pageRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const renderingPages = useRef<Set<number>>(new Set());
+  const renderedPages = useRef<Set<string>>(new Set()); // Track by "pageNum-scale" key
 
   // Load PDF.js from CDN to avoid webpack issues
   useEffect(() => {
@@ -124,8 +144,18 @@ export default function PDFViewerModal({
 
   // Render a single page
   const renderPage = useCallback(async (pageNum: number, canvas: HTMLCanvasElement) => {
-    // Skip if already rendered or currently rendering
-    if (!pdf || renderedPages.has(pageNum) || renderingPages.current.has(pageNum)) {
+    // Skip if currently rendering
+    if (!pdf || renderingPages.current.has(pageNum)) {
+      console.log(`[renderPage] Skipping page ${pageNum} - already rendering or no PDF`);
+      return;
+    }
+
+    // Get unique key for this render (pageNum + scale)
+    const renderKey = `${pageNum}-${scale}`;
+
+    // Check if this specific page at this scale was already rendered
+    if (renderedPages.current.has(renderKey)) {
+      console.log(`[renderPage] Page ${pageNum} already rendered at scale ${scale}, skipping`);
       return;
     }
 
@@ -136,6 +166,8 @@ export default function PDFViewerModal({
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
 
+      console.log(`[renderPage] Rendering page ${pageNum} with scale ${scale}, viewport: ${viewport.width}x${viewport.height}`);
+
       const context = canvas.getContext('2d');
       if (!context) {
         renderingPages.current.delete(pageNum);
@@ -145,21 +177,24 @@ export default function PDFViewerModal({
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
+      console.log(`[renderPage] Canvas dimensions set to: ${canvas.width}x${canvas.height}`);
+
       await page.render({
         canvasContext: context,
         viewport: viewport,
         canvas: canvas,
       }).promise;
 
-      setRenderedPages((prev) => new Set(prev).add(pageNum));
-      console.log(`Page ${pageNum} rendered`);
+      renderedPages.current.add(renderKey);
+      console.log(`[renderPage] Page ${pageNum} rendered successfully at scale ${scale}`);
+      console.log(`[renderPage] Final canvas size: ${canvas.width}x${canvas.height}, style: ${canvas.style.width}x${canvas.style.height}`);
     } catch (err) {
-      console.error(`Error rendering page ${pageNum}:`, err);
+      console.error(`[renderPage] Error rendering page ${pageNum}:`, err);
     } finally {
       // Always remove from rendering list
       renderingPages.current.delete(pageNum);
     }
-  }, [pdf, scale, renderedPages]);
+  }, [pdf, scale]);
 
   // Intersection Observer for lazy loading pages
   useEffect(() => {
@@ -190,7 +225,7 @@ export default function PDFViewerModal({
     );
 
     // Observe all canvas elements
-    pageRefs.current.forEach((canvas, pageNum) => {
+    pageRefs.current.forEach((canvas) => {
       if (canvas) observer.observe(canvas);
     });
 
@@ -199,15 +234,22 @@ export default function PDFViewerModal({
     };
   }, [pdf, numPages, renderPage]);
 
-  // Re-render all pages when scale changes
+  // Reset rendering tracking when scale changes
+  // The key change in the DOM will force React to recreate canvas elements
   useEffect(() => {
-    setRenderedPages(new Set());
+    console.log('[PDFViewerModal] Scale changed to:', scale);
+    renderedPages.current.clear();
     renderingPages.current.clear();
+    pageRefs.current.clear();
   }, [scale]);
 
   // Zoom
   const zoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev + 0.25, 3.0));
+    setScale((prev) => {
+      const newScale = Math.min(prev + 0.25, 3.0);
+      console.log('[zoomIn] Changing scale from', prev, 'to', newScale);
+      return newScale;
+    });
   }, []);
 
   const zoomOut = useCallback(() => {
@@ -278,7 +320,7 @@ export default function PDFViewerModal({
       setLoading(true);
       setError(null);
       setPdf(null);
-      setRenderedPages(new Set());
+      renderedPages.current.clear();
       pageRefs.current.clear();
       renderingPages.current.clear();
     }
@@ -424,20 +466,27 @@ export default function PDFViewerModal({
           )}
 
           {!loading && !error && numPages > 0 && (
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4" style={{ width: 'fit-content', margin: '0 auto' }}>
               {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
                 <div
-                  key={pageNum}
+                  key={`page-${pageNum}-scale-${scale}`}
                   className="relative shadow-2xl bg-white"
-                  style={{ marginBottom: pageNum < numPages ? '16px' : '0' }}
+                  style={{
+                    marginBottom: pageNum < numPages ? '16px' : '0',
+                    width: 'fit-content'
+                  }}
                 >
                   <canvas
                     ref={(el) => {
                       if (el) pageRefs.current.set(pageNum, el);
                     }}
                     data-page={pageNum}
-                    className="max-w-full h-auto"
-                    style={selectionStyle}
+                    style={{
+                      display: 'block',
+                      width: 'auto',
+                      height: 'auto',
+                      ...selectionStyle
+                    }}
                   />
                   {/* Page number badge */}
                   <div className="absolute top-2 right-2 bg-gray-900/80 text-white px-2 py-1 rounded text-xs">

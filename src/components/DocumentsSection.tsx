@@ -209,6 +209,16 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
   const isLoading = documentStatus.isLoading || documentAccess.isLoading || documentStatus.isPolling;
   const currentError = errorMessage || documentStatus.error || documentAccess.error;
 
+  // Debug logs
+  console.log('[DocumentsSection] Render state:', {
+    isLoading,
+    processingDocumentId,
+    'documentStatus.isLoading': documentStatus.isLoading,
+    'documentStatus.isPolling': documentStatus.isPolling,
+    'documentAccess.isLoading': documentAccess.isLoading,
+    'documentStatus.data': documentStatus.data,
+  });
+
   return (
     <>
     <div className="mt-8">
@@ -222,22 +232,94 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
         <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
       </div>
 
-      {/* Loading/Processing message */}
+      {/* Enhanced Loading/Processing message */}
       {isLoading && (
-        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-center gap-3">
-          <Loader2 size={20} className="animate-spin text-blue-400" />
-          <div className="flex-1">
-            <span className="text-sm text-blue-400">
-              {documentStatus.isPolling
-                ? `Processando documento... ${documentStatus.data ? getStatusMessage(documentStatus.data.processingStatus) : ''}`
-                : documentAccess.isLoading
-                ? 'Solicitando acesso ao documento...'
-                : 'Verificando status do documento...'}
-            </span>
-            {documentStatus.isPolling && (
-              <p className="text-xs text-blue-300 mt-1">
-                Isso pode levar alguns minutos. Por favor, aguarde...
-              </p>
+        <div className="mb-4 relative overflow-hidden rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent backdrop-blur-sm">
+          {/* Animated background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-pulse"></div>
+
+          <div className="relative p-4">
+            <div className="flex items-start gap-4">
+              {/* Animated icon */}
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-blue-400/20 rounded-full animate-ping"></div>
+                <div className="relative w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/30">
+                  {documentStatus.isPolling ? (
+                    <Shield size={24} className="text-blue-400" />
+                  ) : (
+                    <Loader2 size={24} className="animate-spin text-blue-400" />
+                  )}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                {/* Title */}
+                <div className="flex items-center gap-2 mb-2">
+                  <h5 className="text-base font-semibold text-blue-400">
+                    {documentStatus.isPolling
+                      ? 'Processando Documento Protegido'
+                      : documentAccess.isLoading
+                      ? 'Solicitando Acesso'
+                      : 'Verificando Status'}
+                  </h5>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-blue-300/90 mb-3">
+                  {documentStatus.isPolling
+                    ? 'Estamos aplicando proteções avançadas ao seu documento. Este processo garante a segurança e controle de acesso ao conteúdo.'
+                    : documentAccess.isLoading
+                    ? 'Gerando acesso seguro ao documento...'
+                    : 'Verificando disponibilidade do documento...'}
+                </p>
+
+                {/* Progress bar */}
+                {documentStatus.isPolling && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-blue-300/70">
+                      <span>Progresso estimado</span>
+                      <span className="font-mono">Processando...</span>
+                    </div>
+                    <div className="h-1.5 bg-blue-950/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional info */}
+                {documentStatus.isPolling && (
+                  <div className="mt-3 flex items-start gap-2 text-xs text-blue-300/60">
+                    <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                    <span>
+                      Tempo estimado: 1-3 minutos. Você pode navegar pela página enquanto aguarda.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Status badge */}
+            {documentStatus.data && (
+              <div className="mt-3 flex items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-400/30 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                  <span className="text-xs font-medium text-blue-300">
+                    Status: {getStatusMessage(documentStatus.data.processingStatus)}
+                  </span>
+                </div>
+                {documentStatus.isRefetching && (
+                  <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-400/20 rounded-full">
+                    <Loader2 size={10} className="animate-spin text-blue-400" />
+                    <span className="text-xs text-blue-400/70">Atualizando...</span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

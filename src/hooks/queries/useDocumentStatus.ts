@@ -167,13 +167,15 @@ export function useDocumentStatus({
     onStatusChange(currentStatus);
   }
 
+  // Check if we should be polling (regardless of if actively refetching at this moment)
+  const shouldPoll = query.data?.processingStatus === 'PENDING' ||
+                     query.data?.processingStatus === 'PROCESSING';
+
   return {
     data: query.data,
     isLoading: query.isLoading,
-    isPolling: query.isRefetching && (
-      query.data?.processingStatus === 'PENDING' ||
-      query.data?.processingStatus === 'PROCESSING'
-    ),
+    isPolling: shouldPoll, // True whenever status is PENDING or PROCESSING
+    isRefetching: query.isRefetching, // True only when actively making request
     error: query.error instanceof Error ? query.error.message : null,
     refetch: query.refetch,
   };

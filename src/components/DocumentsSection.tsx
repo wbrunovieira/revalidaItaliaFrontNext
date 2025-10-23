@@ -1,7 +1,7 @@
 // /src/components/DocumentsSection.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
@@ -69,6 +69,9 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
     resetAt: number;
   } | null>(null);
 
+  // Track which documents have already had POST /access called to prevent duplicates
+  const accessRequestedRef = useRef<Set<string>>(new Set());
+
   // Only render modal on client-side
   useEffect(() => {
     setIsMounted(true);
@@ -87,7 +90,8 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
   // Hook for document access mutation
   const documentAccess = useDocumentAccess({
     onSuccess: (url, rateLimitInfo) => {
-      console.log('[DocumentsSection] Access granted:', { url, rateLimitInfo });
+      console.log('[DocumentsSection] ✅ POST /access SUCCESS - URL received');
+      console.log('[DocumentsSection] Rate limit info:', rateLimitInfo);
 
       const document = documents.find(d => d.id === processingDocumentId);
       if (!document) return;
@@ -106,13 +110,20 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
         protectionLevel: document.protectionLevel || 'NONE',
       });
 
+      // Clean up
       setProcessingDocumentId(null);
       setErrorMessage(null);
+
+      console.log('[DocumentsSection] 🎉 Document opened successfully! Polling stopped.');
     },
     onError: (error) => {
-      console.error('[DocumentsSection] Access error:', error);
+      console.error('[DocumentsSection] ❌ POST /access ERROR:', error);
       setErrorMessage(error);
       setProcessingDocumentId(null);
+
+      // Remove from ref so user can retry
+      const accessKey = `${lessonId}-${processingDocumentId}`;
+      accessRequestedRef.current.delete(accessKey);
     },
   });
 
@@ -126,10 +137,23 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
 
     const { processingStatus, protectionLevel } = documentStatus.data;
 
-    // If document is completed and we don't have a cached URL, request access
+    // If document is completed and we don't have a cached URL
     if (processingStatus === 'COMPLETED' && !cachedUrl.hasCachedUrl) {
-      console.log('[DocumentsSection] Document COMPLETED, requesting access...');
+      // Check if we already requested access for this document (prevent duplicates)
+      const accessKey = `${lessonId}-${processingDocumentId}`;
 
+      if (accessRequestedRef.current.has(accessKey)) {
+        console.log('[DocumentsSection] POST /access already requested for this document, skipping...');
+        return;
+      }
+
+      console.log('[DocumentsSection] ✅ Document COMPLETED, calling POST /access ONE TIME...');
+      console.log('[DocumentsSection] This should be the ONLY POST /access for this document!');
+
+      // Mark as requested BEFORE calling to prevent race conditions
+      accessRequestedRef.current.add(accessKey);
+
+      // Call POST /access ONCE
       documentAccess.accessDocument({
         lessonId,
         documentId: processingDocumentId,
@@ -142,16 +166,16 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       setErrorMessage(documentStatus.data.processingError || 'Falha no processamento do documento');
       setProcessingDocumentId(null);
     }
-  }, [documentStatus.data, processingDocumentId, cachedUrl.hasCachedUrl, lessonId, documentAccess]);
+  }, [documentStatus.data, processingDocumentId, cachedUrl.hasCachedUrl, lessonId]);
 
   const handleDocumentClick = async (document: Document, translation: DocumentTranslation) => {
     const protectionLevel = document.protectionLevel || 'NONE';
 
-    console.log('[DocumentsSection] Document clicked:', {
-      documentId: document.id,
-      protectionLevel,
-      translationUrl: translation.url,
-    });
+    console.log('========================================');
+    console.log('[DocumentsSection] 📄 Document clicked');
+    console.log('[DocumentsSection] documentId:', document.id);
+    console.log('[DocumentsSection] protectionLevel:', protectionLevel);
+    console.log('========================================');
 
     setErrorMessage(null);
 
@@ -172,7 +196,7 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
     }>(['document-access', lessonId, document.id]);
 
     if (cachedData?.url) {
-      console.log('[DocumentsSection] Using cached URL! ⚡');
+      console.log('[DocumentsSection] ⚡ Using cached URL (POST /access was already called)');
 
       // Update rate limit info if available
       if (cachedData.rateLimitInfo) {
@@ -188,8 +212,10 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       return;
     }
 
-    // No cache - need to check status and request access
-    console.log('[DocumentsSection] No cache, checking status...');
+    // No cache - start GET /status polling
+    console.log('[DocumentsSection] 🔄 No cache, starting GET /status polling...');
+    console.log('[DocumentsSection] Will poll GET /status every 10 seconds until status=COMPLETED');
+    console.log('[DocumentsSection] When status=COMPLETED, will call POST /access ONE TIME');
     setProcessingDocumentId(document.id);
   };
 

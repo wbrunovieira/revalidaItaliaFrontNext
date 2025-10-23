@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
   X,
   ZoomIn,
@@ -53,6 +54,52 @@ declare global {
     pdfjsLib?: PDFJSLib;
   }
 }
+
+// Animation variants for staggered fade-in
+const backdropVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.2 }
+  },
+  exit: { opacity: 0, transition: { duration: 0.15 } }
+};
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, delay: 0.05 }
+  },
+  exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
+};
+
+const headerVariants: Variants = {
+  hidden: { opacity: 0, y: -5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, delay: 0.1 }
+  }
+};
+
+const controlsVariants: Variants = {
+  hidden: { opacity: 0, y: 5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, delay: 0.15 }
+  }
+};
+
+const contentVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.3, delay: 0.2 }
+  }
+};
 
 export default function PDFViewerModal({
   isOpen,
@@ -337,8 +384,6 @@ export default function PDFViewerModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const getProtectionIcon = () => {
     switch (protectionLevel) {
       case 'WATERMARK':
@@ -351,56 +396,100 @@ export default function PDFViewerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/70"
-        onClick={onClose}
-      />
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop with radial gradient */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(12, 53, 89, 0.4) 0%, rgba(0, 0, 0, 0.85) 100%)'
+            }}
+            onClick={onClose}
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          />
 
-      {/* Modal */}
-      <div
-        className={`relative bg-primary shadow-2xl flex flex-col ${
-          isFullscreen
-            ? 'w-full h-full'
-            : 'rounded-none sm:rounded-xl w-full sm:max-w-6xl sm:mx-4 max-h-screen sm:max-h-[90vh]'
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-2 sm:p-4 border-b border-secondary/30 flex-shrink-0 bg-primary/90">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+          {/* Modal with gradient background */}
+          <motion.div
+            className={`relative shadow-2xl flex flex-col ${
+              isFullscreen
+                ? 'w-full h-full'
+                : 'rounded-none sm:rounded-xl w-full sm:max-w-6xl sm:mx-4 max-h-screen sm:max-h-[90vh]'
+            }`}
+            style={{
+              background: 'linear-gradient(135deg, #0C3559 0%, #08243a 50%, #051829 100%)',
+              boxShadow: '0 0 60px rgba(56, 135, 166, 0.3), 0 0 120px rgba(56, 135, 166, 0.2)'
+            }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+        {/* Header with gradient */}
+        <motion.div
+          className="flex items-center justify-between p-2 sm:p-4 border-b flex-shrink-0 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(to right, #051829 0%, #08243a 70%, #3887A6 100%)',
+            borderBottom: '1px solid rgba(56, 135, 166, 0.3)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+          }}
+          variants={headerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Shine effect overlay */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              background: 'linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%)'
+            }}
+          />
+          <div className="relative flex items-center gap-2 sm:gap-3 flex-1 min-w-0 z-10">
             <span className="hidden sm:inline">{getProtectionIcon()}</span>
             <h2 className="text-sm sm:text-lg font-bold text-white truncate">
               {documentTitle}
             </h2>
             {(protectionLevel === 'WATERMARK' || protectionLevel === 'FULL') && (
-              <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-secondary/20 rounded text-xs text-secondary border border-secondary/30">
+              <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-white/10 backdrop-blur-sm rounded text-xs text-white border border-white/20">
                 <Shield size={12} />
                 <span>{t('protected')}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="relative flex items-center gap-1 sm:gap-2 z-10">
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors hidden sm:block"
+              className="p-1.5 sm:p-2 text-white hover:text-white hover:bg-white/30 hover:scale-105 backdrop-blur-sm rounded-lg transition-all duration-200 hidden sm:block border border-white/10 hover:border-white/30 hover:shadow-lg"
               title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
             >
               {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 sm:p-2 text-white bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 text-white bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105 rounded-lg transition-all duration-200 shadow-lg hover:shadow-2xl hover:shadow-red-500/50 border border-red-400/30 hover:border-red-400/50"
               title={t('close')}
             >
               <X size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 p-2 sm:p-3 border-b border-secondary/30 bg-primary/50 flex-shrink-0">
+        {/* Controls Bar with gradient */}
+        <motion.div
+          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 p-2 sm:p-3 flex-shrink-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(12, 53, 89, 0.6) 0%, rgba(8, 36, 58, 0.8) 100%)',
+            borderBottom: '1px solid rgba(56, 135, 166, 0.2)',
+            backdropFilter: 'blur(10px)'
+          }}
+          variants={controlsVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {/* Page Indicator */}
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <span className="text-xs sm:text-sm text-gray-300">
@@ -413,38 +502,44 @@ export default function PDFViewerModal({
             <button
               onClick={zoomOut}
               disabled={scale <= 0.5}
-              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 text-white hover:text-white hover:bg-white/30 hover:scale-110 backdrop-blur-sm rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed border border-white/10 hover:border-white/30 hover:shadow-lg"
               title={t('zoomOut')}
             >
               <ZoomOut size={16} className="sm:w-5 sm:h-5" />
             </button>
-            <span className="text-xs sm:text-sm text-gray-300 min-w-[50px] sm:min-w-[60px] text-center">
+            <span className="text-xs sm:text-sm text-white font-medium min-w-[50px] sm:min-w-[60px] text-center px-2 py-1 bg-white/10 backdrop-blur-sm rounded border border-white/20 transition-all duration-200">
               {Math.round(scale * 100)}%
             </span>
             <button
               onClick={zoomIn}
               disabled={scale >= 3.0}
-              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 text-white hover:text-white hover:bg-white/30 hover:scale-110 backdrop-blur-sm rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed border border-white/10 hover:border-white/30 hover:shadow-lg"
               title={t('zoomIn')}
             >
               <ZoomIn size={16} className="sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={resetZoom}
-              className="px-2 sm:px-3 py-1 text-xs text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
+              className="px-2 sm:px-3 py-1 text-xs text-white hover:text-white hover:bg-white/30 hover:scale-105 backdrop-blur-sm rounded-lg transition-all duration-200 border border-white/10 hover:border-white/30 hover:shadow-lg"
               title={t('resetZoom')}
             >
               {t('reset')}
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* PDF Content */}
-        <div
+        <motion.div
           ref={containerRef}
-          className="flex-1 overflow-auto bg-primary/30 p-2 sm:p-4"
+          className="flex-1 overflow-auto p-2 sm:p-4"
           onContextMenu={handleContextMenu}
-          style={selectionStyle}
+          style={{
+            background: 'radial-gradient(ellipse at top, rgba(56, 135, 166, 0.15) 0%, rgba(5, 24, 41, 0.4) 100%)',
+            ...selectionStyle
+          }}
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
         >
           {loading && (
             <div className="flex flex-col items-center gap-3 justify-center h-full">
@@ -459,7 +554,7 @@ export default function PDFViewerModal({
               <p className="text-red-400 font-medium">{error}</p>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/80 transition-colors"
+                className="px-4 py-2 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 hover:scale-105 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-2xl hover:shadow-red-500/50 border border-red-400/30 hover:border-red-400/50"
               >
                 {t('close')}
               </button>
@@ -490,30 +585,46 @@ export default function PDFViewerModal({
                     }}
                   />
                   {/* Page number badge */}
-                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-primary/90 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs border border-secondary/30">
+                  <div
+                    className="absolute top-1 right-1 sm:top-2 sm:right-2 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-semibold shadow-lg"
+                    style={{
+                      background: 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
                     {pageNum}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Footer */}
-        <div className="p-2 sm:p-3 border-t border-secondary/30 bg-primary/90 flex-shrink-0">
+        {/* Footer with gradient */}
+        <div
+          className="p-2 sm:p-3 flex-shrink-0"
+          style={{
+            background: 'linear-gradient(to right, #0C3559 0%, #3887A6 100%)',
+            borderTop: '1px solid rgba(56, 135, 166, 0.3)',
+            boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.3)'
+          }}
+        >
           <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2">
-            <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">
+            <p className="text-[10px] sm:text-xs text-white/60 hidden sm:block">
               {t('keyboardShortcuts')}
             </p>
             <button
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2 bg-secondary hover:bg-secondary/80 text-white rounded-lg transition-colors font-medium text-xs sm:text-sm"
+              className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary hover:to-secondary/90 hover:scale-105 text-white rounded-lg transition-all duration-200 font-medium text-xs sm:text-sm shadow-lg hover:shadow-2xl hover:shadow-secondary/50 border border-white/20 hover:border-white/40"
             >
               {t('backToLesson')}
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -3888,7 +3888,14 @@
           "fetchTitle": "Error al cargar",
           "fetchDescription": "No se pudieron cargar los documentos",
           "deleteTitle": "Error al eliminar",
-          "deleteDescription": "No se pudo eliminar el documento"
+          "deleteDescription": "No se pudo eliminar el documento",
+          "unauthorized": "No autorizado",
+          "tokenMissing": "Debes estar autenticado para ejecutar esta acción",
+          "tokenInvalid": "Tu sesión expiró. Inicia sesión nuevamente",
+          "forbidden": "Acceso denegado",
+          "noPermission": "No tienes permiso para eliminar documentos. Requiere rol de admin o tutor",
+          "notFound": "No encontrado",
+          "documentNotFound": "El documento no fue encontrado o ya fue eliminado"
         }
       },
       "documentView": {

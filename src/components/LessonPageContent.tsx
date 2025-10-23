@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useLesson, useModuleLessons } from '@/hooks/queries/useLesson';
 import { useLessonAssessments } from '@/hooks/queries/useLessonAssessments';
 import { useLessonDocuments } from '@/hooks/queries/useLessonDocuments';
@@ -73,7 +74,6 @@ interface LessonPageContentProps {
   initialDocuments?: Document[];
   initialFlashcards?: Flashcard[];
   pandaData?: PandaData | null;
-  tLesson: (key: string, values?: Record<string, string | number | Date>) => string;
 }
 
 export default function LessonPageContent({
@@ -89,9 +89,9 @@ export default function LessonPageContent({
   initialDocuments,
   initialFlashcards,
   pandaData,
-  tLesson,
 }: LessonPageContentProps) {
   const queryClient = useQueryClient();
+  const tLesson = useTranslations('Lesson');
 
   // Fetch courses (with initial data for hydration)
   const { data: courses = [] } = useCourses();

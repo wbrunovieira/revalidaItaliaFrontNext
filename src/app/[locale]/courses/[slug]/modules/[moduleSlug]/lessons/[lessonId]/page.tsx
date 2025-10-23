@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import NavSidebar from '@/components/NavSidebar';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import LessonPageContent from '@/components/LessonPageContent';
@@ -172,12 +171,6 @@ export default async function LessonPage({
     await params;
   const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-  const [, , tLesson] = await Promise.all([
-    getTranslations({ locale, namespace: 'Course' }),
-    getTranslations({ locale, namespace: 'Module' }),
-    getTranslations({ locale, namespace: 'Lesson' }),
-  ]);
-
   const token = (await cookies()).get('token')?.value;
   if (!token) redirect(`/${locale}/login`);
 
@@ -261,7 +254,6 @@ export default async function LessonPage({
         initialDocuments={documentsData}
         initialFlashcards={flashcards}
         pandaData={pandaData}
-        tLesson={tLesson}
       />
 
       {/* Support Floating Button with Lesson Context */}

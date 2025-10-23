@@ -341,11 +341,11 @@ export default function PDFViewerModal({
   const getProtectionIcon = () => {
     switch (protectionLevel) {
       case 'WATERMARK':
-        return <Shield size={16} className="text-blue-400" />;
+        return <Shield size={16} className="text-secondary" />;
       case 'FULL':
-        return <ShieldCheck size={16} className="text-green-400" />;
+        return <ShieldCheck size={16} className="text-secondary" />;
       default:
-        return <FileText size={16} className="text-gray-400" />;
+        return <FileText size={16} className="text-gray-300" />;
     }
   };
 
@@ -359,21 +359,21 @@ export default function PDFViewerModal({
 
       {/* Modal */}
       <div
-        className={`relative bg-gray-900 shadow-2xl flex flex-col ${
+        className={`relative bg-primary shadow-2xl flex flex-col ${
           isFullscreen
             ? 'w-full h-full'
             : 'rounded-xl w-full max-w-6xl mx-4 max-h-[90vh]'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0 bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-secondary/30 flex-shrink-0 bg-primary/90">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {getProtectionIcon()}
             <h2 className="text-lg font-bold text-white truncate">
               {documentTitle}
             </h2>
             {(protectionLevel === 'WATERMARK' || protectionLevel === 'FULL') && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-blue-500/20 rounded text-xs text-blue-400 border border-blue-500/30">
+              <div className="flex items-center gap-1 px-2 py-1 bg-secondary/20 rounded text-xs text-secondary border border-secondary/30">
                 <Shield size={12} />
                 <span>{t('protected')}</span>
               </div>
@@ -383,14 +383,14 @@ export default function PDFViewerModal({
           <div className="flex items-center gap-2">
             <button
               onClick={toggleFullscreen}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
               title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
             >
               {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              className="p-2 text-white bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
               title={t('close')}
             >
               <X size={20} />
@@ -399,7 +399,7 @@ export default function PDFViewerModal({
         </div>
 
         {/* Controls Bar */}
-        <div className="flex items-center justify-between p-3 border-b border-gray-700 bg-gray-800/50 flex-shrink-0">
+        <div className="flex items-center justify-between p-3 border-b border-secondary/30 bg-primary/50 flex-shrink-0">
           {/* Page Indicator */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-300">
@@ -412,7 +412,7 @@ export default function PDFViewerModal({
             <button
               onClick={zoomOut}
               disabled={scale <= 0.5}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title={t('zoomOut')}
             >
               <ZoomOut size={20} />
@@ -423,14 +423,14 @@ export default function PDFViewerModal({
             <button
               onClick={zoomIn}
               disabled={scale >= 3.0}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title={t('zoomIn')}
             >
               <ZoomIn size={20} />
             </button>
             <button
               onClick={resetZoom}
-              className="px-3 py-1 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-3 py-1 text-xs text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
               title={t('resetZoom')}
             >
               {t('reset')}
@@ -441,14 +441,14 @@ export default function PDFViewerModal({
         {/* PDF Content */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-auto bg-gray-900 p-4"
+          className="flex-1 overflow-auto bg-primary/30 p-4"
           onContextMenu={handleContextMenu}
           style={selectionStyle}
         >
           {loading && (
             <div className="flex flex-col items-center gap-3 justify-center h-full">
               <Loader2 size={48} className="animate-spin text-secondary" />
-              <p className="text-gray-400">{t('loading')}</p>
+              <p className="text-gray-300">{t('loading')}</p>
             </div>
           )}
 
@@ -458,7 +458,7 @@ export default function PDFViewerModal({
               <p className="text-red-400 font-medium">{error}</p>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/80 transition-colors"
               >
                 {t('close')}
               </button>
@@ -489,7 +489,7 @@ export default function PDFViewerModal({
                     }}
                   />
                   {/* Page number badge */}
-                  <div className="absolute top-2 right-2 bg-gray-900/80 text-white px-2 py-1 rounded text-xs">
+                  <div className="absolute top-2 right-2 bg-primary/90 text-white px-2 py-1 rounded text-xs border border-secondary/30">
                     {pageNum}
                   </div>
                 </div>
@@ -499,9 +499,9 @@ export default function PDFViewerModal({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-700 bg-gray-800 flex-shrink-0">
+        <div className="p-3 border-t border-secondary/30 bg-primary/90 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {t('keyboardShortcuts')}
             </p>
             <button

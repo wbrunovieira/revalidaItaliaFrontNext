@@ -67,7 +67,8 @@ export default function PDFViewerModal({
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.0);
+  // Start at 50% zoom for all devices
+  const [scale, setScale] = useState<number>(0.5);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -257,7 +258,7 @@ export default function PDFViewerModal({
   }, []);
 
   const resetZoom = useCallback(() => {
-    setScale(1.0);
+    setScale(0.5);
   }, []);
 
   // Fullscreen
@@ -315,7 +316,7 @@ export default function PDFViewerModal({
   useEffect(() => {
     if (!isOpen) {
       setCurrentPage(1);
-      setScale(1.0);
+      setScale(0.5);
       setIsFullscreen(false);
       setLoading(true);
       setError(null);
@@ -362,75 +363,75 @@ export default function PDFViewerModal({
         className={`relative bg-primary shadow-2xl flex flex-col ${
           isFullscreen
             ? 'w-full h-full'
-            : 'rounded-xl w-full max-w-6xl mx-4 max-h-[90vh]'
+            : 'rounded-none sm:rounded-xl w-full sm:max-w-6xl sm:mx-4 max-h-screen sm:max-h-[90vh]'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-secondary/30 flex-shrink-0 bg-primary/90">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {getProtectionIcon()}
-            <h2 className="text-lg font-bold text-white truncate">
+        <div className="flex items-center justify-between p-2 sm:p-4 border-b border-secondary/30 flex-shrink-0 bg-primary/90">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <span className="hidden sm:inline">{getProtectionIcon()}</span>
+            <h2 className="text-sm sm:text-lg font-bold text-white truncate">
               {documentTitle}
             </h2>
             {(protectionLevel === 'WATERMARK' || protectionLevel === 'FULL') && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-secondary/20 rounded text-xs text-secondary border border-secondary/30">
+              <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-secondary/20 rounded text-xs text-secondary border border-secondary/30">
                 <Shield size={12} />
                 <span>{t('protected')}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={toggleFullscreen}
-              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors hidden sm:block"
               title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
             >
-              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-white bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 text-white bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
               title={t('close')}
             >
-              <X size={20} />
+              <X size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
         {/* Controls Bar */}
-        <div className="flex items-center justify-between p-3 border-b border-secondary/30 bg-primary/50 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0 p-2 sm:p-3 border-b border-secondary/30 bg-primary/50 flex-shrink-0">
           {/* Page Indicator */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-300">
+          <div className="flex items-center justify-center sm:justify-start gap-2">
+            <span className="text-xs sm:text-sm text-gray-300">
               {t('pageInfo', { current: currentPage, total: numPages })}
             </span>
           </div>
 
           {/* Zoom Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             <button
               onClick={zoomOut}
               disabled={scale <= 0.5}
-              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title={t('zoomOut')}
             >
-              <ZoomOut size={20} />
+              <ZoomOut size={16} className="sm:w-5 sm:h-5" />
             </button>
-            <span className="text-sm text-gray-300 min-w-[60px] text-center">
+            <span className="text-xs sm:text-sm text-gray-300 min-w-[50px] sm:min-w-[60px] text-center">
               {Math.round(scale * 100)}%
             </span>
             <button
               onClick={zoomIn}
               disabled={scale >= 3.0}
-              className="p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               title={t('zoomIn')}
             >
-              <ZoomIn size={20} />
+              <ZoomIn size={16} className="sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={resetZoom}
-              className="px-3 py-1 text-xs text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
+              className="px-2 sm:px-3 py-1 text-xs text-gray-300 hover:text-white hover:bg-secondary/30 rounded-lg transition-colors"
               title={t('resetZoom')}
             >
               {t('reset')}
@@ -441,7 +442,7 @@ export default function PDFViewerModal({
         {/* PDF Content */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-auto bg-primary/30 p-4"
+          className="flex-1 overflow-auto bg-primary/30 p-2 sm:p-4"
           onContextMenu={handleContextMenu}
           style={selectionStyle}
         >
@@ -466,13 +467,13 @@ export default function PDFViewerModal({
           )}
 
           {!loading && !error && numPages > 0 && (
-            <div className="flex flex-col items-center gap-4" style={{ width: 'fit-content', margin: '0 auto' }}>
+            <div className="flex flex-col items-center gap-2 sm:gap-4" style={{ width: 'fit-content', margin: '0 auto' }}>
               {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
                 <div
                   key={`page-${pageNum}-scale-${scale}`}
                   className="relative shadow-2xl bg-white"
                   style={{
-                    marginBottom: pageNum < numPages ? '16px' : '0',
+                    marginBottom: pageNum < numPages ? '8px' : '0',
                     width: 'fit-content'
                   }}
                 >
@@ -489,7 +490,7 @@ export default function PDFViewerModal({
                     }}
                   />
                   {/* Page number badge */}
-                  <div className="absolute top-2 right-2 bg-primary/90 text-white px-2 py-1 rounded text-xs border border-secondary/30">
+                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-primary/90 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs border border-secondary/30">
                     {pageNum}
                   </div>
                 </div>
@@ -499,14 +500,14 @@ export default function PDFViewerModal({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-secondary/30 bg-primary/90 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-400">
+        <div className="p-2 sm:p-3 border-t border-secondary/30 bg-primary/90 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2">
+            <p className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">
               {t('keyboardShortcuts')}
             </p>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-white rounded-lg transition-colors font-medium text-sm"
+              className="w-full sm:w-auto px-4 py-2 bg-secondary hover:bg-secondary/80 text-white rounded-lg transition-colors font-medium text-xs sm:text-sm"
             >
               {t('backToLesson')}
             </button>

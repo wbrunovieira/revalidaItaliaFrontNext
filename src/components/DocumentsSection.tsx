@@ -97,6 +97,21 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       if (!document) return;
 
       const translation = document.translations.find(t => t.locale === locale) || document.translations[0];
+      const protectionLevel = document.protectionLevel || 'NONE';
+
+      // NONE: Open in new tab (user's browser PDF reader)
+      if (protectionLevel === 'NONE') {
+        console.log('[DocumentsSection] 🎉 NONE document - opening in new tab with browser PDF reader');
+        window.open(url, '_blank');
+
+        // Clean up
+        setProcessingDocumentId(null);
+        setErrorMessage(null);
+        return;
+      }
+
+      // WATERMARK/FULL: Open in internal PDFViewerModal
+      console.log('[DocumentsSection] 🎉 Protected document - opening in internal PDF viewer');
 
       // Store rate limit info if available (FULL documents)
       if (rateLimitInfo) {
@@ -107,14 +122,12 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
         isOpen: true,
         url,
         title: translation?.title || document.filename,
-        protectionLevel: document.protectionLevel || 'NONE',
+        protectionLevel,
       });
 
       // Clean up
       setProcessingDocumentId(null);
       setErrorMessage(null);
-
-      console.log('[DocumentsSection] 🎉 Document opened successfully! Polling stopped.');
     },
     onError: (error) => {
       console.error('[DocumentsSection] ❌ POST /access ERROR:', error);
@@ -179,9 +192,23 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
 
     setErrorMessage(null);
 
-    // NONE: Use URL directly from translations, open in new tab
+    // NONE: Call POST /access to get CloudFront Signed URL, then open in new tab
+    // User can use their browser's native PDF reader
     if (protectionLevel === 'NONE') {
-      window.open(translation.url, '_blank');
+      // Check cache first
+      const cachedData = queryClient.getQueryData<{
+        url: string;
+      }>(['document-access', lessonId, document.id]);
+
+      if (cachedData?.url) {
+        console.log('[DocumentsSection] ⚡ Using cached URL for NONE document');
+        window.open(cachedData.url, '_blank');
+        return;
+      }
+
+      // No cache - need to get URL from POST /access
+      console.log('[DocumentsSection] 🔄 NONE document - will call POST /access to get CloudFront URL');
+      setProcessingDocumentId(document.id);
       return;
     }
 

@@ -1,0 +1,104 @@
+---
+- name: Cleanup Disk Space and Upgrade Node.js
+  hosts: frontend
+  become: true
+
+  tasks:
+    - name: "📊 DISK - Verificando espaço em disco antes"
+      shell: df -h /
+      register: disk_before
+
+    - name: "📊 DISK - Espaço disponível ANTES"
+      debug:
+        var: disk_before.stdout_lines
+
+    - name: "🧹 CLEANUP - Limpando cache do APT"
+      apt:
+        autoclean: yes
+        autoremove: yes
+
+    - name: "🧹 CLEANUP - Removendo pacotes órfãos"
+      shell: apt-get autoremove -y && apt-get clean
+
+    - name: "🧹 NPM - Limpando cache npm global"
+      shell: npm cache clean --force
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: "🧹 PM2 - Limpando logs do PM2"
+      shell: pm2 flush
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: "🧹 LOGS - Removendo logs antigos do sistema"
+      shell: |
+        journalctl --vacuum-time=7d
+        find /var/log -type f -name "*.log" -mtime +7 -delete
+        find /var/log -type f -name "*.gz" -delete
+      ignore_errors: yes
+
+    - name: "🧹 TMP - Limpando diretório temporário"
+      shell: |
+        rm -rf /tmp/*
+        rm -rf /var/tmp/*
+      ignore_errors: yes
+
+    - name: "🧹 NPM - Removendo node_modules antigo"
+      shell: rm -rf /home/ubuntu/frontend/node_modules
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: "🧹 BUILD - Removendo .next antigo"
+      shell: rm -rf /home/ubuntu/frontend/.next
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: "📊 DISK - Verificando espaço após limpeza"
+      shell: df -h /
+      register: disk_after_clean
+
+    - name: "📊 DISK - Espaço disponível APÓS LIMPEZA"
+      debug:
+        var: disk_after_clean.stdout_lines
+
+    - name: "📦 NODE - Removendo Node.js antigo"
+      apt:
+        name:
+          - nodejs
+          - npm
+        state: absent
+        purge: yes
+
+    - name: "📥 NODE - Instalando NodeSource repository (Node.js 20.x LTS)"
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      args:
+        warn: false
+
+    - name: "📦 NODE - Instalando Node.js 20.x"
+      apt:
+        name: nodejs
+        state: present
+        update_cache: yes
+
+    - name: "✅ NODE - Verificando versão instalada"
+      shell: node --version && npm --version
+      register: node_version
+
+    - name: "✅ NODE - Versões instaladas"
+      debug:
+        var: node_version.stdout_lines
+
+    - name: "📊 DISK - Espaço final disponível"
+      shell: df -h /
+      register: disk_final
+
+    - name: "📊 DISK - Espaço disponível FINAL"
+      debug:
+        var: disk_final.stdout_lines
+
+    - name: "✅ SUCESSO - Limpeza e atualização concluídas!"
+      debug:
+        msg:
+          - "🎉 Servidor limpo e Node.js atualizado com sucesso!"
+          - "Agora você pode executar o quick-deploy.yml novamente"

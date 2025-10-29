@@ -316,6 +316,32 @@
       "expiresIn": "Il link scade tra",
       "expired": "Link scaduto. Clicca di nuovo per generarne uno nuovo."
     },
+    "errorHandler": {
+      "title": "Errore nell'Accesso alla Sessione",
+      "tokenInvalid": "Il link di accesso non è valido o è scaduto. Si prega di generare un nuovo link.",
+      "tokenUsed": "Questo link è già stato utilizzato in precedenza. Per la tua sicurezza, ogni link può essere utilizzato una sola volta.",
+      "sessionUnavailable": "La sessione non è disponibile al momento. Potrebbe essere terminata, cancellata o non ancora iniziata.",
+      "accessDenied": "Non hai il permesso di accedere a questa sessione. Verifica di essere iscritto al corso o contatta il supporto.",
+      "unknownError": "Si è verificato un errore imprevisto. Si prega di riprovare.",
+      "retry": "Riprova",
+      "dismiss": "Chiudi"
+    },
+    "waitingRoom": {
+      "title": "Preparando la Tua Aula",
+      "subtitle": "Aspetta un attimo mentre prepariamo uno spazio speciale per te",
+      "messages": [
+        "Regolando le sedie virtuali...",
+        "Lucidando la lavagna digitale...",
+        "Organizzando i tuoi materiali di studio...",
+        "Verificando la temperatura ideale dell'aula...",
+        "Preparando il caffè virtuale... ☕",
+        "Testando l'acustica perfetta...",
+        "Connettendoti con il tuo professore...",
+        "Quasi fatto! Solo un altro secondo..."
+      ],
+      "validating": "Convalidando il tuo accesso...",
+      "redirecting": "Tutto pronto! Ti stiamo reindirizzando alla lezione..."
+    },
     "page": "Pagina {current} di {total}",
     "previous": "Precedente",
     "next": "Successiva"
@@ -1671,6 +1697,8 @@
     "totalAssessments": "Totale di {total} valutazioni disponibili",
     "documents": "Documenti",
     "openDocument": "Apri",
+    "loadingDocument": "Richiesta di accesso al documento...",
+    "rateLimitInfo": "Controllo Accesso",
     "completed": "Completata",
     "current": "Attuale",
     "locked": "Bloccata",
@@ -1744,6 +1772,25 @@
     "loadMore": "Carica altre",
     "timeAgo": "{time} fa",
     "yesterday": "ieri"
+  },
+  "PDFViewer": {
+    "protected": "Protetto",
+    "close": "Chiudi",
+    "loading": "Caricamento documento...",
+    "enterFullscreen": "Schermo intero",
+    "exitFullscreen": "Esci da schermo intero",
+    "previousPage": "Pagina precedente",
+    "nextPage": "Pagina successiva",
+    "pageInfo": "Pagina {current} di {total}",
+    "zoomIn": "Aumenta zoom",
+    "zoomOut": "Riduci zoom",
+    "resetZoom": "Ripristina zoom",
+    "reset": "Ripristina",
+    "backToLesson": "Torna alla lezione",
+    "keyboardShortcuts": "Scroll per navigare | +/- per zoom | 0 per ripristinare | ESC per chiudere",
+    "errors": {
+      "loadFailed": "Errore nel caricamento del documento. Riprova."
+    }
   },
   "CreatePost": {
     "title": "Crea Nuovo Post",
@@ -3685,6 +3732,7 @@
     "title": "Crea Documento",
     "create": "Crea Documento",
     "creating": "Creando...",
+    "noCourses": "Nessun corso registrato. Registra prima un corso.",
     "fields": {
       "course": "Corso",
       "module": "Modulo",
@@ -3696,7 +3744,8 @@
       "title": "Titolo",
       "description": "Descrizione",
       "url": "URL del Documento",
-      "document": "Documento"
+      "document": "Documento",
+      "protectionLevel": "Livello di Protezione"
     },
     "placeholders": {
       "course": "Seleziona un corso",
@@ -3744,7 +3793,10 @@
       "descriptionMax": "La descrizione deve avere massimo 500 caratteri",
       "urlRequired": "L'URL è obbligatorio",
       "urlMax": "L'URL deve avere massimo 1000 caratteri",
-      "urlInvalid": "L'URL deve iniziare con / o http"
+      "urlInvalid": "L'URL deve iniziare con / o http",
+      "fileRequired": "Per favore, seleziona un file PDF",
+      "onlyPDF": "Solo file PDF sono consentiti",
+      "protectionLevelRequired": "Per favore, seleziona il livello di protezione"
     },
     "error": {
       "title": "Errore nella creazione del documento",
@@ -3763,6 +3815,8 @@
       "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi. Per favore, ricarica la pagina.",
       "invalidFileType": "Tipo di file non valido. Usa PDF, Word, Excel o CSV.",
       "fileTooLarge": "File troppo grande. La dimensione massima è 10MB.",
+      "fileTooLargeTitle": "File troppo grande",
+      "fileTooLargeDescription": "Il file supera la dimensione massima consentita (100MB)",
       "uploadFailed": "Errore nel caricamento del file. Riprova.",
       "documentRequired": "Per favore, seleziona un documento da caricare",
       "fileRequired": "È necessario caricare un file per questa lingua",
@@ -3778,7 +3832,14 @@
     },
     "success": {
       "title": "Documento creato con successo!",
-      "description": "Il documento è stato aggiunto alla lezione."
+      "description": "Il documento è stato aggiunto alla lezione.",
+      "processingTitle": "Caricamento completato con successo!",
+      "processingDescription": "Il documento è in elaborazione in background. Potrebbero volerci alcuni minuti."
+    },
+    "protectionLevel": {
+      "none": "Nessuna protezione, download diretto consentito",
+      "watermark": "Filigrana con dati dello studente",
+      "full": "Massima protezione (filigrana + URL firmato)"
     }
   },
   "documentsList": {
@@ -3828,7 +3889,14 @@
       "fetchTitle": "Errore nel caricamento",
       "fetchDescription": "Non è stato possibile caricare i documenti",
       "deleteTitle": "Errore nell'eliminazione",
-      "deleteDescription": "Non è stato possibile eliminare il documento"
+      "deleteDescription": "Non è stato possibile eliminare il documento",
+      "unauthorized": "Non autorizzato",
+      "tokenMissing": "Devi essere autenticato per eseguire questa azione",
+      "tokenInvalid": "La tua sessione è scaduta. Effettua nuovamente il login",
+      "forbidden": "Accesso negato",
+      "noPermission": "Non hai il permesso di eliminare documenti. Richiede ruolo di admin o tutor",
+      "notFound": "Non trovato",
+      "documentNotFound": "Il documento non è stato trovato o è già stato eliminato"
     }
   },
   "documentView": {
@@ -3856,7 +3924,8 @@
       "updatedAt": "Aggiornato il",
       "title": "Titolo",
       "description": "Descrizione",
-      "url": "URL"
+      "url": "URL",
+      "protectionLevel": "Livello di Protezione"
     },
     "translations": {
       "title": "Traduzioni",
@@ -3867,6 +3936,12 @@
     "error": {
       "fetchTitle": "Errore nel caricamento",
       "fetchDescription": "Non è stato possibile caricare i dettagli del documento"
+    },
+    "protectionLevel": {
+      "none": "Nessuna protezione, download diretto consentito",
+      "watermark": "Filigrana con dati dello studente",
+      "full": "Massima protezione (filigrana + URL firmato)",
+      "unknown": "Livello sconosciuto"
     }
   },
   "documentEdit": {
@@ -3882,7 +3957,10 @@
       "translations": "Traduzioni",
       "title": "Titolo",
       "description": "Descrizione",
-      "document": "Documento"
+      "document": "Documento",
+      "currentFile": "File attuale",
+      "replaceFile": "Sostituisci file PDF",
+      "protectionLevel": "Livello di Protezione"
     },
     "placeholders": {
       "title": "Inserisci il titolo del documento",
@@ -3904,7 +3982,8 @@
       "validationTitle": "Errore di validazione",
       "validationDescription": "Correggi gli errori prima di salvare",
       "invalidFileType": "Tipo di file non valido",
-      "fileTooLarge": "File troppo grande (max 10MB)",
+      "onlyPDF": "Solo file PDF sono consentiti",
+      "fileTooLarge": "File troppo grande (massimo 100MB)",
       "uploadFailed": "Errore nel caricamento del file",
       "uploadTitle": "Errore nel caricamento",
       "uploadDescription": "Non è stato possibile inviare il file"
@@ -3922,10 +4001,16 @@
       "success": "File caricato con successo",
       "replace": "Sostituisci file",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV",
-      "fileSelected": "File selezionato"
+      "fileSelected": "File selezionato",
+      "clickToSelect": "Clicca per selezionare nuovo PDF"
     },
     "currentFile": "File attuale",
-    "newFile": "Nuovo file"
+    "newFile": "Nuovo file",
+    "protectionLevel": {
+      "none": "Nessuna protezione, download diretto consentito",
+      "watermark": "Filigrana con dati dello studente",
+      "full": "Massima protezione (filigrana + URL firmato)"
+    }
   },
   "tabs": {
     "overview": "Panoramica",
@@ -5466,7 +5551,8 @@
     "uploading": "Invio immagine",
     "clickToSelect": "Clicca per selezionare un'immagine",
     "supportedFormats": "Formati supportati",
-    "savedAs": "Salvato come"
+    "savedAs": "Salvato come",
+    "change": "Cambia immagine"
   },
   "validation": {
     "newImageReady": "Nuova immagine pronta per essere salvata"

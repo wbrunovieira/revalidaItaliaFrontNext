@@ -642,7 +642,14 @@ export default function LiveSessionsList() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowEndConfirm(session.id)}
+                        onClick={() => {
+                          console.log('🛑 [LiveSessionsList] Botão "Finalizar Sessão" clicado');
+                          console.log('📋 Session ID:', session.id);
+                          console.log('📊 Session Status:', session.status);
+                          console.log('👤 User:', user);
+                          console.log('✅ canEndSession:', canEndSession(session));
+                          setShowEndConfirm(session.id);
+                        }}
                         disabled={endingSessionId === session.id}
                         className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
                       >
@@ -653,7 +660,7 @@ export default function LiveSessionsList() {
                         )}
                         {t('actions.end')}
                       </Button>
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-xs text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-y-1/2 mb-2 px-2 py-1 bg-gray-900 text-xs text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                         {t('actions.endTooltip')}
                       </div>
                     </div>

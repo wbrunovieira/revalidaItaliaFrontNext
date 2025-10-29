@@ -26,8 +26,9 @@ import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
 import { ExpirationTimer } from './ExpirationTimer';
+import { ErrorHandler } from './ErrorHandler';
 import Button from '@/components/Button';
-import { Radio, Loader2, Clock, AlertCircle } from 'lucide-react';
+import { Radio, Loader2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -60,7 +61,7 @@ export function JoinButton({
   className,
 }: JoinButtonProps) {
   const t = useTranslations('LiveSessions');
-  const { generateToken, joinWithToken, isGenerating, isJoining, error } = useLiveSessionJoin();
+  const { generateToken, joinWithToken, isGenerating, isJoining, error, clearError } = useLiveSessionJoin();
 
   const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
   const [hasExpired, setHasExpired] = useState(false);
@@ -193,19 +194,18 @@ export function JoinButton({
 
       {/* Mensagem de token expirado */}
       {hasExpired && (
-        <div className="flex items-center justify-center gap-2 text-sm text-red-400">
-          <AlertCircle className="w-3 h-3" />
+        <div className="flex items-center justify-center gap-2 text-sm text-yellow-400">
+          <Clock className="w-3 h-3" />
           <span>{t('joinButton.expired') || 'Link expirado. Clique novamente para gerar novo.'}</span>
         </div>
       )}
 
-      {/* Mensagem de erro */}
-      {error && (
-        <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 p-2 rounded border border-red-500/30">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span className="flex-1">{error.detail || 'Erro ao entrar na sessão'}</span>
-        </div>
-      )}
+      {/* Modal de erro (ErrorHandler) */}
+      <ErrorHandler
+        error={error}
+        onRetry={handleJoinSession}
+        onDismiss={clearError}
+      />
     </div>
   );
 }

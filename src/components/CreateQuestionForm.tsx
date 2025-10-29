@@ -27,6 +27,8 @@ import {
   Plus,
   Trash2,
   Languages,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN';
@@ -102,6 +104,15 @@ export default function CreateQuestionForm({
   const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
   const [loadingArguments, setLoadingArguments] = useState(false);
+  const [argumentsPage, setArgumentsPage] = useState(1);
+  const [argumentsPagination, setArgumentsPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false,
+  });
 
   const [formData, setFormData] = useState<FormData>({
     text: '',
@@ -154,11 +165,16 @@ export default function CreateQuestionForm({
     }
   }, [t, toast]);
 
-  const loadArguments = useCallback(async () => {
+  const loadArguments = useCallback(async (page = 1) => {
     setLoadingArguments(true);
     try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+      });
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -172,6 +188,12 @@ export default function CreateQuestionForm({
 
       const data = await response.json();
       setArgumentsList(data.arguments || []);
+
+      if (data.pagination) {
+        setArgumentsPagination(data.pagination);
+      }
+
+      setArgumentsPage(page);
     } catch (error) {
       console.error('Error loading arguments:', error);
       // Not showing toast for arguments as it's optional
@@ -818,8 +840,46 @@ export default function CreateQuestionForm({
                         {argument.title}
                       </SelectItem>
                     ))}
+
+                    {/* Pagination Controls inside dropdown */}
+                    {argumentsPagination.totalPages > 1 && (
+                      <div className="flex items-center justify-between px-2 py-3 mt-1 border-t border-gray-600 bg-gray-800/80">
+                        <div className="text-xs text-gray-400">
+                          Pág. {argumentsPagination.page}/{argumentsPagination.totalPages}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              loadArguments(argumentsPage - 1);
+                            }}
+                            disabled={!argumentsPagination.hasPrevious || loadingArguments}
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Página anterior"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              loadArguments(argumentsPage + 1);
+                            }}
+                            disabled={!argumentsPagination.hasNext || loadingArguments}
+                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Próxima página"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
+
                 <p className="text-gray-400 text-xs">
                   {t('fields.argumentHelp')}
                 </p>

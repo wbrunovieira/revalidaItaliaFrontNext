@@ -13,6 +13,9 @@ import {
   Globe,
   Hash,
   Copy,
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface Translation {
@@ -22,9 +25,12 @@ interface Translation {
   url: string;
 }
 
+type ProtectionLevel = 'NONE' | 'WATERMARK' | 'FULL';
+
 interface DocumentViewData {
   id: string;
   filename: string;
+  protectionLevel?: ProtectionLevel;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -35,6 +41,23 @@ interface DocumentViewModalProps {
   documentId: string | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+// Function to normalize document URL by adding /api/v1/ prefix if needed
+function normalizeDocumentUrl(url: string): string {
+  if (!url) return url;
+
+  // Check if URL already has /api/v1/ prefix
+  if (url.includes('/api/v1/')) {
+    return url;
+  }
+
+  // Check if URL starts with /uploads/
+  if (url.includes('/uploads/')) {
+    return url.replace('/uploads/', '/api/v1/uploads/');
+  }
+
+  return url;
 }
 
 export default function DocumentViewModal({
@@ -66,9 +89,12 @@ export default function DocumentViewModal({
 
       setLoading(true);
       try {
-        const documentResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`
-        );
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`;
+        console.log('🔍 [DocumentViewModal] Fetching document from:', apiUrl);
+
+        const documentResponse = await fetch(apiUrl);
+
+        console.log('📡 [DocumentViewModal] Response status:', documentResponse.status, documentResponse.statusText);
 
         if (!documentResponse.ok) {
           throw new Error('Erro ao buscar documento');
@@ -76,6 +102,10 @@ export default function DocumentViewModal({
 
         const documentData: DocumentViewData =
           await documentResponse.json();
+
+        console.log('📦 [DocumentViewModal] RAW RESPONSE FROM BACKEND:', JSON.stringify(documentData, null, 2));
+        console.log('🔐 [DocumentViewModal] protectionLevel field:', documentData.protectionLevel);
+
         setDocumentData(documentData);
       } catch (error) {
         console.error(
@@ -165,6 +195,44 @@ export default function DocumentViewModal({
   // Obter extensão do arquivo
   const getFileExtension = (filename: string): string => {
     return filename.split('.').pop()?.toUpperCase() || '';
+  };
+
+  // Obter propriedades de estilo do nível de proteção
+  const getProtectionLevelStyle = (level?: ProtectionLevel) => {
+    switch (level) {
+      case 'NONE':
+        return {
+          icon: ShieldAlert,
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-700/50',
+          borderColor: 'border-gray-600',
+          label: t('protectionLevel.none'),
+        };
+      case 'WATERMARK':
+        return {
+          icon: Shield,
+          color: 'text-blue-400',
+          bgColor: 'bg-blue-500/10',
+          borderColor: 'border-blue-500/50',
+          label: t('protectionLevel.watermark'),
+        };
+      case 'FULL':
+        return {
+          icon: ShieldCheck,
+          color: 'text-green-400',
+          bgColor: 'bg-green-500/10',
+          borderColor: 'border-green-500/50',
+          label: t('protectionLevel.full'),
+        };
+      default:
+        return {
+          icon: Shield,
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-700/50',
+          borderColor: 'border-gray-600',
+          label: t('protectionLevel.unknown') || 'Desconhecido',
+        };
+    }
   };
 
   if (!isOpen) {
@@ -297,6 +365,37 @@ export default function DocumentViewModal({
                   </div>
                 </div>
 
+                {/* Nível de Proteção */}
+                {documentData.protectionLevel && (
+                  <div className={`p-4 rounded-lg border ${getProtectionLevelStyle(documentData.protectionLevel).bgColor} ${getProtectionLevelStyle(documentData.protectionLevel).borderColor}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const ProtectionIcon = getProtectionLevelStyle(documentData.protectionLevel).icon;
+                          return (
+                            <ProtectionIcon
+                              size={20}
+                              className={getProtectionLevelStyle(documentData.protectionLevel).color}
+                            />
+                          );
+                        })()}
+                        <div>
+                          <p className="text-sm font-medium text-gray-300">
+                            {t('fields.protectionLevel')}
+                          </p>
+                          <p className={`text-base font-semibold ${getProtectionLevelStyle(documentData.protectionLevel).color}`}>
+                            {documentData.protectionLevel}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400 max-w-xs">
+                          {getProtectionLevelStyle(documentData.protectionLevel).label}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Data de Criação */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
@@ -383,13 +482,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'pt'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>
@@ -436,13 +535,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'es'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>
@@ -489,13 +588,13 @@ export default function DocumentViewModal({
                           <span className="text-gray-400">
                             {t('fields.url')}:
                           </span>{' '}
-                          <code className="text-blue-400 text-xs">
-                            {
+                          <code className="text-blue-400 text-xs break-all">
+                            {normalizeDocumentUrl(
                               getTranslationForLocale(
                                 documentData.translations,
                                 'it'
-                              )?.url
-                            }
+                              )?.url || ''
+                            )}
                           </code>
                         </p>
                       </div>

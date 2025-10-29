@@ -8,8 +8,9 @@ import {
   useMemo,
 } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { getCookie } from '@/lib/auth-utils';
 import {
   FileText,
   Edit,
@@ -81,6 +82,7 @@ interface ModuleStats {
 export default function DocumentsList() {
   const t = useTranslations('Admin.documentsList');
   const params = useParams();
+  const router = useRouter();
   const locale = params.locale as string;
   const { toast } = useToast();
 
@@ -308,14 +310,62 @@ export default function DocumentsList() {
 
   // Função para deletar documento após confirmação
   const deleteDocument = useCallback(
-    async (lessonId: string, documentId: string, documentTranslations?: Translation[]) => {
+    async (lessonId: string, documentId: string) => {
       try {
+        // 1. Verificar se o token existe
+        const token = getCookie('token');
+
+        if (!token) {
+          toast({
+            title: t('error.unauthorized'),
+            description: t('error.tokenMissing'),
+            variant: 'destructive',
+          });
+          router.push(`/${locale}/login`);
+          return;
+        }
+
+        // 2. Fazer requisição com token JWT no header
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
           {
             method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
           }
         );
+
+        // 3. Tratar erros de autenticação e autorização
+        if (response.status === 401) {
+          toast({
+            title: t('error.unauthorized'),
+            description: t('error.tokenInvalid'),
+            variant: 'destructive',
+          });
+          router.push(`/${locale}/login`);
+          return;
+        }
+
+        if (response.status === 403) {
+          toast({
+            title: t('error.forbidden'),
+            description: t('error.noPermission'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (response.status === 404) {
+          toast({
+            title: t('error.notFound'),
+            description: t('error.documentNotFound'),
+            variant: 'destructive',
+          });
+          await fetchData(); // Refresh to sync state
+          return;
+        }
 
         if (!response.ok) {
           throw new Error(
@@ -323,32 +373,14 @@ export default function DocumentsList() {
           );
         }
 
-        // Após sucesso no backend, deletar arquivos físicos
-        if (documentTranslations) {
-          for (const translation of documentTranslations) {
-            if (translation.url) {
-              const urlParts = translation.url.split('/');
-              const documentsIndex = urlParts.findIndex(part => part === 'documents');
-              if (documentsIndex !== -1) {
-                const filePath = urlParts.slice(documentsIndex).join('/');
-                try {
-                  await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
-                    method: 'DELETE',
-                  });
-                } catch (fileError) {
-                  console.error(`Failed to delete file: ${filePath}`, fileError);
-                }
-              }
-            }
-          }
-        }
-
+        // 4. Sucesso - backend já deletou do DB e S3 (incluindo CloudFront)
         toast({
           title: t('success.deleteTitle'),
           description: t('success.deleteDescription'),
           variant: 'default',
         });
 
+        // 5. Recarregar dados para refletir a deleção
         await fetchData();
       } catch (error) {
         handleApiError(error, 'Document deletion error');
@@ -359,7 +391,7 @@ export default function DocumentsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError]
+    [t, toast, fetchData, handleApiError, locale, router]
   );
 
   // Função para mostrar confirmação personalizada usando toast
@@ -471,7 +503,7 @@ export default function DocumentsList() {
           <div className="flex gap-2">
             <button
               onClick={() =>
-                deleteDocument(lessonId, documentId, document.translations)
+                deleteDocument(lessonId, documentId)
               }
               className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
             >

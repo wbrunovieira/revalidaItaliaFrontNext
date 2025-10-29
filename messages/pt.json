@@ -316,6 +316,32 @@
       "expiresIn": "Link expira em",
       "expired": "Link expirado. Clique novamente para gerar novo."
     },
+    "errorHandler": {
+      "title": "Erro ao Entrar na Sessão",
+      "tokenInvalid": "O link de acesso é inválido ou expirou. Por favor, gere um novo link.",
+      "tokenUsed": "Este link já foi usado anteriormente. Para sua segurança, cada link pode ser usado apenas uma vez.",
+      "sessionUnavailable": "A sessão não está disponível no momento. Ela pode ter sido encerrada, cancelada ou ainda não iniciou.",
+      "accessDenied": "Você não tem permissão para acessar esta sessão. Verifique se está matriculado no curso ou entre em contato com o suporte.",
+      "unknownError": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+      "retry": "Tentar Novamente",
+      "dismiss": "Fechar"
+    },
+    "waitingRoom": {
+      "title": "Preparando Sua Sala de Aula",
+      "subtitle": "Aguarde um pouquinho enquanto preparamos um espaço especial para você",
+      "messages": [
+        "Ajustando as cadeiras virtuais...",
+        "Polindo a lousa digital...",
+        "Organizando seus materiais de estudo...",
+        "Verificando a temperatura ideal da sala...",
+        "Preparando o café virtual... ☕",
+        "Testando a acústica perfeita...",
+        "Conectando você com seu professor...",
+        "Quase lá! Só mais um segundinho..."
+      ],
+      "validating": "Validando seu acesso...",
+      "redirecting": "Tudo pronto! Redirecionando você para a aula..."
+    },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
     "next": "Próxima"
@@ -1676,6 +1702,8 @@
     "totalAssessments": "Total de {total} avaliações disponíveis",
     "documents": "Documentos",
     "openDocument": "Abrir",
+    "loadingDocument": "Solicitando acesso ao documento...",
+    "rateLimitInfo": "Controle de Acesso",
     "completed": "Concluída",
     "current": "Atual",
     "locked": "Bloqueada",
@@ -1749,6 +1777,25 @@
     "loadMore": "Carregar mais",
     "timeAgo": "{time} atrás",
     "yesterday": "ontem"
+  },
+  "PDFViewer": {
+    "protected": "Protegido",
+    "close": "Fechar",
+    "loading": "Carregando documento...",
+    "enterFullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
+    "previousPage": "Página anterior",
+    "nextPage": "Próxima página",
+    "pageInfo": "Página {current} de {total}",
+    "zoomIn": "Aumentar zoom",
+    "zoomOut": "Diminuir zoom",
+    "resetZoom": "Resetar zoom",
+    "reset": "Resetar",
+    "backToLesson": "Voltar para a aula",
+    "keyboardShortcuts": "Scroll para navegar | +/- para zoom | 0 para resetar | ESC para fechar",
+    "errors": {
+      "loadFailed": "Erro ao carregar documento. Tente novamente."
+    }
   },
   "CreatePost": {
     "title": "Criar Novo Post",
@@ -2813,7 +2860,6 @@
     },
     "linkedContent": {
       "title": "Conteúdo Vinculado",
-      "module": "Módulo",
       "lesson": "Aula",
       "argument": "Argumento"
     },
@@ -2929,18 +2975,12 @@
       "title": "Sobre Sessões ao Vivo",
       "description": "Crie sessões interativas integradas com o Zoom. Você pode associar a sessão a uma aula específica ou argumento para melhor organização."
     },
-    "required": "Obrigatório",
-    "optional": "Opcional",
     "sections": {
       "basicInfo": "Informações Básicas",
-      "courseInfo": "Informações do Curso",
       "schedule": "Agendamento",
-      "lessonAssociation": "Associar a uma Aula",
+      "associations": "Associações",
       "hosts": "Co-apresentadores",
       "settings": "Configurações"
-    },
-    "lessonAssociation": {
-      "helper": "Se desejar que os alunos vejam que existe uma sessão ao vivo relacionada a uma aula específica, selecione a aula aqui. Isso criará um vínculo visível na página da aula."
     },
     "fields": {
       "title": {
@@ -2977,11 +3017,6 @@
         "label": "Aula",
         "placeholder": "Selecione uma aula",
         "none": "Nenhuma"
-      },
-      "lessonModule": {
-        "label": "Módulo da Aula",
-        "placeholder": "Selecione um módulo",
-        "none": "Nenhum"
       },
       "argument": {
         "label": "Argumento",
@@ -3755,6 +3790,7 @@
     "title": "Criar Documento",
     "create": "Criar Documento",
     "creating": "Criando...",
+    "noCourses": "Nenhum curso cadastrado. Cadastre um curso primeiro.",
     "fields": {
       "course": "Curso",
       "module": "Módulo",
@@ -3766,7 +3802,8 @@
       "title": "Título",
       "description": "Descrição",
       "url": "URL do Documento",
-      "document": "Documento"
+      "document": "Documento",
+      "protectionLevel": "Nível de Proteção"
     },
     "placeholders": {
       "course": "Selecione um curso",
@@ -3814,7 +3851,10 @@
       "descriptionMax": "A descrição deve ter no máximo 500 caracteres",
       "urlRequired": "A URL é obrigatória",
       "urlMax": "A URL deve ter no máximo 1000 caracteres",
-      "urlInvalid": "A URL deve começar com / ou http"
+      "urlInvalid": "A URL deve começar com / ou http",
+      "fileRequired": "Por favor, selecione um arquivo PDF",
+      "onlyPDF": "Apenas arquivos PDF são permitidos",
+      "protectionLevelRequired": "Por favor, selecione o nível de proteção"
     },
     "error": {
       "title": "Erro ao criar documento",
@@ -3833,6 +3873,8 @@
       "fetchCoursesDescription": "Não foi possível carregar a lista de cursos. Por favor, recarregue a página.",
       "invalidFileType": "Tipo de arquivo inválido. Use PDF, Word, Excel ou CSV.",
       "fileTooLarge": "Arquivo muito grande. O tamanho máximo é 10MB.",
+      "fileTooLargeTitle": "Arquivo muito grande",
+      "fileTooLargeDescription": "O arquivo excede o tamanho máximo permitido (100MB)",
       "uploadFailed": "Falha ao fazer upload do arquivo. Tente novamente.",
       "documentRequired": "Por favor, selecione um documento para upload",
       "fileRequired": "É necessário fazer upload de um arquivo para este idioma",
@@ -3848,7 +3890,14 @@
     },
     "success": {
       "title": "Documento criado com sucesso!",
-      "description": "O documento foi adicionado à aula."
+      "description": "O documento foi adicionado à aula.",
+      "processingTitle": "Upload realizado com sucesso!",
+      "processingDescription": "O documento está sendo processado em segundo plano. Isso pode levar alguns minutos."
+    },
+    "protectionLevel": {
+      "none": "Sem proteção, download direto permitido",
+      "watermark": "Marca d'água com dados do aluno",
+      "full": "Máxima proteção (watermark + URL assinada)"
     }
   },
   "documentsList": {
@@ -3898,7 +3947,14 @@
           "fetchTitle": "Erro ao carregar",
           "fetchDescription": "Não foi possível carregar os documentos",
           "deleteTitle": "Erro ao excluir",
-          "deleteDescription": "Não foi possível excluir o documento"
+          "deleteDescription": "Não foi possível excluir o documento",
+          "unauthorized": "Não autorizado",
+          "tokenMissing": "Você precisa estar logado para executar esta ação",
+          "tokenInvalid": "Sua sessão expirou. Faça login novamente",
+          "forbidden": "Acesso negado",
+          "noPermission": "Você não tem permissão para deletar documentos. Requer função de admin ou tutor",
+          "notFound": "Não encontrado",
+          "documentNotFound": "O documento não foi encontrado ou já foi deletado"
         }
       },
       "documentView": {
@@ -3926,7 +3982,8 @@
           "updatedAt": "Atualizado em",
           "title": "Título",
           "description": "Descrição",
-          "url": "URL"
+          "url": "URL",
+          "protectionLevel": "Nível de Proteção"
         },
         "translations": {
           "title": "Traduções",
@@ -3937,6 +3994,12 @@
         "error": {
           "fetchTitle": "Erro ao carregar",
           "fetchDescription": "Não foi possível carregar os detalhes do documento"
+        },
+        "protectionLevel": {
+          "none": "Sem proteção, download direto permitido",
+          "watermark": "Marca d'água com dados do aluno",
+          "full": "Máxima proteção (watermark + URL assinada)",
+          "unknown": "Nível desconhecido"
         }
       },
       "documentEdit": {
@@ -3952,7 +4015,10 @@
           "translations": "Traduções",
           "title": "Título",
           "description": "Descrição",
-          "document": "Documento"
+          "document": "Documento",
+          "currentFile": "Arquivo atual",
+          "replaceFile": "Substituir arquivo PDF",
+          "protectionLevel": "Nível de Proteção"
         },
         "placeholders": {
           "title": "Digite o título do documento",
@@ -3974,7 +4040,8 @@
           "validationTitle": "Erro de validação",
           "validationDescription": "Por favor, corrija os erros antes de salvar",
           "invalidFileType": "Tipo de arquivo inválido",
-          "fileTooLarge": "Arquivo muito grande (máx 10MB)",
+          "onlyPDF": "Apenas arquivos PDF são permitidos",
+          "fileTooLarge": "Arquivo muito grande (máximo 100MB)",
           "uploadFailed": "Erro no upload do arquivo",
           "uploadTitle": "Erro no upload",
           "uploadDescription": "Não foi possível enviar o arquivo"
@@ -3992,10 +4059,16 @@
           "success": "Arquivo enviado com sucesso",
           "replace": "Substituir arquivo",
           "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV",
-          "fileSelected": "Arquivo selecionado"
+          "fileSelected": "Arquivo selecionado",
+          "clickToSelect": "Clique para selecionar novo PDF"
         },
         "currentFile": "Arquivo atual",
-        "newFile": "Novo arquivo"
+        "newFile": "Novo arquivo",
+        "protectionLevel": {
+          "none": "Sem proteção, download direto permitido",
+          "watermark": "Marca d'água com dados do aluno",
+          "full": "Máxima proteção (watermark + URL assinada)"
+        }
       },  
   "tabs": {
     "overview": "Visão Geral",
@@ -5816,7 +5889,8 @@
     "uploading": "Enviando imagem",
     "clickToSelect": "Clique para selecionar uma imagem",
     "supportedFormats": "Formatos suportados",
-    "savedAs": "Salvo como"
+    "savedAs": "Salvo como",
+    "change": "Trocar imagem"
   },
   "validation": {
     "newImageReady": "Nova imagem pronta para ser salva"

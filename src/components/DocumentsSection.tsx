@@ -1,7 +1,7 @@
 // /src/components/DocumentsSection.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
@@ -143,6 +143,15 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
   // Get cached URL for the document being processed
   const cachedUrl = useCachedDocumentUrl(lessonId, processingDocumentId || '');
 
+  // Stable function to request document access
+  const requestDocumentAccess = useCallback((documentId: string, protectionLevel: ProtectionLevel) => {
+    documentAccess.accessDocument({
+      lessonId,
+      documentId,
+      protectionLevel,
+    });
+  }, [lessonId, documentAccess]);
+
   // Auto-trigger access when status becomes COMPLETED
   useEffect(() => {
     if (!processingDocumentId) return;
@@ -167,11 +176,7 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       accessRequestedRef.current.add(accessKey);
 
       // Call POST /access ONCE
-      documentAccess.accessDocument({
-        lessonId,
-        documentId: processingDocumentId,
-        protectionLevel,
-      });
+      requestDocumentAccess(processingDocumentId, protectionLevel);
     }
 
     // If document failed, show error
@@ -179,7 +184,7 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
       setErrorMessage(documentStatus.data.processingError || 'Falha no processamento do documento');
       setProcessingDocumentId(null);
     }
-  }, [documentStatus.data, processingDocumentId, cachedUrl.hasCachedUrl, lessonId]);
+  }, [documentStatus.data, processingDocumentId, cachedUrl.hasCachedUrl, lessonId, requestDocumentAccess]);
 
   const handleDocumentClick = async (document: Document, translation: DocumentTranslation) => {
     const protectionLevel = document.protectionLevel || 'NONE';

@@ -2979,11 +2979,16 @@
       "basicInfo": "Informações Básicas",
       "schedule": "Agendamento",
       "courseInfo": "Informações do Curso",
+      "lessonAssociation": "Associação com Aula",
       "associations": "Associações",
       "hosts": "Co-apresentadores",
       "settings": "Configurações"
     },
     "required": "obrigatório",
+    "optional": "opcional",
+    "lessonAssociation": {
+      "helper": "Associe esta sessão a uma aula específica para facilitar a navegação dos alunos"
+    },
     "fields": {
       "title": {
         "label": "Título da Sessão",
@@ -3019,6 +3024,11 @@
         "label": "Aula",
         "placeholder": "Selecione uma aula",
         "none": "Nenhuma"
+      },
+      "lessonModule": {
+        "label": "Módulo da Aula",
+        "placeholder": "Selecione o módulo da aula",
+        "none": "Nenhum módulo selecionado"
       },
       "argument": {
         "label": "Argumento",

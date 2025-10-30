@@ -382,9 +382,8 @@ export default function CreateLiveSessionModal({
         body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
+        const data = await response.json();
         console.log('✅ Live session created successfully:', data);
         console.log('📊 Live session details:', {
           sessionId: data.sessionId,
@@ -410,8 +409,21 @@ export default function CreateLiveSessionModal({
         onOpenChange(false);
         onSuccess?.();
       } else {
-        console.error('❌ Error creating live session:', data);
-        throw new Error(data.detail || data.message || t('error.createFailed'));
+        // Parse error response and throw complete API error object
+        const errorData = await response.json();
+        console.error('❌ Error creating live session:', errorData);
+
+        // Throw complete API error object (not just message) so error handler can parse it
+        throw {
+          statusCode: response.status,
+          status: response.status,
+          message: errorData.detail || errorData.message,
+          detail: errorData.detail,
+          type: errorData.type,
+          title: errorData.title,
+          error: errorData.error,
+          details: errorData.details,
+        };
       }
     } catch (error) {
       console.error('❌ Error in onSubmit:', error);

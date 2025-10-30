@@ -44,16 +44,16 @@ export interface ErrorHandlerResult {
 export function handleLiveSessionError(error: unknown): ErrorHandlerResult {
   // Default error for unexpected cases
   const defaultError: ErrorHandlerResult = {
-    titleKey: 'Admin.CreateLiveSession.error.title',
-    descriptionKey: 'Admin.CreateLiveSession.error.description',
+    titleKey: 'error.title',
+    descriptionKey: 'error.description',
     isFieldError: false,
   };
 
   // Handle network errors (fetch failed)
   if (error instanceof TypeError && error.message.includes('fetch')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.network.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.network.description',
+      titleKey: 'error.network.title',
+      descriptionKey: 'error.network.description',
       isFieldError: false,
     };
   }
@@ -92,8 +92,8 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   // 1. Validation Errors (Zod)
   if (apiError.error === 'VALIDATION_ERROR' && apiError.details?.fieldErrors) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.validation.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.validation.description',
+      titleKey: 'error.validation.title',
+      descriptionKey: 'error.validation.description',
       isFieldError: true,
       fieldErrors: apiError.details.fieldErrors,
     };
@@ -102,8 +102,8 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   // 2. Permission Errors
   if (message.includes('Only tutors and admins')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.permission.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.permission.description',
+      titleKey: 'error.permission.title',
+      descriptionKey: 'error.permission.description',
       isFieldError: false,
     };
   }
@@ -111,32 +111,32 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   // 3. Time Errors
   if (message.includes('cannot be scheduled in the past')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.time.pastSession',
+      titleKey: 'error.title',
+      descriptionKey: 'error.time.pastSession',
       isFieldError: false,
     };
   }
 
   if (message.includes('End time must be after start time')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.time.endBeforeStart',
+      titleKey: 'error.title',
+      descriptionKey: 'error.time.endBeforeStart',
       isFieldError: false,
     };
   }
 
   if (message.includes('must be at least 15 minutes')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.time.tooShort',
+      titleKey: 'error.title',
+      descriptionKey: 'error.time.tooShort',
       isFieldError: false,
     };
   }
 
   if (message.includes('cannot exceed 480 minutes') || message.includes('cannot exceed') && message.includes('8 hours')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.time.tooLong',
+      titleKey: 'error.title',
+      descriptionKey: 'error.time.tooLong',
       isFieldError: false,
     };
   }
@@ -144,8 +144,8 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   // 4. Settings Errors
   if (message.includes('Host cannot be added as co-host')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.settings.hostAsCoHost',
+      titleKey: 'error.title',
+      descriptionKey: 'error.settings.hostAsCoHost',
       isFieldError: false,
     };
   }
@@ -153,15 +153,15 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   if (message.includes('does not belong to course')) {
     if (message.includes('Module')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.settings.moduleNotInCourse',
+        titleKey: 'error.title',
+        descriptionKey: 'error.settings.moduleNotInCourse',
         isFieldError: false,
       };
     }
     if (message.includes('Lesson')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.settings.lessonNotInCourse',
+        titleKey: 'error.title',
+        descriptionKey: 'error.settings.lessonNotInCourse',
         isFieldError: false,
       };
     }
@@ -170,16 +170,16 @@ function handle400Error(apiError: ApiErrorResponse, message: string): ErrorHandl
   // 5. Related Lesson Different Course
   if (message.includes('Related lesson belongs to a different course')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.relatedLessonDifferentCourse',
+      titleKey: 'error.title',
+      descriptionKey: 'error.relatedLessonDifferentCourse',
       isFieldError: false,
     };
   }
 
   // Fallback for other 400 errors
   return {
-    titleKey: 'Admin.CreateLiveSession.error.title',
-    descriptionKey: 'Admin.CreateLiveSession.error.description',
+    titleKey: 'error.title',
+    descriptionKey: 'error.description',
     isFieldError: false,
   };
 }
@@ -192,24 +192,24 @@ function handle404Error(message: string): ErrorHandlerResult {
 
   if (lowerMessage.includes('host')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.notFound.host',
+      titleKey: 'error.title',
+      descriptionKey: 'error.notFound.host',
       isFieldError: false,
     };
   }
 
   if (lowerMessage.includes('course')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.notFound.course',
+      titleKey: 'error.title',
+      descriptionKey: 'error.notFound.course',
       isFieldError: false,
     };
   }
 
   if (lowerMessage.includes('module')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.notFound.module',
+      titleKey: 'error.title',
+      descriptionKey: 'error.notFound.module',
       isFieldError: false,
     };
   }
@@ -217,30 +217,30 @@ function handle404Error(message: string): ErrorHandlerResult {
   if (lowerMessage.includes('lesson')) {
     if (lowerMessage.includes('related')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.notFound.relatedLesson',
+        titleKey: 'error.title',
+        descriptionKey: 'error.notFound.relatedLesson',
         isFieldError: false,
       };
     }
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.notFound.lesson',
+      titleKey: 'error.title',
+      descriptionKey: 'error.notFound.lesson',
       isFieldError: false,
     };
   }
 
   if (lowerMessage.includes('argument')) {
     return {
-      titleKey: 'Admin.CreateLiveSession.error.title',
-      descriptionKey: 'Admin.CreateLiveSession.error.notFound.argument',
+      titleKey: 'error.title',
+      descriptionKey: 'error.notFound.argument',
       isFieldError: false,
     };
   }
 
   // Fallback for other 404 errors
   return {
-    titleKey: 'Admin.CreateLiveSession.error.title',
-    descriptionKey: 'Admin.CreateLiveSession.error.description',
+    titleKey: 'error.title',
+    descriptionKey: 'error.description',
     isFieldError: false,
   };
 }
@@ -255,24 +255,24 @@ function handle503Error(message: string): ErrorHandlerResult {
   if (lowerMessage.includes('zoom')) {
     if (lowerMessage.includes('rate limit')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.zoom.rateLimit',
+        titleKey: 'error.title',
+        descriptionKey: 'error.zoom.rateLimit',
         isFieldError: false,
       };
     }
 
     if (lowerMessage.includes('authenticate') || lowerMessage.includes('auth')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.zoom.authFailed',
+        titleKey: 'error.title',
+        descriptionKey: 'error.zoom.authFailed',
         isFieldError: false,
       };
     }
 
     if (lowerMessage.includes('failed to create')) {
       return {
-        titleKey: 'Admin.CreateLiveSession.error.title',
-        descriptionKey: 'Admin.CreateLiveSession.error.zoom.createFailed',
+        titleKey: 'error.title',
+        descriptionKey: 'error.zoom.createFailed',
         isFieldError: false,
       };
     }
@@ -280,8 +280,8 @@ function handle503Error(message: string): ErrorHandlerResult {
 
   // Generic service unavailable
   return {
-    titleKey: 'Admin.CreateLiveSession.error.title',
-    descriptionKey: 'Admin.CreateLiveSession.error.service.unavailable',
+    titleKey: 'error.title',
+    descriptionKey: 'error.service.unavailable',
     isFieldError: false,
   };
 }

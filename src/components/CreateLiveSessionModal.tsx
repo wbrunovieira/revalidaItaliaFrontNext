@@ -27,6 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Button from '@/components/Button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
+import { handleLiveSessionError } from '@/lib/liveSessionErrorHandler';
 import {
   Users,
   Calendar,
@@ -415,33 +416,23 @@ export default function CreateLiveSessionModal({
     } catch (error) {
       console.error('❌ Error in onSubmit:', error);
 
-      let errorMessage = t('error.description');
+      // Use error handler to get translation keys
+      const errorResult = handleLiveSessionError(error);
 
-      if (error instanceof Error) {
-        if (error.message.includes('Module') && error.message.includes('does not belong to course')) {
-          errorMessage = 'Módulo não pertence ao curso selecionado';
-        } else if (error.message.includes('Lesson') && error.message.includes('does not belong to course')) {
-          errorMessage = 'Aula não pertence ao curso selecionado';
-        } else if (error.message.includes('Related lesson') && error.message.includes('belongs to course')) {
-          errorMessage = 'Aula relacionada deve pertencer ao mesmo curso';
-        } else if (error.message.includes('Host with ID') && error.message.includes('not found')) {
-          errorMessage = t('error.hostNotFound');
-        } else if (error.message.includes('Course with ID') && error.message.includes('not found')) {
-          errorMessage = 'Curso não encontrado';
-        } else if (error.message.includes('Module with ID') && error.message.includes('not found')) {
-          errorMessage = 'Módulo não encontrado';
-        } else if (error.message.includes('duration')) {
-          errorMessage = t('error.invalidDuration');
-        } else if (error.message.includes('past')) {
-          errorMessage = t('error.pastDate');
-        } else {
-          errorMessage = error.message;
-        }
+      // Handle field validation errors (Zod errors from backend)
+      if (errorResult.isFieldError && errorResult.fieldErrors) {
+        Object.entries(errorResult.fieldErrors).forEach(([fieldName, errors]) => {
+          form.setError(fieldName as any, {
+            type: 'manual',
+            message: errors.join(', '),
+          });
+        });
       }
 
+      // Show toast with translated error message
       toast({
-        title: t('error.title'),
-        description: errorMessage,
+        title: t(errorResult.titleKey),
+        description: t(errorResult.descriptionKey),
         variant: 'destructive',
       });
     } finally {

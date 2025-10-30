@@ -3114,11 +3114,46 @@
       "title": "Erro ao Criar",
       "description": "Não foi possível criar a sessão",
       "createFailed": "Falha ao criar sessão ao vivo",
-      "hostNotFound": "Seu usuário não foi encontrado no sistema. Por favor, faça logout e entre novamente.",
-      "lessonNotFound": "A aula selecionada não foi encontrada. Por favor, selecione outra aula.",
-      "argumentNotFound": "O argumento selecionado não foi encontrado. Por favor, selecione outro argumento.",
-      "invalidDuration": "A duração da sessão deve ser entre 15 minutos e 8 horas.",
-      "pastDate": "A data de início deve ser no futuro. Não é possível agendar sessões no passado."
+      "validation": {
+        "title": "Dados Inválidos",
+        "description": "Por favor, verifique os campos preenchidos e tente novamente"
+      },
+      "permission": {
+        "title": "Sem Permissão",
+        "description": "Apenas tutores e administradores podem criar sessões ao vivo"
+      },
+      "time": {
+        "pastSession": "A sessão não pode ser agendada no passado. Por favor, escolha um horário futuro",
+        "endBeforeStart": "O horário de término deve ser após o horário de início",
+        "tooShort": "A sessão deve ter pelo menos 15 minutos de duração",
+        "tooLong": "A sessão não pode ultrapassar 8 horas de duração"
+      },
+      "settings": {
+        "hostAsCoHost": "O anfitrião não pode ser adicionado como co-anfitrião",
+        "moduleNotInCourse": "O módulo selecionado não pertence ao curso escolhido. Por favor, selecione outro módulo",
+        "lessonNotInCourse": "A aula selecionada não pertence ao curso escolhido. Por favor, selecione outra aula"
+      },
+      "notFound": {
+        "host": "Seu usuário não foi encontrado. Por favor, faça logout e entre novamente",
+        "course": "O curso selecionado não foi encontrado. Por favor, recarregue a página",
+        "module": "O módulo selecionado não foi encontrado. Por favor, selecione outro módulo",
+        "lesson": "A aula selecionada não foi encontrada. Por favor, selecione outra aula",
+        "argument": "O argumento selecionado não foi encontrado. Por favor, selecione outro argumento",
+        "relatedLesson": "A aula relacionada não foi encontrada. Por favor, remova a seleção"
+      },
+      "zoom": {
+        "rateLimit": "Limite de requisições do Zoom atingido. Por favor, aguarde alguns minutos e tente novamente",
+        "authFailed": "Falha na autenticação com o Zoom. Por favor, contate o suporte",
+        "createFailed": "Erro ao criar reunião no Zoom. Por favor, tente novamente"
+      },
+      "service": {
+        "unavailable": "Serviço temporariamente indisponível. Por favor, tente novamente em alguns instantes"
+      },
+      "network": {
+        "title": "Erro de Conexão",
+        "description": "Não foi possível conectar ao servidor. Verifique sua conexão com a internet"
+      },
+      "relatedLessonDifferentCourse": "A aula relacionada pertence a um curso diferente. Por favor, selecione uma aula do mesmo curso"
     }
   },
   

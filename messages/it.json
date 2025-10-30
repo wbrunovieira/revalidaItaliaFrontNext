@@ -2974,10 +2974,12 @@
     "sections": {
       "basicInfo": "Informazioni di Base",
       "schedule": "Programmazione",
+      "courseInfo": "Informazioni del Corso",
       "associations": "Associazioni",
       "hosts": "Co-presentatori",
       "settings": "Impostazioni"
     },
+    "required": "obbligatorio",
     "fields": {
       "title": {
         "label": "Titolo della Sessione",

@@ -2973,10 +2973,12 @@
     "sections": {
       "basicInfo": "Información Básica",
       "schedule": "Programación",
+      "courseInfo": "Información del Curso",
       "associations": "Asociaciones",
       "hosts": "Co-presentadores",
       "settings": "Configuración"
     },
+    "required": "obligatorio",
     "fields": {
       "title": {
         "label": "Título de la Sesión",

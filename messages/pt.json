@@ -2978,10 +2978,12 @@
     "sections": {
       "basicInfo": "Informações Básicas",
       "schedule": "Agendamento",
+      "courseInfo": "Informações do Curso",
       "associations": "Associações",
       "hosts": "Co-apresentadores",
       "settings": "Configurações"
     },
+    "required": "obrigatório",
     "fields": {
       "title": {
         "label": "Título da Sessão",

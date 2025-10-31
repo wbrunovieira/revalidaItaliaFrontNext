@@ -30,7 +30,7 @@ export default function LiveSessionsSection({
   courseSlug,
   moduleSlug,
 }: LiveSessionsSectionProps) {
-  const t = useTranslations('LessonPage.liveSessions');
+  const t = useTranslations('Lesson.liveSessions');
 
   if (!liveSessionRecordings || liveSessionRecordings.length === 0) {
     return null;

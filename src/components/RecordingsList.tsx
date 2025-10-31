@@ -460,6 +460,21 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
                         </div>
                       )}
 
+                      {/* Download Button */}
+                      {recording.status === 'AVAILABLE' && recording.recordingUrl && (
+                        <div className="pt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                            onClick={() => handleDownload(recording)}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            {t('download')}
+                          </Button>
+                        </div>
+                      )}
+
                       {/* Expiration Warning */}
                       {recording.availableUntil && (
                         <div className="text-xs text-yellow-500 flex items-center gap-1">

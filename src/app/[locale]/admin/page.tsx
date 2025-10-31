@@ -23,6 +23,7 @@ import {
   Radio,
   DollarSign,
   GraduationCap,
+  PlayCircle,
 } from 'lucide-react';
 
 import {
@@ -63,6 +64,7 @@ import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import LiveSessionsList from '@/components/LiveSessionsList';
+import RecordingsList from '@/components/RecordingsList';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -688,7 +690,7 @@ export default function AdminPage() {
 
           <TabsContent value="liveSessions">
             <Tabs defaultValue="create" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+              <TabsList className="grid w-full max-w-3xl grid-cols-3 bg-gray-700">
                 <TabsTrigger
                   value="create"
                   className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
@@ -702,6 +704,13 @@ export default function AdminPage() {
                 >
                   <List className="mr-2" size={16} />
                   {t('liveSessions.list')}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="recordings"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                >
+                  <PlayCircle className="mr-2" size={16} />
+                  {t('liveSessions.recordings')}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
@@ -742,6 +751,9 @@ export default function AdminPage() {
               </TabsContent>
               <TabsContent value="list">
                 <LiveSessionsList />
+              </TabsContent>
+              <TabsContent value="recordings">
+                <RecordingsList locale={locale as string} />
               </TabsContent>
             </Tabs>
           </TabsContent>

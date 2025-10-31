@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
-import Image from 'next/image';
 import {
   PlayCircle,
   Download,
@@ -248,6 +247,23 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
     );
   };
 
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return null;
+
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+
+    return `${minutes}min`;
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'AVAILABLE':
@@ -376,38 +392,19 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
                 transition={{ delay: index * 0.05 }}
               >
                 <Card className="bg-gray-800/50 border-gray-700 hover:border-secondary/50 transition-all h-full">
-                  <CardContent className="p-0">
-                    {/* Thumbnail */}
-                    <div className="relative aspect-video bg-gray-900">
-                      {recording.thumbnailUrl ? (
-                        <Image
-                          src={recording.thumbnailUrl}
-                          alt={recording.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <FileVideo className="h-12 w-12 text-gray-600" />
-                        </div>
-                      )}
-                      
-                      {/* Duration Badge */}
-                      {recording.formattedDuration && (
-                        <Badge className="absolute top-2 right-2 bg-black/80 text-white">
-                          {recording.formattedDuration}
+                  <CardContent className="p-4">
+                    {/* Header with Badges */}
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      {getStatusBadge(recording.status)}
+                      {formatDuration(recording.duration) && (
+                        <Badge variant="outline" className="text-xs">
+                          {formatDuration(recording.duration)}
                         </Badge>
                       )}
-
-                      {/* Status Badge */}
-                      <div className="absolute top-2 left-2">
-                        {getStatusBadge(recording.status)}
-                      </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 space-y-3">
+                    <div className="space-y-3">
                       <div>
                         <h3 className="font-semibold text-white line-clamp-2 mb-1">
                           {recording.title}
@@ -432,10 +429,12 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
                           </div>
                         )}
                         <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {recording.viewCount} {t('views')}
-                          </span>
+                          {recording.viewCount > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {recording.viewCount} {t('views')}
+                            </span>
+                          )}
                           {recording.fileSize && (
                             <span className="flex items-center gap-1">
                               <Download className="h-3 w-3" />

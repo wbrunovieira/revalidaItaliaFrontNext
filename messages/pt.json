@@ -2825,7 +2825,8 @@
     "createDescription": "Agende uma nova sessão ao vivo com integração Zoom",
     "createButton": "Criar Nova Sessão",
     "create": "Criar Sessão",
-    "list": "Listar Sessões"
+    "list": "Listar Sessões",
+    "recordings": "Gravações"
   },
   
   "ViewLiveSession": {

@@ -2820,7 +2820,8 @@
     "createDescription": "Programa una nueva sesión en vivo con integración Zoom",
     "createButton": "Crear Nueva Sesión",
     "create": "Crear Sesión",
-    "list": "Listar Sesiones"
+    "list": "Listar Sesiones",
+    "recordings": "Grabaciones"
   },
   
   "ViewLiveSession": {

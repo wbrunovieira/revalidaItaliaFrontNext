@@ -49,6 +49,8 @@ interface LiveSessionRecording {
     slug: string;
     title: string;
     hasVideo: boolean;
+    moduleId: string;
+    courseId: string;
   };
 }
 

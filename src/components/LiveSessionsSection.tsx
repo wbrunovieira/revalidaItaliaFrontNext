@@ -14,27 +14,52 @@ interface LiveSessionRecording {
     slug: string;
     title: string;
     hasVideo: boolean;
+    moduleId: string;
+    courseId: string;
   };
+}
+
+interface Course {
+  id: string;
+  slug: string;
+}
+
+interface Module {
+  id: string;
+  slug: string;
 }
 
 interface LiveSessionsSectionProps {
   liveSessionRecordings: LiveSessionRecording[];
   locale: string;
-  courseSlug: string;
-  moduleSlug: string;
+  courses: Course[];
+  modules: Module[];
 }
 
 export default function LiveSessionsSection({
   liveSessionRecordings,
   locale,
-  courseSlug,
-  moduleSlug,
+  courses,
+  modules,
 }: LiveSessionsSectionProps) {
   const t = useTranslations('Lesson.liveSessions');
 
   if (!liveSessionRecordings || liveSessionRecordings.length === 0) {
     return null;
   }
+
+  // Helper function to get course and module slugs from IDs
+  const getLessonUrl = (recording: LiveSessionRecording) => {
+    const course = courses.find(c => c.id === recording.recordingLesson.courseId);
+    const module = modules.find(m => m.id === recording.recordingLesson.moduleId);
+
+    if (!course || !module) {
+      console.warn('Could not find course or module for recording:', recording);
+      return '#';
+    }
+
+    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${recording.recordingLesson.slug}`;
+  };
 
   const getDateLocale = () => {
     switch (locale) {
@@ -92,7 +117,7 @@ export default function LiveSessionsSection({
 
                 {/* Recording Link */}
                 <Link
-                  href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${recording.recordingLesson.slug}`}
+                  href={getLessonUrl(recording)}
                   className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   {recording.recordingLesson.hasVideo ? (

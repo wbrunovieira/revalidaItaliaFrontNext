@@ -446,8 +446,8 @@ export default function LessonPageContent({
                     <LiveSessionsSection
                       liveSessionRecordings={lesson.liveSessionRecordings}
                       locale={locale}
-                      courseSlug={courseSlug}
-                      moduleSlug={moduleSlug}
+                      courses={courses}
+                      modules={modules}
                     />
                   </div>
                 )}
@@ -592,8 +592,8 @@ export default function LessonPageContent({
                         <LiveSessionsSection
                           liveSessionRecordings={lesson.liveSessionRecordings}
                           locale={locale}
-                          courseSlug={courseSlug}
-                          moduleSlug={moduleSlug}
+                          courses={courses}
+                          modules={modules}
                         />
                       </div>
                     )}

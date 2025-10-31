@@ -58,7 +58,7 @@ export default function LiveSessionsSection({
       return '#';
     }
 
-    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${recording.recordingLesson.slug}`;
+    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${recording.recordingLesson.id}`;
   };
 
   const getDateLocale = () => {

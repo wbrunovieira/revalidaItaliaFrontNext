@@ -41,6 +41,17 @@ interface ModuleData {
   translations: Translation[];
 }
 
+interface LiveSessionRecording {
+  sessionTitle: string;
+  sessionDate: string;
+  recordingLesson: {
+    id: string;
+    slug: string;
+    title: string;
+    hasVideo: boolean;
+  };
+}
+
 interface Lesson {
   id: string;
   moduleId: string;
@@ -48,6 +59,7 @@ interface Lesson {
   video?: Video;
   translations: Translation[];
   flashcardIds?: string[];
+  liveSessionRecordings?: LiveSessionRecording[];
   createdAt: string;
   updatedAt: string;
 }

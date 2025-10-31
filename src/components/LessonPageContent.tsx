@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import StableVideoPlayer from '@/components/StableVideoPlayer';
 import DocumentsSection from '@/components/DocumentsSection';
+import LiveSessionsSection from '@/components/LiveSessionsSection';
 import LessonComments from '@/components/LessonComments';
 import LessonAccessTracker from '@/components/LessonAccessTracker';
 import CollapsibleAssessments from '@/components/CollapsibleAssessments';
@@ -439,6 +440,18 @@ export default function LessonPageContent({
                   lessonId={lessonId}
                 />
 
+                {/* Live Sessions */}
+                {lesson.liveSessionRecordings && lesson.liveSessionRecordings.length > 0 && (
+                  <div className="mt-12">
+                    <LiveSessionsSection
+                      liveSessionRecordings={lesson.liveSessionRecordings}
+                      locale={locale}
+                      courseSlug={courseSlug}
+                      moduleSlug={moduleSlug}
+                    />
+                  </div>
+                )}
+
                 {/* Flashcards */}
                 {flashcards.length > 0 && (
                   <div className="mt-12">
@@ -569,6 +582,18 @@ export default function LessonPageContent({
                           documents={documents}
                           locale={locale}
                           lessonId={lessonId}
+                        />
+                      </div>
+                    )}
+
+                    {/* Live Sessions */}
+                    {lesson.liveSessionRecordings && lesson.liveSessionRecordings.length > 0 && (
+                      <div>
+                        <LiveSessionsSection
+                          liveSessionRecordings={lesson.liveSessionRecordings}
+                          locale={locale}
+                          courseSlug={courseSlug}
+                          moduleSlug={moduleSlug}
                         />
                       </div>
                     )}

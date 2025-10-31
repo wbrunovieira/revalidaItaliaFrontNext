@@ -1722,6 +1722,14 @@
     "notAuthenticated": "Devi essere autenticato",
     "completionError": "Errore nell'aggiornamento dello stato della lezione",
     "autoCompleteHint": "La lezione verrà segnata come completata automaticamente quando avrai guardato il 90% del video ({progress}% guardato)",
+    "liveSessions": {
+      "title": "Lezioni dal Vivo",
+      "description": "Registrazioni di lezioni dal vivo relative a questo contenuto",
+      "watchRecording": "Guarda registrazione",
+      "recordingProcessing": "Registrazione in elaborazione",
+      "available": "Disponibile",
+      "processing": "In elaborazione"
+    },
     "pagination": {
       "page": "Pagina",
       "of": "di",

@@ -361,6 +361,7 @@ export default function CreateLiveSessionModal({
       // Add optional fields
       if (values.lessonId) {
         requestBody.lessonId = values.lessonId;
+        requestBody.relatedLessonId = values.lessonId; // Campo necessário para vincular gravação à aula
       }
       if (values.coHostIds && values.coHostIds.length > 0) {
         requestBody.coHostIds = values.coHostIds;

@@ -110,15 +110,7 @@ interface Course {
     locale: string;
     title: string;
   }>;
-}
-
-interface Module {
-  id: string;
-  slug: string;
-  translations: Array<{
-    locale: string;
-    title: string;
-  }>;
+  modules?: Module[];
 }
 
 interface Lesson {
@@ -128,6 +120,16 @@ interface Lesson {
     locale: string;
     title: string;
   }>;
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  translations: Array<{
+    locale: string;
+    title: string;
+  }>;
+  lessons?: Lesson[];
 }
 
 interface User {
@@ -149,14 +151,8 @@ export default function CreateLiveSessionModal({
 
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [modules, setModules] = useState<Module[]>([]);
-  const [lessonModules, setLessonModules] = useState<Module[]>([]); // Modules for lesson selection
-  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [, setLoadingCourses] = useState(false);
-  const [loadingModules, setLoadingModules] = useState(false);
-  const [loadingLessonModules, setLoadingLessonModules] = useState(false);
-  const [loadingLessons, setLoadingLessons] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const form = useForm<z.input<typeof liveSessionSchema>>({
@@ -187,6 +183,18 @@ export default function CreateLiveSessionModal({
   const selectedCourseId = form.watch('courseId');
   const selectedLessonModuleId = form.watch('lessonModuleId');
 
+  // Compute available modules and lessons based on selection
+  const selectedCourse = courses.find(c => c.id === selectedCourseId);
+
+  // For required section (Course Info)
+  const availableModules = selectedCourse?.modules || [];
+
+  // For optional section (Lesson Association)
+  const availableLessonModules = selectedCourse?.modules || [];
+  const selectedLessonModule = availableLessonModules.find(m => m.id === selectedLessonModuleId);
+  const availableLessons = selectedLessonModule?.lessons || [];
+
+
   // Load initial data
   useEffect(() => {
     if (open) {
@@ -196,36 +204,70 @@ export default function CreateLiveSessionModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Load modules when course is selected (required section)
+  // Reset dependent fields when course changes
   useEffect(() => {
     if (selectedCourseId) {
-      fetchModules(selectedCourseId);
-      // Reset all dependent fields
       form.setValue('moduleId', '');
       form.setValue('lessonModuleId', '');
       form.setValue('lessonId', '');
-      setLessonModules([]);
-      setLessons([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCourseId]);
 
-  // Load lesson modules when course is selected (for optional lesson association)
+  // Reset lesson when lesson module changes
   useEffect(() => {
-    if (selectedCourseId) {
-      fetchLessonModules(selectedCourseId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCourseId]);
-
-  // Load lessons when lesson module is selected
-  useEffect(() => {
-    if (selectedLessonModuleId && selectedCourseId) {
-      fetchLessons(selectedCourseId, selectedLessonModuleId);
+    if (selectedLessonModuleId) {
       form.setValue('lessonId', '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLessonModuleId, selectedCourseId]);
+  }, [selectedLessonModuleId]);
+
+  const fetchLessonsForModule = async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) return [];
+
+      const data = await response.json();
+      return data.lessons || data || [];
+    } catch (error) {
+      console.error(`Error fetching lessons for module ${moduleId}:`, error);
+      return [];
+    }
+  };
+
+  const fetchModulesForCourse = async (courseId: string): Promise<Module[]> => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) return [];
+
+      const modules: Module[] = await response.json();
+
+      // Fetch lessons for each module
+      const modulesWithLessons = await Promise.all(
+        modules.map(async (module) => {
+          const lessons = await fetchLessonsForModule(courseId, module.id);
+          return { ...module, lessons };
+        })
+      );
+
+      return modulesWithLessons;
+    } catch (error) {
+      console.error(`Error fetching modules for course ${courseId}:`, error);
+      return [];
+    }
+  };
 
   const fetchCourses = async () => {
     setLoadingCourses(true);
@@ -237,77 +279,30 @@ export default function CreateLiveSessionModal({
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setCourses(data.courses || data || []);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch courses: ${response.status}`);
       }
+
+      const coursesData: Course[] = await response.json();
+
+      // Fetch modules and lessons for each course
+      const coursesWithData = await Promise.all(
+        coursesData.map(async (course) => {
+          const modules = await fetchModulesForCourse(course.id);
+          return { ...course, modules };
+        })
+      );
+
+      setCourses(coursesWithData);
     } catch (error) {
       console.error('Error fetching courses:', error);
+      toast({
+        title: 'Erro ao carregar cursos',
+        description: 'Não foi possível carregar os cursos disponíveis',
+        variant: 'destructive',
+      });
     } finally {
       setLoadingCourses(false);
-    }
-  };
-
-  const fetchModules = async (courseId: string) => {
-    setLoadingModules(true);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setModules(data.modules || data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching modules:', error);
-    } finally {
-      setLoadingModules(false);
-    }
-  };
-
-  const fetchLessonModules = async (courseId: string) => {
-    setLoadingLessonModules(true);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLessonModules(data.modules || data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching lesson modules:', error);
-    } finally {
-      setLoadingLessonModules(false);
-    }
-  };
-
-  const fetchLessons = async (courseId: string, moduleId: string) => {
-    setLoadingLessons(true);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLessons(data.lessons || data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching lessons:', error);
-    } finally {
-      setLoadingLessons(false);
     }
   };
 
@@ -434,7 +429,7 @@ export default function CreateLiveSessionModal({
       // Handle field validation errors (Zod errors from backend)
       if (errorResult.isFieldError && errorResult.fieldErrors) {
         Object.entries(errorResult.fieldErrors).forEach(([fieldName, errors]) => {
-          form.setError(fieldName as any, {
+          form.setError(fieldName as keyof z.input<typeof liveSessionSchema>, {
             type: 'manual',
             message: errors.join(', '),
           });
@@ -589,7 +584,7 @@ export default function CreateLiveSessionModal({
                           <SelectContent className="bg-gray-700 border-gray-600">
                             {courses.map((course) => (
                               <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-600">
-                                {course.translations.find(t => t.locale === 'pt')?.title || course.slug}
+                                {course.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt')?.title || course.slug}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -614,14 +609,14 @@ export default function CreateLiveSessionModal({
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={loadingModules} className="bg-gray-700 border-gray-600 text-white">
+                              <SelectTrigger disabled={!selectedCourseId} className="bg-gray-700 border-gray-600 text-white">
                                 <SelectValue placeholder={t('fields.module.placeholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-gray-700 border-gray-600">
-                              {modules.map((module) => (
+                              {availableModules.map((module) => (
                                 <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                                  {module.translations.find(t => t.locale === 'pt')?.title || module.slug}
+                                  {module.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt')?.title || module.slug}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -711,11 +706,11 @@ export default function CreateLiveSessionModal({
                             {t('fields.lessonModule.label')}
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                             value={field.value || 'none'}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={loadingLessonModules} className="bg-gray-700 border-gray-600 text-white">
+                              <SelectTrigger disabled={!selectedCourseId} className="bg-gray-700 border-gray-600 text-white">
                                 <SelectValue placeholder={t('fields.lessonModule.placeholder')} />
                               </SelectTrigger>
                             </FormControl>
@@ -723,9 +718,9 @@ export default function CreateLiveSessionModal({
                               <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
                                 {t('fields.lessonModule.none')}
                               </SelectItem>
-                              {lessonModules.map((module) => (
+                              {availableLessonModules.map((module) => (
                                 <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                                  {module.translations.find(t => t.locale === 'pt')?.title || module.slug}
+                                  {module.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt')?.title || module.slug}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -735,21 +730,21 @@ export default function CreateLiveSessionModal({
                       )}
                     />
 
-                    {selectedLessonModuleId && (
+                    {selectedLessonModuleId && selectedLessonModuleId !== 'none' && (
                       <FormField
-                        control={form.control}
-                        name="lessonId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">
-                              {t('fields.lesson.label')}
-                            </FormLabel>
+                          control={form.control}
+                          name="lessonId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">
+                                {t('fields.lesson.label')}
+                              </FormLabel>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                               value={field.value || 'none'}
                             >
                               <FormControl>
-                                <SelectTrigger disabled={loadingLessons} className="bg-gray-700 border-gray-600 text-white">
+                                <SelectTrigger disabled={!selectedLessonModuleId || selectedLessonModuleId === 'none'} className="bg-gray-700 border-gray-600 text-white">
                                   <SelectValue placeholder={t('fields.lesson.placeholder')} />
                                 </SelectTrigger>
                               </FormControl>
@@ -757,11 +752,14 @@ export default function CreateLiveSessionModal({
                                 <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
                                   {t('fields.lesson.none')}
                                 </SelectItem>
-                                {lessons.map((lesson) => (
-                                  <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
-                                    {lesson.translations.find(t => t.locale === 'pt')?.title || lesson.slug}
-                                  </SelectItem>
-                                ))}
+                                {availableLessons.map((lesson) => {
+                                  const lessonTranslation = lesson.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt');
+                                  return (
+                                    <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
+                                      {lessonTranslation?.title || lesson.slug}
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                             <FormMessage />

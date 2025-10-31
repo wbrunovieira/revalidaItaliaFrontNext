@@ -460,42 +460,6 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
                         </div>
                       )}
 
-                      {/* Actions */}
-                      {recording.status === 'AVAILABLE' && (
-                        <div className="flex gap-2 pt-2">
-                          {recording.streamUrl && (
-                            <Button
-                              size="sm"
-                              className="flex-1 bg-secondary hover:bg-secondary/90 text-primary"
-                              onClick={() => handlePlay(recording)}
-                              disabled={playingSession === recording.sessionId}
-                            >
-                              {playingSession === recording.sessionId ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  {t('opening')}
-                                </>
-                              ) : (
-                                <>
-                                  <PlayCircle className="h-4 w-4 mr-2" />
-                                  {t('watch')}
-                                </>
-                              )}
-                            </Button>
-                          )}
-                          {recording.recordingUrl && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                              onClick={() => handleDownload(recording)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-
                       {/* Expiration Warning */}
                       {recording.availableUntil && (
                         <div className="text-xs text-yellow-500 flex items-center gap-1">

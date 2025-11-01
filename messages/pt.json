@@ -6425,7 +6425,39 @@
     "title": "Argumento atualizado",
     "description": "O argumento foi atualizado com sucesso"
   }
+},
+"AccessibleRecordingLessons": {
+  "searchPlaceholder": "Buscar aulas gravadas...",
+  "sortBy": "Ordenar por",
+  "sort": {
+    "recordedAt": "Data de gravação",
+    "title": "Título",
+    "duration": "Duração",
+    "viewCount": "Visualizações",
+    "desc": "Decrescente",
+    "asc": "Crescente"
+  },
+  "status": {
+    "available": "Disponível",
+    "processing": "Processando",
+    "expired": "Expirado"
+  },
+  "progress": {
+    "completed": "Concluído",
+    "inProgress": "Em andamento"
+  },
+  "showing": "Mostrando {count} de {total} aulas",
+  "noLessons": "Nenhuma aula gravada encontrada",
+  "noLessonsDescription": "Não há aulas gravadas disponíveis no momento",
+  "views": "visualizações",
+  "pagination": {
+    "pageOf": "Página {current} de {total}",
+    "previous": "Anterior",
+    "next": "Próxima"
+  },
+  "error": {
+    "fetchTitle": "Erro ao carregar aulas",
+    "fetchDescription": "Não foi possível carregar as aulas gravadas"
+  }
 }
-
-
 }}

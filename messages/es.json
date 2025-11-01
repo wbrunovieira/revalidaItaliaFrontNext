@@ -6116,5 +6116,39 @@
     "title": "Argumento actualizado",
     "description": "El argumento fue actualizado con éxito"
   }
+},
+"AccessibleRecordingLessons": {
+  "searchPlaceholder": "Buscar clases grabadas...",
+  "sortBy": "Ordenar por",
+  "sort": {
+    "recordedAt": "Fecha de grabación",
+    "title": "Título",
+    "duration": "Duración",
+    "viewCount": "Visualizaciones",
+    "desc": "Descendente",
+    "asc": "Ascendente"
+  },
+  "status": {
+    "available": "Disponible",
+    "processing": "Procesando",
+    "expired": "Expirado"
+  },
+  "progress": {
+    "completed": "Completado",
+    "inProgress": "En progreso"
+  },
+  "showing": "Mostrando {count} de {total} clases",
+  "noLessons": "No se encontraron clases grabadas",
+  "noLessonsDescription": "No hay clases grabadas disponibles en este momento",
+  "views": "visualizaciones",
+  "pagination": {
+    "pageOf": "Página {current} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "error": {
+    "fetchTitle": "Error al cargar clases",
+    "fetchDescription": "No fue posible cargar las clases grabadas"
+  }
 }
 }}

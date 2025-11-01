@@ -6087,5 +6087,39 @@
     "title": "Argomento aggiornato",
     "description": "L'argomento è stato aggiornato con successo"
   }
+},
+"AccessibleRecordingLessons": {
+  "searchPlaceholder": "Cerca lezioni registrate...",
+  "sortBy": "Ordina per",
+  "sort": {
+    "recordedAt": "Data di registrazione",
+    "title": "Titolo",
+    "duration": "Durata",
+    "viewCount": "Visualizzazioni",
+    "desc": "Decrescente",
+    "asc": "Crescente"
+  },
+  "status": {
+    "available": "Disponibile",
+    "processing": "In elaborazione",
+    "expired": "Scaduto"
+  },
+  "progress": {
+    "completed": "Completato",
+    "inProgress": "In corso"
+  },
+  "showing": "Mostrando {count} di {total} lezioni",
+  "noLessons": "Nessuna lezione registrata trovata",
+  "noLessonsDescription": "Non ci sono lezioni registrate disponibili al momento",
+  "views": "visualizzazioni",
+  "pagination": {
+    "pageOf": "Pagina {current} di {total}",
+    "previous": "Precedente",
+    "next": "Successiva"
+  },
+  "error": {
+    "fetchTitle": "Errore nel caricamento delle lezioni",
+    "fetchDescription": "Impossibile caricare le lezioni registrate"
+  }
 }
 }}

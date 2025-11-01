@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
 import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Filter, Search, Radio, PlayCircle, X } from 'lucide-react';
+import AccessibleRecordingLessons from '@/components/AccessibleRecordingLessons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -551,13 +552,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
         {/* All Live Sessions */}
         <TabsContent value="allSessions" className="space-y-4">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="text-center py-12">
-              <Radio className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-white">{t('allSessionsTitle')}</h3>
-              <p className="text-gray-400">{t('allSessionsDescription')}</p>
-            </CardContent>
-          </Card>
+          <AccessibleRecordingLessons locale={locale} />
         </TabsContent>
       </Tabs>
     </div>

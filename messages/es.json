@@ -2870,6 +2870,9 @@
       "argument": "Argumento",
       "module": "Módulo"
     },
+    "cancelReason": {
+      "title": "Motivo de la Cancelación"
+    },
     "liveInfo": {
       "title": "Información en Vivo",
       "participants": "Participantes",

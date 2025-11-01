@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Clock, Users, Video, Radio, Link, Lock, MessageSquare, HelpCircle, User, Mic, MicOff, Hand, Monitor, PlayCircle } from 'lucide-react';
+import { Loader2, Calendar, Clock, Users, Video, Radio, Link, Lock, MessageSquare, HelpCircle, User, Mic, MicOff, Hand, Monitor, PlayCircle, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
@@ -79,6 +79,7 @@ interface LiveSessionDetails {
   joinUrl?: string;
   passcode?: string;
   participantCount?: number;
+  cancelReason?: string; // Only present when status is CANCELLED
   createdAt: string;
   updatedAt: string;
 }
@@ -349,6 +350,21 @@ export default function ViewLiveSessionModal({
                   )}
                 </div>
               </div>
+
+              {/* Cancel Reason - Only shown when session is cancelled */}
+              {session.status === 'CANCELLED' && session.cancelReason && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 md:col-span-2">
+                  <h4 className="text-sm font-medium text-red-300 mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    {t('cancelReason.title')}
+                  </h4>
+                  <div className="bg-gray-800/50 rounded p-3">
+                    <p className="text-sm text-gray-300 whitespace-pre-wrap">
+                      {session.cancelReason}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Settings */}
               <div className="bg-gray-700/50 rounded-lg p-4 md:col-span-2">

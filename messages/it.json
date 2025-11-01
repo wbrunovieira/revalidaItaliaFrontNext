@@ -2868,7 +2868,8 @@
     "linkedContent": {
       "title": "Contenuto Collegato",
       "lesson": "Lezione",
-      "argument": "Argomento"
+      "argument": "Argomento",
+      "module": "Modulo"
     },
     "liveInfo": {
       "title": "Informazioni dal Vivo",
@@ -2925,7 +2926,9 @@
       "view": "Visualizza",
       "start": "Avvia",
       "end": "Termina",
-      "endTooltip": "Termina sessione sulla piattaforma"
+      "endTooltip": "Termina sessione sulla piattaforma",
+      "edit": "Modifica",
+      "cancel": "Annulla"
     },
     "syncInfo": {
       "title": "Sincronizzazione Automatica Attiva",
@@ -2947,11 +2950,41 @@
       "confirm": "Termina Sessione",
       "ending": "Terminando..."
     },
+    "editModal": {
+      "title": "Modifica Sessione dal Vivo",
+      "description": "Aggiorna le informazioni della sessione programmata",
+      "titleLabel": "Titolo",
+      "titlePlaceholder": "Inserisci il titolo della sessione",
+      "descriptionLabel": "Descrizione",
+      "descriptionPlaceholder": "Inserisci la descrizione della sessione (opzionale)",
+      "startTimeLabel": "Data e ora di inizio",
+      "endTimeLabel": "Data e ora di fine",
+      "warning": "Solo le sessioni programmate possono essere modificate. Le modifiche verranno applicate immediatamente.",
+      "cancel": "Annulla",
+      "save": "Salva Modifiche",
+      "saving": "Salvataggio..."
+    },
+    "cancelModal": {
+      "title": "Annulla Sessione Programmata",
+      "description": "Questa azione non può essere annullata",
+      "warningTitle": "Attenzione: Azione Irreversibile",
+      "warning": "La sessione sarà annullata e rimossa da Zoom. I partecipanti dovranno essere notificati manualmente dell'annullamento.",
+      "reasonLabel": "Motivo dell'annullamento",
+      "reasonPlaceholder": "Es: Host non disponibile, problemi tecnici, necessità di riprogrammazione...",
+      "reasonRequired": "Campo obbligatorio",
+      "back": "Indietro",
+      "confirm": "Conferma Annullamento",
+      "cancelling": "Annullamento..."
+    },
     "success": {
       "startTitle": "Sessione avviata con successo",
       "startDescription": "La sessione dal vivo è stata avviata ed è disponibile per i partecipanti",
       "endTitle": "Sessione terminata con successo",
-      "endDescription": "La trasmissione è stata terminata. Totale partecipanti: {participants}"
+      "endDescription": "La trasmissione è stata terminata. Totale partecipanti: {participants}",
+      "updateTitle": "Sessione aggiornata con successo",
+      "updateDescription": "Le informazioni della sessione sono state aggiornate",
+      "cancelTitle": "Sessione annullata con successo",
+      "cancelDescription": "La sessione è stata annullata e rimossa da Zoom"
     },
     "pageOf": "Pagina {current} di {total}",
     "previous": "Precedente",
@@ -2962,7 +2995,21 @@
       "startTitle": "Errore nell'avvio della sessione",
       "startDescription": "Non è stato possibile avviare la sessione dal vivo",
       "endTitle": "Errore nel terminare la sessione",
-      "endDescription": "Non è stato possibile terminare la sessione dal vivo"
+      "endDescription": "Non è stato possibile terminare la sessione dal vivo",
+      "updateTitle": "Errore nell'aggiornamento della sessione",
+      "updateDescription": "Non è stato possibile aggiornare la sessione dal vivo",
+      "endTimeBeforeStart": "La data di fine deve essere posteriore alla data di inizio",
+      "cancelTitle": "Errore nell'annullamento della sessione",
+      "cancelDescription": "Non è stato possibile annullare la sessione dal vivo",
+      "cancelReasonRequired": "Motivo obbligatorio",
+      "cancelReasonRequiredDescription": "Devi fornire il motivo dell'annullamento",
+      "cancelReasonTooLong": "Motivo troppo lungo",
+      "cancelReasonTooLongDescription": "Il motivo deve contenere al massimo 500 caratteri",
+      "onlyTutorsCanCancel": "Solo i tutor e gli amministratori possono annullare le sessioni",
+      "cannotCancelInCurrentStatus": "Questa sessione non può essere annullata nello stato attuale. Solo le sessioni programmate possono essere annullate",
+      "onlyHostCanCancel": "Solo l'host o il co-host può annullare questa sessione",
+      "sessionNotFound": "Sessione non trovata",
+      "serviceUnavailable": "Servizio temporaneamente non disponibile. Riprova tra qualche istante"
     },
     "timeWarning": {
       "earlyTitle": "Sessione programmata per più tardi",

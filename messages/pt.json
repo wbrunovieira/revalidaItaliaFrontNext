@@ -2872,7 +2872,8 @@
     "linkedContent": {
       "title": "Conteúdo Vinculado",
       "lesson": "Aula",
-      "argument": "Argumento"
+      "argument": "Argumento",
+      "module": "Módulo"
     },
     "liveInfo": {
       "title": "Informações ao Vivo",
@@ -2929,7 +2930,9 @@
       "view": "Visualizar",
       "start": "Iniciar",
       "end": "Finalizar",
-      "endTooltip": "Finalizar sessão na plataforma"
+      "endTooltip": "Finalizar sessão na plataforma",
+      "edit": "Editar",
+      "cancel": "Cancelar"
     },
     "syncInfo": {
       "title": "Sincronização Automática Ativada",
@@ -2951,11 +2954,41 @@
       "confirm": "Finalizar Sessão",
       "ending": "Finalizando..."
     },
+    "editModal": {
+      "title": "Editar Sessão ao Vivo",
+      "description": "Atualize as informações da sessão agendada",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Digite o título da sessão",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Digite a descrição da sessão (opcional)",
+      "startTimeLabel": "Data e hora de início",
+      "endTimeLabel": "Data e hora de término",
+      "warning": "Apenas sessões agendadas podem ser editadas. Alterações serão aplicadas imediatamente.",
+      "cancel": "Cancelar",
+      "save": "Salvar Alterações",
+      "saving": "Salvando..."
+    },
+    "cancelModal": {
+      "title": "Cancelar Sessão Agendada",
+      "description": "Esta ação não pode ser desfeita",
+      "warningTitle": "Atenção: Ação Irreversível",
+      "warning": "A sessão será cancelada e removida do Zoom. Os participantes deverão ser notificados manualmente sobre o cancelamento.",
+      "reasonLabel": "Motivo do cancelamento",
+      "reasonPlaceholder": "Ex: Host indisponível, problemas técnicos, reagendamento necessário...",
+      "reasonRequired": "Campo obrigatório",
+      "back": "Voltar",
+      "confirm": "Confirmar Cancelamento",
+      "cancelling": "Cancelando..."
+    },
     "success": {
       "startTitle": "Sessão iniciada com sucesso",
       "startDescription": "A sessão ao vivo foi iniciada e está disponível para os participantes",
       "endTitle": "Sessão finalizada com sucesso",
-      "endDescription": "A transmissão foi encerrada. Total de participantes: {participants}"
+      "endDescription": "A transmissão foi encerrada. Total de participantes: {participants}",
+      "updateTitle": "Sessão atualizada com sucesso",
+      "updateDescription": "As informações da sessão foram atualizadas",
+      "cancelTitle": "Sessão cancelada com sucesso",
+      "cancelDescription": "A sessão foi cancelada e removida do Zoom"
     },
     "pageOf": "Página {current} de {total}",
     "previous": "Anterior",
@@ -2966,7 +2999,21 @@
       "startTitle": "Erro ao iniciar sessão",
       "startDescription": "Não foi possível iniciar a sessão ao vivo",
       "endTitle": "Erro ao finalizar sessão",
-      "endDescription": "Não foi possível finalizar a sessão ao vivo"
+      "endDescription": "Não foi possível finalizar a sessão ao vivo",
+      "updateTitle": "Erro ao atualizar sessão",
+      "updateDescription": "Não foi possível atualizar a sessão ao vivo",
+      "endTimeBeforeStart": "A data de término deve ser posterior à data de início",
+      "cancelTitle": "Erro ao cancelar sessão",
+      "cancelDescription": "Não foi possível cancelar a sessão ao vivo",
+      "cancelReasonRequired": "Motivo obrigatório",
+      "cancelReasonRequiredDescription": "Você deve informar o motivo do cancelamento",
+      "cancelReasonTooLong": "Motivo muito longo",
+      "cancelReasonTooLongDescription": "O motivo deve ter no máximo 500 caracteres",
+      "onlyTutorsCanCancel": "Apenas tutores e administradores podem cancelar sessões",
+      "cannotCancelInCurrentStatus": "Esta sessão não pode ser cancelada no status atual. Apenas sessões agendadas podem ser canceladas",
+      "onlyHostCanCancel": "Apenas o host ou co-host pode cancelar esta sessão",
+      "sessionNotFound": "Sessão não encontrada",
+      "serviceUnavailable": "Serviço temporariamente indisponível. Tente novamente em alguns instantes"
     },
     "timeWarning": {
       "earlyTitle": "Sessão agendada para mais tarde",

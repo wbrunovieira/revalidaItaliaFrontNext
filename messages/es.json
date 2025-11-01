@@ -2867,7 +2867,8 @@
     "linkedContent": {
       "title": "Contenido Vinculado",
       "lesson": "Lección",
-      "argument": "Argumento"
+      "argument": "Argumento",
+      "module": "Módulo"
     },
     "liveInfo": {
       "title": "Información en Vivo",
@@ -2924,7 +2925,9 @@
       "view": "Ver",
       "start": "Iniciar",
       "end": "Finalizar",
-      "endTooltip": "Finalizar sesión en la plataforma"
+      "endTooltip": "Finalizar sesión en la plataforma",
+      "edit": "Editar",
+      "cancel": "Cancelar"
     },
     "syncInfo": {
       "title": "Sincronización Automática Activada",
@@ -2946,11 +2949,41 @@
       "confirm": "Finalizar Sesión",
       "ending": "Finalizando..."
     },
+    "editModal": {
+      "title": "Editar Sesión en Vivo",
+      "description": "Actualiza la información de la sesión programada",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Ingresa el título de la sesión",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Ingresa la descripción de la sesión (opcional)",
+      "startTimeLabel": "Fecha y hora de inicio",
+      "endTimeLabel": "Fecha y hora de finalización",
+      "warning": "Solo las sesiones programadas pueden ser editadas. Los cambios se aplicarán inmediatamente.",
+      "cancel": "Cancelar",
+      "save": "Guardar Cambios",
+      "saving": "Guardando..."
+    },
+    "cancelModal": {
+      "title": "Cancelar Sesión Programada",
+      "description": "Esta acción no se puede deshacer",
+      "warningTitle": "Atención: Acción Irreversible",
+      "warning": "La sesión será cancelada y eliminada de Zoom. Los participantes deberán ser notificados manualmente sobre la cancelación.",
+      "reasonLabel": "Motivo de la cancelación",
+      "reasonPlaceholder": "Ej: Host no disponible, problemas técnicos, reprogramación necesaria...",
+      "reasonRequired": "Campo obligatorio",
+      "back": "Volver",
+      "confirm": "Confirmar Cancelación",
+      "cancelling": "Cancelando..."
+    },
     "success": {
       "startTitle": "Sesión iniciada con éxito",
       "startDescription": "La sesión en vivo ha sido iniciada y está disponible para los participantes",
       "endTitle": "Sesión finalizada con éxito",
-      "endDescription": "La transmisión ha sido finalizada. Total de participantes: {participants}"
+      "endDescription": "La transmisión ha sido finalizada. Total de participantes: {participants}",
+      "updateTitle": "Sesión actualizada con éxito",
+      "updateDescription": "La información de la sesión ha sido actualizada",
+      "cancelTitle": "Sesión cancelada con éxito",
+      "cancelDescription": "La sesión ha sido cancelada y eliminada de Zoom"
     },
     "pageOf": "Página {current} de {total}",
     "previous": "Anterior",
@@ -2961,7 +2994,21 @@
       "startTitle": "Error al iniciar sesión",
       "startDescription": "No se pudo iniciar la sesión en vivo",
       "endTitle": "Error al finalizar sesión",
-      "endDescription": "No se pudo finalizar la sesión en vivo"
+      "endDescription": "No se pudo finalizar la sesión en vivo",
+      "updateTitle": "Error al actualizar sesión",
+      "updateDescription": "No se pudo actualizar la sesión en vivo",
+      "endTimeBeforeStart": "La fecha de finalización debe ser posterior a la fecha de inicio",
+      "cancelTitle": "Error al cancelar sesión",
+      "cancelDescription": "No se pudo cancelar la sesión en vivo",
+      "cancelReasonRequired": "Motivo obligatorio",
+      "cancelReasonRequiredDescription": "Debes proporcionar el motivo de la cancelación",
+      "cancelReasonTooLong": "Motivo demasiado largo",
+      "cancelReasonTooLongDescription": "El motivo debe tener como máximo 500 caracteres",
+      "onlyTutorsCanCancel": "Solo los tutores y administradores pueden cancelar sesiones",
+      "cannotCancelInCurrentStatus": "Esta sesión no puede ser cancelada en el estado actual. Solo las sesiones programadas pueden ser canceladas",
+      "onlyHostCanCancel": "Solo el host o co-host puede cancelar esta sesión",
+      "sessionNotFound": "Sesión no encontrada",
+      "serviceUnavailable": "Servicio temporalmente no disponible. Inténtalo de nuevo en unos momentos"
     },
     "timeWarning": {
       "earlyTitle": "Sesión programada para más tarde",

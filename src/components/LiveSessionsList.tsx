@@ -19,10 +19,13 @@ import {
   Clock,
   Eye,
   Play,
-  Square,
   AlertTriangle,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -116,6 +119,17 @@ export default function LiveSessionsList() {
   const [showStartConfirm, setShowStartConfirm] = useState<string | null>(null);
   const [showTimeWarning, setShowTimeWarning] = useState<{ sessionId: string; type: 'early' | 'late'; timeDiff: number } | null>(null);
   const [viewSessionId, setViewSessionId] = useState<string | null>(null);
+  const [editSessionId, setEditSessionId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    description: '',
+    scheduledStartTime: '',
+    scheduledEndTime: '',
+  });
+  const [updatingSessionId, setUpdatingSessionId] = useState<string | null>(null);
+  const [cancelSessionId, setCancelSessionId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancellingSessionId, setCancellingSessionId] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -176,6 +190,27 @@ export default function LiveSessionsList() {
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  // Populate form when editing a session
+  useEffect(() => {
+    if (editSessionId) {
+      const session = sessions.find(s => s.id === editSessionId);
+      if (session) {
+        // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
+        const formatForInput = (isoString: string) => {
+          const date = new Date(isoString);
+          return date.toISOString().slice(0, 16);
+        };
+
+        setEditFormData({
+          title: session.title,
+          description: session.description || '',
+          scheduledStartTime: formatForInput(session.scheduledStartTime),
+          scheduledEndTime: formatForInput(session.scheduledEndTime),
+        });
+      }
+    }
+  }, [editSessionId, sessions]);
 
   const getStatusBadge = (status: LiveSession['status']) => {
     const statusConfig = {
@@ -247,17 +282,49 @@ export default function LiveSessionsList() {
 
   const canStartSession = (session: LiveSession) => {
     if (!user) return false;
-    
+
     // Admins can start any session
     if (user.role === 'admin') return true;
-    
+
     // Tutors can start their own sessions or sessions where they are co-hosts
     if (user.role === 'tutor') {
       const isHost = session.host.id === user.id;
       const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
       return isHost || isCoHost;
     }
-    
+
+    return false;
+  };
+
+  const canEditSession = (session: LiveSession) => {
+    if (!user) return false;
+
+    // Admins can edit any session
+    if (user.role === 'admin') return true;
+
+    // Tutors can edit their own sessions or sessions where they are co-hosts
+    if (user.role === 'tutor') {
+      const isHost = session.host.id === user.id;
+      const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
+      return isHost || isCoHost;
+    }
+
+    return false;
+  };
+
+  const canCancelSession = (session: LiveSession) => {
+    if (!user) return false;
+
+    // Admins can cancel any session
+    if (user.role === 'admin') return true;
+
+    // Tutors can cancel their own sessions or sessions where they are co-hosts
+    if (user.role === 'tutor') {
+      const isHost = session.host.id === user.id;
+      const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
+      return isHost || isCoHost;
+    }
+
     return false;
   };
 
@@ -370,6 +437,177 @@ export default function LiveSessionsList() {
       });
     } finally {
       setStartingSessionId(null);
+    }
+  };
+
+  const handleUpdateSession = async () => {
+    if (!editSessionId) return;
+
+    try {
+      setUpdatingSessionId(editSessionId);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const session = sessions.find(s => s.id === editSessionId);
+      if (!session) {
+        throw new Error('Session not found');
+      }
+
+      // Build update payload with only changed fields
+      const updates: Record<string, string> = {};
+
+      if (editFormData.title !== session.title) {
+        updates.title = editFormData.title;
+      }
+
+      if (editFormData.description !== (session.description || '')) {
+        updates.description = editFormData.description;
+      }
+
+      // Format dates back to ISO 8601
+      const formatToISO = (dateString: string) => {
+        return new Date(dateString).toISOString();
+      };
+
+      const originalStartTime = new Date(session.scheduledStartTime).toISOString().slice(0, 16);
+      const originalEndTime = new Date(session.scheduledEndTime).toISOString().slice(0, 16);
+
+      if (editFormData.scheduledStartTime !== originalStartTime) {
+        updates.scheduledStartTime = formatToISO(editFormData.scheduledStartTime);
+      }
+
+      if (editFormData.scheduledEndTime !== originalEndTime) {
+        updates.scheduledEndTime = formatToISO(editFormData.scheduledEndTime);
+      }
+
+      // Validate that end time is after start time
+      const startTime = new Date(editFormData.scheduledStartTime);
+      const endTime = new Date(editFormData.scheduledEndTime);
+
+      if (endTime <= startTime) {
+        throw new Error(t('error.endTimeBeforeStart'));
+      }
+
+      // If no changes, just close modal
+      if (Object.keys(updates).length === 0) {
+        setEditSessionId(null);
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/v1/live-sessions/${editSessionId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updates),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update session');
+      }
+
+      toast({
+        title: t('success.updateTitle'),
+        description: t('success.updateDescription'),
+      });
+
+      // Refresh the list and close modal
+      fetchSessions();
+      setEditSessionId(null);
+    } catch (error) {
+      console.error('Error updating session:', error);
+      toast({
+        title: t('error.updateTitle'),
+        description: error instanceof Error ? error.message : t('error.updateDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingSessionId(null);
+    }
+  };
+
+  const handleCancelSession = async () => {
+    if (!cancelSessionId) return;
+
+    // Validate cancel reason
+    if (!cancelReason.trim()) {
+      toast({
+        title: t('error.cancelReasonRequired'),
+        description: t('error.cancelReasonRequiredDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (cancelReason.length > 500) {
+      toast({
+        title: t('error.cancelReasonTooLong'),
+        description: t('error.cancelReasonTooLongDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setCancellingSessionId(cancelSessionId);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(
+        `${API_URL}/api/v1/live-sessions/${cancelSessionId}/cancel`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ cancelReason: cancelReason.trim() }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+
+        // Handle specific error cases
+        if (response.status === 400) {
+          if (error.message === 'Only tutors and admins can cancel live sessions') {
+            throw new Error(t('error.onlyTutorsCanCancel'));
+          }
+          if (error.detail?.includes('Only SCHEDULED sessions')) {
+            throw new Error(t('error.cannotCancelInCurrentStatus'));
+          }
+        } else if (response.status === 403) {
+          throw new Error(t('error.onlyHostCanCancel'));
+        } else if (response.status === 404) {
+          throw new Error(t('error.sessionNotFound'));
+        } else if (response.status === 503) {
+          throw new Error(t('error.serviceUnavailable'));
+        }
+
+        throw new Error(error.detail || error.message || 'Failed to cancel session');
+      }
+
+      toast({
+        title: t('success.cancelTitle'),
+        description: t('success.cancelDescription'),
+      });
+
+      // Refresh the list and close modal
+      fetchSessions();
+      setCancelSessionId(null);
+      setCancelReason('');
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+      toast({
+        title: t('error.cancelTitle'),
+        description: error instanceof Error ? error.message : t('error.cancelDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setCancellingSessionId(null);
     }
   };
 
@@ -547,6 +785,31 @@ export default function LiveSessionsList() {
                         <Play className="h-4 w-4" />
                       )}
                       {t('actions.start')}
+                    </Button>
+                  )}
+                  {session.status === 'SCHEDULED' && canEditSession(session) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditSessionId(session.id)}
+                      className="flex items-center gap-2 bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30 hover:text-blue-300"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {t('actions.edit')}
+                    </Button>
+                  )}
+                  {session.status === 'SCHEDULED' && canCancelSession(session) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCancelSessionId(session.id);
+                        setCancelReason('');
+                      }}
+                      className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {t('actions.cancel')}
                     </Button>
                   )}
                   <Button
@@ -743,6 +1006,219 @@ export default function LiveSessionsList() {
                     <>
                       <Play className="h-4 w-4 mr-2" />
                       {t('confirmStart.confirm')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Session Modal */}
+      {editSessionId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 rounded-full">
+                  <Pencil className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {t('editModal.title')}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {t('editModal.description')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-title" className="text-white">
+                    {t('editModal.titleLabel')}
+                  </Label>
+                  <Input
+                    id="edit-title"
+                    value={editFormData.title}
+                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                    placeholder={t('editModal.titlePlaceholder')}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    maxLength={255}
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description" className="text-white">
+                    {t('editModal.descriptionLabel')}
+                  </Label>
+                  <Textarea
+                    id="edit-description"
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    placeholder={t('editModal.descriptionPlaceholder')}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 min-h-[100px]"
+                  />
+                </div>
+
+                {/* Scheduled Start Time */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-start-time" className="text-white">
+                    {t('editModal.startTimeLabel')}
+                  </Label>
+                  <Input
+                    id="edit-start-time"
+                    type="datetime-local"
+                    value={editFormData.scheduledStartTime}
+                    onChange={(e) => setEditFormData({ ...editFormData, scheduledStartTime: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+
+                {/* Scheduled End Time */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-end-time" className="text-white">
+                    {t('editModal.endTimeLabel')}
+                  </Label>
+                  <Input
+                    id="edit-end-time"
+                    type="datetime-local"
+                    value={editFormData.scheduledEndTime}
+                    onChange={(e) => setEditFormData({ ...editFormData, scheduledEndTime: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5" />
+                  <p className="text-sm text-yellow-200">
+                    {t('editModal.warning')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditSessionId(null)}
+                  disabled={updatingSessionId === editSessionId}
+                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  {t('editModal.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleUpdateSession}
+                  disabled={updatingSessionId === editSessionId || !editFormData.title.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {updatingSessionId === editSessionId ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('editModal.saving')}
+                    </>
+                  ) : (
+                    <>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      {t('editModal.save')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Session Modal */}
+      {cancelSessionId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/20 rounded-full">
+                  <Trash2 className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {t('cancelModal.title')}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {t('cancelModal.description')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-red-200">
+                      {t('cancelModal.warningTitle')}
+                    </p>
+                    <p className="text-sm text-red-300">
+                      {t('cancelModal.warning')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cancel-reason" className="text-white">
+                  {t('cancelModal.reasonLabel')} <span className="text-red-400">*</span>
+                </Label>
+                <Textarea
+                  id="cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder={t('cancelModal.reasonPlaceholder')}
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 min-h-[120px]"
+                  maxLength={500}
+                />
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-400">
+                    {t('cancelModal.reasonRequired')}
+                  </span>
+                  <span className={cancelReason.length > 450 ? 'text-yellow-400' : 'text-gray-400'}>
+                    {cancelReason.length}/500
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setCancelSessionId(null);
+                    setCancelReason('');
+                  }}
+                  disabled={cancellingSessionId === cancelSessionId}
+                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                >
+                  {t('cancelModal.back')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleCancelSession}
+                  disabled={cancellingSessionId === cancelSessionId || !cancelReason.trim()}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {cancellingSessionId === cancelSessionId ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('cancelModal.cancelling')}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('cancelModal.confirm')}
                     </>
                   )}
                 </Button>

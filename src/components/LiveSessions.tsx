@@ -428,11 +428,11 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
         {/* Upcoming Sessions */}
         <TabsContent value="upcoming" className="space-y-4">
           {getFilteredSessions(upcomingSessions).length === 0 ? (
-            <Card>
+            <Card className="bg-white/5 border-white/10">
               <CardContent className="text-center py-12">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{t('noUpcoming')}</h3>
-                <p className="text-gray-500">{t('noUpcomingDescription')}</p>
+                <Calendar className="h-12 w-12 text-white/40 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-white">{t('noUpcoming')}</h3>
+                <p className="text-white/60">{t('noUpcomingDescription')}</p>
               </CardContent>
             </Card>
           ) : (
@@ -445,7 +445,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-secondary/20 transition-all">
+                  <Card className="bg-white/5 border-white/10 hover:border-secondary/50 hover:bg-white/10 transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -455,24 +455,24 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                           </div>
 
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">{session.description}</p>
+                          <p className="text-white/70 mb-4">{session.description}</p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Users className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-white/70">
+                              <Users className="h-4 w-4 text-white/60" />
                               <span>
                                 {t('instructor')}: <strong>{session.instructor.name}</strong>
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Clock className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-white/70">
+                              <Clock className="h-4 w-4 text-white/60" />
                               <span>
                                 {t('duration')}: <strong>{formatDuration(session.scheduledAt, session.endTime)}</strong>
                               </span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <div className="flex items-center gap-2 text-sm text-white/60">
                             <Calendar className="h-4 w-4" />
                             <span>
                               {t('scheduledFor')}: {formatDate(session.scheduledAt)}
@@ -491,11 +491,11 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
         {/* Live Sessions */}
         <TabsContent value="live" className="space-y-4">
           {getFilteredSessions(liveSessions).length === 0 ? (
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="bg-white/5 border-white/10">
               <CardContent className="text-center py-12">
-                <Radio className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <Radio className="h-12 w-12 text-white/40 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2 text-white">{t('noLive')}</h3>
-                <p className="text-gray-400">{t('noLiveDescription')}</p>
+                <p className="text-white/60">{t('noLiveDescription')}</p>
               </CardContent>
             </Card>
           ) : (
@@ -508,7 +508,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-gray-800 border-red-500/50 shadow-lg shadow-red-500/10">
+                  <Card className="bg-white/5 border-red-500/50 hover:border-red-500/70 hover:bg-white/10 transition-all shadow-lg shadow-red-500/10">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -518,17 +518,17 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                           </div>
 
                           <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-gray-400 mb-4">{session.description}</p>
+                          <p className="text-white/70 mb-4">{session.description}</p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Users className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-white/70">
+                              <Users className="h-4 w-4 text-white/60" />
                               <span>
                                 {t('instructor')}: <strong>{session.instructor.name}</strong>
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-300">
-                              <Clock className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-white/70">
+                              <Clock className="h-4 w-4 text-white/60" />
                               <span>
                                 {t('endTime')}: {new Date(session.endTime).toLocaleTimeString()}
                               </span>

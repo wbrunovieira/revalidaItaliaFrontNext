@@ -390,7 +390,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-3 bg-gray-800 p-1 gap-1 min-w-full">
+          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-3 bg-white/5 border border-white/10 p-1 gap-1 min-w-full">
             <TabsTrigger
               value="upcoming"
               className="flex-1 sm:flex-none relative data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"

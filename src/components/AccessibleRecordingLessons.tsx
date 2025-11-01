@@ -214,21 +214,21 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
       {/* Header with Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
           <Input
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 bg-gray-800 border-gray-700 text-white"
+            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50 focus:border-secondary/50"
           />
         </div>
 
         <div className="flex gap-2">
           <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
+            <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
               <SelectValue placeholder={t('sortBy')} />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-primary border-white/10">
               <SelectItem value="recordedAt">{t('sort.recordedAt')}</SelectItem>
               <SelectItem value="title">{t('sort.title')}</SelectItem>
               <SelectItem value="duration">{t('sort.duration')}</SelectItem>
@@ -237,10 +237,10 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           </Select>
 
           <Select value={order} onValueChange={(value) => setOrder(value as any)}>
-            <SelectTrigger className="w-[120px] bg-gray-800 border-gray-700 text-white">
+            <SelectTrigger className="w-[120px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-primary border-white/10">
               <SelectItem value="DESC">{t('sort.desc')}</SelectItem>
               <SelectItem value="ASC">{t('sort.asc')}</SelectItem>
             </SelectContent>
@@ -250,18 +250,18 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
 
       {/* Results Count */}
       {meta && (
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-white/60">
           {t('showing', { count: lessons.length, total: meta.total })}
         </div>
       )}
 
       {/* Lessons Grid */}
       {lessons.length === 0 ? (
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white/5 border-white/10">
           <CardContent className="text-center py-12">
-            <PlayCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <PlayCircle className="h-12 w-12 text-white/40 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2 text-white">{t('noLessons')}</h3>
-            <p className="text-gray-400">{t('noLessonsDescription')}</p>
+            <p className="text-white/60">{t('noLessonsDescription')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -272,7 +272,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               href={getLessonUrl(lesson)}
               className="block h-full"
             >
-              <Card className="bg-gray-800/50 border-gray-700 hover:border-secondary/50 transition-all cursor-pointer h-full">
+              <Card className="bg-white/5 border-white/10 hover:border-secondary/50 hover:bg-white/10 transition-all cursor-pointer h-full">
                 <CardContent className="p-4">
                   {/* Header with Badges */}
                   <div className="flex items-start justify-between gap-2 mb-3">
@@ -286,20 +286,20 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
                   </h3>
 
                   {/* Course/Module */}
-                  <div className="text-sm text-gray-400 mb-3">
+                  <div className="text-sm text-white/70 mb-3">
                     <p className="truncate">{lesson.courseName}</p>
                     <p className="truncate text-xs">{lesson.moduleName}</p>
                   </div>
 
                   {/* Description */}
                   {lesson.description && (
-                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                    <p className="text-sm text-white/60 mb-4 line-clamp-2">
                       {lesson.description}
                     </p>
                   )}
 
                   {/* Footer Info */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-700">
+                  <div className="flex items-center justify-between text-xs text-white/50 pt-3 border-t border-white/10">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {lesson.formattedDuration}
@@ -321,7 +321,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
       {/* Pagination */}
       {meta && meta.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-white/60">
             {t('pagination.pageOf', { current: meta.page, total: meta.totalPages })}
           </div>
 
@@ -331,7 +331,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border-gray-700"
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-secondary/50 disabled:opacity-50"
             >
               <ChevronLeft className="h-4 w-4" />
               {t('pagination.previous')}
@@ -342,7 +342,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               variant="outline"
               onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
               disabled={page === meta.totalPages}
-              className="border-gray-700"
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-secondary/50 disabled:opacity-50"
             >
               {t('pagination.next')}
               <ChevronRight className="h-4 w-4" />

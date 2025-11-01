@@ -114,8 +114,6 @@ export default function LiveSessionsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [startingSessionId, setStartingSessionId] = useState<string | null>(null);
   const [showStartConfirm, setShowStartConfirm] = useState<string | null>(null);
-  const [endingSessionId, setEndingSessionId] = useState<string | null>(null);
-  const [showEndConfirm, setShowEndConfirm] = useState<string | null>(null);
   const [showTimeWarning, setShowTimeWarning] = useState<{ sessionId: string; type: 'early' | 'late'; timeDiff: number } | null>(null);
   const [viewSessionId, setViewSessionId] = useState<string | null>(null);
 
@@ -263,22 +261,6 @@ export default function LiveSessionsList() {
     return false;
   };
 
-  const canEndSession = (session: LiveSession) => {
-    if (!user) return false;
-    
-    // Admins can end any session
-    if (user.role === 'admin') return true;
-    
-    // Tutors can end their own sessions or sessions where they are co-hosts
-    if (user.role === 'tutor') {
-      const isHost = session.host.id === user.id;
-      const isCoHost = session.coHosts.some(coHost => coHost.id === user.id);
-      return isHost || isCoHost;
-    }
-    
-    return false;
-  };
-
   const checkSessionTiming = (session: LiveSession): { type: 'early' | 'late' | 'ok'; diffMinutes: number } => {
     const now = new Date();
     const scheduledStart = new Date(session.scheduledStartTime);
@@ -388,76 +370,6 @@ export default function LiveSessionsList() {
       });
     } finally {
       setStartingSessionId(null);
-    }
-  };
-
-  const handleEndSession = async (sessionId: string) => {
-    try {
-      setEndingSessionId(sessionId);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      
-      // Log da requisição para teste
-      console.log('📤 === END SESSION REQUEST ===');
-      console.log('API URL:', API_URL);
-      console.log('Endpoint:', `${API_URL}/api/v1/live-sessions/${sessionId}/end`);
-      console.log('Method:', 'PATCH');
-      console.log('Session ID:', sessionId);
-      console.log('Token (first 20 chars):', token?.substring(0, 20) + '...');
-      console.log('📤 === END REQUEST INFO ===');
-      
-      const response = await fetch(
-        `${API_URL}/api/v1/live-sessions/${sessionId}/end`,
-        {
-          method: 'PATCH',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to end session');
-      }
-
-      const data = await response.json();
-      
-      // Log detalhado do retorno da API para teste
-      console.log('🛑 === END SESSION API RESPONSE ===');
-      console.log('Session ID:', sessionId);
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', JSON.stringify(data, null, 2));
-      console.log('Session Status:', data.status);
-      console.log('Ended At:', data.endedAt);
-      console.log('Total Participants:', data.totalParticipants);
-      console.log('Recording Status:', data.recordingStatus || 'Not provided');
-      console.log('Current User ID:', user?.id);
-      console.log('Current User Role:', user?.role);
-      console.log('🛑 === END SESSION RESPONSE ===');
-      
-      toast({
-        title: t('success.endTitle'),
-        description: t('success.endDescription', { participants: data.totalParticipants || 0 }),
-      });
-      
-      // Refresh the list to show updated status
-      fetchSessions();
-      setShowEndConfirm(null);
-    } catch (error) {
-      console.error('❌ === END SESSION ERROR ===');
-      console.error('Session ID:', sessionId);
-      console.error('Error Type:', error instanceof Error ? 'Error' : typeof error);
-      console.error('Error Message:', error instanceof Error ? error.message : 'Unknown error');
-      console.error('Full Error:', error);
-      console.error('❌ === END SESSION ERROR ===');
-      
-      toast({
-        title: t('error.endTitle'),
-        description: error instanceof Error ? error.message : t('error.endDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setEndingSessionId(null);
     }
   };
 
@@ -637,34 +549,6 @@ export default function LiveSessionsList() {
                       {t('actions.start')}
                     </Button>
                   )}
-                  {session.status === 'LIVE' && canEndSession(session) && (
-                    <div className="relative group">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          console.log('🛑 [LiveSessionsList] Botão "Finalizar Sessão" clicado');
-                          console.log('📋 Session ID:', session.id);
-                          console.log('📊 Session Status:', session.status);
-                          console.log('👤 User:', user);
-                          console.log('✅ canEndSession:', canEndSession(session));
-                          setShowEndConfirm(session.id);
-                        }}
-                        disabled={endingSessionId === session.id}
-                        className="flex items-center gap-2 bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:text-red-300"
-                      >
-                        {endingSessionId === session.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Square className="h-4 w-4" />
-                        )}
-                        {t('actions.end')}
-                      </Button>
-                      <div className="absolute bottom-full left-1/2 transform -translate-y-1/2 mb-2 px-2 py-1 bg-gray-900 text-xs text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                        {t('actions.endTooltip')}
-                      </div>
-                    </div>
-                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -736,68 +620,6 @@ export default function LiveSessionsList() {
               {t('next')}
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-        </div>
-      )}
-
-      {/* End Confirmation Modal */}
-      {showEndConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl">
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-500/20 rounded-full">
-                  <Square className="h-6 w-6 text-red-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    {t('confirmEnd.title')}
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    {t('confirmEnd.description')}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5" />
-                  <p className="text-sm text-yellow-200">
-                    {t('confirmEnd.warning')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowEndConfirm(null)}
-                  disabled={endingSessionId === showEndConfirm}
-                  className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  {t('confirmEnd.cancel')}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleEndSession(showEndConfirm)}
-                  disabled={endingSessionId === showEndConfirm}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  {endingSessionId === showEndConfirm ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t('confirmEnd.ending')}
-                    </>
-                  ) : (
-                    <>
-                      <Square className="h-4 w-4 mr-2" />
-                      {t('confirmEnd.confirm')}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       )}

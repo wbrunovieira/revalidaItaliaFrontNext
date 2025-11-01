@@ -6087,6 +6087,7 @@
     "title": "Argomento aggiornato",
     "description": "L'argomento è stato aggiornato con successo"
   }
+}
 },
 "AccessibleRecordingLessons": {
   "searchPlaceholder": "Cerca lezioni registrate...",
@@ -6122,4 +6123,4 @@
     "fetchDescription": "Impossibile caricare le lezioni registrate"
   }
 }
-}}
+}

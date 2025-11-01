@@ -6116,6 +6116,7 @@
     "title": "Argumento actualizado",
     "description": "El argumento fue actualizado con éxito"
   }
+}
 },
 "AccessibleRecordingLessons": {
   "searchPlaceholder": "Buscar clases grabadas...",
@@ -6151,4 +6152,4 @@
     "fetchDescription": "No fue posible cargar las clases grabadas"
   }
 }
-}}
+}

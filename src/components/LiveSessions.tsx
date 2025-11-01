@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import RecordingsList from '@/components/RecordingsList';
 
 // API interfaces matching backend response
 interface Host {
@@ -404,11 +403,11 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
               )}
             </TabsTrigger>
             <TabsTrigger
-              value="allRecordings"
+              value="allSessions"
               className="flex-1 sm:flex-none data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all text-xs sm:text-sm px-3 py-2 whitespace-nowrap"
             >
-              <PlayCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>{t('allRecordings')}</span>
+              <Radio className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span>{t('allSessions')}</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -550,9 +549,15 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
           )}
         </TabsContent>
 
-        {/* All Recordings from API */}
-        <TabsContent value="allRecordings" className="space-y-4">
-          <RecordingsList locale={locale} translations={t} />
+        {/* All Live Sessions */}
+        <TabsContent value="allSessions" className="space-y-4">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="text-center py-12">
+              <Radio className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2 text-white">{t('allSessionsTitle')}</h3>
+              <p className="text-gray-400">{t('allSessionsDescription')}</p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

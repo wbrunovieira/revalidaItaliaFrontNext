@@ -13,6 +13,45 @@ export const metadata = {
   description: 'Participe de aulas ao vivo com nossos tutores especializados',
 };
 
+async function getCourses() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/courses`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    return [];
+  }
+}
+
+async function getAllModules(courses: any[]) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  try {
+    // Fetch modules for each course
+    const modulesPromises = courses.map(async (course) => {
+      try {
+        const response = await fetch(`${apiUrl}/api/v1/courses/${course.id}/modules`, {
+          cache: 'no-store',
+        });
+        if (!response.ok) return [];
+        return await response.json();
+      } catch {
+        return [];
+      }
+    });
+
+    const modulesArrays = await Promise.all(modulesPromises);
+    // Flatten the array of arrays into a single array
+    return modulesArrays.flat();
+  } catch (error) {
+    console.error('Error fetching modules:', error);
+    return [];
+  }
+}
+
 export default async function LiveSessionsPage({
   params,
 }: {
@@ -30,6 +69,10 @@ export default async function LiveSessionsPage({
   if (!token || isTokenExpired(token)) {
     redirect(`/${locale}/login`);
   }
+
+  // Fetch courses and modules for URL mapping
+  const courses = await getCourses();
+  const modules = await getAllModules(courses);
 
   return (
     <NavSidebar>
@@ -98,7 +141,7 @@ export default async function LiveSessionsPage({
           {/* Conteúdo Principal com padding e max-width */}
           <div className="px-6 pb-12">
             <div className="max-w-7xl mx-auto">
-              <LiveSessions locale={locale} />
+              <LiveSessions locale={locale} courses={courses} modules={modules} />
             </div>
           </div>
         </div>

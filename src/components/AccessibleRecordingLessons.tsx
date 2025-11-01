@@ -24,7 +24,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface RecordingLesson {
   lessonId: string;
@@ -70,14 +70,25 @@ interface RecordingLessonsResponse {
   meta: PaginationMeta;
 }
 
-interface AccessibleRecordingLessonsProps {
-  locale: string;
+interface Course {
+  id: string;
+  slug: string;
 }
 
-export default function AccessibleRecordingLessons({ locale }: AccessibleRecordingLessonsProps) {
+interface Module {
+  id: string;
+  slug: string;
+}
+
+interface AccessibleRecordingLessonsProps {
+  locale: string;
+  courses: Course[];
+  modules: Module[];
+}
+
+export default function AccessibleRecordingLessons({ locale, courses, modules }: AccessibleRecordingLessonsProps) {
   const t = useTranslations('AccessibleRecordingLessons');
   const { toast } = useToast();
-  const router = useRouter();
 
   const [lessons, setLessons] = useState<RecordingLesson[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -134,9 +145,17 @@ export default function AccessibleRecordingLessons({ locale }: AccessibleRecordi
     setPage(1); // Reset to first page on search
   };
 
-  const handleLessonClick = (lesson: RecordingLesson) => {
-    // Navigate to the lesson redirect page which will handle finding the correct slugs
-    router.push(`/${locale}/lessons/${lesson.lessonId}`);
+  // Helper function to get course and module slugs from IDs
+  const getLessonUrl = (lesson: RecordingLesson) => {
+    const course = courses.find(c => c.id === lesson.courseId);
+    const module = modules.find(m => m.id === lesson.moduleId);
+
+    if (!course || !module) {
+      console.warn('Could not find course or module for lesson:', lesson);
+      return '#';
+    }
+
+    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${lesson.lessonId}`;
   };
 
   const getStatusBadge = (status: RecordingLesson['recordingStatus']) => {
@@ -248,51 +267,53 @@ export default function AccessibleRecordingLessons({ locale }: AccessibleRecordi
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {lessons.map((lesson) => (
-            <Card
+            <Link
               key={lesson.lessonId}
-              className="bg-gray-800/50 border-gray-700 hover:border-secondary/50 transition-all cursor-pointer h-full"
-              onClick={() => handleLessonClick(lesson)}
+              href={getLessonUrl(lesson)}
+              className="block h-full"
             >
-              <CardContent className="p-4">
-                {/* Header with Badges */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  {getStatusBadge(lesson.recordingStatus)}
-                  {getProgressBadge(lesson.userProgress)}
-                </div>
+              <Card className="bg-gray-800/50 border-gray-700 hover:border-secondary/50 transition-all cursor-pointer h-full">
+                <CardContent className="p-4">
+                  {/* Header with Badges */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    {getStatusBadge(lesson.recordingStatus)}
+                    {getProgressBadge(lesson.userProgress)}
+                  </div>
 
-                {/* Title */}
-                <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
-                  {lesson.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                    {lesson.title}
+                  </h3>
 
-                {/* Course/Module */}
-                <div className="text-sm text-gray-400 mb-3">
-                  <p className="truncate">{lesson.courseName}</p>
-                  <p className="truncate text-xs">{lesson.moduleName}</p>
-                </div>
+                  {/* Course/Module */}
+                  <div className="text-sm text-gray-400 mb-3">
+                    <p className="truncate">{lesson.courseName}</p>
+                    <p className="truncate text-xs">{lesson.moduleName}</p>
+                  </div>
 
-                {/* Description */}
-                {lesson.description && (
-                  <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                    {lesson.description}
-                  </p>
-                )}
-
-                {/* Footer Info */}
-                <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-700">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {lesson.formattedDuration}
-                  </span>
-                  {lesson.viewCount > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      {lesson.viewCount} {t('views')}
-                    </span>
+                  {/* Description */}
+                  {lesson.description && (
+                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                      {lesson.description}
+                    </p>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+
+                  {/* Footer Info */}
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-700">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {lesson.formattedDuration}
+                    </span>
+                    {lesson.viewCount > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {lesson.viewCount} {t('views')}
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

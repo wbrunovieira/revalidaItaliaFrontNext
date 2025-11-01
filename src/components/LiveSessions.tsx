@@ -92,11 +92,23 @@ interface LiveSessionsResponse {
   meta: PaginationMeta;
 }
 
-interface LiveSessionsProps {
-  locale: string;
+interface Course {
+  id: string;
+  slug: string;
 }
 
-export default function LiveSessions({ locale }: LiveSessionsProps) {
+interface Module {
+  id: string;
+  slug: string;
+}
+
+interface LiveSessionsProps {
+  locale: string;
+  courses: Course[];
+  modules: Module[];
+}
+
+export default function LiveSessions({ locale, courses, modules }: LiveSessionsProps) {
   const t = useTranslations('LiveSessions');
   const { toast } = useToast();
   const { token } = useAuth();
@@ -552,7 +564,7 @@ export default function LiveSessions({ locale }: LiveSessionsProps) {
 
         {/* All Live Sessions */}
         <TabsContent value="allSessions" className="space-y-4">
-          <AccessibleRecordingLessons locale={locale} />
+          <AccessibleRecordingLessons locale={locale} courses={courses} modules={modules} />
         </TabsContent>
       </Tabs>
     </div>

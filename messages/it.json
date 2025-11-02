@@ -6140,6 +6140,7 @@
 }
 },
 "AccessibleRecordingLessons": {
+  "searchLabel": "Cerca lezioni:",
   "searchPlaceholder": "Cerca lezioni registrate...",
   "sortBy": "Ordina per",
   "filter": {

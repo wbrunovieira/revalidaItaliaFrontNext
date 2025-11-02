@@ -215,97 +215,108 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
 
   return (
     <div className="space-y-6">
-      {/* Course and Module Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm text-white/70">{t('filter.courseLabel')}</label>
-          <Select
-            value={courseFilter}
-            onValueChange={(value) => {
-              setCourseFilter(value === 'all' ? '' : value);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-              <SelectValue placeholder={t('filter.selectCourse')} />
-            </SelectTrigger>
-            <SelectContent className="bg-primary border-white/10">
-              <SelectItem value="all">{t('filter.allCourses')}</SelectItem>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.slug}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-sm text-white/70">{t('filter.moduleLabel')}</label>
-          <Select
-            value={moduleFilter}
-            onValueChange={(value) => {
-              setModuleFilter(value === 'all' ? '' : value);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-              <SelectValue placeholder={t('filter.selectModule')} />
-            </SelectTrigger>
-            <SelectContent className="bg-primary border-white/10">
-              <SelectItem value="all">{t('filter.allModules')}</SelectItem>
-              {modules.map((moduleItem) => (
-                <SelectItem key={moduleItem.id} value={moduleItem.id}>
-                  {moduleItem.slug}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Header with Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
-          <Input
-            placeholder={t('searchPlaceholder')}
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50 focus:border-secondary/50"
-          />
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-white/70">{t('sort.orderByLabel')}</label>
-            <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
-              <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-                <SelectValue placeholder={t('sortBy')} />
-              </SelectTrigger>
-              <SelectContent className="bg-primary border-white/10">
-                <SelectItem value="recordedAt">{t('sort.recordedAt')}</SelectItem>
-                <SelectItem value="title">{t('sort.title')}</SelectItem>
-                <SelectItem value="duration">{t('sort.duration')}</SelectItem>
-                <SelectItem value="viewCount">{t('sort.viewCount')}</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Search and Filters Card */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-6 space-y-6">
+          {/* Search Bar */}
+          <div>
+            <label className="text-sm font-medium text-white/80 mb-2 block">{t('searchLabel')}</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-4 w-4" />
+              <Input
+                placeholder={t('searchPlaceholder')}
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50 focus:border-secondary/50 h-11"
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-white/70">{t('sort.orderDirectionLabel')}</label>
-            <Select value={order} onValueChange={(value) => setOrder(value as any)}>
-              <SelectTrigger className="w-[120px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-primary border-white/10">
-                <SelectItem value="DESC">{t('sort.desc')}</SelectItem>
-                <SelectItem value="ASC">{t('sort.asc')}</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Divider */}
+          <div className="border-t border-white/10" />
+
+          {/* Filters and Sorting */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Course Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-white/80">{t('filter.courseLabel')}</label>
+              <Select
+                value={courseFilter}
+                onValueChange={(value) => {
+                  setCourseFilter(value === 'all' ? '' : value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
+                  <SelectValue placeholder={t('filter.selectCourse')} />
+                </SelectTrigger>
+                <SelectContent className="bg-primary border-white/10">
+                  <SelectItem value="all">{t('filter.allCourses')}</SelectItem>
+                  {courses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.slug}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Module Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-white/80">{t('filter.moduleLabel')}</label>
+              <Select
+                value={moduleFilter}
+                onValueChange={(value) => {
+                  setModuleFilter(value === 'all' ? '' : value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
+                  <SelectValue placeholder={t('filter.selectModule')} />
+                </SelectTrigger>
+                <SelectContent className="bg-primary border-white/10">
+                  <SelectItem value="all">{t('filter.allModules')}</SelectItem>
+                  {modules.map((moduleItem) => (
+                    <SelectItem key={moduleItem.id} value={moduleItem.id}>
+                      {moduleItem.slug}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Order By */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-white/80">{t('sort.orderByLabel')}</label>
+              <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
+                <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
+                  <SelectValue placeholder={t('sortBy')} />
+                </SelectTrigger>
+                <SelectContent className="bg-primary border-white/10">
+                  <SelectItem value="recordedAt">{t('sort.recordedAt')}</SelectItem>
+                  <SelectItem value="title">{t('sort.title')}</SelectItem>
+                  <SelectItem value="duration">{t('sort.duration')}</SelectItem>
+                  <SelectItem value="viewCount">{t('sort.viewCount')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Order Direction */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-white/80">{t('sort.orderDirectionLabel')}</label>
+              <Select value={order} onValueChange={(value) => setOrder(value as any)}>
+                <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-primary border-white/10">
+                  <SelectItem value="DESC">{t('sort.desc')}</SelectItem>
+                  <SelectItem value="ASC">{t('sort.asc')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Results Count */}
       {meta && (

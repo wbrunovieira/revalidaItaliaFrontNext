@@ -6169,6 +6169,7 @@
 }
 },
 "AccessibleRecordingLessons": {
+  "searchLabel": "Buscar clases:",
   "searchPlaceholder": "Buscar clases grabadas...",
   "sortBy": "Ordenar por",
   "filter": {

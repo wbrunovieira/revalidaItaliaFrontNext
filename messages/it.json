@@ -6143,6 +6143,8 @@
   "searchPlaceholder": "Cerca lezioni registrate...",
   "sortBy": "Ordina per",
   "filter": {
+    "courseLabel": "Filtra per corso:",
+    "moduleLabel": "Filtra per modulo:",
     "selectCourse": "Seleziona un corso",
     "allCourses": "Tutti i corsi",
     "selectModule": "Seleziona un modulo",

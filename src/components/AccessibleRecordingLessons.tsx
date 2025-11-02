@@ -217,45 +217,51 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
     <div className="space-y-6">
       {/* Course and Module Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Select
-          value={courseFilter}
-          onValueChange={(value) => {
-            setCourseFilter(value === 'all' ? '' : value);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-            <SelectValue placeholder={t('filter.selectCourse')} />
-          </SelectTrigger>
-          <SelectContent className="bg-primary border-white/10">
-            <SelectItem value="all">{t('filter.allCourses')}</SelectItem>
-            {courses.map((course) => (
-              <SelectItem key={course.id} value={course.id}>
-                {course.slug}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm text-white/70">{t('filter.courseLabel')}</label>
+          <Select
+            value={courseFilter}
+            onValueChange={(value) => {
+              setCourseFilter(value === 'all' ? '' : value);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+              <SelectValue placeholder={t('filter.selectCourse')} />
+            </SelectTrigger>
+            <SelectContent className="bg-primary border-white/10">
+              <SelectItem value="all">{t('filter.allCourses')}</SelectItem>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.slug}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select
-          value={moduleFilter}
-          onValueChange={(value) => {
-            setModuleFilter(value === 'all' ? '' : value);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-            <SelectValue placeholder={t('filter.selectModule')} />
-          </SelectTrigger>
-          <SelectContent className="bg-primary border-white/10">
-            <SelectItem value="all">{t('filter.allModules')}</SelectItem>
-            {modules.map((moduleItem) => (
-              <SelectItem key={moduleItem.id} value={moduleItem.id}>
-                {moduleItem.slug}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm text-white/70">{t('filter.moduleLabel')}</label>
+          <Select
+            value={moduleFilter}
+            onValueChange={(value) => {
+              setModuleFilter(value === 'all' ? '' : value);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+              <SelectValue placeholder={t('filter.selectModule')} />
+            </SelectTrigger>
+            <SelectContent className="bg-primary border-white/10">
+              <SelectItem value="all">{t('filter.allModules')}</SelectItem>
+              {modules.map((moduleItem) => (
+                <SelectItem key={moduleItem.id} value={moduleItem.id}>
+                  {moduleItem.slug}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Header with Search and Filters */}

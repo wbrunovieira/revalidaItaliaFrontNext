@@ -6172,6 +6172,8 @@
   "searchPlaceholder": "Buscar clases grabadas...",
   "sortBy": "Ordenar por",
   "filter": {
+    "courseLabel": "Filtrar por curso:",
+    "moduleLabel": "Filtrar por módulo:",
     "selectCourse": "Selecciona un curso",
     "allCourses": "Todos los cursos",
     "selectModule": "Selecciona un módulo",

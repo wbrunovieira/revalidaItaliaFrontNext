@@ -98,6 +98,8 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
   const [limit, setLimit] = useState(20);
   const [orderBy, setOrderBy] = useState<'recordedAt' | 'title' | 'duration' | 'viewCount'>('recordedAt');
   const [order, setOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [courseFilter, setCourseFilter] = useState<string>('');
+  const [moduleFilter, setModuleFilter] = useState<string>('');
 
   const fetchLessons = useCallback(async () => {
     try {
@@ -105,6 +107,8 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
 
       const params = new URLSearchParams();
       if (search && search.length >= 2) params.append('search', search);
+      if (courseFilter) params.append('courseId', courseFilter);
+      if (moduleFilter) params.append('moduleId', moduleFilter);
       params.append('page', page.toString());
       params.append('limit', limit.toString());
       params.append('orderBy', orderBy);
@@ -134,7 +138,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
     } finally {
       setLoading(false);
     }
-  }, [search, page, limit, orderBy, order, t, toast]);
+  }, [search, page, limit, orderBy, order, courseFilter, moduleFilter, t, toast]);
 
   useEffect(() => {
     fetchLessons();
@@ -211,6 +215,49 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
 
   return (
     <div className="space-y-6">
+      {/* Course and Module Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select
+          value={courseFilter}
+          onValueChange={(value) => {
+            setCourseFilter(value === 'all' ? '' : value);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+            <SelectValue placeholder={t('filter.selectCourse')} />
+          </SelectTrigger>
+          <SelectContent className="bg-primary border-white/10">
+            <SelectItem value="all">{t('filter.allCourses')}</SelectItem>
+            {courses.map((course) => (
+              <SelectItem key={course.id} value={course.id}>
+                {course.slug}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={moduleFilter}
+          onValueChange={(value) => {
+            setModuleFilter(value === 'all' ? '' : value);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-full sm:w-[250px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+            <SelectValue placeholder={t('filter.selectModule')} />
+          </SelectTrigger>
+          <SelectContent className="bg-primary border-white/10">
+            <SelectItem value="all">{t('filter.allModules')}</SelectItem>
+            {modules.map((moduleItem) => (
+              <SelectItem key={moduleItem.id} value={moduleItem.id}>
+                {moduleItem.slug}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Header with Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">

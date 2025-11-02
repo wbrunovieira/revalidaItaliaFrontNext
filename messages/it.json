@@ -6142,6 +6142,12 @@
 "AccessibleRecordingLessons": {
   "searchPlaceholder": "Cerca lezioni registrate...",
   "sortBy": "Ordina per",
+  "filter": {
+    "selectCourse": "Seleziona un corso",
+    "allCourses": "Tutti i corsi",
+    "selectModule": "Seleziona un modulo",
+    "allModules": "Tutti i moduli"
+  },
   "sort": {
     "recordedAt": "Data di registrazione",
     "title": "Titolo",

@@ -6480,6 +6480,12 @@
 "AccessibleRecordingLessons": {
   "searchPlaceholder": "Buscar aulas gravadas...",
   "sortBy": "Ordenar por",
+  "filter": {
+    "selectCourse": "Selecione um curso",
+    "allCourses": "Todos os cursos",
+    "selectModule": "Selecione um módulo",
+    "allModules": "Todos os módulos"
+  },
   "sort": {
     "recordedAt": "Data de gravação",
     "title": "Título",

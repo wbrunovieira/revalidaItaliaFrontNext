@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Radio, Loader2, CheckCircle, AlertTriangle, Video, Clock } from 'lucide-react';
 
 interface Translation {
@@ -221,31 +220,31 @@ export default function ConvertToLiveModal({
 
           {/* O que acontecerá */}
           {!success && (
-            <Alert className="bg-blue-500/10 border-blue-500/30">
-              <AlertTriangle className="h-4 w-4 text-blue-400" />
-              <AlertDescription className="text-sm text-blue-300">
+            <div className="bg-blue-500/10 border-blue-500/30 border rounded-lg p-4 flex gap-3">
+              <AlertTriangle className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-300">
                 <strong className="block mb-2">{t('whatHappens.title')}</strong>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>{t('whatHappens.createSession')}</li>
                   <li>{t('whatHappens.createRecording')}</li>
                   <li>{t('whatHappens.available')}</li>
                 </ul>
-              </AlertDescription>
-            </Alert>
+              </div>
+            </div>
           )}
 
           {/* Feedback de sucesso */}
           {success && conversionData && (
-            <Alert className="bg-green-500/10 border-green-500/30">
-              <CheckCircle className="h-4 w-4 text-green-400" />
-              <AlertDescription className="text-sm text-green-300">
+            <div className="bg-green-500/10 border-green-500/30 border rounded-lg p-4 flex gap-3">
+              <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-green-300">
                 <strong className="block mb-2">{t('success.title')}</strong>
                 <div className="space-y-1 text-xs">
                   <p>{t('success.sessionCreated')}: <code className="bg-white/10 px-1 rounded">{conversionData.sessionId.slice(0, 8)}...</code></p>
                   <p>{t('success.recordingCreated')}: <code className="bg-white/10 px-1 rounded">{conversionData.recordingId.slice(0, 8)}...</code></p>
                 </div>
-              </AlertDescription>
-            </Alert>
+              </div>
+            </div>
           )}
         </div>
 

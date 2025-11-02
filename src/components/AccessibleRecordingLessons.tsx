@@ -270,28 +270,34 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           />
         </div>
 
-        <div className="flex gap-2">
-          <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
-            <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-              <SelectValue placeholder={t('sortBy')} />
-            </SelectTrigger>
-            <SelectContent className="bg-primary border-white/10">
-              <SelectItem value="recordedAt">{t('sort.recordedAt')}</SelectItem>
-              <SelectItem value="title">{t('sort.title')}</SelectItem>
-              <SelectItem value="duration">{t('sort.duration')}</SelectItem>
-              <SelectItem value="viewCount">{t('sort.viewCount')}</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-white/70">{t('sort.orderByLabel')}</label>
+            <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
+              <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+                <SelectValue placeholder={t('sortBy')} />
+              </SelectTrigger>
+              <SelectContent className="bg-primary border-white/10">
+                <SelectItem value="recordedAt">{t('sort.recordedAt')}</SelectItem>
+                <SelectItem value="title">{t('sort.title')}</SelectItem>
+                <SelectItem value="duration">{t('sort.duration')}</SelectItem>
+                <SelectItem value="viewCount">{t('sort.viewCount')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Select value={order} onValueChange={(value) => setOrder(value as any)}>
-            <SelectTrigger className="w-[120px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-primary border-white/10">
-              <SelectItem value="DESC">{t('sort.desc')}</SelectItem>
-              <SelectItem value="ASC">{t('sort.asc')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-white/70">{t('sort.orderDirectionLabel')}</label>
+            <Select value={order} onValueChange={(value) => setOrder(value as any)}>
+              <SelectTrigger className="w-[120px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-primary border-white/10">
+                <SelectItem value="DESC">{t('sort.desc')}</SelectItem>
+                <SelectItem value="ASC">{t('sort.asc')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 

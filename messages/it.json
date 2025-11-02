@@ -6149,6 +6149,8 @@
     "allModules": "Tutti i moduli"
   },
   "sort": {
+    "orderByLabel": "Ordina per:",
+    "orderDirectionLabel": "Ordine:",
     "recordedAt": "Data di registrazione",
     "title": "Titolo",
     "duration": "Durata",

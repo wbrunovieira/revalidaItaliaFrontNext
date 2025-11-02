@@ -6178,6 +6178,8 @@
     "allModules": "Todos los módulos"
   },
   "sort": {
+    "orderByLabel": "Ordenar por:",
+    "orderDirectionLabel": "Orden:",
     "recordedAt": "Fecha de grabación",
     "title": "Título",
     "duration": "Duración",

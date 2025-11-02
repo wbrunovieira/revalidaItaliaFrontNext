@@ -5,13 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
-import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Filter, Search, Radio, PlayCircle, X } from 'lucide-react';
+import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Radio, PlayCircle, X } from 'lucide-react';
 import AccessibleRecordingLessons from '@/components/AccessibleRecordingLessons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // API interfaces matching backend response
@@ -116,8 +115,6 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<LiveSessionAPI[]>([]);
   const [selectedTab, setSelectedTab] = useState('upcoming');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterTopic, setFilterTopic] = useState('all');
   const [joiningSession, setJoiningSession] = useState<string | null>(null);
 
   // Debug: Log environment variables
@@ -327,20 +324,6 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
   );
   const liveSessions = displaySessions.filter((s: DisplaySession) => s.status === 'live' || s.status === 'LIVE');
 
-  const getFilteredSessions = (sessionList: DisplaySession[]) => {
-    return sessionList.filter(session => {
-      const matchesSearch =
-        searchTerm === '' ||
-        session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.instructor.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesTopic = filterTopic === 'all' || session.topic === filterTopic;
-
-      return matchesSearch && matchesTopic;
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -354,39 +337,6 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Buscar sessões..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <select
-                value={filterTopic}
-                onChange={e => setFilterTopic(e.target.value)}
-                className="px-3 py-2 border rounded-lg bg-background"
-              >
-                <option value="all">{t('filters.all')}</option>
-                <option value="Anatomia">Anatomia</option>
-                <option value="Farmacologia">Farmacologia</option>
-                <option value="Pediatria">Pediatria</option>
-                <option value="Emergência">Emergência</option>
-                <option value="Geral">Geral</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Sessions Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -427,7 +377,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
 
         {/* Upcoming Sessions */}
         <TabsContent value="upcoming" className="space-y-4">
-          {getFilteredSessions(upcomingSessions).length === 0 ? (
+          {upcomingSessions.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="text-center py-12">
                 <Calendar className="h-12 w-12 text-white/40 mx-auto mb-4" />
@@ -437,7 +387,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
             </Card>
           ) : (
             <AnimatePresence>
-              {getFilteredSessions(upcomingSessions).map((session: DisplaySession, index: number) => (
+              {upcomingSessions.map((session: DisplaySession, index: number) => (
                 <motion.div
                   key={session.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -490,7 +440,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
 
         {/* Live Sessions */}
         <TabsContent value="live" className="space-y-4">
-          {getFilteredSessions(liveSessions).length === 0 ? (
+          {liveSessions.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="text-center py-12">
                 <Radio className="h-12 w-12 text-white/40 mx-auto mb-4" />
@@ -500,7 +450,7 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
             </Card>
           ) : (
             <AnimatePresence>
-              {getFilteredSessions(liveSessions).map((session: DisplaySession, index: number) => (
+              {liveSessions.map((session: DisplaySession, index: number) => (
                 <motion.div
                   key={session.id}
                   initial={{ opacity: 0, scale: 0.95 }}

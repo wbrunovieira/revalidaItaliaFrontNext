@@ -6174,6 +6174,9 @@
   "noLessons": "Nessuna lezione registrata trovata",
   "noLessonsDescription": "Non ci sono lezioni registrate disponibili al momento",
   "views": "visualizzazioni",
+  "duration": "Durata",
+  "viewsLabel": "Visualizzazioni",
+  "watch": "Guarda",
   "pagination": {
     "pageOf": "Pagina {current} di {total}",
     "perPage": "Per pagina:",

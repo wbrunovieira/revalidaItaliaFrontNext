@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,11 @@ import {
   PlayCircle,
   CheckCircle,
   Loader2,
+  Video,
+  Calendar,
+  BookOpen,
+  TrendingUp,
+  Play,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -147,6 +152,167 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(1); // Reset to first page on search
+  };
+
+  // Recording Card Component
+  const RecordingCard = ({ lesson }: { lesson: RecordingLesson }) => {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const gradientRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!cardRef.current || !gradientRef.current) return;
+
+      const card = cardRef.current;
+      const gradient = gradientRef.current;
+      const rect = card.getBoundingClientRect();
+
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = (y - centerY) / 40;
+      const rotateY = (centerX - x) / 40;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(0)`;
+      gradient.style.opacity = '1';
+    };
+
+    const handleMouseLeave = () => {
+      if (!cardRef.current || !gradientRef.current) return;
+
+      cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+      gradientRef.current.style.opacity = '0';
+    };
+
+    return (
+      <Link
+        href={getLessonUrl(lesson)}
+        className="group block"
+      >
+        <div
+          ref={cardRef}
+          className="relative bg-white/5 rounded-xl overflow-hidden border-l-[8px] border-secondary hover:border-l-[10px] hover:shadow-2xl hover:shadow-secondary/20 transition-all duration-500 hover:-translate-y-1 h-full"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 20%, rgba(56, 135, 166, 0.08) 1px, transparent 1px),
+              radial-gradient(circle at 80% 80%, rgba(12, 53, 89, 0.08) 1px, transparent 1px),
+              radial-gradient(circle at 50% 50%, rgba(56, 135, 166, 0.04) 0.8px, transparent 0.8px)
+            `,
+            backgroundSize: '20px 20px, 18px 18px, 30px 30px',
+            backgroundPosition: '0 0, 10px 10px, 5px 5px'
+          }}
+        >
+          {/* Top gradient line */}
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-secondary/30 to-transparent"></div>
+
+          {/* Header Section with Icon */}
+          <div className="relative p-6 pb-4">
+            {/* Video Icon Badge */}
+            <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-secondary/10 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+              <Video size={20} className="text-secondary" />
+            </div>
+
+            {/* Status and Progress Badges */}
+            <div className="flex items-center gap-2 mb-4">
+              {getStatusBadge(lesson.recordingStatus)}
+              {getProgressBadge(lesson.userProgress)}
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-secondary transition-colors duration-300 pr-14">
+              {lesson.title}
+            </h3>
+
+            {/* Divider Line with Dot */}
+            <div className="relative my-3">
+              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-secondary/40 transition-colors duration-300"></div>
+              <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-secondary/40 rounded-full group-hover:scale-150 group-hover:bg-secondary transition-all duration-300"></div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-6 pb-6 space-y-4">
+            {/* Course and Module */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                  <BookOpen size={12} className="text-white/70 group-hover:text-secondary transition-colors duration-300" />
+                </div>
+                <span className="text-white/80 font-medium truncate">{lesson.courseName}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center">
+                  <Calendar size={10} className="text-white/60" />
+                </div>
+                <span className="text-white/60 truncate">{lesson.moduleName}</span>
+              </div>
+            </div>
+
+            {/* Description */}
+            {lesson.description && (
+              <p className="text-sm text-white/70 line-clamp-2 leading-relaxed">
+                {lesson.description}
+              </p>
+            )}
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
+              {/* Duration */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                  <Clock size={14} className="text-secondary" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('duration')}</p>
+                  <p className="text-xs font-semibold text-white">{lesson.formattedDuration}</p>
+                </div>
+              </div>
+
+              {/* Views */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                  <Eye size={14} className="text-secondary" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('viewsLabel')}</p>
+                  <p className="text-xs font-semibold text-white">{lesson.viewCount || 0}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Badge */}
+            <div className="flex items-center justify-between pt-4">
+              <div className="text-xs text-white/50">
+                {new Date(lesson.recordedAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'it' ? 'it-IT' : 'es-ES', {
+                  day: '2-digit',
+                  month: 'short'
+                })}
+              </div>
+              <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-white transition-all duration-300 font-semibold">
+                <Play size={12} />
+                {t('watch')}
+              </div>
+            </div>
+          </div>
+
+          {/* Hover Gradient Overlay */}
+          <div
+            ref={gradientRef}
+            className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-secondary/10 opacity-0 transition-opacity duration-500 pointer-events-none"
+          ></div>
+
+          {/* Hover Ring */}
+          <div className="absolute inset-0 rounded-xl ring-1 ring-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+          {/* Glow Effect */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
+      </Link>
+    );
   };
 
   // Helper function to get course and module slugs from IDs
@@ -364,55 +530,9 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lessons.map((lesson) => (
-            <Link
-              key={lesson.lessonId}
-              href={getLessonUrl(lesson)}
-              className="block h-full"
-            >
-              <Card className="bg-white/5 border-white/10 hover:border-secondary/50 hover:bg-white/10 transition-all cursor-pointer h-full">
-                <CardContent className="p-4">
-                  {/* Header with Badges */}
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    {getStatusBadge(lesson.recordingStatus)}
-                    {getProgressBadge(lesson.userProgress)}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
-                    {lesson.title}
-                  </h3>
-
-                  {/* Course/Module */}
-                  <div className="text-sm text-white/70 mb-3">
-                    <p className="truncate">{lesson.courseName}</p>
-                    <p className="truncate text-xs">{lesson.moduleName}</p>
-                  </div>
-
-                  {/* Description */}
-                  {lesson.description && (
-                    <p className="text-sm text-white/60 mb-4 line-clamp-2">
-                      {lesson.description}
-                    </p>
-                  )}
-
-                  {/* Footer Info */}
-                  <div className="flex items-center justify-between text-xs text-white/50 pt-3 border-t border-white/10">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {lesson.formattedDuration}
-                    </span>
-                    {lesson.viewCount > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {lesson.viewCount} {t('views')}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <RecordingCard key={lesson.lessonId} lesson={lesson} />
           ))}
         </div>
       )}

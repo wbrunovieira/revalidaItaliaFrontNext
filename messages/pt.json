@@ -6512,6 +6512,9 @@
   "noLessons": "Nenhuma aula gravada encontrada",
   "noLessonsDescription": "Não há aulas gravadas disponíveis no momento",
   "views": "visualizações",
+  "duration": "Duração",
+  "viewsLabel": "Visualizações",
+  "watch": "Assistir",
   "pagination": {
     "pageOf": "Página {current} de {total}",
     "perPage": "Por página:",

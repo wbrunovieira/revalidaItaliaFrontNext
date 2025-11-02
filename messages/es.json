@@ -6203,6 +6203,9 @@
   "noLessons": "No se encontraron clases grabadas",
   "noLessonsDescription": "No hay clases grabadas disponibles en este momento",
   "views": "visualizaciones",
+  "duration": "Duración",
+  "viewsLabel": "Visualizaciones",
+  "watch": "Ver",
   "pagination": {
     "pageOf": "Página {current} de {total}",
     "perPage": "Por página:",

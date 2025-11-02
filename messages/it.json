@@ -6185,7 +6185,10 @@
   },
   "error": {
     "fetchTitle": "Errore nel caricamento delle lezioni",
-    "fetchDescription": "Impossibile caricare le lezioni registrate"
+    "fetchDescription": "Impossibile caricare le lezioni registrate",
+    "notAvailableTitle": "Registrazione non disponibile",
+    "processingDescription": "Questa registrazione è ancora in elaborazione. Riprova tra qualche minuto.",
+    "expiredDescription": "Questa registrazione è scaduta e non è più disponibile per la visualizzazione."
   }
 }
 }

@@ -6523,7 +6523,10 @@
   },
   "error": {
     "fetchTitle": "Erro ao carregar aulas",
-    "fetchDescription": "Não foi possível carregar as aulas gravadas"
+    "fetchDescription": "Não foi possível carregar as aulas gravadas",
+    "notAvailableTitle": "Gravação não disponível",
+    "processingDescription": "Esta gravação ainda está sendo processada. Por favor, tente novamente em alguns minutos.",
+    "expiredDescription": "Esta gravação expirou e não está mais disponível para visualização."
   }
 }
 }

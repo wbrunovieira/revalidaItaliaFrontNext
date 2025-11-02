@@ -6214,7 +6214,10 @@
   },
   "error": {
     "fetchTitle": "Error al cargar clases",
-    "fetchDescription": "No fue posible cargar las clases grabadas"
+    "fetchDescription": "No fue posible cargar las clases grabadas",
+    "notAvailableTitle": "Grabación no disponible",
+    "processingDescription": "Esta grabación aún se está procesando. Por favor, inténtalo de nuevo en unos minutos.",
+    "expiredDescription": "Esta grabación ha expirado y ya no está disponible para visualización."
   }
 }
 }

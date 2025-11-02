@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
-import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Radio, PlayCircle, X } from 'lucide-react';
+import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Radio, X } from 'lucide-react';
 import AccessibleRecordingLessons from '@/components/AccessibleRecordingLessons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -395,43 +395,94 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/5 border-white/10 hover:border-secondary/50 hover:bg-white/10 transition-all">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            {getStatusBadge(session.status)}
-                            <Badge variant="outline">{session.topic}</Badge>
+                  <div
+                    className="relative bg-white/5 rounded-xl overflow-hidden border-l-[8px] border-secondary hover:border-l-[10px] hover:shadow-2xl hover:shadow-secondary/20 transition-all duration-500 hover:-translate-y-1 group"
+                    style={{
+                      backgroundImage: `
+                        radial-gradient(circle at 20% 20%, rgba(56, 135, 166, 0.08) 1px, transparent 1px),
+                        radial-gradient(circle at 80% 80%, rgba(12, 53, 89, 0.08) 1px, transparent 1px),
+                        radial-gradient(circle at 50% 50%, rgba(56, 135, 166, 0.04) 0.8px, transparent 0.8px)
+                      `,
+                      backgroundSize: '20px 20px, 18px 18px, 30px 30px',
+                      backgroundPosition: '0 0, 10px 10px, 5px 5px'
+                    }}
+                  >
+                    {/* Top gradient line */}
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-secondary/30 to-transparent"></div>
+
+                    <div className="p-6">
+                      {/* Header with badges */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {getStatusBadge(session.status)}
+                          <Badge variant="outline" className="bg-white/5 border-white/20">{session.topic}</Badge>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-secondary transition-colors duration-300">
+                        {session.title}
+                      </h3>
+
+                      {/* Divider Line with Dot */}
+                      <div className="relative my-4">
+                        <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-secondary/40 transition-colors duration-300"></div>
+                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-secondary/40 rounded-full group-hover:scale-150 group-hover:bg-secondary transition-all duration-300"></div>
+                      </div>
+
+                      {/* Description */}
+                      {session.description && (
+                        <p className="text-white/70 mb-6 line-clamp-2 leading-relaxed">{session.description}</p>
+                      )}
+
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        {/* Instructor */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                            <Users size={18} className="text-secondary" />
                           </div>
-
-                          <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-white/70 mb-4">{session.description}</p>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-white/70">
-                              <Users className="h-4 w-4 text-white/60" />
-                              <span>
-                                {t('instructor')}: <strong>{session.instructor.name}</strong>
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/70">
-                              <Clock className="h-4 w-4 text-white/60" />
-                              <span>
-                                {t('duration')}: <strong>{formatDuration(session.scheduledAt, session.endTime)}</strong>
-                              </span>
-                            </div>
+                          <div>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('instructor')}</p>
+                            <p className="text-sm font-semibold text-white">{session.instructor.name}</p>
                           </div>
+                        </div>
 
-                          <div className="flex items-center gap-2 text-sm text-white/60">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {t('scheduledFor')}: {formatDate(session.scheduledAt)}
-                            </span>
+                        {/* Duration */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
+                            <Clock size={18} className="text-secondary" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('duration')}</p>
+                            <p className="text-sm font-semibold text-white">{formatDuration(session.scheduledAt, session.endTime)}</p>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+
+                      {/* Scheduled Date */}
+                      <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                            <Calendar size={14} className="text-white/60" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/40 uppercase tracking-wider">{t('scheduledFor')}</p>
+                            <p className="text-sm font-medium text-white/90">{formatDate(session.scheduledAt)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hover Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+                    {/* Hover Ring */}
+                    <div className="absolute inset-0 rounded-xl ring-1 ring-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    {/* Glow Effect */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -458,36 +509,84 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/5 border-red-500/50 hover:border-red-500/70 hover:bg-white/10 transition-all shadow-lg shadow-red-500/10">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            {getStatusBadge(session.status)}
-                            <Badge variant="outline">{session.topic}</Badge>
+                  <div
+                    className="relative bg-white/5 rounded-xl overflow-hidden border-l-[8px] border-red-500 hover:border-l-[12px] hover:shadow-2xl hover:shadow-red-500/30 transition-all duration-500 hover:-translate-y-1 group animate-pulse-subtle"
+                    style={{
+                      backgroundImage: `
+                        radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.08) 1px, transparent 1px),
+                        radial-gradient(circle at 80% 80%, rgba(220, 38, 38, 0.08) 1px, transparent 1px),
+                        radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.04) 0.8px, transparent 0.8px)
+                      `,
+                      backgroundSize: '20px 20px, 18px 18px, 30px 30px',
+                      backgroundPosition: '0 0, 10px 10px, 5px 5px'
+                    }}
+                  >
+                    {/* Top gradient line with pulse */}
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-red-500/50 to-transparent animate-pulse"></div>
+
+                    {/* Live indicator badge */}
+                    <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/30">
+                      <span className="flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                      </span>
+                      <span className="text-xs font-bold text-red-400 uppercase tracking-wider">AO VIVO</span>
+                    </div>
+
+                    <div className="p-6">
+                      {/* Header with badges */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {getStatusBadge(session.status)}
+                          <Badge variant="outline" className="bg-white/5 border-white/20">{session.topic}</Badge>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-red-400 transition-colors duration-300">
+                        {session.title}
+                      </h3>
+
+                      {/* Divider Line with Dot */}
+                      <div className="relative my-4">
+                        <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-red-500/40 transition-colors duration-300"></div>
+                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-red-500/40 rounded-full group-hover:scale-150 group-hover:bg-red-500 transition-all duration-300 animate-pulse"></div>
+                      </div>
+
+                      {/* Description */}
+                      {session.description && (
+                        <p className="text-white/70 mb-6 line-clamp-2 leading-relaxed">{session.description}</p>
+                      )}
+
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        {/* Instructor */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors duration-300">
+                            <Users size={18} className="text-red-400" />
                           </div>
-
-                          <h3 className="text-xl font-semibold mb-2 text-white">{session.title}</h3>
-                          <p className="text-white/70 mb-4">{session.description}</p>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-white/70">
-                              <Users className="h-4 w-4 text-white/60" />
-                              <span>
-                                {t('instructor')}: <strong>{session.instructor.name}</strong>
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-white/70">
-                              <Clock className="h-4 w-4 text-white/60" />
-                              <span>
-                                {t('endTime')}: {new Date(session.endTime).toLocaleTimeString()}
-                              </span>
-                            </div>
+                          <div>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('instructor')}</p>
+                            <p className="text-sm font-semibold text-white">{session.instructor.name}</p>
                           </div>
                         </div>
 
+                        {/* End Time */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors duration-300">
+                            <Clock size={18} className="text-red-400" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('endTime')}</p>
+                            <p className="text-sm font-semibold text-white">{new Date(session.endTime).toLocaleTimeString()}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Join Button */}
+                      <div className="flex items-center justify-end pt-4 border-t border-white/10">
                         <Button
-                          className="bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                          className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300"
                           onClick={() => handleJoinSession(session.id)}
                           disabled={joiningSession === session.id || isGenerating || isJoining}
                         >
@@ -501,11 +600,20 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                               <Play className="mr-2 h-4 w-4" />
                               {t('joinNow')}
                             </>
-                          )}
+                            )}
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {/* Hover Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+                    {/* Hover Ring */}
+                    <div className="absolute inset-0 rounded-xl ring-1 ring-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    {/* Glow Effect */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>

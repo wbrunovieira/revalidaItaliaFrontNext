@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/select';
 import {
   Clock,
-  Eye,
   Search,
   ChevronLeft,
   ChevronRight,
@@ -25,7 +24,6 @@ import {
   Video,
   Calendar,
   BookOpen,
-  TrendingUp,
   Play,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -204,11 +202,43 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
       }
     };
 
+    const handleCardClick = (e: React.MouseEvent) => {
+      if (lesson.recordingStatus !== 'AVAILABLE') {
+        e.preventDefault();
+
+        if (lesson.recordingStatus === 'PROCESSING') {
+          toast({
+            title: t('error.notAvailableTitle'),
+            description: t('error.processingDescription'),
+            variant: 'default',
+          });
+        } else if (lesson.recordingStatus === 'EXPIRED') {
+          toast({
+            title: t('error.notAvailableTitle'),
+            description: t('error.expiredDescription'),
+            variant: 'destructive',
+          });
+        }
+      }
+    };
+
+    const CardWrapper = lesson.recordingStatus === 'AVAILABLE' ? Link : 'div';
+    const cardProps = lesson.recordingStatus === 'AVAILABLE'
+      ? { href: getLessonUrl(lesson) }
+      : { onClick: handleCardClick, style: { cursor: 'pointer' } };
+
     return (
-      <Link
-        href={getLessonUrl(lesson)}
-        className="group block"
+      <CardWrapper
+        {...cardProps}
+        className="group block relative"
       >
+        {/* Progress Badge - Outside card to avoid clipping */}
+        {lesson.userProgress.completed && (
+          <div className="absolute -top-2 -right-2 z-20">
+            {getProgressBadge(lesson.userProgress)}
+          </div>
+        )}
+
         <div
           ref={cardRef}
           className="relative bg-white/5 rounded-xl overflow-hidden border-l-[8px] border-secondary hover:border-l-[10px] hover:shadow-2xl hover:shadow-secondary/20 transition-all duration-500 hover:-translate-y-1 h-full"
@@ -260,10 +290,9 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               <Video size={20} className="text-white" />
             </div>
 
-            {/* Status and Progress Badges - Over image */}
+            {/* Status Badge - Bottom Left */}
             <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
               {getStatusBadge(lesson.recordingStatus)}
-              {getProgressBadge(lesson.userProgress)}
             </div>
           </div>
 
@@ -306,8 +335,8 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               </p>
             )}
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
+            {/* Stats */}
+            <div className="pt-3 border-t border-white/10">
               {/* Duration */}
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
@@ -316,17 +345,6 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
                 <div>
                   <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('duration')}</p>
                   <p className="text-xs font-semibold text-white">{lesson.formattedDuration}</p>
-                </div>
-              </div>
-
-              {/* Views */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors duration-300">
-                  <Eye size={14} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('viewsLabel')}</p>
-                  <p className="text-xs font-semibold text-white">{lesson.viewCount || 0}</p>
                 </div>
               </div>
             </div>
@@ -358,21 +376,21 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           {/* Glow Effect */}
           <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
-      </Link>
+      </CardWrapper>
     );
   };
 
   // Helper function to get course and module slugs from IDs
   const getLessonUrl = (lesson: RecordingLesson) => {
     const course = courses.find(c => c.id === lesson.courseId);
-    const module = modules.find(m => m.id === lesson.moduleId);
+    const foundModule = modules.find(m => m.id === lesson.moduleId);
 
-    if (!course || !module) {
+    if (!course || !foundModule) {
       console.warn('Could not find course or module for lesson:', lesson);
       return '#';
     }
 
-    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${lesson.lessonId}`;
+    return `/${locale}/courses/${course.slug}/modules/${foundModule.slug}/lessons/${lesson.lessonId}`;
   };
 
   const getStatusBadge = (status: RecordingLesson['recordingStatus']) => {
@@ -401,10 +419,9 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
   const getProgressBadge = (userProgress: RecordingLesson['userProgress']) => {
     if (userProgress.completed) {
       return (
-        <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          {t('progress.completed')}
-        </Badge>
+        <div className="w-12 h-12 rounded-full bg-green-500/20 backdrop-blur-sm border-2 border-green-500/40 flex items-center justify-center shadow-lg">
+          <CheckCircle className="h-6 w-6 text-green-400" />
+        </div>
       );
     }
     if (userProgress.status === 'IN_PROGRESS') {
@@ -509,7 +526,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               {/* Order By */}
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-medium text-white/80">{t('sort.orderByLabel')}</label>
-                <Select value={orderBy} onValueChange={(value) => setOrderBy(value as any)}>
+                <Select value={orderBy} onValueChange={(value) => setOrderBy(value as 'recordedAt' | 'title' | 'duration' | 'viewCount')}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
                     <SelectValue placeholder={t('sortBy')} />
                   </SelectTrigger>
@@ -525,7 +542,7 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
               {/* Order Direction */}
               <div className="flex flex-col gap-2 flex-1">
                 <label className="text-sm font-medium text-white/80">{t('sort.orderDirectionLabel')}</label>
-                <Select value={order} onValueChange={(value) => setOrder(value as any)}>
+                <Select value={order} onValueChange={(value) => setOrder(value as 'ASC' | 'DESC')}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-11">
                     <SelectValue />
                   </SelectTrigger>

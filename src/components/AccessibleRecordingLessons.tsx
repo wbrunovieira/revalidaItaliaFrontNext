@@ -44,7 +44,8 @@ interface RecordingLesson {
   recordingId: string;
   recordingUrl: string;
   downloadUrl: string | null;
-  thumbnailUrl: string | null;
+  lessonImageUrl?: string; // Imagem customizada da lesson (upload manual)
+  thumbnailUrl: string | null; // Thumbnail automática do PandaVideo
   duration: number;
   formattedDuration: string;
   fileSize: string;
@@ -228,13 +229,13 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
 
           {/* Image Section with Parallax */}
           <div className="relative overflow-hidden h-40">
-            {lesson.thumbnailUrl ? (
+            {(lesson.lessonImageUrl || lesson.thumbnailUrl) ? (
               <div
                 ref={imageRef}
                 className="relative w-full h-full transition-all duration-700 will-change-transform"
               >
                 <Image
-                  src={lesson.thumbnailUrl}
+                  src={lesson.lessonImageUrl || lesson.thumbnailUrl || ''}
                   alt={lesson.title}
                   fill
                   className="object-cover"

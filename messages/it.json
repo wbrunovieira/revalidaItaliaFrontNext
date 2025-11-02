@@ -6176,6 +6176,7 @@
   "views": "visualizzazioni",
   "pagination": {
     "pageOf": "Pagina {current} di {total}",
+    "perPage": "Per pagina:",
     "previous": "Precedente",
     "next": "Successiva"
   },

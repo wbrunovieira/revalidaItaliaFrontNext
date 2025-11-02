@@ -6514,6 +6514,7 @@
   "views": "visualizações",
   "pagination": {
     "pageOf": "Página {current} de {total}",
+    "perPage": "Por página:",
     "previous": "Anterior",
     "next": "Próxima"
   },

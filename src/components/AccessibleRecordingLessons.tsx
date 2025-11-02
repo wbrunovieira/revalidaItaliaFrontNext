@@ -327,10 +327,30 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
         </CardContent>
       </Card>
 
-      {/* Results Count */}
+      {/* Results Count and Per Page Selector */}
       {meta && (
-        <div className="text-sm text-white/60">
-          {t('showing', { count: lessons.length, total: meta.total })}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="text-sm text-white/60">
+            {t('showing', { count: lessons.length, total: meta.total })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-white/60">{t('pagination.perPage')}</label>
+            <Select value={limit.toString()} onValueChange={(value) => {
+              setLimit(Number(value));
+              setPage(1); // Reset to first page when changing limit
+            }}>
+              <SelectTrigger className="w-[100px] bg-white/5 border-white/10 text-white hover:bg-white/10 focus:border-secondary/50 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-primary border-white/10">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 

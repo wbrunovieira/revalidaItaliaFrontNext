@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface RecordingLesson {
   lessonId: string;
@@ -158,12 +159,14 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
   const RecordingCard = ({ lesson }: { lesson: RecordingLesson }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const gradientRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLDivElement>(null);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
       if (!cardRef.current || !gradientRef.current) return;
 
       const card = cardRef.current;
       const gradient = gradientRef.current;
+      const image = imageRef.current;
       const rect = card.getBoundingClientRect();
 
       const x = e.clientX - rect.left;
@@ -175,15 +178,29 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
       const rotateX = (y - centerY) / 40;
       const rotateY = (centerX - x) / 40;
 
+      // Parallax na imagem
+      const moveX = (x - centerX) / 30;
+      const moveY = (y - centerY) / 30;
+
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(0)`;
       gradient.style.opacity = '1';
+
+      if (image) {
+        image.style.transform = `scale(1.05) translate(${moveX}px, ${moveY}px)`;
+      }
     };
 
     const handleMouseLeave = () => {
       if (!cardRef.current || !gradientRef.current) return;
 
+      const image = imageRef.current;
+
       cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
       gradientRef.current.style.opacity = '0';
+
+      if (image) {
+        image.style.transform = 'scale(1) translate(0px, 0px)';
+      }
     };
 
     return (
@@ -209,21 +226,50 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           {/* Top gradient line */}
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-secondary/30 to-transparent"></div>
 
-          {/* Header Section with Icon */}
-          <div className="relative p-6 pb-4">
-            {/* Video Icon Badge */}
-            <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-secondary/10 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-              <Video size={20} className="text-secondary" />
+          {/* Image Section with Parallax */}
+          <div className="relative overflow-hidden h-40">
+            {lesson.thumbnailUrl ? (
+              <div
+                ref={imageRef}
+                className="relative w-full h-full transition-all duration-700 will-change-transform"
+              >
+                <Image
+                  src={lesson.thumbnailUrl}
+                  alt={lesson.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                ref={imageRef}
+                className="w-full h-full bg-gradient-to-br from-secondary/30 to-primary/30 transition-all duration-700 will-change-transform flex items-center justify-center"
+              >
+                <div className="text-white/20">
+                  <PlayCircle size={64} />
+                </div>
+              </div>
+            )}
+
+            {/* Overlay gradient on image */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+            {/* Video Icon Badge - Positioned over image */}
+            <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-secondary/90 backdrop-blur-sm flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 z-10">
+              <Video size={20} className="text-white" />
             </div>
 
-            {/* Status and Progress Badges */}
-            <div className="flex items-center gap-2 mb-4">
+            {/* Status and Progress Badges - Over image */}
+            <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
               {getStatusBadge(lesson.recordingStatus)}
               {getProgressBadge(lesson.userProgress)}
             </div>
+          </div>
 
+          {/* Header Section */}
+          <div className="relative p-6 pb-4">
             {/* Title */}
-            <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-secondary transition-colors duration-300 pr-14">
+            <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-secondary transition-colors duration-300">
               {lesson.title}
             </h3>
 

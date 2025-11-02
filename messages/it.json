@@ -5164,7 +5164,41 @@
       "actions": {
         "view": "Visualizza",
         "edit": "Modifica",
-        "delete": "Elimina"
+        "delete": "Elimina",
+        "convertToLive": "Converti in Lezione dal Vivo"
+      },
+      "convertModal": {
+        "title": "Converti in Registrazione di Lezione dal Vivo",
+        "description": "Questa lezione sarà convertita in una registrazione di sessione dal vivo",
+        "lessonInfo": "Informazioni della Lezione",
+        "lessonTitle": "Titolo",
+        "whatHappens": {
+          "title": "Cosa succederà:",
+          "createSession": "Verrà creata una sessione dal vivo sintetica (stato: TERMINATA)",
+          "createRecording": "Verrà creata una registrazione e associata alla sessione",
+          "available": "La lezione sarà disponibile come registrazione di lezione dal vivo"
+        },
+        "success": {
+          "title": "Conversione completata con successo!",
+          "sessionCreated": "Sessione creata",
+          "recordingCreated": "Registrazione creata"
+        },
+        "errors": {
+          "noVideo": "Questa lezione non ha un video associato",
+          "notPandaVideo": "Il video non è di PandaVideo",
+          "validation": "Errore di validazione. Controlla i dati.",
+          "forbidden": "Non hai i permessi per convertire lezioni",
+          "notFound": "Lezione non trovata",
+          "alreadyConverted": "Questa lezione è già stata convertita in precedenza",
+          "generic": "Errore durante la conversione della lezione. Riprova."
+        },
+        "successTitle": "Conversione completata!",
+        "successDescription": "La lezione è stata convertita in registrazione di lezione dal vivo con successo.",
+        "successMessage": "Lezione convertita con successo!",
+        "errorTitle": "Errore nella conversione",
+        "cancel": "Annulla",
+        "confirm": "Conferma Conversione",
+        "converting": "Conversione in corso..."
       },
       "success": {
         "deleteTitle": "Lezione eliminata!",

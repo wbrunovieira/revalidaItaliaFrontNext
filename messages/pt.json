@@ -5436,7 +5436,41 @@
       "actions": {
         "view": "Visualizar",
         "edit": "Editar",
-        "delete": "Excluir"
+        "delete": "Excluir",
+        "convertToLive": "Converter para Aula ao Vivo"
+      },
+      "convertModal": {
+        "title": "Converter para Gravação de Aula ao Vivo",
+        "description": "Esta aula será convertida em uma gravação de sessão ao vivo",
+        "lessonInfo": "Informações da Aula",
+        "lessonTitle": "Título",
+        "whatHappens": {
+          "title": "O que acontecerá:",
+          "createSession": "Uma sessão ao vivo sintética será criada (status: FINALIZADA)",
+          "createRecording": "Uma gravação será criada e associada à sessão",
+          "available": "A aula ficará disponível como gravação de aula ao vivo"
+        },
+        "success": {
+          "title": "Conversão realizada com sucesso!",
+          "sessionCreated": "Sessão criada",
+          "recordingCreated": "Gravação criada"
+        },
+        "errors": {
+          "noVideo": "Esta aula não possui vídeo associado",
+          "notPandaVideo": "O vídeo não é do PandaVideo",
+          "validation": "Erro de validação. Verifique os dados.",
+          "forbidden": "Você não tem permissão para converter aulas",
+          "notFound": "Aula não encontrada",
+          "alreadyConverted": "Esta aula já foi convertida anteriormente",
+          "generic": "Erro ao converter aula. Tente novamente."
+        },
+        "successTitle": "Conversão concluída!",
+        "successDescription": "A aula foi convertida para gravação de aula ao vivo com sucesso.",
+        "successMessage": "Aula convertida com sucesso!",
+        "errorTitle": "Erro na conversão",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Conversão",
+        "converting": "Convertendo..."
       },
       "success": {
         "deleteTitle": "Aula excluída!",

@@ -22,10 +22,12 @@ import {
   FileText,
   MessageSquare,
   CreditCard,
+  Radio,
 } from 'lucide-react';
 import Image from 'next/image';
 import LessonViewModal from './LessonViewModal';
 import LessonEditModal from './LessonEditModal';
+import ConvertToLiveModal from './ConvertToLiveModal';
 
 interface Translation {
   locale: string;
@@ -131,6 +133,12 @@ export default function LessonsList() {
     useState<string | null>(null);
   const [selectedModuleForEdit, setSelectedModuleForEdit] =
     useState<string | null>(null);
+
+  // Estados para o modal de conversão
+  const [convertModalOpen, setConvertModalOpen] = useState(false);
+  const [selectedLessonForConvert, setSelectedLessonForConvert] =
+    useState<Lesson | null>(null);
+  const [converting, setConverting] = useState(false);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -674,7 +682,29 @@ export default function LessonsList() {
     [toast, t, apiUrl]
   );
 
-  // 10. Função para expandir/contrair curso
+  // 10. Função para abrir modal de conversão
+  const handleConvert = useCallback(
+    async (
+      courseId: string,
+      moduleId: string,
+      lessonId: string
+    ): Promise<void> => {
+      const course = coursesWithLessons.find(c => c.id === courseId);
+      if (!course) return;
+
+      const moduleItem = course.modules?.find(m => m.id === moduleId);
+      if (!moduleItem) return;
+
+      const lesson = moduleItem.lessons?.find(l => l.id === lessonId);
+      if (!lesson) return;
+
+      setSelectedLessonForConvert(lesson);
+      setConvertModalOpen(true);
+    },
+    [coursesWithLessons]
+  );
+
+  // 11. Função para expandir/contrair curso
   const toggleCourse = useCallback((courseId: string) => {
     setExpandedCourses(prev => {
       const newExpanded = new Set(prev);
@@ -1164,6 +1194,31 @@ export default function LessonsList() {
                                                     }
                                                   />
                                                 </button>
+                                                {/* Botão de conversão - mostrar apenas se tem vídeo do PandaVideo */}
+                                                {lesson.video?.providerVideoId &&
+                                                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lesson.video.providerVideoId) && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={e => {
+                                                      e.stopPropagation();
+                                                      handleConvert(
+                                                        course.id,
+                                                        module.id,
+                                                        lesson.id
+                                                      );
+                                                    }}
+                                                    className="p-1.5 text-gray-400 hover:text-secondary hover:bg-secondary/10 rounded transition-all"
+                                                    title={t(
+                                                      'actions.convertToLive'
+                                                    )}
+                                                  >
+                                                    <Radio
+                                                      size={
+                                                        16
+                                                      }
+                                                    />
+                                                  </button>
+                                                )}
                                               </div>
                                             </div>
                                           );
@@ -1308,6 +1363,18 @@ export default function LessonsList() {
           setSelectedLessonForEdit(null);
           setSelectedCourseForEdit(null);
           setSelectedModuleForEdit(null);
+          fetchData();
+        }}
+      />
+
+      <ConvertToLiveModal
+        open={convertModalOpen}
+        onClose={() => {
+          setConvertModalOpen(false);
+          setSelectedLessonForConvert(null);
+        }}
+        lesson={selectedLessonForConvert}
+        onSuccess={() => {
           fetchData();
         }}
       />

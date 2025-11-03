@@ -689,19 +689,30 @@ export default function LessonsList() {
       moduleId: string,
       lessonId: string
     ): Promise<void> => {
-      const course = coursesWithLessons.find(c => c.id === courseId);
-      if (!course) return;
+      try {
+        // Buscar detalhes completos da lição incluindo dados do vídeo
+        const response = await fetch(
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+        );
 
-      const moduleItem = course.modules?.find(m => m.id === moduleId);
-      if (!moduleItem) return;
+        if (!response.ok) {
+          throw new Error('Erro ao buscar detalhes da lição');
+        }
 
-      const lesson = moduleItem.lessons?.find(l => l.id === lessonId);
-      if (!lesson) return;
+        const lessonData: Lesson = await response.json();
 
-      setSelectedLessonForConvert(lesson);
-      setConvertModalOpen(true);
+        setSelectedLessonForConvert(lessonData);
+        setConvertModalOpen(true);
+      } catch (error) {
+        console.error('Erro ao carregar lição para conversão:', error);
+        toast({
+          title: t('error.convertLoadTitle'),
+          description: t('error.convertLoadDescription'),
+          variant: 'destructive',
+        });
+      }
     },
-    [coursesWithLessons]
+    [toast, t, apiUrl]
   );
 
   // 11. Função para expandir/contrair curso
@@ -1056,6 +1067,7 @@ export default function LessonsList() {
                                               locale
                                             );
 
+
                                           return (
                                             <div
                                               key={
@@ -1194,9 +1206,8 @@ export default function LessonsList() {
                                                     }
                                                   />
                                                 </button>
-                                                {/* Botão de conversão - mostrar apenas se tem vídeo do PandaVideo */}
-                                                {lesson.video?.providerVideoId &&
-                                                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lesson.video.providerVideoId) && (
+                                                {/* Botão de conversão - mostrar se tem vídeo */}
+                                                {lesson.videoId && (
                                                   <button
                                                     type="button"
                                                     onClick={e => {

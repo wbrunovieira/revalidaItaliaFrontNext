@@ -1029,7 +1029,7 @@ export default function CreateLessonForm() {
                         value={course.id}
                         className="text-white hover:bg-gray-600"
                       >
-                        {courseTranslation.title ||
+                        {courseTranslation?.title ||
                           course.slug}
                       </SelectItem>
                     );
@@ -1103,7 +1103,7 @@ export default function CreateLessonForm() {
                           value={module.id}
                           className="text-white hover:bg-gray-600"
                         >
-                          {moduleTranslation.title ||
+                          {moduleTranslation?.title ||
                             module.slug}
                         </SelectItem>
                       );

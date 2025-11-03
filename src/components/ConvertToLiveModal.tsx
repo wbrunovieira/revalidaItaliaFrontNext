@@ -66,7 +66,8 @@ export default function ConvertToLiveModal({
   const params = useParams();
   const locale = params.locale as string;
   const { toast } = useToast();
-  const { token, userId } = useAuth();
+  const { token, user } = useAuth();
+  const userId = user?.id;
 
   const [converting, setConverting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -82,7 +83,9 @@ export default function ConvertToLiveModal({
   };
 
   const handleConvert = async () => {
-    if (!lesson || !userId) return;
+    if (!lesson || !userId) {
+      return;
+    }
 
     setConverting(true);
 

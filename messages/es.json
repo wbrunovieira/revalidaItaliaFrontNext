@@ -5243,7 +5243,9 @@
         "deleteTitle": "Error al eliminar",
         "deleteDescription": "No fue posible eliminar la lección.",
         "editLoadTitle": "Error al cargar lección",
-        "editLoadDescription": "No fue posible cargar los datos de la lección para edición."
+        "editLoadDescription": "No fue posible cargar los datos de la lección para edición.",
+        "convertLoadTitle": "Error al cargar lección",
+        "convertLoadDescription": "No fue posible cargar los datos de la lección para conversión."
       },
       "pagination": {
         "showing": "Mostrando",

@@ -5213,7 +5213,8 @@
   "actions": {
     "view": "Visualizar",
     "edit": "Editar",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "convertToLive": "Converter para Aula ao Vivo"
   },
   "success": {
     "deleteTitle": "Aula excluída!",
@@ -5228,7 +5229,9 @@
     "deleteDependencyMessage": "Esta aula possui conteúdos associados que devem ser removidos primeiro:",
     "deleteDependencyWarning": "Remova todas as dependências antes de excluir a aula.",
     "editLoadTitle": "Erro ao carregar aula",
-    "editLoadDescription": "Não foi possível carregar os dados da aula para edição."
+    "editLoadDescription": "Não foi possível carregar os dados da aula para edição.",
+    "convertLoadTitle": "Erro ao carregar aula",
+    "convertLoadDescription": "Não foi possível carregar os dados da aula para conversão."
   },
   "pagination": {
     "showing": "Mostrando",

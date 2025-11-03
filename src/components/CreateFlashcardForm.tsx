@@ -1161,7 +1161,7 @@ export default function CreateFlashcardForm({
                             value={course.id}
                             className="text-white hover:bg-gray-600"
                           >
-                            {courseTranslation.title}
+                            {courseTranslation?.title || course.slug}
                           </SelectItem>
                         );
                       })}
@@ -1199,7 +1199,7 @@ export default function CreateFlashcardForm({
                               value={module.id}
                               className="text-white hover:bg-gray-600"
                             >
-                              {moduleTranslation.title}
+                              {moduleTranslation?.title || module.slug}
                             </SelectItem>
                           );
                         })}
@@ -1242,7 +1242,7 @@ export default function CreateFlashcardForm({
                             htmlFor={`lesson-${lesson.id}`}
                             className="text-sm text-gray-300 cursor-pointer flex-1"
                           >
-                            {lessonTranslation.title}
+                            {lessonTranslation?.title || `Aula ${lesson.order}`}
                           </label>
                         </div>
                       );

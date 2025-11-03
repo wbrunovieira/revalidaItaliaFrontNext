@@ -5210,7 +5210,9 @@
         "deleteTitle": "Errore nell'eliminazione",
         "deleteDescription": "Non è stato possibile eliminare la lezione.",
         "editLoadTitle": "Errore nel caricamento della lezione",
-        "editLoadDescription": "Non è stato possibile caricare i dati della lezione per la modifica."
+        "editLoadDescription": "Non è stato possibile caricare i dati della lezione per la modifica.",
+        "convertLoadTitle": "Errore nel caricamento della lezione",
+        "convertLoadDescription": "Non è stato possibile caricare i dati della lezione per la conversione."
       },
       "pagination": {
         "showing": "Visualizzazione",

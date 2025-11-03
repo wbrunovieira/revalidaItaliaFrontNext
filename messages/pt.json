@@ -5447,6 +5447,9 @@
         "description": "Esta aula será convertida em uma gravação de sessão ao vivo",
         "lessonInfo": "Informações da Aula",
         "lessonTitle": "Título",
+        "recordedDate": "Data da Gravação",
+        "optional": "opcional",
+        "recordedDateHint": "Se não informada, será usada a data de criação da aula. Útil para converter aulas antigas com data retroativa.",
         "whatHappens": {
           "title": "O que acontecerá:",
           "createSession": "Uma sessão ao vivo sintética será criada (status: FINALIZADA)",
@@ -5465,7 +5468,9 @@
           "forbidden": "Você não tem permissão para converter aulas",
           "notFound": "Aula não encontrada",
           "alreadyConverted": "Esta aula já foi convertida anteriormente",
-          "generic": "Erro ao converter aula. Tente novamente."
+          "generic": "Erro ao converter aula. Tente novamente.",
+          "futureDate": "Data inválida",
+          "futureDateDescription": "A data da gravação não pode ser no futuro."
         },
         "successTitle": "Conversão concluída!",
         "successDescription": "A aula foi convertida para gravação de aula ao vivo com sucesso.",

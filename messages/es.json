@@ -5205,6 +5205,9 @@
         "description": "Esta lección será convertida en una grabación de sesión en vivo",
         "lessonInfo": "Información de la Lección",
         "lessonTitle": "Título",
+        "recordedDate": "Fecha de Grabación",
+        "optional": "opcional",
+        "recordedDateHint": "Si no se proporciona, se usará la fecha de creación de la lección. Útil para convertir lecciones antiguas con fecha retroactiva.",
         "whatHappens": {
           "title": "Lo que sucederá:",
           "createSession": "Se creará una sesión en vivo sintética (estado: FINALIZADA)",
@@ -5223,7 +5226,9 @@
           "forbidden": "No tienes permisos para convertir lecciones",
           "notFound": "Lección no encontrada",
           "alreadyConverted": "Esta lección ya fue convertida anteriormente",
-          "generic": "Error al convertir la lección. Inténtalo de nuevo."
+          "generic": "Error al convertir la lección. Inténtalo de nuevo.",
+          "futureDate": "Fecha inválida",
+          "futureDateDescription": "La fecha de grabación no puede estar en el futuro."
         },
         "successTitle": "¡Conversión completada!",
         "successDescription": "La lección fue convertida en grabación de clase en vivo con éxito.",

@@ -5172,6 +5172,9 @@
         "description": "Questa lezione sarà convertita in una registrazione di sessione dal vivo",
         "lessonInfo": "Informazioni della Lezione",
         "lessonTitle": "Titolo",
+        "recordedDate": "Data di Registrazione",
+        "optional": "opzionale",
+        "recordedDateHint": "Se non fornita, verrà utilizzata la data di creazione della lezione. Utile per convertire lezioni vecchie con data retroattiva.",
         "whatHappens": {
           "title": "Cosa succederà:",
           "createSession": "Verrà creata una sessione dal vivo sintetica (stato: TERMINATA)",
@@ -5190,7 +5193,9 @@
           "forbidden": "Non hai i permessi per convertire lezioni",
           "notFound": "Lezione non trovata",
           "alreadyConverted": "Questa lezione è già stata convertita in precedenza",
-          "generic": "Errore durante la conversione della lezione. Riprova."
+          "generic": "Errore durante la conversione della lezione. Riprova.",
+          "futureDate": "Data non valida",
+          "futureDateDescription": "La data di registrazione non può essere nel futuro."
         },
         "successTitle": "Conversione completata!",
         "successDescription": "La lezione è stata convertita in registrazione di lezione dal vivo con successo.",

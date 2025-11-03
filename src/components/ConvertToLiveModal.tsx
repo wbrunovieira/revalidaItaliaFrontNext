@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Radio, Loader2, CheckCircle, AlertTriangle, Video, Clock } from 'lucide-react';
+import { Radio, Loader2, CheckCircle, AlertTriangle, Video, Clock, Calendar, Info } from 'lucide-react';
 
 interface Translation {
   locale: string;
@@ -71,6 +71,7 @@ export default function ConvertToLiveModal({
 
   const [converting, setConverting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [recordedAt, setRecordedAt] = useState<string>('');
   const [conversionData, setConversionData] = useState<{
     sessionId: string;
     recordingId: string;
@@ -87,9 +88,34 @@ export default function ConvertToLiveModal({
       return;
     }
 
+    // Validar data se foi fornecida
+    if (recordedAt) {
+      const selectedDate = new Date(recordedAt);
+      const now = new Date();
+
+      if (selectedDate > now) {
+        toast({
+          title: t('errors.futureDate'),
+          description: t('errors.futureDateDescription'),
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     setConverting(true);
 
     try {
+      // Construir o body com recordedAt opcional
+      const body: { hostId: string; recordedAt?: string } = {
+        hostId: userId,
+      };
+
+      // Só incluir recordedAt se foi fornecido, senão usa lesson.createdAt do backend
+      if (recordedAt) {
+        body.recordedAt = new Date(recordedAt).toISOString();
+      }
+
       const response = await fetch(
         `${apiUrl}/api/v1/admin/lessons/${lesson.id}/convert-to-recording`,
         {
@@ -98,10 +124,7 @@ export default function ConvertToLiveModal({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            hostId: userId,
-            recordedAt: lesson.createdAt,
-          }),
+          body: JSON.stringify(body),
         }
       );
 
@@ -162,6 +185,7 @@ export default function ConvertToLiveModal({
   const handleClose = () => {
     setConverting(false);
     setSuccess(false);
+    setRecordedAt('');
     setConversionData(null);
     onClose();
   };
@@ -169,7 +193,6 @@ export default function ConvertToLiveModal({
   if (!lesson) return null;
 
   const lessonTranslation = getTranslation(lesson.translations);
-  const videoTranslation = lesson.video ? getTranslation(lesson.video.translations) : null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -220,6 +243,31 @@ export default function ConvertToLiveModal({
               )}
             </div>
           </div>
+
+          {/* Campo de Data Customizada (Opcional) */}
+          {!success && (
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-secondary" />
+                {t('recordedDate')}
+                <span className="text-xs font-normal text-gray-400">({t('optional')})</span>
+              </h4>
+              <div className="space-y-2">
+                <input
+                  type="datetime-local"
+                  value={recordedAt}
+                  onChange={(e) => setRecordedAt(e.target.value)}
+                  max={new Date().toISOString().slice(0, 16)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent"
+                  disabled={converting}
+                />
+                <div className="flex items-start gap-2 text-xs text-gray-400">
+                  <Info className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                  <p>{t('recordedDateHint')}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* O que acontecerá */}
           {!success && (

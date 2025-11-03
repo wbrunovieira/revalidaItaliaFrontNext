@@ -353,46 +353,6 @@ export default function ModuleEditModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função de teste para debug
-  const testApiConnection = async (): Promise<void> => {
-    try {
-      console.log('Testando conexão com API...');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      console.log(
-        'Teste GET /courses/{id}/modules:',
-        response.status,
-        response.ok
-      );
-
-      if (module) {
-        const response2 = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${module.id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        console.log(
-          'Teste GET /courses/{id}/modules/{id}:',
-          response2.status,
-          response2.ok
-        );
-      }
-    } catch (error) {
-      console.error('Erro no teste de API:', error);
-    }
-  };
-
   // Generate unique filename
   const generateUniqueFileName = (originalName: string): string => {
     const timestamp = Date.now();
@@ -1123,15 +1083,7 @@ export default function ModuleEditModal({
         </form>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-700 flex-shrink-0">
-          <button
-            type="button"
-            onClick={testApiConnection}
-            className="px-3 py-1 text-xs bg-gray-700 text-gray-300 rounded hover:bg-gray-600"
-          >
-            Testar API
-          </button>
-
+        <div className="flex items-center justify-end p-6 border-t border-gray-700 flex-shrink-0">
           <div className="flex items-center gap-3">
             <button
               type="button"

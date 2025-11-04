@@ -5181,7 +5181,9 @@
           "loadingLessons": "Caricamento lezioni...",
           "noModules": "Nessun modulo disponibile",
           "noLessons": "Nessuna lezione disponibile in questo modulo",
-          "hint": "Opzionale: Collega questa lezione a una lezione correlata dello stesso corso. Utile per connettere le registrazioni alle loro lezioni dal vivo originali."
+          "hint": "Opzionale: Collega questa lezione a una lezione correlata dello stesso corso. Utile per connettere le registrazioni alle loro lezioni dal vivo originali.",
+          "errorTitle": "Errore nel caricamento delle lezioni",
+          "errorDescription": "Non è stato possibile caricare le lezioni del modulo selezionato."
         },
         "whatHappens": {
           "title": "Cosa succederà:",
@@ -5201,6 +5203,7 @@
           "forbidden": "Non hai i permessi per convertire lezioni",
           "notFound": "Lezione non trovata",
           "alreadyConverted": "Questa lezione è già stata convertita in precedenza",
+          "pandaVideoInUse": "Questo video è già in uso in un'altra lezione registrata. Ogni video può essere utilizzato solo una volta.",
           "generic": "Errore durante la conversione della lezione. Riprova.",
           "futureDate": "Data non valida",
           "futureDateDescription": "La data di registrazione non può essere nel futuro.",

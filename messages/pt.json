@@ -5456,7 +5456,9 @@
           "loadingLessons": "Carregando aulas...",
           "noModules": "Nenhum módulo disponível",
           "noLessons": "Nenhuma aula disponível neste módulo",
-          "hint": "Opcional: Vincule esta aula a uma aula relacionada do mesmo curso. Útil para conectar gravações às suas aulas ao vivo originais."
+          "hint": "Opcional: Vincule esta aula a uma aula relacionada do mesmo curso. Útil para conectar gravações às suas aulas ao vivo originais.",
+          "errorTitle": "Erro ao carregar aulas",
+          "errorDescription": "Não foi possível carregar as aulas do módulo selecionado."
         },
         "whatHappens": {
           "title": "O que acontecerá:",
@@ -5476,6 +5478,7 @@
           "forbidden": "Você não tem permissão para converter aulas",
           "notFound": "Aula não encontrada",
           "alreadyConverted": "Esta aula já foi convertida anteriormente",
+          "pandaVideoInUse": "Este vídeo já está sendo usado em outra aula gravada. Cada vídeo só pode ser usado uma vez.",
           "generic": "Erro ao converter aula. Tente novamente.",
           "futureDate": "Data inválida",
           "futureDateDescription": "A data da gravação não pode ser no futuro.",

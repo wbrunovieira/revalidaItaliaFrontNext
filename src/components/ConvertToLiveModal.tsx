@@ -128,29 +128,53 @@ export default function ConvertToLiveModal({
 
   // Buscar lessons do módulo selecionado
   const fetchLessons = useCallback(async (courseId: string, moduleId: string) => {
-    if (!token) return;
+    if (!token) {
+      console.log('[ConvertToLiveModal] No token available for fetching lessons');
+      return;
+    }
 
+    console.log('[ConvertToLiveModal] Fetching lessons for:', { courseId, moduleId });
     setLoadingLessons(true);
     try {
-      const response = await fetch(
-        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
+      const url = `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`;
+      console.log('[ConvertToLiveModal] Fetching URL:', url);
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      console.log('[ConvertToLiveModal] Response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        setRelatedLessons(data);
+        console.log('[ConvertToLiveModal] Raw data:', data);
+
+        // Garantir que sempre temos um array
+        const lessonsArray = Array.isArray(data) ? data : (data?.lessons || []);
+        console.log('[ConvertToLiveModal] Lessons fetched:', lessonsArray.length);
+        setRelatedLessons(lessonsArray);
+      } else {
+        const errorData = await response.json().catch(() => null);
+        console.error('[ConvertToLiveModal] Error response:', errorData);
+        toast({
+          title: t('relatedLesson.errorTitle'),
+          description: t('relatedLesson.errorDescription'),
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Error fetching lessons:', error);
+      console.error('[ConvertToLiveModal] Error fetching lessons:', error);
+      toast({
+        title: t('relatedLesson.errorTitle'),
+        description: t('relatedLesson.errorDescription'),
+        variant: 'destructive',
+      });
     } finally {
       setLoadingLessons(false);
     }
-  }, [token, apiUrl]);
+  }, [token, apiUrl, toast, t]);
 
   // Buscar módulos quando o modal abre
   useEffect(() => {
@@ -222,6 +246,13 @@ export default function ConvertToLiveModal({
 
       if (!response.ok) {
         const error = await response.json();
+        const errorMessage = error.message || error.detail || '';
+        console.log('[ConvertToLiveModal] Error response:', {
+          status: response.status,
+          error,
+          errorMessage,
+          errorTitle: error.title
+        });
 
         // Tratamento de erros específicos
         switch (response.status) {
@@ -230,7 +261,7 @@ export default function ConvertToLiveModal({
               throw new Error(t('errors.noVideo'));
             } else if (error.title === 'Video Not From PandaVideo') {
               throw new Error(t('errors.notPandaVideo'));
-            } else if (error.message?.includes('relatedLessonId')) {
+            } else if (errorMessage.includes('relatedLessonId')) {
               throw new Error(t('errors.invalidRelatedLesson'));
             } else {
               throw new Error(t('errors.validation'));
@@ -238,14 +269,17 @@ export default function ConvertToLiveModal({
           case 403:
             throw new Error(t('errors.forbidden'));
           case 404:
-            if (error.message?.includes('Lesson not found')) {
+            if (errorMessage.includes('Lesson not found')) {
               throw new Error(t('errors.relatedLessonNotFound'));
             }
             throw new Error(t('errors.notFound'));
           case 409:
+            if (errorMessage.includes('already associated with another recording')) {
+              throw new Error(t('errors.pandaVideoInUse'));
+            }
             throw new Error(t('errors.alreadyConverted'));
           case 500:
-            if (error.message?.includes('different course')) {
+            if (errorMessage.includes('different course')) {
               throw new Error(t('errors.differentCourse'));
             }
             throw new Error(t('errors.generic'));

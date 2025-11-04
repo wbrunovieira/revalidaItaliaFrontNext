@@ -145,9 +145,8 @@ export default function DocumentItem({
 }: DocumentItemProps) {
   const protectionLevel = document.protectionLevel || 'NONE';
 
-  // Check if this document has a cached URL
-  const cachedDoc = useCachedDocumentUrl(lessonId, document.id);
-  const hasCachedUrl = cachedDoc.hasCachedUrl;
+  // Check if this document has a cached URL (used internally for performance)
+  useCachedDocumentUrl(lessonId, document.id);
 
   return (
     <div
@@ -178,11 +177,6 @@ export default function DocumentItem({
             <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300 truncate">
               {translation?.title || document.filename}
             </h5>
-            {hasCachedUrl && protectionLevel !== 'NONE' && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/20 rounded text-xs text-green-400 border border-green-500/30">
-                <span>⚡ CACHED</span>
-              </div>
-            )}
             {protectionLevel === 'FULL' && (
               <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/20 rounded text-xs text-red-400 border border-red-500/30">
                 <Shield size={10} />
@@ -206,7 +200,7 @@ export default function DocumentItem({
         {/* Arrow icon with slide animation */}
         <div className="relative flex items-center gap-2">
           <span className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {hasCachedUrl && protectionLevel !== 'NONE' ? 'Abrir (cache)' : openDocumentText}
+            {openDocumentText}
           </span>
           <ExternalLink
             size={16}

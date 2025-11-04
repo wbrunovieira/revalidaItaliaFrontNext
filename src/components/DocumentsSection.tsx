@@ -63,11 +63,6 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
 
   const [processingDocumentId, setProcessingDocumentId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [currentRateLimitInfo, setCurrentRateLimitInfo] = useState<{
-    limit: number;
-    remaining: number;
-    resetAt: number;
-  } | null>(null);
 
   // Track which documents have already had POST /access called to prevent duplicates
   const accessRequestedRef = useRef<Set<string>>(new Set());
@@ -112,12 +107,6 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
 
       // WATERMARK/FULL: Open in internal PDFViewerModal
       console.log('[DocumentsSection] 🎉 Protected document - opening in internal PDF viewer');
-
-      // Store rate limit info if available (FULL documents)
-      if (rateLimitInfo) {
-        setCurrentRateLimitInfo(rateLimitInfo);
-      }
-
       setPdfViewerState({
         isOpen: true,
         url,
@@ -229,11 +218,6 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
 
     if (cachedData?.url) {
       console.log('[DocumentsSection] ⚡ Using cached URL (POST /access was already called)');
-
-      // Update rate limit info if available
-      if (cachedData.rateLimitInfo) {
-        setCurrentRateLimitInfo(cachedData.rateLimitInfo);
-      }
 
       setPdfViewerState({
         isOpen: true,
@@ -375,31 +359,6 @@ export default function DocumentsSection({ documents, locale, lessonId }: Docume
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
           <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
           <span className="text-sm text-red-400">{currentError}</span>
-        </div>
-      )}
-
-      {/* Rate limit info for FULL documents */}
-      {currentRateLimitInfo && (
-        <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Shield size={16} className="text-yellow-400" />
-            <span className="text-sm text-yellow-400 font-medium">
-              Limite de acessos
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-yellow-400 h-full transition-all duration-300"
-                style={{
-                  width: `${(currentRateLimitInfo.remaining / currentRateLimitInfo.limit) * 100}%`,
-                }}
-              />
-            </div>
-            <span className="text-xs text-gray-400">
-              {currentRateLimitInfo.remaining}/{currentRateLimitInfo.limit}
-            </span>
-          </div>
         </div>
       )}
 

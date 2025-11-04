@@ -3986,9 +3986,18 @@
       "processingDescription": "El documento está siendo procesado en segundo plano. Esto puede tardar algunos minutos."
     },
     "protectionLevel": {
-      "none": "Sin protección, descarga directa permitida",
-      "watermark": "Marca de agua con datos del estudiante",
-      "full": "Máxima protección (marca de agua + URL firmada)"
+      "none": {
+        "label": "Ninguna",
+        "description": "Sin protección, descarga directa permitida"
+      },
+      "watermark": {
+        "label": "Protegido",
+        "description": "Marca de agua en todas las páginas, URL única con vencimiento de 1h, verificación de matrícula, logs de acceso completos, visor sin descarga/impresión"
+      },
+      "full": {
+        "label": "Protección Avanzada",
+        "description": "Todas las protecciones del nivel Protegido + límite de 5 generaciones de URL por hora"
+      }
     }
   },
   "documentsList": {

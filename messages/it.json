@@ -3987,9 +3987,18 @@
       "processingDescription": "Il documento è in elaborazione in background. Potrebbero volerci alcuni minuti."
     },
     "protectionLevel": {
-      "none": "Nessuna protezione, download diretto consentito",
-      "watermark": "Filigrana con dati dello studente",
-      "full": "Massima protezione (filigrana + URL firmato)"
+      "none": {
+        "label": "Nessuna",
+        "description": "Nessuna protezione, download diretto consentito"
+      },
+      "watermark": {
+        "label": "Protetto",
+        "description": "Filigrana su tutte le pagine, URL unico con scadenza di 1h, verifica iscrizione, log di accesso completi, visualizzatore senza download/stampa"
+      },
+      "full": {
+        "label": "Protezione Avanzata",
+        "description": "Tutte le protezioni del livello Protetto + limite di 5 generazioni URL per ora"
+      }
     }
   },
   "documentsList": {

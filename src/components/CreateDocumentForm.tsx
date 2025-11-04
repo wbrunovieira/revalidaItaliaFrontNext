@@ -1207,10 +1207,10 @@ export default function CreateDocumentForm() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <ShieldAlert size={18} className="text-gray-400" />
-                    <h4 className="text-white font-medium">NONE</h4>
+                    <h4 className="text-white font-medium">{t('protectionLevel.none.label') || 'Nenhuma'}</h4>
                   </div>
                   <p className="text-xs text-gray-400">
-                    {t('protectionLevel.none') || 'Sem proteção, download direto permitido'}
+                    {t('protectionLevel.none.description') || 'Sem proteção, download direto permitido'}
                   </p>
                 </div>
               </div>
@@ -1237,10 +1237,10 @@ export default function CreateDocumentForm() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Shield size={18} className="text-secondary" />
-                    <h4 className="text-white font-medium">WATERMARK</h4>
+                    <h4 className="text-white font-medium">{t('protectionLevel.watermark.label') || 'Protegido'}</h4>
                   </div>
                   <p className="text-xs text-gray-400">
-                    {t('protectionLevel.watermark') || 'Marca d\'água com dados do aluno'}
+                    {t('protectionLevel.watermark.description') || 'Marca d\'água com dados do aluno'}
                   </p>
                 </div>
               </div>
@@ -1267,10 +1267,10 @@ export default function CreateDocumentForm() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <ShieldCheck size={18} className="text-green-400" />
-                    <h4 className="text-white font-medium">FULL</h4>
+                    <h4 className="text-white font-medium">{t('protectionLevel.full.label') || 'Proteção Avançada'}</h4>
                   </div>
                   <p className="text-xs text-gray-400">
-                    {t('protectionLevel.full') || 'Máxima proteção (watermark + URL assinada)'}
+                    {t('protectionLevel.full.description') || 'Máxima proteção (watermark + URL assinada)'}
                   </p>
                 </div>
               </div>

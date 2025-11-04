@@ -5171,6 +5171,18 @@
         "recordedDate": "Data di Registrazione",
         "optional": "opzionale",
         "recordedDateHint": "Se non fornita, verrà utilizzata la data di creazione della lezione. Utile per convertire lezioni vecchie con data retroattiva.",
+        "relatedLesson": {
+          "title": "Collega Lezione Correlata",
+          "selectModule": "Seleziona il modulo",
+          "selectModulePlaceholder": "Seleziona un modulo...",
+          "selectLesson": "Seleziona la lezione",
+          "selectLessonPlaceholder": "Seleziona una lezione...",
+          "loadingModules": "Caricamento moduli...",
+          "loadingLessons": "Caricamento lezioni...",
+          "noModules": "Nessun modulo disponibile",
+          "noLessons": "Nessuna lezione disponibile in questo modulo",
+          "hint": "Opzionale: Collega questa lezione a una lezione correlata dello stesso corso. Utile per connettere le registrazioni alle loro lezioni dal vivo originali."
+        },
         "whatHappens": {
           "title": "Cosa succederà:",
           "createSession": "Verrà creata una sessione dal vivo sintetica (stato: TERMINATA)",
@@ -5191,7 +5203,10 @@
           "alreadyConverted": "Questa lezione è già stata convertita in precedenza",
           "generic": "Errore durante la conversione della lezione. Riprova.",
           "futureDate": "Data non valida",
-          "futureDateDescription": "La data di registrazione non può essere nel futuro."
+          "futureDateDescription": "La data di registrazione non può essere nel futuro.",
+          "invalidRelatedLesson": "ID della lezione correlata non valido",
+          "relatedLessonNotFound": "Lezione correlata non trovata",
+          "differentCourse": "La lezione correlata deve appartenere allo stesso corso"
         },
         "successTitle": "Conversione completata!",
         "successDescription": "La lezione è stata convertita in registrazione di lezione dal vivo con successo.",

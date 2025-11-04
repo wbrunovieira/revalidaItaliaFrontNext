@@ -701,7 +701,8 @@ export default function LessonsList() {
 
         const lessonData: Lesson = await response.json();
 
-        setSelectedLessonForConvert(lessonData);
+        // Adicionar courseId à lesson para uso no modal
+        setSelectedLessonForConvert({ ...lessonData, courseId });
         setConvertModalOpen(true);
       } catch (error) {
         console.error('Erro ao carregar lição para conversão:', error);

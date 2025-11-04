@@ -5206,6 +5206,18 @@
         "recordedDate": "Fecha de Grabación",
         "optional": "opcional",
         "recordedDateHint": "Si no se proporciona, se usará la fecha de creación de la lección. Útil para convertir lecciones antiguas con fecha retroactiva.",
+        "relatedLesson": {
+          "title": "Vincular Lección Relacionada",
+          "selectModule": "Seleccione el módulo",
+          "selectModulePlaceholder": "Seleccione un módulo...",
+          "selectLesson": "Seleccione la lección",
+          "selectLessonPlaceholder": "Seleccione una lección...",
+          "loadingModules": "Cargando módulos...",
+          "loadingLessons": "Cargando lecciones...",
+          "noModules": "Ningún módulo disponible",
+          "noLessons": "Ninguna lección disponible en este módulo",
+          "hint": "Opcional: Vincule esta lección a una lección relacionada del mismo curso. Útil para conectar grabaciones con sus clases en vivo originales."
+        },
         "whatHappens": {
           "title": "Lo que sucederá:",
           "createSession": "Se creará una sesión en vivo sintética (estado: FINALIZADA)",
@@ -5226,7 +5238,10 @@
           "alreadyConverted": "Esta lección ya fue convertida anteriormente",
           "generic": "Error al convertir la lección. Inténtalo de nuevo.",
           "futureDate": "Fecha inválida",
-          "futureDateDescription": "La fecha de grabación no puede estar en el futuro."
+          "futureDateDescription": "La fecha de grabación no puede estar en el futuro.",
+          "invalidRelatedLesson": "ID de la lección relacionada inválido",
+          "relatedLessonNotFound": "Lección relacionada no encontrada",
+          "differentCourse": "La lección relacionada debe pertenecer al mismo curso"
         },
         "successTitle": "¡Conversión completada!",
         "successDescription": "La lección fue convertida en grabación de clase en vivo con éxito.",

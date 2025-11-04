@@ -118,17 +118,46 @@ async function requestDocumentAccess({
 }
 
 /**
+ * Cache configuration for protected documents
+ *
+ * WATERMARK & FULL both have URLs that expire in 1 hour
+ * Cache for 50 minutes = 10 minute safety margin before expiration
+ *
+ * Why 50 minutes?
+ * - Allows seamless navigation during study sessions (~1 hour)
+ * - For WATERMARK: Reduces backend processing (watermark generation)
+ * - For FULL: Prevents rate limit exhaustion (5/hour limit)
+ * - Students use only 2-3 rate limits per day instead of hitting the limit
+ *
+ * Rate limit acts as security layer against:
+ * - URL extraction attempts
+ * - Automated bots/scripts
+ * - Account sharing
+ * - Direct API abuse
+ */
+const DOCUMENT_CACHE_CONFIG = {
+  WATERMARK: {
+    staleTime: 50 * 60 * 1000,  // 50 minutes - data stays fresh
+    gcTime: 50 * 60 * 1000,     // 50 minutes - keep in memory
+  },
+  FULL: {
+    staleTime: 50 * 60 * 1000,  // 50 minutes - critical for rate limit
+    gcTime: 50 * 60 * 1000,     // 50 minutes - keep in memory
+  },
+};
+
+/**
  * Hook to request access to protected documents using TanStack Query mutation
  *
  * Features:
- * - Automatic caching of document URLs
+ * - Automatic caching of document URLs (50 min for both WATERMARK and FULL)
  * - Rate limit tracking for FULL documents
  * - Smart cache invalidation
  *
  * Cache Strategy:
- * - WATERMARK URLs: Cache for 30 minutes (doesn't change)
- * - FULL signed URLs: Cache for 50 minutes (expires in 1 hour)
- * - Rate limit info: Cache separately for UI feedback
+ * - WATERMARK URLs: Cache for 50 minutes (URL expires in 1h)
+ * - FULL signed URLs: Cache for 50 minutes (URL expires in 1h, saves rate limit)
+ * - Rate limit info: Cache separately for tracking
  */
 export function useDocumentAccess({ onSuccess, onError }: UseDocumentAccessOptions = {}) {
   const queryClient = useQueryClient();
@@ -143,10 +172,34 @@ export function useDocumentAccess({ onSuccess, onError }: UseDocumentAccessOptio
         hasRateLimitInfo: !!data.rateLimitInfo,
       });
 
-      // Cache the document URL
+      // Determine cache time based on protection level
+      const cacheConfig = variables.protectionLevel === 'FULL'
+        ? DOCUMENT_CACHE_CONFIG.FULL
+        : DOCUMENT_CACHE_CONFIG.WATERMARK;
+
+      console.log('[useDocumentAccess] Using cache config:', {
+        protectionLevel: variables.protectionLevel,
+        staleTime: `${cacheConfig.staleTime / 1000 / 60} minutes`,
+        gcTime: `${cacheConfig.gcTime / 1000 / 60} minutes`,
+      });
+
+      // Cache the document URL with custom cache times
       queryClient.setQueryData(
         ['document-access', variables.lessonId, variables.documentId],
-        data
+        data,
+        {
+          // Note: setQueryData doesn't accept these options directly in v5
+          // We need to use setQueryDefaults instead
+        }
+      );
+
+      // Set query defaults for this specific query key
+      queryClient.setQueryDefaults(
+        ['document-access', variables.lessonId, variables.documentId],
+        {
+          staleTime: cacheConfig.staleTime,
+          gcTime: cacheConfig.gcTime,
+        }
       );
 
       // Cache rate limit info separately for FULL documents

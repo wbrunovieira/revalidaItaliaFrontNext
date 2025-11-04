@@ -49,6 +49,7 @@ interface VideoData {
 interface Lesson {
   id: string;
   moduleId: string;
+  courseId?: string;
   order: number;
   imageUrl?: string;
   videoId?: string;
@@ -138,7 +139,6 @@ export default function LessonsList() {
   const [convertModalOpen, setConvertModalOpen] = useState(false);
   const [selectedLessonForConvert, setSelectedLessonForConvert] =
     useState<Lesson | null>(null);
-  const [converting, setConverting] = useState(false);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||

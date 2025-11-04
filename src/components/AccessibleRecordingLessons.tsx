@@ -222,16 +222,8 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
       }
     };
 
-    const CardWrapper = lesson.recordingStatus === 'AVAILABLE' ? Link : 'div';
-    const cardProps = lesson.recordingStatus === 'AVAILABLE'
-      ? { href: getLessonUrl(lesson) }
-      : { onClick: handleCardClick, style: { cursor: 'pointer' } };
-
-    return (
-      <CardWrapper
-        {...cardProps}
-        className="group block relative"
-      >
+    const cardContent = (
+      <>
         {/* Progress Badge - Outside card to avoid clipping */}
         {lesson.userProgress.completed && (
           <div className="absolute -top-2 -right-2 z-20">
@@ -376,7 +368,21 @@ export default function AccessibleRecordingLessons({ locale, courses, modules }:
           {/* Glow Effect */}
           <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
-      </CardWrapper>
+      </>
+    );
+
+    return lesson.recordingStatus === 'AVAILABLE' ? (
+      <Link href={getLessonUrl(lesson)} className="group block relative">
+        {cardContent}
+      </Link>
+    ) : (
+      <div
+        onClick={handleCardClick}
+        style={{ cursor: 'pointer' }}
+        className="group block relative"
+      >
+        {cardContent}
+      </div>
     );
   };
 

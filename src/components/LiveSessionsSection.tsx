@@ -6,7 +6,7 @@ import { Radio, Calendar, Video, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR, es, it } from 'date-fns/locale';
 
-interface LiveSessionRecording {
+export interface LiveSessionRecording {
   sessionTitle: string;
   sessionDate: string;
   recordingLesson: {
@@ -51,14 +51,14 @@ export default function LiveSessionsSection({
   // Helper function to get course and module slugs from IDs
   const getLessonUrl = (recording: LiveSessionRecording) => {
     const course = courses.find(c => c.id === recording.recordingLesson.courseId);
-    const module = modules.find(m => m.id === recording.recordingLesson.moduleId);
+    const lessonModule = modules.find(m => m.id === recording.recordingLesson.moduleId);
 
-    if (!course || !module) {
+    if (!course || !lessonModule) {
       console.warn('Could not find course or module for recording:', recording);
       return '#';
     }
 
-    return `/${locale}/courses/${course.slug}/modules/${module.slug}/lessons/${recording.recordingLesson.id}`;
+    return `/${locale}/courses/${course.slug}/modules/${lessonModule.slug}/lessons/${recording.recordingLesson.id}`;
   };
 
   const getDateLocale = () => {

@@ -18,13 +18,17 @@ interface Video {
   updatedAt: string;
 }
 
+import type { LiveSessionRecording } from '@/components/LiveSessionsSection';
+
 export interface Lesson {
   id: string;
   moduleId: string;
+  courseId?: string;
   imageUrl?: string;
   video?: Video;
   translations: Translation[];
   flashcardIds?: string[];
+  liveSessionRecordings?: LiveSessionRecording[];
   createdAt: string;
   updatedAt: string;
 }

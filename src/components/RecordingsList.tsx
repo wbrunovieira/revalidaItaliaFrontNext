@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import {
-  PlayCircle,
   Download,
   Calendar,
   Users,
@@ -110,7 +109,6 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecordings, setTotalRecordings] = useState(0);
-  const [playingSession, setPlayingSession] = useState<string | null>(null);
 
   const fetchRecordings = useCallback(async () => {
     if (!token) {
@@ -208,19 +206,6 @@ export default function RecordingsList({ locale, translations }: RecordingsListP
     }
     setCurrentPage(1);
   }, [sortBy, sortOrder]);
-
-  const handlePlay = (recording: Recording) => {
-    if (recording.streamUrl) {
-      setPlayingSession(recording.sessionId);
-      window.open(recording.streamUrl, '_blank');
-    } else {
-      toast({
-        title: t('error.noStreamTitle'),
-        description: t('error.noStreamDescription'),
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleDownload = (recording: Recording) => {
     if (recording.recordingUrl) {

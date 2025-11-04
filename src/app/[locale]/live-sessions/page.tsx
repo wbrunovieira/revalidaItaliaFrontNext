@@ -8,6 +8,11 @@ import LiveSessions from '@/components/LiveSessions';
 import { ArrowLeft, Video, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+interface Course {
+  id: string;
+  slug: string;
+}
+
 export const metadata = {
   title: 'Sessões ao Vivo | Revalida Italia',
   description: 'Participe de aulas ao vivo com nossos tutores especializados',
@@ -27,7 +32,7 @@ async function getCourses() {
   }
 }
 
-async function getAllModules(courses: any[]) {
+async function getAllModules(courses: Course[]) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   try {
     // Fetch modules for each course

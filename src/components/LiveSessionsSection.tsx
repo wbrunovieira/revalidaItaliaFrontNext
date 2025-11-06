@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Radio, Calendar, Video, Clock } from 'lucide-react';
+import { Radio, Calendar, Video, Clock, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR, es, it } from 'date-fns/locale';
 
@@ -89,7 +89,7 @@ export default function LiveSessionsSection({
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Radio className="h-6 w-6 text-red-500" />
+        <Radio className="h-6 w-6 text-secondary" />
         <h2 className="text-xl font-semibold text-white">
           {t('title')}
         </h2>
@@ -99,13 +99,13 @@ export default function LiveSessionsSection({
         {liveSessionRecordings.map((recording, index) => (
           <div
             key={index}
-            className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-red-500/50 transition-colors"
+            className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-secondary/50 transition-colors"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 {/* Session Title */}
                 <h3 className="text-white font-medium flex items-center gap-2">
-                  <Radio className="h-4 w-4 text-red-500" />
+                  <Radio className="h-4 w-4 text-secondary" />
                   {recording.sessionTitle}
                 </h3>
 
@@ -136,8 +136,8 @@ export default function LiveSessionsSection({
 
               {/* Status Badge */}
               {recording.recordingLesson.hasVideo ? (
-                <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">
-                  {t('available')}
+                <span className="p-2 bg-secondary/20 text-secondary rounded-full border border-secondary/30">
+                  <Check size={16} />
                 </span>
               ) : (
                 <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full border border-yellow-500/30">

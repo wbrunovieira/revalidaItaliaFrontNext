@@ -221,7 +221,7 @@ export default function LiveSessionsList() {
       },
       LIVE: {
         label: t('status.live'),
-        className: 'bg-green-500/20 text-green-400 border-green-500/30 animate-pulse',
+        className: 'bg-secondary/20 text-secondary border-secondary/30 animate-pulse',
         icon: Radio,
       },
       ENDED: {

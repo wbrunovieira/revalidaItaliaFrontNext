@@ -3,7 +3,7 @@
 
 import { useCachedDocumentUrl } from '@/hooks/queries/useDocumentAccess';
 import type { ProtectionLevel } from '@/hooks/queries/useDocumentStatus';
-import { ExternalLink, Loader2, Shield } from 'lucide-react';
+import { ExternalLink, Loader2, Shield, ShieldCheck, Download } from 'lucide-react';
 import Image from 'next/image';
 import {
   FileText,
@@ -177,17 +177,14 @@ export default function DocumentItem({
             <h5 className="font-medium text-white group-hover:text-secondary transition-colors duration-300 truncate">
               {translation?.title || document.filename}
             </h5>
-            {protectionLevel === 'FULL' && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-red-500/20 rounded text-xs text-red-400 border border-red-500/30">
-                <Shield size={10} />
-                <span>FULL</span>
-              </div>
+            {protectionLevel === 'NONE' && (
+              <Download size={12} className="text-secondary/80 flex-shrink-0" />
             )}
             {protectionLevel === 'WATERMARK' && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/20 rounded text-xs text-blue-400 border border-blue-500/30">
-                <Shield size={10} />
-                <span>WATERMARK</span>
-              </div>
+              <Shield size={12} className="text-secondary/70 flex-shrink-0" />
+            )}
+            {protectionLevel === 'FULL' && (
+              <ShieldCheck size={12} className="text-secondary flex-shrink-0" />
             )}
           </div>
           {/* Description that appears on hover */}

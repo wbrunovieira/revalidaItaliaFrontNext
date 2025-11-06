@@ -6,6 +6,8 @@
   vars:
     app_dir: /home/ubuntu/frontend
     repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
+    aws_region: us-east-2
+    s3_bucket_name: revalida-documents-891ff933
 
   tasks:
     - name: "🔄 INICIANDO - Atualização do código frontend"
@@ -46,6 +48,24 @@
     - name: "✅ BUILD - Status da compilação"
       debug:
         msg: "Build concluído com sucesso!"
+
+    - name: "☁️ S3 SYNC - Sincronizando assets públicos para S3"
+      shell: |
+        aws s3 sync {{ app_dir }}/public/ s3://{{ s3_bucket_name }}/public/ \
+          --region {{ aws_region }} \
+          --delete \
+          --exclude ".git/*" \
+          --exclude "*.md" \
+          --cache-control "public, max-age=86400" \
+          --metadata-directive REPLACE
+      environment:
+        AWS_REGION: "{{ aws_region }}"
+      become_user: ubuntu
+      register: s3_sync_result
+
+    - name: "✅ S3 - Assets sincronizados"
+      debug:
+        msg: "Assets públicos atualizados em s3://{{ s3_bucket_name }}/public/"
 
     - name: "🔄 PM2 - Reiniciando aplicação"
       shell: |

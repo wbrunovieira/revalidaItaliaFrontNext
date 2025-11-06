@@ -1,0 +1,41 @@
+---
+- name: Sync Public Assets to S3
+  hosts: frontend
+  become: true
+
+  vars:
+    app_dir: /home/ubuntu/frontend
+    aws_region: us-east-2
+    s3_bucket_name: revalida-documents-891ff933
+
+  tasks:
+    - name: "🔄 INICIANDO - Sincronização de assets para S3"
+      debug:
+        msg: "Sincronizando pasta public/ para s3://{{ s3_bucket_name }}/public/"
+
+    - name: "📦 S3 SYNC - Sincronizando pasta public/ para S3"
+      shell: |
+        aws s3 sync {{ app_dir }}/public/ s3://{{ s3_bucket_name }}/public/ \
+          --region {{ aws_region }} \
+          --delete \
+          --exclude ".git/*" \
+          --exclude "*.md" \
+          --cache-control "public, max-age=86400" \
+          --metadata-directive REPLACE
+      environment:
+        AWS_REGION: "{{ aws_region }}"
+      become_user: ubuntu
+      register: s3_sync_result
+
+    - name: "📊 S3 - Mostrar resultado da sincronização"
+      debug:
+        msg:
+          - "Sincronização concluída!"
+          - "Bucket: s3://{{ s3_bucket_name }}/public/"
+          - "Região: {{ aws_region }}"
+
+    - name: "✅ SUCESSO - Assets sincronizados com S3!"
+      debug:
+        msg:
+          - "🎉 Assets públicos atualizados no S3!"
+          - "Os ícones e imagens agora estão disponíveis via CDN"

@@ -10,6 +10,7 @@ import {
   setCookie,
   removeCookie
 } from '@/lib/auth-utils';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Interface do usuário com todos os campos necessários
@@ -113,6 +114,30 @@ export interface TermsStatusResponse {
 }
 
 /**
+ * Session Information - Dados da sessão retornados pelo backend
+ */
+export interface Session {
+  id: string; // ID único da sessão
+  ipAddress: string; // IP capturado pelo servidor
+  createdAt: string; // Timestamp de criação (ISO string)
+  expiresAt: string; // Timestamp de expiração (ISO string)
+}
+
+/**
+ * Device Information - Dados do dispositivo capturados no frontend
+ */
+export interface DeviceInfo {
+  userAgent: string;
+  deviceType: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+  browser: string;
+  browserVersion: string;
+  os: string;
+  screenResolution: string;
+  timezone: string;
+  language: string;
+}
+
+/**
  * Credenciais de login
  */
 export interface LoginCredentials {
@@ -134,6 +159,7 @@ export interface LoginResponse {
     role: 'student' | 'admin' | 'tutor';
     profileImageUrl: string | null;
   };
+  session?: Session; // 🆕 Informações da sessão (opcional)
   profileCompleteness: ProfileCompleteness;
   communityProfile: CommunityProfile;
   meta: MetaInfo;
@@ -152,6 +178,10 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+
+  // Session e Device Info
+  session: Session | null; // 🆕 Dados da sessão (do backend)
+  deviceInfo: DeviceInfo | null; // 🆕 Informações do dispositivo (do frontend)
 
   // Novos estados do login
   profileCompleteness: ProfileCompleteness | null;
@@ -185,12 +215,77 @@ export interface AuthState {
   canAccessAdmin: () => boolean;
   canAccessTutorArea: () => boolean;
   hasRole: (role: 'admin' | 'student' | 'tutor') => boolean;
-  
+
   // Internal actions
   setToken: (token: string | null) => void;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+}
+
+/**
+ * Helper: Capturar informações do dispositivo
+ */
+function getDeviceInfo(): DeviceInfo {
+  if (typeof window === 'undefined') {
+    return {
+      userAgent: 'server',
+      deviceType: 'unknown',
+      browser: 'server',
+      browserVersion: '0',
+      os: 'server',
+      screenResolution: '0x0',
+      timezone: 'UTC',
+      language: 'en',
+    };
+  }
+
+  const ua = navigator.userAgent;
+
+  // Detectar tipo de dispositivo
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isTablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+  const deviceType: DeviceInfo['deviceType'] = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop';
+
+  // Detectar browser
+  let browser = 'Unknown';
+  let browserVersion = '0';
+
+  if (ua.includes('Firefox/')) {
+    browser = 'Firefox';
+    browserVersion = ua.split('Firefox/')[1]?.split(' ')[0] || '0';
+  } else if (ua.includes('Edg/')) {
+    browser = 'Edge';
+    browserVersion = ua.split('Edg/')[1]?.split(' ')[0] || '0';
+  } else if (ua.includes('Chrome/') && !ua.includes('Edg/')) {
+    browser = 'Chrome';
+    browserVersion = ua.split('Chrome/')[1]?.split(' ')[0] || '0';
+  } else if (ua.includes('Safari/') && !ua.includes('Chrome/')) {
+    browser = 'Safari';
+    browserVersion = ua.split('Version/')[1]?.split(' ')[0] || '0';
+  } else if (ua.includes('Opera/') || ua.includes('OPR/')) {
+    browser = 'Opera';
+    browserVersion = ua.split('OPR/')[1]?.split(' ')[0] || ua.split('Opera/')[1]?.split(' ')[0] || '0';
+  }
+
+  // Detectar OS
+  let os = 'Unknown';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+  return {
+    userAgent: ua,
+    deviceType,
+    browser,
+    browserVersion,
+    os,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    language: navigator.language,
+  };
 }
 
 /**
@@ -208,6 +303,8 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      session: null,
+      deviceInfo: null,
       profileCompleteness: null,
       communityProfile: null,
       meta: null,
@@ -278,7 +375,36 @@ export const useAuthStore = create<AuthState>()(
               localStorage.setItem('refreshToken', refreshToken);
               console.log('💾 RefreshToken salvo no localStorage');
             }
-            
+
+            // 🆕 Capturar informações do dispositivo
+            const deviceInfo = getDeviceInfo();
+            console.log('📱 Device Info capturado:', {
+              deviceType: deviceInfo.deviceType,
+              browser: `${deviceInfo.browser} ${deviceInfo.browserVersion}`,
+              os: deviceInfo.os,
+              timezone: deviceInfo.timezone,
+            });
+
+            // 🆕 Extrair dados da sessão do backend (se disponível)
+            const sessionData = data.session || null;
+            if (sessionData) {
+              console.log('🔐 Session Info recebida:', {
+                id: sessionData.id,
+                ip: sessionData.ipAddress,
+                createdAt: sessionData.createdAt,
+                expiresAt: sessionData.expiresAt,
+              });
+
+              // 🆕 Mostrar toast informando sobre política de sessão única
+              toast({
+                title: 'Login realizado com sucesso',
+                description: 'Atenção: Este sistema permite apenas uma sessão ativa por vez. Se você tinha uma sessão aberta em outro dispositivo, ela foi automaticamente revogada.',
+                variant: 'default',
+              });
+            } else {
+              console.log('ℹ️ Nenhuma informação de sessão retornada pelo backend');
+            }
+
             // Processar dados do usuário - usar fullName como name para compatibilidade
             const userData: User = {
               id: data.user.id,
@@ -302,6 +428,8 @@ export const useAuthStore = create<AuthState>()(
               refreshToken: refreshToken,
               expiresIn: expiresIn,
               tokenExpiresAt: tokenExpiresAt,
+              session: sessionData, // 🆕 Dados da sessão do backend
+              deviceInfo: deviceInfo, // 🆕 Informações do dispositivo capturadas
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -371,6 +499,8 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: null, // 🆕 Limpar refreshToken do state
           expiresIn: null,
           tokenExpiresAt: null,
+          session: null, // 🆕 Limpar session
+          deviceInfo: null, // 🆕 Limpar deviceInfo
           user: null,
           isAuthenticated: false,
           isLoading: false,
@@ -560,6 +690,8 @@ export const useAuthStore = create<AuthState>()(
             let refreshToken = null;
             let expiresIn = null;
             let tokenExpiresAt = null;
+            let session = null;
+            let deviceInfo = null;
             let profileCompleteness = null;
             let communityProfile = null;
             let meta = null;
@@ -578,6 +710,8 @@ export const useAuthStore = create<AuthState>()(
                   refreshToken = parsed.state.refreshToken;
                   expiresIn = parsed.state.expiresIn;
                   tokenExpiresAt = parsed.state.tokenExpiresAt;
+                  session = parsed.state.session; // 🆕 Restaurar session
+                  deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
                   profileCompleteness = parsed.state.profileCompleteness;
                   communityProfile = parsed.state.communityProfile;
                   meta = parsed.state.meta;
@@ -599,6 +733,8 @@ export const useAuthStore = create<AuthState>()(
               refreshToken: refreshToken,
               expiresIn: expiresIn,
               tokenExpiresAt: tokenExpiresAt,
+              session: session, // 🆕 Restaurar session
+              deviceInfo: deviceInfo, // 🆕 Restaurar deviceInfo
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -937,6 +1073,8 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken, // 🆕 Persistir refreshToken
         expiresIn: state.expiresIn, // 🆕 Persistir expiresIn
         tokenExpiresAt: state.tokenExpiresAt, // 🆕 Persistir tokenExpiresAt
+        session: state.session, // 🆕 Persistir session
+        deviceInfo: state.deviceInfo, // 🆕 Persistir deviceInfo
         user: state.user,
         profileCompleteness: state.profileCompleteness,
         communityProfile: state.communityProfile,

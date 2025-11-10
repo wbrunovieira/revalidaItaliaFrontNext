@@ -125,6 +125,8 @@ export interface LoginCredentials {
  */
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string; // 🆕 Token para renovar accessToken (7 dias)
+  expiresIn: number; // 🆕 Tempo em segundos até accessToken expirar (900s = 15min)
   user: {
     id: string;
     email: string;
@@ -143,11 +145,14 @@ export interface LoginResponse {
 export interface AuthState {
   // Estado principal
   token: string | null;
+  refreshToken: string | null; // 🆕 Token de renovação (7 dias de validade)
+  expiresIn: number | null; // 🆕 Tempo em segundos até token expirar
+  tokenExpiresAt: string | null; // 🆕 Timestamp de quando o token expira
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Novos estados do login
   profileCompleteness: ProfileCompleteness | null;
   communityProfile: CommunityProfile | null;
@@ -166,7 +171,7 @@ export interface AuthState {
   fetchUserProfile: () => Promise<void>;
   updateProfileCompleteness: (data: ProfileCompleteness) => void;
   updateCommunityProfile: (data: CommunityProfile) => void;
-  refreshToken: () => Promise<void>;
+  refreshAccessToken: () => Promise<void>; // Renomeado para evitar conflito com o campo refreshToken
   initializeAuth: () => Promise<void>;
   clearError: () => void;
   
@@ -196,6 +201,9 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       // Estado inicial
       token: null,
+      refreshToken: null,
+      expiresIn: null,
+      tokenExpiresAt: null,
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -246,12 +254,30 @@ export const useAuthStore = create<AuthState>()(
           console.log('👤 Dados do user na resposta:', data.user);
           console.log('📊 Profile Completeness:', data.profileCompleteness);
           console.log('🌐 Community Profile:', data.communityProfile);
+          console.log('🔑 Tokens recebidos:', {
+            accessToken: data.accessToken ? data.accessToken.substring(0, 20) + '...' : 'N/A',
+            refreshToken: data.refreshToken ? data.refreshToken.substring(0, 20) + '...' : 'N/A',
+            expiresIn: data.expiresIn,
+          });
 
           // A API retorna o token como accessToken
           const token = data.accessToken;
-          
+          const refreshToken = data.refreshToken;
+          const expiresIn = data.expiresIn;
+
+          // Calcular quando o token expira
+          const tokenExpiresAt = expiresIn
+            ? new Date(Date.now() + expiresIn * 1000).toISOString()
+            : null;
+
           if (token) {
             saveAuthToken(token);
+
+            // Salvar refreshToken no localStorage também
+            if (refreshToken && typeof window !== 'undefined') {
+              localStorage.setItem('refreshToken', refreshToken);
+              console.log('💾 RefreshToken salvo no localStorage');
+            }
             
             // Processar dados do usuário - usar fullName como name para compatibilidade
             const userData: User = {
@@ -270,9 +296,12 @@ export const useAuthStore = create<AuthState>()(
             };
             
             console.log('🔄 Dados processados do usuário:', userData);
-            
+
             set({
               token: token,
+              refreshToken: refreshToken,
+              expiresIn: expiresIn,
+              tokenExpiresAt: tokenExpiresAt,
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -306,6 +335,9 @@ export const useAuthStore = create<AuthState>()(
           console.error('❌ Erro no login:', error);
           set({
             token: null,
+            refreshToken: null,
+            expiresIn: null,
+            tokenExpiresAt: null,
             user: null,
             isAuthenticated: false,
             isLoading: false,
@@ -319,22 +351,26 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         // Limpar todos os tokens
         clearAuthToken();
-        
+
         // Limpar localStorage do auth-storage (importante!)
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-storage');
+          localStorage.removeItem('refreshToken'); // 🆕 Limpar refreshToken
           // Limpar também qualquer outro storage relacionado
           localStorage.removeItem('accessToken');
           sessionStorage.clear();
         }
-        
+
         // Limpar cookies também
         removeCookie('auth-storage');
         removeCookie('token');
-        
+
         // Resetar o estado
         set({
           token: null,
+          refreshToken: null, // 🆕 Limpar refreshToken do state
+          expiresIn: null,
+          tokenExpiresAt: null,
           user: null,
           isAuthenticated: false,
           isLoading: false,
@@ -348,8 +384,8 @@ export const useAuthStore = create<AuthState>()(
           isTutor: false,
           isStudent: false,
         });
-        
-        console.log('👋 Logout realizado - todos os dados limpos');
+
+        console.log('👋 Logout realizado - todos os dados limpos (incluindo refreshToken)');
       },
 
       // Action: Update Profile Completeness
@@ -493,11 +529,11 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Action: Refresh Token
-      refreshToken: async () => {
+      // Action: Refresh Access Token
+      refreshAccessToken: async () => {
         // TODO: Implementar quando a API tiver endpoint de refresh
         console.log('⚠️ Refresh token não implementado ainda na API');
-        
+
         // Por enquanto, apenas verifica se o token atual ainda é válido
         const currentToken = get().token;
         if (currentToken && !isTokenExpired(currentToken)) {
@@ -521,11 +557,14 @@ export const useAuthStore = create<AuthState>()(
             let userData = extractUserFromToken(existingToken);
             
             // Tenta buscar dados completos do localStorage do auth-storage
+            let refreshToken = null;
+            let expiresIn = null;
+            let tokenExpiresAt = null;
             let profileCompleteness = null;
             let communityProfile = null;
             let meta = null;
             let termsAcceptance = null;
-            
+
             try {
               const authStorage = localStorage.getItem('auth-storage');
               if (authStorage) {
@@ -536,19 +575,30 @@ export const useAuthStore = create<AuthState>()(
                     userData = parsed.state.user;
                   }
                   // Recupera os outros dados do storage
+                  refreshToken = parsed.state.refreshToken;
+                  expiresIn = parsed.state.expiresIn;
+                  tokenExpiresAt = parsed.state.tokenExpiresAt;
                   profileCompleteness = parsed.state.profileCompleteness;
                   communityProfile = parsed.state.communityProfile;
                   meta = parsed.state.meta;
                   termsAcceptance = parsed.state.termsAcceptance;
                 }
               }
+
+              // Se não encontrou refreshToken no state, tenta do localStorage direto
+              if (!refreshToken && typeof window !== 'undefined') {
+                refreshToken = localStorage.getItem('refreshToken');
+              }
             } catch (e) {
               console.log('Parse error:', e);
               console.log('Não foi possível recuperar dados do storage');
             }
-            
+
             set({
               token: existingToken,
+              refreshToken: refreshToken,
+              expiresIn: expiresIn,
+              tokenExpiresAt: tokenExpiresAt,
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -582,12 +632,15 @@ export const useAuthStore = create<AuthState>()(
 
             // TODO: Descomentar quando a API tiver endpoint de refresh
             // setTimeout(() => {
-            //   get().refreshToken();
+            //   get().refreshAccessToken();
             // }, 1000);
           } else {
             // Nenhum token válido
             set({
               token: null,
+              refreshToken: null,
+              expiresIn: null,
+              tokenExpiresAt: null,
               user: null,
               isAuthenticated: false,
               isLoading: false,
@@ -597,6 +650,9 @@ export const useAuthStore = create<AuthState>()(
           console.error('❌ Erro ao inicializar auth:', error);
           set({
             token: null,
+            refreshToken: null,
+            expiresIn: null,
+            tokenExpiresAt: null,
             user: null,
             isAuthenticated: false,
             isLoading: false,
@@ -878,6 +934,9 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         // Persistir todos os dados necessários
         token: state.token,
+        refreshToken: state.refreshToken, // 🆕 Persistir refreshToken
+        expiresIn: state.expiresIn, // 🆕 Persistir expiresIn
+        tokenExpiresAt: state.tokenExpiresAt, // 🆕 Persistir tokenExpiresAt
         user: state.user,
         profileCompleteness: state.profileCompleteness,
         communityProfile: state.communityProfile,

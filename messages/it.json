@@ -5826,7 +5826,8 @@
     "uploading": "Invio immagine",
     "clickToSelect": "Clicca per selezionare un'immagine",
     "supportedFormats": "Formati supportati",
-    "savedAs": "Salvato come"
+    "savedAs": "Salvato come",
+    "change": "Cambia immagine"
   },
   "validation": {
     "newImageReady": "Nuova immagine pronta per essere salvata"

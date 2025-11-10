@@ -19,6 +19,7 @@ import {
   Check,
   Upload,
   ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -196,14 +197,14 @@ export default function TrackEditModal({
 
       // Create a local URL for preview
       const localUrl = URL.createObjectURL(file);
-      
+
       // Save file and preview URL
       setFormData(prev => ({
         ...prev,
         newImageFile: file,
         newImageUrl: localUrl,
       }));
-      
+
       setSavedImageName(file.name);
       
       // Clear image error
@@ -522,7 +523,7 @@ export default function TrackEditModal({
       setErrors({});
       setSavedImageName(null);
     }
-  }, [track, isOpen, formData.newImageUrl]);
+  }, [track, isOpen]);
 
   // Buscar cursos quando abrir o modal
   useEffect(() => {
@@ -627,97 +628,122 @@ export default function TrackEditModal({
                 <ImageIcon size={16} className="inline mr-2" />
                 {t('fields.trackImage')}
               </label>
-              
-              {/* Preview container */}
-              <div className={`grid gap-4 ${formData.newImageUrl && formData.newImageUrl.trim() !== '' ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                {/* Imagem Original */}
-                <div>
-                  <p className="text-xs text-gray-400 mb-2">
-                    {formData.newImageUrl ? t('image.original') : t('image.current')}
-                  </p>
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700">
-                    {formData.imageUrl ? (
-                      <Image
-                        src={formData.imageUrl}
-                        alt="Current track image"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <ImageIcon size={48} className="text-gray-500" />
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* Nova Imagem (se houver) */}
-                {formData.newImageUrl && formData.newImageUrl.trim() !== '' && (
-                  <div>
-                    <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                      {t('image.new')}
-                      <ArrowRight size={12} className="text-green-400" />
-                    </p>
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-700 ring-2 ring-green-500/50">
-                      <Image
-                        src={formData.newImageUrl}
-                        alt="New track image"
-                        fill
-                        className="object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleImageRemove}
-                        className="absolute top-2 right-2 p-2 bg-gray-900/80 hover:bg-gray-900 rounded-lg transition-colors"
-                      >
-                        <X size={20} className="text-white" />
-                      </button>
-                    </div>
-                    <div className="mt-2 p-2 bg-gray-700/50 rounded">
-                      <p className="text-xs text-gray-400">
-                        {savedImageName} ({formData.newImageFile ? (formData.newImageFile.size / 1024 / 1024).toFixed(2) : 0} MB)
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Botão de Upload ou Status */}
-              {!formData.newImageUrl ? (
+              {/* Upload area if no image or new image */}
+              {!formData.imageUrl && !formData.newImageUrl ? (
                 <div className="relative">
                   <input
                     type="file"
-                    id="imageUpload"
-                    className="sr-only"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        handleImageSelection(file);
-                      }
+                      if (file) handleImageSelection(file);
                     }}
-                    key={formData.newImageUrl ? 'has-image' : 'no-image'}
+                    className="hidden"
+                    id="track-image-upload"
                   />
                   <label
-                    htmlFor="imageUpload"
-                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+                    htmlFor="track-image-upload"
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600 transition-colors ${
+                      errors.imageUrl
+                        ? 'border-red-500'
+                        : 'border-gray-600'
+                    }`}
                   >
-                    <Upload size={24} className="text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-300">{t('upload.clickToSelect')}</p>
+                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-400">
+                      {t('upload.clickToSelect')}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {t('upload.supportedFormats')}: JPG, PNG, GIF, WebP (Max 5MB)
+                      {t('upload.supportedFormats')}: JPEG, PNG, GIF, WebP
                     </p>
                   </label>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-green-400 text-sm">
-                  <Check size={16} />
-                  {t('validation.newImageReady')}
+                <div className="space-y-3">
+                  {/* Original image preview (shown alone when no new image) */}
+                  {formData.imageUrl && !formData.newImageUrl && (
+                    <div>
+                      <p className="text-xs text-gray-400 mb-2">{t('image.current')}</p>
+                      <div className="relative group">
+                        <Image
+                          src={formData.imageUrl}
+                          alt="Current track image"
+                          width={400}
+                          height={224}
+                          className="rounded-lg object-cover w-full h-56"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg flex items-center justify-center">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageSelection(file);
+                            }}
+                            className="hidden"
+                            id="track-image-change"
+                          />
+                          <label
+                            htmlFor="track-image-change"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 font-medium text-sm rounded-lg cursor-pointer hover:bg-gray-100 hover:scale-105 transition-all duration-200 shadow-lg"
+                          >
+                            <RefreshCw size={16} className="text-gray-700" />
+                            {t('upload.change')}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dual preview when new image selected */}
+                  {formData.imageUrl && formData.newImageUrl && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2">{t('image.original')}</p>
+                        <Image
+                          src={formData.imageUrl}
+                          alt="Original track image"
+                          width={200}
+                          height={112}
+                          className="rounded-lg object-cover w-full h-28"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs text-green-400 mb-2 flex items-center gap-1">
+                          <ArrowRight size={12} />
+                          {t('image.new')}
+                        </p>
+                        <div className="relative group">
+                          <Image
+                            src={formData.newImageUrl}
+                            alt="New track image"
+                            width={200}
+                            height={112}
+                            className="rounded-lg object-cover w-full h-28 ring-2 ring-green-400"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleImageRemove}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {savedImageName && (
+                    <p className="text-xs text-gray-500">
+                      {t('upload.savedAs')}: {savedImageName}
+                    </p>
+                  )}
                 </div>
               )}
 
               {errors.imageUrl && (
-                <p className="text-xs text-red-500">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.imageUrl}
                 </p>
               )}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { normalizeLocale } from '@/lib/normalizelocale';
 
 interface Translation {
   locale: string;
@@ -186,8 +187,10 @@ export default function ModuleLessonsList({
           {sortedLessons.map((lesson, index) => {
             const isCurrentLesson = lesson.id === currentLessonId;
             const isCompleted = completedLessons.has(lesson.id);
-            const lessonTranslation = lesson.translations.find(t => t.locale === locale);
-            
+            const lessonTranslation = lesson.translations.find(
+              t => normalizeLocale(t.locale) === normalizeLocale(locale)
+            );
+
             return (
               <li key={lesson.id}>
                 <Link

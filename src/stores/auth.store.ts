@@ -218,7 +218,7 @@ export interface AuthState {
 
   // Actions principais
   login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   fetchUserProfile: () => Promise<void>;
   updateProfileCompleteness: (data: ProfileCompleteness) => void;
@@ -580,9 +580,39 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Action: Logout
-      logout: () => {
+      logout: async () => {
         // 🆕 Parar scheduler de renovação de tokens PRIMEIRO
         get().stopTokenRefreshScheduler();
+
+        // 🆕 Chamar endpoint de logout no backend
+        const currentToken = get().token;
+        if (currentToken) {
+          try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            if (apiUrl) {
+              console.log('📡 Chamando POST /api/v1/auth/logout...');
+
+              const response = await fetch(`${apiUrl}/api/v1/auth/logout`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${currentToken}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Logout no servidor realizado:', data.loggedOutAt);
+              } else {
+                console.warn('⚠️ Erro ao fazer logout no servidor:', response.status);
+                // Continua com logout local mesmo se API falhar
+              }
+            }
+          } catch (error) {
+            console.warn('⚠️ Erro ao chamar endpoint de logout:', error);
+            // Continua com logout local mesmo se houver erro de rede
+          }
+        }
 
         // Limpar todos os tokens
         clearAuthToken();
@@ -784,7 +814,7 @@ export const useAuthStore = create<AuthState>()(
 
           if (!refreshToken) {
             console.log('❌ Nenhum refreshToken disponível - fazendo logout');
-            get().logout();
+            await get().logout();
             return;
           }
 
@@ -809,7 +839,7 @@ export const useAuthStore = create<AuthState>()(
 
             if (response.status === 401) {
               // Token expirado ou revogado
-              get().logout();
+              await get().logout();
             }
 
             throw new Error(`Refresh failed: ${response.status}`);
@@ -844,7 +874,7 @@ export const useAuthStore = create<AuthState>()(
 
           // Em caso de erro, fazer logout
           if (error instanceof Error && error.message.includes('401')) {
-            get().logout();
+            await get().logout();
           }
 
           throw error;

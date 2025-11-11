@@ -12,6 +12,12 @@ import {
 } from '@/lib/auth-utils';
 
 /**
+ * Timer global para renovação automática de tokens
+ * Renova a cada 28 minutos (2 min antes do token de 30 min expirar)
+ */
+let tokenRefreshTimer: NodeJS.Timeout | null = null;
+
+/**
  * Interface do usuário com todos os campos necessários
  */
 export interface User {
@@ -234,6 +240,10 @@ export interface AuthState {
 
   // Rate limit helpers
   clearRateLimit: () => void;
+
+  // Token refresh helpers
+  startTokenRefreshScheduler: () => void;
+  stopTokenRefreshScheduler: () => void;
 
   // Internal actions
   setToken: (token: string | null) => void;
@@ -546,6 +556,10 @@ export const useAuthStore = create<AuthState>()(
               console.log('🔍 Verificando status dos termos após login...');
               get().checkTermsStatus();
             }, 100);
+
+            // 🆕 Iniciar scheduler de renovação automática de tokens
+            get().startTokenRefreshScheduler();
+
           } else {
             throw new Error('Token não retornado pela API');
           }
@@ -567,6 +581,9 @@ export const useAuthStore = create<AuthState>()(
 
       // Action: Logout
       logout: () => {
+        // 🆕 Parar scheduler de renovação de tokens PRIMEIRO
+        get().stopTokenRefreshScheduler();
+
         // Limpar todos os tokens
         clearAuthToken();
 
@@ -754,16 +771,83 @@ export const useAuthStore = create<AuthState>()(
 
       // Action: Refresh Access Token
       refreshAccessToken: async () => {
-        // TODO: Implementar quando a API tiver endpoint de refresh
-        console.log('⚠️ Refresh token não implementado ainda na API');
+        console.log('🔄 Iniciando renovação de access token...');
 
-        // Por enquanto, apenas verifica se o token atual ainda é válido
-        const currentToken = get().token;
-        if (currentToken && !isTokenExpired(currentToken)) {
-          console.log('✅ Token ainda válido');
-        } else {
-          console.log('❌ Token expirado - fazendo logout');
-          get().logout();
+        try {
+          const state = get();
+          let refreshToken = state.refreshToken;
+
+          // Se não tiver no state, tentar localStorage
+          if (!refreshToken && typeof window !== 'undefined') {
+            refreshToken = localStorage.getItem('refreshToken');
+          }
+
+          if (!refreshToken) {
+            console.log('❌ Nenhum refreshToken disponível - fazendo logout');
+            get().logout();
+            return;
+          }
+
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          if (!apiUrl) {
+            throw new Error('API URL não configurada');
+          }
+
+          console.log('📡 Chamando /api/v1/auth/refresh...');
+
+          const response = await fetch(`${apiUrl}/api/v1/auth/refresh`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          if (!response.ok) {
+            // Se refresh falhou (401, 403, etc), fazer logout
+            console.log('❌ Refresh token inválido ou expirado - fazendo logout');
+
+            if (response.status === 401) {
+              // Token expirado ou revogado
+              get().logout();
+            }
+
+            throw new Error(`Refresh failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ Token renovado com sucesso!');
+
+          const newAccessToken = data.accessToken;
+          const expiresIn = data.expiresIn || 1800; // 30 minutos default
+
+          // Calcular quando expira
+          const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+          // Salvar novo access token
+          saveAuthToken(newAccessToken);
+
+          // Atualizar state
+          set({
+            token: newAccessToken,
+            expiresIn: expiresIn,
+            tokenExpiresAt: tokenExpiresAt,
+          });
+
+          console.log('💾 Novo access token salvo:', {
+            expiresIn: `${expiresIn}s`,
+            expiresAt: tokenExpiresAt,
+          });
+
+        } catch (error) {
+          console.error('❌ Erro ao renovar token:', error);
+
+          // Em caso de erro, fazer logout
+          if (error instanceof Error && error.message.includes('401')) {
+            get().logout();
+          }
+
+          throw error;
         }
       },
 
@@ -1139,6 +1223,55 @@ export const useAuthStore = create<AuthState>()(
           rateLimitExpiresAt: null,
           error: null,
         });
+      },
+
+      // Helper: Start Token Refresh Scheduler
+      startTokenRefreshScheduler: () => {
+        // Parar scheduler existente se houver
+        if (tokenRefreshTimer) {
+          clearInterval(tokenRefreshTimer);
+        }
+
+        // Renovar a cada 28 minutos (2 min antes do token de 30 min expirar)
+        const REFRESH_INTERVAL = 28 * 60 * 1000; // 28 minutos em ms
+
+        console.log('⏱️ Iniciando scheduler de renovação automática de tokens (a cada 28 min)');
+
+        tokenRefreshTimer = setInterval(async () => {
+          console.log('🔄 Scheduler: Hora de renovar o token automaticamente');
+
+          const state = get();
+
+          // Verificar se ainda tem refreshToken
+          if (!state.refreshToken && typeof window !== 'undefined') {
+            const storedRefreshToken = localStorage.getItem('refreshToken');
+            if (!storedRefreshToken) {
+              console.log('⚠️ Scheduler: Sem refreshToken, parando scheduler');
+              get().stopTokenRefreshScheduler();
+              return;
+            }
+          }
+
+          try {
+            await get().refreshAccessToken();
+            console.log('✅ Scheduler: Token renovado com sucesso!');
+          } catch (error) {
+            console.error('❌ Scheduler: Falha ao renovar token:', error);
+            get().stopTokenRefreshScheduler();
+            // Logout será chamado pelo refreshAccessToken em caso de erro 401
+          }
+        }, REFRESH_INTERVAL);
+
+        console.log('✅ Scheduler iniciado com sucesso');
+      },
+
+      // Helper: Stop Token Refresh Scheduler
+      stopTokenRefreshScheduler: () => {
+        if (tokenRefreshTimer) {
+          console.log('⏹️ Parando scheduler de renovação de tokens');
+          clearInterval(tokenRefreshTimer);
+          tokenRefreshTimer = null;
+        }
       },
 
       // Internal setters

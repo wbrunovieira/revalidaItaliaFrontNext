@@ -195,6 +195,10 @@ export interface AuthState {
   deviceInfo: DeviceInfo | null; // 🆕 Informações do dispositivo (do frontend)
   lastRevokedSession: RevokedSession | null; // 🆕 Última sessão revogada
 
+  // Rate Limiting
+  isRateLimited: boolean; // 🆕 Indica se usuário atingiu rate limit
+  rateLimitExpiresAt: string | null; // 🆕 Timestamp de quando rate limit expira
+
   // Novos estados do login
   profileCompleteness: ProfileCompleteness | null;
   communityProfile: CommunityProfile | null;
@@ -227,6 +231,9 @@ export interface AuthState {
   canAccessAdmin: () => boolean;
   canAccessTutorArea: () => boolean;
   hasRole: (role: 'admin' | 'student' | 'tutor') => boolean;
+
+  // Rate limit helpers
+  clearRateLimit: () => void;
 
   // Internal actions
   setToken: (token: string | null) => void;
@@ -351,6 +358,8 @@ export const useAuthStore = create<AuthState>()(
       session: null,
       deviceInfo: null,
       lastRevokedSession: null,
+      isRateLimited: false,
+      rateLimitExpiresAt: null,
       profileCompleteness: null,
       communityProfile: null,
       meta: null,
@@ -389,6 +398,27 @@ export const useAuthStore = create<AuthState>()(
           if (!response.ok) {
             const errorData = await response.json().catch(() => null);
             console.log('❌ Erro da API:', errorData);
+
+            // 🆕 Tratamento especial para rate limiting (429)
+            if (response.status === 429) {
+              // Calcular quando o rate limit expira (2 minutos a partir de agora)
+              const expiresAt = new Date(Date.now() + 2 * 60 * 1000).toISOString();
+
+              set({
+                isRateLimited: true,
+                rateLimitExpiresAt: expiresAt,
+                isLoading: false,
+                error: 'rate_limit_exceeded',
+              });
+
+              // Auto-limpar rate limit após 2 minutos
+              setTimeout(() => {
+                get().clearRateLimit();
+              }, 2 * 60 * 1000);
+
+              throw new Error('RATE_LIMIT_EXCEEDED');
+            }
+
             throw new Error(errorData?.message || errorData?.error || `Erro ${response.status}: ${response.statusText}`);
           }
 
@@ -562,6 +592,8 @@ export const useAuthStore = create<AuthState>()(
           session: null, // 🆕 Limpar session
           deviceInfo: null, // 🆕 Limpar deviceInfo
           lastRevokedSession: null, // 🆕 Limpar lastRevokedSession
+          isRateLimited: false, // 🆕 Limpar rate limit
+          rateLimitExpiresAt: null, // 🆕 Limpar rate limit expiration
           user: null,
           isAuthenticated: false,
           isLoading: false,
@@ -1097,6 +1129,16 @@ export const useAuthStore = create<AuthState>()(
       hasRole: (role) => {
         const state = get();
         return state.isAuthenticated && state.user?.role === role;
+      },
+
+      // Helper: Clear Rate Limit
+      clearRateLimit: () => {
+        console.log('🔓 Rate limit limpo');
+        set({
+          isRateLimited: false,
+          rateLimitExpiresAt: null,
+          error: null,
+        });
       },
 
       // Internal setters

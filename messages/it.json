@@ -12,6 +12,13 @@
       "title": "Attività Sospetta Rilevata",
       "description": "Abbiamo rilevato un accesso precedente da un dispositivo non riconosciuto ({deviceName} - {deviceType}) dall'IP {ip}. Per sicurezza, ti consigliamo di cambiare la tua password."
     },
+    "rateLimit": {
+      "title": "Troppi tentativi di accesso",
+      "description": "Per sicurezza, limitiamo i tentativi di accesso. Per favore, attendi alcuni minuti prima di riprovare.",
+      "forgotPassword": "Hai dimenticato la password?",
+      "forgotPasswordLink": "Clicca qui per recuperarla",
+      "buttonDisabled": "Attendi..."
+    },
     "deviceInfo": {
       "unknown": "Browser sconosciuto",
       "device": "dispositivo"

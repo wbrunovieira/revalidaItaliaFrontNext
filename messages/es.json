@@ -12,6 +12,13 @@
       "title": "Actividad Sospechosa Detectada",
       "description": "Detectamos un inicio de sesión anterior desde un dispositivo no reconocido ({deviceName} - {deviceType}) desde la IP {ip}. Por seguridad, te recomendamos cambiar tu contraseña."
     },
+    "rateLimit": {
+      "title": "Demasiados intentos de inicio de sesión",
+      "description": "Por seguridad, limitamos los intentos de inicio de sesión. Por favor, espera unos minutos antes de intentarlo nuevamente.",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "forgotPasswordLink": "Haz clic aquí para recuperarla",
+      "buttonDisabled": "Espera..."
+    },
     "deviceInfo": {
       "unknown": "Navegador desconocido",
       "device": "dispositivo"

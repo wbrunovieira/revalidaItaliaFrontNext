@@ -12,6 +12,13 @@
       "title": "Atividade Suspeita Detectada",
       "description": "Detectamos um login anterior de um dispositivo não reconhecido ({deviceName} - {deviceType}) do IP {ip}. Por segurança, recomendamos alterar sua senha."
     },
+    "rateLimit": {
+      "title": "Muitas tentativas de login",
+      "description": "Por segurança, limitamos as tentativas de login. Por favor, aguarde alguns minutos antes de tentar novamente.",
+      "forgotPassword": "Esqueceu sua senha?",
+      "forgotPasswordLink": "Clique aqui para recuperar",
+      "buttonDisabled": "Aguarde..."
+    },
     "deviceInfo": {
       "unknown": "Navegador desconhecido",
       "device": "dispositivo"

@@ -10,7 +10,6 @@ import {
   setCookie,
   removeCookie
 } from '@/lib/auth-utils';
-import { toast } from '@/hooks/use-toast';
 
 /**
  * Interface do usuário com todos os campos necessários
@@ -124,6 +123,17 @@ export interface Session {
 }
 
 /**
+ * Revoked Session - Informações sobre sessões anteriores revogadas
+ */
+export interface RevokedSession {
+  deviceType: 'desktop' | 'mobile' | 'tablet' | null;
+  deviceName: 'Chrome' | 'Firefox' | 'Safari' | 'Edge' | null;
+  ipAddress: string;
+  createdAt: string; // Quando a sessão anterior foi criada
+  revokedAt: string; // Quando ela foi revogada (agora)
+}
+
+/**
  * Device Information - Dados do dispositivo capturados no frontend
  */
 export interface DeviceInfo {
@@ -160,6 +170,7 @@ export interface LoginResponse {
     profileImageUrl: string | null;
   };
   session?: Session; // 🆕 Informações da sessão (opcional)
+  revokedSessions?: RevokedSession[]; // 🆕 Sessões anteriores revogadas (opcional)
   profileCompleteness: ProfileCompleteness;
   communityProfile: CommunityProfile;
   meta: MetaInfo;
@@ -182,6 +193,7 @@ export interface AuthState {
   // Session e Device Info
   session: Session | null; // 🆕 Dados da sessão (do backend)
   deviceInfo: DeviceInfo | null; // 🆕 Informações do dispositivo (do frontend)
+  lastRevokedSession: RevokedSession | null; // 🆕 Última sessão revogada
 
   // Novos estados do login
   profileCompleteness: ProfileCompleteness | null;
@@ -221,6 +233,39 @@ export interface AuthState {
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+}
+
+/**
+ * Helper: Detectar atividade suspeita baseada em sessão revogada
+ * Exportado para uso em componentes
+ */
+export function checkSuspiciousActivity(
+  revokedSession: RevokedSession,
+  currentDeviceInfo: DeviceInfo
+): boolean {
+  // Verificar se o dispositivo é muito diferente
+  const deviceMismatch =
+    revokedSession.deviceType &&
+    currentDeviceInfo.deviceType !== 'unknown' &&
+    revokedSession.deviceType !== currentDeviceInfo.deviceType;
+
+  // Verificar se o browser é diferente (indica dispositivo diferente)
+  const browserMismatch =
+    revokedSession.deviceName &&
+    currentDeviceInfo.browser !== 'Unknown' &&
+    !currentDeviceInfo.browser.includes(revokedSession.deviceName);
+
+  // Verificar se o login foi muito rápido (menos de 5 minutos desde criação da sessão anterior)
+  const sessionCreatedTime = new Date(revokedSession.createdAt).getTime();
+  const timeDiff = Date.now() - sessionCreatedTime;
+  const tooQuick = timeDiff < 5 * 60 * 1000; // 5 minutos
+
+  // Consideramos suspeito se:
+  // 1. Browser/dispositivo diferentes E login muito rápido (possivelmente de locais diferentes)
+  // 2. OU se apenas passou muito pouco tempo (menos de 1 minuto) desde a última sessão
+  const veryQuick = timeDiff < 60 * 1000; // 1 minuto
+
+  return (deviceMismatch && tooQuick) || (browserMismatch && tooQuick) || veryQuick;
 }
 
 /**
@@ -305,6 +350,7 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       session: null,
       deviceInfo: null,
+      lastRevokedSession: null,
       profileCompleteness: null,
       communityProfile: null,
       meta: null,
@@ -394,15 +440,28 @@ export const useAuthStore = create<AuthState>()(
                 createdAt: sessionData.createdAt,
                 expiresAt: sessionData.expiresAt,
               });
-
-              // 🆕 Mostrar toast informando sobre política de sessão única
-              toast({
-                title: 'Login realizado com sucesso',
-                description: 'Atenção: Este sistema permite apenas uma sessão ativa por vez. Se você tinha uma sessão aberta em outro dispositivo, ela foi automaticamente revogada.',
-                variant: 'default',
-              });
             } else {
               console.log('ℹ️ Nenhuma informação de sessão retornada pelo backend');
+            }
+
+            // 🆕 Processar sessões revogadas (se houver)
+            const revokedSessions = data.revokedSessions || null;
+            const lastRevokedSession = revokedSessions && revokedSessions.length > 0 ? revokedSessions[0] : null;
+
+            if (lastRevokedSession) {
+              console.log('⚠️ Sessão anterior revogada:', {
+                deviceType: lastRevokedSession.deviceType,
+                deviceName: lastRevokedSession.deviceName,
+                ip: lastRevokedSession.ipAddress,
+                createdAt: lastRevokedSession.createdAt,
+                revokedAt: lastRevokedSession.revokedAt,
+              });
+
+              // Verificar se é atividade suspeita
+              const isSuspicious = checkSuspiciousActivity(lastRevokedSession, deviceInfo);
+              console.log(`${isSuspicious ? '🚨' : 'ℹ️'} Atividade ${isSuspicious ? 'suspeita' : 'normal'} detectada`);
+            } else {
+              console.log('✅ Primeira sessão criada ou nenhuma sessão anterior');
             }
 
             // Processar dados do usuário - usar fullName como name para compatibilidade
@@ -430,6 +489,7 @@ export const useAuthStore = create<AuthState>()(
               tokenExpiresAt: tokenExpiresAt,
               session: sessionData, // 🆕 Dados da sessão do backend
               deviceInfo: deviceInfo, // 🆕 Informações do dispositivo capturadas
+              lastRevokedSession: lastRevokedSession, // 🆕 Última sessão revogada
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -501,6 +561,7 @@ export const useAuthStore = create<AuthState>()(
           tokenExpiresAt: null,
           session: null, // 🆕 Limpar session
           deviceInfo: null, // 🆕 Limpar deviceInfo
+          lastRevokedSession: null, // 🆕 Limpar lastRevokedSession
           user: null,
           isAuthenticated: false,
           isLoading: false,
@@ -692,6 +753,7 @@ export const useAuthStore = create<AuthState>()(
             let tokenExpiresAt = null;
             let session = null;
             let deviceInfo = null;
+            let lastRevokedSession = null;
             let profileCompleteness = null;
             let communityProfile = null;
             let meta = null;
@@ -712,6 +774,7 @@ export const useAuthStore = create<AuthState>()(
                   tokenExpiresAt = parsed.state.tokenExpiresAt;
                   session = parsed.state.session; // 🆕 Restaurar session
                   deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
+                  lastRevokedSession = parsed.state.lastRevokedSession; // 🆕 Restaurar lastRevokedSession
                   profileCompleteness = parsed.state.profileCompleteness;
                   communityProfile = parsed.state.communityProfile;
                   meta = parsed.state.meta;
@@ -735,6 +798,7 @@ export const useAuthStore = create<AuthState>()(
               tokenExpiresAt: tokenExpiresAt,
               session: session, // 🆕 Restaurar session
               deviceInfo: deviceInfo, // 🆕 Restaurar deviceInfo
+              lastRevokedSession: lastRevokedSession, // 🆕 Restaurar lastRevokedSession
               user: userData,
               isAuthenticated: true,
               isLoading: false,
@@ -1075,6 +1139,7 @@ export const useAuthStore = create<AuthState>()(
         tokenExpiresAt: state.tokenExpiresAt, // 🆕 Persistir tokenExpiresAt
         session: state.session, // 🆕 Persistir session
         deviceInfo: state.deviceInfo, // 🆕 Persistir deviceInfo
+        lastRevokedSession: state.lastRevokedSession, // 🆕 Persistir lastRevokedSession
         user: state.user,
         profileCompleteness: state.profileCompleteness,
         communityProfile: state.communityProfile,

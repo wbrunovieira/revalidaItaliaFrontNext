@@ -1,4 +1,22 @@
 {
+  "Session": {
+    "loginSuccess": {
+      "title": "Inicio de sesión exitoso",
+      "description": "¡Bienvenido! Tu sesión se ha creado con éxito."
+    },
+    "sessionRevoked": {
+      "title": "Sesión Anterior Finalizada",
+      "description": "Tu sesión anterior en {deviceInfo} ha sido finalizada. Creada el {date} desde la IP {ip}. Solo un dispositivo puede estar conectado a la vez."
+    },
+    "suspiciousActivity": {
+      "title": "Actividad Sospechosa Detectada",
+      "description": "Detectamos un inicio de sesión anterior desde un dispositivo no reconocido ({deviceName} - {deviceType}) desde la IP {ip}. Por seguridad, te recomendamos cambiar tu contraseña."
+    },
+    "deviceInfo": {
+      "unknown": "Navegador desconocido",
+      "device": "dispositivo"
+    }
+  },
   "Notifications": {
     "title": "Notificaciones",
     "notifications": "Notificaciones",

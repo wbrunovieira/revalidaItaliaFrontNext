@@ -125,7 +125,12 @@ function CircularProgress({
 export default function UserProgressCard() {
   const t = useTranslations('UserProgress');
   const params = useParams();
-  const locale = params?.locale || 'pt';
+
+  // Validar e normalizar locale
+  const rawLocale = params?.locale as string | undefined;
+  const validLocales = ['pt', 'it', 'es'];
+  const locale = rawLocale && validLocales.includes(rawLocale) ? rawLocale : 'pt';
+
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<CourseProgress[]>([]);
   const [loading, setLoading] = useState(true);

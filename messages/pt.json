@@ -1034,6 +1034,27 @@
         "downloadDescription": "Não foi possível baixar o certificado. Tente novamente."
       }
     },
+    "sessions": {
+      "title": "Sessões e Segurança",
+      "currentSession": "Sessão Atual",
+      "active": "Ativa",
+      "system": "Sistema",
+      "ipAddress": "Endereço IP",
+      "timezone": "Fuso Horário",
+      "loginAt": "Login em",
+      "expires": "Expira",
+      "resolution": "Resolução",
+      "expiresInDays": "em {days} dias",
+      "expiresInHours": "em {hours} horas",
+      "expiresSoon": "em breve",
+      "viewOtherSessions": "Ver outras sessões",
+      "hideOtherSessions": "Ocultar outras sessões",
+      "loading": "Carregando sessões...",
+      "noOtherSessions": "Nenhuma sessão anterior",
+      "onlyOneSessionAllowed": "Apenas uma sessão pode estar ativa por vez. Ao fazer login em um novo dispositivo, a sessão anterior é automaticamente encerrada.",
+      "noSessionData": "Dados de sessão indisponíveis",
+      "reloginRequired": "Faça logout e login novamente para visualizar as informações de sessão"
+    },
     "validation": {
       "nameMin": "Nome deve ter pelo menos 3 caracteres",
       "emailInvalid": "E-mail inválido",

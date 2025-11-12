@@ -1036,6 +1036,27 @@
         "downloadDescription": "Non è stato possibile scaricare il certificato. Riprova."
       }
     },
+    "sessions": {
+      "title": "Sessioni e Sicurezza",
+      "currentSession": "Sessione Corrente",
+      "active": "Attiva",
+      "system": "Sistema",
+      "ipAddress": "Indirizzo IP",
+      "timezone": "Fuso Orario",
+      "loginAt": "Accesso effettuato",
+      "expires": "Scade",
+      "resolution": "Risoluzione",
+      "expiresInDays": "tra {days} giorni",
+      "expiresInHours": "tra {hours} ore",
+      "expiresSoon": "a breve",
+      "viewOtherSessions": "Visualizza altre sessioni",
+      "hideOtherSessions": "Nascondi altre sessioni",
+      "loading": "Caricamento sessioni...",
+      "noOtherSessions": "Nessuna sessione precedente",
+      "onlyOneSessionAllowed": "Può essere attiva solo una sessione alla volta. Quando accedi da un nuovo dispositivo, la sessione precedente viene automaticamente terminata.",
+      "noSessionData": "Dati di sessione non disponibili",
+      "reloginRequired": "Effettua logout e login nuovamente per visualizzare le informazioni sulla sessione"
+    },
     "validation": {
       "nameMin": "Il nome deve avere almeno 3 caratteri",
       "emailInvalid": "E-mail non valida",

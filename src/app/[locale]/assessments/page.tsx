@@ -608,15 +608,14 @@ export default function AssessmentsPage({
     }
 
     if (assessment.lessonId) {
-      // Use the simplified URL pattern
+      // Assessment with lesson - use lesson route
       router.push(
         `/${locale}/lessons/${assessment.lessonId}/assessments/${assessment.id}`
       );
     } else {
-      // For assessments without lessonId
-      console.log('Assessment without lesson:', assessment);
-      alert(
-        'Esta avaliação não está vinculada a uma aula.'
+      // Assessment without lesson - use standalone route
+      router.push(
+        `/${locale}/assessments/${assessment.id}`
       );
     }
   };

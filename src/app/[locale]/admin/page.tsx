@@ -672,17 +672,19 @@ export default function AdminPage() {
               </TabsList>
               <TabsContent value="create">
                 {/* Bulk Import Button */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => setShowFlashcardBulkImportModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary to-secondary/80 text-primary font-medium rounded-lg hover:from-secondary/90 hover:to-secondary/70 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    <Upload size={18} />
-                    {t('flashcards.bulkImport.buttonTitle')}
-                  </button>
-                  <p className="text-gray-400 text-sm mt-2">
-                    {t('flashcards.bulkImport.buttonDescription')}
-                  </p>
+                <div className="flex justify-center mb-8 mt-6">
+                  <div className="text-center border border-gray-700/50 rounded-xl p-6 bg-gray-800/30 backdrop-blur-sm hover:border-secondary/30 transition-colors">
+                    <button
+                      onClick={() => setShowFlashcardBulkImportModal(true)}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-secondary to-secondary/80 text-primary font-medium rounded-lg hover:from-secondary/90 hover:to-secondary/70 transition-all shadow-lg hover:shadow-xl"
+                    >
+                      <Upload size={20} />
+                      {t('flashcards.bulkImport.buttonTitle')}
+                    </button>
+                    <p className="text-gray-400 text-sm mt-3">
+                      {t('flashcards.bulkImport.buttonDescription')}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

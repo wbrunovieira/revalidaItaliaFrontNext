@@ -4608,7 +4608,7 @@
     "fields": {
       "file": "Arquivo",
       "lines": "linhas",
-      "clickToUpload": "Clique para fazer upload ou arraste o arquivo",
+      "clickToUpload": "Clique para fazer upload",
       "txtOnly": "Apenas arquivos .txt",
       "max5MB": "Máximo 5MB",
       "preview": "Pré-visualização",

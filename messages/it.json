@@ -4452,7 +4452,7 @@
       "fields": {
         "file": "File",
         "lines": "righe",
-        "clickToUpload": "Clicca per caricare o trascina il file",
+        "clickToUpload": "Clicca per caricare",
         "txtOnly": "Solo file .txt",
         "max5MB": "Massimo 5MB",
         "preview": "Anteprima",

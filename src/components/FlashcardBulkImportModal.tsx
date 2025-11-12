@@ -449,12 +449,20 @@ export default function FlashcardBulkImportModal({
       formData.append('argumentId', argumentId);
       formData.append('separator', separator);
 
+      console.log('Separator being sent:', separator);
+
       if (selectedLessonIds.length > 0) {
         formData.append('lessonIds', JSON.stringify(selectedLessonIds));
       }
 
       if (selectedTagIds.length > 0) {
         formData.append('tagIds', JSON.stringify(selectedTagIds));
+      }
+
+      // Debug FormData
+      console.log('FormData contents:');
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1]);
       }
 
       const response = await fetch(
@@ -581,30 +589,33 @@ export default function FlashcardBulkImportModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
-            <Upload className="w-6 h-6 text-secondary" />
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700 shadow-2xl">
+        <DialogHeader className="border-b border-gray-700/50 pb-4 mb-6">
+          <DialogTitle className="text-3xl font-bold text-white flex items-center gap-3">
+            <div className="p-2 bg-secondary/20 rounded-lg">
+              <Upload className="w-7 h-7 text-secondary" />
+            </div>
             {t('title')}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-gray-400 text-base mt-2">
             {t('description')}
           </DialogDescription>
         </DialogHeader>
 
         {/* Upload Step */}
         {step === 'upload' && (
-          <div className="space-y-6 py-4">
+          <div className="space-y-6 py-2">
             {/* File Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="file" className="text-white">
-                {t('fields.file')} *
+            <div className="space-y-3">
+              <Label htmlFor="file" className="text-white text-base font-semibold flex items-center gap-2">
+                <FileText className="w-4 h-4 text-secondary" />
+                {t('fields.file')} <span className="text-red-400">*</span>
               </Label>
               <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
                   file
-                    ? 'border-secondary bg-secondary/10'
-                    : 'border-gray-600 hover:border-secondary hover:bg-gray-700/50'
+                    ? 'border-secondary bg-secondary/10 shadow-lg shadow-secondary/20'
+                    : 'border-gray-600 hover:border-secondary/70 hover:bg-gray-700/30 hover:shadow-lg'
                 }`}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -655,20 +666,20 @@ export default function FlashcardBulkImportModal({
 
             {/* File Preview */}
             {filePreview.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-white flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
+              <div className="space-y-3">
+                <Label className="text-white text-base font-semibold flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-secondary" />
                   {t('fields.preview')}
                 </Label>
-                <div className="bg-gray-900 rounded-lg p-4 space-y-1 font-mono text-sm max-h-40 overflow-y-auto border border-gray-700">
+                <div className="bg-gray-950/50 rounded-xl p-4 space-y-1 font-mono text-sm max-h-48 overflow-y-auto border border-gray-700/50 shadow-inner">
                   {filePreview.map((line, index) => (
-                    <div key={index} className="text-gray-300">
-                      <span className="text-gray-500 mr-2">{index + 1}.</span>
+                    <div key={index} className="text-gray-300 hover:bg-gray-800/50 px-2 py-1 rounded transition-colors">
+                      <span className="text-secondary/70 mr-3 font-bold">{index + 1}.</span>
                       {line}
                     </div>
                   ))}
                   {lineCount > 5 && (
-                    <div className="text-gray-500 italic">
+                    <div className="text-gray-500 italic mt-2 px-2">
                       ... +{lineCount - 5} {t('fields.moreLines')}
                     </div>
                   )}
@@ -677,12 +688,12 @@ export default function FlashcardBulkImportModal({
             )}
 
             {/* Argument Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="argument" className="text-white">
-                {t('fields.argument')} *
+            <div className="space-y-3">
+              <Label htmlFor="argument" className="text-white text-base font-semibold">
+                {t('fields.argument')} <span className="text-red-400">*</span>
               </Label>
               <Select value={argumentId} onValueChange={setArgumentId}>
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                <SelectTrigger className="bg-gray-800/50 border-gray-600 text-white hover:border-secondary/50 transition-colors h-11">
                   <SelectValue placeholder={t('fields.selectArgument')} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -707,36 +718,46 @@ export default function FlashcardBulkImportModal({
             </div>
 
             {/* Separator Selection */}
-            <div className="space-y-2">
-              <Label className="text-white">{t('fields.separator')}</Label>
+            <div className="space-y-3">
+              <Label className="text-white text-base font-semibold">{t('fields.separator')}</Label>
               <RadioGroup value={separator} onValueChange={(value) => setSeparator(value as SeparatorType)}>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800/50 transition-colors">
                   <RadioGroupItem value="TAB" id="sep-tab" />
-                  <Label htmlFor="sep-tab" className="text-white font-normal cursor-pointer">
-                    TAB ({t('fields.recommended')})
+                  <Label htmlFor="sep-tab" className="text-white font-normal cursor-pointer flex items-center gap-2">
+                    <span className="font-semibold">TAB</span>
+                    <code className="bg-gray-900/50 px-2 py-1 rounded text-secondary font-mono text-sm">( \t )</code>
+                    <span className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">{t('fields.recommended')}</span>
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800/50 transition-colors">
                   <RadioGroupItem value="PIPE" id="sep-pipe" />
-                  <Label htmlFor="sep-pipe" className="text-white font-normal cursor-pointer">
-                    PIPE (|)
+                  <Label htmlFor="sep-pipe" className="text-white font-normal cursor-pointer flex items-center gap-2">
+                    <span className="font-semibold">PIPE</span>
+                    <code className="bg-gray-900/50 px-2 py-1 rounded text-secondary font-mono text-sm">( | )</code>
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800/50 transition-colors">
                   <RadioGroupItem value="COLON" id="sep-colon" />
-                  <Label htmlFor="sep-colon" className="text-white font-normal cursor-pointer">
-                    COLON (:)
+                  <Label htmlFor="sep-colon" className="text-white font-normal cursor-pointer flex items-center gap-2">
+                    <span className="font-semibold">Dois pontos</span>
+                    <code className="bg-gray-900/50 px-2 py-1 rounded text-secondary font-mono text-sm">( : )</code>
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
             {/* Optional: Course -> Module -> Lessons */}
-            <div className="border-t border-gray-700 pt-4 space-y-4">
-              <h3 className="text-white font-medium flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-secondary" />
-                {t('fields.associateWithLessons')} ({t('fields.optional')})
-              </h3>
+            <div className="border-t border-gray-700/50 pt-6 mt-6 space-y-4">
+              <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/50">
+                <h3 className="text-white text-lg font-semibold flex items-center gap-2 mb-4">
+                  <div className="p-1.5 bg-secondary/20 rounded-lg">
+                    <BookOpen className="w-5 h-5 text-secondary" />
+                  </div>
+                  {t('fields.associateWithLessons')}
+                  <span className="text-xs bg-gray-700/50 text-gray-400 px-2 py-1 rounded-full font-normal">
+                    {t('fields.optional')}
+                  </span>
+                </h3>
 
               {/* Course */}
               <div className="space-y-2">
@@ -832,15 +853,22 @@ export default function FlashcardBulkImportModal({
                   </div>
                 </div>
               )}
+              </div>
             </div>
 
             {/* Optional: Tags */}
-            <div className="border-t border-gray-700 pt-4 space-y-4">
-              <h3 className="text-white font-medium flex items-center gap-2">
-                <Tag className="w-5 h-5 text-secondary" />
-                {t('fields.tags')} ({t('fields.optional')})
-              </h3>
-              <div className="bg-gray-900 rounded-lg p-4 space-y-2 max-h-40 overflow-y-auto border border-gray-700">
+            <div className="border-t border-gray-700/50 pt-6 mt-6 space-y-4">
+              <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/50">
+                <h3 className="text-white text-lg font-semibold flex items-center gap-2 mb-4">
+                  <div className="p-1.5 bg-secondary/20 rounded-lg">
+                    <Tag className="w-5 h-5 text-secondary" />
+                  </div>
+                  {t('fields.tags')}
+                  <span className="text-xs bg-gray-700/50 text-gray-400 px-2 py-1 rounded-full font-normal">
+                    {t('fields.optional')}
+                  </span>
+                </h3>
+              <div className="bg-gray-950/50 rounded-lg p-4 space-y-2 max-h-48 overflow-y-auto border border-gray-700/50">
                 {loadingTags ? (
                   <div className="text-center text-gray-400">
                     <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
@@ -875,6 +903,7 @@ export default function FlashcardBulkImportModal({
                     </div>
                   ))
                 )}
+              </div>
               </div>
             </div>
           </div>
@@ -1015,25 +1044,30 @@ export default function FlashcardBulkImportModal({
         )}
 
         {/* Footer */}
-        <DialogFooter>
+        <DialogFooter className="border-t border-gray-700/50 pt-6 mt-6">
           {step === 'upload' && (
             <>
-              <Button variant="outline" onClick={handleClose}>
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="border-gray-600 hover:bg-gray-800 transition-colors"
+              >
+                <X className="w-4 h-4 mr-2" />
                 {t('actions.cancel')}
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={!file || !argumentId || loading}
-                className="bg-secondary hover:bg-secondary/90 text-primary"
+                className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                     {t('actions.uploading')}
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="w-5 h-5 mr-2" />
                     {t('actions.upload')}
                   </>
                 )}

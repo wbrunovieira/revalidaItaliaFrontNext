@@ -1050,7 +1050,19 @@
       "noOtherSessions": "Nessuna sessione precedente",
       "onlyOneSessionAllowed": "Può essere attiva solo una sessione alla volta. Quando accedi da un nuovo dispositivo, la sessione precedente viene automaticamente terminata.",
       "noSessionData": "Dati di sessione non disponibili",
-      "reloginRequired": "Effettua logout e login nuovamente per visualizzare le informazioni sulla sessione"
+      "reloginRequired": "Effettua logout e login nuovamente per visualizzare le informazioni sulla sessione",
+      "errorLoading": "Errore nel caricamento delle sessioni",
+      "totalSessions": "{total, plural, =0 {Nessuna sessione} =1 {1 sessione} other {{total} sessioni}}",
+      "activeSessions": "{active, plural, =0 {Nessuna attiva} =1 {1 attiva} other {{active} attive}}",
+      "thisSession": "Questa sessione",
+      "revoked": "Revocata",
+      "unknownDevice": "Dispositivo sconosciuto",
+      "lastActivity": "Ultima attività",
+      "created": "Creata",
+      "justNow": "proprio ora",
+      "minutesAgo": "{minutes, plural, =1 {1 minuto fa} other {{minutes} minuti fa}}",
+      "hoursAgo": "{hours, plural, =1 {1 ora fa} other {{hours} ore fa}}",
+      "daysAgo": "{days, plural, =1 {1 giorno fa} other {{days} giorni fa}}"
     },
     "validation": {
       "nameMin": "Il nome deve avere almeno 3 caratteri",

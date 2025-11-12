@@ -433,15 +433,21 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const data: LoginResponse = await response.json();
-          console.log('📦 Resposta completa da API:', data);
-          console.log('👤 Dados do user na resposta:', data.user);
+
+          console.log('═══════════════════════════════════════════════════════');
+          console.log('📦 RESPOSTA COMPLETA DO BACKEND:');
+          console.log('═══════════════════════════════════════════════════════');
+          console.log('👤 User:', data.user);
           console.log('📊 Profile Completeness:', data.profileCompleteness);
           console.log('🌐 Community Profile:', data.communityProfile);
-          console.log('🔑 Tokens recebidos:', {
+          console.log('🔑 Tokens:', {
             accessToken: data.accessToken ? data.accessToken.substring(0, 20) + '...' : 'N/A',
             refreshToken: data.refreshToken ? data.refreshToken.substring(0, 20) + '...' : 'N/A',
             expiresIn: data.expiresIn,
           });
+          console.log('🔐 SESSION (do backend):', data.session);
+          console.log('⚠️ REVOKED SESSIONS (do backend):', data.revokedSessions);
+          console.log('═══════════════════════════════════════════════════════');
 
           // A API retorna o token como accessToken
           const token = data.accessToken;

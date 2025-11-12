@@ -11,12 +11,11 @@ import {
   Monitor,
   ChevronDown,
   ChevronUp,
-  Clock,
-  MapPin,
   Calendar,
   Globe,
   Shield,
   Activity,
+  MapPin,
 } from 'lucide-react';
 
 export default function SessionCard() {
@@ -70,23 +69,6 @@ export default function SessionCard() {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  // Calcular tempo até expirar
-  const getExpirationTime = () => {
-    const now = new Date();
-    const expiration = new Date(session.expiresAt);
-    const diffMs = expiration.getTime() - now.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-    if (diffDays > 0) {
-      return t('expiresInDays', { days: diffDays });
-    } else if (diffHours > 0) {
-      return t('expiresInHours', { hours: diffHours });
-    } else {
-      return t('expiresSoon');
-    }
   };
 
   const handleToggleExpand = async () => {
@@ -172,20 +154,6 @@ export default function SessionCard() {
             <span>{t('loginAt')}:</span>
             <span className="text-white font-medium">{formatDate(session.createdAt)}</span>
           </div>
-
-          <div className="flex items-center gap-2 text-sm text-white/70">
-            <Clock size={16} className="text-white/40" />
-            <span>{t('expires')}:</span>
-            <span className="text-white font-medium">{getExpirationTime()}</span>
-          </div>
-
-          {deviceInfo.screenResolution && (
-            <div className="flex items-center gap-2 text-sm text-white/70">
-              <Monitor size={16} className="text-white/40" />
-              <span>{t('resolution')}:</span>
-              <span className="text-white font-medium">{deviceInfo.screenResolution}</span>
-            </div>
-          )}
         </div>
       </div>
 

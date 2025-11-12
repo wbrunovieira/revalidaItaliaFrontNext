@@ -362,13 +362,11 @@ export default function AssessmentsPage({
 
       if (response.ok) {
         const data = await response.json();
-        // Filtrar apenas assessments que têm lessonId
-        const assessmentsWithLesson = (data.assessments || []).filter(
-          (assessment: Assessment) => assessment.lessonId !== null && assessment.lessonId !== undefined
-        );
-        setAssessments(assessmentsWithLesson);
-        setFilteredAssessments(assessmentsWithLesson);
-        calculateStats(assessmentsWithLesson);
+        // Mostrar todas as avaliações
+        const allAssessments = data.assessments || [];
+        setAssessments(allAssessments);
+        setFilteredAssessments(allAssessments);
+        calculateStats(allAssessments);
 
         // Check status of all assessments
         const token = document.cookie

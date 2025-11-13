@@ -6089,7 +6089,8 @@
   "types": {
     "quiz": "Quiz",
     "simulado": "Simulado",
-    "prova_aberta": "Prueba Abierta"
+    "prova_aberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "position": {
     "before_lesson": "Antes de la Lección",

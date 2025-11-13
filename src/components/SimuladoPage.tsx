@@ -108,7 +108,7 @@ interface Attempt {
   status: 'ACTIVE' | 'FINALIZED' | 'EXPIRED' | 'GRADED';
   startedAt: string;
   finishedAt?: string;
-  expiresAt?: string;
+  timeLimitExpiresAt?: string;
   score?: number;
   passed?: boolean;
   totalQuestions?: number;
@@ -350,37 +350,22 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
 
       const data = await response.json();
       const { attempt, isNew } = data;
-      
+
       setAttempt(attempt);
-      
+
       if (!isNew) {
-        // Tentativa existente - continuar de onde parou
+        // Tentativa existente - reiniciar do zero
         toast({
           title: t('continuingQuiz'),
           description: t('foundActiveAttempt'),
         });
-        
-        // Calcular tempo restante se a tentativa já estava ativa
-        if (attempt.expiresAt) {
-          const expiresAt = new Date(attempt.expiresAt);
-          const now = new Date();
-          const timeRemaining = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
-          
-          if (timeRemaining > 0) {
-            setTimeLeft(timeRemaining);
-            startTimer(timeRemaining / 60);
-          } else {
-            // Tempo já expirado
-            throw new Error('O tempo do simulado já expirou');
-          }
-        }
-      } else {
-        // Nova tentativa - iniciar timer
-        if (assessment.timeLimitInMinutes) {
-          startTimer(assessment.timeLimitInMinutes);
-        }
       }
-      
+
+      // Sempre iniciar timer do zero (tanto para novas tentativas quanto ao retomar)
+      if (assessment.timeLimitInMinutes) {
+        startTimer(assessment.timeLimitInMinutes);
+      }
+
       setPhase('simulado');
       toast({
         title: 'Simulado iniciado',

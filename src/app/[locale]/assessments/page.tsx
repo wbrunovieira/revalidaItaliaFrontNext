@@ -29,6 +29,7 @@ import {
   Eye,
   AlertCircle,
   FileCheck,
+  Mic,
 } from 'lucide-react';
 
 interface PageProps {
@@ -42,7 +43,7 @@ interface Assessment {
   slug: string;
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON' | null;
   passingScore?: number | null;
   timeLimitInMinutes?: number | null;
@@ -110,6 +111,7 @@ export default function AssessmentsPage({
     quiz: 0,
     simulado: 0,
     provaAberta: 0,
+    oralExam: 0,
   });
   const [activeTab, setActiveTab] = useState<
     'available' | 'results' | 'openExams'
@@ -136,12 +138,16 @@ export default function AssessmentsPage({
       const provaAberta = assessments.filter(
         a => a.type === 'PROVA_ABERTA'
       ).length;
+      const oralExam = assessments.filter(
+        a => a.type === 'ORAL_EXAM'
+      ).length;
 
       setStats({
         total: assessments.length,
         quiz,
         simulado,
         provaAberta,
+        oralExam,
       });
     },
     []
@@ -722,7 +728,7 @@ export default function AssessmentsPage({
           {activeTab === 'available' ? (
             <>
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-8">
                 <div className="bg-primary-dark/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 border border-secondary/20">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -796,6 +802,23 @@ export default function AssessmentsPage({
                       width={24}
                       height={24}
                       className="w-5 h-5 mt-2 sm:mt-0 sm:w-6 sm:h-6"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-primary-dark/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 border border-secondary/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-gray-400 text-[10px] sm:text-sm">
+                        {t('types.oral_exam')}
+                      </p>
+                      <p className="text-lg sm:text-2xl font-bold text-white">
+                        {stats.oralExam}
+                      </p>
+                    </div>
+                    <Mic
+                      size={20}
+                      className="text-orange-400 mt-2 sm:mt-0 sm:w-6 sm:h-6"
                     />
                   </div>
                 </div>

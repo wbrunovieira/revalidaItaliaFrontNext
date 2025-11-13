@@ -368,14 +368,14 @@ export default function CreateQuestionForm({
     (assessmentId: string) => {
       setFormData(prev => ({ ...prev, assessmentId }));
       handleFieldValidation('assessmentId', assessmentId);
-      
+
       // Auto-select question type based on assessment type
       const selectedAssessment = assessments.find(a => a.id === assessmentId);
       if (selectedAssessment) {
         if (selectedAssessment.type === 'QUIZ' || selectedAssessment.type === 'SIMULADO') {
           setFormData(prev => ({ ...prev, type: 'MULTIPLE_CHOICE' }));
           setTouched(prev => ({ ...prev, type: true }));
-        } else if (selectedAssessment.type === 'PROVA_ABERTA') {
+        } else if (selectedAssessment.type === 'PROVA_ABERTA' || selectedAssessment.type === 'ORAL_EXAM') {
           setFormData(prev => ({ ...prev, type: 'OPEN' }));
           setTouched(prev => ({ ...prev, type: true }));
         }
@@ -641,13 +641,20 @@ export default function CreateQuestionForm({
       onClose();
     } catch (error) {
       console.error('Error creating question:', error);
-      
-      // Check for duplicate question error
+
+      // Check for specific error types
       const errorMessage = error instanceof Error ? error.message : String(error);
+
       if (errorMessage.includes('DUPLICATE_QUESTION') || errorMessage.includes('409')) {
         toast({
           title: t('error.duplicateTitle'),
           description: t('error.duplicateDescription'),
+          variant: 'destructive',
+        });
+      } else if (errorMessage.includes('QUESTION_TYPE_MISMATCH') || errorMessage.includes('requires question type')) {
+        toast({
+          title: 'Tipo de Questão Incompatível',
+          description: 'Este tipo de avaliação aceita apenas questões do tipo OPEN (abertas)',
           variant: 'destructive',
         });
       } else {

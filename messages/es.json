@@ -4264,6 +4264,10 @@
       "provaaberta": {
         "title": "Prueba Abierta",
         "description": "Evaluación dissertativa con corrección manual"
+      },
+      "oralexam": {
+        "title": "Examen Oral",
+        "description": "Evaluación oral con grabación de audio"
       }
     },
     "fields": {

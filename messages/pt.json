@@ -4420,6 +4420,10 @@
     "provaaberta": {
       "title": "Prova Aberta",
       "description": "Avaliação dissertativa com correção manual"
+    },
+    "oralexam": {
+      "title": "Exame Oral",
+      "description": "Avaliação oral com gravação de áudio"
     }
   },
   "fields": {

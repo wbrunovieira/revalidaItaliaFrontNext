@@ -90,26 +90,34 @@ export default function OralExamPage({
 
   // Start or resume attempt
   const startAttempt = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      console.error('No token available');
+      setLoading(false);
+      return;
+    }
 
+    setLoading(true);
     try {
+      console.log('Starting attempt for assessment:', assessment.id);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${assessment.id}/attempts/start`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `token=${token}`,
           },
           credentials: 'include',
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to start attempt');
+        const errorText = await response.text();
+        console.error('Failed to start attempt:', response.status, errorText);
+        throw new Error(`Failed to start attempt: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Attempt started successfully:', data);
       setAttemptId(data.attempt.id);
 
       // Load existing answers if resuming

@@ -5974,7 +5974,8 @@
     "quiz": "Quiz",
     "simulado": "Simulado",
     "prova_aberta": "Prueba Abierta",
-    "provaAberta": "Prueba Abierta"
+    "provaAberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "actions": {
     "view": "Ver",

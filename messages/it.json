@@ -5942,7 +5942,8 @@
     "quiz": "Quiz",
     "simulado": "Simulazione",
     "prova_aberta": "Prova Aperta",
-    "provaAberta": "Prova Aperta"
+    "provaAberta": "Prova Aperta",
+    "oral_exam": "Esame Orale"
   },
   "actions": {
     "view": "Visualizza",

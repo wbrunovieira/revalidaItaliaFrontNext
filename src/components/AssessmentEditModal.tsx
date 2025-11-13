@@ -28,7 +28,7 @@ import {
   Check,
 } from 'lucide-react';
 
-type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
 type QuizPosition = 'BEFORE_LESSON' | 'AFTER_LESSON';
 
 interface Assessment {

@@ -341,7 +341,6 @@ export default async function AssessmentPage({
         <OralExamPage
           assessment={assessment}
           questions={questions}
-          locale={locale}
           backUrl={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
         />
       </NavSidebar>

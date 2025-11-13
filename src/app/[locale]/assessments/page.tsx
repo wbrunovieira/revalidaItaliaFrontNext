@@ -620,6 +620,22 @@ export default function AssessmentsPage({
       }
     }
 
+    // Check if it's an oral exam
+    if (assessment.type === 'ORAL_EXAM') {
+      if (assessment.lessonId) {
+        // Oral exam with lesson - use lesson route
+        router.push(
+          `/${locale}/lessons/${assessment.lessonId}/assessments/${assessment.id}`
+        );
+      } else {
+        // Oral exam without lesson - use standalone route
+        router.push(
+          `/${locale}/assessments/${assessment.id}`
+        );
+      }
+      return;
+    }
+
     if (assessment.lessonId) {
       // Assessment with lesson - use lesson route
       router.push(

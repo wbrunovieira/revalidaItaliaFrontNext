@@ -48,7 +48,6 @@ interface Option {
 interface OralExamPageProps {
   assessment: Assessment;
   questions: Question[];
-  locale: string;
   backUrl: string;
 }
 

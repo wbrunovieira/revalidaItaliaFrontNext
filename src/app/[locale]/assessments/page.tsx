@@ -1122,6 +1122,35 @@ export default function AssessmentsPage({
                               );
                             }
 
+                            // Para ORAL_EXAM: se ainda não foi iniciada
+                            if (
+                              assessment.type ===
+                                'ORAL_EXAM' &&
+                              !status.status &&
+                              !status.attemptId
+                            ) {
+                              return (
+                                <button
+                                  onClick={() =>
+                                    handleStartAssessment(
+                                      assessment
+                                    )
+                                  }
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-all duration-300 font-medium group/btn"
+                                >
+                                  <Play
+                                    size={16}
+                                    className="group-hover/btn:scale-110 transition-transform"
+                                  />
+                                  {t('startAssessment')}
+                                  <ArrowRight
+                                    size={16}
+                                    className="group-hover/btn:translate-x-1 transition-transform"
+                                  />
+                                </button>
+                              );
+                            }
+
                             // Renderizar status e ações baseado no estado
                             return (
                               <>
@@ -1362,6 +1391,13 @@ export default function AssessmentsPage({
                                         router.push(
                                           `/${locale}/assessments/open-exams/${status.attemptId}`
                                         );
+                                      } else if (assessment.type === 'ORAL_EXAM') {
+                                        console.log(
+                                          '➡️ Redirecionando para ver resultado do exame oral'
+                                        );
+                                        router.push(
+                                          `/${locale}/assessments/open-exams/${status.attemptId}`
+                                        );
                                       } else {
                                         // Para QUIZ/SIMULADO: refazer
                                         console.log(
@@ -1444,7 +1480,9 @@ export default function AssessmentsPage({
                                             size={16}
                                           />
                                           {assessment.type ===
-                                          'PROVA_ABERTA'
+                                          'PROVA_ABERTA' ||
+                                          assessment.type ===
+                                          'ORAL_EXAM'
                                             ? 'Ver Resultado'
                                             : 'Refazer Quiz'}
                                         </>
@@ -1459,6 +1497,18 @@ export default function AssessmentsPage({
                                         <>
                                           <Eye size={16} />
                                           Acompanhar Prova
+                                        </>
+                                      );
+                                    } else if (
+                                      status.status ===
+                                        'IN_PROGRESS' &&
+                                      assessment.type ===
+                                        'ORAL_EXAM'
+                                    ) {
+                                      return (
+                                        <>
+                                          <Mic size={16} />
+                                          Continuar Exame
                                         </>
                                       );
                                     } else if (

@@ -550,6 +550,8 @@ export default function AssessmentsPage({
             className="w-6 h-6"
           />
         );
+      case 'ORAL_EXAM':
+        return <Mic size={24} className="text-orange-400" />;
       default:
         return <ClipboardList size={24} />;
     }
@@ -571,6 +573,11 @@ export default function AssessmentsPage({
         bg: 'bg-accent',
         text: 'text-primary',
         border: 'border-primary/40',
+      },
+      ORAL_EXAM: {
+        bg: 'bg-orange-500/20',
+        text: 'text-orange-300',
+        border: 'border-orange-500/30',
       },
     };
 

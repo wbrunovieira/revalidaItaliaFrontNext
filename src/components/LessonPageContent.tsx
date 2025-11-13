@@ -212,16 +212,32 @@ export default function LessonPageContent({
   // Get translations
   const ct =
     course.translations.find(t => t.locale === locale) ||
-    course.translations[0];
+    course.translations[0] || {
+      locale: locale,
+      title: course.slug,
+      description: ''
+    };
   const mt =
     moduleFound.translations.find(t => t.locale === locale) ||
-    moduleFound.translations[0];
+    moduleFound.translations[0] || {
+      locale: locale,
+      title: moduleFound.slug,
+      description: ''
+    };
   const lt =
     lesson.translations.find(t => t.locale === locale) ||
-    lesson.translations[0];
+    lesson.translations[0] || {
+      locale: locale,
+      title: lessonId,
+      description: ''
+    };
   const vt =
     lesson.video?.translations.find(t => t.locale === locale) ||
-    lesson.video?.translations[0];
+    lesson.video?.translations[0] || {
+      locale: locale,
+      title: lesson.video?.slug || '',
+      description: ''
+    };
 
   const lessonImageUrl = lesson.imageUrl || pandaData?.thumbnail || '';
 

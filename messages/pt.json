@@ -2085,6 +2085,56 @@
     "oralExamComingSoon": "Funcionalidade de Exame Oral",
     "oralExamDescription": "Grave suas respostas em áudio para esta avaliação oral. A gravação de áudio estará disponível em breve."
   },
+  "OralExam": {
+    "question": "Questão",
+    "of": "de",
+    "answered": "respondidas",
+    "argument": "Argumento",
+    "recorder": {
+      "readyToRecord": "Pronto para Gravar",
+      "clickToStart": "Clique no botão abaixo para iniciar a gravação da sua resposta",
+      "startRecording": "Iniciar Gravação",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "stop": "Parar Gravação",
+      "recordingComplete": "Gravação Concluída!",
+      "reviewBeforeSending": "Ouça sua gravação antes de enviar",
+      "discard": "Descartar",
+      "sendAnswer": "Enviar Resposta",
+      "uploading": "Enviando..."
+    },
+    "recording": {
+      "started": "Gravação Iniciada",
+      "startedDescription": "Comece a falar sua resposta"
+    },
+    "status": {
+      "answerSubmitted": "Resposta enviada com sucesso!"
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Próxima",
+      "submitExam": "Finalizar Exame",
+      "submitting": "Finalizando..."
+    },
+    "success": {
+      "answerSubmitted": "Resposta Enviada",
+      "answerSubmittedDescription": "Sua resposta em áudio foi enviada com sucesso",
+      "examSubmitted": "Exame Finalizado",
+      "examSubmittedDescription": "Seu exame oral foi enviado para avaliação"
+    },
+    "error": {
+      "startTitle": "Erro ao Iniciar",
+      "startDescription": "Não foi possível iniciar o exame oral",
+      "microphoneTitle": "Erro no Microfone",
+      "microphoneDescription": "Não foi possível acessar o microfone. Verifique as permissões do navegador",
+      "fileTooLargeTitle": "Arquivo Muito Grande",
+      "fileTooLargeDescription": "O arquivo de áudio excede o limite de 10MB",
+      "submitTitle": "Erro ao Enviar",
+      "submitDescription": "Não foi possível enviar sua resposta. Tente novamente",
+      "submitExamTitle": "Erro ao Finalizar",
+      "submitExamDescription": "Não foi possível finalizar o exame. Tente novamente"
+    }
+  },
   "Trails": {
   "title": "Trilhas de Aprendizado",
   "description": "Explore nossas trilhas de aprendizado cuidadosamente organizadas para guiar sua jornada educacional.",

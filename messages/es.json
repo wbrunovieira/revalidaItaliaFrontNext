@@ -2083,6 +2083,56 @@
     "oralExamComingSoon": "Funcionalidad de Examen Oral",
     "oralExamDescription": "Graba tus respuestas de voz para esta evaluación oral. La grabación de audio estará disponible próximamente."
   },
+  "OralExam": {
+    "question": "Pregunta",
+    "of": "de",
+    "answered": "respondidas",
+    "argument": "Argumento",
+    "recorder": {
+      "readyToRecord": "Listo para Grabar",
+      "clickToStart": "Haz clic en el botón de abajo para comenzar a grabar tu respuesta",
+      "startRecording": "Iniciar Grabación",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "stop": "Detener Grabación",
+      "recordingComplete": "¡Grabación Completada!",
+      "reviewBeforeSending": "Escucha tu grabación antes de enviar",
+      "discard": "Descartar",
+      "sendAnswer": "Enviar Respuesta",
+      "uploading": "Enviando..."
+    },
+    "recording": {
+      "started": "Grabación Iniciada",
+      "startedDescription": "Comienza a hablar tu respuesta"
+    },
+    "status": {
+      "answerSubmitted": "¡Respuesta enviada con éxito!"
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "submitExam": "Finalizar Examen",
+      "submitting": "Finalizando..."
+    },
+    "success": {
+      "answerSubmitted": "Respuesta Enviada",
+      "answerSubmittedDescription": "Tu respuesta de audio fue enviada exitosamente",
+      "examSubmitted": "Examen Finalizado",
+      "examSubmittedDescription": "Tu examen oral ha sido enviado para evaluación"
+    },
+    "error": {
+      "startTitle": "Error al Iniciar",
+      "startDescription": "No se pudo iniciar el examen oral",
+      "microphoneTitle": "Error de Micrófono",
+      "microphoneDescription": "No se pudo acceder al micrófono. Verifica los permisos del navegador",
+      "fileTooLargeTitle": "Archivo Muy Grande",
+      "fileTooLargeDescription": "El archivo de audio excede el límite de 10MB",
+      "submitTitle": "Error al Enviar",
+      "submitDescription": "No se pudo enviar tu respuesta. Inténtalo de nuevo",
+      "submitExamTitle": "Error al Finalizar",
+      "submitExamDescription": "No se pudo finalizar el examen. Inténtalo de nuevo"
+    }
+  },
   "Trails": {
   "title": "Rutas de Aprendizaje",
   "description": "Explora nuestras rutas de aprendizaje cuidadosamente organizadas para guiar tu viaje educativo.",

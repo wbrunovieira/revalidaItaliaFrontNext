@@ -2080,6 +2080,56 @@
     "oralExamComingSoon": "Funzionalità di Esame Orale",
     "oralExamDescription": "Registra le tue risposte vocali per questa valutazione orale. La registrazione audio sarà disponibile a breve."
   },
+  "OralExam": {
+    "question": "Domanda",
+    "of": "di",
+    "answered": "risposte",
+    "argument": "Argomento",
+    "recorder": {
+      "readyToRecord": "Pronto per Registrare",
+      "clickToStart": "Clicca il pulsante qui sotto per iniziare a registrare la tua risposta",
+      "startRecording": "Inizia Registrazione",
+      "pause": "Pausa",
+      "resume": "Riprendi",
+      "stop": "Ferma Registrazione",
+      "recordingComplete": "Registrazione Completata!",
+      "reviewBeforeSending": "Ascolta la tua registrazione prima di inviare",
+      "discard": "Scarta",
+      "sendAnswer": "Invia Risposta",
+      "uploading": "Caricamento..."
+    },
+    "recording": {
+      "started": "Registrazione Iniziata",
+      "startedDescription": "Inizia a parlare la tua risposta"
+    },
+    "status": {
+      "answerSubmitted": "Risposta inviata con successo!"
+    },
+    "navigation": {
+      "previous": "Precedente",
+      "next": "Successiva",
+      "submitExam": "Finalizza Esame",
+      "submitting": "Finalizzando..."
+    },
+    "success": {
+      "answerSubmitted": "Risposta Inviata",
+      "answerSubmittedDescription": "La tua risposta audio è stata inviata con successo",
+      "examSubmitted": "Esame Finalizzato",
+      "examSubmittedDescription": "Il tuo esame orale è stato inviato per la valutazione"
+    },
+    "error": {
+      "startTitle": "Errore all'Avvio",
+      "startDescription": "Impossibile avviare l'esame orale",
+      "microphoneTitle": "Errore Microfono",
+      "microphoneDescription": "Impossibile accedere al microfono. Controlla i permessi del browser",
+      "fileTooLargeTitle": "File Troppo Grande",
+      "fileTooLargeDescription": "Il file audio supera il limite di 10MB",
+      "submitTitle": "Errore nell'Invio",
+      "submitDescription": "Impossibile inviare la tua risposta. Riprova",
+      "submitExamTitle": "Errore nella Finalizzazione",
+      "submitExamDescription": "Impossibile finalizzare l'esame. Riprova"
+    }
+  },
   "Trails": {
   "title": "Percorsi di Apprendimento",
   "description": "Esplora i nostri percorsi di apprendimento accuratamente organizzati per guidare il tuo viaggio educativo.",

@@ -1347,6 +1347,17 @@ export default function AssessmentsPage({
                                         `/${locale}/lessons/${assessment.lessonId}/assessments/${assessment.id}`
                                       );
                                     } else if (
+                                      status.status ===
+                                        'IN_PROGRESS' &&
+                                      !assessment.lessonId
+                                    ) {
+                                      console.log(
+                                        '➡️ Redirecionando para continuar SIMULADO/QUIZ sem lesson (standalone)'
+                                      );
+                                      router.push(
+                                        `/${locale}/assessments/${assessment.id}`
+                                      );
+                                    } else if (
                                       status.attemptId
                                     ) {
                                       console.log(

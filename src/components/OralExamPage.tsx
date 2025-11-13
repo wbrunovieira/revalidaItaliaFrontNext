@@ -60,7 +60,7 @@ export default function OralExamPage({
 }: OralExamPageProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { token } = useAuth();
+  const { token, user, isAuthenticated } = useAuth();
   const t = useTranslations('OralExam');
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -90,23 +90,35 @@ export default function OralExamPage({
 
   // Start or resume attempt
   const startAttempt = useCallback(async () => {
-    if (!token) {
-      console.error('No token available');
+    if (!token || !isAuthenticated || !user) {
+      console.error('No token, not authenticated, or no user available');
+      setLoading(false);
+      return;
+    }
+
+    const identityId = user?.id;
+    if (!identityId) {
+      console.error('No user ID available');
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      console.log('Starting attempt for assessment:', assessment.id);
+      console.log('Starting attempt for assessment:', assessment.id, 'identityId:', identityId);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${assessment.id}/attempts/start`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/start`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           credentials: 'include',
+          body: JSON.stringify({
+            identityId: identityId,
+            assessmentId: assessment.id,
+          }),
         }
       );
 
@@ -121,8 +133,9 @@ export default function OralExamPage({
       setAttemptId(data.attempt.id);
 
       // Load existing answers if resuming
-      if (data.attempt.status === 'IN_PROGRESS') {
+      if (data.attempt.status === 'IN_PROGRESS' && !data.isNew) {
         // TODO: Load existing audio answers
+        console.log('Resuming existing attempt');
       }
     } catch (error) {
       console.error('Error starting attempt:', error);
@@ -134,7 +147,7 @@ export default function OralExamPage({
     } finally {
       setLoading(false);
     }
-  }, [assessment.id, token, toast, t]);
+  }, [assessment.id, token, isAuthenticated, user, toast, t]);
 
   useEffect(() => {
     startAttempt();

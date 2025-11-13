@@ -282,11 +282,22 @@ export default function OralExamPage({
   };
 
   const submitAnswer = async () => {
-    if (!audioBlob || !attemptId) return;
+    console.log('📤 submitAnswer called');
+    console.log('audioBlob:', audioBlob);
+    console.log('audioBlob size:', audioBlob?.size, 'bytes');
+    console.log('audioBlob type:', audioBlob?.type);
+    console.log('attemptId:', attemptId);
+    console.log('currentQuestion.id:', currentQuestion.id);
+
+    if (!audioBlob || !attemptId) {
+      console.error('❌ Missing audioBlob or attemptId');
+      return;
+    }
 
     // Validate file size (10MB)
     const maxSize = 10 * 1024 * 1024;
     if (audioBlob.size > maxSize) {
+      console.error('❌ File too large:', audioBlob.size);
       toast({
         title: t('error.fileTooLargeTitle'),
         description: t('error.fileTooLargeDescription'),
@@ -301,6 +312,9 @@ export default function OralExamPage({
     formData.append('questionId', currentQuestion.id);
     formData.append('audioFile', audioBlob, 'answer.webm');
 
+    console.log('📦 FormData created');
+    console.log('Sending to:', `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/${attemptId}/answers`);
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/${attemptId}/answers`,
@@ -314,12 +328,16 @@ export default function OralExamPage({
         }
       );
 
+      console.log('📨 Response status:', response.status);
+
       if (!response.ok) {
         const error = await response.json();
+        console.error('❌ Response error:', error);
         throw new Error(error.message || 'Failed to submit answer');
       }
 
-      await response.json();
+      const result = await response.json();
+      console.log('✅ Response body:', result);
 
       toast({
         title: t('success.answerSubmitted'),

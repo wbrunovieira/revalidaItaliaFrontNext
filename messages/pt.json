@@ -1146,7 +1146,8 @@
     "types": {
       "quiz": "Quiz",
       "simulado": "Simulado",
-      "prova_aberta": "Prova Aberta"
+      "prova_aberta": "Prova Aberta",
+      "oral_exam": "Exame Oral"
     },
     "tabs": {
       "available": "Avaliações Disponíveis",
@@ -2079,7 +2080,10 @@
     },
     "continuingQuiz": "Continuando Quiz",
     "foundActiveAttempt": "Encontramos uma tentativa ativa. Continuando de onde você parou.",
-    "explanation": "Explicação"
+    "explanation": "Explicação",
+    "oralExam": "Exame Oral",
+    "oralExamComingSoon": "Funcionalidade de Exame Oral",
+    "oralExamDescription": "Grave suas respostas em áudio para esta avaliação oral. A gravação de áudio estará disponível em breve."
   },
   "Trails": {
   "title": "Trilhas de Aprendizado",

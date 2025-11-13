@@ -23,7 +23,7 @@ interface Assessment {
   id: string;
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   passingScore?: number;
   timeLimitInMinutes?: number;
   randomizeQuestions?: boolean;

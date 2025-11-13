@@ -15,6 +15,7 @@ import {
   ClipboardList,
   CheckCircle,
   AlertCircle,
+  Mic,
 } from 'lucide-react';
 
 interface Assessment {
@@ -23,7 +24,7 @@ interface Assessment {
 
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON';
   passingScore?: number;
   timeLimitInMinutes?: number;
@@ -329,6 +330,66 @@ export default async function AssessmentPage({
             locale={locale}
             backUrl={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
           />
+        </div>
+      </NavSidebar>
+    );
+  }
+
+  if (assessment.type === 'ORAL_EXAM') {
+    return (
+      <NavSidebar>
+        <div className="flex-1 flex flex-col bg-primary min-h-screen">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-800">
+            <div className="flex items-center justify-between mb-4">
+              <Link
+                href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
+                className="inline-flex items-center gap-2 text-white hover:text-secondary"
+              >
+                <ArrowLeft size={20} /> {tLesson('back')}
+              </Link>
+
+              <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/20 rounded-full text-orange-400 text-sm font-semibold">
+                <Mic size={16} />
+                <span>{tAssessment('oralExam')}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-white">
+                {assessment.title}
+              </h1>
+              {assessment.description && (
+                <p className="text-gray-300">
+                  {assessment.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Oral Exam Content */}
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center space-y-6 max-w-2xl">
+              <div className="p-6 bg-orange-500/10 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
+                <Mic size={48} className="text-orange-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">
+                {tAssessment('oralExamComingSoon')}
+              </h2>
+              <p className="text-gray-400 text-lg">
+                {tAssessment('oralExamDescription')}
+              </p>
+              <div className="pt-4">
+                <Link
+                  href={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
+                >
+                  <ArrowLeft size={20} />
+                  {tLesson('back')}
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </NavSidebar>
     );

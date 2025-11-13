@@ -307,7 +307,7 @@ export default function OralExamPage({
         {
           method: 'POST',
           headers: {
-            Cookie: `token=${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           credentials: 'include',
           body: formData,
@@ -360,7 +360,7 @@ export default function OralExamPage({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Cookie: `token=${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           credentials: 'include',
         }

@@ -87,7 +87,11 @@ export default function ModuleCardWithProgress({
     fetchProgress();
   }, [module.id]);
 
-  const translation = module.translations.find(t => t.locale === locale) || module.translations[0];
+  const translation = module.translations.find(t => t.locale === locale) || module.translations[0] || {
+    locale: locale,
+    title: module.slug,
+    description: ''
+  };
   const isCompleted = progress?.completed || false;
   const progressPercentage = progress?.progressPercentage || 0;
 

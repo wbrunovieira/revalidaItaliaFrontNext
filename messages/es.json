@@ -6028,7 +6028,8 @@
   "types": {
     "quiz": "Quiz",
     "simulado": "Simulacro",
-    "prova_aberta": "Prueba Abierta"
+    "prova_aberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "fields": {
     "title": "Título",

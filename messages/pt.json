@@ -6336,7 +6336,8 @@
   "types": {
     "quiz": "Quiz",
     "simulado": "Simulado",
-    "prova_aberta": "Prova Aberta"
+    "prova_aberta": "Prova Aberta",
+    "oral_exam": "Exame Oral"
   },
   "fields": {
     "title": "Título",

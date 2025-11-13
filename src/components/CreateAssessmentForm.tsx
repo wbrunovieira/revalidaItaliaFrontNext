@@ -512,8 +512,8 @@ export default function CreateAssessmentForm({
 
     if (!validateForm()) {
       toast({
-        title: t('error.validationTitle'),
-        description: t('error.validationDescription'),
+        title: t('errors.validationTitle'),
+        description: t('errors.validationDescription'),
         variant: 'destructive',
       });
       return;

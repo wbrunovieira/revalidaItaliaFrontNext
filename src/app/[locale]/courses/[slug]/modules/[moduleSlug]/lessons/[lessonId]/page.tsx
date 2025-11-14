@@ -229,9 +229,15 @@ export default async function LessonPage({
       r.ok ? r.json() : { assessments: [], pagination: {} }
     ),
     fetch(
-      `${API_URL}/api/v1/lessons/${lessonId}/documents`,
+      `${API_URL}/api/v1/lessons/${lessonId}/documents?page=1&limit=100`,
       { cache: 'no-store' }
-    ).then(r => (r.ok ? r.json() : [])),
+    ).then(r => {
+      if (!r.ok) return [];
+      const data = r.json();
+      // API agora retorna { documents: [], pagination: {} }
+      // Extrair apenas o array de documentos
+      return data.then(d => (d.documents && Array.isArray(d.documents) ? d.documents : (Array.isArray(d) ? d : [])));
+    }),
   ]);
 
   // Buscar flashcards se a lesson tiver flashcardIds

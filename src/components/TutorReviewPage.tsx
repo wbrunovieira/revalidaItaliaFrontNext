@@ -15,6 +15,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
+import { OralExamReviewForm } from '@/components/OralExamReviewForm';
 
 interface Student {
   id: string;
@@ -26,14 +27,14 @@ interface Assessment {
   id: string;
   title: string;
   description?: string;
-  type: 'PROVA_ABERTA';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
   passingScore?: number;
 }
 
 interface Question {
   id: string;
   text: string;
-  type: 'OPEN_QUESTION';
+  type: 'OPEN_QUESTION' | 'ORAL_QUESTION';
   argumentId?: string;
   argumentName?: string;
 }
@@ -53,7 +54,8 @@ interface AnswerVersion {
 interface Answer {
   id: string;
   questionId: string;
-  textAnswer: string;
+  textAnswer?: string;
+  audioAnswerUrl?: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
   reviewerId?: string;
@@ -96,6 +98,7 @@ interface AttemptAnswer {
   questionText?: string;
   questionType?: string;
   textAnswer?: string;
+  audioAnswerUrl?: string;
   answer?: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
@@ -182,18 +185,19 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
         status: data.attempt?.status || 'SUBMITTED',
         submittedAt: data.attempt?.submittedAt || new Date().toISOString(),
         questions: (data.answers || [])
-          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN' || answer.questionType === 'ORAL')
           .map((answer: AttemptAnswer) => ({
             id: answer.questionId,
             text: answer.questionText,
-            type: 'OPEN_QUESTION',
+            type: answer.questionType === 'ORAL' ? 'ORAL_QUESTION' : 'OPEN_QUESTION',
           })),
         answers: (data.answers || [])
-          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN' || answer.questionType === 'ORAL')
           .map((answer: AttemptAnswer) => ({
               id: answer.id,
               questionId: answer.questionId,
               textAnswer: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'textAnswer' in answer.currentAnswer ? answer.currentAnswer.textAnswer : null) || answer.textAnswer || answer.answer,
+              audioAnswerUrl: answer.audioAnswerUrl || (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'audioAnswerUrl' in answer.currentAnswer ? answer.currentAnswer.audioAnswerUrl as string : undefined),
               isCorrect: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'isCorrect' in answer.currentAnswer ? answer.currentAnswer.isCorrect : null) ?? answer.isCorrect,
               teacherComment: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'teacherComment' in answer.currentAnswer ? answer.currentAnswer.teacherComment : null) || answer.teacherComment,
               reviewerId: answer.reviewerId,
@@ -635,12 +639,21 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           {/* Student Answer with History */}
           <div className="p-4 bg-gray-800 rounded-lg">
             <h3 className="text-lg font-semibold text-white mb-4">
-              {currentAnswer?.versions && currentAnswer.versions.length > 1 
-                ? 'Histórico de Respostas e Revisões' 
+              {currentAnswer?.versions && currentAnswer.versions.length > 1
+                ? 'Histórico de Respostas e Revisões'
+                : attemptData.assessment.type === 'ORAL_EXAM'
+                ? 'Resposta em Áudio do Aluno'
                 : 'Resposta do Aluno'}
             </h3>
-            
-            {currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
+
+            {attemptData.assessment.type === 'ORAL_EXAM' && currentAnswer?.audioAnswerUrl ? (
+              /* ORAL_EXAM - Show Audio Player (handled by OralExamReviewForm below) */
+              <div className="p-3 bg-gray-700 rounded-lg">
+                <p className="text-gray-400 text-sm mb-3">
+                  O player de áudio está disponível na seção de revisão abaixo.
+                </p>
+              </div>
+            ) : currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
               <div className="space-y-4">
                 {currentAnswer.versions.map((version, index) => (
                   <div key={index} className="border-l-2 border-gray-600 pl-4 ml-2 space-y-2">
@@ -652,13 +665,13 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                         {new Date(version.answeredAt).toLocaleString('pt-BR')}
                       </span>
                     </div>
-                    
+
                     <div className="p-3 bg-gray-700 rounded-lg">
                       <p className="text-gray-300 whitespace-pre-wrap">
                         {version.textAnswer}
                       </p>
                     </div>
-                    
+
                     {version.reviewDecision && (
                       <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
                         <div className="flex items-center gap-2 mb-2">
@@ -712,157 +725,175 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           </div>
 
           {/* Review Section */}
-          <div className="p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-4">Revisão</h3>
-            
-            {currentQuestionStatus === 'graded' ? (
-              /* Already Reviewed - Display Only */
-              <div className="space-y-4">
-                <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle size={20} className="text-green-400" />
-                    <span className="text-green-400 font-medium">Resposta já revisada</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {currentAnswer?.isCorrect === true ? (
-                        <>
-                          <ThumbsUp size={16} className="text-green-400" />
-                          <span className="text-green-400">Resposta totalmente aceita</span>
-                        </>
-                      ) : currentAnswer?.isCorrect === false ? (
-                        <>
-                          <ThumbsDown size={16} className="text-red-400" />
-                          <span className="text-red-400">Resposta precisa de revisão</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle size={16} className="text-orange-400" />
-                          <span className="text-orange-400">Resposta parcialmente aceita</span>
-                        </>
+          {attemptData.assessment.type === 'ORAL_EXAM' && currentAnswer?.audioAnswerUrl && isCurrentReviewable ? (
+            /* ORAL_EXAM Review Form */
+            <OralExamReviewForm
+              attemptAnswerId={currentAnswer.id}
+              studentAudioUrl={currentAnswer.audioAnswerUrl}
+              reviewerId={user?.id || ''}
+              onSuccess={() => {
+                // Refresh data after successful review
+                fetchAttemptData();
+                toast({
+                  title: 'Sucesso',
+                  description: 'Revisão salva com sucesso.',
+                });
+              }}
+            />
+          ) : (
+            /* PROVA_ABERTA Text Review */
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-4">Revisão</h3>
+
+              {currentQuestionStatus === 'graded' ? (
+                /* Already Reviewed - Display Only */
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle size={20} className="text-green-400" />
+                      <span className="text-green-400 font-medium">Resposta já revisada</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {currentAnswer?.isCorrect === true ? (
+                          <>
+                            <ThumbsUp size={16} className="text-green-400" />
+                            <span className="text-green-400">Resposta totalmente aceita</span>
+                          </>
+                        ) : currentAnswer?.isCorrect === false ? (
+                          <>
+                            <ThumbsDown size={16} className="text-red-400" />
+                            <span className="text-red-400">Resposta precisa de revisão</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle size={16} className="text-orange-400" />
+                            <span className="text-orange-400">Resposta parcialmente aceita</span>
+                          </>
+                        )}
+                      </div>
+                      {currentAnswer?.teacherComment && (
+                        <div className="mt-3 p-3 bg-gray-700 rounded">
+                          <p className="text-sm text-gray-300">{currentAnswer.teacherComment}</p>
+                        </div>
                       )}
                     </div>
-                    {currentAnswer?.teacherComment && (
-                      <div className="mt-3 p-3 bg-gray-700 rounded">
-                        <p className="text-sm text-gray-300">{currentAnswer.teacherComment}</p>
-                      </div>
-                    )}
+                  </div>
+                  <div className="text-center text-gray-400 text-sm">
+                    Esta resposta não pode ser revisada novamente
                   </div>
                 </div>
-                <div className="text-center text-gray-400 text-sm">
-                  Esta resposta não pode ser revisada novamente
-                </div>
-              </div>
-            ) : isCurrentReviewable ? (
-              /* Can Review - Interactive */
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Avaliação da Resposta
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <button
-                      onClick={() => setCurrentReview({ reviewState: 'FULLY_ACCEPTED', teacherComment: '' })}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'FULLY_ACCEPTED'
-                          ? 'border-green-500 bg-green-500/10 text-green-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
-                      }`}
-                    >
-                      <ThumbsUp size={20} />
-                      <span className="font-medium">Totalmente Aceita</span>
-                      <span className="text-xs text-center">A resposta está completa e correta</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'PARTIALLY_ACCEPTED' }))}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'PARTIALLY_ACCEPTED'
-                          ? 'border-orange-500 bg-orange-500/10 text-orange-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
-                      }`}
-                    >
-                      <AlertCircle size={20} />
-                      <span className="font-medium">Parcialmente Aceita</span>
-                      <span className="text-xs text-center">Resposta correta mas incompleta</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'NEEDS_REVISION' }))}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'NEEDS_REVISION'
-                          ? 'border-red-500 bg-red-500/10 text-red-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
-                      }`}
-                    >
-                      <ThumbsDown size={20} />
-                      <span className="font-medium">Precisa Revisão</span>
-                      <span className="text-xs text-center">Resposta incorreta ou inadequada</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Teacher Comment - Only show for PARTIALLY_ACCEPTED and NEEDS_REVISION */}
-                {currentReview.reviewState !== 'FULLY_ACCEPTED' && (
+              ) : isCurrentReviewable ? (
+                /* Can Review - Interactive */
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
+                      Avaliação da Resposta
                     </label>
-                    <textarea
-                      value={currentReview.teacherComment}
-                      onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
-                      placeholder={
-                        currentReview.reviewState === 'PARTIALLY_ACCEPTED' 
-                          ? "Adicione informações complementares para completar a resposta..." 
-                          : currentReview.reviewState === 'NEEDS_REVISION' 
-                          ? "Explique o que precisa ser corrigido na resposta..."
-                          : "Selecione uma avaliação acima para comentar..."
-                      }
-                      className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
-                    />
-                    {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
-                      <p className="text-sm text-red-400 mt-1">
-                        Comentário obrigatório quando a resposta precisa de revisão.
-                      </p>
-                    )}
-                    {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
-                      <p className="text-sm text-orange-400 mt-1">
-                        Comentário obrigatório para adicionar informações complementares.
-                      </p>
-                    )}
-                    {currentReview.reviewState === null && (
-                      <p className="text-sm text-yellow-400 mt-1">
-                        Selecione uma opção de avaliação antes de enviar a revisão.
-                      </p>
-                    )}
-                  </div>
-                )}
-                
-                {/* Success message for FULLY_ACCEPTED */}
-                {currentReview.reviewState === 'FULLY_ACCEPTED' && (
-                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle size={20} className="text-green-400" />
-                      <p className="text-green-400">
-                        A resposta será marcada como totalmente aceita.
-                      </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <button
+                        onClick={() => setCurrentReview({ reviewState: 'FULLY_ACCEPTED', teacherComment: '' })}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'FULLY_ACCEPTED'
+                            ? 'border-green-500 bg-green-500/10 text-green-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
+                        }`}
+                      >
+                        <ThumbsUp size={20} />
+                        <span className="font-medium">Totalmente Aceita</span>
+                        <span className="text-xs text-center">A resposta está completa e correta</span>
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'PARTIALLY_ACCEPTED' }))}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'PARTIALLY_ACCEPTED'
+                            ? 'border-orange-500 bg-orange-500/10 text-orange-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
+                        }`}
+                      >
+                        <AlertCircle size={20} />
+                        <span className="font-medium">Parcialmente Aceita</span>
+                        <span className="text-xs text-center">Resposta correta mas incompleta</span>
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'NEEDS_REVISION' }))}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'NEEDS_REVISION'
+                            ? 'border-red-500 bg-red-500/10 text-red-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
+                        }`}
+                      >
+                        <ThumbsDown size={20} />
+                        <span className="font-medium">Precisa Revisão</span>
+                        <span className="text-xs text-center">Resposta incorreta ou inadequada</span>
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            ) : (
-              /* Cannot Review - No Response or Invalid State */
-              <div className="text-center space-y-3">
-                <div className="p-4 bg-gray-700/50 rounded-lg">
-                  <AlertCircle size={24} className="text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-400">Esta questão não pode ser revisada</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    {!currentAnswer ? 'Sem resposta do aluno' : 'Estado inválido para revisão'}
-                  </p>
+
+                  {/* Teacher Comment - Only show for PARTIALLY_ACCEPTED and NEEDS_REVISION */}
+                  {currentReview.reviewState !== 'FULLY_ACCEPTED' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
+                      </label>
+                      <textarea
+                        value={currentReview.teacherComment}
+                        onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
+                        placeholder={
+                          currentReview.reviewState === 'PARTIALLY_ACCEPTED'
+                            ? "Adicione informações complementares para completar a resposta..."
+                            : currentReview.reviewState === 'NEEDS_REVISION'
+                            ? "Explique o que precisa ser corrigido na resposta..."
+                            : "Selecione uma avaliação acima para comentar..."
+                        }
+                        className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
+                      />
+                      {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
+                        <p className="text-sm text-red-400 mt-1">
+                          Comentário obrigatório quando a resposta precisa de revisão.
+                        </p>
+                      )}
+                      {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
+                        <p className="text-sm text-orange-400 mt-1">
+                          Comentário obrigatório para adicionar informações complementares.
+                        </p>
+                      )}
+                      {currentReview.reviewState === null && (
+                        <p className="text-sm text-yellow-400 mt-1">
+                          Selecione uma opção de avaliação antes de enviar a revisão.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Success message for FULLY_ACCEPTED */}
+                  {currentReview.reviewState === 'FULLY_ACCEPTED' && (
+                    <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle size={20} className="text-green-400" />
+                        <p className="text-green-400">
+                          A resposta será marcada como totalmente aceita.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                /* Cannot Review - No Response or Invalid State */
+                <div className="text-center space-y-3">
+                  <div className="p-4 bg-gray-700/50 rounded-lg">
+                    <AlertCircle size={24} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400">Esta questão não pode ser revisada</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {!currentAnswer ? 'Sem resposta do aluno' : 'Estado inválido para revisão'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

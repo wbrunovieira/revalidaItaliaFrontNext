@@ -6338,5 +6338,38 @@
     "processingDescription": "Questa registrazione è ancora in elaborazione. Riprova tra qualche minuto.",
     "expiredDescription": "Questa registrazione è scaduta e non è più disponibile per la visualizzazione."
   }
+},
+"OralExamReview": {
+  "studentAnswer": "Risposta dello Studente",
+  "listenToStudentAnswer": "Ascolta la risposta dello studente prima di fornire il tuo feedback",
+  "yourFeedback": "Il Tuo Feedback Audio",
+  "reviewDecision": "Decisione di Revisione",
+  "fullyAccepted": "Completamente Accettata",
+  "fullyAcceptedDesc": "La risposta è completa e corretta",
+  "partiallyAccepted": "Parzialmente Accettata",
+  "partiallyAcceptedDesc": "Risposta corretta ma incompleta",
+  "needsRevision": "Necessita Revisione",
+  "needsRevisionDesc": "Risposta errata o inadeguata",
+  "markAsCorrect": "Segna come Corretta",
+  "markAsCorrectDesc": "La risposta dello studente è completamente corretta",
+  "cancel": "Annulla",
+  "submitReview": "Invia Revisione",
+  "submitting": "Invio in corso...",
+  "success": "Successo",
+  "reviewSubmitted": "Revisione inviata con successo",
+  "error": "Errore",
+  "audioRequired": "Devi registrare un feedback audio",
+  "authenticationRequired": "Autenticazione richiesta. Effettua nuovamente il login.",
+  "submitError": "Impossibile inviare la revisione",
+  "startRecording": "Inizia Registrazione",
+  "recording": "Registrazione in corso",
+  "paused": "In pausa",
+  "pause": "Pausa",
+  "resume": "Riprendi",
+  "stop": "Stop",
+  "clear": "Cancella",
+  "recordingComplete": "Registrazione Completata",
+  "recordingInstructions": "Clicca sul pulsante per iniziare a registrare il tuo feedback audio",
+  "reviewRecordingBeforeSubmit": "Rivedi la tua registrazione prima di inviare"
 }
 }

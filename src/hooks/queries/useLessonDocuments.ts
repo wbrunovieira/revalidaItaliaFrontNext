@@ -29,23 +29,37 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
  */
 async function fetchLessonDocuments(lessonId: string): Promise<Document[]> {
   const response = await fetch(
-    `${apiUrl}/api/v1/lessons/${lessonId}/documents?page=1&limit=100`,
+    `${apiUrl}/api/v1/lessons/${lessonId}/documents?page=1&limit=100&_t=${Date.now()}`,
     {
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'no-store', // Força não usar cache
     }
   );
 
   if (!response.ok) {
+    console.error('[useLessonDocuments] API error:', response.status, response.statusText);
     return [];
   }
 
   const data = await response.json();
+  console.log('[useLessonDocuments] API response:', data);
 
   // API retorna { documents: [], pagination: {} }
   // Extrair apenas o array de documentos
-  return data.documents || [];
+  if (Array.isArray(data)) {
+    console.warn('[useLessonDocuments] ⚠️ API retornou array direto (formato antigo)');
+    return data;
+  }
+
+  if (data.documents && Array.isArray(data.documents)) {
+    console.log('[useLessonDocuments] ✅ API retornou objeto paginado (formato novo)');
+    return data.documents;
+  }
+
+  console.error('[useLessonDocuments] ❌ Formato inesperado:', data);
+  return [];
 }
 
 /**

@@ -792,7 +792,7 @@
         "results": "{count} tentativi trovati"
       },
       "stats": {
-        "openExams": "Esami Aperti",
+        "openExams": "Esami Aperti ed Esami Orali",
         "pending": "In Attesa di Revisione",
         "waitingStudent": "In Attesa dello Studente",
         "approved": "Approvati",

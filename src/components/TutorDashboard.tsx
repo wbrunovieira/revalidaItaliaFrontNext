@@ -855,9 +855,6 @@ export default function TutorDashboard({
 
             {/* Stats Cards */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                {t('stats.openExams')} {/* Provas Abertas e Exames Orais */}
-              </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
                   <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
@@ -1310,6 +1307,12 @@ export default function TutorDashboard({
             </div>
 
             {/* Attempts grouped by student or assessment */}
+            <div className="mt-10 mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                {t('stats.openExams')}
+              </h2>
+            </div>
+
             <div className="space-y-6">
               {Object.keys(groupedAttempts).length === 0 ? (
                 <div className="text-center py-12">

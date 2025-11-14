@@ -4023,7 +4023,10 @@
       "fileSize": "Tamanho do arquivo em megabytes",
       "url": "URL relativa ou completa do documento",
       "downloadableYes": "Usuários podem baixar este documento",
-      "downloadableNo": "Apenas visualização online"
+      "downloadableNo": "Apenas visualização online",
+      "protectionNone": "Aceita: PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP (máx. 100MB)",
+      "protectionWatermark": "Aceita apenas PDF (máx. 100MB) - necessário para marca d'água",
+      "protectionFull": "Aceita apenas PDF (máx. 100MB) - necessário para proteção completa"
     },
     "translations": {
       "title": "Traduções",
@@ -4055,9 +4058,11 @@
       "urlRequired": "A URL é obrigatória",
       "urlMax": "A URL deve ter no máximo 1000 caracteres",
       "urlInvalid": "A URL deve começar com / ou http",
-      "fileRequired": "Por favor, selecione um arquivo PDF",
-      "onlyPDF": "Apenas arquivos PDF são permitidos",
-      "protectionLevelRequired": "Por favor, selecione o nível de proteção"
+      "fileRequired": "Por favor, selecione um arquivo",
+      "onlyPDF": "Apenas arquivos PDF são permitidos para este nível de proteção",
+      "protectionLevelRequired": "Por favor, selecione o nível de proteção",
+      "invalidFileTypeForNone": "Tipo de arquivo não suportado para proteção NONE. Aceitos: PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP",
+      "invalidFileTypeForProtected": "Documentos com proteção WATERMARK ou FULL devem ser PDF. O processamento de marca d'água requer formato PDF"
     },
     "error": {
       "title": "Erro ao criar documento",
@@ -4087,6 +4092,9 @@
     "upload": {
       "clickToSelect": "Clique para selecionar arquivo",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (máx. 10MB)",
+      "supportedFormatsNone": "PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP",
+      "supportedFormatsProtected": "PDF",
+      "maxSize": "Máximo 100MB",
       "success": "Arquivo carregado com sucesso",
       "uploading": "Enviando arquivo",
       "fileSelected": "Arquivo selecionado"
@@ -4100,15 +4108,18 @@
     "protectionLevel": {
       "none": {
         "label": "Nenhuma",
-        "description": "Sem proteção, download direto permitido"
+        "description": "Sem proteção, download direto permitido",
+        "hint": "Aceita múltiplos formatos: PDF, Word, Excel, PowerPoint, etc."
       },
       "watermark": {
         "label": "Protegido",
-        "description": "Watermark em todas as páginas, URL única com expiração de 1h, verificação de matrícula, logs de acesso completos, viewer sem download/impressão"
+        "description": "Watermark em todas as páginas, URL única com expiração de 1h, verificação de matrícula, logs de acesso completos, viewer sem download/impressão",
+        "hint": "Apenas PDF - necessário para aplicar marca d'água"
       },
       "full": {
         "label": "Proteção Avançada",
-        "description": "Todas as proteções do nível Protegido + limite de 5 gerações de URL por hora"
+        "description": "Todas as proteções do nível Protegido + limite de 5 gerações de URL por hora",
+        "hint": "Apenas PDF - máxima proteção com marca d'água"
       }
     }
   },
@@ -4166,7 +4177,18 @@
           "forbidden": "Acesso negado",
           "noPermission": "Você não tem permissão para deletar documentos. Requer função de admin ou tutor",
           "notFound": "Não encontrado",
-          "documentNotFound": "O documento não foi encontrado ou já foi deletado"
+          "documentNotFound": "O documento não foi encontrado ou já foi deletado",
+          "authTitle": "Não autorizado",
+          "authDescription": "Sua sessão expirou. Faça login novamente.",
+          "permissionTitle": "Sem permissão",
+          "permissionDescription": "Você não tem permissão para acessar documentos."
+        },
+        "pagination": {
+          "showing": "Mostrando",
+          "of": "de",
+          "page": "Página",
+          "previous": "Anterior",
+          "next": "Próxima"
         }
       },
       "documentView": {

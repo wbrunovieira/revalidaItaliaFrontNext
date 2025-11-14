@@ -3965,7 +3965,10 @@
       "fileSize": "Tamaño del archivo en megabytes",
       "url": "URL relativa o completa del documento",
       "downloadableYes": "Los usuarios pueden descargar este documento",
-      "downloadableNo": "Solo visualización en línea"
+      "downloadableNo": "Solo visualización en línea",
+      "protectionNone": "Acepta: PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP (máx. 100MB)",
+      "protectionWatermark": "Acepta solo PDF (máx. 100MB) - necesario para marca de agua",
+      "protectionFull": "Acepta solo PDF (máx. 100MB) - necesario para protección completa"
     },
     "translations": {
       "title": "Traducciones",
@@ -3997,9 +4000,11 @@
       "urlRequired": "La URL es obligatoria",
       "urlMax": "La URL debe tener máximo 1000 caracteres",
       "urlInvalid": "La URL debe comenzar con / o http",
-      "fileRequired": "Por favor, seleccione un archivo PDF",
-      "onlyPDF": "Solo se permiten archivos PDF",
-      "protectionLevelRequired": "Por favor, seleccione el nivel de protección"
+      "fileRequired": "Por favor, seleccione un archivo",
+      "onlyPDF": "Solo se permiten archivos PDF para este nivel de protección",
+      "protectionLevelRequired": "Por favor, seleccione el nivel de protección",
+      "invalidFileTypeForNone": "Tipo de archivo no soportado para protección NONE. Aceptados: PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP",
+      "invalidFileTypeForProtected": "Los documentos con protección WATERMARK o FULL deben ser PDF. El procesamiento de marca de agua requiere formato PDF"
     },
     "error": {
       "title": "Error al crear documento",
@@ -4029,6 +4034,9 @@
     "upload": {
       "clickToSelect": "Haga clic para seleccionar archivo",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (máx. 10MB)",
+      "supportedFormatsNone": "PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP",
+      "supportedFormatsProtected": "PDF",
+      "maxSize": "Máximo 100MB",
       "success": "Archivo cargado exitosamente",
       "uploading": "Subiendo archivo",
       "fileSelected": "Archivo seleccionado"
@@ -4042,15 +4050,18 @@
     "protectionLevel": {
       "none": {
         "label": "Ninguna",
-        "description": "Sin protección, descarga directa permitida"
+        "description": "Sin protección, descarga directa permitida",
+        "hint": "Acepta múltiples formatos: PDF, Word, Excel, PowerPoint, etc."
       },
       "watermark": {
         "label": "Protegido",
-        "description": "Marca de agua en todas las páginas, URL única con vencimiento de 1h, verificación de matrícula, logs de acceso completos, visor sin descarga/impresión"
+        "description": "Marca de agua en todas las páginas, URL única con vencimiento de 1h, verificación de matrícula, logs de acceso completos, visor sin descarga/impresión",
+        "hint": "Solo PDF - necesario para aplicar marca de agua"
       },
       "full": {
         "label": "Protección Avanzada",
-        "description": "Todas las protecciones del nivel Protegido + límite de 5 generaciones de URL por hora"
+        "description": "Todas las protecciones del nivel Protegido + límite de 5 generaciones de URL por hora",
+        "hint": "Solo PDF - máxima protección con marca de agua"
       }
     }
   },
@@ -4108,7 +4119,18 @@
           "forbidden": "Acceso denegado",
           "noPermission": "No tienes permiso para eliminar documentos. Requiere rol de admin o tutor",
           "notFound": "No encontrado",
-          "documentNotFound": "El documento no fue encontrado o ya fue eliminado"
+          "documentNotFound": "El documento no fue encontrado o ya fue eliminado",
+          "authTitle": "No autorizado",
+          "authDescription": "Tu sesión expiró. Inicia sesión nuevamente.",
+          "permissionTitle": "Sin permiso",
+          "permissionDescription": "No tienes permiso para acceder a los documentos."
+        },
+        "pagination": {
+          "showing": "Mostrando",
+          "of": "de",
+          "page": "Página",
+          "previous": "Anterior",
+          "next": "Siguiente"
         }
       },
       "documentView": {

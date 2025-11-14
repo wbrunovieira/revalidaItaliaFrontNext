@@ -3912,7 +3912,10 @@
       "fileSize": "Dimensione del file in megabyte",
       "url": "URL relativo o completo del documento",
       "downloadableYes": "Gli utenti possono scaricare questo documento",
-      "downloadableNo": "Solo visualizzazione online"
+      "downloadableNo": "Solo visualizzazione online",
+      "protectionNone": "Accetta: PDF, Word, Excel, PowerPoint, Testo, RTF, ZIP (max. 100MB)",
+      "protectionWatermark": "Accetta solo PDF (max. 100MB) - necessario per filigrana",
+      "protectionFull": "Accetta solo PDF (max. 100MB) - necessario per protezione completa"
     },
     "translations": {
       "title": "Traduzioni",
@@ -3944,9 +3947,11 @@
       "urlRequired": "L'URL è obbligatorio",
       "urlMax": "L'URL deve avere massimo 1000 caratteri",
       "urlInvalid": "L'URL deve iniziare con / o http",
-      "fileRequired": "Per favore, seleziona un file PDF",
-      "onlyPDF": "Solo file PDF sono consentiti",
-      "protectionLevelRequired": "Per favore, seleziona il livello di protezione"
+      "fileRequired": "Per favore, seleziona un file",
+      "onlyPDF": "Solo file PDF sono consentiti per questo livello di protezione",
+      "protectionLevelRequired": "Per favore, seleziona il livello di protezione",
+      "invalidFileTypeForNone": "Tipo di file non supportato per protezione NONE. Accettati: PDF, Word, Excel, PowerPoint, Testo, RTF, ZIP",
+      "invalidFileTypeForProtected": "I documenti con protezione WATERMARK o FULL devono essere PDF. L'elaborazione della filigrana richiede formato PDF"
     },
     "error": {
       "title": "Errore nella creazione del documento",
@@ -3976,6 +3981,9 @@
     "upload": {
       "clickToSelect": "Clicca per selezionare il file",
       "supportedFormats": "PDF, DOC, DOCX, XLS, XLSX, CSV (max. 10MB)",
+      "supportedFormatsNone": "PDF, Word, Excel, PowerPoint, Testo, RTF, ZIP",
+      "supportedFormatsProtected": "PDF",
+      "maxSize": "Massimo 100MB",
       "success": "File caricato con successo",
       "uploading": "Caricamento file",
       "fileSelected": "File selezionato"
@@ -3989,15 +3997,18 @@
     "protectionLevel": {
       "none": {
         "label": "Nessuna",
-        "description": "Nessuna protezione, download diretto consentito"
+        "description": "Nessuna protezione, download diretto consentito",
+        "hint": "Accetta formati multipli: PDF, Word, Excel, PowerPoint, ecc."
       },
       "watermark": {
         "label": "Protetto",
-        "description": "Filigrana su tutte le pagine, URL unico con scadenza di 1h, verifica iscrizione, log di accesso completi, visualizzatore senza download/stampa"
+        "description": "Filigrana su tutte le pagine, URL unico con scadenza di 1h, verifica iscrizione, log di accesso completi, visualizzatore senza download/stampa",
+        "hint": "Solo PDF - necessario per applicare filigrana"
       },
       "full": {
         "label": "Protezione Avanzata",
-        "description": "Tutte le protezioni del livello Protetto + limite di 5 generazioni URL per ora"
+        "description": "Tutte le protezioni del livello Protetto + limite di 5 generazioni URL per ora",
+        "hint": "Solo PDF - massima protezione con filigrana"
       }
     }
   },
@@ -4055,7 +4066,18 @@
       "forbidden": "Accesso negato",
       "noPermission": "Non hai il permesso di eliminare documenti. Richiede ruolo di admin o tutor",
       "notFound": "Non trovato",
-      "documentNotFound": "Il documento non è stato trovato o è già stato eliminato"
+      "documentNotFound": "Il documento non è stato trovato o è già stato eliminato",
+      "authTitle": "Non autorizzato",
+      "authDescription": "La tua sessione è scaduta. Effettua nuovamente il login.",
+      "permissionTitle": "Senza permesso",
+      "permissionDescription": "Non hai il permesso di accedere ai documenti."
+    },
+    "pagination": {
+      "showing": "Mostrando",
+      "of": "di",
+      "page": "Pagina",
+      "previous": "Precedente",
+      "next": "Successivo"
     }
   },
   "documentView": {

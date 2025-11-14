@@ -19,6 +19,7 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Package,
   Play,
   BookOpen,
@@ -100,6 +101,15 @@ export default function DocumentsList() {
     Set<string>
   >(new Set());
 
+  // Estado para controlar paginação por aula
+  const [lessonPagination, setLessonPagination] = useState<{
+    [lessonId: string]: {
+      page: number;
+      totalPages: number;
+      total: number;
+    };
+  }>({});
+
   // Estados para controlar o modal de documento
   const [isDocumentModalOpen, setIsDocumentModalOpen] =
     useState(false);
@@ -141,17 +151,71 @@ export default function DocumentsList() {
 
   // Função para buscar documentos de uma aula específica
   const fetchDocumentsForLesson = useCallback(
-    async (lessonId: string): Promise<DocumentItem[]> => {
+    async (lessonId: string, page: number = 1): Promise<DocumentItem[]> => {
       try {
+        // Buscar token de autenticação
+        const token = getCookie('token');
+
+        if (!token) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.tokenMissing') || 'Token de autenticação não encontrado',
+            variant: 'destructive',
+          });
+          return [];
+        }
+
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents?page=${page}&limit=10`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
         );
+
+        if (response.status === 401) {
+          toast({
+            title: t('error.authTitle') || 'Não autorizado',
+            description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
+            variant: 'destructive',
+          });
+          // Redirecionar para login após 2 segundos
+          setTimeout(() => {
+            router.push(`/${locale}/login`);
+          }, 2000);
+          return [];
+        }
+
+        if (response.status === 403) {
+          toast({
+            title: t('error.permissionTitle') || 'Sem permissão',
+            description: t('error.permissionDescription') || 'Você não tem permissão para acessar documentos.',
+            variant: 'destructive',
+          });
+          return [];
+        }
 
         if (!response.ok) {
           return [];
         }
 
-        return await response.json();
+        const documentsData = await response.json();
+
+        // Atualizar informações de paginação para esta aula
+        if (documentsData.pagination) {
+          setLessonPagination(prev => ({
+            ...prev,
+            [lessonId]: {
+              page: documentsData.pagination.page,
+              totalPages: documentsData.pagination.totalPages,
+              total: documentsData.pagination.total,
+            }
+          }));
+        }
+
+        return documentsData.documents || [];
       } catch (error) {
         handleApiError(
           error,
@@ -160,7 +224,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError]
+    [handleApiError, toast, t, router, locale]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -244,6 +308,43 @@ export default function DocumentsList() {
       }
     },
     [handleApiError, fetchLessonsForModule]
+  );
+
+  // Função para navegar entre páginas de documentos
+  const handlePageChange = useCallback(
+    async (courseId: string, moduleId: string, lessonId: string, newPage: number) => {
+      const paginationInfo = lessonPagination[lessonId];
+      if (!paginationInfo) return;
+
+      // Validar página
+      if (newPage < 1 || newPage > paginationInfo.totalPages) return;
+
+      // Buscar documentos da nova página
+      const documents = await fetchDocumentsForLesson(lessonId, newPage);
+
+      // Atualizar o curso com os novos documentos
+      setCoursesWithDocuments(prev =>
+        prev.map(course => {
+          if (course.id !== courseId) return course;
+
+          return {
+            ...course,
+            modules: course.modules?.map(module => {
+              if (module.id !== moduleId) return module;
+
+              return {
+                ...module,
+                lessons: module.lessons?.map(lesson => {
+                  if (lesson.id !== lessonId) return lesson;
+                  return { ...lesson, documents };
+                }),
+              };
+            }),
+          };
+        })
+      );
+    },
+    [lessonPagination, fetchDocumentsForLesson]
   );
 
   // Função principal para buscar todos os dados
@@ -1282,6 +1383,68 @@ export default function DocumentsList() {
                                                             </div>
                                                           );
                                                         }
+                                                      )}
+
+                                                      {/* Controles de paginação */}
+                                                      {lessonPagination[lesson.id] && lessonPagination[lesson.id].totalPages > 1 && (
+                                                        <div className="mt-4 flex items-center justify-between border-t border-gray-700 pt-4">
+                                                          <div className="text-xs text-gray-400">
+                                                            {t('pagination.showing')} {lesson.documents?.length || 0} {t('pagination.of')} {lessonPagination[lesson.id].total} {t('documents')}
+                                                          </div>
+
+                                                          <div className="flex items-center gap-2">
+                                                            {/* Botão anterior */}
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => handlePageChange(
+                                                                course.id,
+                                                                module.id,
+                                                                lesson.id,
+                                                                lessonPagination[lesson.id].page - 1
+                                                              )}
+                                                              disabled={lessonPagination[lesson.id].page === 1}
+                                                              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                                              title={t('pagination.previous')}
+                                                            >
+                                                              <ChevronLeft size={16} />
+                                                            </button>
+
+                                                            {/* Input de página */}
+                                                            <div className="flex items-center gap-1 text-xs">
+                                                              <span className="text-gray-400">{t('pagination.page')}</span>
+                                                              <input
+                                                                type="number"
+                                                                min="1"
+                                                                max={lessonPagination[lesson.id].totalPages}
+                                                                value={lessonPagination[lesson.id].page}
+                                                                onChange={(e) => {
+                                                                  const page = parseInt(e.target.value);
+                                                                  if (page >= 1 && page <= lessonPagination[lesson.id].totalPages) {
+                                                                    handlePageChange(course.id, module.id, lesson.id, page);
+                                                                  }
+                                                                }}
+                                                                className="w-12 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-center text-white focus:outline-none focus:ring-1 focus:ring-secondary"
+                                                              />
+                                                              <span className="text-gray-400">{t('pagination.of')} {lessonPagination[lesson.id].totalPages}</span>
+                                                            </div>
+
+                                                            {/* Botão próximo */}
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => handlePageChange(
+                                                                course.id,
+                                                                module.id,
+                                                                lesson.id,
+                                                                lessonPagination[lesson.id].page + 1
+                                                              )}
+                                                              disabled={lessonPagination[lesson.id].page === lessonPagination[lesson.id].totalPages}
+                                                              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                                              title={t('pagination.next')}
+                                                            >
+                                                              <ChevronRight size={16} />
+                                                            </button>
+                                                          </div>
+                                                        </div>
                                                       )}
                                                     </div>
                                                   ) : (

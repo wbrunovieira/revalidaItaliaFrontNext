@@ -28,7 +28,15 @@ import {
   Shield,
   ShieldCheck,
   ShieldAlert,
+  Info,
 } from 'lucide-react';
+import {
+  validateFile,
+  getFileInputAccept,
+  getAcceptedFormatsDescription,
+  formatFileSize,
+  getFileIcon,
+} from '@/lib/document-upload';
 
 interface Translation {
   locale: string;
@@ -548,16 +556,23 @@ export default function CreateDocumentForm() {
       isValid = false;
     }
 
-    // Validar arquivo PDF
+    // Validar arquivo baseado no nível de proteção
     if (!formData.file) {
-      newErrors.file = t('errors.fileRequired') || 'Por favor, selecione um arquivo PDF';
+      newErrors.file = t('errors.fileRequired') || 'Por favor, selecione um arquivo';
       isValid = false;
-    } else if (formData.file.type !== 'application/pdf') {
-      newErrors.file = t('errors.onlyPDF') || 'Apenas arquivos PDF são permitidos';
-      isValid = false;
-    } else if (formData.file.size > 100 * 1024 * 1024) {
-      newErrors.file = t('errors.fileTooLarge') || 'Arquivo muito grande (máximo 100MB)';
-      isValid = false;
+    } else {
+      const validation = validateFile(formData.file, formData.protectionLevel);
+      if (!validation.isValid && validation.error) {
+        // Usar mensagens traduzidas quando disponíveis
+        if (validation.error.type === 'size') {
+          newErrors.file = t('error.fileTooLargeDescription') || validation.error.message;
+        } else if (validation.error.type === 'protection') {
+          newErrors.file = t('errors.invalidFileTypeForProtected') || validation.error.message;
+        } else {
+          newErrors.file = t('errors.invalidFileTypeForNone') || validation.error.message;
+        }
+        isValid = false;
+      }
     }
 
     // Validar nível de proteção
@@ -846,22 +861,31 @@ export default function CreateDocumentForm() {
         return;
       }
 
-      // Validar tipo de arquivo
-      if (file.type !== 'application/pdf') {
-        setErrors(prev => ({
-          ...prev,
-          file: t('errors.onlyPDF') || 'Apenas arquivos PDF são permitidos',
-        }));
-        return;
-      }
+      // Validar arquivo baseado no nível de proteção
+      const validation = validateFile(file, formData.protectionLevel);
 
-      // Validar tamanho do arquivo (max 100MB)
-      const maxSize = 100 * 1024 * 1024; // 100MB
-      if (file.size > maxSize) {
+      if (!validation.isValid && validation.error) {
+        let errorMessage = validation.error.message;
+
+        // Usar mensagens traduzidas quando disponíveis
+        if (validation.error.type === 'size') {
+          errorMessage = t('error.fileTooLargeDescription') || validation.error.message;
+        } else if (validation.error.type === 'protection') {
+          errorMessage = t('errors.invalidFileTypeForProtected') || validation.error.message;
+        } else {
+          errorMessage = t('errors.invalidFileTypeForNone') || validation.error.message;
+        }
+
         setErrors(prev => ({
           ...prev,
-          file: t('errors.fileTooLarge') || 'Arquivo muito grande (máximo 100MB)',
+          file: errorMessage,
         }));
+
+        toast({
+          title: t('error.uploadTitle') || 'Erro ao selecionar arquivo',
+          description: errorMessage,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -894,12 +918,13 @@ export default function CreateDocumentForm() {
       });
 
       // Success toast
+      const fileIconEmoji = getFileIcon(file.type);
       toast({
         title: t('upload.fileSelected') || 'Arquivo selecionado',
-        description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`,
+        description: `${fileIconEmoji} ${file.name} (${formatFileSize(file.size)})`,
       });
     },
-    [t, toast, fileNameToTitle]
+    [t, toast, fileNameToTitle, formData.protectionLevel]
   );
 
   // Função para remover arquivo
@@ -1115,25 +1140,27 @@ export default function CreateDocumentForm() {
           </div>
         </div>
 
-        {/* Upload de Arquivo PDF */}
+        {/* Upload de Arquivo */}
         <div className="mb-8">
           <Label className="text-gray-300 flex items-center gap-2 mb-3">
             <Upload size={16} />
             {t('fields.document')}
             <span className="text-red-400">*</span>
-            <span className="text-xs text-gray-500">(Apenas PDF, máx 100MB)</span>
+            <span className="text-xs text-gray-500">
+              ({getAcceptedFormatsDescription(formData.protectionLevel)} • {t('upload.maxSize')})
+            </span>
           </Label>
 
           {formData.file ? (
             <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg border border-gray-600">
               <div className="flex items-center gap-3">
-                <FileText className="text-secondary" size={24} />
+                <span className="text-3xl">{getFileIcon(formData.file.type)}</span>
                 <div>
                   <p className="text-white text-sm font-medium">
                     {formData.file.name}
                   </p>
                   <p className="text-gray-400 text-xs">
-                    {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                    {formatFileSize(formData.file.size)}
                   </p>
                 </div>
               </div>
@@ -1150,9 +1177,9 @@ export default function CreateDocumentForm() {
             <div className="relative">
               <input
                 type="file"
-                id="pdf-upload"
+                id="document-upload"
                 className="sr-only"
-                accept=".pdf,application/pdf"
+                accept={getFileInputAccept(formData.protectionLevel)}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -1161,12 +1188,17 @@ export default function CreateDocumentForm() {
                 }}
               />
               <label
-                htmlFor="pdf-upload"
+                htmlFor="document-upload"
                 className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
               >
                 <Upload size={40} className="text-gray-400 mb-3" />
                 <p className="text-sm text-gray-300 font-medium">{t('upload.clickToSelect')}</p>
-                <p className="text-xs text-gray-500 mt-1">PDF • Máximo 100MB</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.protectionLevel === 'NONE'
+                    ? t('upload.supportedFormatsNone')
+                    : t('upload.supportedFormatsProtected')
+                  } • {t('upload.maxSize')}
+                </p>
               </label>
             </div>
           )}
@@ -1188,7 +1220,7 @@ export default function CreateDocumentForm() {
           <div className="grid gap-4 md:grid-cols-3">
             {/* NONE */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'NONE' }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'NONE', file: null }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'NONE'
                   ? 'border-secondary bg-secondary/10'
@@ -1201,7 +1233,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="NONE"
                   checked={formData.protectionLevel === 'NONE'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
                   className="mt-1"
                 />
                 <div className="flex-1">
@@ -1209,16 +1241,22 @@ export default function CreateDocumentForm() {
                     <ShieldAlert size={18} className="text-gray-400" />
                     <h4 className="text-white font-medium">{t('protectionLevel.none.label') || 'Nenhuma'}</h4>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 mb-2">
                     {t('protectionLevel.none.description') || 'Sem proteção, download direto permitido'}
                   </p>
+                  <div className="flex items-start gap-1.5 mt-2 p-2 bg-blue-500/10 rounded border border-blue-500/20">
+                    <Info size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-blue-300">
+                      {t('protectionLevel.none.hint') || 'Aceita múltiplos formatos: PDF, Word, Excel, PowerPoint, etc.'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* WATERMARK */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'WATERMARK' }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'WATERMARK', file: null }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'WATERMARK'
                   ? 'border-secondary bg-secondary/10'
@@ -1231,7 +1269,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="WATERMARK"
                   checked={formData.protectionLevel === 'WATERMARK'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
                   className="mt-1"
                 />
                 <div className="flex-1">
@@ -1239,16 +1277,22 @@ export default function CreateDocumentForm() {
                     <Shield size={18} className="text-secondary" />
                     <h4 className="text-white font-medium">{t('protectionLevel.watermark.label') || 'Protegido'}</h4>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 mb-2">
                     {t('protectionLevel.watermark.description') || 'Marca d\'água com dados do aluno'}
                   </p>
+                  <div className="flex items-start gap-1.5 mt-2 p-2 bg-amber-500/10 rounded border border-amber-500/20">
+                    <Info size={14} className="text-amber-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-300">
+                      {t('protectionLevel.watermark.hint') || 'Apenas PDF - necessário para aplicar marca d\'água'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* FULL */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'FULL' }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'FULL', file: null }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'FULL'
                   ? 'border-secondary bg-secondary/10'
@@ -1261,7 +1305,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="FULL"
                   checked={formData.protectionLevel === 'FULL'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
                   className="mt-1"
                 />
                 <div className="flex-1">
@@ -1269,9 +1313,15 @@ export default function CreateDocumentForm() {
                     <ShieldCheck size={18} className="text-green-400" />
                     <h4 className="text-white font-medium">{t('protectionLevel.full.label') || 'Proteção Avançada'}</h4>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 mb-2">
                     {t('protectionLevel.full.description') || 'Máxima proteção (watermark + URL assinada)'}
                   </p>
+                  <div className="flex items-start gap-1.5 mt-2 p-2 bg-green-500/10 rounded border border-green-500/20">
+                    <Info size={14} className="text-green-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-green-300">
+                      {t('protectionLevel.full.hint') || 'Apenas PDF - máxima proteção com marca d\'água'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

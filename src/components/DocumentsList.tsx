@@ -10,7 +10,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getCookie } from '@/lib/auth-utils';
+import { getAuthToken } from '@/lib/auth-utils';
 import {
   FileText,
   Edit,
@@ -153,15 +153,19 @@ export default function DocumentsList() {
   const fetchDocumentsForLesson = useCallback(
     async (lessonId: string, page: number = 1): Promise<DocumentItem[]> => {
       try {
-        // Buscar token de autenticação
-        const token = getCookie('token');
+        // Buscar token de autenticação (cookie, localStorage ou sessionStorage)
+        const token = getAuthToken();
 
         if (!token) {
           toast({
             title: t('error.authTitle'),
-            description: t('error.tokenMissing') || 'Token de autenticação não encontrado',
+            description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
             variant: 'destructive',
           });
+          // Redirecionar para login após 2 segundos
+          setTimeout(() => {
+            router.push(`/${locale}/login`);
+          }, 2000);
           return [];
         }
 
@@ -414,15 +418,17 @@ export default function DocumentsList() {
     async (lessonId: string, documentId: string) => {
       try {
         // 1. Verificar se o token existe
-        const token = getCookie('token');
+        const token = getAuthToken();
 
         if (!token) {
           toast({
-            title: t('error.unauthorized'),
-            description: t('error.tokenMissing'),
+            title: t('error.authTitle'),
+            description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
             variant: 'destructive',
           });
-          router.push(`/${locale}/login`);
+          setTimeout(() => {
+            router.push(`/${locale}/login`);
+          }, 2000);
           return;
         }
 

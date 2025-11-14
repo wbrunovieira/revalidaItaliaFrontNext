@@ -161,9 +161,16 @@ export default function LessonPageContent({
     if (initialAssessments) {
       queryClient.setQueryData(['lesson-assessments', lessonId], initialAssessments);
     }
-    if (initialDocuments) {
-      queryClient.setQueryData(['lesson-documents', lessonId], initialDocuments);
-    }
+    // SKIP setting lesson-documents cache - let the hook fetch fresh data
+    // The API now returns paginated format { documents: [], pagination: {} }
+    // and the hook extracts the documents array correctly
+    // if (initialDocuments) {
+    //   queryClient.setQueryData(['lesson-documents', lessonId], initialDocuments);
+    // }
+
+    // Force invalidate lesson-documents cache to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['lesson-documents', lessonId] });
+
     if (initialFlashcards && lesson?.flashcardIds && lesson.flashcardIds.length > 0) {
       queryClient.setQueryData(
         ['flashcards', lesson.flashcardIds.sort().join(',')],

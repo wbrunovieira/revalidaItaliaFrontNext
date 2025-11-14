@@ -4648,7 +4648,8 @@
   },
   "types": {
     "multipleChoice": "Múltipla Escolha",
-    "open": "Dissertativa"
+    "open": "Dissertativa",
+    "oral": "Oral"
   },
   "errors": {
     "textRequired": "O texto da questão é obrigatório",

@@ -166,6 +166,16 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           isCorrect: answer.isCorrect,
           reviewerId: answer.reviewerId
         });
+
+        // ⚠️ WARN: Check for missing audioAnswerUrl in ORAL_EXAM
+        if (data.assessment?.type === 'ORAL_EXAM' && !answer.audioAnswerUrl) {
+          console.warn('⚠️ BACKEND ISSUE: audioAnswerUrl is missing for ORAL_EXAM answer:', {
+            answerId: answer.id,
+            questionId: answer.questionId,
+            assessmentType: data.assessment.type,
+            message: 'Backend should include audioAnswerUrl field in /api/v1/attempts/${attemptId}/results for ORAL_EXAM'
+          });
+        }
       });
       
       // Mapear os dados da API para o formato esperado pelo componente

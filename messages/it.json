@@ -4492,7 +4492,8 @@
     },
     "types": {
       "multipleChoice": "Scelta Multipla",
-      "open": "Dissertativa"
+      "open": "Dissertativa",
+      "oral": "Orale"
     },
     "errors": {
       "textRequired": "Il testo della domanda è obbligatorio",

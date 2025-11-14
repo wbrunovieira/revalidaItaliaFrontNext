@@ -29,9 +29,10 @@ import {
   Languages,
   ChevronLeft,
   ChevronRight,
+  Mic,
 } from 'lucide-react';
 
-type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN';
+type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'ORAL';
 
 interface Option {
   text: string;
@@ -373,10 +374,14 @@ export default function CreateQuestionForm({
       const selectedAssessment = assessments.find(a => a.id === assessmentId);
       if (selectedAssessment) {
         if (selectedAssessment.type === 'QUIZ' || selectedAssessment.type === 'SIMULADO') {
-          setFormData(prev => ({ ...prev, type: 'MULTIPLE_CHOICE' }));
+          setFormData(prev => ({ ...prev, type: 'MULTIPLE_CHOICE', assessmentId }));
           setTouched(prev => ({ ...prev, type: true }));
-        } else if (selectedAssessment.type === 'PROVA_ABERTA' || selectedAssessment.type === 'ORAL_EXAM') {
-          setFormData(prev => ({ ...prev, type: 'OPEN' }));
+        } else if (selectedAssessment.type === 'ORAL_EXAM') {
+          // ORAL_EXAM requires ORAL type questions
+          setFormData(prev => ({ ...prev, type: 'ORAL', assessmentId }));
+          setTouched(prev => ({ ...prev, type: true }));
+        } else if (selectedAssessment.type === 'PROVA_ABERTA') {
+          setFormData(prev => ({ ...prev, type: 'OPEN', assessmentId }));
           setTouched(prev => ({ ...prev, type: true }));
         }
       }
@@ -796,6 +801,11 @@ export default function CreateQuestionForm({
                           <>
                             <CircleDot size={16} className="text-blue-400" />
                             {t('types.multipleChoice')}
+                          </>
+                        ) : formData.type === 'ORAL' ? (
+                          <>
+                            <Mic size={16} className="text-orange-400" />
+                            {t('types.oral')}
                           </>
                         ) : formData.type === 'OPEN' ? (
                           <>

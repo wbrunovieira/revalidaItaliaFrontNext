@@ -29,7 +29,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
  */
 async function fetchLessonDocuments(lessonId: string): Promise<Document[]> {
   const response = await fetch(
-    `${apiUrl}/api/v1/lessons/${lessonId}/documents`,
+    `${apiUrl}/api/v1/lessons/${lessonId}/documents?page=1&limit=100`,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +41,11 @@ async function fetchLessonDocuments(lessonId: string): Promise<Document[]> {
     return [];
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // API retorna { documents: [], pagination: {} }
+  // Extrair apenas o array de documentos
+  return data.documents || [];
 }
 
 /**

@@ -37,6 +37,36 @@ export function OralExamReviewForm({
   const [teacherAudioBlob, setTeacherAudioBlob] = useState<Blob | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Debug: Log when component renders
+  console.log('[OralExamReviewForm] Rendered with:', {
+    attemptAnswerId,
+    studentAudioUrl,
+    reviewerId,
+  });
+
+  // Test if URL is accessible
+  const testAudioUrl = async () => {
+    try {
+      console.log('[OralExamReviewForm] Testing audio URL accessibility...');
+      const response = await fetch(studentAudioUrl, { method: 'HEAD' });
+      console.log('[OralExamReviewForm] Audio URL test result:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: {
+          'content-type': response.headers.get('content-type'),
+          'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+        },
+      });
+    } catch (error) {
+      console.error('[OralExamReviewForm] Failed to access audio URL:', error);
+    }
+  };
+
+  // Run test on mount
+  if (typeof window !== 'undefined') {
+    testAudioUrl();
+  }
+
   const handleSubmitReview = async () => {
     if (!teacherAudioBlob) {
       toast({
@@ -60,11 +90,43 @@ export function OralExamReviewForm({
         return;
       }
 
-      const formData = new FormData();
-      formData.append('reviewerId', reviewerId);
-      formData.append('isCorrect', String(isCorrect));
-      formData.append('reviewDecision', reviewDecision);
-      formData.append('teacherAudioFile', teacherAudioBlob, 'teacher-feedback.mp3');
+      // Step 1: Upload teacher's audio file to get URL
+      console.log('[OralExamReviewForm] Uploading teacher audio...');
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', teacherAudioBlob, 'teacher-feedback.webm');
+
+      const uploadResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/teacher-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: uploadFormData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => null);
+        throw new Error(
+          errorData?.message || `Failed to upload audio: ${uploadResponse.status} ${uploadResponse.statusText}`
+        );
+      }
+
+      const uploadResult = await uploadResponse.json();
+      const teacherAudioUrl = uploadResult.url || uploadResult.teacherAudioUrl;
+      console.log('[OralExamReviewForm] Teacher audio uploaded:', teacherAudioUrl);
+
+      // Step 2: Submit review with audio URL
+      console.log('[OralExamReviewForm] Submitting review...');
+      const reviewPayload = {
+        reviewerId: reviewerId,
+        isCorrect: isCorrect, // ✅ Boolean (not string!)
+        teacherAudioUrl: teacherAudioUrl,
+        reviewDecision: reviewDecision,
+      };
+
+      console.log('[OralExamReviewForm] Review payload:', reviewPayload);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/review`,
@@ -72,9 +134,9 @@ export function OralExamReviewForm({
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            // Do NOT set Content-Type for FormData - browser will set it automatically
+            'Content-Type': 'application/json',
           },
-          body: formData,
+          body: JSON.stringify(reviewPayload),
         }
       );
 
@@ -122,8 +184,20 @@ export function OralExamReviewForm({
             backgroundColor: 'transparent',
             borderRadius: '8px',
           }}
+          onError={(e) => {
+            console.error('[OralExamReviewForm] Audio error:', {
+              error: e.currentTarget.error,
+              code: e.currentTarget.error?.code,
+              message: e.currentTarget.error?.message,
+              url: studentAudioUrl,
+            });
+          }}
+          onLoadedMetadata={() => {
+            console.log('[OralExamReviewForm] Audio loaded successfully:', studentAudioUrl);
+          }}
         />
         <p className="text-xs text-gray-500">{t('listenToStudentAnswer')}</p>
+        <p className="text-xs text-gray-600 break-all">URL: {studentAudioUrl}</p>
       </div>
 
       {/* Teacher's Audio Feedback Recorder */}

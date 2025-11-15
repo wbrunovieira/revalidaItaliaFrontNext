@@ -553,6 +553,15 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   const isCurrentReviewable = isAnswerReviewable(currentQuestion.id);
   const progressPercentage = (reviewedCount / attemptData.totalQuestions) * 100;
 
+  // Debug: Log render conditions for ORAL_EXAM
+  console.log('[TutorReviewPage] Render conditions:', {
+    assessmentType: attemptData.assessment.type,
+    hasAudioUrl: !!currentAnswer?.audioAnswerUrl,
+    audioUrl: currentAnswer?.audioAnswerUrl,
+    isReviewable: isCurrentReviewable,
+    willRenderOralExam: attemptData.assessment.type === 'ORAL_EXAM' && !!currentAnswer?.audioAnswerUrl && isCurrentReviewable,
+  });
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Student and Assessment Info */}

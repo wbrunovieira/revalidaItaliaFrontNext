@@ -58,11 +58,14 @@ interface Answer {
   questionId: string;
   textAnswer?: string;
   audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   isCorrect?: boolean | null;
   teacherComment?: string;
   reviewerId?: string;
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   answeredAt: string;
+  reviewedAt?: string;
   versions?: AnswerVersion[];
 }
 
@@ -112,6 +115,7 @@ interface AttemptAnswer {
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt?: string;
   answeredAt?: string;
+  reviewedAt?: string;
   history?: AnswerHistoryEntry[];
   currentAnswer?: string | Record<string, unknown>;
   originalData?: unknown;

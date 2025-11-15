@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
-interface Answer {
+export interface Answer {
   id: string;
   questionId: string;
   questionText: string;
@@ -177,7 +177,7 @@ export function StudentOralExamView({
 
       // Debug FormData contents
       console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
+      for (const [key, value] of formData.entries()) {
         console.log(key, value);
       }
 

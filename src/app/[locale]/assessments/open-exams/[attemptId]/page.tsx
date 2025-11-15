@@ -1,7 +1,7 @@
 'use client';
 
 import { StudentAssessmentDetails } from '@/components/StudentAssessmentDetails';
-import { StudentOralExamView } from '@/components/StudentOralExamView';
+import { StudentOralExamView, Answer } from '@/components/StudentOralExamView';
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -18,7 +18,13 @@ export default function AssessmentDetailsPage({ params }: PageProps) {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [assessmentType, setAssessmentType] = useState<'PROVA_ABERTA' | 'ORAL_EXAM' | null>(null);
-  const [assessmentData, setAssessmentData] = useState<any>(null);
+  const [assessmentData, setAssessmentData] = useState<{
+    assessment?: {
+      title?: string;
+      type?: string;
+    };
+    answers?: Answer[];
+  } | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated and fetch assessment type

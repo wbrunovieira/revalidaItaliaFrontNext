@@ -42,7 +42,7 @@ interface Student {
 interface Assessment {
   id: string;
   title: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   lessonId?: string;
   lesson?: {
     id: string;

@@ -25,23 +25,11 @@ import {
 interface Assessment {
   id: string;
   title: string;
-  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
   moduleId?: string;
   moduleName?: string;
   lessonId?: string;
   lessonName?: string;
-}
-
-interface Answer {
-  id: string;
-  questionId: string;
-  questionText: string;
-  studentAnswer: string;
-  tutorFeedback?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  score?: number;
-  answeredAt: string;
-  reviewedAt?: string;
 }
 
 interface AttemptAnswer {
@@ -49,6 +37,12 @@ interface AttemptAnswer {
   questionId: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
+  teacherAudioUrl?: string;
+  audioAnswerUrl?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
+  status?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
 }
 
 interface AttemptDetails {
@@ -91,7 +85,7 @@ interface StudentAttempt {
   correctAnswers?: number;
   scorePercentage?: number;
   passed?: boolean;
-  answers?: Answer[];
+  answers?: AttemptAnswer[];
 }
 
 interface StudentAssessmentsPageProps {
@@ -269,7 +263,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
     // ORAL_EXAM: Verificar se professor já enviou feedback
     if (attempt.assessment.type === 'ORAL_EXAM') {
       // Se tem teacherAudioUrl em alguma resposta, professor já respondeu
-      const hasTeacherFeedback = attempt.answers?.some((answer: any) => answer.teacherAudioUrl);
+      const hasTeacherFeedback = attempt.answers?.some((answer: { teacherAudioUrl?: string }) => answer.teacherAudioUrl);
 
       if (hasTeacherFeedback) {
         return {

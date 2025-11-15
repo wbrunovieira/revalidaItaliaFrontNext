@@ -103,6 +103,8 @@ interface AttemptAnswer {
   questionType?: string;
   textAnswer?: string;
   audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   answer?: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
@@ -275,7 +277,7 @@ export default function TutorReviewPage({ attemptId, studentName, studentEmail }
     } finally {
       setLoading(false);
     }
-  }, [attemptId, toast, apiUrl]);
+  }, [attemptId, toast, apiUrl, studentName, studentEmail]);
 
   useEffect(() => {
     fetchAttemptData();

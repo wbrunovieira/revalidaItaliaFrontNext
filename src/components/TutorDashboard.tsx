@@ -37,7 +37,7 @@ interface Assessment {
   id: string;
   title: string;
   description?: string;
-  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
 }
 
 interface PendingAttempt {

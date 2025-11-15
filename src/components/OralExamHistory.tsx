@@ -17,10 +17,9 @@ interface HistoryEntry {
 
 interface OralExamHistoryProps {
   history: HistoryEntry[];
-  currentVersion?: HistoryEntry;
 }
 
-export function OralExamHistory({ history, currentVersion }: OralExamHistoryProps) {
+export function OralExamHistory({ history }: OralExamHistoryProps) {
   if (!history || history.length === 0) {
     return null;
   }

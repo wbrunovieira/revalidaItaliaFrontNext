@@ -90,43 +90,20 @@ export function OralExamReviewForm({
         return;
       }
 
-      // Step 1: Upload teacher's audio file to get URL
-      console.log('[OralExamReviewForm] Uploading teacher audio...');
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', teacherAudioBlob, 'teacher-feedback.webm');
+      // Submit review with audio file using FormData
+      console.log('[OralExamReviewForm] Submitting review with audio...');
+      const formData = new FormData();
+      formData.append('reviewerId', reviewerId);
+      formData.append('isCorrect', isCorrect.toString()); // FormData requires string, backend will convert to boolean
+      formData.append('teacherAudioFile', teacherAudioBlob, 'teacher-feedback.webm');
+      formData.append('reviewDecision', reviewDecision);
 
-      const uploadResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/teacher-audio`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: uploadFormData,
-        }
-      );
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `Failed to upload audio: ${uploadResponse.status} ${uploadResponse.statusText}`
-        );
-      }
-
-      const uploadResult = await uploadResponse.json();
-      const teacherAudioUrl = uploadResult.url || uploadResult.teacherAudioUrl;
-      console.log('[OralExamReviewForm] Teacher audio uploaded:', teacherAudioUrl);
-
-      // Step 2: Submit review with audio URL
-      console.log('[OralExamReviewForm] Submitting review...');
-      const reviewPayload = {
-        reviewerId: reviewerId,
-        isCorrect: isCorrect, // ✅ Boolean (not string!)
-        teacherAudioUrl: teacherAudioUrl,
-        reviewDecision: reviewDecision,
-      };
-
-      console.log('[OralExamReviewForm] Review payload:', reviewPayload);
+      console.log('[OralExamReviewForm] FormData contents:', {
+        reviewerId,
+        isCorrect,
+        reviewDecision,
+        hasAudioFile: !!teacherAudioBlob,
+      });
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/review`,
@@ -134,9 +111,9 @@ export function OralExamReviewForm({
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            // Do NOT set Content-Type - browser will set it automatically with boundary
           },
-          body: JSON.stringify(reviewPayload),
+          body: formData,
         }
       );
 

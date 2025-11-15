@@ -25,7 +25,7 @@ import {
 interface Assessment {
   id: string;
   title: string;
-  type: 'PROVA_ABERTA';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
   moduleId?: string;
   moduleName?: string;
   lessonId?: string;
@@ -54,10 +54,10 @@ interface AttemptAnswer {
 interface AttemptDetails {
   id: string;
   student?: { id: string; name: string; email: string };
-  assessment?: { 
-    id: string; 
-    title: string; 
-    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+  assessment?: {
+    id: string;
+    title: string;
+    type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
     moduleId?: string;
     moduleName?: string;
     lessonId?: string;
@@ -140,11 +140,11 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       console.log('StudentAssessmentsPage - API Response:', data);
       console.log('StudentAssessmentsPage - User ID:', userId);
       
-      // Filtrar apenas PROVA_ABERTA e tentativas do usuário atual
+      // Filtrar apenas PROVA_ABERTA e ORAL_EXAM e tentativas do usuário atual
       // Excluir tentativas IN_PROGRESS pois não foram finalizadas
-      const userOpenAttempts = (data.attempts || []).filter((attempt: AttemptDetails) => 
-        attempt.student?.id === userId && 
-        attempt.assessment?.type === 'PROVA_ABERTA' &&
+      const userOpenAttempts = (data.attempts || []).filter((attempt: AttemptDetails) =>
+        attempt.student?.id === userId &&
+        (attempt.assessment?.type === 'PROVA_ABERTA' || attempt.assessment?.type === 'ORAL_EXAM') &&
         attempt.status !== 'IN_PROGRESS' // Apenas tentativas finalizadas
       );
       
@@ -218,7 +218,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           assessment: {
             id: attempt.assessment?.id || '',
             title: attempt.assessment?.title || 'Avaliação',
-            type: 'PROVA_ABERTA' as const,
+            type: attempt.assessment?.type || 'PROVA_ABERTA',
             moduleId: attempt.assessment?.moduleId,
             moduleName: attempt.assessment?.moduleName || 'Módulo',
             lessonId: attempt.assessment?.lessonId,
@@ -231,6 +231,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           correctAnswers: reviewedQuestions, // Use reviewed questions as correct answers
           scorePercentage: attempt.results?.scorePercentage || (totalQuestions > 0 ? ((reviewedQuestions / totalQuestions) * 100) : 0),
           passed: attempt.results?.passed || (totalQuestions > 0 && reviewedQuestions / totalQuestions >= 0.7),
+          answers: attempt.answers, // Incluir answers para poder verificar teacherAudioUrl
         };
       });
 
@@ -265,6 +266,22 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
   }, [userId, fetchAttempts]);
 
   const getStatusInfo = (attempt: StudentAttempt) => {
+    // ORAL_EXAM: Verificar se professor já enviou feedback
+    if (attempt.assessment.type === 'ORAL_EXAM') {
+      // Se tem teacherAudioUrl em alguma resposta, professor já respondeu
+      const hasTeacherFeedback = attempt.answers?.some((answer: any) => answer.teacherAudioUrl);
+
+      if (hasTeacherFeedback) {
+        return {
+          text: 'Professor respondeu',
+          color: 'text-orange-400',
+          bgColor: 'bg-orange-900/20 border-orange-500/30',
+          icon: <AlertCircle size={16} />,
+          priority: 'high'
+        };
+      }
+    }
+
     // GRADED com 100% = Totalmente concluída e aprovada
     if (attempt.status === 'GRADED' && attempt.scorePercentage === 100) {
       return {

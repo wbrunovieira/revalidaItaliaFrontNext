@@ -1,6 +1,7 @@
 // src/components/AudioRecorder.tsx
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { Mic, Square, Play, Pause, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ export function AudioRecorder({
   disabled = false,
 }: AudioRecorderProps) {
   const t = useTranslations('OralExamReview');
+  const hasNotifiedRef = useRef(false);
 
   const {
     isRecording,
@@ -45,13 +47,21 @@ export function AudioRecorder({
 
   const handleClearRecording = () => {
     clearRecording();
+    hasNotifiedRef.current = false;
     onClear?.();
   };
 
-  // When recording stops and we have a blob, notify parent
-  if (audioBlob && !isRecording) {
-    onRecordingComplete(audioBlob);
-  }
+  // When recording stops and we have a blob, notify parent (only once)
+  useEffect(() => {
+    if (audioBlob && !isRecording && !hasNotifiedRef.current) {
+      console.log('[AudioRecorder] Notifying parent of new recording:', {
+        size: audioBlob.size,
+        type: audioBlob.type,
+      });
+      onRecordingComplete(audioBlob);
+      hasNotifiedRef.current = true;
+    }
+  }, [audioBlob, isRecording, onRecordingComplete]);
 
   return (
     <div className="space-y-4">

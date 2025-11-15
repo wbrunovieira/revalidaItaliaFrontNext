@@ -690,8 +690,13 @@ export default function TutorDashboard({
     >
   );
 
-  const handleViewAttempt = (attemptId: string) => {
-    router.push(`/${locale}/tutor/reviews/${attemptId}`);
+  const handleViewAttempt = (attemptId: string, studentName?: string, studentEmail?: string) => {
+    const params = new URLSearchParams();
+    if (studentName) params.set('studentName', studentName);
+    if (studentEmail) params.set('studentEmail', studentEmail);
+
+    const url = `/${locale}/tutor/reviews/${attemptId}${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(url);
   };
 
   if (loading) {
@@ -1602,7 +1607,9 @@ export default function TutorDashboard({
                                         className={`p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors ${cardBgColor}`}
                                         onClick={() =>
                                           handleViewAttempt(
-                                            attempt.id
+                                            attempt.id,
+                                            attempt.student.name,
+                                            attempt.student.email
                                           )
                                         }
                                       >

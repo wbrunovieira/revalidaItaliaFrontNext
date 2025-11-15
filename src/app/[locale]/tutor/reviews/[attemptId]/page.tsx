@@ -10,13 +10,19 @@ import { ArrowLeft } from 'lucide-react';
 
 export default async function TutorReviewPageWrapper({
   params,
+  searchParams,
 }: {
   params: Promise<{
     locale: string;
     attemptId: string;
   }>;
+  searchParams: Promise<{
+    studentName?: string;
+    studentEmail?: string;
+  }>;
 }) {
   const { locale, attemptId } = await params;
+  const { studentName, studentEmail } = await searchParams;
 
   const token = (await cookies()).get('token')?.value;
   if (!token) redirect(`/${locale}/login`);
@@ -47,10 +53,12 @@ export default async function TutorReviewPageWrapper({
           </p>
         </div>
 
-        <TutorReviewPage 
-          attemptId={attemptId} 
-          locale={locale} 
+        <TutorReviewPage
+          attemptId={attemptId}
+          locale={locale}
           backUrl={`/${locale}/tutor`}
+          studentName={studentName}
+          studentEmail={studentEmail}
         />
       </div>
     </NavSidebar>

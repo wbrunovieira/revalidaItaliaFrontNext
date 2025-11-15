@@ -5,10 +5,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AudioRecorder } from '@/components/AudioRecorder';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Send, Loader2, Volume2 } from 'lucide-react';
+import { Send, Loader2, Volume2, ThumbsUp, ThumbsDown, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthToken } from '@/lib/auth-utils';
 
@@ -37,42 +34,26 @@ export function OralExamReviewForm({
   const [teacherAudioBlob, setTeacherAudioBlob] = useState<Blob | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Debug: Log when component renders
-  console.log('[OralExamReviewForm] Rendered with:', {
-    attemptAnswerId,
-    studentAudioUrl,
-    reviewerId,
-  });
-
-  // Test if URL is accessible
-  const testAudioUrl = async () => {
-    try {
-      console.log('[OralExamReviewForm] Testing audio URL accessibility...');
-      const response = await fetch(studentAudioUrl, { method: 'HEAD' });
-      console.log('[OralExamReviewForm] Audio URL test result:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: {
-          'content-type': response.headers.get('content-type'),
-          'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
-        },
-      });
-    } catch (error) {
-      console.error('[OralExamReviewForm] Failed to access audio URL:', error);
-    }
-  };
-
-  // Run test on mount
-  if (typeof window !== 'undefined') {
-    testAudioUrl();
-  }
-
   const handleSubmitReview = async () => {
     if (!teacherAudioBlob) {
       toast({
         title: t('error'),
         description: t('audioRequired'),
         variant: 'destructive',
+      });
+      return;
+    }
+
+    // Verificar se o blob de áudio tem conteúdo
+    if (teacherAudioBlob.size === 0) {
+      toast({
+        title: t('error'),
+        description: 'O arquivo de áudio está vazio. Por favor, grave novamente.',
+        variant: 'destructive',
+      });
+      console.error('[OralExamReviewForm] Audio blob is empty!', {
+        size: teacherAudioBlob.size,
+        type: teacherAudioBlob.type,
       });
       return;
     }
@@ -91,41 +72,54 @@ export function OralExamReviewForm({
       }
 
       // Submit review with audio file using FormData
-      console.log('[OralExamReviewForm] Submitting review with audio...');
       const formData = new FormData();
       formData.append('reviewerId', reviewerId);
-      formData.append('isCorrect', isCorrect.toString()); // FormData requires string, backend will convert to boolean
-      formData.append('teacherAudioFile', teacherAudioBlob, 'teacher-feedback.webm');
+      formData.append('isCorrect', isCorrect ? 'true' : 'false'); // Backend converte string para boolean
       formData.append('reviewDecision', reviewDecision);
 
-      console.log('[OralExamReviewForm] FormData contents:', {
+      // Adicionar arquivo de áudio somente se tiver conteúdo
+      if (teacherAudioBlob && teacherAudioBlob.size > 0) {
+        formData.append('teacherAudioFile', teacherAudioBlob, 'teacher-feedback.webm');
+      } else {
+        console.error('[OralExamReviewForm] Audio blob is empty! Not sending file.');
+      }
+
+      const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/review`;
+
+      console.log('[OralExamReviewForm] Submitting review:');
+      console.log('Endpoint:', endpoint);
+      console.log('Payload:', {
         reviewerId,
-        isCorrect,
+        isCorrect: isCorrect ? 'true' : 'false',
         reviewDecision,
-        hasAudioFile: !!teacherAudioBlob,
+        teacherAudioFile: {
+          name: 'teacher-feedback.webm',
+          size: teacherAudioBlob.size,
+          type: teacherAudioBlob.type,
+        },
       });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/review`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            // Do NOT set Content-Type - browser will set it automatically with boundary
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Do NOT set Content-Type - browser will set it automatically with boundary
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
+        console.error('[OralExamReviewForm] Review submission failed:');
+        console.error('Status:', response.status, response.statusText);
+        console.error('Error data:', errorData);
         throw new Error(
           errorData?.message || `Failed to submit review: ${response.status} ${response.statusText}`
         );
       }
 
       const result = await response.json();
-      console.log('[OralExamReviewForm] Review submitted:', result.attemptAnswer);
+      console.log('[OralExamReviewForm] Review submitted successfully:', result);
 
       toast({
         title: t('success'),
@@ -161,20 +155,8 @@ export function OralExamReviewForm({
             backgroundColor: 'transparent',
             borderRadius: '8px',
           }}
-          onError={(e) => {
-            console.error('[OralExamReviewForm] Audio error:', {
-              error: e.currentTarget.error,
-              code: e.currentTarget.error?.code,
-              message: e.currentTarget.error?.message,
-              url: studentAudioUrl,
-            });
-          }}
-          onLoadedMetadata={() => {
-            console.log('[OralExamReviewForm] Audio loaded successfully:', studentAudioUrl);
-          }}
         />
         <p className="text-xs text-gray-500">{t('listenToStudentAnswer')}</p>
-        <p className="text-xs text-gray-600 break-all">URL: {studentAudioUrl}</p>
       </div>
 
       {/* Teacher's Audio Feedback Recorder */}
@@ -191,55 +173,78 @@ export function OralExamReviewForm({
       </div>
 
       {/* Review Decision */}
-      <div className="space-y-3 p-4 bg-primary-dark rounded-lg border border-secondary/20">
-        <Label className="text-white font-semibold">{t('reviewDecision')}</Label>
-        <RadioGroup
-          value={reviewDecision}
-          onValueChange={(value) => setReviewDecision(value as ReviewDecision)}
-          disabled={isSubmitting}
-        >
-          <div className="flex items-center space-x-2 p-3 rounded-lg hover:bg-primary/40 transition-colors">
-            <RadioGroupItem value="FULLY_ACCEPTED" id="fully-accepted" />
-            <Label htmlFor="fully-accepted" className="flex-1 cursor-pointer">
-              <div className="font-medium text-white">{t('fullyAccepted')}</div>
-              <div className="text-xs text-gray-400">{t('fullyAcceptedDesc')}</div>
-            </Label>
-          </div>
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-300">
+          {t('reviewDecision')}
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setReviewDecision('FULLY_ACCEPTED');
+              setIsCorrect(true);
+            }}
+            disabled={isSubmitting}
+            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+              reviewDecision === 'FULLY_ACCEPTED'
+                ? 'border-green-500 bg-green-500/10 text-green-400'
+                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
+            } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <ThumbsUp size={20} />
+            <span className="font-medium">{t('fullyAccepted')}</span>
+            <span className="text-xs text-center">{t('fullyAcceptedDesc')}</span>
+          </button>
 
-          <div className="flex items-center space-x-2 p-3 rounded-lg hover:bg-primary/40 transition-colors">
-            <RadioGroupItem value="PARTIALLY_ACCEPTED" id="partially-accepted" />
-            <Label htmlFor="partially-accepted" className="flex-1 cursor-pointer">
-              <div className="font-medium text-white">{t('partiallyAccepted')}</div>
-              <div className="text-xs text-gray-400">{t('partiallyAcceptedDesc')}</div>
-            </Label>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setReviewDecision('PARTIALLY_ACCEPTED');
+              setIsCorrect(true);
+            }}
+            disabled={isSubmitting}
+            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+              reviewDecision === 'PARTIALLY_ACCEPTED'
+                ? 'border-orange-500 bg-orange-500/10 text-orange-400'
+                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
+            } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <AlertCircle size={20} />
+            <span className="font-medium">{t('partiallyAccepted')}</span>
+            <span className="text-xs text-center">{t('partiallyAcceptedDesc')}</span>
+          </button>
 
-          <div className="flex items-center space-x-2 p-3 rounded-lg hover:bg-primary/40 transition-colors">
-            <RadioGroupItem value="NEEDS_REVISION" id="needs-revision" />
-            <Label htmlFor="needs-revision" className="flex-1 cursor-pointer">
-              <div className="font-medium text-white">{t('needsRevision')}</div>
-              <div className="text-xs text-gray-400">{t('needsRevisionDesc')}</div>
-            </Label>
-          </div>
-        </RadioGroup>
+          <button
+            type="button"
+            onClick={() => {
+              setReviewDecision('NEEDS_REVISION');
+              setIsCorrect(false);
+            }}
+            disabled={isSubmitting}
+            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+              reviewDecision === 'NEEDS_REVISION'
+                ? 'border-red-500 bg-red-500/10 text-red-400'
+                : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
+            } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <ThumbsDown size={20} />
+            <span className="font-medium">{t('needsRevision')}</span>
+            <span className="text-xs text-center">{t('needsRevisionDesc')}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Is Correct Checkbox */}
-      <div className="flex items-center space-x-2 p-4 bg-primary-dark rounded-lg border border-secondary/20">
-        <Checkbox
-          id="is-correct"
-          checked={isCorrect}
-          onCheckedChange={(checked) => setIsCorrect(checked === true)}
-          disabled={isSubmitting}
-        />
-        <Label
-          htmlFor="is-correct"
-          className="flex-1 cursor-pointer"
-        >
-          <div className="font-medium text-white">{t('markAsCorrect')}</div>
-          <div className="text-xs text-gray-400">{t('markAsCorrectDesc')}</div>
-        </Label>
-      </div>
+      {/* Success message for FULLY_ACCEPTED */}
+      {reviewDecision === 'FULLY_ACCEPTED' && (
+        <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <CheckCircle size={20} className="text-green-400" />
+            <p className="text-green-400">
+              {t('fullyAcceptedMessage')}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
@@ -255,7 +260,7 @@ export function OralExamReviewForm({
         )}
         <Button
           onClick={handleSubmitReview}
-          disabled={!teacherAudioBlob || isSubmitting}
+          disabled={!teacherAudioBlob || !reviewDecision || isSubmitting}
           className="flex-1 bg-secondary hover:bg-secondary/80"
         >
           {isSubmitting ? (

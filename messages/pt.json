@@ -6686,6 +6686,7 @@
   "reviewDecision": "Decisão de Revisão",
   "fullyAccepted": "Totalmente Aceita",
   "fullyAcceptedDesc": "A resposta está completa e correta",
+  "fullyAcceptedMessage": "A resposta será marcada como totalmente aceita.",
   "partiallyAccepted": "Parcialmente Aceita",
   "partiallyAcceptedDesc": "Resposta correta mas incompleta",
   "needsRevision": "Precisa Revisão",

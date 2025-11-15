@@ -63,7 +63,12 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/mp3' });
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        console.log('[useAudioRecorder] Recording stopped, blob created:', {
+          size: blob.size,
+          type: blob.type,
+          chunks: chunksRef.current.length,
+        });
         setAudioBlob(blob);
 
         // Create URL for playback

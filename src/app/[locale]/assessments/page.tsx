@@ -1177,6 +1177,19 @@ export default function AssessmentsPage({
                                         status.status ===
                                         'SUBMITTED'
                                       ) {
+                                        // Para ORAL_EXAM: mostrar mensagem específica se está aguardando revisão
+                                        if (assessment.type === 'ORAL_EXAM' && status.pendingReviewQuestions > 0) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-blue-400">
+                                              <Clock
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Aguardando revisão do professor
+                                              </span>
+                                            </div>
+                                          );
+                                        }
                                         return (
                                           <div className="flex items-center gap-2 text-blue-400">
                                             <Clock
@@ -1192,6 +1205,32 @@ export default function AssessmentsPage({
                                         status.status ===
                                         'GRADING'
                                       ) {
+                                        // Para ORAL_EXAM: mostrar mensagem específica se precisa revisão do aluno
+                                        if (assessment.type === 'ORAL_EXAM' && status.rejectedQuestions > 0) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-orange-400">
+                                              <AlertCircle
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Professor pediu revisão
+                                              </span>
+                                            </div>
+                                          );
+                                        }
+                                        // Para ORAL_EXAM: se needsStudentAction (PARTIALLY_ACCEPTED)
+                                        if (assessment.type === 'ORAL_EXAM' && status.needsStudentAction) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-yellow-400">
+                                              <AlertCircle
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Professor enviou feedback
+                                              </span>
+                                            </div>
+                                          );
+                                        }
                                         return (
                                           <div className="flex items-center gap-2 text-yellow-400">
                                             <FileCheck
@@ -1460,6 +1499,8 @@ export default function AssessmentsPage({
                                   className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
                                     status.needsStudentAction
                                       ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                      : status.rejectedQuestions > 0
+                                      ? 'bg-orange-600 text-white hover:bg-orange-700'
                                       : status.status ===
                                         'GRADED'
                                       ? 'bg-green-600 text-white hover:bg-green-700'
@@ -1532,7 +1573,29 @@ export default function AssessmentsPage({
                                           <AlertCircle
                                             size={16}
                                           />
-                                          Revisar Respostas
+                                          {assessment.type === 'ORAL_EXAM'
+                                            ? 'Aceitar ou Recusar'
+                                            : 'Revisar Respostas'}
+                                        </>
+                                      );
+                                    } else if (
+                                      assessment.type === 'ORAL_EXAM' &&
+                                      status.rejectedQuestions > 0
+                                    ) {
+                                      return (
+                                        <>
+                                          <Mic size={16} />
+                                          Reenviar Resposta
+                                        </>
+                                      );
+                                    } else if (
+                                      assessment.type === 'ORAL_EXAM' &&
+                                      status.pendingReviewQuestions > 0
+                                    ) {
+                                      return (
+                                        <>
+                                          <Eye size={16} />
+                                          Acompanhar Status
                                         </>
                                       );
                                     } else {

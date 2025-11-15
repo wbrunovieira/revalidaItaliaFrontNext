@@ -9,7 +9,7 @@ interface HistoryEntry {
   teacherAudioUrl?: string;
   teacherComment?: string;
   reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
-  isCorrect?: boolean;
+  isCorrect?: boolean | null;
   submittedAt?: string;
   reviewedAt?: string;
   status: string;

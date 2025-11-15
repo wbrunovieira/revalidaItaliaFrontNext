@@ -44,13 +44,17 @@ interface Question {
 interface AnswerVersion {
   id: string;
   textAnswer: string;
+  audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
   teacherComment?: string;
   reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   isCorrect?: boolean | null;
   answeredAt: string;
+  submittedAt?: string;
   reviewedAt?: string;
   version: number;
   isLatest: boolean;
+  status: string;
 }
 
 interface Answer {
@@ -867,7 +871,6 @@ export default function TutorReviewPage({ attemptId, studentName, studentEmail }
               {currentAnswer?.versions && currentAnswer.versions.length > 0 && (
                 <OralExamHistory
                   history={currentAnswer.versions}
-                  currentVersion={currentAnswer.versions[currentAnswer.versions.length - 1]}
                 />
               )}
 

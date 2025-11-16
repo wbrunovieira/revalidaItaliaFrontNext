@@ -86,6 +86,7 @@ interface StudentAttempt {
   scorePercentage?: number;
   passed?: boolean;
   answers?: AttemptAnswer[];
+  needsStudentAction?: boolean;
 }
 
 interface StudentAssessmentsPageProps {
@@ -131,9 +132,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       }
 
       const data = await response.json();
-      console.log('StudentAssessmentsPage - API Response:', data);
-      console.log('StudentAssessmentsPage - User ID:', userId);
-      
+
       // Filtrar apenas PROVA_ABERTA e ORAL_EXAM e tentativas do usuário atual
       // Excluir tentativas IN_PROGRESS pois não foram finalizadas
       const userOpenAttempts = (data.attempts || []).filter((attempt: AttemptDetails) =>
@@ -142,17 +141,14 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
         attempt.status !== 'IN_PROGRESS' // Apenas tentativas finalizadas
       );
       
-      console.log('StudentAssessmentsPage - Filtered user open attempts:', userOpenAttempts.length);
-      
       // Para cada tentativa, buscar os detalhes reais usando o endpoint /results
       const attemptsWithDetails = await Promise.all(
         userOpenAttempts.map(async (attempt: AttemptDetails) => {
           // Skip fetching results for IN_PROGRESS attempts (safety check)
           if (attempt.status === 'IN_PROGRESS') {
-            console.log(`Skipping results fetch for IN_PROGRESS attempt ${attempt.id}`);
             return attempt;
           }
-          
+
           try {
             const resultsResponse = await fetch(`${apiUrl}/api/v1/attempts/${attempt.id}/results`, {
               method: 'GET',
@@ -162,13 +158,15 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
               },
               credentials: 'include',
             });
-            
+
             if (resultsResponse.ok) {
               const resultsData = await resultsResponse.json();
+              console.log(`GET /api/v1/attempts/${attempt.id}/results:`, resultsData);
               return {
                 ...attempt,
                 results: resultsData.results,
-                answers: resultsData.answers
+                answers: resultsData.answers,
+                needsStudentAction: resultsData.attempt?.needsStudentAction
               };
             }
           } catch (error) {
@@ -226,6 +224,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
           scorePercentage: attempt.results?.scorePercentage || (totalQuestions > 0 ? ((reviewedQuestions / totalQuestions) * 100) : 0),
           passed: attempt.results?.passed || (totalQuestions > 0 && reviewedQuestions / totalQuestions >= 0.7),
           answers: attempt.answers, // Incluir answers para poder verificar teacherAudioUrl
+          needsStudentAction: attempt.needsStudentAction, // Campo já vem de resultsData.attempt.needsStudentAction
         };
       });
 
@@ -260,18 +259,61 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
   }, [userId, fetchAttempts]);
 
   const getStatusInfo = (attempt: StudentAttempt) => {
-    // ORAL_EXAM: Verificar se professor já enviou feedback
+    // ORAL_EXAM: Verificar se professor já enviou feedback E se foi aprovado/reprovado
     if (attempt.assessment.type === 'ORAL_EXAM') {
+      // PRIORIDADE: Se needsStudentAction é true, aluno precisa aceitar primeiro
+      if (attempt.needsStudentAction) {
+        return {
+          text: 'Aguardando sua confirmação',
+          color: 'text-yellow-400',
+          bgColor: 'bg-yellow-900/20 border-yellow-500/30',
+          icon: <AlertCircle size={16} />,
+          priority: 'high'
+        };
+      }
+
       // Se tem teacherAudioUrl em alguma resposta, professor já respondeu
       const hasTeacherFeedback = attempt.answers?.some((answer: { teacherAudioUrl?: string }) => answer.teacherAudioUrl);
 
       if (hasTeacherFeedback) {
+        // Verificar se foi aprovado (isCorrect)
+        const isApproved = attempt.answers?.some((answer: { isCorrect?: boolean; teacherAudioUrl?: string }) =>
+          answer.teacherAudioUrl && answer.isCorrect === true
+        );
+
+        // Cenário 1: Aprovado COM feedback do professor (e já aceitou)
+        if (isApproved) {
+          return {
+            text: 'Aprovado - Ouça o feedback',
+            color: 'text-green-400',
+            bgColor: 'bg-green-900/20 border-green-500/30',
+            icon: <CheckCircle size={16} />,
+            priority: 'high'
+          };
+        }
+
+        // Cenário 2: Reprovado COM feedback do professor
         return {
           text: 'Professor respondeu',
           color: 'text-orange-400',
           bgColor: 'bg-orange-900/20 border-orange-500/30',
           icon: <AlertCircle size={16} />,
           priority: 'high'
+        };
+      }
+
+      // Cenário 3: Aprovado SEM feedback (isCorrect mas sem teacherAudioUrl)
+      const isApprovedWithoutFeedback = attempt.answers?.some((answer: { isCorrect?: boolean; teacherAudioUrl?: string }) =>
+        answer.isCorrect === true && !answer.teacherAudioUrl
+      );
+
+      if (isApprovedWithoutFeedback) {
+        return {
+          text: 'Aprovado',
+          color: 'text-green-400',
+          bgColor: 'bg-green-900/20 border-green-500/30',
+          icon: <CheckCircle size={16} />,
+          priority: 'low'
         };
       }
     }

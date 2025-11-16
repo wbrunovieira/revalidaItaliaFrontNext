@@ -19,6 +19,12 @@ export interface Answer {
   status: string;
   submittedAt?: string;
   reviewedAt?: string;
+  currentAnswer?: {
+    reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
+    isCorrect?: boolean;
+    teacherAudioUrl?: string;
+    audioAnswerUrl?: string;
+  };
 }
 
 interface StudentOralExamViewProps {
@@ -40,6 +46,7 @@ export function StudentOralExamView({
   const router = useRouter();
   const [newAudioBlob, setNewAudioBlob] = useState<Blob | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [accepting, setAccepting] = useState(false);
 
   // Para ORAL_EXAM, podem ter múltiplas versões da mesma questão
   // O backend retorna todas as versões no array answers
@@ -53,22 +60,70 @@ export function StudentOralExamView({
   // A primeira versão é sempre a mais recente
   const latestAnswer = sortedAnswers[0];
 
+  // Pegar reviewDecision do currentAnswer se disponível, senão do nível superior
+  const reviewDecision = latestAnswer.currentAnswer?.reviewDecision || latestAnswer.reviewDecision;
+  const isCorrect = latestAnswer.currentAnswer?.isCorrect ?? latestAnswer.isCorrect;
+  const teacherAudioUrl = latestAnswer.currentAnswer?.teacherAudioUrl || latestAnswer.teacherAudioUrl;
+  const audioAnswerUrl = latestAnswer.currentAnswer?.audioAnswerUrl || latestAnswer.audioAnswerUrl;
+
   // Log para debug
-  console.log('[StudentOralExamView] All answers sorted:', {
-    totalAnswers: sortedAnswers.length,
-    latestAnswer: {
-      id: latestAnswer.id,
-      status: latestAnswer.status,
-      submittedAt: latestAnswer.submittedAt,
-      hasTeacherAudio: !!latestAnswer.teacherAudioUrl,
-    },
+  console.log('[StudentOralExamView] Latest answer:', {
+    id: latestAnswer.id,
+    status: latestAnswer.status,
+    reviewDecision,
+    hasTeacherAudio: !!teacherAudioUrl,
+    isCorrect,
+    willShowAcceptButton: reviewDecision === 'PARTIALLY_ACCEPTED'
   });
 
-  console.log('[StudentOralExamView] Sorted answers:', sortedAnswers);
-
   const getStatusBadge = () => {
-    // Se tem teacherAudioUrl mas não tem reviewDecision, inferir NEEDS_REVISION
-    if (latestAnswer.teacherAudioUrl && !latestAnswer.reviewDecision) {
+    // Se status é GRADED mas não tem reviewDecision, usar isCorrect para determinar
+    if (latestAnswer.status === 'GRADED' && !reviewDecision) {
+      const hasTeacherAudio = !!teacherAudioUrl;
+
+      // Cenário 1: Aprovado COM áudio do professor
+      if (isCorrect && hasTeacherAudio) {
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-green-400">
+              <CheckCircle size={16} />
+              <span className="text-sm font-medium">Aprovado</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-400">
+              <Volume2 size={14} />
+              <span className="text-xs">Ouça o feedback do professor abaixo</span>
+            </div>
+          </div>
+        );
+      }
+
+      // Cenário 2: Aprovado SEM áudio do professor
+      if (isCorrect && !hasTeacherAudio) {
+        return (
+          <div className="flex items-center gap-2 text-green-400">
+            <CheckCircle size={16} />
+            <span className="text-sm font-medium">Aprovado</span>
+          </div>
+        );
+      }
+
+      // Cenário 3: Reprovado COM áudio do professor
+      if (!isCorrect && hasTeacherAudio) {
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-orange-400">
+              <AlertCircle size={16} />
+              <span className="text-sm font-medium">Revisar</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-400">
+              <Volume2 size={14} />
+              <span className="text-xs">Professor respondeu - Ouça o feedback</span>
+            </div>
+          </div>
+        );
+      }
+
+      // Cenário 4: Reprovado SEM áudio
       return (
         <div className="flex items-center gap-2 text-red-400">
           <AlertCircle size={16} />
@@ -77,7 +132,17 @@ export function StudentOralExamView({
       );
     }
 
-    if (!latestAnswer.reviewDecision) {
+    // Se tem teacherAudioUrl mas não tem reviewDecision, inferir NEEDS_REVISION
+    if (teacherAudioUrl && !reviewDecision) {
+      return (
+        <div className="flex items-center gap-2 text-red-400">
+          <AlertCircle size={16} />
+          <span className="text-sm font-medium">Precisa Revisão</span>
+        </div>
+      );
+    }
+
+    if (!reviewDecision) {
       return (
         <div className="flex items-center gap-2 text-yellow-400">
           <AlertCircle size={16} />
@@ -86,7 +151,7 @@ export function StudentOralExamView({
       );
     }
 
-    switch (latestAnswer.reviewDecision) {
+    switch (reviewDecision) {
       case 'FULLY_ACCEPTED':
         return (
           <div className="flex items-center gap-2 text-green-400">
@@ -209,8 +274,8 @@ export function StudentOralExamView({
       console.log('[StudentOralExamView] New answer submitted successfully:', result);
 
       toast({
-        title: 'Sucesso!',
-        description: 'Sua nova resposta foi enviada para revisão do professor.',
+        title: 'Áudio Gravado!',
+        description: 'Sua resposta foi salva e enviada para revisão do professor.',
       });
 
       // Refresh page to show new data
@@ -225,6 +290,79 @@ export function StudentOralExamView({
       });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAcceptPartialReview = async () => {
+    try {
+      setAccepting(true);
+
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        toast({
+          title: 'Erro',
+          description: 'Você precisa estar autenticado.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${latestAnswer.id}/accept-partial-review`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        let errorMessage = 'Falha ao aceitar resposta';
+
+        if (errorData?.error) {
+          switch (errorData.error) {
+            case 'ANSWER_NOT_REVIEWABLE':
+              errorMessage = 'Esta resposta não pode ser aceita ou já foi aceita anteriormente';
+              break;
+            case 'INSUFFICIENT_PERMISSIONS':
+              errorMessage = 'Você só pode aceitar suas próprias revisões';
+              break;
+            case 'ATTEMPT_ANSWER_NOT_FOUND':
+              errorMessage = 'Resposta não encontrada';
+              break;
+            default:
+              errorMessage = errorData.message || errorMessage;
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      toast({
+        title: 'Sucesso!',
+        description: 'Resposta aceita com sucesso!',
+      });
+
+      // Redirect back to assessments page
+      router.push(backUrl);
+
+    } catch (error) {
+      console.error('Error accepting partial review:', error);
+      toast({
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Falha ao aceitar resposta',
+        variant: 'destructive',
+      });
+    } finally {
+      setAccepting(false);
     }
   };
 
@@ -264,86 +402,151 @@ export function StudentOralExamView({
           <h2 className="text-xl font-semibold text-white mb-4">{latestAnswer.questionText}</h2>
         </div>
 
-        {/* Timeline de todas as versões (mais recente primeiro) */}
-        <div className="space-y-6 mb-6">
-          {sortedAnswers.map((answer, index) => {
-            const isLatest = index === 0;
-
-            return (
-              <div
-                key={answer.id}
-                className={`bg-primary-dark rounded-lg p-6 border ${
-                  isLatest ? 'border-secondary' : 'border-secondary/20'
-                }`}
-              >
-                {/* Header da versão */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className={`text-sm font-medium ${
-                      isLatest ? 'text-secondary' : 'text-gray-400'
-                    }`}>
-                      {isLatest ? '📍 Última Resposta' : 'Resposta Anterior'}
+        {/* Se PARTIALLY_ACCEPTED, mostrar APENAS a última resposta com botão de aceitar */}
+        {reviewDecision === 'PARTIALLY_ACCEPTED' ? (
+          <div className="space-y-6 mb-6">
+            {/* Mostrar apenas a última resposta */}
+            <div className="bg-primary-dark rounded-lg p-6 border border-secondary">
+              {/* Header da versão */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-secondary">
+                    📍 Sua Resposta
+                  </span>
+                  {latestAnswer.submittedAt && (
+                    <span className="text-xs text-gray-500">
+                      {formatDate(latestAnswer.submittedAt)}
                     </span>
-                    {answer.submittedAt && (
-                      <span className="text-xs text-gray-500">
-                        {formatDate(answer.submittedAt)}
+                  )}
+                </div>
+              </div>
+
+              {/* Áudio do Aluno */}
+              {audioAnswerUrl && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mic size={16} className="text-blue-400" />
+                    <h4 className="text-sm font-medium text-blue-400">Sua Resposta</h4>
+                  </div>
+                  <audio
+                    src={audioAnswerUrl}
+                    controls
+                    className="w-full"
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderRadius: '8px',
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Áudio do Professor */}
+              {teacherAudioUrl && (
+                <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Volume2 size={16} className="text-green-400" />
+                    <h4 className="text-sm font-medium text-green-400">Feedback do Professor</h4>
+                    {latestAnswer.reviewedAt && (
+                      <span className="text-xs text-gray-500 ml-auto">
+                        {formatDate(latestAnswer.reviewedAt)}
                       </span>
                     )}
                   </div>
-
-                  {/* Status badge apenas para a última resposta */}
-                  {isLatest && getStatusBadge()}
+                  <audio
+                    src={teacherAudioUrl}
+                    controls
+                    className="w-full"
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderRadius: '8px',
+                    }}
+                  />
                 </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Timeline de todas as versões (mais recente primeiro) - Para NEEDS_REVISION */
+          <div className="space-y-6 mb-6">
+            {sortedAnswers.map((answer, index) => {
+              const isLatest = index === 0;
 
-                {/* Áudio do Aluno */}
-                {answer.audioAnswerUrl && (
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Mic size={16} className="text-blue-400" />
-                      <h4 className="text-sm font-medium text-blue-400">Sua Resposta</h4>
-                    </div>
-                    <audio
-                      src={answer.audioAnswerUrl}
-                      controls
-                      className="w-full"
-                      style={{
-                        backgroundColor: 'transparent',
-                        borderRadius: '8px',
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Áudio do Professor (se tiver feedback) */}
-                {answer.teacherAudioUrl && (
-                  <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Volume2 size={16} className="text-green-400" />
-                      <h4 className="text-sm font-medium text-green-400">Feedback do Professor</h4>
-                      {answer.reviewedAt && (
-                        <span className="text-xs text-gray-500 ml-auto">
-                          {formatDate(answer.reviewedAt)}
+              return (
+                <div
+                  key={answer.id}
+                  className={`bg-primary-dark rounded-lg p-6 border ${
+                    isLatest ? 'border-secondary' : 'border-secondary/20'
+                  }`}
+                >
+                  {/* Header da versão */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-medium ${
+                        isLatest ? 'text-secondary' : 'text-gray-400'
+                      }`}>
+                        {isLatest ? '📍 Última Resposta' : 'Resposta Anterior'}
+                      </span>
+                      {answer.submittedAt && (
+                        <span className="text-xs text-gray-500">
+                          {formatDate(answer.submittedAt)}
                         </span>
                       )}
                     </div>
-                    <audio
-                      src={answer.teacherAudioUrl}
-                      controls
-                      className="w-full"
-                      style={{
-                        backgroundColor: 'transparent',
-                        borderRadius: '8px',
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
 
-        {/* Resubmit Section - Show if teacher sent feedback (has teacherAudioUrl) */}
-        {latestAnswer.teacherAudioUrl && latestAnswer.reviewDecision !== 'FULLY_ACCEPTED' && (
+                    {/* Status badge apenas para a última resposta */}
+                    {isLatest && getStatusBadge()}
+                  </div>
+
+                  {/* Áudio do Aluno */}
+                  {answer.audioAnswerUrl && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Mic size={16} className="text-blue-400" />
+                        <h4 className="text-sm font-medium text-blue-400">Sua Resposta</h4>
+                      </div>
+                      <audio
+                        src={answer.audioAnswerUrl}
+                        controls
+                        className="w-full"
+                        style={{
+                          backgroundColor: 'transparent',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Áudio do Professor (se tiver feedback) */}
+                  {answer.teacherAudioUrl && (
+                    <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Volume2 size={16} className="text-green-400" />
+                        <h4 className="text-sm font-medium text-green-400">Feedback do Professor</h4>
+                        {answer.reviewedAt && (
+                          <span className="text-xs text-gray-500 ml-auto">
+                            {formatDate(answer.reviewedAt)}
+                          </span>
+                        )}
+                      </div>
+                      <audio
+                        src={answer.teacherAudioUrl}
+                        controls
+                        className="w-full"
+                        style={{
+                          backgroundColor: 'transparent',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Resubmit Section - Show ONLY for NEEDS_REVISION (not PARTIALLY_ACCEPTED) */}
+        {teacherAudioUrl && reviewDecision === 'NEEDS_REVISION' && (
           <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-6">
             <h3 className="text-xl font-semibold text-white mb-4">
               Reenviar Nova Resposta
@@ -370,22 +573,28 @@ export function StudentOralExamView({
           </div>
         )}
 
-        {/* Info if PARTIALLY_ACCEPTED */}
-        {latestAnswer.reviewDecision === 'PARTIALLY_ACCEPTED' && (
+        {/* Action buttons for PARTIALLY_ACCEPTED */}
+        {reviewDecision === 'PARTIALLY_ACCEPTED' && (
           <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-4">
               <AlertCircle size={20} className="text-yellow-400" />
               <h3 className="text-lg font-semibold text-white">Resposta Parcialmente Aceita</h3>
             </div>
-            <p className="text-gray-300">
-              O professor aceitou parcialmente sua resposta. Você pode aceitar ou recusar esta avaliação.
+            <p className="text-gray-300 mb-6">
+              O professor aceitou parcialmente sua resposta. Ouça o feedback acima e clique em "Aceitar Resposta" para confirmar.
             </p>
-            {/* TODO: Adicionar botões Aceitar/Recusar quando backend implementar */}
+            <Button
+              onClick={handleAcceptPartialReview}
+              disabled={accepting}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+            >
+              {accepting ? 'Aceitando...' : 'Aceitar Resposta'}
+            </Button>
           </div>
         )}
 
         {/* Info if FULLY_ACCEPTED */}
-        {latestAnswer.reviewDecision === 'FULLY_ACCEPTED' && (
+        {reviewDecision === 'FULLY_ACCEPTED' && (
           <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle size={20} className="text-green-400" />

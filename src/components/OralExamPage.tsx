@@ -17,6 +17,7 @@ import {
   CheckCircle,
   Loader2,
   Volume2,
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 
@@ -443,6 +444,25 @@ export default function OralExamPage({
           </div>
         </div>
 
+        {/* Alert: Ready to Submit */}
+        {submittedAnswers.size === questions.length && !submitting && (
+          <div className="mb-6 bg-gradient-to-r from-green-500/20 to-secondary/20 border-2 border-green-500 rounded-xl p-6 animate-pulse">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-green-500/20 rounded-lg">
+                <CheckCircle size={28} className="text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-green-400 mb-2">
+                  {t('alert.readyToSubmit')}
+                </h3>
+                <p className="text-gray-300">
+                  {t('alert.readyToSubmitDescription')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Question */}
         <div className="bg-primary-dark/50 backdrop-blur-sm rounded-xl p-6 border border-secondary/20 mb-6">
           <div className="flex items-start gap-3 mb-4">
@@ -634,16 +654,19 @@ export default function OralExamPage({
             <button
               onClick={submitExam}
               disabled={submitting || submittedAnswers.size < questions.length}
-              className="px-8 py-3 bg-secondary hover:bg-secondary/90 text-primary rounded-lg font-semibold transition-all duration-200 inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-10 py-4 bg-gradient-to-r from-green-500 to-secondary hover:from-green-600 hover:to-secondary/90 text-white rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-700 animate-pulse-slow"
+              style={{
+                animation: submittedAnswers.size === questions.length && !submitting ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+              }}
             >
               {submitting ? (
                 <>
-                  <Loader2 size={20} className="animate-spin" />
+                  <Loader2 size={24} className="animate-spin" />
                   {t('navigation.submitting')}
                 </>
               ) : (
                 <>
-                  <CheckCircle size={20} />
+                  <CheckCircle size={24} />
                   {t('navigation.submitExam')}
                 </>
               )}

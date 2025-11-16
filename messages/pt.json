@@ -2108,7 +2108,7 @@
       "startedDescription": "Comece a falar sua resposta"
     },
     "status": {
-      "answerSubmitted": "Resposta enviada com sucesso!"
+      "answerSubmitted": "Áudio gravado! Lembre-se de clicar em 'Finalizar Exame' para concluir"
     },
     "navigation": {
       "previous": "Anterior",
@@ -2116,9 +2116,13 @@
       "submitExam": "Finalizar Exame",
       "submitting": "Finalizando..."
     },
+    "alert": {
+      "readyToSubmit": "Todas as respostas foram gravadas!",
+      "readyToSubmitDescription": "Clique no botão 'Finalizar Exame' abaixo para enviar seu exame oral"
+    },
     "success": {
-      "answerSubmitted": "Resposta Enviada",
-      "answerSubmittedDescription": "Sua resposta em áudio foi enviada com sucesso",
+      "answerSubmitted": "Áudio Gravado",
+      "answerSubmittedDescription": "Áudio salvo! Lembre-se de clicar em 'Finalizar Exame' para enviar",
       "examSubmitted": "Exame Finalizado",
       "examSubmittedDescription": "Seu exame oral foi enviado para avaliação"
     },

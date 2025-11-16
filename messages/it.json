@@ -2103,7 +2103,7 @@
       "startedDescription": "Inizia a parlare la tua risposta"
     },
     "status": {
-      "answerSubmitted": "Risposta inviata con successo!"
+      "answerSubmitted": "Audio registrato! Ricorda di cliccare su 'Finalizza Esame' per completare"
     },
     "navigation": {
       "previous": "Precedente",
@@ -2111,9 +2111,13 @@
       "submitExam": "Finalizza Esame",
       "submitting": "Finalizzando..."
     },
+    "alert": {
+      "readyToSubmit": "Tutte le risposte sono state registrate!",
+      "readyToSubmitDescription": "Clicca sul pulsante 'Finalizza Esame' qui sotto per inviare il tuo esame orale"
+    },
     "success": {
-      "answerSubmitted": "Risposta Inviata",
-      "answerSubmittedDescription": "La tua risposta audio è stata inviata con successo",
+      "answerSubmitted": "Audio Registrato",
+      "answerSubmittedDescription": "Audio salvato! Ricorda di cliccare su 'Finalizza Esame' per inviare",
       "examSubmitted": "Esame Finalizzato",
       "examSubmittedDescription": "Il tuo esame orale è stato inviato per la valutazione"
     },

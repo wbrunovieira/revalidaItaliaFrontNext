@@ -1063,9 +1063,11 @@ export default function AssessmentsPage({
                             }
 
                             // Para QUIZ/SIMULADO: pode iniciar nova tentativa mesmo se já tem GRADED
+                            // Para ORAL_EXAM: não permitir nova tentativa se já está SUBMITTED ou GRADING
                             if (
                               assessment.type !==
                                 'PROVA_ABERTA' &&
+                              assessment.type !== 'ORAL_EXAM' &&
                               status.canStartNewAttempt &&
                               !status.hasActiveAttempt &&
                               status.status !== 'GRADED' // Não mostrar este botão se já foi concluído
@@ -1574,7 +1576,7 @@ export default function AssessmentsPage({
                                             size={16}
                                           />
                                           {assessment.type === 'ORAL_EXAM'
-                                            ? 'Aceitar ou Recusar'
+                                            ? 'Ouvir Feedback e Aceitar'
                                             : 'Revisar Respostas'}
                                         </>
                                       );

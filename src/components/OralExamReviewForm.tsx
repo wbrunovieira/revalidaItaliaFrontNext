@@ -30,12 +30,15 @@ export function OralExamReviewForm({
   const { toast } = useToast();
 
   const [isCorrect, setIsCorrect] = useState(false);
-  const [reviewDecision, setReviewDecision] = useState<ReviewDecision>('FULLY_ACCEPTED');
+  const [reviewDecision, setReviewDecision] = useState<ReviewDecision | null>(null);
   const [teacherAudioBlob, setTeacherAudioBlob] = useState<Blob | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmitReview = async () => {
-    if (!teacherAudioBlob) {
+    // Validação de áudio apenas para PARTIALLY_ACCEPTED e NEEDS_REVISION
+    const requiresAudio = reviewDecision === 'PARTIALLY_ACCEPTED' || reviewDecision === 'NEEDS_REVISION';
+
+    if (requiresAudio && !teacherAudioBlob) {
       toast({
         title: t('error'),
         description: t('audioRequired'),
@@ -44,8 +47,8 @@ export function OralExamReviewForm({
       return;
     }
 
-    // Verificar se o blob de áudio tem conteúdo
-    if (teacherAudioBlob.size === 0) {
+    // Verificar se o blob de áudio tem conteúdo (somente se o áudio for obrigatório)
+    if (requiresAudio && teacherAudioBlob && teacherAudioBlob.size === 0) {
       toast({
         title: t('error'),
         description: 'O arquivo de áudio está vazio. Por favor, grave novamente.',
@@ -92,11 +95,11 @@ export function OralExamReviewForm({
         reviewerId,
         isCorrect: isCorrect ? 'true' : 'false',
         reviewDecision,
-        teacherAudioFile: {
+        teacherAudioFile: teacherAudioBlob ? {
           name: 'teacher-feedback.webm',
           size: teacherAudioBlob.size,
           type: teacherAudioBlob.type,
-        },
+        } : null,
       });
 
       const response = await fetch(endpoint, {
@@ -163,7 +166,12 @@ export function OralExamReviewForm({
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-white">{t('yourFeedback')}</h3>
-          <span className="text-xs text-red-500">*</span>
+          {(reviewDecision === 'PARTIALLY_ACCEPTED' || reviewDecision === 'NEEDS_REVISION') && (
+            <span className="text-xs text-red-500">*</span>
+          )}
+          {reviewDecision === 'FULLY_ACCEPTED' && (
+            <span className="text-xs text-gray-500">(opcional)</span>
+          )}
         </div>
         <AudioRecorder
           onRecordingComplete={setTeacherAudioBlob}
@@ -260,7 +268,11 @@ export function OralExamReviewForm({
         )}
         <Button
           onClick={handleSubmitReview}
-          disabled={!teacherAudioBlob || !reviewDecision || isSubmitting}
+          disabled={
+            !reviewDecision ||
+            isSubmitting ||
+            ((reviewDecision === 'PARTIALLY_ACCEPTED' || reviewDecision === 'NEEDS_REVISION') && !teacherAudioBlob)
+          }
           className="flex-1 bg-secondary hover:bg-secondary/80"
         >
           {isSubmitting ? (

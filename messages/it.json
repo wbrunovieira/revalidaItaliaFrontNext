@@ -4528,7 +4528,86 @@
   },
   "flashcards": {
     "create": "Crea Flashcard",
-    "list": "Elenco Flashcard"
+    "list": "Elenco Flashcard",
+    "bulkImport": {
+      "buttonTitle": "Importazione di Massa",
+      "buttonDescription": "Importa più flashcard contemporaneamente usando un file .txt",
+      "title": "Importazione di Massa di Flashcard",
+      "description": "Importa più flashcard contemporaneamente da un file di testo",
+      "fields": {
+        "file": "File",
+        "lines": "righe",
+        "clickToUpload": "Clicca per caricare",
+        "txtOnly": "Solo file .txt",
+        "max5MB": "Massimo 5MB",
+        "preview": "Anteprima",
+        "moreLines": "righe in più",
+        "argument": "Argomento",
+        "selectArgument": "Seleziona un argomento",
+        "loading": "Caricamento...",
+        "separator": "Separatore",
+        "recommended": "consigliato",
+        "associateWithLessons": "Associa alle Lezioni",
+        "optional": "opzionale",
+        "course": "Corso",
+        "selectCourse": "Seleziona un corso",
+        "module": "Modulo",
+        "selectModule": "Seleziona un modulo",
+        "lessons": "Lezioni",
+        "noLessons": "Nessuna lezione disponibile",
+        "tags": "Tag",
+        "noTags": "Nessun tag disponibile"
+      },
+      "processing": {
+        "title": "Elaborazione flashcard...",
+        "description": "Attendere prego mentre elaboriamo il file"
+      },
+      "result": {
+        "allCreatedTitle": "Tutte le flashcard create con successo!",
+        "partialCreatedTitle": "Flashcard create parzialmente",
+        "totalCreated": "Totale creato",
+        "totalLines": "Totale righe",
+        "totalSkipped": "Totale ignorato",
+        "errors": "Errori",
+        "line": "Riga",
+        "createdFlashcards": "Flashcard Create",
+        "moreFlashcards": "flashcard in più"
+      },
+      "actions": {
+        "remove": "Rimuovi",
+        "downloadReport": "Scarica Rapporto",
+        "cancel": "Annulla",
+        "upload": "Carica",
+        "uploading": "Caricamento...",
+        "close": "Chiudi",
+        "importAnother": "Importa un Altro"
+      },
+      "errors": {
+        "invalidFileType": "Tipo di file non valido",
+        "onlyTxtAllowed": "Solo file .txt sono permessi",
+        "rtfNotAllowed": "File RTF non supportato",
+        "usePlainText": "Si prega di utilizzare un file di testo semplice (.txt). Apri il file nel Blocco note e salvalo come 'Testo semplice' o '.txt'",
+        "fileTooLarge": "File troppo grande",
+        "maxSize5MB": "La dimensione massima è 5MB",
+        "readError": "Errore nella lettura del file",
+        "couldNotReadFile": "Impossibile leggere il file",
+        "requiredFields": "Campi obbligatori",
+        "fileAndArgumentRequired": "File e argomento sono obbligatori",
+        "uploadFailed": "Caricamento fallito",
+        "unknownError": "Errore sconosciuto",
+        "networkError": "Errore di rete durante il caricamento del file"
+      },
+      "warnings": {
+        "tooManyLines": "Troppe righe",
+        "max1000Lines": "Il file contiene {count} righe. Il massimo consentito è 1000."
+      },
+      "success": {
+        "allCreated": "Flashcard create con successo",
+        "created": "{count} flashcard create",
+        "partialCreated": "Creazione parziale",
+        "partialCreatedDesc": "{created} di {total} flashcard sono state create"
+      }
+    }
   },
   "dashboard": {
     "title": "Statistiche Generali",

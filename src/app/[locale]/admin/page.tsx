@@ -24,6 +24,7 @@ import {
   DollarSign,
   GraduationCap,
   PlayCircle,
+  Upload,
 } from 'lucide-react';
 
 import {
@@ -62,6 +63,7 @@ import CreateFlashcardForm from '@/components/CreateFlashcardForm';
 import CreateFlashcardTagForm from '@/components/CreateFlashcardTagForm';
 import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
+import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
@@ -96,6 +98,10 @@ export default function AdminPage() {
   const [
     showCreateLiveSessionModal,
     setShowCreateLiveSessionModal,
+  ] = useState(false);
+  const [
+    showFlashcardBulkImportModal,
+    setShowFlashcardBulkImportModal,
   ] = useState(false);
 
   // Garante que não-admins não fiquem nas abas restritas
@@ -665,6 +671,22 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="create">
+                {/* Bulk Import Button */}
+                <div className="flex justify-center mb-8 mt-6">
+                  <div className="text-center border border-gray-700/50 rounded-xl p-6 bg-gray-800/30 backdrop-blur-sm hover:border-secondary/30 transition-colors">
+                    <button
+                      onClick={() => setShowFlashcardBulkImportModal(true)}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-secondary to-secondary/80 text-primary font-medium rounded-lg hover:from-secondary/90 hover:to-secondary/70 transition-all shadow-lg hover:shadow-xl"
+                    >
+                      <Upload size={20} />
+                      {t('flashcards.bulkImport.buttonTitle')}
+                    </button>
+                    <p className="text-gray-400 text-sm mt-3">
+                      {t('flashcards.bulkImport.buttonDescription')}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <CreateFlashcardForm />
                   <CreateFlashcardTagForm />
@@ -842,6 +864,16 @@ export default function AdminPage() {
         onSuccess={() => {
           console.log('Live session created successfully');
           // Could refresh a list of live sessions here if needed
+        }}
+      />
+
+      {/* Flashcard Bulk Import Modal */}
+      <FlashcardBulkImportModal
+        open={showFlashcardBulkImportModal}
+        onOpenChange={setShowFlashcardBulkImportModal}
+        onSuccess={() => {
+          console.log('Flashcards imported successfully');
+          // Could refresh flashcards list here if needed
         }}
       />
     </div>

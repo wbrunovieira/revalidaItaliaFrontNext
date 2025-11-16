@@ -533,7 +533,7 @@ export default function TrackEditModal({
       setErrors({});
       setSavedImageName(null);
     }
-  }, [track, isOpen]);
+  }, [track, isOpen, formData.newImageUrl]);
 
   // Buscar cursos quando abrir o modal
   useEffect(() => {

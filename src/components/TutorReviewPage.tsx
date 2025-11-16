@@ -13,8 +13,11 @@ import {
   ThumbsUp,
   ThumbsDown,
   Trophy,
+  Volume2,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
+import { OralExamReviewForm } from '@/components/OralExamReviewForm';
+import { OralExamHistory } from '@/components/OralExamHistory';
 
 interface Student {
   id: string;
@@ -26,14 +29,14 @@ interface Assessment {
   id: string;
   title: string;
   description?: string;
-  type: 'PROVA_ABERTA';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
   passingScore?: number;
 }
 
 interface Question {
   id: string;
   text: string;
-  type: 'OPEN_QUESTION';
+  type: 'OPEN_QUESTION' | 'ORAL_QUESTION';
   argumentId?: string;
   argumentName?: string;
 }
@@ -41,24 +44,32 @@ interface Question {
 interface AnswerVersion {
   id: string;
   textAnswer: string;
+  audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
   teacherComment?: string;
   reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   isCorrect?: boolean | null;
   answeredAt: string;
+  submittedAt?: string;
   reviewedAt?: string;
   version: number;
   isLatest: boolean;
+  status: string;
 }
 
 interface Answer {
   id: string;
   questionId: string;
-  textAnswer: string;
+  textAnswer?: string;
+  audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   isCorrect?: boolean | null;
   teacherComment?: string;
   reviewerId?: string;
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   answeredAt: string;
+  reviewedAt?: string;
   versions?: AnswerVersion[];
 }
 
@@ -79,6 +90,8 @@ interface TutorReviewPageProps {
   attemptId: string;
   locale: string;
   backUrl: string;
+  studentName?: string;
+  studentEmail?: string;
 }
 
 interface AnswerHistoryEntry {
@@ -96,6 +109,9 @@ interface AttemptAnswer {
   questionText?: string;
   questionType?: string;
   textAnswer?: string;
+  audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
+  reviewDecision?: 'FULLY_ACCEPTED' | 'PARTIALLY_ACCEPTED' | 'NEEDS_REVISION';
   answer?: string;
   isCorrect?: boolean | null;
   teacherComment?: string;
@@ -103,12 +119,13 @@ interface AttemptAnswer {
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt?: string;
   answeredAt?: string;
+  reviewedAt?: string;
   history?: AnswerHistoryEntry[];
   currentAnswer?: string | Record<string, unknown>;
   originalData?: unknown;
 }
 
-export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
+export default function TutorReviewPage({ attemptId, studentName, studentEmail }: TutorReviewPageProps) {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
@@ -163,15 +180,32 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           isCorrect: answer.isCorrect,
           reviewerId: answer.reviewerId
         });
+
+        // ⚠️ WARN: Check for missing audioAnswerUrl in ORAL_EXAM
+        if (data.assessment?.type === 'ORAL_EXAM' && !answer.audioAnswerUrl) {
+          console.warn('⚠️ BACKEND ISSUE: audioAnswerUrl is missing for ORAL_EXAM answer:', {
+            answerId: answer.id,
+            questionId: answer.questionId,
+            assessmentType: data.assessment.type,
+            message: 'Backend should include audioAnswerUrl field in /api/v1/attempts/${attemptId}/results for ORAL_EXAM'
+          });
+        }
       });
       
+      // Log student data for debugging
+      console.log('[TutorReviewPage] Student data from API:', {
+        user: data.user,
+        student: data.student,
+        attempt: data.attempt,
+      });
+
       // Mapear os dados da API para o formato esperado pelo componente
       const mappedData = {
         id: data.attempt?.id || attemptId,
         student: {
-          id: data.user?.id || '',
-          name: data.user?.name || 'Nome não disponível',
-          email: data.user?.email || '',
+          id: data.student?.id || data.user?.id || '',
+          name: studentName || data.student?.name || data.user?.name || 'Nome não disponível',
+          email: studentEmail || data.student?.email || data.user?.email || '',
         },
         assessment: {
           id: data.assessment?.id || '',
@@ -182,27 +216,43 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
         status: data.attempt?.status || 'SUBMITTED',
         submittedAt: data.attempt?.submittedAt || new Date().toISOString(),
         questions: (data.answers || [])
-          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN' || answer.questionType === 'ORAL')
           .map((answer: AttemptAnswer) => ({
             id: answer.questionId,
             text: answer.questionText,
-            type: 'OPEN_QUESTION',
+            type: answer.questionType === 'ORAL' ? 'ORAL_QUESTION' : 'OPEN_QUESTION',
           })),
         answers: (data.answers || [])
-          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN')
-          .map((answer: AttemptAnswer) => ({
+          .filter((answer: AttemptAnswer) => answer.questionType === 'OPEN' || answer.questionType === 'ORAL')
+          .map((answer: AttemptAnswer) => {
+            // Log history data for debugging
+            if (answer.questionType === 'ORAL') {
+              console.log('[TutorReviewPage] ORAL answer history:', {
+                questionId: answer.questionId,
+                hasHistory: !!answer.history,
+                historyLength: answer.history?.length,
+                history: answer.history,
+              });
+            }
+
+            return {
               id: answer.id,
               questionId: answer.questionId,
               textAnswer: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'textAnswer' in answer.currentAnswer ? answer.currentAnswer.textAnswer : null) || answer.textAnswer || answer.answer,
+              audioAnswerUrl: answer.audioAnswerUrl || (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'audioAnswerUrl' in answer.currentAnswer ? answer.currentAnswer.audioAnswerUrl as string : undefined),
+              teacherAudioUrl: answer.teacherAudioUrl || (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'teacherAudioUrl' in answer.currentAnswer ? answer.currentAnswer.teacherAudioUrl as string : undefined),
+              reviewDecision: answer.reviewDecision || (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'reviewDecision' in answer.currentAnswer ? answer.currentAnswer.reviewDecision as string : undefined),
               isCorrect: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'isCorrect' in answer.currentAnswer ? answer.currentAnswer.isCorrect : null) ?? answer.isCorrect,
               teacherComment: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'teacherComment' in answer.currentAnswer ? answer.currentAnswer.teacherComment : null) || answer.teacherComment,
               reviewerId: answer.reviewerId,
               status: answer.status,
               answeredAt: (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'submittedAt' in answer.currentAnswer ? answer.currentAnswer.submittedAt : null) || answer.submittedAt || answer.answeredAt,
+              reviewedAt: answer.reviewedAt || (typeof answer.currentAnswer === 'object' && answer.currentAnswer && 'reviewedAt' in answer.currentAnswer ? answer.currentAnswer.reviewedAt as string : undefined),
               versions: answer.history || [],
               // Guardar dados originais para debug
               originalData: answer,
-          })),
+            };
+          }),
         totalQuestions: data.results?.totalQuestions || 0,
         reviewedQuestions: data.results?.reviewedQuestions || 0,
         pendingReview: data.results?.pendingReview || 0,
@@ -235,7 +285,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [attemptId, toast, apiUrl]);
+  }, [attemptId, toast, apiUrl, studentName, studentEmail]);
 
   useEffect(() => {
     fetchAttemptData();
@@ -539,6 +589,19 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
   const isCurrentReviewable = isAnswerReviewable(currentQuestion.id);
   const progressPercentage = (reviewedCount / attemptData.totalQuestions) * 100;
 
+  // Debug: Log render conditions for ORAL_EXAM
+  console.log('[TutorReviewPage] Render conditions:', {
+    assessmentType: attemptData.assessment.type,
+    hasAudioUrl: !!currentAnswer?.audioAnswerUrl,
+    audioUrl: currentAnswer?.audioAnswerUrl,
+    isReviewable: isCurrentReviewable,
+    willRenderOralExam: attemptData.assessment.type === 'ORAL_EXAM' && !!currentAnswer?.audioAnswerUrl && isCurrentReviewable,
+    hasVersions: !!currentAnswer?.versions,
+    versionsLength: currentAnswer?.versions?.length,
+    versionsData: currentAnswer?.versions,
+    currentAnswerKeys: currentAnswer ? Object.keys(currentAnswer) : [],
+  });
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Student and Assessment Info */}
@@ -635,12 +698,21 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           {/* Student Answer with History */}
           <div className="p-4 bg-gray-800 rounded-lg">
             <h3 className="text-lg font-semibold text-white mb-4">
-              {currentAnswer?.versions && currentAnswer.versions.length > 1 
-                ? 'Histórico de Respostas e Revisões' 
+              {currentAnswer?.versions && currentAnswer.versions.length > 1
+                ? 'Histórico de Respostas e Revisões'
+                : attemptData.assessment.type === 'ORAL_EXAM'
+                ? 'Resposta em Áudio do Aluno'
                 : 'Resposta do Aluno'}
             </h3>
-            
-            {currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
+
+            {attemptData.assessment.type === 'ORAL_EXAM' && currentAnswer?.audioAnswerUrl ? (
+              /* ORAL_EXAM - Show Audio Player (handled by OralExamReviewForm below) */
+              <div className="p-3 bg-gray-700 rounded-lg">
+                <p className="text-gray-400 text-sm mb-3">
+                  O player de áudio está disponível na seção de revisão abaixo.
+                </p>
+              </div>
+            ) : currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
               <div className="space-y-4">
                 {currentAnswer.versions.map((version, index) => (
                   <div key={index} className="border-l-2 border-gray-600 pl-4 ml-2 space-y-2">
@@ -652,13 +724,13 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                         {new Date(version.answeredAt).toLocaleString('pt-BR')}
                       </span>
                     </div>
-                    
+
                     <div className="p-3 bg-gray-700 rounded-lg">
                       <p className="text-gray-300 whitespace-pre-wrap">
                         {version.textAnswer}
                       </p>
                     </div>
-                    
+
                     {version.reviewDecision && (
                       <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
                         <div className="flex items-center gap-2 mb-2">
@@ -712,157 +784,267 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           </div>
 
           {/* Review Section */}
-          <div className="p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-4">Revisão</h3>
-            
-            {currentQuestionStatus === 'graded' ? (
-              /* Already Reviewed - Display Only */
-              <div className="space-y-4">
-                <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle size={20} className="text-green-400" />
-                    <span className="text-green-400 font-medium">Resposta já revisada</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {currentAnswer?.isCorrect === true ? (
-                        <>
-                          <ThumbsUp size={16} className="text-green-400" />
-                          <span className="text-green-400">Resposta totalmente aceita</span>
-                        </>
-                      ) : currentAnswer?.isCorrect === false ? (
-                        <>
-                          <ThumbsDown size={16} className="text-red-400" />
-                          <span className="text-red-400">Resposta precisa de revisão</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle size={16} className="text-orange-400" />
-                          <span className="text-orange-400">Resposta parcialmente aceita</span>
-                        </>
+          {attemptData.assessment.type === 'ORAL_EXAM' ? (
+            <>
+              {/* Mostrar áudios quando já foi revisada mas histórico ainda não chegou */}
+              {currentAnswer?.audioAnswerUrl && currentAnswer?.teacherAudioUrl && !isCurrentReviewable && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-lg font-semibold text-white">Revisão Enviada</h3>
+
+                  {/* Áudio do Aluno */}
+                  <div className="p-4 bg-primary-dark rounded-lg border border-secondary/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Volume2 size={16} className="text-blue-400" />
+                        <span className="text-sm font-medium text-blue-400">Resposta do Aluno</span>
+                      </div>
+                      {currentAnswer.answeredAt && (
+                        <span className="text-xs text-gray-500">
+                          {new Date(currentAnswer.answeredAt).toLocaleString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
                       )}
                     </div>
-                    {currentAnswer?.teacherComment && (
-                      <div className="mt-3 p-3 bg-gray-700 rounded">
-                        <p className="text-sm text-gray-300">{currentAnswer.teacherComment}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="text-center text-gray-400 text-sm">
-                  Esta resposta não pode ser revisada novamente
-                </div>
-              </div>
-            ) : isCurrentReviewable ? (
-              /* Can Review - Interactive */
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Avaliação da Resposta
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <button
-                      onClick={() => setCurrentReview({ reviewState: 'FULLY_ACCEPTED', teacherComment: '' })}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'FULLY_ACCEPTED'
-                          ? 'border-green-500 bg-green-500/10 text-green-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
-                      }`}
-                    >
-                      <ThumbsUp size={20} />
-                      <span className="font-medium">Totalmente Aceita</span>
-                      <span className="text-xs text-center">A resposta está completa e correta</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'PARTIALLY_ACCEPTED' }))}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'PARTIALLY_ACCEPTED'
-                          ? 'border-orange-500 bg-orange-500/10 text-orange-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
-                      }`}
-                    >
-                      <AlertCircle size={20} />
-                      <span className="font-medium">Parcialmente Aceita</span>
-                      <span className="text-xs text-center">Resposta correta mas incompleta</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'NEEDS_REVISION' }))}
-                      className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
-                        currentReview.reviewState === 'NEEDS_REVISION'
-                          ? 'border-red-500 bg-red-500/10 text-red-400'
-                          : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
-                      }`}
-                    >
-                      <ThumbsDown size={20} />
-                      <span className="font-medium">Precisa Revisão</span>
-                      <span className="text-xs text-center">Resposta incorreta ou inadequada</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Teacher Comment - Only show for PARTIALLY_ACCEPTED and NEEDS_REVISION */}
-                {currentReview.reviewState !== 'FULLY_ACCEPTED' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
-                    </label>
-                    <textarea
-                      value={currentReview.teacherComment}
-                      onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
-                      placeholder={
-                        currentReview.reviewState === 'PARTIALLY_ACCEPTED' 
-                          ? "Adicione informações complementares para completar a resposta..." 
-                          : currentReview.reviewState === 'NEEDS_REVISION' 
-                          ? "Explique o que precisa ser corrigido na resposta..."
-                          : "Selecione uma avaliação acima para comentar..."
-                      }
-                      className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
+                    <audio
+                      src={currentAnswer.audioAnswerUrl}
+                      controls
+                      className="w-full"
+                      style={{ backgroundColor: 'transparent', borderRadius: '8px' }}
                     />
-                    {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
-                      <p className="text-sm text-red-400 mt-1">
-                        Comentário obrigatório quando a resposta precisa de revisão.
-                      </p>
-                    )}
-                    {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
-                      <p className="text-sm text-orange-400 mt-1">
-                        Comentário obrigatório para adicionar informações complementares.
-                      </p>
-                    )}
-                    {currentReview.reviewState === null && (
-                      <p className="text-sm text-yellow-400 mt-1">
-                        Selecione uma opção de avaliação antes de enviar a revisão.
-                      </p>
-                    )}
                   </div>
-                )}
-                
-                {/* Success message for FULLY_ACCEPTED */}
-                {currentReview.reviewState === 'FULLY_ACCEPTED' && (
-                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle size={20} className="text-green-400" />
-                      <p className="text-green-400">
-                        A resposta será marcada como totalmente aceita.
+
+                  {/* Áudio do Professor */}
+                  <div className="p-4 bg-primary-dark rounded-lg border border-secondary/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Volume2 size={16} className="text-green-400" />
+                        <span className="text-sm font-medium text-green-400">Seu Feedback</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {currentAnswer.reviewedAt ? (
+                          new Date(currentAnswer.reviewedAt).toLocaleString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        ) : (
+                          'Enviado'
+                        )}
+                      </span>
+                    </div>
+                    <audio
+                      src={currentAnswer.teacherAudioUrl}
+                      controls
+                      className="w-full"
+                      style={{ backgroundColor: 'transparent', borderRadius: '8px' }}
+                    />
+                  </div>
+
+                  {/* Status da Decisão */}
+                  {currentAnswer.reviewDecision && (
+                    <div className="p-3 bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-300">
+                        <span className="font-semibold">Decisão: </span>
+                        {currentAnswer.reviewDecision === 'FULLY_ACCEPTED' && 'Totalmente Aceita'}
+                        {currentAnswer.reviewDecision === 'PARTIALLY_ACCEPTED' && 'Parcialmente Aceita'}
+                        {currentAnswer.reviewDecision === 'NEEDS_REVISION' && 'Precisa Revisão'}
                       </p>
                     </div>
+                  )}
+
+                  <div className="p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                    <p className="text-sm text-yellow-400">
+                      Aguardando o aluno revisar a resposta para você poder avaliar novamente.
+                    </p>
                   </div>
-                )}
-              </div>
-            ) : (
-              /* Cannot Review - No Response or Invalid State */
-              <div className="text-center space-y-3">
-                <div className="p-4 bg-gray-700/50 rounded-lg">
-                  <AlertCircle size={24} className="text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-400">Esta questão não pode ser revisada</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    {!currentAnswer ? 'Sem resposta do aluno' : 'Estado inválido para revisão'}
-                  </p>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+
+              {/* Mostrar histórico se existir */}
+              {currentAnswer?.versions && currentAnswer.versions.length > 0 && (
+                <OralExamHistory
+                  history={currentAnswer.versions}
+                />
+              )}
+
+              {/* Formulário de revisão apenas se for revisável */}
+              {currentAnswer?.audioAnswerUrl && isCurrentReviewable && (
+                <OralExamReviewForm
+                  attemptAnswerId={currentAnswer.id}
+                  studentAudioUrl={currentAnswer.audioAnswerUrl}
+                  reviewerId={user?.id || ''}
+                  onSuccess={() => {
+                    // Refresh data after successful review
+                    fetchAttemptData();
+                    toast({
+                      title: 'Sucesso',
+                      description: 'Revisão salva com sucesso.',
+                    });
+                  }}
+                />
+              )}
+            </>
+          ) : (
+            /* PROVA_ABERTA Text Review */
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-4">Revisão</h3>
+
+              {currentQuestionStatus === 'graded' ? (
+                /* Already Reviewed - Display Only */
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle size={20} className="text-green-400" />
+                      <span className="text-green-400 font-medium">Resposta já revisada</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        {currentAnswer?.isCorrect === true ? (
+                          <>
+                            <ThumbsUp size={16} className="text-green-400" />
+                            <span className="text-green-400">Resposta totalmente aceita</span>
+                          </>
+                        ) : currentAnswer?.isCorrect === false ? (
+                          <>
+                            <ThumbsDown size={16} className="text-red-400" />
+                            <span className="text-red-400">Resposta precisa de revisão</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle size={16} className="text-orange-400" />
+                            <span className="text-orange-400">Resposta parcialmente aceita</span>
+                          </>
+                        )}
+                      </div>
+                      {currentAnswer?.teacherComment && (
+                        <div className="mt-3 p-3 bg-gray-700 rounded">
+                          <p className="text-sm text-gray-300">{currentAnswer.teacherComment}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center text-gray-400 text-sm">
+                    Esta resposta não pode ser revisada novamente
+                  </div>
+                </div>
+              ) : isCurrentReviewable ? (
+                /* Can Review - Interactive */
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Avaliação da Resposta
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <button
+                        onClick={() => setCurrentReview({ reviewState: 'FULLY_ACCEPTED', teacherComment: '' })}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'FULLY_ACCEPTED'
+                            ? 'border-green-500 bg-green-500/10 text-green-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-green-500'
+                        }`}
+                      >
+                        <ThumbsUp size={20} />
+                        <span className="font-medium">Totalmente Aceita</span>
+                        <span className="text-xs text-center">A resposta está completa e correta</span>
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'PARTIALLY_ACCEPTED' }))}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'PARTIALLY_ACCEPTED'
+                            ? 'border-orange-500 bg-orange-500/10 text-orange-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-orange-500'
+                        }`}
+                      >
+                        <AlertCircle size={20} />
+                        <span className="font-medium">Parcialmente Aceita</span>
+                        <span className="text-xs text-center">Resposta correta mas incompleta</span>
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentReview(prev => ({ ...prev, reviewState: 'NEEDS_REVISION' }))}
+                        className={`flex flex-col items-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                          currentReview.reviewState === 'NEEDS_REVISION'
+                            ? 'border-red-500 bg-red-500/10 text-red-400'
+                            : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-red-500'
+                        }`}
+                      >
+                        <ThumbsDown size={20} />
+                        <span className="font-medium">Precisa Revisão</span>
+                        <span className="text-xs text-center">Resposta incorreta ou inadequada</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Teacher Comment - Only show for PARTIALLY_ACCEPTED and NEEDS_REVISION */}
+                  {currentReview.reviewState !== 'FULLY_ACCEPTED' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Comentário do Tutor {(currentReview.reviewState === 'NEEDS_REVISION' || currentReview.reviewState === 'PARTIALLY_ACCEPTED') && <span className="text-red-400">*</span>}
+                      </label>
+                      <textarea
+                        value={currentReview.teacherComment}
+                        onChange={(e) => setCurrentReview(prev => ({ ...prev, teacherComment: e.target.value }))}
+                        placeholder={
+                          currentReview.reviewState === 'PARTIALLY_ACCEPTED'
+                            ? "Adicione informações complementares para completar a resposta..."
+                            : currentReview.reviewState === 'NEEDS_REVISION'
+                            ? "Explique o que precisa ser corrigido na resposta..."
+                            : "Selecione uma avaliação acima para comentar..."
+                        }
+                        className="w-full h-32 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-secondary focus:outline-none resize-none"
+                      />
+                      {currentReview.reviewState === 'NEEDS_REVISION' && !currentReview.teacherComment.trim() && (
+                        <p className="text-sm text-red-400 mt-1">
+                          Comentário obrigatório quando a resposta precisa de revisão.
+                        </p>
+                      )}
+                      {currentReview.reviewState === 'PARTIALLY_ACCEPTED' && !currentReview.teacherComment.trim() && (
+                        <p className="text-sm text-orange-400 mt-1">
+                          Comentário obrigatório para adicionar informações complementares.
+                        </p>
+                      )}
+                      {currentReview.reviewState === null && (
+                        <p className="text-sm text-yellow-400 mt-1">
+                          Selecione uma opção de avaliação antes de enviar a revisão.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Success message for FULLY_ACCEPTED */}
+                  {currentReview.reviewState === 'FULLY_ACCEPTED' && (
+                    <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle size={20} className="text-green-400" />
+                        <p className="text-green-400">
+                          A resposta será marcada como totalmente aceita.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Cannot Review - No Response or Invalid State */
+                <div className="text-center space-y-3">
+                  <div className="p-4 bg-gray-700/50 rounded-lg">
+                    <AlertCircle size={24} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-400">Esta questão não pode ser revisada</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {!currentAnswer ? 'Sem resposta do aluno' : 'Estado inválido para revisão'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -882,7 +1064,7 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
           </button>
 
           <div className="flex items-center gap-3">
-            {isCurrentReviewable ? (
+            {isCurrentReviewable && attemptData.assessment.type !== 'ORAL_EXAM' ? (
               <button
                 onClick={handleSaveCurrentReview}
                 disabled={saving}
@@ -900,17 +1082,17 @@ export default function TutorReviewPage({ attemptId }: TutorReviewPageProps) {
                   </>
                 )}
               </button>
-            ) : currentQuestionStatus === 'graded' ? (
+            ) : attemptData.assessment.type !== 'ORAL_EXAM' && currentQuestionStatus === 'graded' ? (
               <div className="flex items-center gap-2 text-green-400">
                 <CheckCircle size={16} />
                 <span className="text-sm font-medium">Revisão concluída</span>
               </div>
-            ) : (
+            ) : attemptData.assessment.type !== 'ORAL_EXAM' ? (
               <div className="flex items-center gap-2 text-gray-400">
                 <AlertCircle size={16} />
                 <span className="text-sm font-medium">Não revisável</span>
               </div>
-            )}
+            ) : null}
 
             {pendingCount === 0 && reviewedCount > 0 && (
               <div className="flex items-center gap-2 text-green-400">

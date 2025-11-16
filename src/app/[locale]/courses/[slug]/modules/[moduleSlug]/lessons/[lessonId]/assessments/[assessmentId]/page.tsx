@@ -8,6 +8,7 @@ import NavSidebar from '@/components/NavSidebar';
 import QuizPage from '@/components/QuizPage';
 import SimuladoPage from '@/components/SimuladoPage';
 import ProvaAbertaPage from '@/components/ProvaAbertaPage';
+import OralExamPage from '@/components/OralExamPage';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -23,7 +24,7 @@ interface Assessment {
 
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON';
   passingScore?: number;
   timeLimitInMinutes?: number;
@@ -330,6 +331,18 @@ export default async function AssessmentPage({
             backUrl={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
           />
         </div>
+      </NavSidebar>
+    );
+  }
+
+  if (assessment.type === 'ORAL_EXAM') {
+    return (
+      <NavSidebar>
+        <OralExamPage
+          assessment={assessment}
+          questions={questions}
+          backUrl={`/${locale}/courses/${slug}/modules/${moduleSlug}/lessons/${lessonId}`}
+        />
       </NavSidebar>
     );
   }

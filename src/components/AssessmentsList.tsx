@@ -20,6 +20,7 @@ import {
   BookOpen,
   Package,
   Play,
+  Mic,
 } from 'lucide-react';
 import {
   Select,
@@ -32,7 +33,7 @@ import { Label } from '@/components/ui/label';
 import ViewAssessmentModal from '@/components/ViewAssessmentModal';
 import AssessmentEditModal from '@/components/AssessmentEditModal';
 
-type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
 type QuizPosition = 'BEFORE_LESSON' | 'AFTER_LESSON' | null;
 
 interface Assessment {
@@ -506,6 +507,8 @@ export default function AssessmentsList() {
         return <FileQuestion size={16} className="text-green-400" />;
       case 'PROVA_ABERTA':
         return <FileText size={16} className="text-purple-400" />;
+      case 'ORAL_EXAM':
+        return <Mic size={16} className="text-orange-400" />;
     }
   };
 
@@ -518,6 +521,8 @@ export default function AssessmentsList() {
         return 'bg-green-500/20 text-green-300 border-green-500/30';
       case 'PROVA_ABERTA':
         return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'ORAL_EXAM':
+        return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
     }
   };
 

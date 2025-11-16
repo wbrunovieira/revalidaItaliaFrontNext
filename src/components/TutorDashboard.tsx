@@ -37,7 +37,7 @@ interface Assessment {
   id: string;
   title: string;
   description?: string;
-  type: 'PROVA_ABERTA';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
 }
 
 interface PendingAttempt {
@@ -71,7 +71,7 @@ interface TutorAttempt {
   assessment: {
     id: string;
     title: string;
-    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+    type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
   };
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt: string;
@@ -96,7 +96,7 @@ interface AnalyticsAttempt {
   assessment: {
     id: string;
     title: string;
-    type: 'PROVA_ABERTA' | 'QUIZ' | 'SIMULADO';
+    type: 'PROVA_ABERTA' | 'ORAL_EXAM' | 'QUIZ' | 'SIMULADO';
   };
   status: 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt: string;
@@ -194,7 +194,8 @@ export default function TutorDashboard({
       const allAttempts = data.attempts || [];
       const openAssessmentAttempts = allAttempts.filter(
         (attempt: TutorAttempt) =>
-          attempt.assessment?.type === 'PROVA_ABERTA'
+          attempt.assessment?.type === 'PROVA_ABERTA' ||
+          attempt.assessment?.type === 'ORAL_EXAM'
       );
       const quizAttempts = allAttempts.filter(
         (attempt: TutorAttempt) =>
@@ -320,7 +321,7 @@ export default function TutorDashboard({
             assessment: {
               id: attempt.assessment?.id || '',
               title: attempt.assessment?.title || '',
-              type: 'PROVA_ABERTA' as const,
+              type: attempt.assessment?.type || 'PROVA_ABERTA',
             },
             status: attempt.status,
             submittedAt: attempt.submittedAt,
@@ -689,8 +690,13 @@ export default function TutorDashboard({
     >
   );
 
-  const handleViewAttempt = (attemptId: string) => {
-    router.push(`/${locale}/tutor/reviews/${attemptId}`);
+  const handleViewAttempt = (attemptId: string, studentName?: string, studentEmail?: string) => {
+    const params = new URLSearchParams();
+    if (studentName) params.set('studentName', studentName);
+    if (studentEmail) params.set('studentEmail', studentEmail);
+
+    const url = `/${locale}/tutor/reviews/${attemptId}${params.toString() ? `?${params.toString()}` : ''}`;
+    router.push(url);
   };
 
   if (loading) {
@@ -854,9 +860,6 @@ export default function TutorDashboard({
 
             {/* Stats Cards */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                {t('stats.openExams')}
-              </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
                   <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-left">
@@ -1309,6 +1312,12 @@ export default function TutorDashboard({
             </div>
 
             {/* Attempts grouped by student or assessment */}
+            <div className="mt-10 mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                {t('stats.openExams')}
+              </h2>
+            </div>
+
             <div className="space-y-6">
               {Object.keys(groupedAttempts).length === 0 ? (
                 <div className="text-center py-12">
@@ -1374,7 +1383,7 @@ export default function TutorDashboard({
                                 {assessment.title}
                               </h3>
                               <p className="text-gray-400 text-xs sm:text-sm">
-                                Prova Aberta
+                                {assessment.type === 'ORAL_EXAM' ? 'Exame Oral' : 'Prova Aberta'}
                               </p>
                             </>
                           )}
@@ -1598,7 +1607,9 @@ export default function TutorDashboard({
                                         className={`p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors ${cardBgColor}`}
                                         onClick={() =>
                                           handleViewAttempt(
-                                            attempt.id
+                                            attempt.id,
+                                            attempt.student.name,
+                                            attempt.student.email
                                           )
                                         }
                                       >

@@ -18,7 +18,7 @@ import {
 interface Assessment {
   id: string;
   title: string;
-  type: 'PROVA_ABERTA';
+  type: 'PROVA_ABERTA' | 'ORAL_EXAM';
 }
 
 interface Answer {
@@ -124,14 +124,14 @@ export default function StudentAssessmentStatus({
           userId
         );
 
-        // Filtrar apenas PROVA_ABERTA e tentativas do usuário atual
+        // Filtrar apenas PROVA_ABERTA e ORAL_EXAM e tentativas do usuário atual
         // Excluir tentativas IN_PROGRESS pois não foram finalizadas
         const userOpenAttempts = (
           data.attempts || []
         ).filter(
           (attempt: StudentAttempt) =>
             attempt.student?.id === userId &&
-            attempt.assessment?.type === 'PROVA_ABERTA' &&
+            (attempt.assessment?.type === 'PROVA_ABERTA' || attempt.assessment?.type === 'ORAL_EXAM') &&
             attempt.status !== 'IN_PROGRESS' // Apenas tentativas finalizadas
         );
 

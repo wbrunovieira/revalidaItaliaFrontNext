@@ -29,6 +29,7 @@ import {
   Eye,
   AlertCircle,
   FileCheck,
+  Mic,
 } from 'lucide-react';
 
 interface PageProps {
@@ -42,7 +43,7 @@ interface Assessment {
   slug: string;
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON' | null;
   passingScore?: number | null;
   timeLimitInMinutes?: number | null;
@@ -110,6 +111,7 @@ export default function AssessmentsPage({
     quiz: 0,
     simulado: 0,
     provaAberta: 0,
+    oralExam: 0,
   });
   const [activeTab, setActiveTab] = useState<
     'available' | 'results' | 'openExams'
@@ -136,12 +138,16 @@ export default function AssessmentsPage({
       const provaAberta = assessments.filter(
         a => a.type === 'PROVA_ABERTA'
       ).length;
+      const oralExam = assessments.filter(
+        a => a.type === 'ORAL_EXAM'
+      ).length;
 
       setStats({
         total: assessments.length,
         quiz,
         simulado,
         provaAberta,
+        oralExam,
       });
     },
     []
@@ -544,6 +550,8 @@ export default function AssessmentsPage({
             className="w-6 h-6"
           />
         );
+      case 'ORAL_EXAM':
+        return <Mic size={24} className="text-orange-400" />;
       default:
         return <ClipboardList size={24} />;
     }
@@ -565,6 +573,11 @@ export default function AssessmentsPage({
         bg: 'bg-accent',
         text: 'text-primary',
         border: 'border-primary/40',
+      },
+      ORAL_EXAM: {
+        bg: 'bg-orange-500/20',
+        text: 'text-orange-300',
+        border: 'border-orange-500/30',
       },
     };
 
@@ -605,6 +618,22 @@ export default function AssessmentsPage({
         }
         return;
       }
+    }
+
+    // Check if it's an oral exam
+    if (assessment.type === 'ORAL_EXAM') {
+      if (assessment.lessonId) {
+        // Oral exam with lesson - use lesson route
+        router.push(
+          `/${locale}/lessons/${assessment.lessonId}/assessments/${assessment.id}`
+        );
+      } else {
+        // Oral exam without lesson - use standalone route
+        router.push(
+          `/${locale}/assessments/${assessment.id}`
+        );
+      }
+      return;
     }
 
     if (assessment.lessonId) {
@@ -722,7 +751,7 @@ export default function AssessmentsPage({
           {activeTab === 'available' ? (
             <>
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-8">
                 <div className="bg-primary-dark/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 border border-secondary/20">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -796,6 +825,23 @@ export default function AssessmentsPage({
                       width={24}
                       height={24}
                       className="w-5 h-5 mt-2 sm:mt-0 sm:w-6 sm:h-6"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-primary-dark/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 border border-secondary/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-gray-400 text-[10px] sm:text-sm">
+                        {t('types.oral_exam')}
+                      </p>
+                      <p className="text-lg sm:text-2xl font-bold text-white">
+                        {stats.oralExam}
+                      </p>
+                    </div>
+                    <Mic
+                      size={20}
+                      className="text-orange-400 mt-2 sm:mt-0 sm:w-6 sm:h-6"
                     />
                   </div>
                 </div>
@@ -1017,9 +1063,11 @@ export default function AssessmentsPage({
                             }
 
                             // Para QUIZ/SIMULADO: pode iniciar nova tentativa mesmo se já tem GRADED
+                            // Para ORAL_EXAM: não permitir nova tentativa se já está SUBMITTED ou GRADING
                             if (
                               assessment.type !==
                                 'PROVA_ABERTA' &&
+                              assessment.type !== 'ORAL_EXAM' &&
                               status.canStartNewAttempt &&
                               !status.hasActiveAttempt &&
                               status.status !== 'GRADED' // Não mostrar este botão se já foi concluído
@@ -1076,6 +1124,35 @@ export default function AssessmentsPage({
                               );
                             }
 
+                            // Para ORAL_EXAM: se ainda não foi iniciada
+                            if (
+                              assessment.type ===
+                                'ORAL_EXAM' &&
+                              !status.status &&
+                              !status.attemptId
+                            ) {
+                              return (
+                                <button
+                                  onClick={() =>
+                                    handleStartAssessment(
+                                      assessment
+                                    )
+                                  }
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-all duration-300 font-medium group/btn"
+                                >
+                                  <Play
+                                    size={16}
+                                    className="group-hover/btn:scale-110 transition-transform"
+                                  />
+                                  {t('startAssessment')}
+                                  <ArrowRight
+                                    size={16}
+                                    className="group-hover/btn:translate-x-1 transition-transform"
+                                  />
+                                </button>
+                              );
+                            }
+
                             // Renderizar status e ações baseado no estado
                             return (
                               <>
@@ -1102,6 +1179,19 @@ export default function AssessmentsPage({
                                         status.status ===
                                         'SUBMITTED'
                                       ) {
+                                        // Para ORAL_EXAM: mostrar mensagem específica se está aguardando revisão
+                                        if (assessment.type === 'ORAL_EXAM' && status.pendingReviewQuestions > 0) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-blue-400">
+                                              <Clock
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Aguardando revisão do professor
+                                              </span>
+                                            </div>
+                                          );
+                                        }
                                         return (
                                           <div className="flex items-center gap-2 text-blue-400">
                                             <Clock
@@ -1117,6 +1207,32 @@ export default function AssessmentsPage({
                                         status.status ===
                                         'GRADING'
                                       ) {
+                                        // Para ORAL_EXAM: mostrar mensagem específica se precisa revisão do aluno
+                                        if (assessment.type === 'ORAL_EXAM' && status.rejectedQuestions > 0) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-orange-400">
+                                              <AlertCircle
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Professor pediu revisão
+                                              </span>
+                                            </div>
+                                          );
+                                        }
+                                        // Para ORAL_EXAM: se needsStudentAction (PARTIALLY_ACCEPTED)
+                                        if (assessment.type === 'ORAL_EXAM' && status.needsStudentAction) {
+                                          return (
+                                            <div className="flex items-center gap-2 text-yellow-400">
+                                              <AlertCircle
+                                                size={16}
+                                              />
+                                              <span className="text-sm font-medium">
+                                                Professor enviou feedback
+                                              </span>
+                                            </div>
+                                          );
+                                        }
                                         return (
                                           <div className="flex items-center gap-2 text-yellow-400">
                                             <FileCheck
@@ -1316,6 +1432,13 @@ export default function AssessmentsPage({
                                         router.push(
                                           `/${locale}/assessments/open-exams/${status.attemptId}`
                                         );
+                                      } else if (assessment.type === 'ORAL_EXAM') {
+                                        console.log(
+                                          '➡️ Redirecionando para ver resultado do exame oral'
+                                        );
+                                        router.push(
+                                          `/${locale}/assessments/open-exams/${status.attemptId}`
+                                        );
                                       } else {
                                         // Para QUIZ/SIMULADO: refazer
                                         console.log(
@@ -1378,6 +1501,8 @@ export default function AssessmentsPage({
                                   className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
                                     status.needsStudentAction
                                       ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                      : status.rejectedQuestions > 0
+                                      ? 'bg-orange-600 text-white hover:bg-orange-700'
                                       : status.status ===
                                         'GRADED'
                                       ? 'bg-green-600 text-white hover:bg-green-700'
@@ -1398,7 +1523,9 @@ export default function AssessmentsPage({
                                             size={16}
                                           />
                                           {assessment.type ===
-                                          'PROVA_ABERTA'
+                                          'PROVA_ABERTA' ||
+                                          assessment.type ===
+                                          'ORAL_EXAM'
                                             ? 'Ver Resultado'
                                             : 'Refazer Quiz'}
                                         </>
@@ -1413,6 +1540,18 @@ export default function AssessmentsPage({
                                         <>
                                           <Eye size={16} />
                                           Acompanhar Prova
+                                        </>
+                                      );
+                                    } else if (
+                                      status.status ===
+                                        'IN_PROGRESS' &&
+                                      assessment.type ===
+                                        'ORAL_EXAM'
+                                    ) {
+                                      return (
+                                        <>
+                                          <Mic size={16} />
+                                          Continuar Exame
                                         </>
                                       );
                                     } else if (
@@ -1436,7 +1575,29 @@ export default function AssessmentsPage({
                                           <AlertCircle
                                             size={16}
                                           />
-                                          Revisar Respostas
+                                          {assessment.type === 'ORAL_EXAM'
+                                            ? 'Ouvir Feedback e Aceitar'
+                                            : 'Revisar Respostas'}
+                                        </>
+                                      );
+                                    } else if (
+                                      assessment.type === 'ORAL_EXAM' &&
+                                      status.rejectedQuestions > 0
+                                    ) {
+                                      return (
+                                        <>
+                                          <Mic size={16} />
+                                          Reenviar Resposta
+                                        </>
+                                      );
+                                    } else if (
+                                      assessment.type === 'ORAL_EXAM' &&
+                                      status.pendingReviewQuestions > 0
+                                    ) {
+                                      return (
+                                        <>
+                                          <Eye size={16} />
+                                          Acompanhar Status
                                         </>
                                       );
                                     } else {

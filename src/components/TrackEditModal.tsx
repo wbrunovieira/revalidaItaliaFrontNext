@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -106,6 +106,7 @@ export default function TrackEditModal({
   >([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const prevBlobUrlRef = useRef<string | null>(null);
   const [savedImageName, setSavedImageName] = useState<string | null>(null);
   const [loadingCourses, setLoadingCourses] =
     useState(false);
@@ -197,6 +198,14 @@ export default function TrackEditModal({
 
       // Create a local URL for preview
       const localUrl = URL.createObjectURL(file);
+
+      // Clean up previous blob URL if exists
+      if (prevBlobUrlRef.current && prevBlobUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(prevBlobUrlRef.current);
+      }
+
+      // Store new blob URL in ref
+      prevBlobUrlRef.current = localUrl;
 
       // Save file and preview URL
       setFormData(prev => ({
@@ -482,9 +491,10 @@ export default function TrackEditModal({
   // Atualizar formulário quando track mudar
   useEffect(() => {
     if (track && isOpen) {
-      // Clean up any existing blob URLs
-      if (formData.newImageUrl && formData.newImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(formData.newImageUrl);
+      // Clean up any existing blob URLs stored in ref
+      if (prevBlobUrlRef.current && prevBlobUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(prevBlobUrlRef.current);
+        prevBlobUrlRef.current = null;
       }
 
       const translationsObj: FormTranslations = {

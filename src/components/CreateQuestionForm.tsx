@@ -29,9 +29,10 @@ import {
   Languages,
   ChevronLeft,
   ChevronRight,
+  Mic,
 } from 'lucide-react';
 
-type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN';
+type QuestionType = 'MULTIPLE_CHOICE' | 'OPEN' | 'ORAL';
 
 interface Option {
   text: string;
@@ -368,15 +369,19 @@ export default function CreateQuestionForm({
     (assessmentId: string) => {
       setFormData(prev => ({ ...prev, assessmentId }));
       handleFieldValidation('assessmentId', assessmentId);
-      
+
       // Auto-select question type based on assessment type
       const selectedAssessment = assessments.find(a => a.id === assessmentId);
       if (selectedAssessment) {
         if (selectedAssessment.type === 'QUIZ' || selectedAssessment.type === 'SIMULADO') {
-          setFormData(prev => ({ ...prev, type: 'MULTIPLE_CHOICE' }));
+          setFormData(prev => ({ ...prev, type: 'MULTIPLE_CHOICE', assessmentId }));
+          setTouched(prev => ({ ...prev, type: true }));
+        } else if (selectedAssessment.type === 'ORAL_EXAM') {
+          // ORAL_EXAM requires ORAL type questions
+          setFormData(prev => ({ ...prev, type: 'ORAL', assessmentId }));
           setTouched(prev => ({ ...prev, type: true }));
         } else if (selectedAssessment.type === 'PROVA_ABERTA') {
-          setFormData(prev => ({ ...prev, type: 'OPEN' }));
+          setFormData(prev => ({ ...prev, type: 'OPEN', assessmentId }));
           setTouched(prev => ({ ...prev, type: true }));
         }
       }
@@ -641,13 +646,20 @@ export default function CreateQuestionForm({
       onClose();
     } catch (error) {
       console.error('Error creating question:', error);
-      
-      // Check for duplicate question error
+
+      // Check for specific error types
       const errorMessage = error instanceof Error ? error.message : String(error);
+
       if (errorMessage.includes('DUPLICATE_QUESTION') || errorMessage.includes('409')) {
         toast({
           title: t('error.duplicateTitle'),
           description: t('error.duplicateDescription'),
+          variant: 'destructive',
+        });
+      } else if (errorMessage.includes('QUESTION_TYPE_MISMATCH') || errorMessage.includes('requires question type')) {
+        toast({
+          title: 'Tipo de Questão Incompatível',
+          description: 'Este tipo de avaliação aceita apenas questões do tipo OPEN (abertas)',
           variant: 'destructive',
         });
       } else {
@@ -789,6 +801,11 @@ export default function CreateQuestionForm({
                           <>
                             <CircleDot size={16} className="text-blue-400" />
                             {t('types.multipleChoice')}
+                          </>
+                        ) : formData.type === 'ORAL' ? (
+                          <>
+                            <Mic size={16} className="text-orange-400" />
+                            {t('types.oral')}
                           </>
                         ) : formData.type === 'OPEN' ? (
                           <>

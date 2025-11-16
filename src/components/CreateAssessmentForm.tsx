@@ -26,9 +26,10 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Mic,
 } from 'lucide-react';
 
-type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+type AssessmentType = 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
 type QuizPosition = 'BEFORE_LESSON' | 'AFTER_LESSON';
 
 interface FormData {
@@ -285,7 +286,7 @@ export default function CreateAssessmentForm({
               message: t('errors.typeRequired'),
             };
           }
-          if (!['QUIZ', 'SIMULADO', 'PROVA_ABERTA'].includes(String(value))) {
+          if (!['QUIZ', 'SIMULADO', 'PROVA_ABERTA', 'ORAL_EXAM'].includes(String(value))) {
             return {
               isValid: false,
               message: t('errors.typeInvalid'),
@@ -445,7 +446,8 @@ export default function CreateAssessmentForm({
       ...(formData.description.trim() && {
         description: formData.description.trim(),
       }),
-      ...(formData.type !== 'PROVA_ABERTA' && {
+      // ORAL_EXAM and PROVA_ABERTA don't need these fields
+      ...(formData.type !== 'PROVA_ABERTA' && formData.type !== 'ORAL_EXAM' && {
         passingScore: formData.passingScore,
         randomizeQuestions: formData.randomizeQuestions,
         randomizeOptions: formData.randomizeOptions,
@@ -510,8 +512,8 @@ export default function CreateAssessmentForm({
 
     if (!validateForm()) {
       toast({
-        title: t('error.validationTitle'),
-        description: t('error.validationDescription'),
+        title: t('errors.validationTitle'),
+        description: t('errors.validationDescription'),
         variant: 'destructive',
       });
       return;
@@ -581,7 +583,7 @@ export default function CreateAssessmentForm({
                 {t('selectType')}
               </p>
               
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Quiz Option */}
                 <button
                   onClick={() => handleTypeSelect('QUIZ')}
@@ -641,6 +643,26 @@ export default function CreateAssessmentForm({
                     </div>
                   </div>
                 </button>
+
+                {/* Oral Exam Option */}
+                <button
+                  onClick={() => handleTypeSelect('ORAL_EXAM')}
+                  className="p-6 bg-gray-700 hover:bg-gray-600 rounded-lg border border-gray-600 hover:border-secondary transition-all duration-200 group"
+                >
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-3 bg-orange-500/20 rounded-full group-hover:bg-orange-500/30">
+                      <Mic size={32} className="text-orange-400" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        {t('types.oralexam.title')}
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        {t('types.oralexam.description')}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               </div>
             </div>
           ) : (
@@ -663,13 +685,14 @@ export default function CreateAssessmentForm({
                     {formData.type === 'QUIZ' && <BookOpen size={20} className="text-blue-400" />}
                     {formData.type === 'SIMULADO' && <Clock size={20} className="text-green-400" />}
                     {formData.type === 'PROVA_ABERTA' && <FileText size={20} className="text-purple-400" />}
+                    {formData.type === 'ORAL_EXAM' && <Mic size={20} className="text-orange-400" />}
                   </div>
                   <div>
                     <h3 className="text-white font-semibold">
-                      {t(`types.${formData.type === 'PROVA_ABERTA' ? 'provaaberta' : formData.type?.toLowerCase()}.title`)}
+                      {t(`types.${formData.type === 'PROVA_ABERTA' ? 'provaaberta' : formData.type === 'ORAL_EXAM' ? 'oralexam' : formData.type?.toLowerCase()}.title`)}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      {t(`types.${formData.type === 'PROVA_ABERTA' ? 'provaaberta' : formData.type?.toLowerCase()}.description`)}
+                      {t(`types.${formData.type === 'PROVA_ABERTA' ? 'provaaberta' : formData.type === 'ORAL_EXAM' ? 'oralexam' : formData.type?.toLowerCase()}.description`)}
                     </p>
                   </div>
                 </div>
@@ -737,8 +760,8 @@ export default function CreateAssessmentForm({
                   )}
                 </div>
 
-                {/* Passing Score - Not for PROVA_ABERTA */}
-                {formData.type !== 'PROVA_ABERTA' && (
+                {/* Passing Score - Not for PROVA_ABERTA or ORAL_EXAM */}
+                {formData.type !== 'PROVA_ABERTA' && formData.type !== 'ORAL_EXAM' && (
                   <div className="space-y-2">
                     <Label htmlFor="passingScore" className="text-gray-300 flex items-center gap-2">
                       <Award size={16} />
@@ -834,8 +857,8 @@ export default function CreateAssessmentForm({
                   )}
                 </div>
 
-                {/* Randomization Options - Not for PROVA_ABERTA */}
-                {formData.type !== 'PROVA_ABERTA' && (
+                {/* Randomization Options - Not for PROVA_ABERTA or ORAL_EXAM */}
+                {formData.type !== 'PROVA_ABERTA' && formData.type !== 'ORAL_EXAM' && (
                   <div className="space-y-4 md:col-span-2">
                     <h4 className="text-white font-semibold flex items-center gap-2">
                       <Shuffle size={16} />

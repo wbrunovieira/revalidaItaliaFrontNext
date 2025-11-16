@@ -792,7 +792,7 @@
         "results": "{count} intentos encontrados"
       },
       "stats": {
-        "openExams": "Exámenes Abiertos",
+        "openExams": "Exámenes Abiertos y Exámenes Orales",
         "pending": "Esperando Revisión",
         "waitingStudent": "Esperando Estudiante",
         "approved": "Aprobados",
@@ -1144,7 +1144,8 @@
     "types": {
       "quiz": "Quiz",
       "simulado": "Simulacro",
-      "prova_aberta": "Prueba Abierta"
+      "prova_aberta": "Prueba Abierta",
+      "oral_exam": "Examen Oral"
     },
     "tabs": {
       "available": "Evaluaciones Disponibles",
@@ -2077,7 +2078,64 @@
     },
     "continuingQuiz": "Continuando Quiz",
     "foundActiveAttempt": "Encontramos un intento activo. Continuando desde donde lo dejaste.",
-    "explanation": "Explicación"
+    "explanation": "Explicación",
+    "oralExam": "Examen Oral",
+    "oralExamComingSoon": "Funcionalidad de Examen Oral",
+    "oralExamDescription": "Graba tus respuestas de voz para esta evaluación oral. La grabación de audio estará disponible próximamente."
+  },
+  "OralExam": {
+    "question": "Pregunta",
+    "of": "de",
+    "answered": "respondidas",
+    "argument": "Argumento",
+    "recorder": {
+      "readyToRecord": "Listo para Grabar",
+      "clickToStart": "Haz clic en el botón de abajo para comenzar a grabar tu respuesta",
+      "startRecording": "Iniciar Grabación",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "stop": "Detener Grabación",
+      "recordingComplete": "¡Grabación Completada!",
+      "reviewBeforeSending": "Escucha tu grabación antes de enviar",
+      "discard": "Descartar",
+      "sendAnswer": "Enviar Respuesta",
+      "uploading": "Enviando..."
+    },
+    "recording": {
+      "started": "Grabación Iniciada",
+      "startedDescription": "Comienza a hablar tu respuesta"
+    },
+    "status": {
+      "answerSubmitted": "¡Audio grabado! Recuerda hacer clic en 'Finalizar Examen' para completar"
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "submitExam": "Finalizar Examen",
+      "submitting": "Finalizando..."
+    },
+    "alert": {
+      "readyToSubmit": "¡Todas las respuestas han sido grabadas!",
+      "readyToSubmitDescription": "Haz clic en el botón 'Finalizar Examen' a continuación para enviar tu examen oral"
+    },
+    "success": {
+      "answerSubmitted": "Audio Grabado",
+      "answerSubmittedDescription": "¡Audio guardado! Recuerda hacer clic en 'Finalizar Examen' para enviar",
+      "examSubmitted": "Examen Finalizado",
+      "examSubmittedDescription": "Tu examen oral ha sido enviado para evaluación"
+    },
+    "error": {
+      "startTitle": "Error al Iniciar",
+      "startDescription": "No se pudo iniciar el examen oral",
+      "microphoneTitle": "Error de Micrófono",
+      "microphoneDescription": "No se pudo acceder al micrófono. Verifica los permisos del navegador",
+      "fileTooLargeTitle": "Archivo Muy Grande",
+      "fileTooLargeDescription": "El archivo de audio excede el límite de 10MB",
+      "submitTitle": "Error al Enviar",
+      "submitDescription": "No se pudo enviar tu respuesta. Inténtalo de nuevo",
+      "submitExamTitle": "Error al Finalizar",
+      "submitExamDescription": "No se pudo finalizar el examen. Inténtalo de nuevo"
+    }
   },
   "Trails": {
   "title": "Rutas de Aprendizaje",
@@ -4286,6 +4344,10 @@
       "provaaberta": {
         "title": "Prueba Abierta",
         "description": "Evaluación dissertativa con corrección manual"
+      },
+      "oralexam": {
+        "title": "Examen Oral",
+        "description": "Evaluación oral con grabación de audio"
       }
     },
     "fields": {
@@ -4434,7 +4496,8 @@
     },
     "types": {
       "multipleChoice": "Opción Múltiple",
-      "open": "Disertativa"
+      "open": "Disertativa",
+      "oral": "Oral"
     },
     "errors": {
       "textRequired": "El texto de la pregunta es obligatorio",
@@ -5992,7 +6055,8 @@
     "quiz": "Quiz",
     "simulado": "Simulado",
     "prova_aberta": "Prueba Abierta",
-    "provaAberta": "Prueba Abierta"
+    "provaAberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "actions": {
     "view": "Ver",
@@ -6045,7 +6109,8 @@
   "types": {
     "quiz": "Quiz",
     "simulado": "Simulacro",
-    "prova_aberta": "Prueba Abierta"
+    "prova_aberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "fields": {
     "title": "Título",
@@ -6106,7 +6171,8 @@
   "types": {
     "quiz": "Quiz",
     "simulado": "Simulado",
-    "prova_aberta": "Prueba Abierta"
+    "prova_aberta": "Prueba Abierta",
+    "oral_exam": "Examen Oral"
   },
   "position": {
     "before_lesson": "Antes de la Lección",
@@ -6308,5 +6374,39 @@
     "processingDescription": "Esta grabación aún se está procesando. Por favor, inténtalo de nuevo en unos minutos.",
     "expiredDescription": "Esta grabación ha expirado y ya no está disponible para visualización."
   }
+},
+"OralExamReview": {
+  "studentAnswer": "Respuesta del Estudiante",
+  "listenToStudentAnswer": "Escucha la respuesta del estudiante antes de proporcionar tu feedback",
+  "yourFeedback": "Tu Feedback en Audio",
+  "reviewDecision": "Decisión de Revisión",
+  "fullyAccepted": "Totalmente Aceptada",
+  "fullyAcceptedDesc": "La respuesta está completa y correcta",
+  "fullyAcceptedMessage": "La respuesta será marcada como totalmente aceptada.",
+  "partiallyAccepted": "Parcialmente Aceptada",
+  "partiallyAcceptedDesc": "Respuesta correcta pero incompleta",
+  "needsRevision": "Necesita Revisión",
+  "needsRevisionDesc": "Respuesta incorrecta o inadecuada",
+  "markAsCorrect": "Marcar como Correcta",
+  "markAsCorrectDesc": "La respuesta del estudiante es completamente correcta",
+  "cancel": "Cancelar",
+  "submitReview": "Enviar Revisión",
+  "submitting": "Enviando...",
+  "success": "Éxito",
+  "reviewSubmitted": "Revisión enviada con éxito",
+  "error": "Error",
+  "audioRequired": "Debes grabar un feedback en audio",
+  "authenticationRequired": "Autenticación requerida. Inicia sesión nuevamente.",
+  "submitError": "No fue posible enviar la revisión",
+  "startRecording": "Iniciar Grabación",
+  "recording": "Grabando",
+  "paused": "Pausado",
+  "pause": "Pausar",
+  "resume": "Reanudar",
+  "stop": "Detener",
+  "clear": "Limpiar",
+  "recordingComplete": "Grabación Completada",
+  "recordingInstructions": "Haz clic en el botón para comenzar a grabar tu feedback en audio",
+  "reviewRecordingBeforeSubmit": "Revisa tu grabación antes de enviar"
 }
 }

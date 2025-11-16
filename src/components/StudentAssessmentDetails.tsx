@@ -36,6 +36,8 @@ interface Answer {
   questionId: string;
   questionText: string;
   studentAnswer: string;
+  audioAnswerUrl?: string;
+  teacherAudioUrl?: string;
   tutorFeedback?: string;
   status:
     | 'PENDING'
@@ -70,7 +72,7 @@ interface AttemptDetails {
     id: string;
     title: string;
     description?: string;
-    type: 'PROVA_ABERTA';
+    type: 'PROVA_ABERTA' | 'ORAL_EXAM';
     moduleId?: string;
     moduleName?: string;
     lessonId?: string;

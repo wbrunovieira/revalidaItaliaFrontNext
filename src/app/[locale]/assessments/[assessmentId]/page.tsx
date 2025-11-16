@@ -7,6 +7,7 @@ import NavSidebar from '@/components/NavSidebar';
 import QuizPage from '@/components/QuizPage';
 import SimuladoPage from '@/components/SimuladoPage';
 import ProvaAbertaPage from '@/components/ProvaAbertaPage';
+import OralExamPage from '@/components/OralExamPage';
 import { SupportFloatingButton } from '@/components/SupportFloatingButton';
 import Link from 'next/link';
 import {
@@ -22,7 +23,7 @@ interface Assessment {
   slug: string;
   title: string;
   description?: string;
-  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   quizPosition?: 'BEFORE_LESSON' | 'AFTER_LESSON';
   passingScore?: number;
   timeLimitInMinutes?: number;
@@ -310,6 +311,27 @@ export default async function AssessmentPage({
             type: "ASSESSMENT",
             id: assessment.id,
             title: `${assessment.title} (PROVA ABERTA)`
+          }}
+        />
+      </NavSidebar>
+    );
+  }
+
+  if (assessment.type === 'ORAL_EXAM') {
+    return (
+      <NavSidebar>
+        <OralExamPage
+          assessment={assessment}
+          questions={questions}
+          backUrl={backUrl}
+        />
+
+        {/* Support Floating Button with Assessment Context */}
+        <SupportFloatingButton
+          context={{
+            type: "ASSESSMENT",
+            id: assessment.id,
+            title: `${assessment.title} (ORAL EXAM)`
           }}
         />
       </NavSidebar>

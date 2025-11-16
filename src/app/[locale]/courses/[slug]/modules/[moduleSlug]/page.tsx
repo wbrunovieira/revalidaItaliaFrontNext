@@ -124,11 +124,19 @@ export default async function ModulePage({
   const courseTrans =
     courseFound.translations.find(
       tr => tr.locale === locale
-    ) ?? courseFound.translations[0];
+    ) ?? courseFound.translations[0] ?? {
+      locale: locale,
+      title: courseFound.slug,
+      description: ''
+    };
   const moduleTrans =
     moduleData.translations.find(
       tr => tr.locale === locale
-    ) ?? moduleData.translations[0];
+    ) ?? moduleData.translations[0] ?? {
+      locale: locale,
+      title: moduleData.slug,
+      description: ''
+    };
 
   // Total de aulas (usar o total da paginação, não apenas as da página atual)
   const totalLessons = pagination.total;
@@ -310,7 +318,11 @@ export default async function ModulePage({
                   
                   {/* Módulos */}
                   {moduleFound.map((mod, idx) => {
-                    const modTrans = mod.translations.find(t => t.locale === locale) || mod.translations[0];
+                    const modTrans = mod.translations.find(t => t.locale === locale) || mod.translations[0] || {
+                      locale: locale,
+                      title: mod.slug,
+                      description: ''
+                    };
                     const isCompleted = idx < moduleData.order - 1; // Módulos anteriores completos
                     const isCurrent = mod.id === moduleData.id;
                     

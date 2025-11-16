@@ -27,6 +27,7 @@ import {
   BarChart3,
   Filter,
   SortDesc,
+  Mic,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
@@ -68,7 +69,7 @@ interface AttemptResults {
     id: string;
     title: string;
     description?: string;
-    type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+    type: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
     passingScore?: number;
     lesson?: {
       id: string;
@@ -96,7 +97,7 @@ interface AttemptResults {
 interface GroupedAssessment {
   assessmentId: string;
   assessmentTitle: string;
-  assessmentType: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA';
+  assessmentType: 'QUIZ' | 'SIMULADO' | 'PROVA_ABERTA' | 'ORAL_EXAM';
   lessonTitle?: string;
   attempts: AttemptResults[];
   bestScore: number;
@@ -132,6 +133,7 @@ export default function StudentQuizResults({
         'assessmentType.QUIZ': 'Quiz',
         'assessmentType.SIMULADO': 'Simulado',
         'assessmentType.PROVA_ABERTA': 'Prova Aberta',
+        'assessmentType.ORAL_EXAM': 'Exame Oral',
         passed: 'Aprovado',
         failed: 'Reprovado',
         pending: 'Pendente',
@@ -160,6 +162,7 @@ export default function StudentQuizResults({
         'assessmentType.QUIZ': 'Quiz',
         'assessmentType.SIMULADO': 'Simulazione',
         'assessmentType.PROVA_ABERTA': 'Prova Aperta',
+        'assessmentType.ORAL_EXAM': 'Esame Orale',
         passed: 'Promosso',
         failed: 'Bocciato',
         pending: 'In attesa',
@@ -189,6 +192,7 @@ export default function StudentQuizResults({
         'assessmentType.QUIZ': 'Quiz',
         'assessmentType.SIMULADO': 'Simulacro',
         'assessmentType.PROVA_ABERTA': 'Prueba Abierta',
+        'assessmentType.ORAL_EXAM': 'Examen Oral',
         passed: 'Aprobado',
         failed: 'Reprobado',
         pending: 'Pendiente',
@@ -563,6 +567,10 @@ export default function StudentQuizResults({
         return (
           <FileText className="w-4 h-4 text-secondary" />
         );
+      case 'ORAL_EXAM':
+        return (
+          <Mic className="w-4 h-4 text-orange-400" />
+        );
       default:
         return (
           <FileText className="w-4 h-4 text-secondary" />
@@ -577,6 +585,8 @@ export default function StudentQuizResults({
         'bg-purple-500/20 text-purple-400 border-purple-500/30',
       PROVA_ABERTA:
         'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      ORAL_EXAM:
+        'bg-orange-600/20 text-orange-300 border-orange-600/30',
     };
     return (
       colors[type as keyof typeof colors] ||

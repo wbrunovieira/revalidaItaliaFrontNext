@@ -17,7 +17,6 @@ import {
   CheckCircle,
   Loader2,
   Volume2,
-  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 

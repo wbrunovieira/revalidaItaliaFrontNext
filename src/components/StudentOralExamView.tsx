@@ -581,7 +581,7 @@ export function StudentOralExamView({
               <h3 className="text-lg font-semibold text-white">Resposta Parcialmente Aceita</h3>
             </div>
             <p className="text-gray-300 mb-6">
-              O professor aceitou parcialmente sua resposta. Ouça o feedback acima e clique em "Aceitar Resposta" para confirmar.
+              O professor aceitou parcialmente sua resposta. Ouça o feedback acima e clique em &quot;Aceitar Resposta&quot; para confirmar.
             </p>
             <Button
               onClick={handleAcceptPartialReview}

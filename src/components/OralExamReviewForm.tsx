@@ -78,7 +78,9 @@ export function OralExamReviewForm({
       const formData = new FormData();
       formData.append('reviewerId', reviewerId);
       formData.append('isCorrect', isCorrect ? 'true' : 'false'); // Backend converte string para boolean
-      formData.append('reviewDecision', reviewDecision);
+      if (reviewDecision) {
+        formData.append('reviewDecision', reviewDecision);
+      }
 
       // Adicionar arquivo de áudio somente se tiver conteúdo
       if (teacherAudioBlob && teacherAudioBlob.size > 0) {

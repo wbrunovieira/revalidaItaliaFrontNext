@@ -70,6 +70,7 @@ interface AttemptDetails {
   status: 'IN_PROGRESS' | 'SUBMITTED' | 'GRADING' | 'GRADED';
   submittedAt?: string;
   gradedAt?: string;
+  needsStudentAction?: boolean;
 }
 
 interface StudentAttempt {
@@ -277,7 +278,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
 
       if (hasTeacherFeedback) {
         // Verificar se foi aprovado (isCorrect)
-        const isApproved = attempt.answers?.some((answer: { isCorrect?: boolean; teacherAudioUrl?: string }) =>
+        const isApproved = attempt.answers?.some((answer: { isCorrect?: boolean | null; teacherAudioUrl?: string }) =>
           answer.teacherAudioUrl && answer.isCorrect === true
         );
 
@@ -303,7 +304,7 @@ export default function StudentAssessmentsPage({ userId, locale }: StudentAssess
       }
 
       // Cenário 3: Aprovado SEM feedback (isCorrect mas sem teacherAudioUrl)
-      const isApprovedWithoutFeedback = attempt.answers?.some((answer: { isCorrect?: boolean; teacherAudioUrl?: string }) =>
+      const isApprovedWithoutFeedback = attempt.answers?.some((answer: { isCorrect?: boolean | null; teacherAudioUrl?: string }) =>
         answer.isCorrect === true && !answer.teacherAudioUrl
       );
 

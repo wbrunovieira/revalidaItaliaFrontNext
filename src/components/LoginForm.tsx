@@ -7,18 +7,23 @@ import { useRouter, useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Shield } from 'lucide-react';
 import TextField from './TextField';
 import Button from './Button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/stores/auth.store';
+import { useAuth, useAuthStore } from '@/stores/auth.store';
 
 export default function LoginForm() {
   const t = useTranslations('Login');
+  const tSession = useTranslations('Session');
   const router = useRouter();
   const params = useParams() as { locale?: string };
   const locale = params?.locale || 'pt';
   const { login } = useAuth();
+
+  // Observar estado de rate limit do Zustand
+  const isRateLimited = useAuthStore((state) => state.isRateLimited);
 
   const [formError, setFormError] = useState<string | null>(
     null
@@ -80,8 +85,15 @@ export default function LoginForm() {
     } catch (err: unknown) {
       let message: string;
       if (err instanceof Error) {
+        // 🆕 Tratamento especial para rate limiting
+        if (err.message === 'RATE_LIMIT_EXCEEDED') {
+          // Não definir formError aqui, o Alert será mostrado automaticamente
+          // graças ao isRateLimited do store
+          setLoginSuccess(false);
+          return; // Sair sem definir formError
+        }
         // Check for network errors
-        if (err.message.toLowerCase().includes('failed to fetch') || 
+        else if (err.message.toLowerCase().includes('failed to fetch') ||
             err.message.toLowerCase().includes('network') ||
             err.message.toLowerCase().includes('fetch')) {
           message = t('networkError');
@@ -115,7 +127,28 @@ export default function LoginForm() {
       className="space-y-6"
       noValidate
     >
-      {formError && (
+      {/* Rate Limit Alert */}
+      {isRateLimited && (
+        <div className="border border-yellow-500 bg-yellow-50 rounded-lg p-4 flex gap-3">
+          <Shield className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h3 className="text-yellow-900 font-semibold mb-1">
+              {tSession('rateLimit.title')}
+            </h3>
+            <p className="text-yellow-800 text-sm mb-2">
+              {tSession('rateLimit.description')}
+            </p>
+            <Link
+              href={`/${locale}/forgot-password`}
+              className="text-sm underline font-medium text-yellow-900 hover:text-yellow-700"
+            >
+              {tSession('rateLimit.forgotPassword')} {tSession('rateLimit.forgotPasswordLink')}
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {formError && !isRateLimited && (
         <p className="text-center text-red-500">
           {formError}
         </p>
@@ -211,14 +244,16 @@ export default function LoginForm() {
       <Button
         type="submit"
         text={
-          loginSuccess
+          isRateLimited
+            ? tSession('rateLimit.buttonDisabled')
+            : loginSuccess
             ? t('buttonSuccess')
             : isSubmitting
             ? t('buttonLoading')
             : t('button')
         }
         size="large"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isRateLimited}
       />
     </form>
   );

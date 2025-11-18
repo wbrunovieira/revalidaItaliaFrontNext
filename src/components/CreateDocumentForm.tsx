@@ -132,7 +132,7 @@ export default function CreateDocumentForm() {
     moduleId: '',
     lessonId: '',
     file: null,
-    protectionLevel: 'WATERMARK',
+    protectionLevel: '' as ProtectionLevel,
     translations: {
       pt: {
         locale: 'pt',
@@ -705,7 +705,7 @@ export default function CreateDocumentForm() {
       moduleId: '',
       lessonId: '',
       file: null,
-      protectionLevel: 'WATERMARK',
+      protectionLevel: '' as ProtectionLevel,
       translations: {
         pt: {
           locale: 'pt',
@@ -1220,7 +1220,7 @@ export default function CreateDocumentForm() {
           <div className="grid gap-4 md:grid-cols-3">
             {/* NONE */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'NONE', file: null }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'NONE' }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'NONE'
                   ? 'border-secondary bg-secondary/10'
@@ -1233,7 +1233,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="NONE"
                   checked={formData.protectionLevel === 'NONE'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
                   className="mt-1"
                 />
                 <div className="flex-1">
@@ -1256,7 +1256,7 @@ export default function CreateDocumentForm() {
 
             {/* WATERMARK */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'WATERMARK', file: null }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'WATERMARK' }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'WATERMARK'
                   ? 'border-secondary bg-secondary/10'
@@ -1269,7 +1269,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="WATERMARK"
                   checked={formData.protectionLevel === 'WATERMARK'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
                   className="mt-1"
                 />
                 <div className="flex-1">
@@ -1292,7 +1292,7 @@ export default function CreateDocumentForm() {
 
             {/* FULL */}
             <div
-              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'FULL', file: null }))}
+              onClick={() => setFormData(prev => ({ ...prev, protectionLevel: 'FULL' }))}
               className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-200 ${
                 formData.protectionLevel === 'FULL'
                   ? 'border-secondary bg-secondary/10'
@@ -1305,7 +1305,7 @@ export default function CreateDocumentForm() {
                   name="protectionLevel"
                   value="FULL"
                   checked={formData.protectionLevel === 'FULL'}
-                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel, file: null }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protectionLevel: e.target.value as ProtectionLevel }))}
                   className="mt-1"
                 />
                 <div className="flex-1">

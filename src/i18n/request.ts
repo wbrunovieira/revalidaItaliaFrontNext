@@ -35,7 +35,11 @@ export default getRequestConfig(
       const referer = (await headers()).get('referer');
       if (referer) {
         try {
-          const url = new URL(referer);
+          // Adiciona protocolo se não existir
+          const refererUrl = referer.startsWith('http://') || referer.startsWith('https://')
+            ? referer
+            : `https://${referer}`;
+          const url = new URL(refererUrl);
           const segments = url.pathname.split('/');
           if (
             segments.length > 1 &&

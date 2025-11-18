@@ -8,6 +8,7 @@ import {
   useMemo,
 } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 // TODO: Descomentar quando reabilitar autenticação
 // import { getAuthToken } from '@/lib/auth-utils';
@@ -82,6 +83,8 @@ interface ModuleStats {
 
 export default function DocumentsList() {
   const t = useTranslations('Admin.documentsList');
+  const params = useParams();
+  const locale = params.locale as string;
   const { toast } = useToast();
 
   const [coursesWithDocuments, setCoursesWithDocuments] =
@@ -629,6 +632,7 @@ export default function DocumentsList() {
       coursesWithDocuments,
       t,
       getTranslationByLocale,
+      locale,
     ]
   );
 
@@ -837,6 +841,7 @@ export default function DocumentsList() {
     coursesWithDocuments,
     searchTerm,
     getTranslationByLocale,
+    locale,
   ]);
 
   // Estatísticas gerais

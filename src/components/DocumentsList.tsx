@@ -8,7 +8,6 @@ import {
   useMemo,
 } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 // TODO: Descomentar quando reabilitar autenticação
 // import { getAuthToken } from '@/lib/auth-utils';
@@ -83,9 +82,6 @@ interface ModuleStats {
 
 export default function DocumentsList() {
   const t = useTranslations('Admin.documentsList');
-  const params = useParams();
-  const router = useRouter();
-  const locale = params.locale as string;
   const { toast } = useToast();
 
   const [coursesWithDocuments, setCoursesWithDocuments] =
@@ -233,7 +229,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, toast, t, router, locale]
+    [handleApiError]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -505,7 +501,7 @@ export default function DocumentsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError, locale, router]
+    [t, toast, fetchData, handleApiError]
   );
 
   // Função para mostrar confirmação personalizada usando toast
@@ -632,7 +628,6 @@ export default function DocumentsList() {
       deleteDocument,
       coursesWithDocuments,
       t,
-      locale,
       getTranslationByLocale,
     ]
   );
@@ -841,7 +836,6 @@ export default function DocumentsList() {
   }, [
     coursesWithDocuments,
     searchTerm,
-    locale,
     getTranslationByLocale,
   ]);
 

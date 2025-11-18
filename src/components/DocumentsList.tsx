@@ -743,7 +743,7 @@ export default function DocumentsList() {
             sum +
             (module.lessons?.reduce(
               (lessonSum, lesson) =>
-                lessonSum + (lesson.documents?.length || 0),
+                lessonSum + (lessonPagination[lesson.id]?.total || lesson.documents?.length || 0),
               0
             ) || 0),
           0
@@ -751,7 +751,7 @@ export default function DocumentsList() {
 
       return { moduleCount, lessonCount, documentCount };
     },
-    []
+    [lessonPagination]
   );
 
   // Função para calcular estatísticas de um módulo
@@ -761,13 +761,13 @@ export default function DocumentsList() {
       const documentCount =
         module.lessons?.reduce(
           (sum, lesson) =>
-            sum + (lesson.documents?.length || 0),
+            sum + (lessonPagination[lesson.id]?.total || lesson.documents?.length || 0),
           0
         ) || 0;
 
       return { lessonCount, documentCount };
     },
-    []
+    [lessonPagination]
   );
 
   // Filtrar baseado na busca
@@ -1163,9 +1163,9 @@ export default function DocumentsList() {
                                             expandedLessons.has(
                                               lesson.id
                                             );
+                                          // Usar total da paginação se disponível, senão usar length dos documentos carregados
                                           const documentCount =
-                                            lesson.documents
-                                              ?.length || 0;
+                                            lessonPagination[lesson.id]?.total || lesson.documents?.length || 0;
 
                                           return (
                                             <div

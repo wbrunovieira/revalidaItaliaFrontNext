@@ -38,6 +38,16 @@
       become_user: ubuntu
       register: npm_install
 
+    - name: "🧹 LIMPEZA - Removendo cache do Next.js (.next)"
+      file:
+        path: '{{ app_dir }}/.next'
+        state: absent
+      become_user: ubuntu
+
+    - name: "✅ CACHE - Cache do Next.js removido"
+      debug:
+        msg: "Pasta .next removida para garantir build limpo"
+
     - name: "🔨 BUILD - Compilando aplicação Next.js"
       command: npm run build
       args:

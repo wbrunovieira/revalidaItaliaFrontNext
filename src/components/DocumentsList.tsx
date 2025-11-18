@@ -785,7 +785,7 @@ export default function DocumentsList() {
       const lessonCount =
         course.modules?.reduce(
           (sum, module) =>
-            sum + (module.lessons?.length || 0),
+            sum + (modulePagination[module.id]?.total || module.lessons?.length || 0),
           0
         ) || 0;
       const documentCount =
@@ -802,13 +802,13 @@ export default function DocumentsList() {
 
       return { moduleCount, lessonCount, documentCount };
     },
-    [lessonPagination]
+    [lessonPagination, modulePagination]
   );
 
   // Função para calcular estatísticas de um módulo
   const getModuleStats = useCallback(
     (module: Module): ModuleStats => {
-      const lessonCount = module.lessons?.length || 0;
+      const lessonCount = modulePagination[module.id]?.total || module.lessons?.length || 0;
       const documentCount =
         module.lessons?.reduce(
           (sum, lesson) =>
@@ -818,7 +818,7 @@ export default function DocumentsList() {
 
       return { lessonCount, documentCount };
     },
-    [lessonPagination]
+    [lessonPagination, modulePagination]
   );
 
   // Filtrar baseado na busca

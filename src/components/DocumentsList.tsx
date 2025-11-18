@@ -101,9 +101,18 @@ export default function DocumentsList() {
     Set<string>
   >(new Set());
 
-  // Estado para controlar paginação por aula
+  // Estado para controlar paginação por aula (documentos)
   const [lessonPagination, setLessonPagination] = useState<{
     [lessonId: string]: {
+      page: number;
+      totalPages: number;
+      total: number;
+    };
+  }>({});
+
+  // Estado para controlar paginação por módulo (aulas)
+  const [modulePagination, setModulePagination] = useState<{
+    [moduleId: string]: {
       page: number;
       totalPages: number;
       total: number;
@@ -239,11 +248,12 @@ export default function DocumentsList() {
   const fetchLessonsForModule = useCallback(
     async (
       courseId: string,
-      moduleId: string
+      moduleId: string,
+      page: number = 1
     ): Promise<Lesson[]> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
         );
 
         if (!response.ok) {
@@ -252,6 +262,18 @@ export default function DocumentsList() {
 
         const lessonsData = await response.json();
         const lessons = lessonsData.lessons || [];
+
+        // Atualizar informações de paginação para este módulo
+        if (lessonsData.pagination) {
+          setModulePagination(prev => ({
+            ...prev,
+            [moduleId]: {
+              page: lessonsData.pagination.page,
+              totalPages: lessonsData.pagination.totalPages,
+              total: lessonsData.pagination.total,
+            }
+          }));
+        }
 
         // Buscar documentos para cada aula
         const lessonsWithDocuments = await Promise.all(
@@ -353,6 +375,36 @@ export default function DocumentsList() {
       );
     },
     [lessonPagination, fetchDocumentsForLesson]
+  );
+
+  // Função para navegar entre páginas de aulas do módulo
+  const handleModulePageChange = useCallback(
+    async (courseId: string, moduleId: string, newPage: number) => {
+      const paginationInfo = modulePagination[moduleId];
+      if (!paginationInfo) return;
+
+      // Validar página
+      if (newPage < 1 || newPage > paginationInfo.totalPages) return;
+
+      // Buscar aulas da nova página
+      const lessons = await fetchLessonsForModule(courseId, moduleId, newPage);
+
+      // Atualizar o curso com as novas aulas
+      setCoursesWithDocuments(prev =>
+        prev.map(course => {
+          if (course.id !== courseId) return course;
+
+          return {
+            ...course,
+            modules: course.modules?.map(module => {
+              if (module.id !== moduleId) return module;
+              return { ...module, lessons };
+            }),
+          };
+        })
+      );
+    },
+    [modulePagination, fetchLessonsForModule]
   );
 
   // Função principal para buscar todos os dados
@@ -1150,6 +1202,7 @@ export default function DocumentsList() {
                                 <div className="bg-gray-800/30 p-4">
                                   {moduleStats.lessonCount >
                                   0 ? (
+                                    <>
                                     <div className="space-y-3 pl-2">
                                       {module.lessons?.map(
                                         lesson => {
@@ -1481,7 +1534,67 @@ export default function DocumentsList() {
                                         }
                                       )}
                                     </div>
-                                  ) : (
+
+                                    {/* Paginação de aulas do módulo */}
+                                    {modulePagination[module.id] && modulePagination[module.id].totalPages > 1 && (
+                                      <div className="mt-4 flex items-center justify-between border-t border-gray-700 pt-4">
+                                        <div className="text-xs text-gray-400">
+                                          {t('pagination.showing')} {module.lessons?.length || 0} {t('pagination.of')} {modulePagination[module.id].total} {t('lessons')}
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                          {/* Botão anterior */}
+                                          <button
+                                            type="button"
+                                            onClick={() => handleModulePageChange(
+                                              course.id,
+                                              module.id,
+                                              modulePagination[module.id].page - 1
+                                            )}
+                                            disabled={modulePagination[module.id].page === 1}
+                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t('pagination.previous')}
+                                          >
+                                            <ChevronLeft size={16} />
+                                          </button>
+
+                                          {/* Input de página */}
+                                          <div className="flex items-center gap-1 text-xs">
+                                            <span className="text-gray-400">{t('pagination.page')}</span>
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              max={modulePagination[module.id].totalPages}
+                                              value={modulePagination[module.id].page}
+                                              onChange={(e) => {
+                                                const page = parseInt(e.target.value);
+                                                if (page >= 1 && page <= modulePagination[module.id].totalPages) {
+                                                  handleModulePageChange(course.id, module.id, page);
+                                                }
+                                              }}
+                                              className="w-12 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-center text-white focus:outline-none focus:ring-1 focus:ring-secondary"
+                                            />
+                                            <span className="text-gray-400">{t('pagination.of')} {modulePagination[module.id].totalPages}</span>
+                                          </div>
+
+                                          {/* Botão próximo */}
+                                          <button
+                                            type="button"
+                                            onClick={() => handleModulePageChange(
+                                              course.id,
+                                              module.id,
+                                              modulePagination[module.id].page + 1
+                                            )}
+                                            disabled={modulePagination[module.id].page === modulePagination[module.id].totalPages}
+                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                            title={t('pagination.next')}
+                                          >
+                                            <ChevronRight size={16} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </>) : (
                                     <div className="text-center py-4">
                                       <Play
                                         size={32}

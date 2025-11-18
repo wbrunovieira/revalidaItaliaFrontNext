@@ -402,8 +402,8 @@ export function StudentOralExamView({
           <h2 className="text-xl font-semibold text-white mb-4">{latestAnswer.questionText}</h2>
         </div>
 
-        {/* Se PARTIALLY_ACCEPTED, mostrar APENAS a última resposta com botão de aceitar */}
-        {reviewDecision === 'PARTIALLY_ACCEPTED' ? (
+        {/* Se PARTIALLY_ACCEPTED ou FULLY_ACCEPTED, mostrar APENAS a última resposta */}
+        {(reviewDecision === 'PARTIALLY_ACCEPTED' || reviewDecision === 'FULLY_ACCEPTED') ? (
           <div className="space-y-6 mb-6">
             {/* Mostrar apenas a última resposta */}
             <div className="bg-primary-dark rounded-lg p-6 border border-secondary">

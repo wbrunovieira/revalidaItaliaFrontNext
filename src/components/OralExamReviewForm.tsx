@@ -85,8 +85,14 @@ export function OralExamReviewForm({
       // Adicionar arquivo de áudio somente se tiver conteúdo
       if (teacherAudioBlob && teacherAudioBlob.size > 0) {
         formData.append('teacherAudioFile', teacherAudioBlob, 'teacher-feedback.webm');
+        console.log('[OralExamReviewForm] Sending teacher audio file:', {
+          size: teacherAudioBlob.size,
+          type: teacherAudioBlob.type
+        });
+      } else if (requiresAudio) {
+        console.error('[OralExamReviewForm] Audio blob is empty but audio is required!');
       } else {
-        console.error('[OralExamReviewForm] Audio blob is empty! Not sending file.');
+        console.log('[OralExamReviewForm] No audio file to send (not required for FULLY_ACCEPTED)');
       }
 
       const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/attempts/answers/${attemptAnswerId}/review`;
@@ -155,11 +161,18 @@ export function OralExamReviewForm({
         <audio
           src={studentAudioUrl}
           controls
+          preload="metadata"
           className="w-full"
           style={{
             backgroundColor: 'transparent',
             borderRadius: '8px',
           }}
+          onLoadedMetadata={() => console.log('[OralExamReviewForm] Audio metadata loaded successfully')}
+          onError={(e) => {
+            console.error('[OralExamReviewForm] Audio failed to load:', e);
+            console.error('[OralExamReviewForm] Audio URL:', studentAudioUrl);
+          }}
+          onCanPlay={() => console.log('[OralExamReviewForm] Audio can play')}
         />
         <p className="text-xs text-gray-500">{t('listenToStudentAnswer')}</p>
       </div>

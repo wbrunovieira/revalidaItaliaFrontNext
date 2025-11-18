@@ -695,93 +695,88 @@ export default function TutorReviewPage({ attemptId, studentName, studentEmail }
             </div>
           </div>
 
-          {/* Student Answer with History */}
-          <div className="p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              {currentAnswer?.versions && currentAnswer.versions.length > 1
-                ? 'Histórico de Respostas e Revisões'
-                : attemptData.assessment.type === 'ORAL_EXAM'
-                ? 'Resposta em Áudio do Aluno'
-                : 'Resposta do Aluno'}
-            </h3>
+          {/* Student Answer with History - Only show for PROVA_ABERTA or when there's actual revision history */}
+          {(attemptData.assessment.type !== 'ORAL_EXAM' ||
+            (currentAnswer?.versions && currentAnswer.versions.length > 1) ||
+            (currentAnswer?.versions && currentAnswer.versions.some(v => v.reviewDecision))) && (
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="text-lg font-semibold text-white mb-4">
+                {currentAnswer?.versions && currentAnswer.versions.length > 1
+                  ? 'Histórico de Respostas e Revisões'
+                  : 'Resposta do Aluno'}
+              </h3>
 
-            {attemptData.assessment.type === 'ORAL_EXAM' && currentAnswer?.audioAnswerUrl ? (
-              /* ORAL_EXAM - Show Audio Player (handled by OralExamReviewForm below) */
-              <div className="p-3 bg-gray-700 rounded-lg">
-                <p className="text-gray-400 text-sm mb-3">
-                  O player de áudio está disponível na seção de revisão abaixo.
-                </p>
-              </div>
-            ) : currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
-              <div className="space-y-4">
-                {currentAnswer.versions.map((version, index) => (
-                  <div key={index} className="border-l-2 border-gray-600 pl-4 ml-2 space-y-2">
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span className="font-semibold text-secondary">
-                        Versão {version.version}
-                      </span>
-                      <span>
-                        {new Date(version.answeredAt).toLocaleString('pt-BR')}
-                      </span>
-                    </div>
+              {currentAnswer?.versions && currentAnswer.versions.length > 0 ? (
+                <div className="space-y-4">
+                  {currentAnswer.versions.map((version, index) => (
+                    <div key={index} className="border-l-2 border-gray-600 pl-4 ml-2 space-y-2">
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <span className="font-semibold text-secondary">
+                          Versão {version.version}
+                        </span>
+                        <span>
+                          {new Date(version.answeredAt).toLocaleString('pt-BR')}
+                        </span>
+                      </div>
 
-                    <div className="p-3 bg-gray-700 rounded-lg">
-                      <p className="text-gray-300 whitespace-pre-wrap">
-                        {version.textAnswer}
-                      </p>
-                    </div>
+                      <div className="p-3 bg-gray-700 rounded-lg">
+                        <p className="text-gray-300 whitespace-pre-wrap">
+                          {version.textAnswer}
+                        </p>
+                      </div>
 
-                    {version.reviewDecision && (
-                      <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
-                        <div className="flex items-center gap-2 mb-2">
-                          {version.reviewDecision === 'FULLY_ACCEPTED' ? (
-                            <>
-                              <ThumbsUp size={16} className="text-green-400" />
-                              <span className="text-green-400 text-sm font-medium">
-                                Resposta Aceita
+                      {version.reviewDecision && (
+                        <div className="mt-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            {version.reviewDecision === 'FULLY_ACCEPTED' ? (
+                              <>
+                                <ThumbsUp size={16} className="text-green-400" />
+                                <span className="text-green-400 text-sm font-medium">
+                                  Resposta Aceita
+                                </span>
+                              </>
+                            ) : version.reviewDecision === 'PARTIALLY_ACCEPTED' ? (
+                              <>
+                                <AlertCircle size={16} className="text-orange-400" />
+                                <span className="text-orange-400 text-sm font-medium">
+                                  Parcialmente Aceita
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <ThumbsDown size={16} className="text-red-400" />
+                                <span className="text-red-400 text-sm font-medium">
+                                  Precisa Revisão
+                                </span>
+                              </>
+                            )}
+                            {version.reviewedAt && (
+                              <span className="text-gray-500 text-xs ml-auto">
+                                Revisado em {new Date(version.reviewedAt).toLocaleString('pt-BR')}
                               </span>
-                            </>
-                          ) : version.reviewDecision === 'PARTIALLY_ACCEPTED' ? (
-                            <>
-                              <AlertCircle size={16} className="text-orange-400" />
-                              <span className="text-orange-400 text-sm font-medium">
-                                Parcialmente Aceita
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <ThumbsDown size={16} className="text-red-400" />
-                              <span className="text-red-400 text-sm font-medium">
-                                Precisa Revisão
-                              </span>
-                            </>
-                          )}
-                          {version.reviewedAt && (
-                            <span className="text-gray-500 text-xs ml-auto">
-                              Revisado em {new Date(version.reviewedAt).toLocaleString('pt-BR')}
-                            </span>
+                            )}
+                          </div>
+                          {version.teacherComment && (
+                            <p className="text-gray-300 text-sm">
+                              <span className="font-medium text-gray-400">Feedback do professor:</span> {version.teacherComment}
+                            </p>
                           )}
                         </div>
-                        {version.teacherComment && (
-                          <p className="text-gray-300 text-sm">
-                            <span className="font-medium text-gray-400">Feedback do professor:</span> {version.teacherComment}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : currentAnswer?.textAnswer ? (
-              <div className="p-3 bg-gray-700 rounded-lg">
-                <p className="text-gray-300 whitespace-pre-wrap">
-                  {currentAnswer.textAnswer}
-                </p>
-              </div>
-            ) : (
-              <p className="text-gray-400 italic">Não respondida</p>
-            )}
-          </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : currentAnswer?.textAnswer ? (
+                <div className="p-3 bg-gray-700 rounded-lg">
+                  <p className="text-gray-300 whitespace-pre-wrap">
+                    {currentAnswer.textAnswer}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-400 italic">Não respondida</p>
+              )}
+            </div>
+          )}
 
           {/* Review Section */}
           {attemptData.assessment.type === 'ORAL_EXAM' ? (
@@ -867,8 +862,9 @@ export default function TutorReviewPage({ attemptId, studentName, studentEmail }
                 </div>
               )}
 
-              {/* Mostrar histórico se existir */}
-              {currentAnswer?.versions && currentAnswer.versions.length > 0 && (
+              {/* Mostrar histórico apenas se tiver múltiplas versões OU se alguma foi revisada */}
+              {currentAnswer?.versions &&
+                (currentAnswer.versions.length > 1 || currentAnswer.versions.some(v => v.reviewDecision)) && (
                 <OralExamHistory
                   history={currentAnswer.versions}
                 />

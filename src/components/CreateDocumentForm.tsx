@@ -1140,76 +1140,7 @@ export default function CreateDocumentForm() {
           </div>
         </div>
 
-        {/* Upload de Arquivo */}
-        <div className="mb-8">
-          <Label className="text-gray-300 flex items-center gap-2 mb-3">
-            <Upload size={16} />
-            {t('fields.document')}
-            <span className="text-red-400">*</span>
-            <span className="text-xs text-gray-500">
-              ({getAcceptedFormatsDescription(formData.protectionLevel)} • {t('upload.maxSize')})
-            </span>
-          </Label>
-
-          {formData.file ? (
-            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg border border-gray-600">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{getFileIcon(formData.file.type)}</span>
-                <div>
-                  <p className="text-white text-sm font-medium">
-                    {formData.file.name}
-                  </p>
-                  <p className="text-gray-400 text-xs">
-                    {formatFileSize(formData.file.size)}
-                  </p>
-                </div>
-              </div>
-              <Button
-                type="button"
-                size="small"
-                onClick={handleFileRemove}
-                className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          ) : (
-            <div className="relative">
-              <input
-                type="file"
-                id="document-upload"
-                className="sr-only"
-                accept={getFileInputAccept(formData.protectionLevel)}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleFileSelect(file);
-                  }
-                }}
-              />
-              <label
-                htmlFor="document-upload"
-                className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
-              >
-                <Upload size={40} className="text-gray-400 mb-3" />
-                <p className="text-sm text-gray-300 font-medium">{t('upload.clickToSelect')}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {formData.protectionLevel === 'NONE'
-                    ? t('upload.supportedFormatsNone')
-                    : t('upload.supportedFormatsProtected')
-                  } • {t('upload.maxSize')}
-                </p>
-              </label>
-            </div>
-          )}
-          {errors.file && (
-            <p className="text-xs text-red-500 mt-2">
-              {errors.file}
-            </p>
-          )}
-        </div>
-
-        {/* Nível de Proteção */}
+        {/* Nível de Proteção - MOVIDO PARA ANTES DO UPLOAD */}
         <div className="mb-8">
           <Label className="text-gray-300 flex items-center gap-2 mb-4">
             <Shield size={16} />
@@ -1329,6 +1260,87 @@ export default function CreateDocumentForm() {
           {errors.protectionLevel && (
             <p className="text-xs text-red-500 mt-2">
               {errors.protectionLevel}
+            </p>
+          )}
+        </div>
+
+        {/* Upload de Arquivo - AGORA DEPOIS DO NÍVEL DE PROTEÇÃO */}
+        <div className="mb-8">
+          <Label className="text-gray-300 flex items-center gap-2 mb-3">
+            <Upload size={16} />
+            {t('fields.document')}
+            <span className="text-red-400">*</span>
+            {formData.protectionLevel && (
+              <span className="text-xs text-gray-500">
+                ({getAcceptedFormatsDescription(formData.protectionLevel)} • {t('upload.maxSize')})
+              </span>
+            )}
+          </Label>
+
+          {!formData.protectionLevel ? (
+            <div className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-lg bg-gray-700/30">
+              <Shield size={40} className="text-gray-500 mb-3" />
+              <p className="text-sm text-gray-400 font-medium">
+                Selecione o nível de proteção primeiro
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                O tipo de arquivo aceito depende da proteção escolhida
+              </p>
+            </div>
+          ) : formData.file ? (
+            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg border border-gray-600">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{getFileIcon(formData.file.type)}</span>
+                <div>
+                  <p className="text-white text-sm font-medium">
+                    {formData.file.name}
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    {formatFileSize(formData.file.size)}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                size="small"
+                onClick={handleFileRemove}
+                className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
+          ) : (
+            <div className="relative">
+              <input
+                type="file"
+                id="document-upload"
+                className="sr-only"
+                accept={getFileInputAccept(formData.protectionLevel)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileSelect(file);
+                  }
+                }}
+              />
+              <label
+                htmlFor="document-upload"
+                className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700/50 hover:bg-gray-700 transition-all duration-200 hover:border-secondary/50"
+              >
+                <Upload size={40} className="text-gray-400 mb-3" />
+                <p className="text-sm text-gray-300 font-medium">{t('upload.clickToSelect')}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.protectionLevel === 'NONE'
+                    ? t('upload.supportedFormatsNone')
+                    : t('upload.supportedFormatsProtected')
+                  } • {t('upload.maxSize')}
+                </p>
+              </label>
+            </div>
+          )}
+          {errors.file && (
+            <p className="text-xs text-red-500 mt-2">
+              {errors.file}
             </p>
           )}
         </div>

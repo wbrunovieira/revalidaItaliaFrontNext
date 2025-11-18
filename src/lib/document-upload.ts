@@ -88,7 +88,11 @@ export function getAcceptedExtensions(protectionLevel: ProtectionLevel): string[
 /**
  * Retorna o atributo accept para input file baseado no nível de proteção
  */
-export function getFileInputAccept(protectionLevel: ProtectionLevel): string {
+export function getFileInputAccept(protectionLevel: ProtectionLevel | ''): string {
+  // Se não houver proteção selecionada, aceitar todos os formatos suportados
+  if (!protectionLevel) {
+    return [...NONE_PROTECTION_EXTENSIONS].join(',');
+  }
   return getAcceptedExtensions(protectionLevel).join(',');
 }
 
@@ -116,8 +120,8 @@ export function getMimeTypeLabel(mimeType: string): string {
 /**
  * Retorna descrição dos formatos aceitos baseado no nível de proteção
  */
-export function getAcceptedFormatsDescription(protectionLevel: ProtectionLevel): string {
-  if (protectionLevel === 'NONE') {
+export function getAcceptedFormatsDescription(protectionLevel: ProtectionLevel | ''): string {
+  if (protectionLevel === 'NONE' || !protectionLevel) {
     return 'PDF, Word, Excel, PowerPoint, Texto, RTF, ZIP';
   }
   return 'PDF';

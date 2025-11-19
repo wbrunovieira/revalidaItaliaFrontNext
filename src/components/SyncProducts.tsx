@@ -73,6 +73,10 @@ export default function SyncProducts() {
     setIsSyncing(true);
     setLastSyncResult(null);
 
+    // 📊 LOGS DE PRODUÇÃO - INÍCIO
+    const requestStartTime = Date.now();
+    const requestTimestamp = new Date().toISOString();
+
     try {
       const queryParams = new URLSearchParams();
       queryParams.append('dryRun', isDryRun.toString());
@@ -80,22 +84,228 @@ export default function SyncProducts() {
         queryParams.append('provider', selectedProvider);
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admin/billing/sync-products?${queryParams}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/admin/billing/sync-products?${queryParams}`;
+
+      // 🔷 LOG 1: Request Configuration
+      console.group('🚀 [SYNC PRODUCTS] REQUEST INICIADO');
+      console.log('⏰ Timestamp:', requestTimestamp);
+      console.log('🔧 Configuração:', {
+        isDryRun,
+        selectedProvider,
+        queryString: queryParams.toString()
+      });
+      console.log('🌐 URL Completa:', fullUrl);
+      console.log('🔑 Token presente:', !!token);
+      console.log('🔑 Token prefix:', token ? `${token.substring(0, 20)}...` : 'N/A');
+      console.groupEnd();
+
+      const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const requestDuration = Date.now() - requestStartTime;
+
+      // 🔷 LOG 2: Response Status
+      console.group('📡 [SYNC PRODUCTS] RESPONSE RECEBIDO');
+      console.log('⏱️ Tempo de resposta:', `${requestDuration}ms`);
+      console.log('📊 Status:', response.status, response.statusText);
+      console.log('✅ OK:', response.ok);
+      console.log('🔗 Response URL:', response.url);
+      console.log('📋 Headers:', {
+        contentType: response.headers.get('content-type'),
+        contentLength: response.headers.get('content-length'),
+        date: response.headers.get('date'),
+      });
+      console.groupEnd();
 
       if (!response.ok) {
-        throw new Error('Failed to sync products');
+        // 🔷 LOG 3: Error Response
+        console.group('❌ [SYNC PRODUCTS] ERRO NA RESPOSTA');
+        console.error('Status:', response.status);
+        console.error('Status Text:', response.statusText);
+
+        let errorBody;
+        try {
+          errorBody = await response.json();
+          console.error('Error Body (JSON):', errorBody);
+        } catch {
+          errorBody = await response.text();
+          console.error('Error Body (Text):', errorBody);
+        }
+        console.groupEnd();
+
+        throw new Error(`Failed to sync products: ${response.status} - ${response.statusText}`);
       }
 
       const data: SyncResult = await response.json();
-      console.log('Sync Products API Response:', data); // Debug: Log completo da resposta da API
+
+      // 🔷 LOG 4: Response Data - Estrutura Completa
+      console.group('📦 [SYNC PRODUCTS] DADOS DA RESPOSTA - ESTRUTURA COMPLETA');
+      console.log('🔍 Response Object Completo:', JSON.stringify(data, null, 2));
+      console.log('📐 Tipo da resposta:', typeof data);
+      console.log('🗂️ Keys presentes:', Object.keys(data));
+      console.groupEnd();
+
+      // 🔷 LOG 5: Summary Analysis
+      console.group('📊 [SYNC PRODUCTS] ANÁLISE DO SUMMARY');
+      console.log('🎯 Summary completo:', data.summary);
+      console.table({
+        'Criados': data.summary?.created ?? 'N/A',
+        'Atualizados': data.summary?.updated ?? 'N/A',
+        'Desativados': data.summary?.deactivated ?? 'N/A',
+        'Inalterados': data.summary?.unchanged ?? 'N/A',
+        'Erros': data.summary?.errors ?? 'N/A',
+      });
+
+      const totalProducts = (data.summary?.created ?? 0) +
+                          (data.summary?.updated ?? 0) +
+                          (data.summary?.deactivated ?? 0) +
+                          (data.summary?.unchanged ?? 0);
+      console.log('📈 Total de produtos processados:', totalProducts);
+      console.log('⚠️ Taxa de erro:', totalProducts > 0 ? `${((data.summary?.errors ?? 0) / totalProducts * 100).toFixed(2)}%` : '0%');
+      console.groupEnd();
+
+      // 🔷 LOG 6: Results Array Analysis
+      console.group('📝 [SYNC PRODUCTS] ANÁLISE DOS RESULTADOS');
+      console.log('📋 Total de resultados:', data.results?.length ?? 0);
+      console.log('🔍 Array de resultados presente:', !!data.results);
+      console.log('🔍 É um array:', Array.isArray(data.results));
+
+      if (data.results && data.results.length > 0) {
+        // Agrupa por action
+        const groupedByAction = data.results.reduce((acc, result) => {
+          const action = result.action || 'undefined';
+          if (!acc[action]) acc[action] = [];
+          acc[action].push(result);
+          return acc;
+        }, {} as Record<string, typeof data.results>);
+
+        console.log('📊 Resultados agrupados por ação:');
+        Object.entries(groupedByAction).forEach(([action, items]) => {
+          console.group(`  ➤ ${action.toUpperCase()} (${items.length})`);
+          items.forEach((item, idx) => {
+            console.log(`    ${idx + 1}.`, {
+              productId: item.productId,
+              internalCode: item.internalCode,
+              name: item.name,
+              changesCount: item.changes?.length ?? 0,
+              changes: item.changes
+            });
+          });
+          console.groupEnd();
+        });
+
+        // Mostra primeiros 3 resultados completos
+        console.group('🔬 PRIMEIROS 3 RESULTADOS (detalhado)');
+        data.results.slice(0, 3).forEach((result, idx) => {
+          console.log(`Resultado ${idx + 1}:`, result);
+        });
+        console.groupEnd();
+
+        // Se houver mais de 10, mostra aviso
+        if (data.results.length > 10) {
+          console.warn(`⚠️ Total de ${data.results.length} resultados. Mostrando apenas primeiros 3 detalhados acima.`);
+        }
+      } else {
+        console.warn('⚠️ Nenhum resultado no array results ou array vazio');
+      }
+      console.groupEnd();
+
+      // 🔷 LOG 7: Errors Analysis
+      console.group('⚠️ [SYNC PRODUCTS] ANÁLISE DE ERROS');
+      console.log('🔢 Total de erros:', data.errors?.length ?? 0);
+      console.log('🔍 Array de erros presente:', !!data.errors);
+      console.log('🔍 É um array:', Array.isArray(data.errors));
+
+      if (data.errors && data.errors.length > 0) {
+        console.table(data.errors.map((err, idx) => ({
+          Index: idx + 1,
+          ExternalID: err.externalId,
+          Error: err.error
+        })));
+
+        console.group('🔬 ERROS DETALHADOS');
+        data.errors.forEach((error, idx) => {
+          console.error(`Erro ${idx + 1}:`, error);
+        });
+        console.groupEnd();
+      } else {
+        console.log('✅ Nenhum erro encontrado');
+      }
+      console.groupEnd();
+
+      // 🔷 LOG 8: Metadata & Additional Fields
+      console.group('🔍 [SYNC PRODUCTS] CAMPOS ADICIONAIS E METADATA');
+      console.log('🏷️ Provider:', data.provider ?? 'N/A');
+      console.log('🎭 DryRun mode:', data.dryRun);
+      console.log('⏰ SyncedAt:', data.syncedAt);
+      console.log('📅 SyncedAt (parsed):', data.syncedAt ? new Date(data.syncedAt).toLocaleString('pt-BR') : 'N/A');
+
+      // Verifica campos extras que não estão na interface
+      const knownKeys = ['dryRun', 'provider', 'summary', 'results', 'errors', 'syncedAt'];
+      const extraKeys = Object.keys(data).filter(key => !knownKeys.includes(key));
+
+      if (extraKeys.length > 0) {
+        console.warn('⚠️ Campos extras encontrados (não mapeados na interface):', extraKeys);
+        extraKeys.forEach(key => {
+          console.log(`  📌 ${key}:`, (data as never)[key]);
+        });
+      } else {
+        console.log('✅ Nenhum campo extra encontrado');
+      }
+      console.groupEnd();
+
+      // 🔷 LOG 9: Validação de Dados
+      console.group('✔️ [SYNC PRODUCTS] VALIDAÇÃO DE DADOS');
+      const validations = {
+        'Summary existe': !!data.summary,
+        'Summary tem todas as propriedades': !!(
+          data.summary &&
+          typeof data.summary.created === 'number' &&
+          typeof data.summary.updated === 'number' &&
+          typeof data.summary.deactivated === 'number' &&
+          typeof data.summary.unchanged === 'number' &&
+          typeof data.summary.errors === 'number'
+        ),
+        'Results é array': Array.isArray(data.results),
+        'Errors é array': Array.isArray(data.errors),
+        'Provider informado': !!data.provider,
+        'DryRun informado': typeof data.dryRun === 'boolean',
+        'SyncedAt informado': !!data.syncedAt,
+        'Summary totais batem': data.summary ?
+          (data.summary.created + data.summary.updated + data.summary.deactivated + data.summary.unchanged) ===
+          (data.results?.length ?? 0) : false
+      };
+
+      console.table(validations);
+
+      const failedValidations = Object.entries(validations).filter(([, value]) => !value);
+      if (failedValidations.length > 0) {
+        console.error('❌ Validações falharam:', failedValidations.map(([key]) => key));
+      } else {
+        console.log('✅ Todas as validações passaram!');
+      }
+      console.groupEnd();
+
+      // 🔷 LOG 10: Resumo Final
+      console.group('🎯 [SYNC PRODUCTS] RESUMO FINAL');
+      console.log('✅ Sync concluído com sucesso');
+      console.log('⏱️ Tempo total:', `${requestDuration}ms`);
+      console.log('🎭 Modo:', isDryRun ? 'PREVIEW (Dry Run)' : 'PRODUÇÃO (Real Sync)');
+      console.log('🔧 Provider:', selectedProvider);
+      console.log('📊 Estatísticas:', {
+        totalProcessados: totalProducts,
+        criados: data.summary?.created ?? 0,
+        atualizados: data.summary?.updated ?? 0,
+        desativados: data.summary?.deactivated ?? 0,
+        inalterados: data.summary?.unchanged ?? 0,
+        erros: data.summary?.errors ?? 0,
+      });
+      console.groupEnd();
+
       setLastSyncResult(data);
 
       const { summary } = data;
@@ -128,7 +338,78 @@ export default function SyncProducts() {
         });
       }
     } catch (error) {
-      console.error('Error syncing products:', error);
+      // 🔷 LOG 11: Catch Block - Análise de Erro Completa
+      const requestDuration = Date.now() - requestStartTime;
+
+      console.group('🚨 [SYNC PRODUCTS] ERRO CAPTURADO NO CATCH');
+      console.log('⏱️ Tempo até o erro:', `${requestDuration}ms`);
+      console.log('⏰ Timestamp do erro:', new Date().toISOString());
+
+      // Análise do tipo de erro
+      console.log('📋 Tipo do erro:', typeof error);
+      console.log('🔍 É instância de Error:', error instanceof Error);
+      console.log('🔍 Constructor name:', error?.constructor?.name);
+
+      // Detalhes do erro
+      if (error instanceof Error) {
+        console.error('❌ Error.name:', error.name);
+        console.error('❌ Error.message:', error.message);
+        console.error('❌ Error.stack:', error.stack);
+
+        // Verifica se tem propriedades customizadas
+        const errorKeys = Object.keys(error);
+        if (errorKeys.length > 0) {
+          console.log('📦 Propriedades do erro:', errorKeys);
+          errorKeys.forEach(key => {
+            console.log(`  📌 ${key}:`, (error as never)[key]);
+          });
+        }
+      } else {
+        console.error('❌ Erro (não é Error object):', error);
+        console.error('❌ JSON.stringify do erro:', JSON.stringify(error, null, 2));
+      }
+
+      // Contexto do erro
+      console.group('🔍 CONTEXTO DO ERRO');
+      console.log('⚙️ isDryRun:', isDryRun);
+      console.log('⚙️ selectedProvider:', selectedProvider);
+      console.log('⚙️ Token presente:', !!token);
+      console.log('⚙️ API URL:', process.env.NEXT_PUBLIC_API_URL);
+      console.groupEnd();
+
+      // Possíveis causas
+      console.group('💡 DIAGNÓSTICO AUTOMÁTICO');
+      const diagnostics = [];
+
+      if (!token) {
+        diagnostics.push('⚠️ Token não está presente - possível problema de autenticação');
+      }
+
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        diagnostics.push('⚠️ NEXT_PUBLIC_API_URL não está definida');
+      }
+
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        diagnostics.push('⚠️ Possível problema de rede ou CORS');
+      }
+
+      if (error instanceof Error && error.message.includes('Failed to sync products')) {
+        diagnostics.push('⚠️ Erro retornado pela API (response não OK)');
+      }
+
+      if (error instanceof SyntaxError) {
+        diagnostics.push('⚠️ Erro ao fazer parse do JSON - resposta pode não ser JSON válido');
+      }
+
+      if (diagnostics.length > 0) {
+        diagnostics.forEach(diag => console.warn(diag));
+      } else {
+        console.log('ℹ️ Nenhum diagnóstico automático aplicável');
+      }
+      console.groupEnd();
+
+      console.groupEnd();
+
       toast({
         title: t('error.syncFailed'),
         description: t('error.syncFailedDesc'),
@@ -136,6 +417,10 @@ export default function SyncProducts() {
       });
     } finally {
       setIsSyncing(false);
+
+      // 🔷 LOG 12: Finally Block
+      console.log('🏁 [SYNC PRODUCTS] Finalizando operação de sync');
+      console.log('🔄 isSyncing setado para:', false);
     }
   };
 

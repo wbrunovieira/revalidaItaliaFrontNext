@@ -10,8 +10,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-// TODO: Descomentar quando reabilitar autenticação
-// import { getAuthToken } from '@/lib/auth-utils';
+import { getAuthToken } from '@/lib/auth-utils';
 import {
   FileText,
   Edit,
@@ -162,57 +161,14 @@ export default function DocumentsList() {
   const fetchDocumentsForLesson = useCallback(
     async (lessonId: string, page: number = 1): Promise<DocumentItem[]> => {
       try {
-        // TODO: AUTENTICAÇÃO TEMPORARIAMENTE DESABILITADA - REABILITAR DEPOIS
-        // Buscar token de autenticação (cookie, localStorage ou sessionStorage)
-        // const token = getAuthToken();
-
-        // if (!token) {
-        //   toast({
-        //     title: t('error.authTitle'),
-        //     description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
-        //     variant: 'destructive',
-        //   });
-        //   // Redirecionar para login após 2 segundos
-        //   setTimeout(() => {
-        //     router.push(`/${locale}/login`);
-        //   }, 2000);
-        //   return [];
-        // }
-
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents?page=${page}&limit=10`,
           {
             headers: {
-              // 'Authorization': `Bearer ${token}`,  // TODO: Descomentar quando reabilitar autenticação
               'Content-Type': 'application/json',
             },
           }
         );
-
-        // TODO: TRATAMENTO DE ERROS DE AUTH DESABILITADO - REABILITAR DEPOIS
-        // if (response.status === 401) {
-        //   toast({
-        //     title: t('error.authTitle') || 'Não autorizado',
-        //     description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
-        //     variant: 'destructive',
-        //   });
-        //   // Redirecionar para login após 2 segundos
-        //   setTimeout(() => {
-        //     router.push(`/${locale}/login`);
-        //   }, 2000);
-        //   return [];
-        // }
-
-        // if (response.status === 403) {
-        //   const errorBody = await response.text();
-        //   console.error('❌ 403 Forbidden - Response body:', errorBody);
-        //   toast({
-        //     title: t('error.permissionTitle') || 'Sem permissão',
-        //     description: t('error.permissionDescription') || 'Você não tem permissão para acessar documentos.',
-        //     variant: 'destructive',
-        //   });
-        //   return [];
-        // }
 
         if (!response.ok) {
           return [];
@@ -473,54 +429,48 @@ export default function DocumentsList() {
   const deleteDocument = useCallback(
     async (lessonId: string, documentId: string) => {
       try {
-        // TODO: AUTENTICAÇÃO TEMPORARIAMENTE DESABILITADA - REABILITAR DEPOIS
         // 1. Verificar se o token existe
-        // const token = getAuthToken();
+        const token = getAuthToken();
 
-        // if (!token) {
-        //   toast({
-        //     title: t('error.authTitle'),
-        //     description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
-        //     variant: 'destructive',
-        //   });
-        //   setTimeout(() => {
-        //     router.push(`/${locale}/login`);
-        //   }, 2000);
-        //   return;
-        // }
+        if (!token) {
+          toast({
+            title: t('error.authTitle'),
+            description: t('error.authDescription') || 'Sua sessão expirou. Faça login novamente.',
+            variant: 'destructive',
+          });
+          return;
+        }
 
-        // 2. Fazer requisição sem autenticação (temporário)
+        // 2. Fazer requisição com autenticação
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
           {
             method: 'DELETE',
             headers: {
-              // 'Authorization': `Bearer ${token}`,  // TODO: Descomentar quando reabilitar autenticação
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }
         );
 
-        // TODO: TRATAMENTO DE ERROS DE AUTH DESABILITADO - REABILITAR DEPOIS
         // 3. Tratar erros de autenticação e autorização
-        // if (response.status === 401) {
-        //   toast({
-        //     title: t('error.unauthorized'),
-        //     description: t('error.tokenInvalid'),
-        //     variant: 'destructive',
-        //   });
-        //   router.push(`/${locale}/login`);
-        //   return;
-        // }
+        if (response.status === 401) {
+          toast({
+            title: t('error.unauthorized'),
+            description: t('error.tokenInvalid'),
+            variant: 'destructive',
+          });
+          return;
+        }
 
-        // if (response.status === 403) {
-        //   toast({
-        //     title: t('error.forbidden'),
-        //     description: t('error.noPermission'),
-        //     variant: 'destructive',
-        //   });
-        //   return;
-        // }
+        if (response.status === 403) {
+          toast({
+            title: t('error.forbidden'),
+            description: t('error.noPermission'),
+            variant: 'destructive',
+          });
+          return;
+        }
 
         if (response.status === 404) {
           toast({

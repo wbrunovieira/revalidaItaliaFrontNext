@@ -2361,7 +2361,35 @@
       "internalNotes": "Notas Internas"
     },
     "pagination": {
-      "pageOf": "Página {current} de {total}"
+      "pageOf": "Página {current} de {total}",
+      "itemsPerPage": "Elementos por página"
+    },
+    "filters": {
+      "title": "Filtros",
+      "status": "Estado de Revisión",
+      "documentType": "Tipo de Documento",
+      "studentId": "ID del Estudiante",
+      "studentIdPlaceholder": "Ingresa el UUID del estudiante...",
+      "dateFrom": "Fecha Inicial",
+      "dateTo": "Fecha Final",
+      "sortBy": "Ordenar por",
+      "ascending": "Ascendente",
+      "descending": "Descendente",
+      "clearAll": "Limpiar filtros",
+      "activeFilters": "Filtros activos",
+      "statusOptions": {
+        "PENDING_REVIEW": "Pendiente de Análisis",
+        "UNDER_REVIEW": "En Análisis",
+        "APPROVED": "Aprobado",
+        "REJECTED": "Rechazado",
+        "NEEDS_REPLACEMENT": "Requiere Sustitución",
+        "NEEDS_ADDITIONAL_INFO": "Info Adicional"
+      },
+      "sortOptions": {
+        "createdAt": "Fecha de Subida",
+        "name": "Nombre",
+        "updatedAt": "Última Actualización"
+      }
     },
     "error": {
       "title": "Error",

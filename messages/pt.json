@@ -2363,7 +2363,35 @@
       "internalNotes": "Notas Internas"
     },
     "pagination": {
-      "pageOf": "Página {current} de {total}"
+      "pageOf": "Página {current} de {total}",
+      "itemsPerPage": "Itens por página"
+    },
+    "filters": {
+      "title": "Filtros",
+      "status": "Status de Revisão",
+      "documentType": "Tipo de Documento",
+      "studentId": "ID do Estudante",
+      "studentIdPlaceholder": "Digite o UUID do estudante...",
+      "dateFrom": "Data Inicial",
+      "dateTo": "Data Final",
+      "sortBy": "Ordenar por",
+      "ascending": "Crescente",
+      "descending": "Decrescente",
+      "clearAll": "Limpar filtros",
+      "activeFilters": "Filtros ativos",
+      "statusOptions": {
+        "PENDING_REVIEW": "Aguardando Análise",
+        "UNDER_REVIEW": "Em Análise",
+        "APPROVED": "Aprovado",
+        "REJECTED": "Rejeitado",
+        "NEEDS_REPLACEMENT": "Substituição Necessária",
+        "NEEDS_ADDITIONAL_INFO": "Info Adicional"
+      },
+      "sortOptions": {
+        "createdAt": "Data de Envio",
+        "name": "Nome",
+        "updatedAt": "Última Atualização"
+      }
     },
     "error": {
       "title": "Erro",

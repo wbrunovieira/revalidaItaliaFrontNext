@@ -765,9 +765,9 @@ export default function ProfileContent({
           </div>
         </div>
 
-        {/* Segunda linha: Sessões e Segurança - Full width */}
+        {/* Segunda linha: Documentos - Full width */}
         <div className="px-6">
-          <SessionCard />
+          <ProfileDocuments userId={userData.id} />
         </div>
 
         {/* Terceira linha: Certificados - Full width */}
@@ -788,9 +788,9 @@ export default function ProfileContent({
           </div>
         </div>
 
-        {/* Quarta linha: Documentos - Full width */}
+        {/* Quarta linha: Sessões e Segurança - Full width */}
         <div className="px-6">
-          <ProfileDocuments userId={userData.id} />
+          <SessionCard />
         </div>
       </div>
       

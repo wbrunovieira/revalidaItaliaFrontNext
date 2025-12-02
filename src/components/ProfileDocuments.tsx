@@ -75,6 +75,38 @@ interface ProfileDocumentsProps {
   userId?: string;
 }
 
+// Map API status to local status (pure function - outside component)
+const mapApiStatusToLocal = (apiStatus: ApiReviewStatus): DocumentStatus => {
+  const statusMap: Record<ApiReviewStatus, DocumentStatus> = {
+    'PENDING_REVIEW': 'pending',
+    'UNDER_REVIEW': 'under_review',
+    'APPROVED': 'approved',
+    'REJECTED': 'rejected',
+    'NEEDS_REPLACEMENT': 'needs_replacement',
+    'NEEDS_ADDITIONAL_INFO': 'needs_additional_info',
+  };
+  return statusMap[apiStatus] || 'pending';
+};
+
+// Map API document to local format (pure function - outside component)
+const mapApiDocumentToLocal = (apiDoc: ApiDocument): UserDocument => ({
+  id: apiDoc.id,
+  name: apiDoc.name,
+  fileName: apiDoc.fileName,
+  originalFileName: apiDoc.originalFileName,
+  type: apiDoc.documentType as DocumentType,
+  status: mapApiStatusToLocal(apiDoc.reviewStatus),
+  fileSize: apiDoc.fileSize,
+  mimeType: apiDoc.mimeType,
+  url: apiDoc.fileUrl,
+  fileUrl: apiDoc.fileUrl,
+  description: apiDoc.description,
+  uploadedAt: apiDoc.createdAt,
+  createdAt: apiDoc.createdAt,
+  reviewedAt: apiDoc.reviewedAt,
+  rejectionReason: apiDoc.rejectionReason,
+});
+
 export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
   const t = useTranslations('Profile.documents');
   const { token } = useAuth();
@@ -87,38 +119,6 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<UserDocument | null>(null);
-
-  // Map API status to local status
-  const mapApiStatusToLocal = (apiStatus: ApiReviewStatus): DocumentStatus => {
-    const statusMap: Record<ApiReviewStatus, DocumentStatus> = {
-      'PENDING_REVIEW': 'pending',
-      'UNDER_REVIEW': 'under_review',
-      'APPROVED': 'approved',
-      'REJECTED': 'rejected',
-      'NEEDS_REPLACEMENT': 'needs_replacement',
-      'NEEDS_ADDITIONAL_INFO': 'needs_additional_info',
-    };
-    return statusMap[apiStatus] || 'pending';
-  };
-
-  // Map API document to local format
-  const mapApiDocumentToLocal = (apiDoc: ApiDocument): UserDocument => ({
-    id: apiDoc.id,
-    name: apiDoc.name,
-    fileName: apiDoc.fileName,
-    originalFileName: apiDoc.originalFileName,
-    type: apiDoc.documentType as DocumentType,
-    status: mapApiStatusToLocal(apiDoc.reviewStatus),
-    fileSize: apiDoc.fileSize,
-    mimeType: apiDoc.mimeType,
-    url: apiDoc.fileUrl,
-    fileUrl: apiDoc.fileUrl,
-    description: apiDoc.description,
-    uploadedAt: apiDoc.createdAt,
-    createdAt: apiDoc.createdAt,
-    reviewedAt: apiDoc.reviewedAt,
-    rejectionReason: apiDoc.rejectionReason,
-  });
 
   // Fetch documents from API
   const fetchDocuments = useCallback(async () => {

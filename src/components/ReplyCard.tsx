@@ -32,7 +32,7 @@ interface Author {
   profession?: string;
   specialization?: string;
   bio?: string;
-  role?: 'student' | 'admin' | 'tutor';
+  role?: 'student' | 'admin' | 'tutor' | 'document_analyst';
 }
 
 interface Reply {

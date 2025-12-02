@@ -25,7 +25,7 @@ export interface User {
   email: string;
   name: string; // ESSENCIAL - usado em 10+ componentes
   fullName?: string; // Nome completo retornado pelo login
-  role: 'admin' | 'student' | 'tutor'; // ESSENCIAL - controle de acesso
+  role: 'admin' | 'student' | 'tutor' | 'document_analyst'; // ESSENCIAL - controle de acesso
   profileImageUrl?: string;
   nationalId?: string; // CPF
   phone?: string;
@@ -172,7 +172,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     fullName: string;
-    role: 'student' | 'admin' | 'tutor';
+    role: 'student' | 'admin' | 'tutor' | 'document_analyst';
     profileImageUrl: string | null;
   };
   session?: Session; // 🆕 Informações da sessão (opcional)
@@ -215,6 +215,7 @@ export interface AuthState {
   isAdmin: boolean;
   isTutor: boolean;
   isStudent: boolean;
+  isDocumentAnalyst: boolean;
 
   // Actions principais
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -236,7 +237,8 @@ export interface AuthState {
   // Helpers de permissão
   canAccessAdmin: () => boolean;
   canAccessTutorArea: () => boolean;
-  hasRole: (role: 'admin' | 'student' | 'tutor') => boolean;
+  canAccessStudentDocuments: () => boolean;
+  hasRole: (role: 'admin' | 'student' | 'tutor' | 'document_analyst') => boolean;
 
   // Rate limit helpers
   clearRateLimit: () => void;
@@ -379,6 +381,7 @@ export const useAuthStore = create<AuthState>()(
       isAdmin: false,
       isTutor: false,
       isStudent: false,
+      isDocumentAnalyst: false,
 
       // Action: Login
       login: async (credentials) => {
@@ -549,6 +552,7 @@ export const useAuthStore = create<AuthState>()(
               isAdmin: userData.role === 'admin',
               isTutor: userData.role === 'tutor',
               isStudent: userData.role === 'student',
+              isDocumentAnalyst: userData.role === 'document_analyst',
             });
 
             console.log('✅ Login realizado com sucesso!', {
@@ -659,6 +663,7 @@ export const useAuthStore = create<AuthState>()(
           isAdmin: false,
           isTutor: false,
           isStudent: false,
+          isDocumentAnalyst: false,
         });
 
         console.log('👋 Logout realizado - todos os dados limpos (incluindo refreshToken)');
@@ -679,12 +684,13 @@ export const useAuthStore = create<AuthState>()(
         const currentUser = get().user;
         if (currentUser) {
           const updatedUser = { ...currentUser, ...userData };
-          set({ 
+          set({
             user: updatedUser,
             // Atualizar computed properties se role mudou
             isAdmin: updatedUser.role === 'admin',
             isTutor: updatedUser.role === 'tutor',
             isStudent: updatedUser.role === 'student',
+            isDocumentAnalyst: updatedUser.role === 'document_analyst',
           });
           console.log('👤 Usuário atualizado:', updatedUser);
         }
@@ -786,13 +792,14 @@ export const useAuthStore = create<AuthState>()(
             lastLogin: profileData.lastLogin,
           };
 
-          set({ 
+          set({
             user: updatedUser,
             profileCompleteness,
             isAdmin: updatedUser.role === 'admin',
             isTutor: updatedUser.role === 'tutor',
             isStudent: updatedUser.role === 'student',
-            isLoading: false 
+            isDocumentAnalyst: updatedUser.role === 'document_analyst',
+            isLoading: false,
           });
 
           console.log('✅ Perfil atualizado com sucesso:', updatedUser);
@@ -963,6 +970,7 @@ export const useAuthStore = create<AuthState>()(
               isAdmin: userData?.role === 'admin',
               isTutor: userData?.role === 'tutor',
               isStudent: userData?.role === 'student',
+              isDocumentAnalyst: userData?.role === 'document_analyst',
             });
 
             console.log('🔐 Auth inicializado do token existente:', {
@@ -1245,6 +1253,12 @@ export const useAuthStore = create<AuthState>()(
         return state.isAuthenticated && (state.user?.role === 'tutor' || state.user?.role === 'admin');
       },
 
+      // Helper: Can Access Student Documents Area
+      canAccessStudentDocuments: () => {
+        const state = get();
+        return state.isAuthenticated && (state.user?.role === 'document_analyst' || state.user?.role === 'admin');
+      },
+
       // Helper: Has Role
       hasRole: (role) => {
         const state = get();
@@ -1371,8 +1385,9 @@ export const useAuth = () => {
     ...store,
     // Adicionar qualquer computed property adicional aqui
     displayName: store.user?.name || 'Usuário',
-    roleLabel: store.user?.role === 'admin' ? 'Administrador' : 
-               store.user?.role === 'tutor' ? 'Tutor' : 'Estudante',
+    roleLabel: store.user?.role === 'admin' ? 'Administrador' :
+               store.user?.role === 'tutor' ? 'Tutor' :
+               store.user?.role === 'document_analyst' ? 'Analista de Documentos' : 'Estudante',
     // Helper para verificar se o perfil precisa ser completado
     needsProfileCompletion: store.meta?.requiresProfileCompletion || false,
     profilePercentage: store.profileCompleteness?.percentage || 0,

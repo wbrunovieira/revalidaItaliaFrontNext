@@ -403,6 +403,7 @@
     "role": {
       "student": "Studente",
       "tutor": "Tutor",
+      "document_analyst": "Analista Documenti",
       "admin": "Admin"
     },
     "error": {
@@ -1699,6 +1700,7 @@
     "roles": {
       "admin": "Admin",
       "tutor": "Tutor",
+      "document_analyst": "Analista Documenti",
       "student": "Studente"
     },
     "comments": {
@@ -2674,6 +2676,7 @@
     "roles": {
       "admin": "Amministratore",
       "tutor": "Tutor",
+      "document_analyst": "Analista Documenti",
       "student": "Studente"
     },
     "instructions": {
@@ -4697,6 +4700,7 @@
   "roles": {
     "student": "Studente",
     "tutor": "Tutor",
+    "document_analyst": "Analista Documenti",
     "admin": "Amministratore"
   },
   "errors": {
@@ -4769,10 +4773,12 @@
     "total": "Totale",
     "admins": "Amministratori",
     "tutors": "Tutor",
+    "documentAnalysts": "Analisti",
     "students": "Studenti"
   },
   "roleAdmin": "Amministratore",
   "roleTutor": "Tutor",
+  "roleDocument_analyst": "Analista Documenti",
   "roleStudent": "Studente",
   "actions": {
     "view": "Visualizza",
@@ -5783,6 +5789,7 @@
   "roles": {
     "student": "Studente",
     "tutor": "Tutor",
+    "document_analyst": "Analista Documenti",
     "admin": "Amministratore"
   },
   "errors": {

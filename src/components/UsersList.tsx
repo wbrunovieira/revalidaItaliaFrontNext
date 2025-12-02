@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
+  FileText,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
@@ -28,7 +29,7 @@ interface User {
   fullName: string;
   email: string;
   nationalId: string;
-  role: 'admin' | 'student' | 'tutor';
+  role: 'admin' | 'student' | 'tutor' | 'document_analyst';
   createdAt: string;
   updatedAt?: string;
   // Campos adicionais opcionais
@@ -47,7 +48,7 @@ interface UserEditData {
   fullName: string;
   email: string;
   nationalId: string;
-  role: 'admin' | 'student' | 'tutor';
+  role: 'admin' | 'student' | 'tutor' | 'document_analyst';
 }
 
 // API might return users with different property names
@@ -492,6 +493,8 @@ export default function UsersList() {
       .length,
     students: users.filter(user => user.role === 'student')
       .length,
+    documentAnalysts: users.filter(user => user.role === 'document_analyst')
+      .length,
   };
 
   // Função para obter ícone do papel
@@ -503,6 +506,8 @@ export default function UsersList() {
         return (
           <GraduationCap size={20} className="text-white" />
         );
+      case 'document_analyst':
+        return <FileText size={20} className="text-white" />;
       case 'student':
       default:
         return <User size={20} className="text-white" />;
@@ -516,6 +521,8 @@ export default function UsersList() {
         return 'bg-red-900/30 text-red-400 border border-red-800';
       case 'tutor':
         return 'bg-green-900/30 text-green-400 border border-green-800';
+      case 'document_analyst':
+        return 'bg-purple-900/30 text-purple-400 border border-purple-800';
       case 'student':
       default:
         return 'bg-blue-900/30 text-blue-400 border border-blue-800';
@@ -607,7 +614,7 @@ export default function UsersList() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4 mb-6">
         <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
           <p className="text-2xl sm:text-3xl font-bold text-white">
             {userCounts.total}
@@ -630,6 +637,14 @@ export default function UsersList() {
           </p>
           <p className="text-[10px] sm:text-sm text-gray-400 break-words">
             {t('stats.tutors')}
+          </p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">
+          <p className="text-2xl sm:text-3xl font-bold text-white">
+            {userCounts.documentAnalysts}
+          </p>
+          <p className="text-[10px] sm:text-sm text-gray-400 break-words">
+            {t('stats.documentAnalysts')}
           </p>
         </div>
         <div className="bg-gray-700/50 rounded-lg p-2 sm:p-4 text-center min-w-0">

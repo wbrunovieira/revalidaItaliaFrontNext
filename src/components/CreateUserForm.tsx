@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-type UserRole = 'admin' | 'tutor' | 'student';
+type UserRole = 'admin' | 'tutor' | 'student' | 'document_analyst';
 
 interface FormData {
   name: string;
@@ -267,7 +267,7 @@ export default function CreateUserForm() {
             };
           }
           if (
-            !['admin', 'tutor', 'student'].includes(value)
+            !['admin', 'tutor', 'student', 'document_analyst'].includes(value)
           ) {
             return {
               isValid: false,
@@ -698,6 +698,12 @@ export default function CreateUserForm() {
                   className="text-white hover:bg-gray-600"
                 >
                   {t('roles.tutor')}
+                </SelectItem>
+                <SelectItem
+                  value="document_analyst"
+                  className="text-white hover:bg-gray-600"
+                >
+                  {t('roles.document_analyst')}
                 </SelectItem>
                 <SelectItem
                   value="admin"

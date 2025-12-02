@@ -1,7 +1,7 @@
 // /src/components/ProfileDocuments.tsx
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   FileText,
@@ -16,12 +16,19 @@ import {
   Image as ImageIcon,
   FileSpreadsheet,
   Loader2,
+  RefreshCw,
+  Info,
 } from 'lucide-react';
+import { useAuth } from '@/stores/auth.store';
+import { toast } from '@/hooks/use-toast';
 import UploadDocumentModal, { UploadedDocument } from '@/components/UploadDocumentModal';
 
 // Tipos de documento suportados
 type DocumentType = 'diploma' | 'certificate' | 'id' | 'passport' | 'transcript' | 'other' | 'PDF' | 'WORD' | 'EXCEL' | 'IMAGE';
-type DocumentStatus = 'pending' | 'approved' | 'rejected' | 'under_review';
+type DocumentStatus = 'pending' | 'approved' | 'rejected' | 'under_review' | 'needs_replacement' | 'needs_additional_info';
+
+// API Review Status mapping
+type ApiReviewStatus = 'PENDING_REVIEW' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_REPLACEMENT' | 'NEEDS_ADDITIONAL_INFO';
 
 interface UserDocument {
   id: string;
@@ -39,6 +46,29 @@ interface UserDocument {
   createdAt?: string;
   reviewedAt?: string;
   reviewNotes?: string;
+  rejectionReason?: string;
+}
+
+// API response interface
+interface ApiDocument {
+  id: string;
+  studentId: string;
+  name: string;
+  description?: string;
+  fileName: string;
+  originalFileName: string;
+  fileUrl: string;
+  fileSize: number;
+  mimeType: string;
+  documentType: string;
+  uploadedBy: string;
+  reviewStatus: ApiReviewStatus;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ProfileDocumentsProps {
@@ -47,13 +77,83 @@ interface ProfileDocumentsProps {
 
 export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
   const t = useTranslations('Profile.documents');
+  const { token } = useAuth();
 
   // Estado local
   const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<UserDocument | null>(null);
+
+  // Map API status to local status
+  const mapApiStatusToLocal = (apiStatus: ApiReviewStatus): DocumentStatus => {
+    const statusMap: Record<ApiReviewStatus, DocumentStatus> = {
+      'PENDING_REVIEW': 'pending',
+      'UNDER_REVIEW': 'under_review',
+      'APPROVED': 'approved',
+      'REJECTED': 'rejected',
+      'NEEDS_REPLACEMENT': 'needs_replacement',
+      'NEEDS_ADDITIONAL_INFO': 'needs_additional_info',
+    };
+    return statusMap[apiStatus] || 'pending';
+  };
+
+  // Map API document to local format
+  const mapApiDocumentToLocal = (apiDoc: ApiDocument): UserDocument => ({
+    id: apiDoc.id,
+    name: apiDoc.name,
+    fileName: apiDoc.fileName,
+    originalFileName: apiDoc.originalFileName,
+    type: apiDoc.documentType as DocumentType,
+    status: mapApiStatusToLocal(apiDoc.reviewStatus),
+    fileSize: apiDoc.fileSize,
+    mimeType: apiDoc.mimeType,
+    url: apiDoc.fileUrl,
+    fileUrl: apiDoc.fileUrl,
+    description: apiDoc.description,
+    uploadedAt: apiDoc.createdAt,
+    createdAt: apiDoc.createdAt,
+    reviewedAt: apiDoc.reviewedAt,
+    rejectionReason: apiDoc.rejectionReason,
+  });
+
+  // Fetch documents from API
+  const fetchDocuments = useCallback(async () => {
+    if (!token || !userId) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/api/v1/student-documents?studentId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(t('error.fetchFailed'));
+      }
+
+      const data = await response.json();
+      const mappedDocs = (data.documents || []).map(mapApiDocumentToLocal);
+      setDocuments(mappedDocs);
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+      setError(err instanceof Error ? err.message : t('error.fetchFailed'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, userId, t]);
+
+  // Fetch documents on mount
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   // Formatar tamanho do arquivo
   const formatFileSize = (bytes: number): string => {
@@ -104,10 +204,24 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
         };
       case 'under_review':
         return {
+          bg: 'bg-blue-500/20',
+          text: 'text-blue-400',
+          border: 'border-blue-500/30',
+          icon: <Loader2 size={14} className="animate-spin" />,
+        };
+      case 'needs_replacement':
+        return {
+          bg: 'bg-orange-500/20',
+          text: 'text-orange-400',
+          border: 'border-orange-500/30',
+          icon: <RefreshCw size={14} />,
+        };
+      case 'needs_additional_info':
+        return {
           bg: 'bg-yellow-500/20',
           text: 'text-yellow-400',
           border: 'border-yellow-500/30',
-          icon: <Loader2 size={14} className="animate-spin" />,
+          icon: <Info size={14} />,
         };
       case 'pending':
       default:
@@ -160,22 +274,41 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
 
   // Handler para excluir documento
   const handleDelete = useCallback(async (documentId: string) => {
+    if (!token) return;
+
     setIsDeleting(true);
 
     try {
-      // TODO: Implementar chamada real da API
-      // await fetch(`/api/documents/${documentId}`, { method: 'DELETE' });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/api/v1/student-documents/${documentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        throw new Error(t('error.deleteFailed'));
+      }
 
       setDocuments(prev => prev.filter(doc => doc.id !== documentId));
       setShowDeleteConfirm(null);
-    } catch (error) {
-      console.error('Delete error:', error);
+
+      toast({
+        title: t('success.deleteTitle'),
+        description: t('success.deleteDescription'),
+      });
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast({
+        title: t('error.title'),
+        description: err instanceof Error ? err.message : t('error.deleteFailed'),
+        variant: 'destructive',
+      });
     } finally {
       setIsDeleting(false);
     }
-  }, []);
+  }, [token, t]);
 
   return (
     <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-xl">
@@ -203,16 +336,43 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
         </button>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <Loader2 size={48} className="mx-auto mb-4 text-secondary animate-spin" />
+          <p className="text-gray-400">{t('loading')}</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="text-center py-12">
+          <AlertCircle size={48} className="mx-auto mb-4 text-red-400" />
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={fetchDocuments}
+            className="px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
+          >
+            {t('retry')}
+          </button>
+        </div>
+      )}
+
       {/* Lista de Documentos */}
-      {documents.length > 0 ? (
+      {!isLoading && !error && documents.length > 0 && (
         <div className="space-y-4">
           {documents.map(doc => {
             const statusStyle = getStatusStyle(doc.status);
+            const needsAction = ['rejected', 'needs_replacement', 'needs_additional_info'].includes(doc.status);
 
             return (
               <div
                 key={doc.id}
-                className="group bg-gradient-to-br from-white/5 to-transparent rounded-lg p-4 border border-white/10 hover:border-secondary/50 transition-all"
+                className={`group bg-gradient-to-br from-white/5 to-transparent rounded-lg p-4 border transition-all ${
+                  needsAction
+                    ? 'border-orange-500/30 hover:border-orange-500/50'
+                    : 'border-white/10 hover:border-secondary/50'
+                }`}
               >
                 <div className="flex items-start gap-4">
                   {/* Ícone do arquivo */}
@@ -248,10 +408,11 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
                       <span>{formatDate(doc.uploadedAt)}</span>
                     </div>
 
-                    {/* Notas de revisão */}
-                    {doc.reviewNotes && (
-                      <div className="mt-2 p-2 bg-white/5 rounded text-sm text-gray-400">
-                        <span className="font-medium text-gray-300">{t('reviewNotes')}:</span> {doc.reviewNotes}
+                    {/* Rejection Reason - Show when document needs action */}
+                    {needsAction && doc.rejectionReason && (
+                      <div className="mt-3 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                        <p className="text-xs font-medium text-orange-400 mb-1">{t('actionRequired')}</p>
+                        <p className="text-sm text-white">{doc.rejectionReason}</p>
                       </div>
                     )}
                   </div>
@@ -287,7 +448,10 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
             );
           })}
         </div>
-      ) : (
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && documents.length === 0 && (
         <div className="text-center py-12">
           <File size={48} className="mx-auto mb-4 text-gray-500" />
           <p className="text-gray-400 mb-2">{t('noDocuments')}</p>

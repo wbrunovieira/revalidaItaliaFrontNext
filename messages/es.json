@@ -1088,7 +1088,21 @@
         "pending": "Pendiente",
         "approved": "Aprobado",
         "rejected": "Rechazado",
-        "under_review": "En Revisión"
+        "under_review": "En Revisión",
+        "needs_replacement": "Requiere Sustitución",
+        "needs_additional_info": "Info Adicional"
+      },
+      "loading": "Cargando documentos...",
+      "retry": "Reintentar",
+      "actionRequired": "Acción Requerida",
+      "error": {
+        "title": "Error",
+        "fetchFailed": "Error al cargar documentos",
+        "deleteFailed": "Error al eliminar documento"
+      },
+      "success": {
+        "deleteTitle": "Documento eliminado",
+        "deleteDescription": "El documento ha sido eliminado con éxito"
       }
     },
     "sessions": {

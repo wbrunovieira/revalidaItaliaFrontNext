@@ -1035,6 +1035,60 @@
         "downloadDescription": "Não foi possível baixar o certificado. Tente novamente."
       }
     },
+    "documents": {
+      "title": "Meus Documentos",
+      "description": "Envie seus documentos para validação de credenciais",
+      "uploadButton": "Enviar Documento",
+      "uploading": "Enviando",
+      "dragDropText": "Arraste e solte arquivos aqui ou clique para selecionar",
+      "supportedFormats": "PDF, JPG, PNG, DOC, DOCX (máx. 10MB)",
+      "noDocuments": "Nenhum documento enviado",
+      "noDocumentsHint": "Envie seus documentos para iniciar o processo de validação",
+      "view": "Visualizar",
+      "download": "Baixar",
+      "delete": "Excluir",
+      "deleteConfirmTitle": "Excluir Documento",
+      "deleteConfirmMessage": "Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirmDelete": "Excluir",
+      "reviewNotes": "Observações",
+      "previewImagePlaceholder": "Preview da imagem será exibido aqui",
+      "previewNotAvailable": "Preview não disponível para este tipo de arquivo",
+      "downloadToView": "Baixar para visualizar",
+      "upload": {
+        "title": "Enviar Documento",
+        "nameLabel": "Nome do Documento",
+        "namePlaceholder": "Ex: Diploma de Medicina",
+        "descriptionLabel": "Descrição (opcional)",
+        "descriptionPlaceholder": "Adicione uma descrição para o documento...",
+        "submit": "Enviar",
+        "clickToChange": "Clique para alterar o arquivo",
+        "supportedFormatsDetail": "PDF, Word, Excel, Imagens (máx. 50MB)",
+        "unsupportedType": "Tipo de arquivo não suportado",
+        "fileTooLarge": "Arquivo muito grande (máx. 50MB)",
+        "invalidRequest": "Requisição inválida",
+        "unauthorized": "Não autorizado",
+        "studentNotFound": "Estudante não encontrado",
+        "failed": "Falha ao enviar documento",
+        "successTitle": "Documento enviado!",
+        "successDescription": "Seu documento foi enviado com sucesso.",
+        "errorTitle": "Erro ao enviar"
+      },
+      "types": {
+        "diploma": "Diploma",
+        "certificate": "Certificado",
+        "id": "Documento de Identidade",
+        "passport": "Passaporte",
+        "transcript": "Histórico Escolar",
+        "other": "Outro"
+      },
+      "status": {
+        "pending": "Pendente",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "under_review": "Em Análise"
+      }
+    },
     "sessions": {
       "title": "Sessões e Segurança",
       "currentSession": "Sessão Atual",
@@ -2255,6 +2309,50 @@
   "title": "Painel Administrativo",
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
+
+  "studentDocuments": {
+    "pageTitle": "Documentos de Estudantes",
+    "pageDescription": "Visualize e gerencie os documentos enviados pelos estudantes",
+    "backToAdmin": "Voltar ao painel",
+    "title": "Documentos",
+    "description": "Lista de documentos enviados para validação",
+    "loading": "Carregando documentos...",
+    "noDocuments": "Nenhum documento encontrado",
+    "searchPlaceholder": "Buscar por nome, arquivo ou estudante...",
+    "filterByStudentId": "Filtrar por ID do estudante",
+    "showing": "Mostrando {count} de {total} documentos",
+    "retry": "Tentar novamente",
+    "close": "Fechar",
+    "previewNotAvailable": "Preview não disponível para este tipo de arquivo",
+    "columns": {
+      "document": "Documento",
+      "student": "Estudante",
+      "type": "Tipo",
+      "size": "Tamanho",
+      "uploadedAt": "Enviado em",
+      "actions": "Ações"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "download": "Baixar"
+    },
+    "details": {
+      "student": "Estudante",
+      "type": "Tipo de Arquivo",
+      "size": "Tamanho",
+      "uploadedAt": "Enviado em",
+      "description": "Descrição"
+    },
+    "pagination": {
+      "pageOf": "Página {current} de {total}"
+    },
+    "error": {
+      "title": "Erro",
+      "noAccess": "Você não tem permissão para acessar esta página",
+      "unauthorized": "Sessão expirada. Faça login novamente.",
+      "fetchFailed": "Erro ao carregar documentos"
+    }
+  },
 
   "coursesList": {
     "loading": "Carregando cursos..."

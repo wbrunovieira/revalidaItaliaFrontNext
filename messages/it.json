@@ -1037,6 +1037,60 @@
         "downloadDescription": "Non è stato possibile scaricare il certificato. Riprova."
       }
     },
+    "documents": {
+      "title": "I Miei Documenti",
+      "description": "Carica i tuoi documenti per la validazione delle credenziali",
+      "uploadButton": "Carica Documento",
+      "uploading": "Caricamento",
+      "dragDropText": "Trascina e rilascia i file qui o clicca per selezionare",
+      "supportedFormats": "PDF, JPG, PNG, DOC, DOCX (max. 10MB)",
+      "noDocuments": "Nessun documento caricato",
+      "noDocumentsHint": "Carica i tuoi documenti per iniziare il processo di validazione",
+      "view": "Visualizza",
+      "download": "Scarica",
+      "delete": "Elimina",
+      "deleteConfirmTitle": "Elimina Documento",
+      "deleteConfirmMessage": "Sei sicuro di voler eliminare questo documento? Questa azione non può essere annullata.",
+      "cancel": "Annulla",
+      "confirmDelete": "Elimina",
+      "reviewNotes": "Note",
+      "previewImagePlaceholder": "L'anteprima dell'immagine verrà visualizzata qui",
+      "previewNotAvailable": "Anteprima non disponibile per questo tipo di file",
+      "downloadToView": "Scarica per visualizzare",
+      "upload": {
+        "title": "Carica Documento",
+        "nameLabel": "Nome del Documento",
+        "namePlaceholder": "Es: Diploma di Medicina",
+        "descriptionLabel": "Descrizione (opzionale)",
+        "descriptionPlaceholder": "Aggiungi una descrizione per il documento...",
+        "submit": "Carica",
+        "clickToChange": "Clicca per cambiare il file",
+        "supportedFormatsDetail": "PDF, Word, Excel, Immagini (max. 50MB)",
+        "unsupportedType": "Tipo di file non supportato",
+        "fileTooLarge": "File troppo grande (max. 50MB)",
+        "invalidRequest": "Richiesta non valida",
+        "unauthorized": "Non autorizzato",
+        "studentNotFound": "Studente non trovato",
+        "failed": "Caricamento del documento fallito",
+        "successTitle": "Documento caricato!",
+        "successDescription": "Il tuo documento è stato caricato con successo.",
+        "errorTitle": "Errore nel caricamento"
+      },
+      "types": {
+        "diploma": "Diploma",
+        "certificate": "Certificato",
+        "id": "Documento d'Identità",
+        "passport": "Passaporto",
+        "transcript": "Pagella Scolastica",
+        "other": "Altro"
+      },
+      "status": {
+        "pending": "In Attesa",
+        "approved": "Approvato",
+        "rejected": "Rifiutato",
+        "under_review": "In Revisione"
+      }
+    },
     "sessions": {
       "title": "Sessioni e Sicurezza",
       "currentSession": "Sessione Corrente",
@@ -2251,6 +2305,50 @@
   "title": "Pannello Amministrativo",
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
+
+  "studentDocuments": {
+    "pageTitle": "Documenti degli Studenti",
+    "pageDescription": "Visualizza e gestisci i documenti caricati dagli studenti",
+    "backToAdmin": "Torna al pannello",
+    "title": "Documenti",
+    "description": "Lista dei documenti caricati per la validazione",
+    "loading": "Caricamento documenti...",
+    "noDocuments": "Nessun documento trovato",
+    "searchPlaceholder": "Cerca per nome, file o studente...",
+    "filterByStudentId": "Filtra per ID studente",
+    "showing": "Mostrando {count} di {total} documenti",
+    "retry": "Riprova",
+    "close": "Chiudi",
+    "previewNotAvailable": "Anteprima non disponibile per questo tipo di file",
+    "columns": {
+      "document": "Documento",
+      "student": "Studente",
+      "type": "Tipo",
+      "size": "Dimensione",
+      "uploadedAt": "Caricato il",
+      "actions": "Azioni"
+    },
+    "actions": {
+      "view": "Visualizza",
+      "download": "Scarica"
+    },
+    "details": {
+      "student": "Studente",
+      "type": "Tipo di File",
+      "size": "Dimensione",
+      "uploadedAt": "Caricato il",
+      "description": "Descrizione"
+    },
+    "pagination": {
+      "pageOf": "Pagina {current} di {total}"
+    },
+    "error": {
+      "title": "Errore",
+      "noAccess": "Non hai i permessi per accedere a questa pagina",
+      "unauthorized": "Sessione scaduta. Effettua nuovamente l'accesso.",
+      "fetchFailed": "Errore nel caricamento dei documenti"
+    }
+  },
 
   "coursesList": {
     "loading": "Caricamento corsi..."

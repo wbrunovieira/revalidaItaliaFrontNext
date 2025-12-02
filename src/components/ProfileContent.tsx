@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import AddAddressModal from '@/components/AddAddressModal';
 import EditProfileForm from '@/components/EditProfileForm';
 import ProfileCertificates from '@/components/ProfileCertificates';
+import ProfileDocuments from '@/components/ProfileDocuments';
 import SessionCard from '@/components/SessionCard';
 import {
   MapPin,
@@ -785,6 +786,11 @@ export default function ProfileContent({
             </div>
             <ProfileCertificates />
           </div>
+        </div>
+
+        {/* Quarta linha: Documentos - Full width */}
+        <div className="px-6">
+          <ProfileDocuments userId={userData.id} />
         </div>
       </div>
       

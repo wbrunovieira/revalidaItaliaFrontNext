@@ -2326,6 +2326,7 @@
       "type": "Tipo",
       "size": "Dimensione",
       "uploadedAt": "Caricato il",
+      "status": "Stato",
       "actions": "Azioni"
     },
     "actions": {
@@ -2337,7 +2338,11 @@
       "type": "Tipo di File",
       "size": "Dimensione",
       "uploadedAt": "Caricato il",
-      "description": "Descrizione"
+      "description": "Descrizione",
+      "reviewStatus": "Stato della Revisione",
+      "reviewedAt": "Revisionato il",
+      "rejectionReason": "Motivo del Rifiuto",
+      "internalNotes": "Note Interne"
     },
     "pagination": {
       "pageOf": "Pagina {current} di {total}"
@@ -2347,6 +2352,39 @@
       "noAccess": "Non hai i permessi per accedere a questa pagina",
       "unauthorized": "Sessione scaduta. Effettua nuovamente l'accesso.",
       "fetchFailed": "Errore nel caricamento dei documenti"
+    },
+    "review": {
+      "changeStatus": "Cambia Stato",
+      "selectNewStatus": "Seleziona un nuovo stato per questo documento",
+      "requiresReason": "Richiede motivazione",
+      "provideReason": "Fornisci il motivo per lo studente",
+      "rejectionReason": "Motivo (visibile allo studente)",
+      "rejectionReasonPlaceholder": "Es: Documento illeggibile, si prega di inviare nuovamente con migliore qualità...",
+      "visibleToStudent": "Questo messaggio sarà visibile allo studente",
+      "internalNotes": "Note interne",
+      "internalNotesPlaceholder": "Note visibili solo al team...",
+      "notVisibleToStudent": "Non visibile allo studente",
+      "optional": "opzionale",
+      "back": "Indietro",
+      "confirm": "Conferma",
+      "updating": "Aggiornamento...",
+      "status": {
+        "pendingReview": "In Attesa di Analisi",
+        "underReview": "In Analisi",
+        "approved": "Approvato",
+        "rejected": "Rifiutato",
+        "needsReplacement": "Sostituzione Necessaria",
+        "needsAdditionalInfo": "Info Aggiuntive Richieste"
+      },
+      "success": {
+        "title": "Successo",
+        "statusUpdated": "Stato del documento aggiornato con successo"
+      },
+      "error": {
+        "title": "Errore",
+        "updateFailed": "Impossibile aggiornare lo stato del documento",
+        "reasonRequired": "Per favore, fornisci il motivo per lo studente"
+      }
     }
   },
 

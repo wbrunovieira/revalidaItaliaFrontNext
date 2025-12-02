@@ -24,6 +24,8 @@ import {
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
 
+import ReviewStatusPopover, { ReviewStatus } from './ReviewStatusPopover';
+
 interface StudentDocument {
   id: string;
   studentId: string;
@@ -37,6 +39,11 @@ interface StudentDocument {
   mimeType: string;
   documentType: string;
   uploadedBy: string;
+  reviewStatus: ReviewStatus;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -282,6 +289,9 @@ export default function StudentDocumentsList() {
                     <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">
                       {t('columns.uploadedAt')}
                     </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">
+                      {t('columns.status')}
+                    </th>
                     <th className="text-right py-3 px-4 text-sm font-medium text-gray-400">
                       {t('columns.actions')}
                     </th>
@@ -342,6 +352,23 @@ export default function StudentDocumentsList() {
                           <Calendar size={14} />
                           {formatDate(doc.createdAt)}
                         </div>
+                      </td>
+
+                      {/* Review Status */}
+                      <td className="py-4 px-4">
+                        <ReviewStatusPopover
+                          documentId={doc.id}
+                          currentStatus={doc.reviewStatus || 'PENDING_REVIEW'}
+                          onStatusChange={(newStatus) => {
+                            setDocuments(prev =>
+                              prev.map(d =>
+                                d.id === doc.id
+                                  ? { ...d, reviewStatus: newStatus }
+                                  : d
+                              )
+                            );
+                          }}
+                        />
                       </td>
 
                       {/* Actions */}
@@ -467,6 +494,48 @@ export default function StudentDocumentsList() {
                   <p className="text-white">{formatDate(previewDocument.createdAt)}</p>
                 </div>
               </div>
+
+              {/* Review Status Section */}
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <p className="text-xs text-gray-400 mb-2">{t('details.reviewStatus')}</p>
+                <ReviewStatusPopover
+                  documentId={previewDocument.id}
+                  currentStatus={previewDocument.reviewStatus || 'PENDING_REVIEW'}
+                  onStatusChange={(newStatus) => {
+                    setPreviewDocument(prev =>
+                      prev ? { ...prev, reviewStatus: newStatus } : null
+                    );
+                    setDocuments(prev =>
+                      prev.map(d =>
+                        d.id === previewDocument.id
+                          ? { ...d, reviewStatus: newStatus }
+                          : d
+                      )
+                    );
+                  }}
+                />
+                {previewDocument.reviewedAt && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {t('details.reviewedAt')}: {formatDate(previewDocument.reviewedAt)}
+                  </p>
+                )}
+              </div>
+
+              {/* Rejection Reason - Show if document requires action */}
+              {previewDocument.rejectionReason && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <p className="text-xs text-red-400 font-medium mb-1">{t('details.rejectionReason')}</p>
+                  <p className="text-white text-sm">{previewDocument.rejectionReason}</p>
+                </div>
+              )}
+
+              {/* Internal Notes - Only visible to admin/analyst */}
+              {previewDocument.reviewNotes && (
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  <p className="text-xs text-blue-400 font-medium mb-1">{t('details.internalNotes')}</p>
+                  <p className="text-white text-sm">{previewDocument.reviewNotes}</p>
+                </div>
+              )}
 
               {/* Description */}
               {previewDocument.description && (

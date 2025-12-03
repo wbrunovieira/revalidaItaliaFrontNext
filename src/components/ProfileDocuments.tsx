@@ -23,6 +23,7 @@ import {
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
 import UploadDocumentModal, { UploadedDocument } from '@/components/UploadDocumentModal';
+import DocumentPreviewModal from '@/components/DocumentPreviewModal';
 
 // Tipos de documento suportados
 type DocumentType = 'diploma' | 'certificate' | 'id' | 'passport' | 'transcript' | 'other' | 'PDF' | 'WORD' | 'EXCEL' | 'IMAGE';
@@ -119,7 +120,7 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState<UserDocument | null>(null);
+  const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
 
   // Fetch documents from API
   const fetchDocuments = useCallback(async () => {
@@ -461,7 +462,7 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
                   {/* Ações */}
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => setPreviewDocument(doc)}
+                      onClick={() => setPreviewDocumentId(doc.id)}
                       className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
                       title={t('view')}
                     >
@@ -542,69 +543,13 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
         </div>
       )}
 
-      {/* Modal de Preview */}
-      {previewDocument && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
-            {/* Header do modal */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                {getFileIcon(previewDocument.mimeType)}
-                <div>
-                  <h3 className="text-lg font-bold text-white">
-                    {previewDocument.name}
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    {previewDocument.fileName}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setPreviewDocument(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-gray-400" />
-              </button>
-            </div>
-
-            {/* Conteúdo do preview */}
-            <div className="p-8 flex items-center justify-center min-h-[400px] bg-black/20">
-              {previewDocument.mimeType.startsWith('image/') ? (
-                <div className="text-center">
-                  <ImageIcon size={64} className="mx-auto mb-4 text-gray-500" />
-                  <p className="text-gray-400">{t('previewImagePlaceholder')}</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <FileText size={64} className="mx-auto mb-4 text-gray-500" />
-                  <p className="text-gray-400">{t('previewNotAvailable')}</p>
-                  <a
-                    href={previewDocument.fileUrl || previewDocument.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
-                  >
-                    <Download size={16} />
-                    {t('downloadToView')}
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {/* Footer com informações */}
-            <div className="p-4 border-t border-white/10 flex items-center justify-between text-sm text-gray-400">
-              <div className="flex items-center gap-4">
-                <span>{formatFileSize(previewDocument.fileSize)}</span>
-                <span>{formatDate(previewDocument.uploadedAt)}</span>
-              </div>
-              <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${getStatusStyle(previewDocument.status).bg} ${getStatusStyle(previewDocument.status).text} ${getStatusStyle(previewDocument.status).border}`}>
-                {getStatusStyle(previewDocument.status).icon}
-                {t(`status.${previewDocument.status}`)}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        isOpen={!!previewDocumentId}
+        documentId={previewDocumentId}
+        onClose={() => setPreviewDocumentId(null)}
+        isAdminView={false}
+      />
 
       {/* Upload Document Modal */}
       {userId && (

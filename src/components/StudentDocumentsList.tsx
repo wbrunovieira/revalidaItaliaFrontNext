@@ -39,6 +39,7 @@ import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
 
 import ReviewStatusPopover, { ReviewStatus } from './ReviewStatusPopover';
+import DocumentPreviewModal from './DocumentPreviewModal';
 
 interface StudentDocument {
   id: string;
@@ -122,7 +123,7 @@ export default function StudentDocumentsList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState<StudentDocument | null>(null);
+  const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
@@ -973,7 +974,7 @@ export default function StudentDocumentsList() {
 
                                     <div className="flex items-center gap-1">
                                       <button
-                                        onClick={() => setPreviewDocument(doc)}
+                                        onClick={() => setPreviewDocumentId(doc.id)}
                                         className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
                                         title={t('actions.view')}
                                       >
@@ -1124,7 +1125,7 @@ export default function StudentDocumentsList() {
                       <td className="py-4 px-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => setPreviewDocument(doc)}
+                            onClick={() => setPreviewDocumentId(doc.id)}
                             className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
                             title={t('actions.view')}
                           >
@@ -1229,144 +1230,13 @@ export default function StudentDocumentsList() {
         </>
       )}
 
-      {/* Preview Modal */}
-      {previewDocument && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                {getFileIcon(previewDocument.mimeType)}
-                <div>
-                  <h3 className="text-lg font-bold text-white">{previewDocument.name}</h3>
-                  <p className="text-sm text-gray-400">{previewDocument.originalFileName}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setPreviewDocument(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-gray-400" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-4 max-h-[calc(90vh-200px)] overflow-y-auto">
-              {/* Document Details */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-1">{t('details.student')}</p>
-                  <p className="text-white">
-                    {previewDocument.studentName || previewDocument.studentId}
-                  </p>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-1">{t('details.type')}</p>
-                  <span
-                    className={`inline-flex items-center px-2 py-1 text-xs rounded-full border ${getDocumentTypeBadge(previewDocument.documentType)}`}
-                  >
-                    {previewDocument.documentType}
-                  </span>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-1">{t('details.size')}</p>
-                  <p className="text-white">{formatFileSize(previewDocument.fileSize)}</p>
-                </div>
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-1">{t('details.uploadedAt')}</p>
-                  <p className="text-white">{formatDate(previewDocument.createdAt)}</p>
-                </div>
-              </div>
-
-              {/* Review Status Section */}
-              <div className="bg-gray-700/30 rounded-lg p-4">
-                <p className="text-xs text-gray-400 mb-2">{t('details.reviewStatus')}</p>
-                <ReviewStatusPopover
-                  documentId={previewDocument.id}
-                  currentStatus={previewDocument.reviewStatus || 'PENDING_REVIEW'}
-                  onStatusChange={(newStatus) => {
-                    setPreviewDocument(prev =>
-                      prev ? { ...prev, reviewStatus: newStatus } : null
-                    );
-                    setDocuments(prev =>
-                      prev.map(d =>
-                        d.id === previewDocument.id
-                          ? { ...d, reviewStatus: newStatus }
-                          : d
-                      )
-                    );
-                  }}
-                />
-                {previewDocument.reviewedAt && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    {t('details.reviewedAt')}: {formatDate(previewDocument.reviewedAt)}
-                  </p>
-                )}
-              </div>
-
-              {/* Rejection Reason */}
-              {previewDocument.rejectionReason && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                  <p className="text-xs text-red-400 font-medium mb-1">{t('details.rejectionReason')}</p>
-                  <p className="text-white text-sm">{previewDocument.rejectionReason}</p>
-                </div>
-              )}
-
-              {/* Internal Notes */}
-              {previewDocument.reviewNotes && (
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                  <p className="text-xs text-blue-400 font-medium mb-1">{t('details.internalNotes')}</p>
-                  <p className="text-white text-sm">{previewDocument.reviewNotes}</p>
-                </div>
-              )}
-
-              {/* Description */}
-              {previewDocument.description && (
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-xs text-gray-400 mb-1">{t('details.description')}</p>
-                  <p className="text-white">{previewDocument.description}</p>
-                </div>
-              )}
-
-              {/* Preview Area */}
-              <div className="bg-black/20 rounded-lg p-8 flex flex-col items-center justify-center min-h-[200px]">
-                {previewDocument.mimeType.startsWith('image/') ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={previewDocument.fileUrl}
-                    alt={previewDocument.name}
-                    className="max-w-full max-h-[400px] object-contain rounded-lg"
-                  />
-                ) : (
-                  <>
-                    <FileText size={64} className="text-gray-500 mb-4" />
-                    <p className="text-gray-400 mb-4">{t('previewNotAvailable')}</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end gap-3 p-4 border-t border-white/10">
-              <button
-                onClick={() => setPreviewDocument(null)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-              >
-                {t('close')}
-              </button>
-              <a
-                href={previewDocument.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg hover:bg-secondary/90 transition-colors"
-              >
-                <Download size={16} />
-                {t('actions.download')}
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        isOpen={!!previewDocumentId}
+        documentId={previewDocumentId}
+        onClose={() => setPreviewDocumentId(null)}
+        isAdminView={true}
+      />
     </div>
   );
 }

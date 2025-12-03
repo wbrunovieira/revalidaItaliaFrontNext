@@ -24,6 +24,34 @@
       "device": "dispositivo"
     }
   },
+  "documentPreview": {
+    "title": "Detalhes do Documento",
+    "loading": "Carregando documento...",
+    "retry": "Tentar novamente",
+    "close": "Fechar",
+    "download": "Baixar Documento",
+    "student": "Estudante",
+    "description": "Descrição",
+    "rejectionReason": "Motivo da Rejeição",
+    "internalNotes": "Notas Internas",
+    "documentType": "Tipo de Documento",
+    "fileSize": "Tamanho do Arquivo",
+    "uploadedAt": "Enviado em",
+    "updatedAt": "Atualizado em",
+    "status": {
+      "pendingReview": "Aguardando Análise",
+      "underReview": "Em Análise",
+      "approved": "Aprovado",
+      "rejected": "Rejeitado",
+      "needsReplacement": "Substituição Necessária",
+      "needsAdditionalInfo": "Info Adicional Necessária"
+    },
+    "error": {
+      "fetchFailed": "Erro ao carregar documento",
+      "notFound": "Documento não encontrado",
+      "unauthorized": "Sessão expirada"
+    }
+  },
   "Notifications": {
     "title": "Notificações",
     "notifications": "Notificações",

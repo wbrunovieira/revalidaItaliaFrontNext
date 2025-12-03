@@ -34,6 +34,7 @@
     "description": "Descripción",
     "rejectionReason": "Motivo del Rechazo",
     "internalNotes": "Notas Internas",
+    "noNotes": "Sin notas",
     "documentType": "Tipo de Documento",
     "fileSize": "Tamaño del Archivo",
     "uploadedAt": "Subido el",

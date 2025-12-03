@@ -7,10 +7,6 @@ import { useTranslations } from 'next-intl';
 import {
   X,
   FileText,
-  Image as ImageIcon,
-  FileSpreadsheet,
-  FileType,
-  File,
   Download,
   Loader2,
   AlertCircle,
@@ -116,23 +112,6 @@ export default function DocumentPreviewModal({
       setError(null);
     }
   }, [isOpen, documentId, fetchDocument]);
-
-  // Get file icon based on document type
-  const getFileIcon = (documentType: string, mimeType: string) => {
-    if (mimeType?.startsWith('image/') || documentType === 'IMAGE') {
-      return <ImageIcon size={24} className="text-purple-400" />;
-    }
-    if (documentType === 'EXCEL' || mimeType?.includes('spreadsheet') || mimeType?.includes('excel')) {
-      return <FileSpreadsheet size={24} className="text-green-400" />;
-    }
-    if (documentType === 'WORD' || mimeType?.includes('word')) {
-      return <FileType size={24} className="text-blue-400" />;
-    }
-    if (documentType === 'PDF' || mimeType === 'application/pdf') {
-      return <FileText size={24} className="text-red-400" />;
-    }
-    return <File size={24} className="text-gray-400" />;
-  };
 
   // Get document type badge
   const getDocumentTypeBadge = (documentType: string) => {
@@ -276,9 +255,6 @@ export default function DocumentPreviewModal({
             <div className="space-y-6">
               {/* Document Header */}
               <div className="flex items-start gap-4">
-                <div className="p-4 bg-white/5 rounded-xl">
-                  {getFileIcon(document.documentType, document.mimeType)}
-                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-semibold text-white truncate">
                     {document.name}
@@ -341,13 +317,13 @@ export default function DocumentPreviewModal({
               )}
 
               {/* Internal Notes - Only for admin/analyst */}
-              {isAdminView && document.reviewNotes && (
+              {isAdminView && (
                 <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
                   <div className="flex items-start gap-3">
                     <Info size={18} className="text-blue-400 mt-0.5" />
                     <div>
                       <p className="text-xs text-blue-400 font-medium mb-1">{t('internalNotes')}</p>
-                      <p className="text-white">{document.reviewNotes}</p>
+                      <p className="text-white">{document.reviewNotes || t('noNotes')}</p>
                     </div>
                   </div>
                 </div>

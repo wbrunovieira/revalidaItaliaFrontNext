@@ -1,7 +1,8 @@
 // /src/components/UploadDocumentModal.tsx
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import {
   X,
@@ -248,11 +249,19 @@ export default function UploadDocumentModal({
     }
   }, [file, name, description, studentId, token, t, onSuccess, resetForm, onClose]);
 
-  if (!isOpen) return null;
+  // Portal state - only render after mount to ensure document.body exists
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl max-w-lg w-full border border-white/10 shadow-2xl">
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl max-w-lg w-full max-h-[90vh] flex flex-col border border-white/10 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -273,7 +282,7 @@ export default function UploadDocumentModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Error Message */}
           {error && (
             <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -384,27 +393,27 @@ export default function UploadDocumentModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-4 border-t border-white/10">
+        <div className="flex justify-end gap-3 p-4 border-t border-white/10 bg-gray-800/50 flex-shrink-0">
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className="px-4 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+            className="px-6 py-3 text-gray-400 hover:text-white transition-colors disabled:opacity-50 font-medium"
           >
             {t('cancel')}
           </button>
           <button
             onClick={handleUpload}
             disabled={isUploading || !file || !name.trim()}
-            className="inline-flex items-center gap-2 px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3 min-w-[160px] bg-secondary text-primary text-lg font-semibold rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             {isUploading ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={20} className="animate-spin" />
                 {t('uploading')}...
               </>
             ) : (
               <>
-                <Upload size={18} />
+                <Upload size={20} />
                 {t('upload.submit')}
               </>
             )}
@@ -413,4 +422,6 @@ export default function UploadDocumentModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

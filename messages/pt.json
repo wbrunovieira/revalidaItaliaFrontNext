@@ -2448,6 +2448,16 @@
         "notFound": "Documento não encontrado",
         "deleteFailed": "Falha ao excluir o documento"
       }
+    },
+    "viewMode": {
+      "list": "Lista",
+      "grouped": "Por Estudante"
+    },
+    "groupedView": {
+      "studentsCount": "{count} estudantes",
+      "documentsCount": "{count} documentos",
+      "expandAll": "Expandir todos",
+      "collapseAll": "Recolher todos"
     }
   },
 

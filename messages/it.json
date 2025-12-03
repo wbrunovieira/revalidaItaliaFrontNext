@@ -2444,6 +2444,16 @@
         "notFound": "Documento non trovato",
         "deleteFailed": "Impossibile eliminare il documento"
       }
+    },
+    "viewMode": {
+      "list": "Lista",
+      "grouped": "Per Studente"
+    },
+    "groupedView": {
+      "studentsCount": "{count} studenti",
+      "documentsCount": "{count} documenti",
+      "expandAll": "Espandi tutti",
+      "collapseAll": "Comprimi tutti"
     }
   },
 

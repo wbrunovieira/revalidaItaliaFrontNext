@@ -32,6 +32,8 @@ import {
   RefreshCw,
   AlertTriangle,
   Trash2,
+  List,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -76,6 +78,22 @@ interface Filters {
   order: 'asc' | 'desc';
 }
 
+type ViewMode = 'list' | 'grouped';
+
+interface StudentGroup {
+  studentId: string;
+  studentName: string;
+  documents: StudentDocument[];
+  stats: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    underReview: number;
+    needsAction: number;
+  };
+}
+
 const REVIEW_STATUSES: ReviewStatus[] = [
   'PENDING_REVIEW',
   'UNDER_REVIEW',
@@ -105,6 +123,8 @@ export default function StudentDocumentsList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<StudentDocument | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
   // Filters state
   const [filters, setFilters] = useState<Filters>({
@@ -426,6 +446,83 @@ export default function StudentDocumentsList() {
     };
   }, [searchQuery]);
 
+  // Group documents by student
+  const groupedByStudent: StudentGroup[] = (() => {
+    const groups: Record<string, StudentGroup> = {};
+
+    documents.forEach(doc => {
+      const studentId = doc.studentId;
+      if (!groups[studentId]) {
+        groups[studentId] = {
+          studentId,
+          studentName: doc.studentName || studentId.substring(0, 8) + '...',
+          documents: [],
+          stats: {
+            total: 0,
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            underReview: 0,
+            needsAction: 0,
+          },
+        };
+      }
+
+      groups[studentId].documents.push(doc);
+      groups[studentId].stats.total++;
+
+      switch (doc.reviewStatus) {
+        case 'PENDING_REVIEW':
+          groups[studentId].stats.pending++;
+          break;
+        case 'APPROVED':
+          groups[studentId].stats.approved++;
+          break;
+        case 'REJECTED':
+          groups[studentId].stats.rejected++;
+          groups[studentId].stats.needsAction++;
+          break;
+        case 'UNDER_REVIEW':
+          groups[studentId].stats.underReview++;
+          break;
+        case 'NEEDS_REPLACEMENT':
+        case 'NEEDS_ADDITIONAL_INFO':
+          groups[studentId].stats.needsAction++;
+          break;
+      }
+    });
+
+    return Object.values(groups).sort((a, b) => {
+      // Sort by needs action first, then by total documents
+      if (a.stats.needsAction !== b.stats.needsAction) {
+        return b.stats.needsAction - a.stats.needsAction;
+      }
+      return b.stats.total - a.stats.total;
+    });
+  })();
+
+  // Toggle student expansion
+  const toggleStudentExpanded = (studentId: string) => {
+    setExpandedStudents(prev => {
+      const next = new Set(prev);
+      if (next.has(studentId)) {
+        next.delete(studentId);
+      } else {
+        next.add(studentId);
+      }
+      return next;
+    });
+  };
+
+  // Expand/collapse all
+  const expandAll = () => {
+    setExpandedStudents(new Set(groupedByStudent.map(g => g.studentId)));
+  };
+
+  const collapseAll = () => {
+    setExpandedStudents(new Set());
+  };
+
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
   // Check access
@@ -463,6 +560,34 @@ export default function StudentDocumentsList() {
             placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-secondary transition-colors"
           />
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="inline-flex items-center rounded-lg border border-gray-600 bg-gray-700/50 p-1">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'list'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-400 hover:text-white'
+            }`}
+            title={t('viewMode.list')}
+          >
+            <List size={16} />
+            <span className="hidden sm:inline">{t('viewMode.list')}</span>
+          </button>
+          <button
+            onClick={() => setViewMode('grouped')}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'grouped'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-400 hover:text-white'
+            }`}
+            title={t('viewMode.grouped')}
+          >
+            <Users size={16} />
+            <span className="hidden sm:inline">{t('viewMode.grouped')}</span>
+          </button>
         </div>
 
         {/* Filter Toggle Button */}
@@ -713,10 +838,178 @@ export default function StudentDocumentsList() {
         </div>
       )}
 
-      {/* Documents Table */}
+      {/* Documents View */}
       {!isLoading && !error && (
         <>
           {documents.length > 0 ? (
+            <>
+              {/* Grouped View */}
+              {viewMode === 'grouped' && (
+                <div className="space-y-4">
+                  {/* Expand/Collapse All */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-400">
+                      {t('groupedView.studentsCount', { count: groupedByStudent.length })}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={expandAll}
+                        className="text-xs text-secondary hover:underline"
+                      >
+                        {t('groupedView.expandAll')}
+                      </button>
+                      <span className="text-gray-600">|</span>
+                      <button
+                        onClick={collapseAll}
+                        className="text-xs text-secondary hover:underline"
+                      >
+                        {t('groupedView.collapseAll')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Student Cards */}
+                  {groupedByStudent.map(group => {
+                    const isExpanded = expandedStudents.has(group.studentId);
+                    return (
+                      <div
+                        key={group.studentId}
+                        className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 overflow-hidden"
+                      >
+                        {/* Student Header - Clickable */}
+                        <button
+                          onClick={() => toggleStudentExpanded(group.studentId)}
+                          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-secondary/20 rounded-full">
+                              <User size={24} className="text-secondary" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-lg font-semibold text-white">
+                                {group.studentName}
+                              </h3>
+                              <p className="text-sm text-gray-400">
+                                {t('groupedView.documentsCount', { count: group.stats.total })}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            {/* Status Summary */}
+                            <div className="hidden sm:flex items-center gap-2">
+                              {group.stats.approved > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                                  <CheckCircle2 size={12} />
+                                  {group.stats.approved}
+                                </span>
+                              )}
+                              {group.stats.pending > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/30">
+                                  <Clock size={12} />
+                                  {group.stats.pending}
+                                </span>
+                              )}
+                              {group.stats.underReview > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                  <Search size={12} />
+                                  {group.stats.underReview}
+                                </span>
+                              )}
+                              {group.stats.needsAction > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                                  <AlertTriangle size={12} />
+                                  {group.stats.needsAction}
+                                </span>
+                              )}
+                            </div>
+
+                            <ChevronDown
+                              size={20}
+                              className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          </div>
+                        </button>
+
+                        {/* Expanded Documents */}
+                        {isExpanded && (
+                          <div className="border-t border-gray-700">
+                            <div className="p-4 space-y-3">
+                              {group.documents.map(doc => (
+                                <div
+                                  key={doc.id}
+                                  className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="p-2 bg-gray-700/50 rounded-lg">
+                                      {getFileIcon(doc.mimeType)}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-white font-medium truncate">
+                                        {doc.name}
+                                      </p>
+                                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                                        <span>{doc.documentType}</span>
+                                        <span>{formatFileSize(doc.fileSize)}</span>
+                                        <span>{formatDate(doc.createdAt)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-3">
+                                    <ReviewStatusPopover
+                                      documentId={doc.id}
+                                      currentStatus={doc.reviewStatus || 'PENDING_REVIEW'}
+                                      onStatusChange={(newStatus) => {
+                                        setDocuments(prev =>
+                                          prev.map(d =>
+                                            d.id === doc.id
+                                              ? { ...d, reviewStatus: newStatus }
+                                              : d
+                                          )
+                                        );
+                                      }}
+                                    />
+
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        onClick={() => setPreviewDocument(doc)}
+                                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
+                                        title={t('actions.view')}
+                                      >
+                                        <Eye size={14} className="text-white" />
+                                      </button>
+                                      <a
+                                        href={doc.fileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
+                                        title={t('actions.download')}
+                                      >
+                                        <Download size={14} className="text-white" />
+                                      </a>
+                                      <button
+                                        onClick={() => handleDeleteClick(doc)}
+                                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-red-600/80 transition-colors"
+                                        title={t('actions.delete')}
+                                      >
+                                        <Trash2 size={14} className="text-white" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* List View (Table) */}
+              {viewMode === 'list' && (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -860,6 +1153,8 @@ export default function StudentDocumentsList() {
                 </tbody>
               </table>
             </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12">
               <FileText size={48} className="mx-auto mb-4 text-gray-500" />

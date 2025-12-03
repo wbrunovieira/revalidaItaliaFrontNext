@@ -85,6 +85,17 @@
       "forbidden": "Non hai il permesso di modificare questo documento",
       "saveFailed": "Errore nel salvataggio del documento",
       "validationFailed": "Errore di validazione"
+    },
+    "fileReplace": {
+      "title": "Sostituisci File",
+      "dropzone": "Trascina un file o clicca per selezionare",
+      "formats": "PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (max. 10MB)",
+      "replaceButton": "Sostituisci File",
+      "replacing": "Sostituzione...",
+      "success": "File sostituito con successo",
+      "uploadFailed": "Errore nella sostituzione del file",
+      "fileTooLarge": "File troppo grande (max. 10MB)",
+      "invalidType": "Tipo di file non consentito"
     }
   },
   "Notifications": {

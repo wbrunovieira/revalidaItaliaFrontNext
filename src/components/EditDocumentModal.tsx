@@ -1,7 +1,7 @@
 // /src/components/EditDocumentModal.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import {
@@ -10,6 +10,10 @@ import {
   AlertCircle,
   Save,
   FileText,
+  Upload,
+  File,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -19,6 +23,10 @@ interface DocumentDetails {
   name: string;
   description?: string | null;
   reviewNotes?: string | null;
+  originalFileName?: string;
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
 }
 
 interface EditDocumentModalProps {
@@ -42,6 +50,7 @@ export default function EditDocumentModal({
   const [document, setDocument] = useState<DocumentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -49,6 +58,11 @@ export default function EditDocumentModal({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [reviewNotes, setReviewNotes] = useState('');
+
+  // File replacement state
+  const [newFile, setNewFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -103,8 +117,117 @@ export default function EditDocumentModal({
       setName('');
       setDescription('');
       setReviewNotes('');
+      setNewFile(null);
     }
   }, [isOpen, documentId, fetchDocument]);
+
+  // File handling functions
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleFileSelect = (file: File) => {
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ title: t('fileReplace.fileTooLarge'), variant: 'destructive' });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: t('fileReplace.invalidType'), variant: 'destructive' });
+      return;
+    }
+
+    setNewFile(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleReplaceFile = async () => {
+    if (!documentId || !token || !newFile) return;
+
+    setIsReplacingFile(true);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      const formData = new FormData();
+      formData.append('file', newFile);
+
+      const response = await fetch(`${apiUrl}/api/v1/student-documents/${documentId}/file`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(t('error.notFound'));
+        }
+        if (response.status === 403) {
+          throw new Error(t('error.forbidden'));
+        }
+        if (response.status === 400) {
+          throw new Error(t('fileReplace.uploadFailed'));
+        }
+        throw new Error(t('fileReplace.uploadFailed'));
+      }
+
+      const updatedDoc = await response.json();
+      setDocument(updatedDoc);
+      setNewFile(null);
+      toast({ title: t('fileReplace.success') });
+      onSuccess?.();
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : t('fileReplace.uploadFailed'), variant: 'destructive' });
+    } finally {
+      setIsReplacingFile(false);
+    }
+  };
 
   // Handle save
   const handleSave = async () => {
@@ -298,6 +421,90 @@ export default function EditDocumentModal({
                   </p>
                 </div>
               )}
+
+              {/* File Replacement Section */}
+              <div className="pt-4 border-t border-white/10">
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  {t('fileReplace.title')}
+                </label>
+
+                {/* Current File Info */}
+                {document.originalFileName && (
+                  <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10 mb-3">
+                    <File size={20} className="text-gray-400" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{document.originalFileName}</p>
+                      {document.fileSize && (
+                        <p className="text-xs text-gray-500">{formatFileSize(document.fileSize)}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* New File Selected */}
+                {newFile ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/30">
+                      <File size={20} className="text-green-400" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white truncate">{newFile.name}</p>
+                        <p className="text-xs text-green-400">{formatFileSize(newFile.size)}</p>
+                      </div>
+                      <button
+                        onClick={() => setNewFile(null)}
+                        className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                        disabled={isReplacingFile}
+                      >
+                        <Trash2 size={16} className="text-red-400" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handleReplaceFile}
+                      disabled={isReplacingFile}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-colors disabled:opacity-50"
+                    >
+                      {isReplacingFile ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          {t('fileReplace.replacing')}
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw size={16} />
+                          {t('fileReplace.replaceButton')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  /* Drop Zone */
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`
+                      p-6 border-2 border-dashed rounded-lg cursor-pointer transition-all text-center
+                      ${isDragging
+                        ? 'border-secondary bg-secondary/10'
+                        : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+                      }
+                    `}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileInputChange}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                      className="hidden"
+                    />
+                    <Upload size={24} className={`mx-auto mb-2 ${isDragging ? 'text-secondary' : 'text-gray-500'}`} />
+                    <p className="text-sm text-gray-400">{t('fileReplace.dropzone')}</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('fileReplace.formats')}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

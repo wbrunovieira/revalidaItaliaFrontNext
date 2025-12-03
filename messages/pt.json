@@ -85,6 +85,17 @@
       "forbidden": "Você não tem permissão para editar este documento",
       "saveFailed": "Erro ao salvar documento",
       "validationFailed": "Erro de validação"
+    },
+    "fileReplace": {
+      "title": "Substituir Arquivo",
+      "dropzone": "Arraste um arquivo ou clique para selecionar",
+      "formats": "PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (máx. 10MB)",
+      "replaceButton": "Substituir Arquivo",
+      "replacing": "Substituindo...",
+      "success": "Arquivo substituído com sucesso",
+      "uploadFailed": "Erro ao substituir arquivo",
+      "fileTooLarge": "Arquivo muito grande (máx. 10MB)",
+      "invalidType": "Tipo de arquivo não permitido"
     }
   },
   "Notifications": {

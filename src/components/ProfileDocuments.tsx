@@ -18,6 +18,7 @@ import {
   Loader2,
   RefreshCw,
   Info,
+  FileType,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -234,20 +235,49 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
     }
   };
 
-  // Obter label do tipo de documento
-  const getDocumentTypeLabel = (type: DocumentType): string => {
-    // Map API document types to translation keys
-    const typeMap: Record<string, string> = {
-      'PDF': 'other',
-      'WORD': 'other',
-      'EXCEL': 'other',
-      'IMAGE': 'other',
-    };
-    const translationKey = typeMap[type] || type;
-    try {
-      return t(`types.${translationKey}`);
-    } catch {
-      return type;
+  // Get document type badge with icon
+  const getDocumentTypeBadge = (type: DocumentType) => {
+    switch (type) {
+      case 'PDF':
+        return {
+          icon: <FileText size={12} />,
+          bg: 'bg-red-500/20',
+          text: 'text-red-400',
+          border: 'border-red-500/30',
+          label: 'PDF',
+        };
+      case 'WORD':
+        return {
+          icon: <FileType size={12} />,
+          bg: 'bg-blue-500/20',
+          text: 'text-blue-400',
+          border: 'border-blue-500/30',
+          label: 'Word',
+        };
+      case 'EXCEL':
+        return {
+          icon: <FileSpreadsheet size={12} />,
+          bg: 'bg-green-500/20',
+          text: 'text-green-400',
+          border: 'border-green-500/30',
+          label: 'Excel',
+        };
+      case 'IMAGE':
+        return {
+          icon: <ImageIcon size={12} />,
+          bg: 'bg-purple-500/20',
+          text: 'text-purple-400',
+          border: 'border-purple-500/30',
+          label: 'Imagem',
+        };
+      default:
+        return {
+          icon: <File size={12} />,
+          bg: 'bg-gray-500/20',
+          text: 'text-gray-400',
+          border: 'border-gray-500/30',
+          label: type,
+        };
     }
   };
 
@@ -402,8 +432,19 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
                     </div>
 
                     {/* Metadados */}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                      <span>{getDocumentTypeLabel(doc.type)}</span>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                      {/* Document Type Badge */}
+                      {(() => {
+                        const typeBadge = getDocumentTypeBadge(doc.type);
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border ${typeBadge.bg} ${typeBadge.text} ${typeBadge.border}`}
+                          >
+                            {typeBadge.icon}
+                            {typeBadge.label}
+                          </span>
+                        );
+                      })()}
                       <span>{formatFileSize(doc.fileSize)}</span>
                       <span>{formatDate(doc.uploadedAt)}</span>
                     </div>

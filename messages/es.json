@@ -53,6 +53,40 @@
       "unauthorized": "Sesión expirada"
     }
   },
+  "editDocument": {
+    "title": "Editar Documento",
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "success": "Documento actualizado con éxito",
+    "adminOnly": "solo admin/analista",
+    "fields": {
+      "name": "Nombre del Documento",
+      "description": "Descripción",
+      "reviewNotes": "Notas Internas"
+    },
+    "placeholders": {
+      "name": "Ingresa el nombre del documento",
+      "description": "Agrega una descripción (opcional)",
+      "reviewNotes": "Agrega notas internas sobre este documento"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio",
+      "nameTooLong": "El nombre debe tener máximo 255 caracteres",
+      "descriptionTooLong": "La descripción debe tener máximo 1000 caracteres",
+      "reviewNotesTooLong": "Las notas deben tener máximo 2000 caracteres"
+    },
+    "error": {
+      "fetchFailed": "Error al cargar el documento",
+      "notFound": "Documento no encontrado",
+      "unauthorized": "Sesión expirada",
+      "forbidden": "No tienes permiso para editar este documento",
+      "saveFailed": "Error al guardar el documento",
+      "validationFailed": "Error de validación"
+    }
+  },
   "Notifications": {
     "title": "Notificaciones",
     "notifications": "Notificaciones",
@@ -1076,6 +1110,7 @@
       "noDocuments": "Ningún documento subido",
       "noDocumentsHint": "Sube tus documentos para iniciar el proceso de validación",
       "view": "Ver",
+      "edit": "Editar",
       "download": "Descargar",
       "delete": "Eliminar",
       "deleteConfirmTitle": "Eliminar Documento",
@@ -2376,6 +2411,7 @@
     },
     "actions": {
       "view": "Ver",
+      "edit": "Editar",
       "download": "Descargar",
       "delete": "Eliminar"
     },

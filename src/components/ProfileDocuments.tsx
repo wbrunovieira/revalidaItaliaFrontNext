@@ -19,11 +19,13 @@ import {
   RefreshCw,
   Info,
   FileType,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
 import UploadDocumentModal, { UploadedDocument } from '@/components/UploadDocumentModal';
 import DocumentPreviewModal from '@/components/DocumentPreviewModal';
+import EditDocumentModal from '@/components/EditDocumentModal';
 
 // Tipos de documento suportados
 type DocumentType = 'diploma' | 'certificate' | 'id' | 'passport' | 'transcript' | 'other' | 'PDF' | 'WORD' | 'EXCEL' | 'IMAGE';
@@ -121,6 +123,7 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
+  const [editDocumentId, setEditDocumentId] = useState<string | null>(null);
 
   // Fetch documents from API
   const fetchDocuments = useCallback(async () => {
@@ -468,6 +471,13 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
                     >
                       <Eye size={16} className="text-white" />
                     </button>
+                    <button
+                      onClick={() => setEditDocumentId(doc.id)}
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                      title={t('edit')}
+                    >
+                      <Pencil size={16} className="text-white" />
+                    </button>
                     <a
                       href={doc.fileUrl || doc.url}
                       target="_blank"
@@ -548,6 +558,15 @@ export default function ProfileDocuments({ userId }: ProfileDocumentsProps) {
         isOpen={!!previewDocumentId}
         documentId={previewDocumentId}
         onClose={() => setPreviewDocumentId(null)}
+        isAdminView={false}
+      />
+
+      {/* Edit Document Modal */}
+      <EditDocumentModal
+        isOpen={!!editDocumentId}
+        documentId={editDocumentId}
+        onClose={() => setEditDocumentId(null)}
+        onSuccess={fetchDocuments}
         isAdminView={false}
       />
 

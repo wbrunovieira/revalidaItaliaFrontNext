@@ -34,12 +34,14 @@ import {
   Trash2,
   List,
   Users,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
 
 import ReviewStatusPopover, { ReviewStatus } from './ReviewStatusPopover';
 import DocumentPreviewModal from './DocumentPreviewModal';
+import EditDocumentModal from './EditDocumentModal';
 
 interface StudentDocument {
   id: string;
@@ -124,6 +126,7 @@ export default function StudentDocumentsList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
+  const [editDocumentId, setEditDocumentId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
@@ -980,6 +983,13 @@ export default function StudentDocumentsList() {
                                       >
                                         <Eye size={14} className="text-white" />
                                       </button>
+                                      <button
+                                        onClick={() => setEditDocumentId(doc.id)}
+                                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
+                                        title={t('actions.edit')}
+                                      >
+                                        <Pencil size={14} className="text-white" />
+                                      </button>
                                       <a
                                         href={doc.fileUrl}
                                         target="_blank"
@@ -1131,6 +1141,13 @@ export default function StudentDocumentsList() {
                           >
                             <Eye size={16} className="text-white" />
                           </button>
+                          <button
+                            onClick={() => setEditDocumentId(doc.id)}
+                            className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600 transition-colors"
+                            title={t('actions.edit')}
+                          >
+                            <Pencil size={16} className="text-white" />
+                          </button>
                           <a
                             href={doc.fileUrl}
                             target="_blank"
@@ -1235,6 +1252,15 @@ export default function StudentDocumentsList() {
         isOpen={!!previewDocumentId}
         documentId={previewDocumentId}
         onClose={() => setPreviewDocumentId(null)}
+        isAdminView={true}
+      />
+
+      {/* Edit Document Modal */}
+      <EditDocumentModal
+        isOpen={!!editDocumentId}
+        documentId={editDocumentId}
+        onClose={() => setEditDocumentId(null)}
+        onSuccess={fetchDocuments}
         isAdminView={true}
       />
     </div>

@@ -2328,7 +2328,7 @@
     "description": "Lista dei documenti caricati per la validazione",
     "loading": "Caricamento documenti...",
     "noDocuments": "Nessun documento trovato",
-    "searchPlaceholder": "Cerca per nome, file o studente...",
+    "searchPlaceholder": "Cerca per nome dello studente...",
     "filterByStudentId": "Filtra per ID studente",
     "showing": "Mostrando {count} di {total} documenti",
     "retry": "Riprova",
@@ -2345,7 +2345,8 @@
     },
     "actions": {
       "view": "Visualizza",
-      "download": "Scarica"
+      "download": "Scarica",
+      "delete": "Elimina"
     },
     "details": {
       "student": "Studente",
@@ -2426,6 +2427,22 @@
         "title": "Errore",
         "updateFailed": "Impossibile aggiornare lo stato del documento",
         "reasonRequired": "Per favore, fornisci il motivo per lo studente"
+      }
+    },
+    "deleteConfirmation": {
+      "title": "Elimina Documento",
+      "message": "Sei sicuro di voler eliminare il documento \"{documentName}\"?",
+      "warning": "Questa azione non può essere annullata",
+      "confirm": "Elimina",
+      "success": {
+        "title": "Documento Eliminato",
+        "description": "Il documento è stato eliminato con successo"
+      },
+      "errors": {
+        "title": "Errore durante l'eliminazione",
+        "forbidden": "Non hai i permessi per eliminare questo documento",
+        "notFound": "Documento non trovato",
+        "deleteFailed": "Impossibile eliminare il documento"
       }
     }
   },

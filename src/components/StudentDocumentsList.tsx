@@ -1,7 +1,7 @@
 // /src/components/StudentDocumentsList.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   FileText,
@@ -31,6 +31,7 @@ import {
   XCircle,
   RefreshCw,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -101,6 +102,7 @@ export default function StudentDocumentsList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<StudentDocument | null>(null);
 
@@ -225,8 +227,13 @@ export default function StudentDocumentsList() {
       if (filters.documentType) params.append('documentType', filters.documentType);
       if (filters.createdFrom) params.append('createdFrom', filters.createdFrom);
       if (filters.createdTo) params.append('createdTo', filters.createdTo);
+      if (debouncedSearch.trim()) params.append('studentName', debouncedSearch.trim());
 
-      const response = await fetch(`${apiUrl}/api/v1/student-documents?${params}`, {
+      const fullUrl = `${apiUrl}/api/v1/student-documents?${params}`;
+      console.log('[StudentDocuments] Fetching:', fullUrl);
+      console.log('[StudentDocuments] debouncedSearch:', debouncedSearch);
+
+      const response = await fetch(fullUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -240,6 +247,7 @@ export default function StudentDocumentsList() {
       }
 
       const data = await response.json();
+      console.log('[StudentDocuments] Response:', { total: data.total, documentsCount: data.documents?.length });
       setDocuments(data.documents || []);
       setPagination(prev => ({
         ...prev,
@@ -256,7 +264,7 @@ export default function StudentDocumentsList() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, pagination.page, pagination.limit, filters, t]);
+  }, [token, pagination.page, pagination.limit, filters, debouncedSearch, t]);
 
   useEffect(() => {
     fetchDocuments();
@@ -304,17 +312,119 @@ export default function StudentDocumentsList() {
     }));
   };
 
-  // Filter documents by search query (client-side for name/description)
-  const filteredDocuments = documents.filter(doc => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      doc.name.toLowerCase().includes(query) ||
-      doc.originalFileName.toLowerCase().includes(query) ||
-      doc.description?.toLowerCase().includes(query) ||
-      doc.studentName?.toLowerCase().includes(query)
-    );
-  });
+  // Delete document
+  const deleteDocument = useCallback(
+    async (documentId: string) => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(`${apiUrl}/api/v1/student-documents/${documentId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error(t('error.unauthorized'));
+          }
+          if (response.status === 403) {
+            throw new Error(t('deleteConfirmation.errors.forbidden'));
+          }
+          if (response.status === 404) {
+            throw new Error(t('deleteConfirmation.errors.notFound'));
+          }
+          throw new Error(t('deleteConfirmation.errors.deleteFailed'));
+        }
+
+        // Remove from local state
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+        setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+
+        toast({
+          title: t('deleteConfirmation.success.title'),
+          description: t('deleteConfirmation.success.description'),
+        });
+      } catch (err) {
+        console.error('Error deleting document:', err);
+        toast({
+          title: t('error.title'),
+          description: err instanceof Error ? err.message : t('deleteConfirmation.errors.deleteFailed'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [token, t]
+  );
+
+  // Handle delete click - show confirmation toast
+  const handleDeleteClick = useCallback(
+    (doc: StudentDocument) => {
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', { documentName: doc.name })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <FileText size={14} />
+                  <span className="truncate">{doc.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User size={14} />
+                  <span>{doc.studentName || doc.studentId.substring(0, 8) + '...'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} />
+                  <span>{new Date(doc.createdAt).toLocaleDateString('pt-BR')}</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <button
+            onClick={() => deleteDocument(doc.id)}
+            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+          >
+            {t('deleteConfirmation.confirm')}
+          </button>
+        ),
+      });
+    },
+    [t, deleteDocument]
+  );
+
+  // Debounce search query - only trigger API call after user stops typing
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Clear any existing timer
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+
+    // Set new timer
+    searchTimerRef.current = setTimeout(() => {
+      console.log('[StudentDocuments] Debounce triggered, setting debouncedSearch to:', searchQuery);
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    // Cleanup on unmount
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, [searchQuery]);
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -337,7 +447,7 @@ export default function StudentDocumentsList() {
           <p className="text-sm text-gray-400">{t('description')}</p>
         </div>
         <div className="text-sm text-gray-400">
-          {t('showing', { count: filteredDocuments.length, total: pagination.total })}
+          {t('showing', { count: documents.length, total: pagination.total })}
         </div>
       </div>
 
@@ -606,7 +716,7 @@ export default function StudentDocumentsList() {
       {/* Documents Table */}
       {!isLoading && !error && (
         <>
-          {filteredDocuments.length > 0 ? (
+          {documents.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -644,7 +754,7 @@ export default function StudentDocumentsList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredDocuments.map(doc => (
+                  {documents.map(doc => (
                     <tr
                       key={doc.id}
                       className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
@@ -736,6 +846,13 @@ export default function StudentDocumentsList() {
                           >
                             <Download size={16} className="text-white" />
                           </a>
+                          <button
+                            onClick={() => handleDeleteClick(doc)}
+                            className="p-2 rounded-lg bg-gray-700/50 hover:bg-red-600/80 transition-colors"
+                            title={t('actions.delete')}
+                          >
+                            <Trash2 size={16} className="text-white" />
+                          </button>
                         </div>
                       </td>
                     </tr>

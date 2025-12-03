@@ -2332,7 +2332,7 @@
     "description": "Lista de documentos enviados para validação",
     "loading": "Carregando documentos...",
     "noDocuments": "Nenhum documento encontrado",
-    "searchPlaceholder": "Buscar por nome, arquivo ou estudante...",
+    "searchPlaceholder": "Buscar por nome do aluno...",
     "filterByStudentId": "Filtrar por ID do estudante",
     "showing": "Mostrando {count} de {total} documentos",
     "retry": "Tentar novamente",
@@ -2349,7 +2349,8 @@
     },
     "actions": {
       "view": "Visualizar",
-      "download": "Baixar"
+      "download": "Baixar",
+      "delete": "Excluir"
     },
     "details": {
       "student": "Estudante",
@@ -2430,6 +2431,22 @@
         "title": "Erro",
         "updateFailed": "Falha ao atualizar status do documento",
         "reasonRequired": "Por favor, informe o motivo para o estudante"
+      }
+    },
+    "deleteConfirmation": {
+      "title": "Excluir Documento",
+      "message": "Tem certeza que deseja excluir o documento \"{documentName}\"?",
+      "warning": "Esta ação não pode ser desfeita",
+      "confirm": "Excluir",
+      "success": {
+        "title": "Documento Excluído",
+        "description": "O documento foi excluído com sucesso"
+      },
+      "errors": {
+        "title": "Erro ao Excluir",
+        "forbidden": "Você não tem permissão para excluir este documento",
+        "notFound": "Documento não encontrado",
+        "deleteFailed": "Falha ao excluir o documento"
       }
     }
   },

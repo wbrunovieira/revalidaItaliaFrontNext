@@ -126,7 +126,7 @@ export default function LessonCard({
       )}
 
       <Link
-        href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lesson.slug || lesson.id}`}
+        href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lesson.id}`}
         className="block"
       >
         <div 

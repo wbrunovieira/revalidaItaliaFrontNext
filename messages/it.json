@@ -2574,6 +2574,51 @@
       "documentsCount": "{count} documenti",
       "expandAll": "Espandi tutti",
       "collapseAll": "Comprimi tutti"
+    },
+    "tabs": {
+      "documents": "Documenti",
+      "conversations": "Conversazioni"
+    },
+    "conversations": {
+      "title": "Conversazioni sui Documenti",
+      "description": "Gestisci le conversazioni di analisi documenti con gli studenti",
+      "loading": "Caricamento conversazioni...",
+      "noConversations": "Nessuna conversazione trovata",
+      "noConversationsDescription": "Non ci sono conversazioni di analisi documenti al momento",
+      "searchPlaceholder": "Cerca per studente o documento...",
+      "showing": "Mostrando {count} di {total} conversazioni",
+      "message": "messaggio",
+      "messages": "messaggi",
+      "hasAttachments": "Contiene allegati",
+      "lastMessage": "Ultimo messaggio",
+      "view": "Visualizza",
+      "stats": {
+        "total": "Totale Conversazioni",
+        "open": "Aperte",
+        "answered": "Risposte",
+        "resolved": "Risolte"
+      },
+      "status": {
+        "open": "Aperta",
+        "answered": "Risposta",
+        "resolved": "Risolta"
+      },
+      "filter": {
+        "all": "Tutte",
+        "open": "Aperte",
+        "answered": "Risposte",
+        "resolved": "Risolte"
+      },
+      "pagination": {
+        "perPage": "Per pagina:",
+        "pageOf": "Pagina {current} di {total}",
+        "first": "Prima",
+        "last": "Ultima"
+      },
+      "error": {
+        "fetchTitle": "Errore nel caricamento",
+        "fetchDescription": "Impossibile caricare le conversazioni. Riprova."
+      }
     }
   },
 
@@ -3755,7 +3800,11 @@
       "lesson": "Lezione",
       "assessment": "Valutazione",
       "flashcard": "Flashcard",
-      "general": "Generale"
+      "general": "Generale",
+      "document_analysis": "Analisi Documento",
+      "technical_support": "Supporto Tecnico",
+      "class_questions": "Domande sulla Lezione",
+      "other": "Altro"
     },
     "filter": {
       "pending": "In Attesa",
@@ -3770,7 +3819,11 @@
       "lesson": "Lezioni",
       "assessment": "Valutazioni",
       "flashcard": "Flashcard",
-      "general": "Generale"
+      "general": "Generale",
+      "document_analysis": "Analisi Documento",
+      "technical_support": "Supporto Tecnico",
+      "class_questions": "Domande sulla Lezione",
+      "other": "Altro"
     },
     "searchPlaceholder": "Cerca per studente, contenuto o contesto...",
     "showing": "Mostrando {count} di {total} ticket",

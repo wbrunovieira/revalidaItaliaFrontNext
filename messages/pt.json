@@ -98,6 +98,34 @@
       "invalidType": "Tipo de arquivo não permitido"
     }
   },
+  "documentChat": {
+    "title": "Conversar sobre Documento",
+    "documentInfo": "Documento",
+    "studentInfo": "Estudante",
+    "info": "Esta mensagem será enviada diretamente ao estudante como um ticket de suporte relacionado a este documento.",
+    "messageLabel": "Mensagem",
+    "messagePlaceholder": "Digite sua mensagem para o estudante sobre este documento...",
+    "minChars": "Mínimo {min} caracteres",
+    "shortcutHint": "Pressione Ctrl+Enter para enviar",
+    "cancel": "Cancelar",
+    "send": "Enviar Mensagem",
+    "sending": "Enviando...",
+    "success": {
+      "title": "Mensagem enviada!",
+      "description": "O estudante receberá sua mensagem em seus tickets.",
+      "chatStarted": "Conversa iniciada com sucesso",
+      "messageAdded": "Mensagem adicionada à conversa existente"
+    },
+    "validation": {
+      "messageTooShort": "A mensagem deve ter pelo menos 10 caracteres",
+      "messageTooLong": "A mensagem deve ter no máximo 5000 caracteres"
+    },
+    "error": {
+      "documentNotFound": "Documento não encontrado",
+      "notAuthorized": "Você não tem permissão para esta ação",
+      "sendFailed": "Erro ao enviar mensagem"
+    }
+  },
   "Notifications": {
     "title": "Notificações",
     "notifications": "Notificações",
@@ -2425,6 +2453,7 @@
     "actions": {
       "view": "Visualizar",
       "edit": "Editar",
+      "chat": "Conversar",
       "download": "Baixar",
       "delete": "Excluir"
     },

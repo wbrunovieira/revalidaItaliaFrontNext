@@ -35,6 +35,7 @@ import {
   List,
   Users,
   Pencil,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -42,6 +43,7 @@ import { toast } from '@/hooks/use-toast';
 import ReviewStatusPopover, { ReviewStatus } from './ReviewStatusPopover';
 import DocumentPreviewModal from './DocumentPreviewModal';
 import EditDocumentModal from './EditDocumentModal';
+import DocumentChatModal from './DocumentChatModal';
 
 interface StudentDocument {
   id: string;
@@ -127,6 +129,7 @@ export default function StudentDocumentsList() {
   const [showFilters, setShowFilters] = useState(false);
   const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
   const [editDocumentId, setEditDocumentId] = useState<string | null>(null);
+  const [chatDocument, setChatDocument] = useState<StudentDocument | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
@@ -990,6 +993,13 @@ export default function StudentDocumentsList() {
                                       >
                                         <Pencil size={14} className="text-white" />
                                       </button>
+                                      <button
+                                        onClick={() => setChatDocument(doc)}
+                                        className="p-2 rounded-lg bg-gray-700/50 hover:bg-blue-600/80 transition-colors"
+                                        title={t('actions.chat')}
+                                      >
+                                        <MessageCircle size={14} className="text-blue-400" />
+                                      </button>
                                       <a
                                         href={doc.fileUrl}
                                         target="_blank"
@@ -1148,6 +1158,13 @@ export default function StudentDocumentsList() {
                           >
                             <Pencil size={16} className="text-white" />
                           </button>
+                          <button
+                            onClick={() => setChatDocument(doc)}
+                            className="p-2 rounded-lg bg-gray-700/50 hover:bg-blue-600/80 transition-colors"
+                            title={t('actions.chat')}
+                          >
+                            <MessageCircle size={16} className="text-blue-400" />
+                          </button>
                           <a
                             href={doc.fileUrl}
                             target="_blank"
@@ -1262,6 +1279,14 @@ export default function StudentDocumentsList() {
         onClose={() => setEditDocumentId(null)}
         onSuccess={fetchDocuments}
         isAdminView={true}
+      />
+
+      {/* Document Chat Modal */}
+      <DocumentChatModal
+        isOpen={!!chatDocument}
+        document={chatDocument}
+        onClose={() => setChatDocument(null)}
+        onSuccess={fetchDocuments}
       />
     </div>
   );

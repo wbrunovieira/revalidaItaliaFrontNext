@@ -592,7 +592,11 @@
       "lesson": "Lezione",
       "assessment": "Valutazione",
       "flashcard": "Flashcard",
-      "general": "Generale"
+      "general": "Generale",
+      "document_analysis": "Analisi Documento",
+      "technical_support": "Supporto Tecnico",
+      "class_questions": "Domande sulla Lezione",
+      "other": "Altro"
     },
     "filter": {
       "all": "Tutti",
@@ -605,7 +609,11 @@
       "lesson": "Lezioni",
       "assessment": "Valutazioni",
       "flashcard": "Flashcards",
-      "general": "Generale"
+      "general": "Generale",
+      "document_analysis": "Analisi Documento",
+      "technical_support": "Supporto Tecnico",
+      "class_questions": "Domande sulla Lezione",
+      "other": "Altro"
     },
     "searchPlaceholder": "Cerca nei titoli e nei contenuti...",
     "error": {
@@ -633,11 +641,16 @@
       "title": "Invia Domanda",
       "subtitle": "Siamo qui per aiutarti",
       "generalContext": "Domanda Generale",
+      "categoryLabel": "Categoria",
       "contextTypes": {
         "lesson": "Lezione",
         "assessment": "Valutazione",
         "flashcard": "Flashcard",
-        "general": "Generale"
+        "general": "Generale",
+        "document_analysis": "Analisi Documento",
+        "technical_support": "Supporto Tecnico",
+        "class_questions": "Domande sulla Lezione",
+        "other": "Altro"
       },
       "questionLabel": "Qual è la tua domanda?",
       "questionPlaceholder": "Descrivi la tua domanda in modo chiaro e dettagliato. Il professore riceverà il tuo messaggio e risponderà appena possibile.",

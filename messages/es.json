@@ -591,7 +591,11 @@
       "lesson": "Lección",
       "assessment": "Evaluación",
       "flashcard": "Flashcard",
-      "general": "General"
+      "general": "General",
+      "document_analysis": "Análisis de Documento",
+      "technical_support": "Soporte Técnico",
+      "class_questions": "Preguntas de Clase",
+      "other": "Otros"
     },
     "filter": {
       "all": "Todos",
@@ -604,7 +608,11 @@
       "lesson": "Lecciones",
       "assessment": "Evaluaciones",
       "flashcard": "Flashcards",
-      "general": "General"
+      "general": "General",
+      "document_analysis": "Análisis de Documento",
+      "technical_support": "Soporte Técnico",
+      "class_questions": "Preguntas de Clase",
+      "other": "Otros"
     },
     "searchPlaceholder": "Buscar en títulos y contenido...",
     "error": {
@@ -633,11 +641,16 @@
       "title": "Enviar Pregunta",
       "subtitle": "Estamos aquí para ayudarte",
       "generalContext": "Pregunta General",
+      "categoryLabel": "Categoría",
       "contextTypes": {
         "lesson": "Lección",
         "assessment": "Evaluación",
         "flashcard": "Flashcard",
-        "general": "General"
+        "general": "General",
+        "document_analysis": "Análisis de Documento",
+        "technical_support": "Soporte Técnico",
+        "class_questions": "Preguntas de Clase",
+        "other": "Otros"
       },
       "questionLabel": "¿Cuál es tu pregunta?",
       "questionPlaceholder": "Describe tu pregunta de forma clara y detallada. El profesor recibirá tu mensaje y responderá lo antes posible.",

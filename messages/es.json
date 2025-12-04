@@ -2443,6 +2443,7 @@
     "pageTitle": "Documentos de Estudiantes",
     "pageDescription": "Visualiza y gestiona los documentos subidos por los estudiantes",
     "backToAdmin": "Volver al panel",
+    "accessButton": "Acceder a Documentos",
     "title": "Documentos",
     "description": "Lista de documentos subidos para validación",
     "loading": "Cargando documentos...",
@@ -4699,9 +4700,10 @@
     "flashcards": "Flashcards",
     "liveSessions": "Clases en Vivo",
     "transactions": "Transacciones",
-    "tutor": "Tutor"
+    "tutor": "Tutor",
+    "studentDocuments": "Doc. Estudiantes"
   },
-  
+
   "tutor": {
     "title": "Área del Tutor",
     "description": "Accede al panel de tutoría para gestionar evaluaciones y comentarios de los estudiantes",

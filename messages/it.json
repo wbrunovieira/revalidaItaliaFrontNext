@@ -2441,6 +2441,7 @@
     "pageTitle": "Documenti degli Studenti",
     "pageDescription": "Visualizza e gestisci i documenti caricati dagli studenti",
     "backToAdmin": "Torna al pannello",
+    "accessButton": "Accedi ai Documenti",
     "title": "Documenti",
     "description": "Lista dei documenti caricati per la validazione",
     "loading": "Caricamento documenti...",
@@ -4692,14 +4693,15 @@
     "tracks": "Percorsi",
     "modules": "Moduli",
     "lessons": "Lezioni",
-     "videos": "Video",
+    "videos": "Video",
     "documents": "Documenti",
     "assessments": "Valutazioni",
     "arguments": "Argomenti",
     "flashcards": "Flashcard",
     "liveSessions": "Lezioni dal Vivo",
     "transactions": "Transazioni",
-    "tutor": "Tutor"
+    "tutor": "Tutor",
+    "studentDocuments": "Doc. Studenti"
   },
   
   "tutor": {

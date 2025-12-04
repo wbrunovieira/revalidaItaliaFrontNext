@@ -2445,6 +2445,7 @@
     "pageTitle": "Documentos de Estudantes",
     "pageDescription": "Visualize e gerencie os documentos enviados pelos estudantes",
     "backToAdmin": "Voltar ao painel",
+    "accessButton": "Acessar Documentos",
     "title": "Documentos",
     "description": "Lista de documentos enviados para validação",
     "loading": "Carregando documentos...",
@@ -4750,13 +4751,14 @@
     "modules": "Módulos",
     "lessons": "Aulas",
     "videos": "Vídeos",
-     "documents": "Documentos",
+    "documents": "Documentos",
     "assessments": "Avaliações",
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Aulas ao Vivo",
     "transactions": "Transações",
-    "tutor": "Tutor"
+    "tutor": "Tutor",
+    "studentDocuments": "Docs. Estudantes"
   },
   
   "tutor": {

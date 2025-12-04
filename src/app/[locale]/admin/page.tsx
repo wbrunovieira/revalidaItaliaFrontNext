@@ -25,6 +25,7 @@ import {
   GraduationCap,
   PlayCircle,
   Upload,
+  FolderSearch,
 } from 'lucide-react';
 
 import {
@@ -72,7 +73,7 @@ export default function AdminPage() {
   const t = useTranslations('Admin');
   const params = useParams();
   const locale = params?.locale || 'pt';
-  const { isAdmin, isTutor } = useAuth();
+  const { isAdmin, isTutor, isDocumentAnalyst } = useAuth();
 
   // Define a aba inicial baseada no role
   // Admin: overview, Tutor: courses, Outros: courses
@@ -296,6 +297,21 @@ export default function AdminPage() {
               />
               {t('tabs.tutor')}
             </TabsTrigger>
+
+            {/* Apenas mostra a aba studentDocuments para admins e document analysts */}
+            {(isAdmin || isDocumentAnalyst) && (
+              <TabsTrigger
+                value="studentDocuments"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <FolderSearch
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.studentDocuments')}
+              </TabsTrigger>
+            )}
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -824,6 +840,30 @@ export default function AdminPage() {
               </div>
             </div>
           </TabsContent>
+
+          {/* Apenas renderiza o conteúdo de studentDocuments para admins e document analysts */}
+          {(isAdmin || isDocumentAnalyst) && (
+            <TabsContent value="studentDocuments">
+              <div className="p-6 space-y-6">
+                <div className="text-center">
+                  <FolderSearch className="mx-auto mb-4 text-secondary" size={48} />
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {t('studentDocuments.pageTitle')}
+                  </h2>
+                  <p className="text-gray-400 mb-6">
+                    {t('studentDocuments.pageDescription')}
+                  </p>
+                  <a
+                    href={`/${locale}/admin/student-documents`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary-dark font-semibold rounded-lg hover:bg-secondary/80 transition-colors"
+                  >
+                    <FolderSearch size={20} />
+                    {t('studentDocuments.accessButton')}
+                  </a>
+                </div>
+              </div>
+            </TabsContent>
+          )}
         </div>
       </Tabs>
 

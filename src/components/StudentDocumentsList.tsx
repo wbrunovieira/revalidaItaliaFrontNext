@@ -899,9 +899,17 @@ export default function StudentDocumentsList() {
                         className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 overflow-hidden"
                       >
                         {/* Student Header - Clickable */}
-                        <button
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={() => toggleStudentExpanded(group.studentId)}
-                          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              toggleStudentExpanded(group.studentId);
+                            }
+                          }}
+                          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
                             <div className="p-3 bg-secondary/20 rounded-full">
@@ -966,7 +974,7 @@ export default function StudentDocumentsList() {
                               className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                             />
                           </div>
-                        </button>
+                        </div>
 
                         {/* Expanded Documents */}
                         {isExpanded && (

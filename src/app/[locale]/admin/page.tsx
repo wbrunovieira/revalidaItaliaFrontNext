@@ -827,10 +827,10 @@ export default function AdminPage() {
               </div>
 
               <div className="max-w-md mx-auto">
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-emerald-500/50 transition-all duration-200">
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
                   <div className="text-center space-y-4">
-                    <div className="p-3 bg-emerald-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                      <UserCheck size={24} className="text-emerald-400" />
+                    <div className="p-3 bg-secondary/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                      <UserCheck size={24} className="text-secondary" />
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold text-white mb-2">
@@ -842,7 +842,7 @@ export default function AdminPage() {
                     </div>
                     <button
                       onClick={() => setShowCreatePersonalSessionModal(true)}
-                      className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      className="w-full bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                       {t('personalSessions.createButton')}
                     </button>
@@ -966,7 +966,7 @@ export default function AdminPage() {
       {/* Personal Session Creation Modal */}
       <CreatePersonalSessionModal
         open={showCreatePersonalSessionModal}
-        onOpenChange={setShowCreatePersonalSessionModal}
+        onClose={() => setShowCreatePersonalSessionModal(false)}
         onSuccess={() => {
           console.log('Personal session created successfully');
         }}

@@ -75,7 +75,7 @@ const personalSessionSchema = z.object({
 
 interface CreatePersonalSessionModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   onSuccess?: () => void;
 }
 
@@ -89,7 +89,7 @@ interface StudentSearchResult {
 
 export default function CreatePersonalSessionModal({
   open,
-  onOpenChange,
+  onClose,
   onSuccess,
 }: CreatePersonalSessionModalProps) {
   const t = useTranslations('Admin.CreatePersonalSession');
@@ -238,7 +238,7 @@ export default function CreatePersonalSessionModal({
 
         form.reset();
         setSelectedStudent(null);
-        onOpenChange(false);
+        onClose();
         onSuccess?.();
       } else {
         const errorData = await response.json();
@@ -284,7 +284,7 @@ export default function CreatePersonalSessionModal({
       setSelectedStudent(null);
       setSearchQuery('');
       setSearchResults([]);
-      onOpenChange(false);
+      onClose();
     }
   };
 
@@ -296,7 +296,7 @@ export default function CreatePersonalSessionModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <UserCheck size={24} className="text-emerald-400" />
+            <UserCheck size={24} className="text-secondary" />
             <h2 className="text-xl font-semibold text-white">
               {t('title')}
             </h2>
@@ -315,10 +315,10 @@ export default function CreatePersonalSessionModal({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Info Card */}
-              <div className="p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <div className="p-4 bg-secondary/10 rounded-lg border border-secondary/20">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-emerald-500/20 rounded-full">
-                    <Info size={20} className="text-emerald-400" />
+                  <div className="p-2 bg-secondary/20 rounded-full">
+                    <Info size={20} className="text-secondary" />
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">
@@ -334,7 +334,7 @@ export default function CreatePersonalSessionModal({
               {/* Student Selection Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-gray-300 mb-4">
-                  <User className="h-5 w-5 text-emerald-400" />
+                  <User className="h-5 w-5 text-secondary" />
                   <h3 className="text-lg font-semibold">
                     {t('sections.student')}
                   </h3>
@@ -358,7 +358,7 @@ export default function CreatePersonalSessionModal({
                         }}
                         onFocus={() => setShowResults(true)}
                         placeholder={t('fields.student.placeholder')}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition-colors"
+                        className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-secondary transition-colors"
                       />
 
                       {/* Search Results Dropdown */}
@@ -378,8 +378,8 @@ export default function CreatePersonalSessionModal({
                                     onClick={() => handleSelectStudent(student)}
                                     className="w-full flex items-center gap-3 p-3 hover:bg-gray-600 transition-colors text-left"
                                   >
-                                    <div className="p-2 bg-emerald-500/20 rounded-full flex-shrink-0">
-                                      <User size={16} className="text-emerald-400" />
+                                    <div className="p-2 bg-secondary/20 rounded-full flex-shrink-0">
+                                      <User size={16} className="text-secondary" />
                                     </div>
                                     <div className="min-w-0 flex-1">
                                       <p className="text-white font-medium truncate">
@@ -408,10 +408,10 @@ export default function CreatePersonalSessionModal({
                     </div>
                   ) : (
                     /* Selected Student Card */
-                    <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-secondary/10 border border-secondary/30 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/20 rounded-full">
-                          <User size={18} className="text-emerald-400" />
+                        <div className="p-2 bg-secondary/20 rounded-full">
+                          <User size={18} className="text-secondary" />
                         </div>
                         <div>
                           <p className="text-white font-semibold">{selectedStudent.name}</p>
@@ -571,7 +571,7 @@ export default function CreatePersonalSessionModal({
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3"
+                      className="bg-secondary hover:bg-secondary/80 text-primary-dark px-8 py-3"
                     >
                       {loading ? (
                         <div className="flex items-center gap-2">

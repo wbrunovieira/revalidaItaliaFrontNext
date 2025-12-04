@@ -2582,7 +2582,8 @@
     },
     "tabs": {
       "documents": "Documentos",
-      "conversations": "Conversas"
+      "conversations": "Conversas",
+      "personalSessions": "Sessões Individuais"
     },
     "conversations": {
       "title": "Conversas sobre Documentos",

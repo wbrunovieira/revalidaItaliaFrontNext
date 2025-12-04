@@ -2580,7 +2580,8 @@
     },
     "tabs": {
       "documents": "Documentos",
-      "conversations": "Conversaciones"
+      "conversations": "Conversaciones",
+      "personalSessions": "Sesiones Individuales"
     },
     "conversations": {
       "title": "Conversaciones sobre Documentos",

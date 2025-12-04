@@ -1175,7 +1175,8 @@
         "failed": "Falha ao enviar documento",
         "successTitle": "Documento enviado!",
         "successDescription": "Seu documento foi enviado com sucesso.",
-        "errorTitle": "Erro ao enviar"
+        "errorTitle": "Erro ao enviar",
+        "uploadingFor": "Enviando para"
       },
       "types": {
         "diploma": "Diploma",
@@ -2455,7 +2456,8 @@
       "edit": "Editar",
       "chat": "Conversar",
       "download": "Baixar",
-      "delete": "Excluir"
+      "delete": "Excluir",
+      "uploadForStudent": "Clique para enviar documento para este aluno"
     },
     "details": {
       "student": "Estudante",

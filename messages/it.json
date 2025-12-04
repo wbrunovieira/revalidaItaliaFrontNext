@@ -1177,7 +1177,8 @@
         "failed": "Caricamento del documento fallito",
         "successTitle": "Documento caricato!",
         "successDescription": "Il tuo documento è stato caricato con successo.",
-        "errorTitle": "Errore nel caricamento"
+        "errorTitle": "Errore nel caricamento",
+        "uploadingFor": "Caricamento per"
       },
       "types": {
         "diploma": "Diploma",
@@ -2451,7 +2452,8 @@
       "edit": "Modifica",
       "chat": "Chatta",
       "download": "Scarica",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "uploadForStudent": "Clicca per caricare documento per questo studente"
     },
     "details": {
       "student": "Studente",

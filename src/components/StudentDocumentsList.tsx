@@ -36,6 +36,7 @@ import {
   Users,
   Pencil,
   MessageCircle,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -44,6 +45,7 @@ import ReviewStatusPopover, { ReviewStatus } from './ReviewStatusPopover';
 import DocumentPreviewModal from './DocumentPreviewModal';
 import EditDocumentModal from './EditDocumentModal';
 import DocumentChatModal from './DocumentChatModal';
+import UploadDocumentModal from './UploadDocumentModal';
 
 interface StudentDocument {
   id: string;
@@ -130,6 +132,7 @@ export default function StudentDocumentsList() {
   const [previewDocumentId, setPreviewDocumentId] = useState<string | null>(null);
   const [editDocumentId, setEditDocumentId] = useState<string | null>(null);
   const [chatDocument, setChatDocument] = useState<StudentDocument | null>(null);
+  const [uploadForStudent, setUploadForStudent] = useState<{ id: string; name: string } | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
@@ -893,9 +896,24 @@ export default function StudentDocumentsList() {
                               <User size={24} className="text-secondary" />
                             </div>
                             <div className="text-left">
-                              <h3 className="text-lg font-semibold text-white">
-                                {group.studentName}
-                              </h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-semibold text-white">
+                                  {group.studentName}
+                                </h3>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUploadForStudent({
+                                      id: group.studentId,
+                                      name: group.studentName
+                                    });
+                                  }}
+                                  className="p-1.5 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                                  title={t('actions.uploadForStudent')}
+                                >
+                                  <Upload size={14} className="text-secondary" />
+                                </button>
+                              </div>
                               <p className="text-sm text-gray-400">
                                 {t('groupedView.documentsCount', { count: group.stats.total })}
                               </p>
@@ -1095,9 +1113,19 @@ export default function StudentDocumentsList() {
                         <div className="flex items-center gap-2">
                           <User size={16} className="text-gray-400" />
                           <div className="min-w-0">
-                            <p className="text-white text-sm truncate max-w-xs">
-                              {doc.studentName || doc.studentId.substring(0, 8) + '...'}
-                            </p>
+                            <button
+                              onClick={() => setUploadForStudent({
+                                id: doc.studentId,
+                                name: doc.studentName || doc.studentId.substring(0, 8) + '...'
+                              })}
+                              className="group flex items-center gap-1.5 text-white text-sm truncate max-w-xs hover:text-secondary transition-colors"
+                              title={t('actions.uploadForStudent')}
+                            >
+                              <span className="truncate">
+                                {doc.studentName || doc.studentId.substring(0, 8) + '...'}
+                              </span>
+                              <Upload size={14} className="text-gray-500 group-hover:text-secondary transition-colors flex-shrink-0" />
+                            </button>
                           </div>
                         </div>
                       </td>
@@ -1287,6 +1315,15 @@ export default function StudentDocumentsList() {
         document={chatDocument}
         onClose={() => setChatDocument(null)}
         onSuccess={fetchDocuments}
+      />
+
+      {/* Upload Document Modal (for uploading on behalf of a student) */}
+      <UploadDocumentModal
+        isOpen={!!uploadForStudent}
+        onClose={() => setUploadForStudent(null)}
+        onSuccess={fetchDocuments}
+        studentId={uploadForStudent?.id}
+        studentName={uploadForStudent?.name}
       />
     </div>
   );

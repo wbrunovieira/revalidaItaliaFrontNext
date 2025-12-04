@@ -13,6 +13,7 @@ import {
   Loader2,
   AlertCircle,
   Plus,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -20,8 +21,9 @@ import { toast } from '@/hooks/use-toast';
 interface UploadDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (document: UploadedDocument) => void;
-  studentId: string;
+  onSuccess: ((document: UploadedDocument) => void) | (() => void);
+  studentId?: string;
+  studentName?: string;
 }
 
 export interface UploadedDocument {
@@ -62,6 +64,7 @@ export default function UploadDocumentModal({
   onClose,
   onSuccess,
   studentId,
+  studentName,
 }: UploadDocumentModalProps) {
   const t = useTranslations('Profile.documents');
   const { token } = useAuth();
@@ -167,7 +170,7 @@ export default function UploadDocumentModal({
 
   // Handle upload
   const handleUpload = useCallback(async () => {
-    if (!file || !name.trim() || !token) {
+    if (!file || !name.trim() || !token || !studentId) {
       return;
     }
 
@@ -283,6 +286,21 @@ export default function UploadDocumentModal({
 
         {/* Content */}
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
+          {/* Student Info Banner (when uploading for a specific student) */}
+          {studentName && (
+            <div className="flex items-center gap-3 p-4 bg-secondary/10 border border-secondary/30 rounded-lg">
+              <div className="p-2 bg-secondary/20 rounded-full">
+                <User size={18} className="text-secondary" />
+              </div>
+              <div>
+                <p className="text-xs text-secondary/80 font-medium uppercase tracking-wide">
+                  {t('upload.uploadingFor')}
+                </p>
+                <p className="text-white font-semibold">{studentName}</p>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -403,7 +421,7 @@ export default function UploadDocumentModal({
           </button>
           <button
             onClick={handleUpload}
-            disabled={isUploading || !file || !name.trim()}
+            disabled={isUploading || !file || !name.trim() || !studentId}
             className="inline-flex items-center justify-center gap-2 px-8 py-3 min-w-[160px] bg-secondary text-primary text-lg font-semibold rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             {isUploading ? (

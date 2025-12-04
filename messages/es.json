@@ -1177,7 +1177,8 @@
         "failed": "Error al subir el documento",
         "successTitle": "¡Documento subido!",
         "successDescription": "Tu documento ha sido subido con éxito.",
-        "errorTitle": "Error al subir"
+        "errorTitle": "Error al subir",
+        "uploadingFor": "Subiendo para"
       },
       "types": {
         "diploma": "Diploma",
@@ -2453,7 +2454,8 @@
       "edit": "Editar",
       "chat": "Conversar",
       "download": "Descargar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "uploadForStudent": "Haz clic para subir documento para este estudiante"
     },
     "details": {
       "student": "Estudiante",

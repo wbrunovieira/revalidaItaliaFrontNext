@@ -2622,6 +2622,21 @@
         "fetchTitle": "Error al cargar",
         "fetchDescription": "No se pudieron cargar las conversaciones. Intenta nuevamente."
       }
+    },
+    "uploadForStudent": {
+      "button": "Enviar a Estudiante",
+      "title": "Enviar Documento a Estudiante",
+      "searchLabel": "Buscar Estudiante",
+      "searchPlaceholder": "Escribe el nombre del estudiante...",
+      "searching": "Buscando...",
+      "noResults": "Ningún estudiante encontrado",
+      "minChars": "Escribe al menos 2 caracteres para buscar",
+      "changeStudent": "Cambiar estudiante",
+      "uploadSection": "Documento",
+      "success": {
+        "title": "Documento Enviado",
+        "description": "Documento enviado con éxito a {studentName}"
+      }
     }
   },
 

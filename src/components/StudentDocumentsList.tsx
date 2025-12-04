@@ -37,6 +37,7 @@ import {
   Pencil,
   MessageCircle,
   Upload,
+  UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 import { toast } from '@/hooks/use-toast';
@@ -46,6 +47,7 @@ import DocumentPreviewModal from './DocumentPreviewModal';
 import EditDocumentModal from './EditDocumentModal';
 import DocumentChatModal from './DocumentChatModal';
 import UploadDocumentModal from './UploadDocumentModal';
+import UploadForStudentModal from './UploadForStudentModal';
 
 interface StudentDocument {
   id: string;
@@ -133,6 +135,7 @@ export default function StudentDocumentsList() {
   const [editDocumentId, setEditDocumentId] = useState<string | null>(null);
   const [chatDocument, setChatDocument] = useState<StudentDocument | null>(null);
   const [uploadForStudent, setUploadForStudent] = useState<{ id: string; name: string } | null>(null);
+  const [showUploadForStudentModal, setShowUploadForStudentModal] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
 
@@ -553,8 +556,17 @@ export default function StudentDocumentsList() {
           <h2 className="text-2xl font-bold text-white">{t('title')}</h2>
           <p className="text-sm text-gray-400">{t('description')}</p>
         </div>
-        <div className="text-sm text-gray-400">
-          {t('showing', { count: documents.length, total: pagination.total })}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowUploadForStudentModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors shadow-lg"
+          >
+            <UserPlus size={18} />
+            {t('uploadForStudent.button')}
+          </button>
+          <div className="text-sm text-gray-400">
+            {t('showing', { count: documents.length, total: pagination.total })}
+          </div>
         </div>
       </div>
 
@@ -1324,6 +1336,13 @@ export default function StudentDocumentsList() {
         onSuccess={fetchDocuments}
         studentId={uploadForStudent?.id}
         studentName={uploadForStudent?.name}
+      />
+
+      {/* Upload for Student Modal (with student search) */}
+      <UploadForStudentModal
+        isOpen={showUploadForStudentModal}
+        onClose={() => setShowUploadForStudentModal(false)}
+        onSuccess={fetchDocuments}
       />
     </div>
   );

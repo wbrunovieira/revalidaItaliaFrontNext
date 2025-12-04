@@ -2620,6 +2620,21 @@
         "fetchTitle": "Errore nel caricamento",
         "fetchDescription": "Impossibile caricare le conversazioni. Riprova."
       }
+    },
+    "uploadForStudent": {
+      "button": "Invia a Studente",
+      "title": "Invia Documento a Studente",
+      "searchLabel": "Cerca Studente",
+      "searchPlaceholder": "Digita il nome dello studente...",
+      "searching": "Ricerca...",
+      "noResults": "Nessuno studente trovato",
+      "minChars": "Digita almeno 2 caratteri per cercare",
+      "changeStudent": "Cambia studente",
+      "uploadSection": "Documento",
+      "success": {
+        "title": "Documento Inviato",
+        "description": "Documento inviato con successo a {studentName}"
+      }
     }
   },
 

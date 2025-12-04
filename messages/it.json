@@ -3368,7 +3368,64 @@
       "relatedLessonDifferentCourse": "La lezione correlata appartiene a un corso diverso. Per favore, seleziona una lezione dello stesso corso"
     }
   },
-  
+
+  "CreatePersonalSession": {
+    "title": "Crea Sessione Individuale",
+    "infoCard": {
+      "title": "Informazioni sulle Sessioni Individuali",
+      "description": "Crea una sessione video privata con uno studente specifico per tutoraggio personalizzato o accompagnamento individuale."
+    },
+    "sections": {
+      "student": "Seleziona Studente",
+      "basicInfo": "Informazioni di Base",
+      "schedule": "Programmazione",
+      "settings": "Impostazioni"
+    },
+    "fields": {
+      "student": {
+        "label": "Studente",
+        "placeholder": "Digita il nome dello studente...",
+        "searching": "Ricerca...",
+        "noResults": "Nessuno studente trovato",
+        "minChars": "Digita almeno 2 caratteri per cercare",
+        "change": "Cambia studente"
+      },
+      "title": {
+        "label": "Titolo della Sessione",
+        "placeholder": "Es: Tutoraggio Individuale - Preparazione Esame"
+      },
+      "description": {
+        "label": "Descrizione",
+        "placeholder": "Descrivi l'obiettivo della sessione...",
+        "helper": "Opzionale - Massimo 1000 caratteri"
+      },
+      "startTime": {
+        "label": "Data e Ora di Inizio"
+      },
+      "endTime": {
+        "label": "Data e Ora di Fine"
+      }
+    },
+    "selectStudentFirst": "Seleziona uno studente per continuare",
+    "actions": {
+      "cancel": "Annulla",
+      "create": "Crea Sessione",
+      "creating": "Creazione..."
+    },
+    "success": {
+      "title": "Sessione Creata",
+      "description": "Sessione individuale con {studentName} programmata con successo"
+    },
+    "errors": {
+      "title": "Errore nella Creazione",
+      "generic": "Impossibile creare la sessione",
+      "validation": "Per favore, verifica i campi compilati",
+      "forbidden": "Non hai il permesso di creare sessioni individuali",
+      "notFound": "Studente non trovato",
+      "zoomError": "Errore nella creazione della riunione Zoom. Riprova"
+    }
+  },
+
   "supportResponse": {
     "title": "Rispondi al Ticket",
     "subtitle": "Invia una risposta allo studente",
@@ -4317,10 +4374,19 @@
     "arguments": "Argomenti",
     "flashcards": "Flashcard",
     "liveSessions": "Lezioni dal Vivo",
+    "personalSessions": "Sessioni Individuali",
     "transactions": "Transazioni",
     "tutor": "Tutor"
   },
-  
+
+  "personalSessions": {
+    "title": "Sessioni Individuali",
+    "description": "Crea sessioni di tutoraggio individuale con studenti specifici",
+    "createTitle": "Crea Sessione Individuale",
+    "createDescription": "Programma una sessione video individuale con uno studente per tutoraggio personalizzato",
+    "createButton": "Nuova Sessione Individuale"
+  },
+
   "tutor": {
     "title": "Area del Tutor",
     "description": "Accedi al pannello di tutoraggio per gestire valutazioni e feedback degli studenti",

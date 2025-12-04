@@ -25,6 +25,7 @@ import {
   GraduationCap,
   PlayCircle,
   Upload,
+  UserCheck,
 } from 'lucide-react';
 
 import {
@@ -65,6 +66,7 @@ import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
 import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
+import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 
@@ -98,6 +100,10 @@ export default function AdminPage() {
   const [
     showCreateLiveSessionModal,
     setShowCreateLiveSessionModal,
+  ] = useState(false);
+  const [
+    showCreatePersonalSessionModal,
+    setShowCreatePersonalSessionModal,
   ] = useState(false);
   const [
     showFlashcardBulkImportModal,
@@ -268,6 +274,18 @@ export default function AdminPage() {
                 aria-hidden="true"
               />
               {t('tabs.liveSessions')}
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="personalSessions"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <UserCheck
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.personalSessions')}
             </TabsTrigger>
 
             {/* Apenas mostra a aba transactions para admins */}
@@ -780,6 +798,44 @@ export default function AdminPage() {
             </Tabs>
           </TabsContent>
 
+          {/* Personal Sessions Tab */}
+          <TabsContent value="personalSessions">
+            <div className="p-6 space-y-6">
+              <div className="text-center space-y-3">
+                <h3 className="text-xl font-semibold text-white">
+                  {t('personalSessions.title')}
+                </h3>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  {t('personalSessions.description')}
+                </p>
+              </div>
+
+              <div className="max-w-md mx-auto">
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-emerald-500/50 transition-all duration-200">
+                  <div className="text-center space-y-4">
+                    <div className="p-3 bg-emerald-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                      <UserCheck size={24} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">
+                        {t('personalSessions.createTitle')}
+                      </h4>
+                      <p className="text-gray-400 text-sm mb-4">
+                        {t('personalSessions.createDescription')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowCreatePersonalSessionModal(true)}
+                      className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      {t('personalSessions.createButton')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Apenas renderiza o conteúdo de transactions para admins */}
           {isAdmin && (
             <TabsContent value="transactions">
@@ -864,6 +920,15 @@ export default function AdminPage() {
         onSuccess={() => {
           console.log('Live session created successfully');
           // Could refresh a list of live sessions here if needed
+        }}
+      />
+
+      {/* Personal Session Creation Modal */}
+      <CreatePersonalSessionModal
+        open={showCreatePersonalSessionModal}
+        onOpenChange={setShowCreatePersonalSessionModal}
+        onSuccess={() => {
+          console.log('Personal session created successfully');
         }}
       />
 

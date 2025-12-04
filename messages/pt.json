@@ -3758,7 +3758,80 @@
       "relatedLessonDifferentCourse": "A aula relacionada pertence a um curso diferente. Por favor, selecione uma aula do mesmo curso"
     }
   },
-  
+
+  "CreatePersonalSession": {
+    "title": "Criar Sessão Individual",
+    "infoCard": {
+      "title": "Sobre Sessões Individuais",
+      "description": "Crie uma sessão de vídeo privada com um aluno específico para tutoria personalizada ou acompanhamento individual."
+    },
+    "sections": {
+      "student": "Selecionar Aluno",
+      "basicInfo": "Informações Básicas",
+      "schedule": "Agendamento",
+      "settings": "Configurações"
+    },
+    "fields": {
+      "student": {
+        "label": "Aluno",
+        "placeholder": "Digite o nome do aluno...",
+        "searching": "Buscando...",
+        "noResults": "Nenhum aluno encontrado",
+        "minChars": "Digite pelo menos 2 caracteres para buscar",
+        "change": "Trocar aluno"
+      },
+      "title": {
+        "label": "Título da Sessão",
+        "placeholder": "Ex: Tutoria Individual - Preparação para Prova"
+      },
+      "description": {
+        "label": "Descrição",
+        "placeholder": "Descreva o objetivo da sessão...",
+        "helper": "Opcional - Máximo 1000 caracteres"
+      },
+      "startTime": {
+        "label": "Data e Hora de Início"
+      },
+      "endTime": {
+        "label": "Data e Hora de Término"
+      },
+      "recordingEnabled": {
+        "label": "Habilitar Gravação",
+        "helper": "Permitir gravação da sessão"
+      },
+      "autoStartRecording": {
+        "label": "Iniciar Gravação Automaticamente",
+        "helper": "A gravação inicia quando a sessão começar"
+      },
+      "chatEnabled": {
+        "label": "Chat Habilitado",
+        "helper": "Permitir chat durante a sessão"
+      },
+      "waitingRoomEnabled": {
+        "label": "Sala de Espera",
+        "helper": "O aluno aguarda aprovação para entrar"
+      }
+    },
+    "selectStudentFirst": "Selecione um aluno para continuar",
+    "actions": {
+      "cancel": "Cancelar",
+      "create": "Criar Sessão",
+      "creating": "Criando..."
+    },
+    "success": {
+      "title": "Sessão Criada",
+      "description": "Sessão individual com {studentName} foi agendada com sucesso"
+    },
+    "errors": {
+      "title": "Erro ao Criar",
+      "generic": "Não foi possível criar a sessão",
+      "validation": "Por favor, verifique os campos preenchidos",
+      "forbidden": "Você não tem permissão para criar sessões individuais",
+      "notFound": "Aluno não encontrado",
+      "zoomError": "Erro ao criar reunião no Zoom. Tente novamente"
+    }
+  },
+
   "supportResponse": {
     "title": "Responder Ticket",
     "subtitle": "Envie uma resposta para o aluno",
@@ -4771,11 +4844,20 @@
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Aulas ao Vivo",
+    "personalSessions": "Sessões Individuais",
     "transactions": "Transações",
     "tutor": "Tutor",
     "studentDocuments": "Análise Docs"
   },
-  
+
+  "personalSessions": {
+    "title": "Sessões Individuais",
+    "description": "Crie sessões de tutoria individual com alunos específicos",
+    "createTitle": "Criar Sessão Individual",
+    "createDescription": "Agende uma sessão de vídeo individual com um aluno para tutoria personalizada",
+    "createButton": "Nova Sessão Individual"
+  },
+
   "tutor": {
     "title": "Área do Tutor",
     "description": "Acesse o painel de tutoria para gerenciar avaliações e feedbacks dos alunos",

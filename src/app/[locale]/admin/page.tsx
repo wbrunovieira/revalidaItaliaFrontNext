@@ -68,6 +68,7 @@ import FlashcardTagsList from '@/components/FlashcardTagsList';
 import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
+import PersonalSessionsList from '@/components/PersonalSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 
@@ -817,7 +818,7 @@ export default function AdminPage() {
           {/* Personal Sessions Tab */}
           <TabsContent value="personalSessions">
             <div className="p-6 space-y-6">
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-3 mb-6">
                 <h3 className="text-xl font-semibold text-white">
                   {t('personalSessions.title')}
                 </h3>
@@ -826,29 +827,59 @@ export default function AdminPage() {
                 </p>
               </div>
 
-              <div className="max-w-md mx-auto">
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
-                  <div className="text-center space-y-4">
-                    <div className="p-3 bg-secondary/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                      <UserCheck size={24} className="text-secondary" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-2">
-                        {t('personalSessions.createTitle')}
-                      </h4>
-                      <p className="text-gray-400 text-sm mb-4">
-                        {t('personalSessions.createDescription')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowCreatePersonalSessionModal(true)}
-                      className="w-full bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              {/* Sub-tabs for Personal Sessions */}
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className={`grid w-full max-w-md mx-auto ${isAdmin ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-800 p-1`}>
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.create')}
+                  </TabsTrigger>
+                  {isAdmin && (
+                    <TabsTrigger
+                      value="list"
+                      className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
                     >
-                      {t('personalSessions.createButton')}
-                    </button>
+                      {t('personalSessions.tabs.list')}
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                {/* Create Session Sub-tab */}
+                <TabsContent value="create" className="mt-6">
+                  <div className="max-w-md mx-auto">
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-secondary/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <UserCheck size={24} className="text-secondary" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-2">
+                            {t('personalSessions.createTitle')}
+                          </h4>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('personalSessions.createDescription')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreatePersonalSessionModal(true)}
+                          className="w-full bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                          {t('personalSessions.createButton')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                {/* List Sessions Sub-tab (Admin only) */}
+                {isAdmin && (
+                  <TabsContent value="list" className="mt-6">
+                    <PersonalSessionsList />
+                  </TabsContent>
+                )}
+              </Tabs>
             </div>
           </TabsContent>
 

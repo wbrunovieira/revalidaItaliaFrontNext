@@ -4783,7 +4783,52 @@
     "description": "Crea sessioni di tutoraggio individuale con studenti specifici",
     "createTitle": "Crea Sessione Individuale",
     "createDescription": "Programma una sessione video individuale con uno studente per tutoraggio personalizzato",
-    "createButton": "Nuova Sessione Individuale"
+    "createButton": "Nuova Sessione Individuale",
+    "tabs": {
+      "create": "Crea Sessione",
+      "list": "Elenco Sessioni"
+    }
+  },
+  "PersonalSessionsList": {
+    "title": "Sessioni Individuali",
+    "totalSessions": "sessioni",
+    "loading": "Caricamento sessioni...",
+    "searchPlaceholder": "Cerca per titolo, studente o host...",
+    "filterByStatus": "Filtra per stato",
+    "allStatuses": "Tutti gli stati",
+    "noSessions": "Nessuna sessione individuale trovata",
+    "hasRecording": "Registrazione",
+    "host": "Host",
+    "student": "Studente",
+    "viewDetails": "Vedi dettagli",
+    "sessionDetails": "Dettagli della Sessione",
+    "description": "Descrizione",
+    "scheduledStart": "Inizio Programmato",
+    "scheduledEnd": "Fine Programmata",
+    "actualStart": "Inizio Effettivo",
+    "actualEnd": "Fine Effettiva",
+    "zoomMeetingId": "ID Riunione Zoom",
+    "settings": "Impostazioni",
+    "settingsRecording": "Registrazione",
+    "settingsChat": "Chat",
+    "settingsWaitingRoom": "Sala d'Attesa",
+    "enabled": "Abilitato",
+    "disabled": "Disabilitato",
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il",
+    "showing": "Mostrando {from} a {to} di {total}",
+    "pageOf": "Pagina {current} di {total}",
+    "status": {
+      "scheduled": "Programmata",
+      "live": "In Diretta",
+      "ended": "Terminata",
+      "cancelled": "Annullata",
+      "failed": "Fallita"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento sessioni",
+      "fetchDescription": "Impossibile caricare l'elenco delle sessioni individuali"
+    }
   },
 
   "tutor": {

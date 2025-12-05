@@ -9,6 +9,7 @@ import { useAuth } from '@/stores/auth.store';
 import StudentDocumentsList from '@/components/StudentDocumentsList';
 import DocumentConversations from '@/components/DocumentConversations';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
+import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -109,17 +110,43 @@ export default function StudentDocumentsPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-800/70 rounded-lg p-6 border border-gray-700">
-                <h3 className="text-lg font-medium text-white mb-2">{tAdmin('personalSessions.createTitle')}</h3>
-                <p className="text-gray-400 mb-4">{tAdmin('personalSessions.createDescription')}</p>
-                <button
-                  onClick={() => setShowCreatePersonalSessionModal(true)}
-                  className="bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <UserCheck size={20} />
-                  {tAdmin('personalSessions.createButton')}
-                </button>
-              </div>
+              {/* Sub-tabs for Personal Sessions */}
+              <Tabs defaultValue="mySessions" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-800 p-1 mb-6">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {tAdmin('personalSessions.tabs.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="mySessions"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {tAdmin('personalSessions.tabs.mySessions')}
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Create Session Sub-tab */}
+                <TabsContent value="create">
+                  <div className="bg-gray-800/70 rounded-lg p-6 border border-gray-700">
+                    <h3 className="text-lg font-medium text-white mb-2">{tAdmin('personalSessions.createTitle')}</h3>
+                    <p className="text-gray-400 mb-4">{tAdmin('personalSessions.createDescription')}</p>
+                    <button
+                      onClick={() => setShowCreatePersonalSessionModal(true)}
+                      className="bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                      <UserCheck size={20} />
+                      {tAdmin('personalSessions.createButton')}
+                    </button>
+                  </div>
+                </TabsContent>
+
+                {/* My Sessions Sub-tab */}
+                <TabsContent value="mySessions">
+                  <MyHostedSessionsList />
+                </TabsContent>
+              </Tabs>
             </div>
           </TabsContent>
         </Tabs>

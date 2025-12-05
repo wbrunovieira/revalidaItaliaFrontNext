@@ -4916,6 +4916,16 @@
       "create": "Criar Sessão",
       "mySessions": "Minhas Sessões",
       "list": "Todas as Sessões"
+    },
+    "zoomSession": {
+      "title": "Sessão via Zoom",
+      "description": "Crie uma sessão ao vivo com integração Zoom. O link será gerado automaticamente.",
+      "button": "Criar Sessão Zoom"
+    },
+    "manualUpload": {
+      "title": "Upload Manual",
+      "description": "Envie uma gravação de vídeo já existente para um aluno específico.",
+      "button": "Enviar Gravação"
     }
   },
   "MyHostedSessionsList": {
@@ -5028,6 +5038,70 @@
     "error": {
       "fetchTitle": "Erro ao carregar sessões",
       "fetchDescription": "Não foi possível carregar a lista de sessões individuais"
+    }
+  },
+
+  "UploadPersonalRecording": {
+    "title": "Enviar Gravação",
+    "infoCard": {
+      "title": "Upload Manual de Gravação",
+      "description": "Envie uma gravação de vídeo para associar a um aluno específico. O vídeo será processado e disponibilizado automaticamente."
+    },
+    "sections": {
+      "video": "Arquivo de Vídeo",
+      "student": "Aluno",
+      "basicInfo": "Informações do Vídeo"
+    },
+    "fields": {
+      "student": {
+        "label": "Selecionar Aluno",
+        "placeholder": "Buscar aluno por nome ou email...",
+        "searching": "Buscando...",
+        "noResults": "Nenhum aluno encontrado",
+        "minChars": "Digite pelo menos 2 caracteres para buscar",
+        "change": "Trocar aluno"
+      },
+      "title": {
+        "label": "Título da Gravação",
+        "placeholder": "Ex: Tutoria de Anatomia - 05/12/2024",
+        "helper": "Mínimo 3 caracteres, máximo 200"
+      },
+      "description": {
+        "label": "Descrição",
+        "placeholder": "Descreva o conteúdo da gravação...",
+        "helper": "Máximo 1000 caracteres (opcional)"
+      },
+      "recordedAt": {
+        "label": "Data da Gravação",
+        "helper": "Quando o vídeo foi gravado (opcional)"
+      }
+    },
+    "fileSelected": "Arquivo Selecionado",
+    "changeFile": "Trocar arquivo",
+    "selectFile": "Clique para selecionar",
+    "orDragDrop": "ou arraste e solte aqui",
+    "supportedFormats": "Formatos suportados",
+    "maxSize": "Tamanho máximo",
+    "uploading": "Enviando...",
+    "selectStudentFirst": "Selecione um aluno para continuar",
+    "actions": {
+      "cancel": "Cancelar",
+      "upload": "Enviar Gravação",
+      "uploading": "Enviando..."
+    },
+    "success": {
+      "title": "Gravação enviada com sucesso!",
+      "description": "A gravação foi enviada e está sendo processada para {studentName}"
+    },
+    "errors": {
+      "title": "Erro ao enviar gravação",
+      "generic": "Ocorreu um erro ao enviar a gravação. Tente novamente.",
+      "validation": "Dados inválidos. Verifique os campos e tente novamente.",
+      "forbidden": "Você não tem permissão para enviar gravações.",
+      "notFound": "Aluno não encontrado.",
+      "fileTooLarge": "O arquivo é muito grande. Máximo permitido: 500MB",
+      "invalidFileType": "Formato de arquivo não suportado. Use MP4, MOV, AVI, MKV ou WebM",
+      "noFile": "Selecione um arquivo de vídeo"
     }
   },
 

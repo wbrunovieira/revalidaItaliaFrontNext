@@ -68,6 +68,7 @@ import FlashcardTagsList from '@/components/FlashcardTagsList';
 import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
+import UploadPersonalRecordingModal from '@/components/UploadPersonalRecordingModal';
 import PersonalSessionsList from '@/components/PersonalSessionsList';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
@@ -111,6 +112,10 @@ export default function AdminPage() {
   const [
     showFlashcardBulkImportModal,
     setShowFlashcardBulkImportModal,
+  ] = useState(false);
+  const [
+    showUploadRecordingModal,
+    setShowUploadRecordingModal,
   ] = useState(false);
 
   // Garante que não-admins não fiquem nas abas restritas
@@ -855,25 +860,61 @@ export default function AdminPage() {
 
                 {/* Create Session Sub-tab */}
                 <TabsContent value="create" className="mt-6">
-                  <div className="max-w-md mx-auto">
-                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-secondary/50 transition-all duration-200">
+                  <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Zoom Session Card */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-blue-500/50 transition-all duration-200">
                       <div className="text-center space-y-4">
-                        <div className="p-3 bg-secondary/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                          <UserCheck size={24} className="text-secondary" />
+                        <div className="p-3 bg-blue-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <Video size={24} className="text-blue-400" />
                         </div>
                         <div>
-                          <h4 className="text-lg font-semibold text-white mb-2">
-                            {t('personalSessions.createTitle')}
-                          </h4>
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <h4 className="text-lg font-semibold text-white">
+                              {t('personalSessions.zoomSession.title')}
+                            </h4>
+                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">
+                              Zoom
+                            </span>
+                          </div>
                           <p className="text-gray-400 text-sm mb-4">
-                            {t('personalSessions.createDescription')}
+                            {t('personalSessions.zoomSession.description')}
                           </p>
                         </div>
                         <button
                           onClick={() => setShowCreatePersonalSessionModal(true)}
-                          className="w-full bg-secondary hover:bg-secondary/80 text-primary-dark px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                          className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                         >
-                          {t('personalSessions.createButton')}
+                          <Video size={18} />
+                          {t('personalSessions.zoomSession.button')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Manual Upload Card */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <Upload size={24} className="text-purple-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <h4 className="text-lg font-semibold text-white">
+                              {t('personalSessions.manualUpload.title')}
+                            </h4>
+                            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full font-medium">
+                              Upload
+                            </span>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('personalSessions.manualUpload.description')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowUploadRecordingModal(true)}
+                          className="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        >
+                          <Upload size={18} />
+                          {t('personalSessions.manualUpload.button')}
                         </button>
                       </div>
                     </div>
@@ -1012,6 +1053,15 @@ export default function AdminPage() {
         onClose={() => setShowCreatePersonalSessionModal(false)}
         onSuccess={() => {
           console.log('Personal session created successfully');
+        }}
+      />
+
+      {/* Upload Personal Recording Modal */}
+      <UploadPersonalRecordingModal
+        open={showUploadRecordingModal}
+        onClose={() => setShowUploadRecordingModal(false)}
+        onSuccess={() => {
+          console.log('Recording uploaded successfully');
         }}
       />
 

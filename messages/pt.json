@@ -473,7 +473,33 @@
     },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
-    "next": "Próxima"
+    "next": "Próxima",
+    "personalSessions": {
+      "title": "Sessões Individuais",
+      "description": "Suas sessões individuais agendadas com tutores",
+      "groupSessions": "Aulas em Grupo",
+      "groupSessionsDescription": "Sessões ao vivo com múltiplos participantes",
+      "loading": "Carregando suas sessões...",
+      "noSessions": "Nenhuma sessão individual",
+      "noSessionsDescription": "Você não tem sessões individuais agendadas no momento",
+      "individualSession": "Individual",
+      "hasRecording": "Gravação",
+      "tutor": "Tutor",
+      "duration": "Duração",
+      "scheduledFor": "Agendado para",
+      "joinNow": "Entrar Agora",
+      "joinSession": "Acessar Sessão",
+      "status": {
+        "scheduled": "Agendada",
+        "live": "Ao Vivo",
+        "ended": "Encerrada",
+        "cancelled": "Cancelada"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar sessões",
+        "fetchDescription": "Não foi possível carregar suas sessões individuais"
+      }
+    }
   },
     "ViewTicket": {
     "title": "Detalhes do Ticket",

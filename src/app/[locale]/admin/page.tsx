@@ -69,6 +69,7 @@ import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
 import PersonalSessionsList from '@/components/PersonalSessionsList';
+import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 
@@ -828,13 +829,19 @@ export default function AdminPage() {
               </div>
 
               {/* Sub-tabs for Personal Sessions */}
-              <Tabs defaultValue="create" className="w-full">
-                <TabsList className={`grid w-full max-w-md mx-auto ${isAdmin ? 'grid-cols-2' : 'grid-cols-1'} bg-gray-800 p-1`}>
+              <Tabs defaultValue="mySessions" className="w-full">
+                <TabsList className={`grid w-full max-w-xl mx-auto ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} bg-gray-800 p-1`}>
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
                   >
                     {t('personalSessions.tabs.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="mySessions"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.mySessions')}
                   </TabsTrigger>
                   {isAdmin && (
                     <TabsTrigger
@@ -873,7 +880,12 @@ export default function AdminPage() {
                   </div>
                 </TabsContent>
 
-                {/* List Sessions Sub-tab (Admin only) */}
+                {/* My Sessions Sub-tab */}
+                <TabsContent value="mySessions" className="mt-6">
+                  <MyHostedSessionsList />
+                </TabsContent>
+
+                {/* List All Sessions Sub-tab (Admin only) */}
                 {isAdmin && (
                   <TabsContent value="list" className="mt-6">
                     <PersonalSessionsList />

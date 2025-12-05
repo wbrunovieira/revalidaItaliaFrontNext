@@ -4859,7 +4859,48 @@
     "createButton": "Nova Sessão Individual",
     "tabs": {
       "create": "Criar Sessão",
-      "list": "Listar Sessões"
+      "mySessions": "Minhas Sessões",
+      "list": "Todas as Sessões"
+    }
+  },
+  "MyHostedSessionsList": {
+    "title": "Minhas Sessões",
+    "totalSessions": "sessões",
+    "loading": "Carregando sessões...",
+    "searchPlaceholder": "Buscar por título ou aluno...",
+    "filterByStatus": "Filtrar por status",
+    "allStatuses": "Todos os status",
+    "noSessions": "Você ainda não tem sessões individuais",
+    "hasRecording": "Gravação",
+    "student": "Aluno",
+    "viewDetails": "Ver detalhes",
+    "joinSession": "Entrar na Sessão",
+    "sessionDetails": "Detalhes da Sessão",
+    "description": "Descrição",
+    "scheduledStart": "Início Agendado",
+    "scheduledEnd": "Término Agendado",
+    "actualStart": "Início Real",
+    "actualEnd": "Término Real",
+    "zoomMeetingId": "ID da Reunião Zoom",
+    "settings": "Configurações",
+    "settingsRecording": "Gravação",
+    "settingsChat": "Chat",
+    "settingsWaitingRoom": "Sala de Espera",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "scheduled": "Agendada",
+      "live": "Ao Vivo",
+      "ended": "Encerrada",
+      "cancelled": "Cancelada"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar sessões",
+      "fetchDescription": "Não foi possível carregar suas sessões"
     }
   },
   "PersonalSessionsList": {

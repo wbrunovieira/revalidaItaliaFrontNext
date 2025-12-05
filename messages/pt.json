@@ -499,6 +499,35 @@
         "fetchTitle": "Erro ao carregar sessões",
         "fetchDescription": "Não foi possível carregar suas sessões individuais"
       }
+    },
+    "personalRecordings": {
+      "title": "Gravações Individuais",
+      "description": "Gravações das suas sessões individuais com tutores",
+      "groupRecordings": "Gravações de Aulas em Grupo",
+      "groupRecordingsDescription": "Gravações das aulas ao vivo em grupo",
+      "loading": "Carregando gravações...",
+      "noRecordings": "Nenhuma gravação disponível",
+      "noRecordingsDescription": "Suas gravações de sessões individuais aparecerão aqui",
+      "individualSession": "Individual",
+      "manualUpload": "Upload Manual",
+      "zoomRecording": "Gravação Zoom",
+      "tutor": "Tutor",
+      "duration": "Duração",
+      "fileSize": "Tamanho",
+      "recordedOn": "Gravado em",
+      "views": "visualizações",
+      "watch": "Assistir",
+      "processingVideo": "Processando vídeo...",
+      "videoNotAvailable": "Vídeo não disponível",
+      "status": {
+        "available": "Disponível",
+        "processing": "Processando",
+        "failed": "Falhou"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar gravações",
+        "fetchDescription": "Não foi possível carregar suas gravações"
+      }
     }
   },
     "ViewTicket": {
@@ -4918,15 +4947,46 @@
     "updatedAt": "Atualizado em",
     "showing": "Mostrando {from} a {to} de {total}",
     "pageOf": "Página {current} de {total}",
+    "startSession": "Iniciar Sessão",
+    "starting": "Iniciando...",
+    "cancelSession": "Cancelar",
     "status": {
       "scheduled": "Agendada",
       "live": "Ao Vivo",
       "ended": "Encerrada",
       "cancelled": "Cancelada"
     },
+    "success": {
+      "startTitle": "Sessão iniciada",
+      "startDescription": "A sessão foi iniciada com sucesso",
+      "cancelTitle": "Sessão cancelada",
+      "cancelDescription": "A sessão foi cancelada com sucesso"
+    },
     "error": {
       "fetchTitle": "Erro ao carregar sessões",
-      "fetchDescription": "Não foi possível carregar suas sessões"
+      "fetchDescription": "Não foi possível carregar suas sessões",
+      "startTitle": "Erro ao iniciar sessão",
+      "startDescription": "Não foi possível iniciar a sessão",
+      "startForbiddenTitle": "Permissão negada",
+      "startForbiddenDescription": "Você não tem permissão para iniciar esta sessão",
+      "startBadRequestTitle": "Ação não permitida",
+      "startBadRequestDescription": "A sessão não pode ser iniciada",
+      "cancelTitle": "Erro ao cancelar sessão",
+      "cancelDescription": "Não foi possível cancelar a sessão",
+      "cancelForbiddenTitle": "Permissão negada",
+      "cancelForbiddenDescription": "Você não tem permissão para cancelar esta sessão",
+      "cancelBadRequestTitle": "Ação não permitida",
+      "cancelBadRequestDescription": "A sessão não pode ser cancelada"
+    },
+    "cancelModal": {
+      "title": "Cancelar Sessão",
+      "warning": "Esta ação não pode ser desfeita. Ao cancelar, a reunião do Zoom será deletada e o aluno será notificado.",
+      "reasonLabel": "Motivo do cancelamento",
+      "reasonPlaceholder": "Informe o motivo do cancelamento...",
+      "characters": "caracteres",
+      "back": "Voltar",
+      "confirm": "Confirmar Cancelamento",
+      "cancelling": "Cancelando..."
     }
   },
   "PersonalSessionsList": {

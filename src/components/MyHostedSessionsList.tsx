@@ -20,9 +20,11 @@ import {
   Mail,
   ChevronsLeft,
   ChevronsRight,
-  ExternalLink,
   Play,
+  X,
+  Ban,
 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -84,6 +86,10 @@ export default function MyHostedSessionsList() {
 
   const [sessions, setSessions] = useState<MyHostedSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startingSessionId, setStartingSessionId] = useState<string | null>(null);
+  const [cancellingSession, setCancellingSession] = useState<MyHostedSession | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
   const [meta, setMeta] = useState<PaginationMeta>({
     page: 1,
     perPage: 20,
@@ -210,6 +216,170 @@ export default function MyHostedSessionsList() {
     }
   };
 
+  const handleStartSession = async (sessionId: string) => {
+    try {
+      setStartingSessionId(sessionId);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(
+        `${API_URL}/api/v1/personal-sessions/${sessionId}/start`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 403) {
+          toast({
+            title: t('error.startForbiddenTitle'),
+            description: t('error.startForbiddenDescription'),
+            variant: 'destructive',
+          });
+        } else if (response.status === 400) {
+          toast({
+            title: t('error.startBadRequestTitle'),
+            description: errorData.message || t('error.startBadRequestDescription'),
+            variant: 'destructive',
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to start session');
+        }
+        return;
+      }
+
+      const data = await response.json();
+
+      // Update the session in the local state
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === sessionId
+            ? { ...session, status: 'LIVE' as const, hostJoinUrl: data.hostJoinUrl }
+            : session
+        )
+      );
+
+      // Also update selected session if it's the same
+      if (selectedSession?.id === sessionId) {
+        setSelectedSession((prev) =>
+          prev ? { ...prev, status: 'LIVE' as const, hostJoinUrl: data.hostJoinUrl } : null
+        );
+      }
+
+      toast({
+        title: t('success.startTitle'),
+        description: t('success.startDescription'),
+      });
+
+      // Redirect host to Zoom meeting
+      if (data.hostJoinUrl) {
+        window.open(data.hostJoinUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error starting session:', error);
+      toast({
+        title: t('error.startTitle'),
+        description: t('error.startDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setStartingSessionId(null);
+    }
+  };
+
+  const handleCancelSession = async () => {
+    if (!cancellingSession || !cancelReason.trim()) return;
+
+    try {
+      setIsCancelling(true);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(
+        `${API_URL}/api/v1/personal-sessions/${cancellingSession.id}/cancel`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cancelReason: cancelReason.trim(),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 403) {
+          toast({
+            title: t('error.cancelForbiddenTitle'),
+            description: t('error.cancelForbiddenDescription'),
+            variant: 'destructive',
+          });
+        } else if (response.status === 400) {
+          toast({
+            title: t('error.cancelBadRequestTitle'),
+            description: errorData.detail || errorData.message || t('error.cancelBadRequestDescription'),
+            variant: 'destructive',
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to cancel session');
+        }
+        return;
+      }
+
+      // Update the session in the local state
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === cancellingSession.id
+            ? { ...session, status: 'CANCELLED' as const }
+            : session
+        )
+      );
+
+      // Also update selected session if it's the same
+      if (selectedSession?.id === cancellingSession.id) {
+        setSelectedSession((prev) =>
+          prev ? { ...prev, status: 'CANCELLED' as const } : null
+        );
+      }
+
+      toast({
+        title: t('success.cancelTitle'),
+        description: t('success.cancelDescription'),
+      });
+
+      // Close modal and reset
+      setCancellingSession(null);
+      setCancelReason('');
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+      toast({
+        title: t('error.cancelTitle'),
+        description: t('error.cancelDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const openCancelModal = (session: MyHostedSession) => {
+    setCancellingSession(session);
+    setCancelReason('');
+  };
+
+  const closeCancelModal = () => {
+    setCancellingSession(null);
+    setCancelReason('');
+  };
+
   // Filter sessions by search query (client-side)
   const filteredSessions = sessions.filter((session) => {
     if (!searchQuery) return true;
@@ -327,14 +497,45 @@ export default function MyHostedSessionsList() {
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
-                  {/* Join button for SCHEDULED or LIVE sessions */}
-                  {(session.status === 'SCHEDULED' || session.status === 'LIVE') && session.hostJoinUrl && (
+                  {/* Start Session button for SCHEDULED sessions */}
+                  {session.status === 'SCHEDULED' && (
+                    <>
+                      <button
+                        onClick={() => handleStartSession(session.id)}
+                        disabled={startingSessionId === session.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={t('startSession')}
+                      >
+                        {startingSessionId === session.id ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            {t('starting')}
+                          </>
+                        ) : (
+                          <>
+                            <Play size={16} />
+                            {t('startSession')}
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => openCancelModal(session)}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                        title={t('cancelSession')}
+                      >
+                        <Ban size={16} />
+                        {t('cancelSession')}
+                      </button>
+                    </>
+                  )}
+                  {/* Join button for LIVE sessions */}
+                  {session.status === 'LIVE' && session.hostJoinUrl && (
                     <button
                       onClick={() => handleJoinSession(session)}
                       className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-primary-dark rounded-lg transition-colors font-medium"
                       title={t('joinSession')}
                     >
-                      {session.status === 'LIVE' ? <Play size={16} /> : <ExternalLink size={16} />}
+                      <Play size={16} />
                       {t('joinSession')}
                     </button>
                   )}
@@ -489,16 +690,51 @@ export default function MyHostedSessionsList() {
                 </div>
               )}
 
-              {/* Join Button */}
-              {(selectedSession.status === 'SCHEDULED' || selectedSession.status === 'LIVE') && selectedSession.hostJoinUrl && (
-                <button
-                  onClick={() => handleJoinSession(selectedSession)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary hover:bg-secondary/80 text-primary-dark rounded-lg transition-colors font-medium"
-                >
-                  {selectedSession.status === 'LIVE' ? <Play size={18} /> : <ExternalLink size={18} />}
-                  {t('joinSession')}
-                </button>
-              )}
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                {/* Start Session Button for SCHEDULED sessions */}
+                {selectedSession.status === 'SCHEDULED' && (
+                  <>
+                    <button
+                      onClick={() => handleStartSession(selectedSession.id)}
+                      disabled={startingSessionId === selectedSession.id}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {startingSessionId === selectedSession.id ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          {t('starting')}
+                        </>
+                      ) : (
+                        <>
+                          <Play size={18} />
+                          {t('startSession')}
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedSession(null);
+                        openCancelModal(selectedSession);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                    >
+                      <Ban size={18} />
+                      {t('cancelSession')}
+                    </button>
+                  </>
+                )}
+                {/* Join Button for LIVE sessions */}
+                {selectedSession.status === 'LIVE' && selectedSession.hostJoinUrl && (
+                  <button
+                    onClick={() => handleJoinSession(selectedSession)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary hover:bg-secondary/80 text-primary-dark rounded-lg transition-colors font-medium"
+                  >
+                    <Play size={18} />
+                    {t('joinSession')}
+                  </button>
+                )}
+              </div>
 
               {/* Settings */}
               <div>
@@ -539,6 +775,91 @@ export default function MyHostedSessionsList() {
                 <p>{t('createdAt')}: {formatDateTime(selectedSession.createdAt)}</p>
                 <p>{t('updatedAt')}: {formatDateTime(selectedSession.updatedAt)}</p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Session Modal */}
+      {cancellingSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/20 rounded-lg">
+                  <Ban size={20} className="text-red-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">{t('cancelModal.title')}</h2>
+              </div>
+              <button
+                onClick={closeCancelModal}
+                className="p-2 hover:bg-gray-700 rounded-full transition-colors text-gray-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Session info */}
+              <div className="bg-gray-700/50 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-1">{cancellingSession.title}</h3>
+                <p className="text-sm text-gray-400">
+                  {t('student')}: {cancellingSession.student.fullName}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {formatDateTime(cancellingSession.scheduledStartTime)}
+                </p>
+              </div>
+
+              {/* Warning message */}
+              <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-300">{t('cancelModal.warning')}</p>
+              </div>
+
+              {/* Cancel reason */}
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  {t('cancelModal.reasonLabel')} <span className="text-red-400">*</span>
+                </label>
+                <Textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder={t('cancelModal.reasonPlaceholder')}
+                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 min-h-[100px]"
+                  maxLength={500}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {cancelReason.length}/500 {t('cancelModal.characters')}
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-700">
+              <button
+                onClick={closeCancelModal}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                {t('cancelModal.back')}
+              </button>
+              <button
+                onClick={handleCancelSession}
+                disabled={!cancelReason.trim() || isCancelling}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    {t('cancelModal.cancelling')}
+                  </>
+                ) : (
+                  <>
+                    <Ban size={16} />
+                    {t('cancelModal.confirm')}
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

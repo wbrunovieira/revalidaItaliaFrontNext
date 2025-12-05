@@ -5,9 +5,10 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/stores/auth.store';
 import { useLiveSessionJoin } from '@/hooks/useLiveSessionJoin';
-import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Radio, X, UserCheck } from 'lucide-react';
+import { Users, Clock, Calendar, Play, CheckCircle, Loader2, Radio, X, UserCheck, Video } from 'lucide-react';
 import AccessibleRecordingLessons from '@/components/AccessibleRecordingLessons';
 import MyStudentSessionsList from '@/components/MyStudentSessionsList';
+import MyPersonalRecordingsList from '@/components/MyPersonalRecordingsList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -649,9 +650,37 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
           )}
         </TabsContent>
 
-        {/* All Live Sessions */}
-        <TabsContent value="allSessions" className="space-y-4">
-          <AccessibleRecordingLessons locale={locale} courses={courses} modules={modules} />
+        {/* All Recordings */}
+        <TabsContent value="allSessions" className="space-y-8">
+          {/* Group Recordings Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-secondary/20 rounded-lg">
+                <Users size={20} className="text-secondary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">{t('personalRecordings.groupRecordings')}</h2>
+                <p className="text-sm text-white/60">{t('personalRecordings.groupRecordingsDescription')}</p>
+              </div>
+            </div>
+
+            <AccessibleRecordingLessons locale={locale} courses={courses} modules={modules} />
+          </div>
+
+          {/* Individual Recordings Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Video size={20} className="text-purple-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">{t('personalRecordings.title')}</h2>
+                <p className="text-sm text-white/60">{t('personalRecordings.description')}</p>
+              </div>
+            </div>
+
+            <MyPersonalRecordingsList locale={locale} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

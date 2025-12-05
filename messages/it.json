@@ -499,6 +499,35 @@
         "fetchTitle": "Errore nel caricamento delle sessioni",
         "fetchDescription": "Non è stato possibile caricare le tue sessioni individuali"
       }
+    },
+    "personalRecordings": {
+      "title": "Registrazioni Individuali",
+      "description": "Registrazioni delle tue sessioni individuali con i tutor",
+      "groupRecordings": "Registrazioni Lezioni di Gruppo",
+      "groupRecordingsDescription": "Registrazioni delle lezioni dal vivo in gruppo",
+      "loading": "Caricamento registrazioni...",
+      "noRecordings": "Nessuna registrazione disponibile",
+      "noRecordingsDescription": "Le registrazioni delle tue sessioni individuali appariranno qui",
+      "individualSession": "Individuale",
+      "manualUpload": "Upload Manuale",
+      "zoomRecording": "Registrazione Zoom",
+      "tutor": "Tutor",
+      "duration": "Durata",
+      "fileSize": "Dimensione",
+      "recordedOn": "Registrato il",
+      "views": "visualizzazioni",
+      "watch": "Guarda",
+      "processingVideo": "Elaborazione video...",
+      "videoNotAvailable": "Video non disponibile",
+      "status": {
+        "available": "Disponibile",
+        "processing": "In elaborazione",
+        "failed": "Fallito"
+      },
+      "error": {
+        "fetchTitle": "Errore nel caricamento delle registrazioni",
+        "fetchDescription": "Non è stato possibile caricare le tue registrazioni"
+      }
     }
   },
 
@@ -4845,15 +4874,46 @@
     "updatedAt": "Aggiornato il",
     "showing": "Mostrando {from} a {to} di {total}",
     "pageOf": "Pagina {current} di {total}",
+    "startSession": "Avvia Sessione",
+    "starting": "Avvio in corso...",
+    "cancelSession": "Annulla",
     "status": {
       "scheduled": "Programmata",
       "live": "In Diretta",
       "ended": "Terminata",
       "cancelled": "Annullata"
     },
+    "success": {
+      "startTitle": "Sessione avviata",
+      "startDescription": "La sessione è stata avviata con successo",
+      "cancelTitle": "Sessione annullata",
+      "cancelDescription": "La sessione è stata annullata con successo"
+    },
     "error": {
       "fetchTitle": "Errore nel caricamento sessioni",
-      "fetchDescription": "Impossibile caricare le tue sessioni"
+      "fetchDescription": "Impossibile caricare le tue sessioni",
+      "startTitle": "Errore nell'avvio della sessione",
+      "startDescription": "Impossibile avviare la sessione",
+      "startForbiddenTitle": "Permesso negato",
+      "startForbiddenDescription": "Non hai il permesso di avviare questa sessione",
+      "startBadRequestTitle": "Azione non consentita",
+      "startBadRequestDescription": "La sessione non può essere avviata",
+      "cancelTitle": "Errore nell'annullamento della sessione",
+      "cancelDescription": "Impossibile annullare la sessione",
+      "cancelForbiddenTitle": "Permesso negato",
+      "cancelForbiddenDescription": "Non hai il permesso di annullare questa sessione",
+      "cancelBadRequestTitle": "Azione non consentita",
+      "cancelBadRequestDescription": "La sessione non può essere annullata"
+    },
+    "cancelModal": {
+      "title": "Annulla Sessione",
+      "warning": "Questa azione non può essere annullata. Annullando, la riunione Zoom verrà eliminata e lo studente sarà notificato.",
+      "reasonLabel": "Motivo dell'annullamento",
+      "reasonPlaceholder": "Inserisci il motivo dell'annullamento...",
+      "characters": "caratteri",
+      "back": "Indietro",
+      "confirm": "Conferma Annullamento",
+      "cancelling": "Annullamento..."
     }
   },
   "PersonalSessionsList": {

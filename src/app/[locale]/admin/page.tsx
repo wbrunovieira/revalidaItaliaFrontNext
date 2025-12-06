@@ -70,6 +70,7 @@ import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
 import UploadPersonalRecordingModal from '@/components/UploadPersonalRecordingModal';
 import PersonalSessionsList from '@/components/PersonalSessionsList';
+import PersonalRecordingsAdminList from '@/components/PersonalRecordingsAdminList';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
@@ -835,7 +836,7 @@ export default function AdminPage() {
 
               {/* Sub-tabs for Personal Sessions */}
               <Tabs defaultValue="mySessions" className="w-full">
-                <TabsList className={`grid w-full max-w-xl mx-auto ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} bg-gray-800 p-1`}>
+                <TabsList className={`grid w-full max-w-2xl mx-auto ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} bg-gray-800 p-1`}>
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
@@ -854,6 +855,14 @@ export default function AdminPage() {
                       className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
                     >
                       {t('personalSessions.tabs.list')}
+                    </TabsTrigger>
+                  )}
+                  {isAdmin && (
+                    <TabsTrigger
+                      value="recordings"
+                      className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                    >
+                      {t('personalSessions.tabs.recordings')}
                     </TabsTrigger>
                   )}
                 </TabsList>
@@ -930,6 +939,13 @@ export default function AdminPage() {
                 {isAdmin && (
                   <TabsContent value="list" className="mt-6">
                     <PersonalSessionsList />
+                  </TabsContent>
+                )}
+
+                {/* All Recordings Sub-tab (Admin only) */}
+                {isAdmin && (
+                  <TabsContent value="recordings" className="mt-6">
+                    <PersonalRecordingsAdminList />
                   </TabsContent>
                 )}
               </Tabs>

@@ -4900,7 +4900,7 @@
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Aulas ao Vivo",
-    "personalSessions": "Sessões Individuais",
+    "personalSessions": "Aulas 1:1",
     "transactions": "Transações",
     "tutor": "Tutor",
     "studentDocuments": "Análise Docs"
@@ -4915,7 +4915,8 @@
     "tabs": {
       "create": "Criar Sessão",
       "mySessions": "Minhas Sessões",
-      "list": "Todas as Sessões"
+      "list": "Todas as Sessões",
+      "recordings": "Gravações"
     },
     "zoomSession": {
       "title": "Sessão via Zoom",
@@ -5102,6 +5103,54 @@
       "fileTooLarge": "O arquivo é muito grande. Máximo permitido: 500MB",
       "invalidFileType": "Formato de arquivo não suportado. Use MP4, MOV, AVI, MKV ou WebM",
       "noFile": "Selecione um arquivo de vídeo"
+    }
+  },
+
+  "PersonalRecordingsAdminList": {
+    "title": "Gravações Pessoais",
+    "totalRecordings": "gravações",
+    "loading": "Carregando gravações...",
+    "searchPlaceholder": "Buscar por título, aluno ou tutor...",
+    "filterByStatus": "Status",
+    "allStatuses": "Todos os status",
+    "filterByPandaStatus": "Status Panda",
+    "allPandaStatuses": "Todos",
+    "noRecordings": "Nenhuma gravação encontrada",
+    "manualUpload": "Upload Manual",
+    "zoomRecording": "Gravação Zoom",
+    "host": "Tutor",
+    "student": "Aluno",
+    "views": "visualizações",
+    "watch": "Assistir",
+    "viewDetails": "Ver detalhes",
+    "recordingDetails": "Detalhes da Gravação",
+    "description": "Descrição",
+    "duration": "Duração",
+    "fileSize": "Tamanho",
+    "viewCount": "Visualizações",
+    "processedAt": "Processado em",
+    "pandaInfo": "Informações Panda Video",
+    "watchRecording": "Assistir Gravação",
+    "videoNotAvailable": "Vídeo não disponível",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "available": "Disponível",
+      "processing": "Processando",
+      "failed": "Falhou"
+    },
+    "pandaStatus": {
+      "none": "Nenhum",
+      "uploading": "Enviando",
+      "processing": "Processando",
+      "available": "Disponível",
+      "failed": "Falhou"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar gravações",
+      "fetchDescription": "Não foi possível carregar a lista de gravações"
     }
   },
 

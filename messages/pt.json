@@ -4915,8 +4915,9 @@
     "tabs": {
       "create": "Criar Sessão",
       "mySessions": "Minhas Sessões",
+      "myRecordings": "Minhas Gravações",
       "list": "Todas as Sessões",
-      "recordings": "Gravações"
+      "allRecordings": "Todas Gravações"
     },
     "zoomSession": {
       "title": "Sessão via Zoom",
@@ -5151,6 +5152,43 @@
     "error": {
       "fetchTitle": "Erro ao carregar gravações",
       "fetchDescription": "Não foi possível carregar a lista de gravações"
+    }
+  },
+
+  "MyCreatedRecordingsList": {
+    "title": "Minhas Gravações",
+    "totalRecordings": "gravações",
+    "loading": "Carregando gravações...",
+    "searchPlaceholder": "Buscar por título ou aluno...",
+    "filterByStatus": "Status",
+    "allStatuses": "Todos os status",
+    "noRecordings": "Você ainda não tem gravações",
+    "manualUpload": "Upload Manual",
+    "zoomRecording": "Gravação Zoom",
+    "student": "Aluno",
+    "views": "visualizações",
+    "watch": "Assistir",
+    "viewDetails": "Ver detalhes",
+    "recordingDetails": "Detalhes da Gravação",
+    "description": "Descrição",
+    "duration": "Duração",
+    "fileSize": "Tamanho",
+    "viewCount": "Visualizações",
+    "processedAt": "Processado em",
+    "watchRecording": "Assistir Gravação",
+    "videoNotAvailable": "Vídeo não disponível",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "available": "Disponível",
+      "processing": "Processando",
+      "failed": "Falhou"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar gravações",
+      "fetchDescription": "Não foi possível carregar suas gravações"
     }
   },
 

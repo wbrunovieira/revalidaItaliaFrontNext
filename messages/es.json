@@ -2494,6 +2494,43 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
 
+  "MyCreatedRecordingsList": {
+    "title": "Mis Grabaciones",
+    "totalRecordings": "grabaciones",
+    "loading": "Cargando grabaciones...",
+    "searchPlaceholder": "Buscar por título o estudiante...",
+    "filterByStatus": "Estado",
+    "allStatuses": "Todos los estados",
+    "noRecordings": "Aún no tienes grabaciones",
+    "manualUpload": "Carga Manual",
+    "zoomRecording": "Grabación Zoom",
+    "student": "Estudiante",
+    "views": "visualizaciones",
+    "watch": "Ver",
+    "viewDetails": "Ver detalles",
+    "recordingDetails": "Detalles de la Grabación",
+    "description": "Descripción",
+    "duration": "Duración",
+    "fileSize": "Tamaño",
+    "viewCount": "Visualizaciones",
+    "processedAt": "Procesado el",
+    "watchRecording": "Ver Grabación",
+    "videoNotAvailable": "Video no disponible",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "available": "Disponible",
+      "processing": "Procesando",
+      "failed": "Fallido"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar grabaciones",
+      "fetchDescription": "No se pudieron cargar tus grabaciones"
+    }
+  },
+
   "studentDocuments": {
     "pageTitle": "Documentos de Estudiantes",
     "pageDescription": "Visualiza y gestiona los documentos subidos por los estudiantes",
@@ -4842,8 +4879,9 @@
     "tabs": {
       "create": "Crear Sesión",
       "mySessions": "Mis Sesiones",
+      "myRecordings": "Mis Grabaciones",
       "list": "Todas las Sesiones",
-      "recordings": "Grabaciones"
+      "allRecordings": "Todas Grabaciones"
     },
     "zoomSession": {
       "title": "Sesión vía Zoom",

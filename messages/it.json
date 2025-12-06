@@ -4842,8 +4842,9 @@
     "tabs": {
       "create": "Crea Sessione",
       "mySessions": "Le Mie Sessioni",
+      "myRecordings": "Mie Registrazioni",
       "list": "Tutte le Sessioni",
-      "recordings": "Registrazioni"
+      "allRecordings": "Tutte Registrazioni"
     },
     "zoomSession": {
       "title": "Sessione via Zoom",
@@ -5078,6 +5079,43 @@
     "error": {
       "fetchTitle": "Errore nel caricamento registrazioni",
       "fetchDescription": "Impossibile caricare l'elenco delle registrazioni"
+    }
+  },
+
+  "MyCreatedRecordingsList": {
+    "title": "Le Mie Registrazioni",
+    "totalRecordings": "registrazioni",
+    "loading": "Caricamento registrazioni...",
+    "searchPlaceholder": "Cerca per titolo o studente...",
+    "filterByStatus": "Stato",
+    "allStatuses": "Tutti gli stati",
+    "noRecordings": "Non hai ancora registrazioni",
+    "manualUpload": "Caricamento Manuale",
+    "zoomRecording": "Registrazione Zoom",
+    "student": "Studente",
+    "views": "visualizzazioni",
+    "watch": "Guarda",
+    "viewDetails": "Vedi dettagli",
+    "recordingDetails": "Dettagli della Registrazione",
+    "description": "Descrizione",
+    "duration": "Durata",
+    "fileSize": "Dimensione",
+    "viewCount": "Visualizzazioni",
+    "processedAt": "Elaborato il",
+    "watchRecording": "Guarda Registrazione",
+    "videoNotAvailable": "Video non disponibile",
+    "createdAt": "Creato il",
+    "updatedAt": "Aggiornato il",
+    "showing": "Mostrando {from} a {to} di {total}",
+    "pageOf": "Pagina {current} di {total}",
+    "status": {
+      "available": "Disponibile",
+      "processing": "In elaborazione",
+      "failed": "Fallito"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento registrazioni",
+      "fetchDescription": "Impossibile caricare le tue registrazioni"
     }
   },
 

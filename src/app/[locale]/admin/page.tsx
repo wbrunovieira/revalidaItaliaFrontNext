@@ -71,6 +71,7 @@ import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal'
 import UploadPersonalRecordingModal from '@/components/UploadPersonalRecordingModal';
 import PersonalSessionsList from '@/components/PersonalSessionsList';
 import PersonalRecordingsAdminList from '@/components/PersonalRecordingsAdminList';
+import MyCreatedRecordingsList from '@/components/MyCreatedRecordingsList';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
@@ -836,7 +837,7 @@ export default function AdminPage() {
 
               {/* Sub-tabs for Personal Sessions */}
               <Tabs defaultValue="mySessions" className="w-full">
-                <TabsList className={`grid w-full max-w-2xl mx-auto ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} bg-gray-800 p-1`}>
+                <TabsList className={`grid w-full max-w-3xl mx-auto ${isAdmin ? 'grid-cols-5' : 'grid-cols-3'} bg-gray-800 p-1`}>
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
@@ -849,6 +850,12 @@ export default function AdminPage() {
                   >
                     {t('personalSessions.tabs.mySessions')}
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="myRecordings"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.myRecordings')}
+                  </TabsTrigger>
                   {isAdmin && (
                     <TabsTrigger
                       value="list"
@@ -859,10 +866,10 @@ export default function AdminPage() {
                   )}
                   {isAdmin && (
                     <TabsTrigger
-                      value="recordings"
+                      value="allRecordings"
                       className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
                     >
-                      {t('personalSessions.tabs.recordings')}
+                      {t('personalSessions.tabs.allRecordings')}
                     </TabsTrigger>
                   )}
                 </TabsList>
@@ -935,6 +942,11 @@ export default function AdminPage() {
                   <MyHostedSessionsList />
                 </TabsContent>
 
+                {/* My Recordings Sub-tab */}
+                <TabsContent value="myRecordings" className="mt-6">
+                  <MyCreatedRecordingsList />
+                </TabsContent>
+
                 {/* List All Sessions Sub-tab (Admin only) */}
                 {isAdmin && (
                   <TabsContent value="list" className="mt-6">
@@ -944,7 +956,7 @@ export default function AdminPage() {
 
                 {/* All Recordings Sub-tab (Admin only) */}
                 {isAdmin && (
-                  <TabsContent value="recordings" className="mt-6">
+                  <TabsContent value="allRecordings" className="mt-6">
                     <PersonalRecordingsAdminList />
                   </TabsContent>
                 )}

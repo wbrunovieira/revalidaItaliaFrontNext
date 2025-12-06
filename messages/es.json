@@ -2533,6 +2533,11 @@
     "error": {
       "fetchTitle": "Error al cargar grabaciones",
       "fetchDescription": "No se pudieron cargar tus grabaciones"
+    },
+    "modal": {
+      "loadingDetails": "Cargando detalles...",
+      "fullscreen": "Pantalla completa",
+      "exitFullscreen": "Salir de pantalla completa"
     }
   },
 

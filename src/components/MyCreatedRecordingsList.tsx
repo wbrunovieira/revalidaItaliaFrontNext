@@ -23,6 +23,8 @@ import {
   FileVideo,
   CheckCircle,
   XCircle,
+  X,
+  Maximize2,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -37,6 +39,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface RecordingSession {
   id: string;
@@ -82,6 +85,40 @@ interface PaginationMeta {
   totalPages: number;
 }
 
+// Detailed recording response from GET /api/v1/personal-recordings/:id
+interface RecordingDetails {
+  id: string;
+  sessionId: string;
+  pandaVideoId: string | null;
+  pandaFolderId: string | null;
+  status: 'PENDING' | 'PROCESSING' | 'AVAILABLE' | 'ERROR';
+  pandaUploadStatus: 'PENDING' | 'UPLOADING' | 'PROCESSING' | 'AVAILABLE' | 'ERROR';
+  durationInSeconds: number | null;
+  fileSize: number | null;
+  formattedDuration: string | null;
+  formattedFileSize: string | null;
+  canBeWatched: boolean;
+  createdAt: string;
+  updatedAt: string;
+  session: {
+    id: string;
+    title: string;
+    description: string | null;
+    scheduledAt: string;
+    isManualUpload: boolean;
+  };
+  host: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  student: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+}
+
 export default function MyCreatedRecordingsList() {
   const t = useTranslations('Admin.MyCreatedRecordingsList');
   const { toast } = useToast();
@@ -104,6 +141,9 @@ export default function MyCreatedRecordingsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRecording, setSelectedRecording] = useState<MyCreatedRecording | null>(null);
   const [playingRecording, setPlayingRecording] = useState<MyCreatedRecording | null>(null);
+  const [recordingDetails, setRecordingDetails] = useState<RecordingDetails | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const fetchRecordings = useCallback(async () => {
     try {
@@ -154,6 +194,48 @@ export default function MyCreatedRecordingsList() {
   useEffect(() => {
     fetchRecordings();
   }, [fetchRecordings]);
+
+  // Fetch recording details from GET /api/v1/personal-recordings/:id
+  const fetchRecordingDetails = useCallback(async (recordingId: string) => {
+    if (!token) return null;
+
+    try {
+      setLoadingDetails(true);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const response = await fetch(
+        `${API_URL}/api/v1/personal-recordings/${recordingId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Forbidden');
+        }
+        if (response.status === 404) {
+          throw new Error('Not found');
+        }
+        throw new Error('Failed to fetch recording details');
+      }
+
+      const data = await response.json();
+      return data.recording as RecordingDetails;
+    } catch (error) {
+      console.error('Error fetching recording details:', error);
+      toast({
+        title: t('error.fetchTitle'),
+        description: t('error.fetchDescription'),
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [token, t, toast]);
 
   const getStatusBadge = (status: MyCreatedRecording['status']) => {
     const statusConfig = {
@@ -218,10 +300,25 @@ export default function MyCreatedRecordingsList() {
     );
   });
 
-  const handleWatchRecording = (recording: MyCreatedRecording) => {
+  const handleWatchRecording = async (recording: MyCreatedRecording) => {
     if (recording.status === 'AVAILABLE' && recording.pandaVideoExternalId) {
       setPlayingRecording(recording);
+      // Fetch detailed info
+      const details = await fetchRecordingDetails(recording.id);
+      if (details) {
+        setRecordingDetails(details);
+      }
     }
+  };
+
+  const handleCloseModal = () => {
+    setPlayingRecording(null);
+    setRecordingDetails(null);
+    setIsFullscreen(false);
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   if (loading) {
@@ -524,42 +621,168 @@ export default function MyCreatedRecordingsList() {
         </div>
       )}
 
-      {/* Video Player Modal */}
-      {playingRecording && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-4xl bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <div>
-                <h3 className="text-lg font-semibold text-white">{playingRecording.session.title}</h3>
-                <p className="text-sm text-gray-400">
-                  {t('student')}: {playingRecording.student.fullName}
-                </p>
-              </div>
-              <button
-                onClick={() => setPlayingRecording(null)}
-                className="p-2 hover:bg-gray-700 rounded-full transition-colors text-gray-400 hover:text-white"
-              >
-                ×
-              </button>
-            </div>
+      {/* Modern Video Player Modal */}
+      <AnimatePresence>
+        {playingRecording && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className={`w-full ${isFullscreen ? 'max-w-7xl' : 'max-w-5xl'} bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900/20 rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/10 border border-purple-500/20`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="relative p-4 sm:p-6 border-b border-white/10">
+                {/* Gradient line */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
 
-            <div className="aspect-video bg-black">
-              {playingRecording.pandaVideoExternalId ? (
-                <iframe
-                  src={`https://player-vz-cb4ade65-255.tv.pandavideo.com.br/embed/?v=${playingRecording.pandaVideoExternalId}`}
-                  className="w-full h-full"
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  {t('videoNotAvailable')}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        <Video size={12} className="mr-1" />
+                        {t('manualUpload')}
+                      </Badge>
+                      {playingRecording.session.isManualUpload ? (
+                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                          <Upload size={12} className="mr-1" />
+                          {t('manualUpload')}
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-secondary/20 text-secondary border-secondary/30">
+                          <FileVideo size={12} className="mr-1" />
+                          {t('zoomRecording')}
+                        </Badge>
+                      )}
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
+                      {playingRecording.session.title}
+                    </h3>
+                    {playingRecording.session.description && (
+                      <p className="text-white/60 mt-1 text-sm line-clamp-1">
+                        {playingRecording.session.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 text-white/70 hover:text-white group"
+                      title={isFullscreen ? t('modal.exitFullscreen') : t('modal.fullscreen')}
+                    >
+                      <Maximize2 size={18} className="group-hover:scale-110 transition-transform" />
+                    </button>
+                    <button
+                      onClick={handleCloseModal}
+                      className="p-2.5 bg-white/5 hover:bg-red-500/20 rounded-lg transition-all duration-200 text-white/70 hover:text-red-400 group"
+                    >
+                      <X size={18} className="group-hover:scale-110 transition-transform" />
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
+
+              {/* Video Player */}
+              <div className={`relative bg-black ${isFullscreen ? 'aspect-video' : 'aspect-video max-h-[60vh]'}`}>
+                {playingRecording.pandaVideoExternalId ? (
+                  <iframe
+                    src={`https://player-vz-cb4ade65-255.tv.pandavideo.com.br/embed/?v=${playingRecording.pandaVideoExternalId}`}
+                    className="w-full h-full"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-white/40 gap-4">
+                    <Video size={48} />
+                    <p>{t('videoNotAvailable')}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Info Panel */}
+              <div className="p-4 sm:p-6 bg-black/40">
+                {loadingDetails ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+                    <span className="ml-2 text-white/60">{t('modal.loadingDetails')}</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {/* Student */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <UserCheck size={18} className="text-purple-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('student')}</p>
+                        <p className="text-sm font-medium text-white truncate">
+                          {recordingDetails?.student.fullName || playingRecording.student.fullName}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Duration */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <Clock size={18} className="text-purple-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('duration')}</p>
+                        <p className="text-sm font-medium text-white">
+                          {recordingDetails?.formattedDuration || playingRecording.formattedDuration || '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* File Size */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <HardDrive size={18} className="text-purple-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('fileSize')}</p>
+                        <p className="text-sm font-medium text-white">
+                          {recordingDetails?.formattedFileSize || playingRecording.formattedFileSize || '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Date */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <Calendar size={18} className="text-purple-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-white/50 uppercase tracking-wider">{t('createdAt')}</p>
+                        <p className="text-sm font-medium text-white">
+                          {formatDateTime(recordingDetails?.createdAt || playingRecording.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* View Count Badge */}
+                <div className="flex items-center justify-center mt-4 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 text-white/50 bg-white/5 px-4 py-2 rounded-full">
+                    <Eye size={16} />
+                    <span className="text-sm">{playingRecording.viewCount} {t('views')}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

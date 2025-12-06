@@ -10,6 +10,7 @@ import StudentDocumentsList from '@/components/StudentDocumentsList';
 import DocumentConversations from '@/components/DocumentConversations';
 import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
+import MyCreatedRecordingsList from '@/components/MyCreatedRecordingsList';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -112,7 +113,7 @@ export default function StudentDocumentsPage() {
 
               {/* Sub-tabs for Personal Sessions */}
               <Tabs defaultValue="mySessions" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-800 p-1 mb-6">
+                <TabsList className="grid w-full max-w-xl grid-cols-3 bg-gray-800 p-1 mb-6">
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
@@ -124,6 +125,12 @@ export default function StudentDocumentsPage() {
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
                   >
                     {tAdmin('personalSessions.tabs.mySessions')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="myRecordings"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {tAdmin('personalSessions.tabs.myRecordings')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -145,6 +152,11 @@ export default function StudentDocumentsPage() {
                 {/* My Sessions Sub-tab */}
                 <TabsContent value="mySessions">
                   <MyHostedSessionsList />
+                </TabsContent>
+
+                {/* My Recordings Sub-tab */}
+                <TabsContent value="myRecordings">
+                  <MyCreatedRecordingsList />
                 </TabsContent>
               </Tabs>
             </div>

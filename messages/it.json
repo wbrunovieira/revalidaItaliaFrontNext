@@ -527,6 +527,11 @@
       "error": {
         "fetchTitle": "Errore nel caricamento delle registrazioni",
         "fetchDescription": "Non è stato possibile caricare le tue registrazioni"
+      },
+      "modal": {
+        "loadingDetails": "Caricamento dettagli...",
+        "fullscreen": "Schermo intero",
+        "exitFullscreen": "Esci dallo schermo intero"
       }
     }
   },

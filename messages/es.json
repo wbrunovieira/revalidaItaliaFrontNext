@@ -527,6 +527,11 @@
       "error": {
         "fetchTitle": "Error al cargar grabaciones",
         "fetchDescription": "No fue posible cargar tus grabaciones"
+      },
+      "modal": {
+        "loadingDetails": "Cargando detalles...",
+        "fullscreen": "Pantalla completa",
+        "exitFullscreen": "Salir de pantalla completa"
       }
     }
   },

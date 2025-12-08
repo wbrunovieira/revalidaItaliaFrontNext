@@ -919,31 +919,34 @@ export const useAuthStore = create<AuthState>()(
             let termsAcceptance = null;
 
             try {
-              const authStorage = localStorage.getItem('auth-storage');
-              if (authStorage) {
-                const parsed = JSON.parse(authStorage);
-                if (parsed?.state) {
-                  // Se não tiver nome no userData, pega do storage
-                  if (!userData?.name && parsed.state.user) {
-                    userData = parsed.state.user;
+              // Verificar se está no servidor (SSR)
+              if (typeof window !== 'undefined') {
+                const authStorage = localStorage.getItem('auth-storage');
+                if (authStorage) {
+                  const parsed = JSON.parse(authStorage);
+                  if (parsed?.state) {
+                    // Se não tiver nome no userData, pega do storage
+                    if (!userData?.name && parsed.state.user) {
+                      userData = parsed.state.user;
+                    }
+                    // Recupera os outros dados do storage
+                    refreshToken = parsed.state.refreshToken;
+                    expiresIn = parsed.state.expiresIn;
+                    tokenExpiresAt = parsed.state.tokenExpiresAt;
+                    session = parsed.state.session; // 🆕 Restaurar session
+                    deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
+                    lastRevokedSession = parsed.state.lastRevokedSession; // 🆕 Restaurar lastRevokedSession
+                    profileCompleteness = parsed.state.profileCompleteness;
+                    communityProfile = parsed.state.communityProfile;
+                    meta = parsed.state.meta;
+                    termsAcceptance = parsed.state.termsAcceptance;
                   }
-                  // Recupera os outros dados do storage
-                  refreshToken = parsed.state.refreshToken;
-                  expiresIn = parsed.state.expiresIn;
-                  tokenExpiresAt = parsed.state.tokenExpiresAt;
-                  session = parsed.state.session; // 🆕 Restaurar session
-                  deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
-                  lastRevokedSession = parsed.state.lastRevokedSession; // 🆕 Restaurar lastRevokedSession
-                  profileCompleteness = parsed.state.profileCompleteness;
-                  communityProfile = parsed.state.communityProfile;
-                  meta = parsed.state.meta;
-                  termsAcceptance = parsed.state.termsAcceptance;
                 }
-              }
 
-              // Se não encontrou refreshToken no state, tenta do localStorage direto
-              if (!refreshToken && typeof window !== 'undefined') {
-                refreshToken = localStorage.getItem('refreshToken');
+                // Se não encontrou refreshToken no state, tenta do localStorage direto
+                if (!refreshToken) {
+                  refreshToken = localStorage.getItem('refreshToken');
+                }
               }
             } catch (e) {
               console.log('Parse error:', e);
@@ -1334,6 +1337,11 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage', // nome da chave no localStorage
       storage: createJSONStorage(() => ({
         getItem: (name) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return null;
+          }
+
           // Tentar múltiplas fontes
           const cookieValue = getCookie('auth-storage');
           if (cookieValue) {
@@ -1341,17 +1349,27 @@ export const useAuthStore = create<AuthState>()(
               return cookieValue;
             } catch {}
           }
-          
+
           // Fallback para localStorage
           return localStorage.getItem(name);
         },
         setItem: (name, value) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return;
+          }
+
           // Salvar em múltiplos lugares
           localStorage.setItem(name, value);
           // Também salvar em cookie para SSR
           setCookie('auth-storage', value, 7);
         },
         removeItem: (name) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return;
+          }
+
           localStorage.removeItem(name);
           removeCookie('auth-storage');
         },

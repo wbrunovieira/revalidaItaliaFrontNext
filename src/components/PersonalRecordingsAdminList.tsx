@@ -679,10 +679,11 @@ export default function PersonalRecordingsAdminList() {
               </button>
             </div>
 
+            {/* Video Player - uses streamUrl from API */}
             <div className="aspect-video bg-black">
-              {playingRecording.pandaVideoExternalId ? (
+              {playingRecording.streamUrl ? (
                 <iframe
-                  src={`https://player-vz-cb4ade65-255.tv.pandavideo.com.br/embed/?v=${playingRecording.pandaVideoExternalId}`}
+                  src={playingRecording.streamUrl}
                   className="w-full h-full"
                   allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
                   allowFullScreen

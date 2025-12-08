@@ -255,7 +255,9 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
   };
 
   const handleWatchRecording = async (recording: PersonalRecording) => {
-    if (recording.status === 'AVAILABLE' && recording.pandaVideoExternalId) {
+    // Check if recording is available and has streamUrl for the player
+    const isAvailable = recording.status === 'AVAILABLE' || recording.pandaUploadStatus === 'AVAILABLE';
+    if (isAvailable && recording.streamUrl) {
       setPlayingRecording(recording);
       // Fetch detailed info
       const details = await fetchRecordingDetails(recording.id);
@@ -417,8 +419,9 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
                     </div>
                   </div>
 
-                  {/* Watch Button */}
-                  {recording.status === 'AVAILABLE' && (
+                  {/* Watch Button - requires AVAILABLE status and streamUrl for player */}
+                  {(recording.status === 'AVAILABLE' || recording.pandaUploadStatus === 'AVAILABLE') &&
+                   recording.streamUrl && (
                     <Button
                       className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300"
                       onClick={() => handleWatchRecording(recording)}
@@ -428,7 +431,7 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
                     </Button>
                   )}
 
-                  {recording.status === 'PROCESSING' && (
+                  {(recording.status === 'PROCESSING' || recording.status === 'PENDING') && (
                     <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 px-4 py-2">
                       <Loader2 size={14} className="mr-2 animate-spin" />
                       {t('processingVideo')}
@@ -441,7 +444,7 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
               {/* Hover Ring */}
-              <div className="absolute inset-0 rounded-xl ring-1 ring-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 rounded-xl ring-1 ring-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
           </motion.div>
         ))}
@@ -517,11 +520,11 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
                 </div>
               </div>
 
-              {/* Video Player */}
+              {/* Video Player - uses streamUrl from API */}
               <div className={`relative bg-black ${isFullscreen ? 'aspect-video' : 'aspect-video max-h-[60vh]'}`}>
-                {playingRecording.pandaVideoExternalId ? (
+                {playingRecording.streamUrl ? (
                   <iframe
-                    src={`https://player-vz-cb4ade65-255.tv.pandavideo.com.br/embed/?v=${playingRecording.pandaVideoExternalId}`}
+                    src={playingRecording.streamUrl}
                     className="w-full h-full"
                     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
                     allowFullScreen

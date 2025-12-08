@@ -431,7 +431,7 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
                     </Button>
                   )}
 
-                  {(recording.status === 'PROCESSING' || recording.status === 'PENDING') && (
+                  {recording.status === 'PROCESSING' && (
                     <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 px-4 py-2">
                       <Loader2 size={14} className="mr-2 animate-spin" />
                       {t('processingVideo')}

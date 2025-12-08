@@ -106,6 +106,17 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
+variable "cloudflare_account_id" {
+  description = "Cloudflare Account ID"
+  type        = string
+}
+
+variable "domain" {
+  description = "Main domain name"
+  type        = string
+  default     = "portalrevalida.com"
+}
+
 # Security and Monitoring
 variable "alert_email" {
   description = "Email address for security alerts from GuardDuty"

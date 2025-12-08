@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 // Types for Support Tickets
-type ContextType = 'LESSON' | 'ASSESSMENT' | 'FLASHCARD' | 'GENERAL';
+type ContextType = 'LESSON' | 'ASSESSMENT' | 'FLASHCARD' | 'GENERAL' | 'DOCUMENT_ANALYSIS' | 'TECHNICAL_SUPPORT' | 'CLASS_QUESTIONS' | 'OTHER';
 type TicketStatus = 'OPEN' | 'ANSWERED' | 'RESOLVED';
 
 interface TicketListItem {
@@ -220,6 +220,14 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
         return 'text-[#8BCAD9] bg-[#8BCAD9]/20';
       case 'GENERAL':
         return 'text-gray-400 bg-gray-900/20';
+      case 'DOCUMENT_ANALYSIS':
+        return 'text-purple-400 bg-purple-900/20';
+      case 'TECHNICAL_SUPPORT':
+        return 'text-orange-400 bg-orange-900/20';
+      case 'CLASS_QUESTIONS':
+        return 'text-emerald-400 bg-emerald-900/20';
+      case 'OTHER':
+        return 'text-slate-400 bg-slate-900/20';
       default:
         return 'text-gray-400 bg-gray-900/20';
     }
@@ -235,6 +243,14 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
         return t('context.flashcard');
       case 'GENERAL':
         return t('context.general');
+      case 'DOCUMENT_ANALYSIS':
+        return t('context.document_analysis');
+      case 'TECHNICAL_SUPPORT':
+        return t('context.technical_support');
+      case 'CLASS_QUESTIONS':
+        return t('context.class_questions');
+      case 'OTHER':
+        return t('context.other');
       default:
         return contextType;
     }
@@ -405,6 +421,10 @@ export default function StudentTickets({ locale }: StudentTicketsProps) {
             <option value="ASSESSMENT">{t('contextFilter.assessment')}</option>
             <option value="FLASHCARD">{t('contextFilter.flashcard')}</option>
             <option value="GENERAL">{t('contextFilter.general')}</option>
+            <option value="DOCUMENT_ANALYSIS">{t('contextFilter.document_analysis')}</option>
+            <option value="TECHNICAL_SUPPORT">{t('contextFilter.technical_support')}</option>
+            <option value="CLASS_QUESTIONS">{t('contextFilter.class_questions')}</option>
+            <option value="OTHER">{t('contextFilter.other')}</option>
           </select>
         </div>
 

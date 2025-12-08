@@ -25,6 +25,8 @@ import {
   GraduationCap,
   PlayCircle,
   Upload,
+  FolderSearch,
+  UserCheck,
 } from 'lucide-react';
 
 import {
@@ -65,6 +67,12 @@ import FlashcardsList from '@/components/FlashcardsList';
 import FlashcardTagsList from '@/components/FlashcardTagsList';
 import FlashcardBulkImportModal from '@/components/FlashcardBulkImportModal';
 import CreateLiveSessionModal from '@/components/CreateLiveSessionModal';
+import CreatePersonalSessionModal from '@/components/CreatePersonalSessionModal';
+import UploadPersonalRecordingModal from '@/components/UploadPersonalRecordingModal';
+import PersonalSessionsList from '@/components/PersonalSessionsList';
+import PersonalRecordingsAdminList from '@/components/PersonalRecordingsAdminList';
+import MyCreatedRecordingsList from '@/components/MyCreatedRecordingsList';
+import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 
@@ -72,7 +80,7 @@ export default function AdminPage() {
   const t = useTranslations('Admin');
   const params = useParams();
   const locale = params?.locale || 'pt';
-  const { isAdmin, isTutor } = useAuth();
+  const { isAdmin, isTutor, isDocumentAnalyst } = useAuth();
 
   // Define a aba inicial baseada no role
   // Admin: overview, Tutor: courses, Outros: courses
@@ -100,8 +108,16 @@ export default function AdminPage() {
     setShowCreateLiveSessionModal,
   ] = useState(false);
   const [
+    showCreatePersonalSessionModal,
+    setShowCreatePersonalSessionModal,
+  ] = useState(false);
+  const [
     showFlashcardBulkImportModal,
     setShowFlashcardBulkImportModal,
+  ] = useState(false);
+  const [
+    showUploadRecordingModal,
+    setShowUploadRecordingModal,
   ] = useState(false);
 
   // Garante que não-admins não fiquem nas abas restritas
@@ -270,6 +286,18 @@ export default function AdminPage() {
               {t('tabs.liveSessions')}
             </TabsTrigger>
 
+            <TabsTrigger
+              value="personalSessions"
+              className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <UserCheck
+                className="-ms-0.5 me-2 opacity-60"
+                size={18}
+                aria-hidden="true"
+              />
+              {t('tabs.personalSessions')}
+            </TabsTrigger>
+
             {/* Apenas mostra a aba transactions para admins */}
             {isAdmin && (
               <TabsTrigger
@@ -296,6 +324,21 @@ export default function AdminPage() {
               />
               {t('tabs.tutor')}
             </TabsTrigger>
+
+            {/* Apenas mostra a aba studentDocuments para admins e document analysts */}
+            {(isAdmin || isDocumentAnalyst) && (
+              <TabsTrigger
+                value="studentDocuments"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <FolderSearch
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.studentDocuments')}
+              </TabsTrigger>
+            )}
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -780,6 +823,147 @@ export default function AdminPage() {
             </Tabs>
           </TabsContent>
 
+          {/* Personal Sessions Tab */}
+          <TabsContent value="personalSessions">
+            <div className="p-6 space-y-6">
+              <div className="text-center space-y-3 mb-6">
+                <h3 className="text-xl font-semibold text-white">
+                  {t('personalSessions.title')}
+                </h3>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  {t('personalSessions.description')}
+                </p>
+              </div>
+
+              {/* Sub-tabs for Personal Sessions */}
+              <Tabs defaultValue="mySessions" className="w-full">
+                <TabsList className={`grid w-full max-w-3xl mx-auto ${isAdmin ? 'grid-cols-5' : 'grid-cols-3'} bg-gray-800 p-1`}>
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="mySessions"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.mySessions')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="myRecordings"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                  >
+                    {t('personalSessions.tabs.myRecordings')}
+                  </TabsTrigger>
+                  {isAdmin && (
+                    <TabsTrigger
+                      value="list"
+                      className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                    >
+                      {t('personalSessions.tabs.list')}
+                    </TabsTrigger>
+                  )}
+                  {isAdmin && (
+                    <TabsTrigger
+                      value="allRecordings"
+                      className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark"
+                    >
+                      {t('personalSessions.tabs.allRecordings')}
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                {/* Create Session Sub-tab */}
+                <TabsContent value="create" className="mt-6">
+                  <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Zoom Session Card */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-blue-500/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-blue-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <Video size={24} className="text-blue-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <h4 className="text-lg font-semibold text-white">
+                              {t('personalSessions.zoomSession.title')}
+                            </h4>
+                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">
+                              Zoom
+                            </span>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('personalSessions.zoomSession.description')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowCreatePersonalSessionModal(true)}
+                          className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        >
+                          <Video size={18} />
+                          {t('personalSessions.zoomSession.button')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Manual Upload Card */}
+                    <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-all duration-200">
+                      <div className="text-center space-y-4">
+                        <div className="p-3 bg-purple-500/20 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                          <Upload size={24} className="text-purple-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <h4 className="text-lg font-semibold text-white">
+                              {t('personalSessions.manualUpload.title')}
+                            </h4>
+                            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full font-medium">
+                              Upload
+                            </span>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-4">
+                            {t('personalSessions.manualUpload.description')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setShowUploadRecordingModal(true)}
+                          className="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        >
+                          <Upload size={18} />
+                          {t('personalSessions.manualUpload.button')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* My Sessions Sub-tab */}
+                <TabsContent value="mySessions" className="mt-6">
+                  <MyHostedSessionsList />
+                </TabsContent>
+
+                {/* My Recordings Sub-tab */}
+                <TabsContent value="myRecordings" className="mt-6">
+                  <MyCreatedRecordingsList />
+                </TabsContent>
+
+                {/* List All Sessions Sub-tab (Admin only) */}
+                {isAdmin && (
+                  <TabsContent value="list" className="mt-6">
+                    <PersonalSessionsList />
+                  </TabsContent>
+                )}
+
+                {/* All Recordings Sub-tab (Admin only) */}
+                {isAdmin && (
+                  <TabsContent value="allRecordings" className="mt-6">
+                    <PersonalRecordingsAdminList />
+                  </TabsContent>
+                )}
+              </Tabs>
+            </div>
+          </TabsContent>
+
           {/* Apenas renderiza o conteúdo de transactions para admins */}
           {isAdmin && (
             <TabsContent value="transactions">
@@ -824,6 +1008,30 @@ export default function AdminPage() {
               </div>
             </div>
           </TabsContent>
+
+          {/* Apenas renderiza o conteúdo de studentDocuments para admins e document analysts */}
+          {(isAdmin || isDocumentAnalyst) && (
+            <TabsContent value="studentDocuments">
+              <div className="p-6 space-y-6">
+                <div className="text-center">
+                  <FolderSearch className="mx-auto mb-4 text-secondary" size={48} />
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {t('studentDocuments.pageTitle')}
+                  </h2>
+                  <p className="text-gray-400 mb-6">
+                    {t('studentDocuments.pageDescription')}
+                  </p>
+                  <a
+                    href={`/${locale}/admin/student-documents`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-primary-dark font-semibold rounded-lg hover:bg-secondary/80 transition-colors"
+                  >
+                    <FolderSearch size={20} />
+                    {t('studentDocuments.accessButton')}
+                  </a>
+                </div>
+              </div>
+            </TabsContent>
+          )}
         </div>
       </Tabs>
 
@@ -864,6 +1072,24 @@ export default function AdminPage() {
         onSuccess={() => {
           console.log('Live session created successfully');
           // Could refresh a list of live sessions here if needed
+        }}
+      />
+
+      {/* Personal Session Creation Modal */}
+      <CreatePersonalSessionModal
+        open={showCreatePersonalSessionModal}
+        onClose={() => setShowCreatePersonalSessionModal(false)}
+        onSuccess={() => {
+          console.log('Personal session created successfully');
+        }}
+      />
+
+      {/* Upload Personal Recording Modal */}
+      <UploadPersonalRecordingModal
+        open={showUploadRecordingModal}
+        onClose={() => setShowUploadRecordingModal(false)}
+        onSuccess={() => {
+          console.log('Recording uploaded successfully');
         }}
       />
 

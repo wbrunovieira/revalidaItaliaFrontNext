@@ -1,12 +1,12 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Shield, Users, GraduationCap } from 'lucide-react';
+import { Shield, Users, GraduationCap, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
 interface RoleBadgeProps {
-  role: 'student' | 'admin' | 'tutor';
+  role: 'student' | 'admin' | 'tutor' | 'document_analyst';
   className?: string;
 }
 
@@ -20,6 +20,11 @@ const roleConfig = {
     icon: Users,
     labelKey: 'tutor',
     className: 'bg-gradient-to-r from-[#3887A6]/20 to-amber-500/10 text-[#3887A6] border-amber-500/40 hover:from-[#3887A6]/30 hover:to-amber-500/20',
+  },
+  document_analyst: {
+    icon: FileText,
+    labelKey: 'document_analyst',
+    className: 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30',
   },
   student: {
     icon: GraduationCap,

@@ -1,3 +1,4 @@
+// /src/components/DocumentConversations.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { ViewTicketModal } from './ViewTicketModal';
 import Image from 'next/image';
 import {
-  HelpCircle,
+  FileSearch,
   MessageSquare,
   User,
   Calendar,
@@ -17,11 +18,11 @@ import {
   ChevronLeft,
   Clock,
   Paperclip,
-  Tag,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
 
-// Types for Support Tickets
-type ContextType = 'LESSON' | 'ASSESSMENT' | 'FLASHCARD' | 'GENERAL' | 'DOCUMENT_ANALYSIS' | 'TECHNICAL_SUPPORT' | 'CLASS_QUESTIONS' | 'OTHER';
+type TicketStatus = 'OPEN' | 'ANSWERED' | 'RESOLVED';
 
 interface PaginationMeta {
   page: number;
@@ -32,10 +33,10 @@ interface PaginationMeta {
 
 interface TicketListItem {
   id: string;
-  contextType: ContextType;
+  contextType: string;
   contextId: string | null;
   contextTitle: string;
-  status: 'OPEN' | 'ANSWERED' | 'RESOLVED';
+  status: TicketStatus;
   student: {
     id: string;
     fullName: string;
@@ -54,20 +55,19 @@ interface TicketsResponse {
   meta: PaginationMeta;
 }
 
-interface TutorSupportProps {
+interface DocumentConversationsProps {
   locale: string;
 }
 
-export default function TutorSupport({ locale }: TutorSupportProps) {
+export default function DocumentConversations({ locale }: DocumentConversationsProps) {
   const { toast } = useToast();
-  const t = useTranslations('Admin.support');
+  const t = useTranslations('Admin.studentDocuments.conversations');
   const [tickets, setTickets] = useState<TicketListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'pending' | 'OPEN' | 'ANSWERED' | 'RESOLVED'>('pending');
-  const [contextFilter, setContextFilter] = useState<ContextType | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | TicketStatus>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -89,20 +89,21 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
       const params = new URLSearchParams({
         page: page.toString(),
         perPage: perPage.toString(),
+        contextType: 'DOCUMENT_ANALYSIS', // Only document analysis conversations
       });
 
-      // Add status filter for non-pending requests
-      if (statusFilter !== 'pending') {
+      // Add status filter
+      if (statusFilter !== 'all') {
         params.append('status', statusFilter);
       }
-      
-      // Use different endpoint based on status filter
-      const endpoint = statusFilter === 'pending' 
-        ? `${apiUrl}/api/v1/support/tickets/pending?${params}`
-        : `${apiUrl}/api/v1/support/tickets?${params}`;
+
+      // Add search term
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
 
       const response = await fetch(
-        endpoint,
+        `${apiUrl}/api/v1/support/tickets?${params}`,
         {
           method: 'GET',
           headers: {
@@ -113,17 +114,12 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         }
       );
 
-      console.log('Support tickets response status:', response.status);
-      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch support tickets: ${response.status}`);
+        throw new Error(`Failed to fetch tickets: ${response.status}`);
       }
 
       const data: TicketsResponse = await response.json();
-      console.log('Support tickets data:', data);
-      
+
       setTickets(data.tickets || []);
       setMeta(data.meta || {
         page: 1,
@@ -132,9 +128,8 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         totalPages: 0
       });
     } catch (error) {
-      console.error('Error fetching support tickets:', error);
-      
-      // Set empty data to show the empty state instead of error
+      console.error('Error fetching document conversations:', error);
+
       setTickets([]);
       setMeta({
         page: 1,
@@ -142,8 +137,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         total: 0,
         totalPages: 0
       });
-      
-      // Only show toast for network errors, not 404s
+
       if (error instanceof Error && !error.message.includes('404')) {
         toast({
           title: t('error.fetchTitle'),
@@ -154,13 +148,13 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, page, perPage, statusFilter, t, toast]);
+  }, [apiUrl, page, perPage, statusFilter, searchTerm, t, toast]);
 
   useEffect(() => {
     fetchTickets();
-  }, [fetchTickets, statusFilter]);
+  }, [fetchTickets]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: TicketStatus) => {
     switch (status) {
       case 'OPEN':
         return 'text-blue-400 bg-blue-900/20';
@@ -173,7 +167,20 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusIcon = (status: TicketStatus) => {
+    switch (status) {
+      case 'OPEN':
+        return <AlertCircle size={14} />;
+      case 'ANSWERED':
+        return <MessageSquare size={14} />;
+      case 'RESOLVED':
+        return <CheckCircle size={14} />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusText = (status: TicketStatus) => {
     switch (status) {
       case 'OPEN':
         return t('status.open');
@@ -183,52 +190,6 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         return t('status.resolved');
       default:
         return status;
-    }
-  };
-
-  const getContextColor = (contextType: ContextType) => {
-    switch (contextType) {
-      case 'LESSON':
-        return 'text-purple-400 bg-purple-900/20';
-      case 'ASSESSMENT':
-        return 'text-orange-400 bg-orange-900/20';
-      case 'FLASHCARD':
-        return 'text-pink-400 bg-pink-900/20';
-      case 'GENERAL':
-        return 'text-gray-400 bg-gray-900/20';
-      case 'DOCUMENT_ANALYSIS':
-        return 'text-cyan-400 bg-cyan-900/20';
-      case 'TECHNICAL_SUPPORT':
-        return 'text-red-400 bg-red-900/20';
-      case 'CLASS_QUESTIONS':
-        return 'text-emerald-400 bg-emerald-900/20';
-      case 'OTHER':
-        return 'text-slate-400 bg-slate-900/20';
-      default:
-        return 'text-gray-400 bg-gray-900/20';
-    }
-  };
-
-  const getContextText = (contextType: ContextType) => {
-    switch (contextType) {
-      case 'LESSON':
-        return t('context.lesson');
-      case 'ASSESSMENT':
-        return t('context.assessment');
-      case 'FLASHCARD':
-        return t('context.flashcard');
-      case 'GENERAL':
-        return t('context.general');
-      case 'DOCUMENT_ANALYSIS':
-        return t('context.document_analysis');
-      case 'TECHNICAL_SUPPORT':
-        return t('context.technical_support');
-      case 'CLASS_QUESTIONS':
-        return t('context.class_questions');
-      case 'OTHER':
-        return t('context.other');
-      default:
-        return contextType;
     }
   };
 
@@ -242,20 +203,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
     });
   };
 
-  // Unused function kept for future reference
-  // const formatFileSize = (bytes: number) => {
-  //   if (bytes < 1024) return bytes + ' B';
-  //   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  //   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  // };
-
   const filteredTickets = tickets.filter(ticket => {
-    // Filter by context type
-    if (contextFilter !== 'all' && ticket.contextType !== contextFilter) {
-      return false;
-    }
-
-    // Filter by search term
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       return (
@@ -263,9 +211,13 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         ticket.contextTitle.toLowerCase().includes(search)
       );
     }
-
     return true;
   });
+
+  // Count tickets by status
+  const openCount = tickets.filter(t => t.status === 'OPEN').length;
+  const answeredCount = tickets.filter(t => t.status === 'ANSWERED').length;
+  const resolvedCount = tickets.filter(t => t.status === 'RESOLVED').length;
 
   if (loading) {
     return (
@@ -298,10 +250,22 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <HelpCircle size={24} className="text-blue-400" />
+            <FileSearch size={24} className="text-purple-400" />
+            <div>
+              <p className="text-2xl font-bold text-purple-400">
+                {meta?.total || 0}
+              </p>
+              <p className="text-gray-400 text-sm">{t('stats.total')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-gray-800 rounded-lg">
+          <div className="flex items-center gap-3">
+            <AlertCircle size={24} className="text-blue-400" />
             <div>
               <p className="text-2xl font-bold text-blue-400">
-                {tickets.length}
+                {openCount}
               </p>
               <p className="text-gray-400 text-sm">{t('stats.open')}</p>
             </div>
@@ -310,36 +274,24 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
 
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <Clock size={24} className="text-yellow-400" />
+            <MessageSquare size={24} className="text-yellow-400" />
             <div>
               <p className="text-2xl font-bold text-yellow-400">
-                {tickets.filter(t => t.hasAttachments).length}
+                {answeredCount}
               </p>
-              <p className="text-gray-400 text-sm">{t('stats.withAttachments') || 'Com Anexos'}</p>
+              <p className="text-gray-400 text-sm">{t('stats.answered')}</p>
             </div>
           </div>
         </div>
 
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3">
-            <User size={24} className="text-purple-400" />
-            <div>
-              <p className="text-2xl font-bold text-purple-400">
-                {[...new Set(tickets.map(t => t.student.id))].length}
-              </p>
-              <p className="text-gray-400 text-sm">{t('stats.uniqueStudents')}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-gray-800 rounded-lg">
-          <div className="flex items-center gap-3">
-            <MessageSquare size={24} className="text-green-400" />
+            <CheckCircle size={24} className="text-green-400" />
             <div>
               <p className="text-2xl font-bold text-green-400">
-                {tickets.reduce((sum, t) => sum + t.messageCount, 0)}
+                {resolvedCount}
               </p>
-              <p className="text-gray-400 text-sm">{t('stats.totalMessages') || 'Total de Mensagens'}</p>
+              <p className="text-gray-400 text-sm">{t('stats.resolved')}</p>
             </div>
           </div>
         </div>
@@ -348,14 +300,14 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
       {/* Status Filter Buttons */}
       <div className="flex gap-2 mb-4">
         <button
-          onClick={() => setStatusFilter('pending')}
+          onClick={() => setStatusFilter('all')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            statusFilter === 'pending'
+            statusFilter === 'all'
               ? 'bg-secondary text-primary'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
           }`}
         >
-          {t('filter.pending')}
+          {t('filter.all')}
         </button>
         <button
           onClick={() => setStatusFilter('OPEN')}
@@ -389,28 +341,8 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         </button>
       </div>
 
-      {/* Filters */}
+      {/* Search */}
       <div className="flex flex-col md:flex-row gap-4 items-center">
-
-        <div className="flex items-center gap-2">
-          <Tag size={20} className="text-gray-400" />
-          <select
-            value={contextFilter}
-            onChange={(e) => setContextFilter(e.target.value as ContextType | 'all')}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-secondary focus:outline-none"
-          >
-            <option value="all">{t('contextFilter.all')}</option>
-            <option value="LESSON">{t('contextFilter.lesson')}</option>
-            <option value="ASSESSMENT">{t('contextFilter.assessment')}</option>
-            <option value="FLASHCARD">{t('contextFilter.flashcard')}</option>
-            <option value="GENERAL">{t('contextFilter.general')}</option>
-            <option value="DOCUMENT_ANALYSIS">{t('contextFilter.document_analysis')}</option>
-            <option value="TECHNICAL_SUPPORT">{t('contextFilter.technical_support')}</option>
-            <option value="CLASS_QUESTIONS">{t('contextFilter.class_questions')}</option>
-            <option value="OTHER">{t('contextFilter.other')}</option>
-          </select>
-        </div>
-
         <div className="relative flex-1 max-w-md">
           <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
@@ -431,14 +363,14 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
       <div className="space-y-4">
         {filteredTickets.length === 0 ? (
           <div className="text-center py-12 bg-gray-800 rounded-lg">
-            <HelpCircle size={48} className="text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-400 mb-2">{t('noTickets')}</h3>
-            <p className="text-gray-500">{t('noTicketsDescription')}</p>
+            <FileSearch size={48} className="text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-400 mb-2">{t('noConversations')}</h3>
+            <p className="text-gray-500">{t('noConversationsDescription')}</p>
           </div>
         ) : (
           filteredTickets.map((ticket) => (
             <div key={ticket.id} className="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
                   {/* Student Avatar */}
                   <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
@@ -461,24 +393,25 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                       <h3 className="text-lg font-semibold text-white">
                         {ticket.student.fullName}
                       </h3>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ticket.status || 'OPEN')}`}>
-                        {getStatusText(ticket.status || 'OPEN')}
-                      </span>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getContextColor(ticket.contextType)}`}>
-                        {getContextText(ticket.contextType)}
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                        {getStatusIcon(ticket.status)}
+                        {getStatusText(ticket.status)}
                       </span>
                     </div>
 
-                    {/* Context Title */}
+                    {/* Document Title */}
                     {ticket.contextTitle && (
-                      <p className="text-sm text-gray-400 mb-2">
-                        {ticket.contextTitle}
-                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileSearch size={16} className="text-purple-400" />
+                        <p className="text-sm text-gray-300">
+                          {ticket.contextTitle}
+                        </p>
+                      </div>
                     )}
 
-                    {/* Message Count Info */}
+                    {/* Message Count */}
                     <p className="text-white mb-3">
-                      {ticket.messageCount} {ticket.messageCount === 1 ? 'mensagem' : 'mensagens'} na conversa
+                      {ticket.messageCount} {ticket.messageCount === 1 ? t('message') : t('messages')}
                     </p>
 
                     {/* Attachments */}
@@ -486,7 +419,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                       <div className="flex items-center gap-2 mb-3">
                         <Paperclip size={16} className="text-gray-400" />
                         <span className="text-sm text-gray-400">
-                          {t('attachments')}
+                          {t('hasAttachments')}
                         </span>
                       </div>
                     )}
@@ -497,16 +430,10 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
                         <Calendar size={14} />
                         <span>{formatDate(ticket.createdAt)}</span>
                       </div>
-                      {ticket.messageCount > 1 && (
-                        <div className="flex items-center gap-1">
-                          <MessageSquare size={14} />
-                          <span>{ticket.messageCount} {t('messages') || 'mensagens'}</span>
-                        </div>
-                      )}
                       {ticket.lastMessageAt && (
                         <div className="flex items-center gap-1">
                           <Clock size={14} />
-                          <span>Última: {formatDate(ticket.lastMessageAt)}</span>
+                          <span>{t('lastMessage')}: {formatDate(ticket.lastMessageAt)}</span>
                         </div>
                       )}
                     </div>
@@ -597,7 +524,7 @@ export default function TutorSupport({ locale }: TutorSupportProps) {
         }}
         ticketId={selectedTicketId}
         onStatusChange={() => {
-          fetchTickets(); // Refresh the list after status change
+          fetchTickets();
         }}
         isTutor={true}
       />

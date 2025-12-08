@@ -25,7 +25,7 @@ export interface User {
   email: string;
   name: string; // ESSENCIAL - usado em 10+ componentes
   fullName?: string; // Nome completo retornado pelo login
-  role: 'admin' | 'student' | 'tutor'; // ESSENCIAL - controle de acesso
+  role: 'admin' | 'student' | 'tutor' | 'document_analyst'; // ESSENCIAL - controle de acesso
   profileImageUrl?: string;
   nationalId?: string; // CPF
   phone?: string;
@@ -172,7 +172,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     fullName: string;
-    role: 'student' | 'admin' | 'tutor';
+    role: 'student' | 'admin' | 'tutor' | 'document_analyst';
     profileImageUrl: string | null;
   };
   session?: Session; // 🆕 Informações da sessão (opcional)
@@ -215,6 +215,7 @@ export interface AuthState {
   isAdmin: boolean;
   isTutor: boolean;
   isStudent: boolean;
+  isDocumentAnalyst: boolean;
 
   // Actions principais
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -236,7 +237,8 @@ export interface AuthState {
   // Helpers de permissão
   canAccessAdmin: () => boolean;
   canAccessTutorArea: () => boolean;
-  hasRole: (role: 'admin' | 'student' | 'tutor') => boolean;
+  canAccessStudentDocuments: () => boolean;
+  hasRole: (role: 'admin' | 'student' | 'tutor' | 'document_analyst') => boolean;
 
   // Rate limit helpers
   clearRateLimit: () => void;
@@ -379,6 +381,7 @@ export const useAuthStore = create<AuthState>()(
       isAdmin: false,
       isTutor: false,
       isStudent: false,
+      isDocumentAnalyst: false,
 
       // Action: Login
       login: async (credentials) => {
@@ -549,6 +552,7 @@ export const useAuthStore = create<AuthState>()(
               isAdmin: userData.role === 'admin',
               isTutor: userData.role === 'tutor',
               isStudent: userData.role === 'student',
+              isDocumentAnalyst: userData.role === 'document_analyst',
             });
 
             console.log('✅ Login realizado com sucesso!', {
@@ -659,6 +663,7 @@ export const useAuthStore = create<AuthState>()(
           isAdmin: false,
           isTutor: false,
           isStudent: false,
+          isDocumentAnalyst: false,
         });
 
         console.log('👋 Logout realizado - todos os dados limpos (incluindo refreshToken)');
@@ -679,12 +684,13 @@ export const useAuthStore = create<AuthState>()(
         const currentUser = get().user;
         if (currentUser) {
           const updatedUser = { ...currentUser, ...userData };
-          set({ 
+          set({
             user: updatedUser,
             // Atualizar computed properties se role mudou
             isAdmin: updatedUser.role === 'admin',
             isTutor: updatedUser.role === 'tutor',
             isStudent: updatedUser.role === 'student',
+            isDocumentAnalyst: updatedUser.role === 'document_analyst',
           });
           console.log('👤 Usuário atualizado:', updatedUser);
         }
@@ -786,13 +792,14 @@ export const useAuthStore = create<AuthState>()(
             lastLogin: profileData.lastLogin,
           };
 
-          set({ 
+          set({
             user: updatedUser,
             profileCompleteness,
             isAdmin: updatedUser.role === 'admin',
             isTutor: updatedUser.role === 'tutor',
             isStudent: updatedUser.role === 'student',
-            isLoading: false 
+            isDocumentAnalyst: updatedUser.role === 'document_analyst',
+            isLoading: false,
           });
 
           console.log('✅ Perfil atualizado com sucesso:', updatedUser);
@@ -912,31 +919,34 @@ export const useAuthStore = create<AuthState>()(
             let termsAcceptance = null;
 
             try {
-              const authStorage = localStorage.getItem('auth-storage');
-              if (authStorage) {
-                const parsed = JSON.parse(authStorage);
-                if (parsed?.state) {
-                  // Se não tiver nome no userData, pega do storage
-                  if (!userData?.name && parsed.state.user) {
-                    userData = parsed.state.user;
+              // Verificar se está no servidor (SSR)
+              if (typeof window !== 'undefined') {
+                const authStorage = localStorage.getItem('auth-storage');
+                if (authStorage) {
+                  const parsed = JSON.parse(authStorage);
+                  if (parsed?.state) {
+                    // Se não tiver nome no userData, pega do storage
+                    if (!userData?.name && parsed.state.user) {
+                      userData = parsed.state.user;
+                    }
+                    // Recupera os outros dados do storage
+                    refreshToken = parsed.state.refreshToken;
+                    expiresIn = parsed.state.expiresIn;
+                    tokenExpiresAt = parsed.state.tokenExpiresAt;
+                    session = parsed.state.session; // 🆕 Restaurar session
+                    deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
+                    lastRevokedSession = parsed.state.lastRevokedSession; // 🆕 Restaurar lastRevokedSession
+                    profileCompleteness = parsed.state.profileCompleteness;
+                    communityProfile = parsed.state.communityProfile;
+                    meta = parsed.state.meta;
+                    termsAcceptance = parsed.state.termsAcceptance;
                   }
-                  // Recupera os outros dados do storage
-                  refreshToken = parsed.state.refreshToken;
-                  expiresIn = parsed.state.expiresIn;
-                  tokenExpiresAt = parsed.state.tokenExpiresAt;
-                  session = parsed.state.session; // 🆕 Restaurar session
-                  deviceInfo = parsed.state.deviceInfo; // 🆕 Restaurar deviceInfo
-                  lastRevokedSession = parsed.state.lastRevokedSession; // 🆕 Restaurar lastRevokedSession
-                  profileCompleteness = parsed.state.profileCompleteness;
-                  communityProfile = parsed.state.communityProfile;
-                  meta = parsed.state.meta;
-                  termsAcceptance = parsed.state.termsAcceptance;
                 }
-              }
 
-              // Se não encontrou refreshToken no state, tenta do localStorage direto
-              if (!refreshToken && typeof window !== 'undefined') {
-                refreshToken = localStorage.getItem('refreshToken');
+                // Se não encontrou refreshToken no state, tenta do localStorage direto
+                if (!refreshToken) {
+                  refreshToken = localStorage.getItem('refreshToken');
+                }
               }
             } catch (e) {
               console.log('Parse error:', e);
@@ -963,6 +973,7 @@ export const useAuthStore = create<AuthState>()(
               isAdmin: userData?.role === 'admin',
               isTutor: userData?.role === 'tutor',
               isStudent: userData?.role === 'student',
+              isDocumentAnalyst: userData?.role === 'document_analyst',
             });
 
             console.log('🔐 Auth inicializado do token existente:', {
@@ -1245,6 +1256,12 @@ export const useAuthStore = create<AuthState>()(
         return state.isAuthenticated && (state.user?.role === 'tutor' || state.user?.role === 'admin');
       },
 
+      // Helper: Can Access Student Documents Area
+      canAccessStudentDocuments: () => {
+        const state = get();
+        return state.isAuthenticated && (state.user?.role === 'document_analyst' || state.user?.role === 'admin');
+      },
+
       // Helper: Has Role
       hasRole: (role) => {
         const state = get();
@@ -1320,6 +1337,11 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage', // nome da chave no localStorage
       storage: createJSONStorage(() => ({
         getItem: (name) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return null;
+          }
+
           // Tentar múltiplas fontes
           const cookieValue = getCookie('auth-storage');
           if (cookieValue) {
@@ -1327,17 +1349,27 @@ export const useAuthStore = create<AuthState>()(
               return cookieValue;
             } catch {}
           }
-          
+
           // Fallback para localStorage
           return localStorage.getItem(name);
         },
         setItem: (name, value) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return;
+          }
+
           // Salvar em múltiplos lugares
           localStorage.setItem(name, value);
           // Também salvar em cookie para SSR
           setCookie('auth-storage', value, 7);
         },
         removeItem: (name) => {
+          // Verificar se está no servidor (SSR)
+          if (typeof window === 'undefined') {
+            return;
+          }
+
           localStorage.removeItem(name);
           removeCookie('auth-storage');
         },
@@ -1371,8 +1403,9 @@ export const useAuth = () => {
     ...store,
     // Adicionar qualquer computed property adicional aqui
     displayName: store.user?.name || 'Usuário',
-    roleLabel: store.user?.role === 'admin' ? 'Administrador' : 
-               store.user?.role === 'tutor' ? 'Tutor' : 'Estudante',
+    roleLabel: store.user?.role === 'admin' ? 'Administrador' :
+               store.user?.role === 'tutor' ? 'Tutor' :
+               store.user?.role === 'document_analyst' ? 'Analista de Documentos' : 'Estudante',
     // Helper para verificar se o perfil precisa ser completado
     needsProfileCompletion: store.meta?.requiresProfileCompletion || false,
     profilePercentage: store.profileCompleteness?.percentage || 0,

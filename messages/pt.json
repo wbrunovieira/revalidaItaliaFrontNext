@@ -24,6 +24,108 @@
       "device": "dispositivo"
     }
   },
+  "documentPreview": {
+    "title": "Detalhes do Documento",
+    "loading": "Carregando documento...",
+    "retry": "Tentar novamente",
+    "close": "Fechar",
+    "download": "Baixar Documento",
+    "student": "Estudante",
+    "description": "Descrição",
+    "rejectionReason": "Motivo da Rejeição",
+    "internalNotes": "Notas Internas",
+    "noNotes": "Sem notas",
+    "documentType": "Tipo de Documento",
+    "fileSize": "Tamanho do Arquivo",
+    "uploadedAt": "Enviado em",
+    "updatedAt": "Atualizado em",
+    "status": {
+      "pendingReview": "Aguardando Análise",
+      "underReview": "Em Análise",
+      "approved": "Aprovado",
+      "rejected": "Rejeitado",
+      "needsReplacement": "Substituição Necessária",
+      "needsAdditionalInfo": "Info Adicional Necessária"
+    },
+    "error": {
+      "fetchFailed": "Erro ao carregar documento",
+      "notFound": "Documento não encontrado",
+      "unauthorized": "Sessão expirada"
+    }
+  },
+  "editDocument": {
+    "title": "Editar Documento",
+    "loading": "Carregando...",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "success": "Documento atualizado com sucesso",
+    "adminOnly": "apenas admin/analista",
+    "fields": {
+      "name": "Nome do Documento",
+      "description": "Descrição",
+      "reviewNotes": "Notas Internas"
+    },
+    "placeholders": {
+      "name": "Digite o nome do documento",
+      "description": "Adicione uma descrição (opcional)",
+      "reviewNotes": "Adicione notas internas sobre este documento"
+    },
+    "validation": {
+      "nameRequired": "O nome é obrigatório",
+      "nameTooLong": "O nome deve ter no máximo 255 caracteres",
+      "descriptionTooLong": "A descrição deve ter no máximo 1000 caracteres",
+      "reviewNotesTooLong": "As notas devem ter no máximo 2000 caracteres"
+    },
+    "error": {
+      "fetchFailed": "Erro ao carregar documento",
+      "notFound": "Documento não encontrado",
+      "unauthorized": "Sessão expirada",
+      "forbidden": "Você não tem permissão para editar este documento",
+      "saveFailed": "Erro ao salvar documento",
+      "validationFailed": "Erro de validação"
+    },
+    "fileReplace": {
+      "title": "Substituir Arquivo",
+      "dropzone": "Arraste um arquivo ou clique para selecionar",
+      "formats": "PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (máx. 10MB)",
+      "replaceButton": "Substituir Arquivo",
+      "replacing": "Substituindo...",
+      "success": "Arquivo substituído com sucesso",
+      "uploadFailed": "Erro ao substituir arquivo",
+      "fileTooLarge": "Arquivo muito grande (máx. 10MB)",
+      "invalidType": "Tipo de arquivo não permitido"
+    }
+  },
+  "documentChat": {
+    "title": "Conversar sobre Documento",
+    "documentInfo": "Documento",
+    "studentInfo": "Estudante",
+    "info": "Esta mensagem será enviada diretamente ao estudante como um ticket de suporte relacionado a este documento.",
+    "messageLabel": "Mensagem",
+    "messagePlaceholder": "Digite sua mensagem para o estudante sobre este documento...",
+    "minChars": "Mínimo {min} caracteres",
+    "shortcutHint": "Pressione Ctrl+Enter para enviar",
+    "cancel": "Cancelar",
+    "send": "Enviar Mensagem",
+    "sending": "Enviando...",
+    "success": {
+      "title": "Mensagem enviada!",
+      "description": "O estudante receberá sua mensagem em seus tickets.",
+      "chatStarted": "Conversa iniciada com sucesso",
+      "messageAdded": "Mensagem adicionada à conversa existente"
+    },
+    "validation": {
+      "messageTooShort": "A mensagem deve ter pelo menos 10 caracteres",
+      "messageTooLong": "A mensagem deve ter no máximo 5000 caracteres"
+    },
+    "error": {
+      "documentNotFound": "Documento não encontrado",
+      "notAuthorized": "Você não tem permissão para esta ação",
+      "sendFailed": "Erro ao enviar mensagem"
+    }
+  },
   "Notifications": {
     "title": "Notificações",
     "notifications": "Notificações",
@@ -371,7 +473,86 @@
     },
     "page": "Página {current} de {total}",
     "previous": "Anterior",
-    "next": "Próxima"
+    "next": "Próxima",
+    "personalSessions": {
+      "title": "Sessões Individuais",
+      "description": "Suas sessões individuais agendadas com tutores",
+      "groupSessions": "Aulas em Grupo",
+      "groupSessionsDescription": "Sessões ao vivo com múltiplos participantes",
+      "loading": "Carregando suas sessões...",
+      "noSessions": "Nenhuma sessão individual",
+      "noSessionsDescription": "Você não tem sessões individuais agendadas no momento",
+      "individualSession": "Individual",
+      "hasRecording": "Gravação",
+      "tutor": "Tutor",
+      "duration": "Duração",
+      "scheduledFor": "Agendado para",
+      "joinNow": "Entrar Agora",
+      "joinSession": "Acessar Sessão",
+      "status": {
+        "scheduled": "Agendada",
+        "live": "Ao Vivo",
+        "ended": "Encerrada",
+        "cancelled": "Cancelada"
+      },
+      "joining": "Entrando...",
+      "error": {
+        "fetchTitle": "Erro ao carregar sessões",
+        "fetchDescription": "Não foi possível carregar suas sessões individuais",
+        "joinTitle": "Erro ao entrar na sessão",
+        "joinDescription": "Não foi possível entrar na sessão. Tente novamente.",
+        "authTitle": "Autenticação necessária",
+        "authDescription": "Você precisa estar autenticado para entrar na sessão",
+        "accessDeniedTitle": "Acesso negado",
+        "accessDeniedDescription": "Você não tem acesso a esta sessão",
+        "notFoundTitle": "Sessão não encontrada",
+        "notFoundDescription": "Esta sessão não existe ou foi removida",
+        "unavailableTitle": "Sessão indisponível",
+        "unavailableDescription": "Esta sessão não está disponível para entrada no momento",
+        "sessionEndedDescription": "Esta sessão já foi encerrada",
+        "noUrlDescription": "O link de acesso ainda não está disponível. Tente novamente em alguns instantes.",
+        "tokenExpiredTitle": "Link expirado",
+        "tokenExpiredDescription": "O link de entrada expirou ou já foi usado. Tente novamente."
+      },
+      "success": {
+        "joiningTitle": "Entrando na sessão",
+        "joiningDescription": "Redirecionando para: {title}"
+      }
+    },
+    "personalRecordings": {
+      "title": "Gravações Individuais",
+      "description": "Gravações das suas sessões individuais com tutores",
+      "groupRecordings": "Gravações de Aulas em Grupo",
+      "groupRecordingsDescription": "Gravações das aulas ao vivo em grupo",
+      "loading": "Carregando gravações...",
+      "noRecordings": "Nenhuma gravação disponível",
+      "noRecordingsDescription": "Suas gravações de sessões individuais aparecerão aqui",
+      "individualSession": "Individual",
+      "manualUpload": "Upload Manual",
+      "zoomRecording": "Gravação Zoom",
+      "tutor": "Tutor",
+      "duration": "Duração",
+      "fileSize": "Tamanho",
+      "recordedOn": "Gravado em",
+      "views": "visualizações",
+      "watch": "Assistir",
+      "processingVideo": "Processando vídeo...",
+      "videoNotAvailable": "Vídeo não disponível",
+      "status": {
+        "available": "Disponível",
+        "processing": "Processando",
+        "failed": "Falhou"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar gravações",
+        "fetchDescription": "Não foi possível carregar suas gravações"
+      },
+      "modal": {
+        "loadingDetails": "Carregando detalhes...",
+        "fullscreen": "Tela cheia",
+        "exitFullscreen": "Sair da tela cheia"
+      }
+    }
   },
     "ViewTicket": {
     "title": "Detalhes do Ticket",
@@ -402,6 +583,7 @@
     "role": {
       "student": "Aluno",
       "tutor": "Tutor",
+      "document_analyst": "Analista de Documentos",
       "admin": "Admin"
     },
     "error": {
@@ -488,7 +670,11 @@
       "lesson": "Aula",
       "assessment": "Avaliação",
       "flashcard": "Flashcard",
-      "general": "Geral"
+      "general": "Geral",
+      "document_analysis": "Análise de Documento",
+      "technical_support": "Suporte Técnico",
+      "class_questions": "Perguntas de Aula",
+      "other": "Outros"
     },
     "filter": {
       "all": "Todos",
@@ -501,7 +687,11 @@
       "lesson": "Aulas",
       "assessment": "Avaliações",
       "flashcard": "Flashcards",
-      "general": "Geral"
+      "general": "Geral",
+      "document_analysis": "Análise de Documento",
+      "technical_support": "Suporte Técnico",
+      "class_questions": "Perguntas de Aula",
+      "other": "Outros"
     },
     "searchPlaceholder": "Buscar em títulos e conteúdo...",
     "error": {
@@ -527,11 +717,16 @@
       "title": "Enviar Dúvida",
       "subtitle": "Estamos aqui para ajudar",
       "generalContext": "Dúvida Geral",
+      "categoryLabel": "Categoria",
       "contextTypes": {
         "lesson": "Aula",
         "assessment": "Avaliação",
         "flashcard": "Flashcard",
-        "general": "Geral"
+        "general": "Geral",
+        "document_analysis": "Análise de Documento",
+        "technical_support": "Suporte Técnico",
+        "class_questions": "Perguntas de Aula",
+        "other": "Outros"
       },
       "questionLabel": "Qual é sua dúvida?",
       "questionPlaceholder": "Descreva sua dúvida de forma clara e detalhada. O professor receberá sua mensagem e responderá assim que possível.",
@@ -1032,6 +1227,76 @@
         "fetchDescription": "Não foi possível carregar seus certificados. Tente novamente.",
         "downloadTitle": "Erro ao baixar certificado",
         "downloadDescription": "Não foi possível baixar o certificado. Tente novamente."
+      }
+    },
+    "documents": {
+      "title": "Meus Documentos",
+      "description": "Envie seus documentos para validação de credenciais",
+      "uploadButton": "Enviar Documento",
+      "uploading": "Enviando",
+      "dragDropText": "Arraste e solte arquivos aqui ou clique para selecionar",
+      "supportedFormats": "PDF, JPG, PNG, DOC, DOCX (máx. 10MB)",
+      "noDocuments": "Nenhum documento enviado",
+      "noDocumentsHint": "Envie seus documentos para iniciar o processo de validação",
+      "view": "Visualizar",
+      "edit": "Editar",
+      "download": "Baixar",
+      "delete": "Excluir",
+      "deleteConfirmTitle": "Excluir Documento",
+      "deleteConfirmMessage": "Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirmDelete": "Excluir",
+      "reviewNotes": "Observações",
+      "previewImagePlaceholder": "Preview da imagem será exibido aqui",
+      "previewNotAvailable": "Preview não disponível para este tipo de arquivo",
+      "downloadToView": "Baixar para visualizar",
+      "upload": {
+        "title": "Enviar Documento",
+        "nameLabel": "Nome do Documento",
+        "namePlaceholder": "Ex: Diploma de Medicina",
+        "descriptionLabel": "Descrição (opcional)",
+        "descriptionPlaceholder": "Adicione uma descrição para o documento...",
+        "submit": "Enviar",
+        "clickToChange": "Clique para alterar o arquivo",
+        "supportedFormatsDetail": "PDF, Word, Excel, Imagens (máx. 50MB)",
+        "unsupportedType": "Tipo de arquivo não suportado",
+        "fileTooLarge": "Arquivo muito grande (máx. 50MB)",
+        "invalidRequest": "Requisição inválida",
+        "unauthorized": "Não autorizado",
+        "studentNotFound": "Estudante não encontrado",
+        "failed": "Falha ao enviar documento",
+        "successTitle": "Documento enviado!",
+        "successDescription": "Seu documento foi enviado com sucesso.",
+        "errorTitle": "Erro ao enviar",
+        "uploadingFor": "Enviando para"
+      },
+      "types": {
+        "diploma": "Diploma",
+        "certificate": "Certificado",
+        "id": "Documento de Identidade",
+        "passport": "Passaporte",
+        "transcript": "Histórico Escolar",
+        "other": "Outro"
+      },
+      "status": {
+        "pending": "Pendente",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "under_review": "Em Análise",
+        "needs_replacement": "Substituição Necessária",
+        "needs_additional_info": "Informação Adicional"
+      },
+      "loading": "Carregando documentos...",
+      "retry": "Tentar Novamente",
+      "actionRequired": "Ação Necessária",
+      "error": {
+        "title": "Erro",
+        "fetchFailed": "Erro ao carregar documentos",
+        "deleteFailed": "Erro ao excluir documento"
+      },
+      "success": {
+        "deleteTitle": "Documento excluído",
+        "deleteDescription": "O documento foi excluído com sucesso"
       }
     },
     "sessions": {
@@ -1704,6 +1969,7 @@
     "roles": {
       "admin": "Admin",
       "tutor": "Tutor",
+      "document_analyst": "Analista de Documentos",
       "student": "Aluno"
     },
     "comments": {
@@ -2254,6 +2520,208 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
 
+  "studentDocuments": {
+    "pageTitle": "Documentos de Estudantes",
+    "pageDescription": "Visualize e gerencie os documentos enviados pelos estudantes",
+    "backToAdmin": "Voltar ao painel",
+    "accessButton": "Acessar Documentos",
+    "title": "Documentos",
+    "description": "Lista de documentos enviados para validação",
+    "loading": "Carregando documentos...",
+    "noDocuments": "Nenhum documento encontrado",
+    "searchPlaceholder": "Buscar por nome do aluno...",
+    "filterByStudentId": "Filtrar por ID do estudante",
+    "showing": "Mostrando {count} de {total} documentos",
+    "retry": "Tentar novamente",
+    "close": "Fechar",
+    "previewNotAvailable": "Preview não disponível para este tipo de arquivo",
+    "columns": {
+      "document": "Documento",
+      "student": "Estudante",
+      "type": "Tipo",
+      "size": "Tamanho",
+      "uploadedAt": "Enviado em",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "chat": "Conversar",
+      "download": "Baixar",
+      "delete": "Excluir",
+      "uploadForStudent": "Clique para enviar documento para este aluno"
+    },
+    "details": {
+      "student": "Estudante",
+      "type": "Tipo de Arquivo",
+      "size": "Tamanho",
+      "uploadedAt": "Enviado em",
+      "description": "Descrição",
+      "reviewStatus": "Status da Revisão",
+      "reviewedAt": "Revisado em",
+      "rejectionReason": "Motivo da Rejeição",
+      "internalNotes": "Notas Internas"
+    },
+    "pagination": {
+      "pageOf": "Página {current} de {total}",
+      "itemsPerPage": "Itens por página"
+    },
+    "filters": {
+      "title": "Filtros",
+      "status": "Status de Revisão",
+      "documentType": "Tipo de Documento",
+      "studentId": "ID do Estudante",
+      "studentIdPlaceholder": "Digite o UUID do estudante...",
+      "dateFrom": "Data Inicial",
+      "dateTo": "Data Final",
+      "sortBy": "Ordenar por",
+      "ascending": "Crescente",
+      "descending": "Decrescente",
+      "clearAll": "Limpar filtros",
+      "activeFilters": "Filtros ativos",
+      "statusOptions": {
+        "PENDING_REVIEW": "Aguardando Análise",
+        "UNDER_REVIEW": "Em Análise",
+        "APPROVED": "Aprovado",
+        "REJECTED": "Rejeitado",
+        "NEEDS_REPLACEMENT": "Substituição Necessária",
+        "NEEDS_ADDITIONAL_INFO": "Info Adicional"
+      },
+      "sortOptions": {
+        "createdAt": "Data de Envio",
+        "name": "Nome",
+        "updatedAt": "Última Atualização"
+      }
+    },
+    "error": {
+      "title": "Erro",
+      "noAccess": "Você não tem permissão para acessar esta página",
+      "unauthorized": "Sessão expirada. Faça login novamente.",
+      "fetchFailed": "Erro ao carregar documentos"
+    },
+    "review": {
+      "changeStatus": "Alterar Status",
+      "selectNewStatus": "Selecione um novo status para este documento",
+      "requiresReason": "Requer motivo",
+      "provideReason": "Forneça o motivo para o estudante",
+      "rejectionReason": "Motivo (visível para o estudante)",
+      "rejectionReasonPlaceholder": "Ex: Documento ilegível, favor enviar novamente com melhor qualidade...",
+      "visibleToStudent": "Esta mensagem será visível para o estudante",
+      "internalNotes": "Notas internas",
+      "internalNotesPlaceholder": "Notas visíveis apenas para a equipe...",
+      "notVisibleToStudent": "Não visível para o estudante",
+      "optional": "opcional",
+      "back": "Voltar",
+      "confirm": "Confirmar",
+      "updating": "Atualizando...",
+      "status": {
+        "pendingReview": "Aguardando Análise",
+        "underReview": "Em Análise",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "needsReplacement": "Substituição Necessária",
+        "needsAdditionalInfo": "Info Adicional Necessária"
+      },
+      "success": {
+        "title": "Sucesso",
+        "statusUpdated": "Status do documento atualizado com sucesso"
+      },
+      "error": {
+        "title": "Erro",
+        "updateFailed": "Falha ao atualizar status do documento",
+        "reasonRequired": "Por favor, informe o motivo para o estudante"
+      }
+    },
+    "deleteConfirmation": {
+      "title": "Excluir Documento",
+      "message": "Tem certeza que deseja excluir o documento \"{documentName}\"?",
+      "warning": "Esta ação não pode ser desfeita",
+      "confirm": "Excluir",
+      "success": {
+        "title": "Documento Excluído",
+        "description": "O documento foi excluído com sucesso"
+      },
+      "errors": {
+        "title": "Erro ao Excluir",
+        "forbidden": "Você não tem permissão para excluir este documento",
+        "notFound": "Documento não encontrado",
+        "deleteFailed": "Falha ao excluir o documento"
+      }
+    },
+    "viewMode": {
+      "list": "Lista",
+      "grouped": "Por Estudante"
+    },
+    "groupedView": {
+      "studentsCount": "{count} estudantes",
+      "documentsCount": "{count} documentos",
+      "expandAll": "Expandir todos",
+      "collapseAll": "Recolher todos"
+    },
+    "tabs": {
+      "documents": "Documentos",
+      "conversations": "Conversas",
+      "personalSessions": "Sessões Individuais"
+    },
+    "conversations": {
+      "title": "Conversas sobre Documentos",
+      "description": "Gerencie as conversas de análise de documentos com os estudantes",
+      "loading": "Carregando conversas...",
+      "noConversations": "Nenhuma conversa encontrada",
+      "noConversationsDescription": "Não há conversas de análise de documentos no momento",
+      "searchPlaceholder": "Buscar por aluno ou documento...",
+      "showing": "Mostrando {count} de {total} conversas",
+      "message": "mensagem",
+      "messages": "mensagens",
+      "hasAttachments": "Contém anexos",
+      "lastMessage": "Última mensagem",
+      "view": "Visualizar",
+      "stats": {
+        "total": "Total de Conversas",
+        "open": "Abertas",
+        "answered": "Respondidas",
+        "resolved": "Resolvidas"
+      },
+      "status": {
+        "open": "Aberta",
+        "answered": "Respondida",
+        "resolved": "Resolvida"
+      },
+      "filter": {
+        "all": "Todas",
+        "open": "Abertas",
+        "answered": "Respondidas",
+        "resolved": "Resolvidas"
+      },
+      "pagination": {
+        "perPage": "Por página:",
+        "pageOf": "Página {current} de {total}",
+        "first": "Primeira",
+        "last": "Última"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar conversas",
+        "fetchDescription": "Não foi possível carregar as conversas. Tente novamente."
+      }
+    },
+    "uploadForStudent": {
+      "button": "Enviar para Aluno",
+      "title": "Enviar Documento para Aluno",
+      "searchLabel": "Buscar Aluno",
+      "searchPlaceholder": "Digite o nome do aluno...",
+      "searching": "Buscando...",
+      "noResults": "Nenhum aluno encontrado",
+      "minChars": "Digite pelo menos 2 caracteres para buscar",
+      "changeStudent": "Trocar aluno",
+      "uploadSection": "Documento",
+      "success": {
+        "title": "Documento Enviado",
+        "description": "Documento enviado com sucesso para {studentName}"
+      }
+    }
+  },
+
   "coursesList": {
     "loading": "Carregando cursos..."
   },
@@ -2677,6 +3145,7 @@
     "roles": {
       "admin": "Administrador",
       "tutor": "Tutor",
+      "document_analyst": "Analista de Documentos",
       "student": "Estudante"
     },
     "instructions": {
@@ -3369,7 +3838,80 @@
       "relatedLessonDifferentCourse": "A aula relacionada pertence a um curso diferente. Por favor, selecione uma aula do mesmo curso"
     }
   },
-  
+
+  "CreatePersonalSession": {
+    "title": "Criar Sessão Individual",
+    "infoCard": {
+      "title": "Sobre Sessões Individuais",
+      "description": "Crie uma sessão de vídeo privada com um aluno específico para tutoria personalizada ou acompanhamento individual."
+    },
+    "sections": {
+      "student": "Selecionar Aluno",
+      "basicInfo": "Informações Básicas",
+      "schedule": "Agendamento",
+      "settings": "Configurações"
+    },
+    "fields": {
+      "student": {
+        "label": "Aluno",
+        "placeholder": "Digite o nome do aluno...",
+        "searching": "Buscando...",
+        "noResults": "Nenhum aluno encontrado",
+        "minChars": "Digite pelo menos 2 caracteres para buscar",
+        "change": "Trocar aluno"
+      },
+      "title": {
+        "label": "Título da Sessão",
+        "placeholder": "Ex: Tutoria Individual - Preparação para Prova"
+      },
+      "description": {
+        "label": "Descrição",
+        "placeholder": "Descreva o objetivo da sessão...",
+        "helper": "Opcional - Máximo 1000 caracteres"
+      },
+      "startTime": {
+        "label": "Data e Hora de Início"
+      },
+      "endTime": {
+        "label": "Data e Hora de Término"
+      },
+      "recordingEnabled": {
+        "label": "Habilitar Gravação",
+        "helper": "Permitir gravação da sessão"
+      },
+      "autoStartRecording": {
+        "label": "Iniciar Gravação Automaticamente",
+        "helper": "A gravação inicia quando a sessão começar"
+      },
+      "chatEnabled": {
+        "label": "Chat Habilitado",
+        "helper": "Permitir chat durante a sessão"
+      },
+      "waitingRoomEnabled": {
+        "label": "Sala de Espera",
+        "helper": "O aluno aguarda aprovação para entrar"
+      }
+    },
+    "selectStudentFirst": "Selecione um aluno para continuar",
+    "actions": {
+      "cancel": "Cancelar",
+      "create": "Criar Sessão",
+      "creating": "Criando..."
+    },
+    "success": {
+      "title": "Sessão Criada",
+      "description": "Sessão individual com {studentName} foi agendada com sucesso"
+    },
+    "errors": {
+      "title": "Erro ao Criar",
+      "generic": "Não foi possível criar a sessão",
+      "validation": "Por favor, verifique os campos preenchidos",
+      "forbidden": "Você não tem permissão para criar sessões individuais",
+      "notFound": "Aluno não encontrado",
+      "zoomError": "Erro ao criar reunião no Zoom. Tente novamente"
+    }
+  },
+
   "supportResponse": {
     "title": "Responder Ticket",
     "subtitle": "Envie uma resposta para o aluno",
@@ -3428,7 +3970,11 @@
       "lesson": "Aula",
       "assessment": "Avaliação",
       "flashcard": "Flashcard",
-      "general": "Geral"
+      "general": "Geral",
+      "document_analysis": "Análise de Documento",
+      "technical_support": "Suporte Técnico",
+      "class_questions": "Perguntas de Aula",
+      "other": "Outros"
     },
     "filter": {
       "pending": "Pendentes",
@@ -3443,7 +3989,11 @@
       "lesson": "Aulas",
       "assessment": "Avaliações",
       "flashcard": "Flashcards",
-      "general": "Geral"
+      "general": "Geral",
+      "document_analysis": "Análise de Documento",
+      "technical_support": "Suporte Técnico",
+      "class_questions": "Perguntas de Aula",
+      "other": "Outros"
     },
     "searchPlaceholder": "Buscar por aluno, conteúdo ou contexto...",
     "showing": "Mostrando {count} de {total} tickets",
@@ -4369,15 +4919,308 @@
     "modules": "Módulos",
     "lessons": "Aulas",
     "videos": "Vídeos",
-     "documents": "Documentos",
+    "documents": "Documentos",
     "assessments": "Avaliações",
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
     "liveSessions": "Aulas ao Vivo",
+    "personalSessions": "Aulas 1:1",
     "transactions": "Transações",
-    "tutor": "Tutor"
+    "tutor": "Tutor",
+    "studentDocuments": "Análise Docs"
   },
-  
+
+  "personalSessions": {
+    "title": "Sessões Individuais",
+    "description": "Crie sessões de tutoria individual com alunos específicos",
+    "createTitle": "Criar Sessão Individual",
+    "createDescription": "Agende uma sessão de vídeo individual com um aluno para tutoria personalizada",
+    "createButton": "Nova Sessão Individual",
+    "tabs": {
+      "create": "Criar Sessão",
+      "mySessions": "Minhas Sessões",
+      "myRecordings": "Minhas Gravações",
+      "list": "Todas as Sessões",
+      "allRecordings": "Todas Gravações"
+    },
+    "zoomSession": {
+      "title": "Sessão via Zoom",
+      "description": "Crie uma sessão ao vivo com integração Zoom. O link será gerado automaticamente.",
+      "button": "Criar Sessão Zoom"
+    },
+    "manualUpload": {
+      "title": "Upload Manual",
+      "description": "Envie uma gravação de vídeo já existente para um aluno específico.",
+      "button": "Enviar Gravação"
+    }
+  },
+  "MyHostedSessionsList": {
+    "title": "Minhas Sessões",
+    "totalSessions": "sessões",
+    "loading": "Carregando sessões...",
+    "searchPlaceholder": "Buscar por título ou aluno...",
+    "filterByStatus": "Filtrar por status",
+    "allStatuses": "Todos os status",
+    "noSessions": "Você ainda não tem sessões individuais",
+    "hasRecording": "Gravação",
+    "student": "Aluno",
+    "viewDetails": "Ver detalhes",
+    "joinSession": "Entrar na Sessão",
+    "sessionDetails": "Detalhes da Sessão",
+    "description": "Descrição",
+    "scheduledStart": "Início Agendado",
+    "scheduledEnd": "Término Agendado",
+    "actualStart": "Início Real",
+    "actualEnd": "Término Real",
+    "zoomMeetingId": "ID da Reunião Zoom",
+    "settings": "Configurações",
+    "settingsRecording": "Gravação",
+    "settingsChat": "Chat",
+    "settingsWaitingRoom": "Sala de Espera",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "startSession": "Iniciar Sessão",
+    "starting": "Iniciando...",
+    "cancelSession": "Cancelar",
+    "status": {
+      "scheduled": "Agendada",
+      "live": "Ao Vivo",
+      "ended": "Encerrada",
+      "cancelled": "Cancelada"
+    },
+    "success": {
+      "startTitle": "Sessão iniciada",
+      "startDescription": "A sessão foi iniciada com sucesso",
+      "cancelTitle": "Sessão cancelada",
+      "cancelDescription": "A sessão foi cancelada com sucesso"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar sessões",
+      "fetchDescription": "Não foi possível carregar suas sessões",
+      "startTitle": "Erro ao iniciar sessão",
+      "startDescription": "Não foi possível iniciar a sessão",
+      "startForbiddenTitle": "Permissão negada",
+      "startForbiddenDescription": "Você não tem permissão para iniciar esta sessão",
+      "startBadRequestTitle": "Ação não permitida",
+      "startBadRequestDescription": "A sessão não pode ser iniciada",
+      "cancelTitle": "Erro ao cancelar sessão",
+      "cancelDescription": "Não foi possível cancelar a sessão",
+      "cancelForbiddenTitle": "Permissão negada",
+      "cancelForbiddenDescription": "Você não tem permissão para cancelar esta sessão",
+      "cancelBadRequestTitle": "Ação não permitida",
+      "cancelBadRequestDescription": "A sessão não pode ser cancelada"
+    },
+    "cancelModal": {
+      "title": "Cancelar Sessão",
+      "warning": "Esta ação não pode ser desfeita. Ao cancelar, a reunião do Zoom será deletada e o aluno será notificado.",
+      "reasonLabel": "Motivo do cancelamento",
+      "reasonPlaceholder": "Informe o motivo do cancelamento...",
+      "characters": "caracteres",
+      "back": "Voltar",
+      "confirm": "Confirmar Cancelamento",
+      "cancelling": "Cancelando..."
+    }
+  },
+  "PersonalSessionsList": {
+    "title": "Sessões Individuais",
+    "totalSessions": "sessões",
+    "loading": "Carregando sessões...",
+    "searchPlaceholder": "Buscar por título, aluno ou host...",
+    "filterByStatus": "Filtrar por status",
+    "allStatuses": "Todos os status",
+    "noSessions": "Nenhuma sessão individual encontrada",
+    "hasRecording": "Gravação",
+    "host": "Host",
+    "student": "Aluno",
+    "viewDetails": "Ver detalhes",
+    "sessionDetails": "Detalhes da Sessão",
+    "description": "Descrição",
+    "scheduledStart": "Início Agendado",
+    "scheduledEnd": "Término Agendado",
+    "actualStart": "Início Real",
+    "actualEnd": "Término Real",
+    "zoomMeetingId": "ID da Reunião Zoom",
+    "settings": "Configurações",
+    "settingsRecording": "Gravação",
+    "settingsChat": "Chat",
+    "settingsWaitingRoom": "Sala de Espera",
+    "enabled": "Ativado",
+    "disabled": "Desativado",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "scheduled": "Agendada",
+      "live": "Ao Vivo",
+      "ended": "Encerrada",
+      "cancelled": "Cancelada",
+      "failed": "Falhou"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar sessões",
+      "fetchDescription": "Não foi possível carregar a lista de sessões individuais"
+    }
+  },
+
+  "UploadPersonalRecording": {
+    "title": "Enviar Gravação",
+    "infoCard": {
+      "title": "Upload Manual de Gravação",
+      "description": "Envie uma gravação de vídeo para associar a um aluno específico. O vídeo será processado e disponibilizado automaticamente."
+    },
+    "sections": {
+      "video": "Arquivo de Vídeo",
+      "student": "Aluno",
+      "basicInfo": "Informações do Vídeo"
+    },
+    "fields": {
+      "student": {
+        "label": "Selecionar Aluno",
+        "placeholder": "Buscar aluno por nome ou email...",
+        "searching": "Buscando...",
+        "noResults": "Nenhum aluno encontrado",
+        "minChars": "Digite pelo menos 2 caracteres para buscar",
+        "change": "Trocar aluno"
+      },
+      "title": {
+        "label": "Título da Gravação",
+        "placeholder": "Ex: Tutoria de Anatomia - 05/12/2024",
+        "helper": "Mínimo 3 caracteres, máximo 200"
+      },
+      "description": {
+        "label": "Descrição",
+        "placeholder": "Descreva o conteúdo da gravação...",
+        "helper": "Máximo 1000 caracteres (opcional)"
+      },
+      "recordedAt": {
+        "label": "Data da Gravação",
+        "helper": "Quando o vídeo foi gravado (opcional)"
+      }
+    },
+    "fileSelected": "Arquivo Selecionado",
+    "changeFile": "Trocar arquivo",
+    "selectFile": "Clique para selecionar",
+    "orDragDrop": "ou arraste e solte aqui",
+    "supportedFormats": "Formatos suportados",
+    "maxSize": "Tamanho máximo",
+    "uploading": "Enviando...",
+    "selectStudentFirst": "Selecione um aluno para continuar",
+    "actions": {
+      "cancel": "Cancelar",
+      "upload": "Enviar Gravação",
+      "uploading": "Enviando..."
+    },
+    "success": {
+      "title": "Gravação enviada com sucesso!",
+      "description": "A gravação foi enviada e está sendo processada para {studentName}"
+    },
+    "errors": {
+      "title": "Erro ao enviar gravação",
+      "generic": "Ocorreu um erro ao enviar a gravação. Tente novamente.",
+      "validation": "Dados inválidos. Verifique os campos e tente novamente.",
+      "forbidden": "Você não tem permissão para enviar gravações.",
+      "notFound": "Aluno não encontrado.",
+      "fileTooLarge": "O arquivo é muito grande. Máximo permitido: 500MB",
+      "invalidFileType": "Formato de arquivo não suportado. Use MP4, MOV, AVI, MKV ou WebM",
+      "noFile": "Selecione um arquivo de vídeo"
+    }
+  },
+
+  "PersonalRecordingsAdminList": {
+    "title": "Gravações Pessoais",
+    "totalRecordings": "gravações",
+    "loading": "Carregando gravações...",
+    "searchPlaceholder": "Buscar por título, aluno ou tutor...",
+    "filterByStatus": "Status",
+    "allStatuses": "Todos os status",
+    "filterByPandaStatus": "Status Panda",
+    "allPandaStatuses": "Todos",
+    "noRecordings": "Nenhuma gravação encontrada",
+    "manualUpload": "Upload Manual",
+    "zoomRecording": "Gravação Zoom",
+    "host": "Tutor",
+    "student": "Aluno",
+    "views": "visualizações",
+    "watch": "Assistir",
+    "viewDetails": "Ver detalhes",
+    "recordingDetails": "Detalhes da Gravação",
+    "description": "Descrição",
+    "duration": "Duração",
+    "fileSize": "Tamanho",
+    "viewCount": "Visualizações",
+    "processedAt": "Processado em",
+    "pandaInfo": "Informações Panda Video",
+    "watchRecording": "Assistir Gravação",
+    "videoNotAvailable": "Vídeo não disponível",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "available": "Disponível",
+      "processing": "Processando",
+      "failed": "Falhou"
+    },
+    "pandaStatus": {
+      "none": "Nenhum",
+      "uploading": "Enviando",
+      "processing": "Processando",
+      "available": "Disponível",
+      "failed": "Falhou"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar gravações",
+      "fetchDescription": "Não foi possível carregar a lista de gravações"
+    }
+  },
+
+  "MyCreatedRecordingsList": {
+    "title": "Minhas Gravações",
+    "totalRecordings": "gravações",
+    "loading": "Carregando gravações...",
+    "searchPlaceholder": "Buscar por título ou aluno...",
+    "filterByStatus": "Status",
+    "allStatuses": "Todos os status",
+    "noRecordings": "Você ainda não tem gravações",
+    "manualUpload": "Upload Manual",
+    "zoomRecording": "Gravação Zoom",
+    "student": "Aluno",
+    "views": "visualizações",
+    "watch": "Assistir",
+    "viewDetails": "Ver detalhes",
+    "recordingDetails": "Detalhes da Gravação",
+    "description": "Descrição",
+    "duration": "Duração",
+    "fileSize": "Tamanho",
+    "viewCount": "Visualizações",
+    "processedAt": "Processado em",
+    "watchRecording": "Assistir Gravação",
+    "videoNotAvailable": "Vídeo não disponível",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "showing": "Mostrando {from} a {to} de {total}",
+    "pageOf": "Página {current} de {total}",
+    "status": {
+      "available": "Disponível",
+      "processing": "Processando",
+      "failed": "Falhou"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar gravações",
+      "fetchDescription": "Não foi possível carregar suas gravações"
+    },
+    "modal": {
+      "loadingDetails": "Carregando detalhes...",
+      "fullscreen": "Tela cheia",
+      "exitFullscreen": "Sair da tela cheia"
+    }
+  },
+
   "tutor": {
     "title": "Área do Tutor",
     "description": "Acesse o painel de tutoria para gerenciar avaliações e feedbacks dos alunos",
@@ -4423,6 +5266,7 @@
   "roles": {
     "student": "Aluno",
     "tutor": "Tutor",
+    "document_analyst": "Analista de Documentos",
     "admin": "Administrador"
   },
   "errors": {
@@ -5984,10 +6828,12 @@
     "total": "Total",
     "admins": "Administradores",
     "tutors": "Tutores",
+    "documentAnalysts": "Analistas",
     "students": "Estudantes"
   },
   "roleAdmin": "Administrador",
   "roleTutor": "Tutor",
+  "roleDocument_analyst": "Analista de Documentos",
   "roleStudent": "Estudante",
   "actions": {
     "view": "Visualizar",
@@ -6047,6 +6893,7 @@
   "roles": {
     "student": "Estudante",
     "tutor": "Tutor",
+    "document_analyst": "Analista de Documentos",
     "admin": "Administrador"
   },
   "errors": {

@@ -166,7 +166,7 @@ interface Author {
   city?: string;
   country?: string;
   profession?: string;
-  role?: 'student' | 'admin' | 'tutor';
+  role?: 'student' | 'admin' | 'tutor' | 'document_analyst';
 }
 
 interface Reply {

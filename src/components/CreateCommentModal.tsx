@@ -15,7 +15,7 @@ interface Author {
   name: string;
   avatar?: string;
   profileImageUrl?: string;
-  role?: 'student' | 'admin' | 'tutor';
+  role?: 'student' | 'admin' | 'tutor' | 'document_analyst';
 }
 
 interface CommentData {

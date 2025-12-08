@@ -6,11 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslations } from "next-intl";
 import Image from 'next/image';
-import { 
- 
-  Loader2, 
-  Send, 
-  Paperclip, 
+import {
+  Loader2,
+  Send,
+  Paperclip,
   AlertCircle,
   Upload,
   FileText,
@@ -19,7 +18,15 @@ import {
   HelpCircle,
   Sparkles,
   MessageSquareText,
-  X
+  X,
+  BookOpen,
+  ClipboardCheck,
+  Layers,
+  Globe,
+  FileSearch,
+  Wrench,
+  GraduationCap,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   Dialog,
@@ -45,7 +52,21 @@ import { motion, AnimatePresence } from "framer-motion";
 const MAX_ATTACHMENTS = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+const CONTEXT_TYPES = [
+  "LESSON",
+  "ASSESSMENT",
+  "FLASHCARD",
+  "GENERAL",
+  "DOCUMENT_ANALYSIS",
+  "TECHNICAL_SUPPORT",
+  "CLASS_QUESTIONS",
+  "OTHER"
+] as const;
+
 const formSchema = z.object({
+  category: z.enum(CONTEXT_TYPES, {
+    required_error: "Please select a category",
+  }),
   content: z
     .string()
     .min(10, "Minimum 10 characters")
@@ -66,11 +87,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+type ContextType = "LESSON" | "ASSESSMENT" | "FLASHCARD" | "GENERAL" | "DOCUMENT_ANALYSIS" | "TECHNICAL_SUPPORT" | "CLASS_QUESTIONS" | "OTHER";
+
 interface CreateSupportTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
   context?: {
-    type: "LESSON" | "ASSESSMENT" | "FLASHCARD" | "GENERAL";
+    type: ContextType;
     id?: string;
     title?: string;
   };
@@ -92,10 +115,26 @@ export function CreateSupportTicketModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      category: context.type !== "GENERAL" ? context.type : undefined,
       content: "",
       attachments: [],
     },
   });
+
+  // Category icons mapping
+  const getCategoryIcon = (category: ContextType) => {
+    const icons: Record<ContextType, React.ReactNode> = {
+      LESSON: <BookOpen className="h-5 w-5" />,
+      ASSESSMENT: <ClipboardCheck className="h-5 w-5" />,
+      FLASHCARD: <Layers className="h-5 w-5" />,
+      GENERAL: <Globe className="h-5 w-5" />,
+      DOCUMENT_ANALYSIS: <FileSearch className="h-5 w-5" />,
+      TECHNICAL_SUPPORT: <Wrench className="h-5 w-5" />,
+      CLASS_QUESTIONS: <GraduationCap className="h-5 w-5" />,
+      OTHER: <MoreHorizontal className="h-5 w-5" />,
+    };
+    return icons[category];
+  };
 
   const handleFileSelect = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -253,14 +292,14 @@ export function CreateSupportTicketModal({
       }
       
       const requestBody: SupportTicketRequest = {
-        contextType: context.type,
-        contextTitle: context.title || t("modal.generalContext"),
+        contextType: data.category,
+        contextTitle: context.title || t(`modal.contextTypes.${data.category.toLowerCase()}`),
         content: data.content,
         attachments: uploadedAttachments,
       };
 
-      // Only include contextId for non-GENERAL types
-      if (context.type !== 'GENERAL' && context.id) {
+      // Only include contextId for specific content types with an ID
+      if (context.id && ['LESSON', 'ASSESSMENT', 'FLASHCARD'].includes(data.category)) {
         requestBody.contextId = context.id;
       }
 
@@ -416,6 +455,51 @@ export function CreateSupportTicketModal({
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Category Selector */}
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold text-white">
+                      <Layers className="h-4 w-4 text-white" />
+                      {t("modal.categoryLabel")}
+                      <span className="text-red-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {CONTEXT_TYPES.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => field.onChange(type)}
+                            disabled={isSubmitting}
+                            className={cn(
+                              "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200",
+                              field.value === type
+                                ? "border-secondary bg-secondary/20 text-white"
+                                : "border-white/20 bg-white/5 text-white/70 hover:border-white/40 hover:bg-white/10",
+                              isSubmitting && "opacity-50 cursor-not-allowed"
+                            )}
+                          >
+                            <span className={cn(
+                              "transition-colors",
+                              field.value === type ? "text-secondary" : "text-white/60"
+                            )}>
+                              {getCategoryIcon(type as ContextType)}
+                            </span>
+                            <span className="text-xs font-medium text-center leading-tight">
+                              {t(`modal.contextTypes.${type.toLowerCase()}`)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Enhanced Textarea Field */}
               <FormField
                 control={form.control}

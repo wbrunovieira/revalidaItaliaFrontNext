@@ -16,15 +16,16 @@ import {
   Loader2,
   Check,
   AlertCircle,
+  FileText,
 } from 'lucide-react';
 
-// Tipos atualizados com suporte a tutor
+// Tipos atualizados com suporte a tutor e document_analyst
 interface UserEditData {
   identityId: string;
   fullName: string;
   email: string;
   nationalId: string;
-  role: 'admin' | 'student' | 'tutor';
+  role: 'admin' | 'student' | 'tutor' | 'document_analyst';
 }
 
 interface UserEditModalProps {
@@ -34,7 +35,7 @@ interface UserEditModalProps {
   onSave: (updatedUser: UserEditData) => void;
 }
 
-type UserRole = 'admin' | 'student' | 'tutor';
+type UserRole = 'admin' | 'student' | 'tutor' | 'document_analyst';
 
 interface FormData {
   fullName: string;
@@ -162,7 +163,7 @@ export default function UserEditModal({
             };
           }
           if (
-            !['admin', 'tutor', 'student'].includes(value)
+            !['admin', 'tutor', 'student', 'document_analyst'].includes(value)
           ) {
             return {
               isValid: false,
@@ -212,6 +213,10 @@ export default function UserEditModal({
             className="text-green-400"
           />
         );
+      case 'document_analyst':
+        return (
+          <FileText size={size} className="text-purple-400" />
+        );
       case 'student':
       default:
         return (
@@ -227,6 +232,8 @@ export default function UserEditModal({
         return 'text-red-400';
       case 'tutor':
         return 'text-green-400';
+      case 'document_analyst':
+        return 'text-purple-400';
       case 'student':
       default:
         return 'text-blue-400';
@@ -673,6 +680,9 @@ export default function UserEditModal({
                 </option>
                 <option value="tutor">
                   {t('roles.tutor')}
+                </option>
+                <option value="document_analyst">
+                  {t('roles.document_analyst')}
                 </option>
                 <option value="admin">
                   {t('roles.admin')}

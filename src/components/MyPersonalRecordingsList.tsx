@@ -202,7 +202,7 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
   }, [token, t, toast]);
 
   const getStatusBadge = (status: PersonalRecording['status']) => {
-    const statusConfig = {
+    const statusConfig: Record<string, { label: string; className: string; icon: typeof Video }> = {
       AVAILABLE: {
         label: t('status.available'),
         className: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -218,9 +218,20 @@ export default function MyPersonalRecordingsList({ locale }: MyPersonalRecording
         className: 'bg-red-500/20 text-red-400 border-red-500/30',
         icon: Video,
       },
+      // Fallback statuses from API
+      PENDING: {
+        label: t('status.processing'),
+        className: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        icon: Loader2,
+      },
+      ERROR: {
+        label: t('status.failed'),
+        className: 'bg-red-500/20 text-red-400 border-red-500/30',
+        icon: Video,
+      },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig['PROCESSING'];
     const Icon = config.icon;
 
     return (

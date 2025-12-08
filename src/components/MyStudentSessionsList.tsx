@@ -14,7 +14,6 @@ import {
   Radio,
   User,
   Play,
-  ExternalLink,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,6 +67,9 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
   const [sessions, setSessions] = useState<MySession[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Auto-refresh interval for live sessions (every 30 seconds)
+  const REFRESH_INTERVAL = 30000;
+
   const fetchSessions = useCallback(async () => {
     if (!token) {
       setLoading(false);
@@ -116,6 +118,24 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
+
+  // Auto-refresh when there are LIVE sessions to catch status changes
+  useEffect(() => {
+    const hasLiveSessions = sessions.some(s => s.status === 'LIVE');
+
+    if (hasLiveSessions && token) {
+      console.log('[MyStudentSessionsList] 🔄 Starting auto-refresh for live sessions');
+      const intervalId = setInterval(() => {
+        console.log('[MyStudentSessionsList] 🔄 Auto-refreshing sessions...');
+        fetchSessions();
+      }, REFRESH_INTERVAL);
+
+      return () => {
+        console.log('[MyStudentSessionsList] 🛑 Stopping auto-refresh');
+        clearInterval(intervalId);
+      };
+    }
+  }, [sessions, token, fetchSessions, REFRESH_INTERVAL]);
 
   const getStatusBadge = (status: MySession['status']) => {
     const statusConfig = {
@@ -178,9 +198,48 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
   };
 
   const handleJoinSession = (session: MySession) => {
-    if (session.participantJoinUrl) {
-      window.open(session.participantJoinUrl, '_blank');
+    console.log('🔗 [MyStudentSessionsList] Attempting to join session:', {
+      sessionId: session.id,
+      status: session.status,
+      participantJoinUrl: session.participantJoinUrl,
+    });
+
+    // Validate session status before joining
+    if (session.status !== 'SCHEDULED' && session.status !== 'LIVE') {
+      console.error('❌ [MyStudentSessionsList] Cannot join session with status:', session.status);
+      toast({
+        title: t('error.unavailableTitle'),
+        description: session.status === 'ENDED'
+          ? t('error.sessionEndedDescription')
+          : t('error.unavailableDescription'),
+        variant: 'destructive',
+      });
+      // Refresh the list to get updated statuses
+      fetchSessions();
+      return;
     }
+
+    // PersonalSessions use participantJoinUrl directly (no token generation needed)
+    if (!session.participantJoinUrl || session.participantJoinUrl.trim() === '') {
+      console.error('❌ [MyStudentSessionsList] No participantJoinUrl available');
+      toast({
+        title: t('error.joinTitle'),
+        description: t('error.noUrlDescription'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    console.log('✅ [MyStudentSessionsList] Redirecting to Zoom:', session.participantJoinUrl);
+
+    // Show success toast
+    toast({
+      title: t('success.joiningTitle'),
+      description: t('success.joiningDescription', { title: session.title }),
+    });
+
+    // Open Zoom URL directly
+    window.open(session.participantJoinUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Filter sessions based on showOnlyUpcoming
@@ -334,14 +393,18 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
                   </div>
 
                   {/* Join Button for SCHEDULED or LIVE sessions */}
-                  {(session.status === 'SCHEDULED' || session.status === 'LIVE') && session.participantJoinUrl && (
+                  {(session.status === 'SCHEDULED' || session.status === 'LIVE') && (
                     <Button
                       className={`${
                         session.status === 'LIVE'
                           ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 hover:shadow-red-500/40'
                           : 'bg-secondary hover:bg-secondary/80 shadow-lg shadow-secondary/20 hover:shadow-secondary/40'
-                      } text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-300`}
-                      onClick={() => handleJoinSession(session)}
+                      } text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-300 z-10 relative`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('🔴 [MyStudentSessionsList] CLICK no botão! session:', session.id, session.status);
+                        handleJoinSession(session);
+                      }}
                     >
                       {session.status === 'LIVE' ? (
                         <>
@@ -350,7 +413,7 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
                         </>
                       ) : (
                         <>
-                          <ExternalLink className="mr-2 h-4 w-4" />
+                          <Play className="mr-2 h-4 w-4" />
                           {t('joinSession')}
                         </>
                       )}
@@ -369,7 +432,7 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
               {/* Hover Ring */}
               <div className={`absolute inset-0 rounded-xl ring-1 ${
                 session.status === 'LIVE' ? 'ring-red-500/20' : 'ring-secondary/20'
-              } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+              } opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
             </div>
           </motion.div>
         ))}

@@ -174,6 +174,8 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
   }, [fetchSessions]);
 
   const handleJoinSession = async (sessionId: string) => {
+    console.log('🖱️ [LiveSessions] CLICK DETECTADO! sessionId:', sessionId);
+
     setJoiningSession(sessionId);
 
     // Debug: Log session details
@@ -617,7 +619,10 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                       <div className="flex items-center justify-end pt-4 border-t border-white/10">
                         <Button
                           className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300"
-                          onClick={() => handleJoinSession(session.id)}
+                          onClick={() => {
+                            console.log('🔴 [LiveSessions] onClick triggered! session.id:', session.id);
+                            handleJoinSession(session.id);
+                          }}
                           disabled={joiningSession === session.id || isGenerating || isJoining}
                         >
                           {joiningSession === session.id || isGenerating || isJoining ? (

@@ -495,9 +495,28 @@
         "ended": "Encerrada",
         "cancelled": "Cancelada"
       },
+      "joining": "Entrando...",
       "error": {
         "fetchTitle": "Erro ao carregar sessões",
-        "fetchDescription": "Não foi possível carregar suas sessões individuais"
+        "fetchDescription": "Não foi possível carregar suas sessões individuais",
+        "joinTitle": "Erro ao entrar na sessão",
+        "joinDescription": "Não foi possível entrar na sessão. Tente novamente.",
+        "authTitle": "Autenticação necessária",
+        "authDescription": "Você precisa estar autenticado para entrar na sessão",
+        "accessDeniedTitle": "Acesso negado",
+        "accessDeniedDescription": "Você não tem acesso a esta sessão",
+        "notFoundTitle": "Sessão não encontrada",
+        "notFoundDescription": "Esta sessão não existe ou foi removida",
+        "unavailableTitle": "Sessão indisponível",
+        "unavailableDescription": "Esta sessão não está disponível para entrada no momento",
+        "sessionEndedDescription": "Esta sessão já foi encerrada",
+        "noUrlDescription": "O link de acesso ainda não está disponível. Tente novamente em alguns instantes.",
+        "tokenExpiredTitle": "Link expirado",
+        "tokenExpiredDescription": "O link de entrada expirou ou já foi usado. Tente novamente."
+      },
+      "success": {
+        "joiningTitle": "Entrando na sessão",
+        "joiningDescription": "Redirecionando para: {title}"
       }
     },
     "personalRecordings": {

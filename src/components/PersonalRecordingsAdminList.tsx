@@ -170,7 +170,7 @@ export default function PersonalRecordingsAdminList() {
   }, [fetchRecordings]);
 
   const getStatusBadge = (status: PersonalRecording['status']) => {
-    const statusConfig = {
+    const statusConfig: Record<string, { label: string; className: string; icon: typeof CheckCircle }> = {
       AVAILABLE: {
         label: t('status.available'),
         className: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -186,9 +186,20 @@ export default function PersonalRecordingsAdminList() {
         className: 'bg-red-500/20 text-red-400 border-red-500/30',
         icon: XCircle,
       },
+      // Fallback statuses from API
+      PENDING: {
+        label: t('status.processing'),
+        className: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        icon: Loader2,
+      },
+      ERROR: {
+        label: t('status.failed'),
+        className: 'bg-red-500/20 text-red-400 border-red-500/30',
+        icon: XCircle,
+      },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig['PROCESSING'];
     const Icon = config.icon;
 
     return (
@@ -200,7 +211,7 @@ export default function PersonalRecordingsAdminList() {
   };
 
   const getPandaStatusBadge = (status: PersonalRecording['pandaUploadStatus']) => {
-    const statusConfig = {
+    const statusConfig: Record<string, { label: string; className: string }> = {
       NONE: {
         label: t('pandaStatus.none'),
         className: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
@@ -221,9 +232,18 @@ export default function PersonalRecordingsAdminList() {
         label: t('pandaStatus.failed'),
         className: 'bg-red-500/20 text-red-400 border-red-500/30',
       },
+      // Fallback statuses
+      PENDING: {
+        label: t('pandaStatus.processing'),
+        className: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      },
+      ERROR: {
+        label: t('pandaStatus.failed'),
+        className: 'bg-red-500/20 text-red-400 border-red-500/30',
+      },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig['NONE'];
 
     return (
       <Badge className={`${config.className} flex items-center gap-1`}>

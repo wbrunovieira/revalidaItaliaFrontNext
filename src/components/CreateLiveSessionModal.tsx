@@ -1,7 +1,7 @@
 // src/components/CreateLiveSessionModal.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -155,6 +155,9 @@ export default function CreateLiveSessionModal({
   const [, setLoadingCourses] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
+  // Filtros de roles para co-apresentadores
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(['tutor', 'admin', 'document_analyst']);
+
   const form = useForm<z.input<typeof liveSessionSchema>>({
     resolver: zodResolver(liveSessionSchema),
     defaultValues: {
@@ -195,34 +198,7 @@ export default function CreateLiveSessionModal({
   const availableLessons = selectedLessonModule?.lessons || [];
 
 
-  // Load initial data
-  useEffect(() => {
-    if (open) {
-      fetchCourses();
-      fetchUsers();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  // Reset dependent fields when course changes
-  useEffect(() => {
-    if (selectedCourseId) {
-      form.setValue('moduleId', '');
-      form.setValue('lessonModuleId', '');
-      form.setValue('lessonId', '');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCourseId]);
-
-  // Reset lesson when lesson module changes
-  useEffect(() => {
-    if (selectedLessonModuleId) {
-      form.setValue('lessonId', '');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLessonModuleId]);
-
-  const fetchLessonsForModule = async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+  const fetchLessonsForModule = useCallback(async (courseId: string, moduleId: string): Promise<Lesson[]> => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`, {
@@ -239,9 +215,9 @@ export default function CreateLiveSessionModal({
       console.error(`Error fetching lessons for module ${moduleId}:`, error);
       return [];
     }
-  };
+  }, [token]);
 
-  const fetchModulesForCourse = async (courseId: string): Promise<Module[]> => {
+  const fetchModulesForCourse = useCallback(async (courseId: string): Promise<Module[]> => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
@@ -267,9 +243,9 @@ export default function CreateLiveSessionModal({
       console.error(`Error fetching modules for course ${courseId}:`, error);
       return [];
     }
-  };
+  }, [token, fetchLessonsForModule]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     setLoadingCourses(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -304,31 +280,91 @@ export default function CreateLiveSessionModal({
     } finally {
       setLoadingCourses(false);
     }
-  };
+  }, [token, fetchModulesForCourse, toast]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async (roles: string[]) => {
+    if (roles.length === 0) {
+      setUsers([]);
+      return;
+    }
+
     setLoadingUsers(true);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/users`, {
+
+      // Construir query params com múltiplas roles
+      const searchParams = new URLSearchParams();
+      roles.forEach(role => searchParams.append('roles', role));
+      searchParams.append('pageSize', '100');
+
+      const url = `${API_URL}/api/v1/users?${searchParams.toString()}`;
+      console.log('📡 [Co-hosts] Fetching users from:', url);
+
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      console.log('📡 [Co-hosts] Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
-        const usersList: User[] = data.items || [];
+        console.log('📡 [Co-hosts] Users fetched:', data.items?.length || 0, 'with roles:', roles);
+
+        const usersList: User[] = data.items || data.users || data || [];
         setUsers(usersList);
       } else {
-        console.warn('Failed to fetch users, status:', response.status);
+        const errorText = await response.text();
+        console.warn('❌ [Co-hosts] Failed to fetch users, status:', response.status, 'error:', errorText);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('❌ [Co-hosts] Error fetching users:', error);
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, [token]);
+
+  // Toggle role filter
+  const toggleRoleFilter = useCallback((role: string) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(role)) {
+        return prev.filter(r => r !== role);
+      } else {
+        return [...prev, role];
+      }
+    });
+  }, []);
+
+  // Load courses when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchCourses();
+    }
+  }, [open, fetchCourses]);
+
+  // Refetch users when role filters change
+  useEffect(() => {
+    if (open) {
+      fetchUsers(selectedRoles);
+    }
+  }, [selectedRoles, open, fetchUsers]);
+
+  // Reset dependent fields when course changes
+  useEffect(() => {
+    if (selectedCourseId) {
+      form.setValue('moduleId', '');
+      form.setValue('lessonModuleId', '');
+      form.setValue('lessonId', '');
+    }
+  }, [selectedCourseId, form]);
+
+  // Reset lesson when lesson module changes
+  useEffect(() => {
+    if (selectedLessonModuleId) {
+      form.setValue('lessonId', '');
+    }
+  }, [selectedLessonModuleId, form]);
 
   const onSubmit = async (values: z.input<typeof liveSessionSchema>) => {
     try {
@@ -781,6 +817,49 @@ export default function CreateLiveSessionModal({
                   </h3>
                 </div>
 
+                {/* Role Filters */}
+                <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                  <p className="text-sm text-gray-300 mb-3">{t('fields.coHosts.filterByRole')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { role: 'tutor', label: 'Tutor', color: 'emerald' },
+                      { role: 'admin', label: 'Admin', color: 'purple' },
+                      { role: 'document_analyst', label: t('fields.coHosts.roles.documentAnalyst'), color: 'amber' },
+                    ].map(({ role, label, color }) => {
+                      const isSelected = selectedRoles.includes(role);
+                      const colorClasses = {
+                        emerald: isSelected
+                          ? 'bg-emerald-500/30 border-emerald-500 text-emerald-300'
+                          : 'bg-gray-700/50 border-gray-600 text-gray-400 hover:border-emerald-500/50',
+                        purple: isSelected
+                          ? 'bg-purple-500/30 border-purple-500 text-purple-300'
+                          : 'bg-gray-700/50 border-gray-600 text-gray-400 hover:border-purple-500/50',
+                        amber: isSelected
+                          ? 'bg-amber-500/30 border-amber-500 text-amber-300'
+                          : 'bg-gray-700/50 border-gray-600 text-gray-400 hover:border-amber-500/50',
+                      };
+                      return (
+                        <button
+                          key={role}
+                          type="button"
+                          onClick={() => toggleRoleFilter(role)}
+                          className={`
+                            px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200
+                            flex items-center gap-2
+                            ${colorClasses[color as keyof typeof colorClasses]}
+                          `}
+                        >
+                          {isSelected && <Check size={14} />}
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedRoles.length === 0 && (
+                    <p className="text-xs text-amber-400 mt-2">{t('fields.coHosts.noRoleSelected')}</p>
+                  )}
+                </div>
+
                 <FormField
                   control={form.control}
                   name="coHostIds"
@@ -798,8 +877,8 @@ export default function CreateLiveSessionModal({
                             }
                           }}
                         >
-                          <SelectTrigger disabled={loadingUsers} className="bg-gray-700 border-gray-600 text-white">
-                            <SelectValue placeholder={t('fields.coHosts.placeholder')} />
+                          <SelectTrigger disabled={loadingUsers || selectedRoles.length === 0} className="bg-gray-700 border-gray-600 text-white">
+                            <SelectValue placeholder={loadingUsers ? t('fields.coHosts.loading') : t('fields.coHosts.placeholder')} />
                           </SelectTrigger>
                           <SelectContent className="bg-gray-700 border-gray-600">
                             {users.length === 0 ? (
@@ -807,22 +886,39 @@ export default function CreateLiveSessionModal({
                                 {t('fields.coHosts.noUsers')}
                               </div>
                             ) : (
-                              users.map((user) => (
-                                <SelectItem
-                                  key={user.id || user.identityId}
-                                  value={user.id || user.identityId}
-                                  disabled={field.value?.includes(user.id || user.identityId)}
-                                  className="text-white hover:bg-gray-600 disabled:opacity-50"
-                                >
-                                  {user.fullName} ({user.email})
-                                </SelectItem>
-                              ))
+                              users.map((user) => {
+                                const roleColors: Record<string, string> = {
+                                  tutor: 'text-emerald-400',
+                                  admin: 'text-purple-400',
+                                  document_analyst: 'text-amber-400',
+                                };
+                                return (
+                                  <SelectItem
+                                    key={user.id || user.identityId}
+                                    value={user.id || user.identityId}
+                                    disabled={field.value?.includes(user.id || user.identityId)}
+                                    className="text-white hover:bg-gray-600 disabled:opacity-50"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span>{user.fullName}</span>
+                                      <span className={`text-xs ${roleColors[user.role] || 'text-gray-400'}`}>
+                                        ({user.role === 'document_analyst' ? 'Analista' : user.role})
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })
                             )}
                           </SelectContent>
                         </Select>
                       </FormControl>
                       <FormDescription className="text-gray-400">
                         {t('fields.coHosts.helper')}
+                        {users.length > 0 && (
+                          <span className="ml-1 text-cyan-400">
+                            ({users.length} {t('fields.coHosts.available')})
+                          </span>
+                        )}
                       </FormDescription>
                       {field.value && field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">

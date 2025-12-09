@@ -3720,9 +3720,16 @@
       },
       "coHosts": {
         "label": "Co-apresentadores",
-        "placeholder": "Selecione tutores como co-apresentadores",
+        "placeholder": "Selecione co-apresentadores",
         "helper": "Co-apresentadores podem gerenciar a sessão",
-        "noUsers": "Nenhum usuário disponível para ser co-apresentador"
+        "noUsers": "Nenhum usuário disponível para ser co-apresentador",
+        "filterByRole": "Filtrar por tipo de usuário:",
+        "roles": {
+          "documentAnalyst": "Analista"
+        },
+        "noRoleSelected": "Selecione pelo menos um tipo de usuário para ver os disponíveis",
+        "loading": "Carregando usuários...",
+        "available": "disponíveis"
       },
       "maxParticipants": {
         "label": "Máximo de Participantes",

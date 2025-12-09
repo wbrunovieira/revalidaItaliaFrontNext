@@ -3761,8 +3761,15 @@
       "coHosts": {
         "label": "Co-presentadores",
         "placeholder": "Selecciona co-presentadores",
-        "helper": "Añade tutores o administradores como co-presentadores",
-        "noUsers": "No hay usuarios disponibles como co-presentadores"
+        "helper": "Los co-presentadores pueden gestionar la sesión",
+        "noUsers": "No hay usuarios disponibles como co-presentadores",
+        "filterByRole": "Filtrar por tipo de usuario:",
+        "roles": {
+          "documentAnalyst": "Analista"
+        },
+        "noRoleSelected": "Selecciona al menos un tipo de usuario para ver los disponibles",
+        "loading": "Cargando usuarios...",
+        "available": "disponibles"
       },
       "maxParticipants": {
         "label": "Número Máximo de Participantes",

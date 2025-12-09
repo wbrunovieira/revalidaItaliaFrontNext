@@ -409,8 +409,16 @@ export default function LiveSessionsList() {
       });
       
       // Open Zoom URLs if available
-      if (data.hostUrl && user?.id === sessions.find(s => s.id === sessionId)?.host.id) {
-        console.log('📹 Opening HOST URL:', data.hostUrl);
+      // Both host and co-hosts receive hostUrl and can start as host
+      const session = sessions.find(s => s.id === sessionId);
+      const isHost = session?.host.id === user?.id;
+      const isCoHost = session?.coHosts.some(coHost => coHost.id === user?.id);
+      const isAdmin = user?.role === 'admin';
+
+      console.log('📹 Checking permissions:', { isHost, isCoHost, isAdmin, userId: user?.id });
+
+      if (data.hostUrl && (isHost || isCoHost || isAdmin)) {
+        console.log('📹 Opening HOST URL (user is host/co-host/admin):', data.hostUrl);
         window.open(data.hostUrl, '_blank');
       } else if (data.participantUrl) {
         console.log('📹 Opening PARTICIPANT URL:', data.participantUrl);

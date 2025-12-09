@@ -78,6 +78,7 @@
       delegate_to: localhost
       become: false
       run_once: true
+      tags: [cloudflare]
 
     - name: Display IPs to be blocked on Cloudflare
       debug:
@@ -85,6 +86,7 @@
       delegate_to: localhost
       become: false
       run_once: true
+      tags: [cloudflare]
 
     - name: Block malicious IPs on Cloudflare WAF
       uri:
@@ -107,6 +109,7 @@
       run_once: true
       register: cloudflare_result
       ignore_errors: yes
+      tags: [cloudflare]
 
     - name: Show Cloudflare blocking results
       debug:
@@ -116,6 +119,7 @@
       become: false
       run_once: true
       when: cloudflare_result is defined
+      tags: [cloudflare]
 
     # =========================================================================
     # NGINX - Backup protection on server

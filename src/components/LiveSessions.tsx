@@ -119,8 +119,35 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
   const [selectedTab, setSelectedTab] = useState('upcoming');
   const [joiningSession, setJoiningSession] = useState<string | null>(null);
 
-  // Debug: Log environment variables
-  console.log('🌍 [LiveSessions] NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+  // Individual sessions counts for badges
+  const [individualUpcomingCount, setIndividualUpcomingCount] = useState(0);
+  const [individualLiveCount, setIndividualLiveCount] = useState(0);
+
+  // Fetch individual sessions count
+  const fetchIndividualSessionsCounts = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      // Fetch upcoming individual sessions (SCHEDULED + LIVE)
+      const upcomingResponse = await fetch(
+        `${API_URL}/api/v1/personal-sessions/my-sessions?status=SCHEDULED,LIVE&page=1&limit=100`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (upcomingResponse.ok) {
+        const data = await upcomingResponse.json();
+        const sessions = data.sessions || [];
+        const scheduledCount = sessions.filter((s: { status: string }) => s.status === 'SCHEDULED').length;
+        const liveCount = sessions.filter((s: { status: string }) => s.status === 'LIVE').length;
+        setIndividualUpcomingCount(scheduledCount + liveCount);
+        setIndividualLiveCount(liveCount);
+      }
+    } catch (error) {
+      console.error('Error fetching individual sessions counts:', error);
+    }
+  }, [token]);
 
   // Fetch sessions from API
   const fetchSessions = useCallback(async () => {
@@ -171,7 +198,8 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
 
   useEffect(() => {
     fetchSessions();
-  }, [fetchSessions]);
+    fetchIndividualSessionsCounts();
+  }, [fetchSessions, fetchIndividualSessionsCounts]);
 
   const handleJoinSession = async (sessionId: string) => {
     console.log('🖱️ [LiveSessions] CLICK DETECTADO! sessionId:', sessionId);
@@ -351,9 +379,9 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
             >
               <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('upcoming')}</span>
-              {upcomingSessions.length > 0 && (
+              {(upcomingSessions.length + individualUpcomingCount) > 0 && (
                 <Badge className="ml-1 sm:ml-2 bg-blue-500 text-white text-[10px] sm:text-xs px-1">
-                  {upcomingSessions.length}
+                  {upcomingSessions.length + individualUpcomingCount}
                 </Badge>
               )}
             </TabsTrigger>
@@ -363,9 +391,9 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
             >
               <Radio className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t('live')}</span>
-              {liveSessions.length > 0 && (
+              {(liveSessions.length + individualLiveCount) > 0 && (
                 <Badge className="ml-1 sm:ml-2 bg-red-500 text-white animate-pulse text-[10px] sm:text-xs px-1">
-                  {liveSessions.length}
+                  {liveSessions.length + individualLiveCount}
                 </Badge>
               )}
             </TabsTrigger>
@@ -522,16 +550,28 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
         </TabsContent>
 
         {/* Live Sessions */}
-        <TabsContent value="live" className="space-y-4">
-          {liveSessions.length === 0 ? (
-            <Card className="bg-white/5 border-white/10">
-              <CardContent className="text-center py-12">
-                <Radio className="h-12 w-12 text-white/40 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-white">{t('noLive')}</h3>
-                <p className="text-white/60">{t('noLiveDescription')}</p>
-              </CardContent>
-            </Card>
-          ) : (
+        <TabsContent value="live" className="space-y-8">
+          {/* Group Sessions Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <Users size={20} className="text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">{t('personalSessions.groupSessions')}</h2>
+                <p className="text-sm text-white/60">{t('liveNow.groupDescription')}</p>
+              </div>
+            </div>
+
+            {liveSessions.length === 0 ? (
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="text-center py-8">
+                  <Radio className="h-10 w-10 text-white/40 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold mb-1 text-white">{t('noLive')}</h3>
+                  <p className="text-white/60 text-sm">{t('noLiveDescription')}</p>
+                </CardContent>
+              </Card>
+            ) : (
             <AnimatePresence>
               {liveSessions.map((session: DisplaySession, index: number) => (
                 <motion.div
@@ -652,7 +692,23 @@ export default function LiveSessions({ locale, courses, modules }: LiveSessionsP
                 </motion.div>
               ))}
             </AnimatePresence>
-          )}
+            )}
+          </div>
+
+          {/* Individual Sessions Section - Live Now */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <UserCheck size={20} className="text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">{t('personalSessions.title')}</h2>
+                <p className="text-sm text-white/60">{t('liveNow.individualDescription')}</p>
+              </div>
+            </div>
+
+            <MyStudentSessionsList locale={locale} showOnlyLive={true} />
+          </div>
         </TabsContent>
 
         {/* All Recordings */}

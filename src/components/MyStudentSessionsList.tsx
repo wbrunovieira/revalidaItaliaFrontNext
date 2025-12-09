@@ -57,9 +57,10 @@ interface MySession {
 interface MyStudentSessionsListProps {
   locale: string;
   showOnlyUpcoming?: boolean;
+  showOnlyLive?: boolean;
 }
 
-export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false }: MyStudentSessionsListProps) {
+export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false, showOnlyLive = false }: MyStudentSessionsListProps) {
   const t = useTranslations('LiveSessions.personalSessions');
   const { toast } = useToast();
   const { token } = useAuth();
@@ -84,7 +85,9 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
       searchParams.append('page', '1');
       searchParams.append('limit', '20');
 
-      if (showOnlyUpcoming) {
+      if (showOnlyLive) {
+        searchParams.append('status', 'LIVE');
+      } else if (showOnlyUpcoming) {
         searchParams.append('status', 'SCHEDULED,LIVE');
       }
 
@@ -113,7 +116,7 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
     } finally {
       setLoading(false);
     }
-  }, [token, showOnlyUpcoming, t, toast]);
+  }, [token, showOnlyUpcoming, showOnlyLive, t, toast]);
 
   useEffect(() => {
     fetchSessions();
@@ -204,14 +207,16 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
       participantJoinUrl: session.participantJoinUrl,
     });
 
-    // Validate session status before joining
-    if (session.status !== 'SCHEDULED' && session.status !== 'LIVE') {
+    // Validate session status before joining - only LIVE sessions can be joined
+    if (session.status !== 'LIVE') {
       console.error('❌ [MyStudentSessionsList] Cannot join session with status:', session.status);
       toast({
         title: t('error.unavailableTitle'),
-        description: session.status === 'ENDED'
-          ? t('error.sessionEndedDescription')
-          : t('error.unavailableDescription'),
+        description: session.status === 'SCHEDULED'
+          ? t('error.sessionNotStartedDescription')
+          : session.status === 'ENDED'
+            ? t('error.sessionEndedDescription')
+            : t('error.unavailableDescription'),
         variant: 'destructive',
       });
       // Refresh the list to get updated statuses
@@ -242,10 +247,12 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
     window.open(session.participantJoinUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Filter sessions based on showOnlyUpcoming
-  const displaySessions = showOnlyUpcoming
-    ? sessions.filter((s) => s.status === 'SCHEDULED' || s.status === 'LIVE')
-    : sessions;
+  // Filter sessions based on props
+  const displaySessions = showOnlyLive
+    ? sessions.filter((s) => s.status === 'LIVE')
+    : showOnlyUpcoming
+      ? sessions.filter((s) => s.status === 'SCHEDULED' || s.status === 'LIVE')
+      : sessions;
 
   if (loading) {
     return (
@@ -392,31 +399,18 @@ export default function MyStudentSessionsList({ locale, showOnlyUpcoming = false
                     </div>
                   </div>
 
-                  {/* Join Button for SCHEDULED or LIVE sessions */}
-                  {(session.status === 'SCHEDULED' || session.status === 'LIVE') && (
+                  {/* Join Button only for LIVE sessions - student can only join when tutor has started */}
+                  {session.status === 'LIVE' && (
                     <Button
-                      className={`${
-                        session.status === 'LIVE'
-                          ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 hover:shadow-red-500/40'
-                          : 'bg-secondary hover:bg-secondary/80 shadow-lg shadow-secondary/20 hover:shadow-secondary/40'
-                      } text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-300 z-10 relative`}
+                      className="bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-300 z-10 relative"
                       onClick={(e) => {
                         e.stopPropagation();
                         console.log('🔴 [MyStudentSessionsList] CLICK no botão! session:', session.id, session.status);
                         handleJoinSession(session);
                       }}
                     >
-                      {session.status === 'LIVE' ? (
-                        <>
-                          <Play className="mr-2 h-4 w-4" />
-                          {t('joinNow')}
-                        </>
-                      ) : (
-                        <>
-                          <Play className="mr-2 h-4 w-4" />
-                          {t('joinSession')}
-                        </>
-                      )}
+                      <Play className="mr-2 h-4 w-4" />
+                      {t('joinNow')}
                     </Button>
                   )}
                 </div>

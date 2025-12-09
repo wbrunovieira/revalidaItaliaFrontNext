@@ -366,6 +366,10 @@
     "noUpcomingDescription": "Non ci sono sessioni programmate al momento. Torna più tardi!",
     "noLive": "Nessuna sessione dal vivo",
     "noLiveDescription": "Non ci sono sessioni in corso ora",
+    "liveNow": {
+      "groupDescription": "Sessioni di gruppo in corso",
+      "individualDescription": "Le tue sessioni individuali in diretta"
+    },
     "noRecorded": "Nessuna registrazione disponibile",
     "noRecordedDescription": "Le registrazioni delle sessioni precedenti appariranno qui",
     "joinNow": "Partecipa Ora",
@@ -509,6 +513,7 @@
         "notFoundDescription": "Questa sessione non esiste o è stata rimossa",
         "unavailableTitle": "Sessione non disponibile",
         "unavailableDescription": "Questa sessione non è disponibile per l'accesso in questo momento",
+        "sessionNotStartedDescription": "Questa sessione non è ancora stata avviata dal tutor. Attendere l'inizio.",
         "sessionEndedDescription": "Questa sessione è già terminata",
         "noUrlDescription": "Il link di accesso non è ancora disponibile. Riprova tra qualche istante.",
         "tokenExpiredTitle": "Link scaduto",

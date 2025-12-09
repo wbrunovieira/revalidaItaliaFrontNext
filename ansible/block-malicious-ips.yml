@@ -26,7 +26,21 @@
     cloudflare_zone_id: "{{ lookup('env', 'CLOUDFLARE_ZONE_ID') }}"
 
     # Lista de IPs maliciosos detectados em 08/Dec/2025
+    # Atualizado em 09/Dec/2025 com IPs do alerta AWS CVE-2025-55182 (React2Shell)
+    # Ref: https://aws.amazon.com/blogs/security/china-nexus-cyber-threat-groups-rapidly-exploit-react2shell-vulnerability-cve-2025-55182/
     blocked_ips:
+      # === CVE-2025-55182 React2Shell Attackers ===
+      - ip: "52.221.210.62"
+        reason: "AWS Alert - CVE-2025-55182 React2Shell exploit - 05/Dec/2025"
+      - ip: "206.237.3.150"
+        reason: "Earth Lamia (China-nexus) - CVE-2025-55182 - 04/Dec/2025"
+      - ip: "45.77.33.136"
+        reason: "Jackpot Panda (China-nexus) - CVE-2025-55182 - 04/Dec/2025"
+      - ip: "143.198.92.82"
+        reason: "Anonymization Network - CVE-2025-55182 - 04/Dec/2025"
+      - ip: "183.6.80.214"
+        reason: "Unattributed China cluster - CVE-2025-55182 - 116 requests in 52min"
+      # === Previous attackers ===
       - ip: "95.214.52.170"
         reason: "Scanner bot - 152 requests"
       - ip: "45.61.157.12"

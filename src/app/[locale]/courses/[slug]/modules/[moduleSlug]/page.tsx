@@ -310,12 +310,12 @@ export default async function ModulePage({
             </h3>
             {/* Timeline Visual */}
             <div className="space-y-6">
-              {/* Timeline */}
-              <div className="relative">
-                <div className="flex items-center justify-between relative">
+              {/* Timeline com scroll horizontal */}
+              <div className="relative overflow-x-auto pb-2 custom-scrollbar">
+                <div className="flex items-center gap-4 relative min-w-max px-2">
                   {/* Linha conectora de fundo */}
                   <div className="absolute top-6 left-0 right-0 h-[2px] bg-gray-700"></div>
-                  
+
                   {/* Módulos */}
                   {moduleFound.map((mod, idx) => {
                     const modTrans = mod.translations.find(t => t.locale === locale) || mod.translations[0] || {

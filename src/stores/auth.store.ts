@@ -980,12 +980,20 @@ export const useAuthStore = create<AuthState>()(
               userName: userData?.name,
               userRole: userData?.role,
             });
-            
+
+            // Se o nome do usuário estiver vazio, buscar perfil completo do servidor
+            if (!userData?.name && userData?.id) {
+              console.log('📥 Nome do usuário não encontrado no token, buscando do servidor...');
+              setTimeout(() => {
+                get().fetchUserProfile();
+              }, 100);
+            }
+
             // Verificar status dos termos após inicialização
             if (!termsAcceptance) {
               // Primeiro tenta migrar do localStorage
               get().migrateTermsFromLocalStorage();
-              
+
               // Depois verifica com o backend
               setTimeout(() => {
                 console.log('🔍 Verificando status dos termos após inicialização...');

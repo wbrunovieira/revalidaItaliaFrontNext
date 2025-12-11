@@ -2,7 +2,8 @@
 
 ## Visão Geral
 
-Implementar o primeiro ambiente 3D interativo para aulas de anatomia, substituindo o player de vídeo por uma experiência imersiva em Three.js.
+Implementar o primeiro ambiente 3D interativo para aulas de anatomia, substituindo o player de vídeo por uma experiência
+imersiva em Three.js.
 
 ---
 
@@ -38,13 +39,9 @@ npm install three @react-three/fiber @react-three/drei
 npm install -D @types/three
 ```
 
-**Pacotes:**
-| Pacote | Propósito |
-|--------|-----------|
-| `three` | Biblioteca base Three.js |
-| `@react-three/fiber` | React renderer para Three.js |
-| `@react-three/drei` | Helpers e componentes prontos (OrbitControls, Loader, etc) |
-| `@types/three` | Tipos TypeScript |
+**Pacotes:** | Pacote | Propósito | |--------|-----------| | `three` | Biblioteca base Three.js | | `@react-three/fiber`
+| React renderer para Three.js | | `@react-three/drei` | Helpers e componentes prontos (OrbitControls, Loader, etc) | |
+`@types/three` | Tipos TypeScript |
 
 ---
 
@@ -55,7 +52,10 @@ npm install -D @types/three
 ```tsx
 // src/components/3d-environments/registry.ts
 
-export const environment3DRegistry: Record<string, () => Promise<{ default: React.ComponentType<Environment3DProps> }>> = {
+export const environment3DRegistry: Record<
+  string,
+  () => Promise<{ default: React.ComponentType<Environment3DProps> }>
+> = {
   'human-body': () => import('./human-body'),
   // Futuros ambientes:
   // 'anatomia-coracao': () => import('./anatomia-coracao'),
@@ -82,6 +82,7 @@ export const isValidEnvironment = (slug: string): boolean => {
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { environment3DRegistry, Environment3DProps } from './registry';
+import { useTranslations } from 'next-intl';
 import LoadingSpinner3D from './common/LoadingSpinner3D';
 import ErrorBoundary3D from './common/ErrorBoundary3D';
 
@@ -90,20 +91,21 @@ interface Props extends Environment3DProps {
 }
 
 export function Environment3DLoader({ slug, ...props }: Props) {
+  const t = useTranslations('Environment3D');
   const loader = environment3DRegistry[slug];
 
   if (!loader) {
-    return <Environment3DNotFound slug={slug} />;
+    return <Environment3DNotFound slug={slug} message={t('error.notFound')} />;
   }
 
   const Environment3D = dynamic(loader, {
     ssr: false,
-    loading: () => <LoadingSpinner3D />
+    loading: () => <LoadingSpinner3D message={t('loading.message')} />,
   });
 
   return (
-    <ErrorBoundary3D>
-      <Suspense fallback={<LoadingSpinner3D />}>
+    <ErrorBoundary3D fallbackMessage={t('error.loadFailed')} retryText={t('error.retry')}>
+      <Suspense fallback={<LoadingSpinner3D message={t('loading.message')} />}>
         <Environment3D {...props} />
       </Suspense>
     </ErrorBoundary3D>
@@ -111,10 +113,13 @@ export function Environment3DLoader({ slug, ...props }: Props) {
 }
 ```
 
-### 2.3 Container com controles
+### 2.3 Container com controles (com i18n)
 
 ```tsx
 // src/components/3d-environments/Environment3DContainer.tsx
+'use client';
+
+import { useTranslations } from 'next-intl';
 
 interface Props {
   children: React.ReactNode;
@@ -124,6 +129,8 @@ interface Props {
 }
 
 export function Environment3DContainer({ children, title, onFullscreen, onReset }: Props) {
+  const t = useTranslations('Environment3D');
+
   return (
     <div className="relative w-full h-[70vh] bg-black rounded-lg overflow-hidden">
       {/* Header com título e controles */}
@@ -131,8 +138,8 @@ export function Environment3DContainer({ children, title, onFullscreen, onReset 
         <div className="flex justify-between items-center">
           <h2 className="text-white font-semibold">{title}</h2>
           <div className="flex gap-2">
-            <button onClick={onReset}>Reset</button>
-            <button onClick={onFullscreen}>Fullscreen</button>
+            <button onClick={onReset}>{t('controls.reset')}</button>
+            <button onClick={onFullscreen}>{t('controls.fullscreen')}</button>
           </div>
         </div>
       </div>
@@ -142,10 +149,95 @@ export function Environment3DContainer({ children, title, onFullscreen, onReset 
 
       {/* Instruções */}
       <div className="absolute bottom-4 left-4 text-white/60 text-sm">
-        Arraste para rotacionar • Scroll para zoom • Clique para selecionar
+        {t('instructions.dragToRotate')} • {t('instructions.scrollToZoom')} • {t('instructions.clickToSelect')}
       </div>
     </div>
   );
+}
+```
+
+### 2.4 Traduções (messages/*.json)
+
+Adicionar em cada arquivo de tradução:
+
+**messages/pt.json:**
+```json
+"Environment3D": {
+  "controls": {
+    "reset": "Resetar",
+    "fullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar"
+  },
+  "instructions": {
+    "dragToRotate": "Arraste para rotacionar",
+    "scrollToZoom": "Scroll para zoom",
+    "clickToSelect": "Clique para selecionar"
+  },
+  "loading": {
+    "message": "Carregando ambiente 3D...",
+    "loadingModel": "Carregando modelo..."
+  },
+  "error": {
+    "notFound": "Ambiente 3D não encontrado",
+    "loadFailed": "Falha ao carregar o ambiente 3D",
+    "retry": "Tentar novamente"
+  }
+}
+```
+
+**messages/it.json:**
+```json
+"Environment3D": {
+  "controls": {
+    "reset": "Reimposta",
+    "fullscreen": "Schermo intero",
+    "exitFullscreen": "Esci da schermo intero",
+    "zoomIn": "Ingrandisci",
+    "zoomOut": "Riduci"
+  },
+  "instructions": {
+    "dragToRotate": "Trascina per ruotare",
+    "scrollToZoom": "Scorri per zoom",
+    "clickToSelect": "Clicca per selezionare"
+  },
+  "loading": {
+    "message": "Caricamento ambiente 3D...",
+    "loadingModel": "Caricamento modello..."
+  },
+  "error": {
+    "notFound": "Ambiente 3D non trovato",
+    "loadFailed": "Impossibile caricare l'ambiente 3D",
+    "retry": "Riprova"
+  }
+}
+```
+
+**messages/es.json:**
+```json
+"Environment3D": {
+  "controls": {
+    "reset": "Restablecer",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar"
+  },
+  "instructions": {
+    "dragToRotate": "Arrastra para rotar",
+    "scrollToZoom": "Scroll para zoom",
+    "clickToSelect": "Clic para seleccionar"
+  },
+  "loading": {
+    "message": "Cargando entorno 3D...",
+    "loadingModel": "Cargando modelo..."
+  },
+  "error": {
+    "notFound": "Entorno 3D no encontrado",
+    "loadFailed": "Error al cargar el entorno 3D",
+    "retry": "Reintentar"
+  }
 }
 ```
 
@@ -155,13 +247,13 @@ export function Environment3DContainer({ children, title, onFullscreen, onReset 
 
 ### 3.1 Opções de fonte para modelos
 
-| Fonte | Tipo | Licença |
-|-------|------|---------|
-| [Sketchfab](https://sketchfab.com) | Modelos prontos | Varia (CC, compra) |
-| [TurboSquid](https://turbosquid.com) | Modelos profissionais | Comercial |
-| [CGTrader](https://cgtrader.com) | Modelos médicos | Comercial |
-| [BioDigital](https://biodigital.com) | Anatomia especializada | API/Licença |
-| [Zygote Body](https://zygotebody.com) | Corpo humano completo | Comercial |
+| Fonte                                 | Tipo                   | Licença            |
+| ------------------------------------- | ---------------------- | ------------------ |
+| [Sketchfab](https://sketchfab.com)    | Modelos prontos        | Varia (CC, compra) |
+| [TurboSquid](https://turbosquid.com)  | Modelos profissionais  | Comercial          |
+| [CGTrader](https://cgtrader.com)      | Modelos médicos        | Comercial          |
+| [BioDigital](https://biodigital.com)  | Anatomia especializada | API/Licença        |
+| [Zygote Body](https://zygotebody.com) | Corpo humano completo  | Comercial          |
 
 ### 3.2 Requisitos do modelo
 
@@ -197,22 +289,13 @@ import { Environment3DProps } from '../registry';
 export default function HumanBodyEnvironment({ lessonId, locale }: Environment3DProps) {
   return (
     <Environment3DContainer title="Anatomy - Human Body">
-      <Canvas
-        camera={{ position: [0, 0, 5], fov: 50 }}
-        style={{ background: '#0a0a0a' }}
-      >
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }} style={{ background: '#0a0a0a' }}>
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
 
         <BodyModel />
 
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          minDistance={2}
-          maxDistance={10}
-        />
+        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={10} />
         <Environment preset="studio" />
       </Canvas>
     </Environment3DContainer>
@@ -251,7 +334,7 @@ interface Lesson {
 
   // NOVOS CAMPOS
   type: 'STANDARD' | 'ENVIRONMENT_3D';
-  environment3dSlug?: string;  // só quando type = ENVIRONMENT_3D
+  environment3dSlug?: string; // só quando type = ENVIRONMENT_3D
 }
 ```
 
@@ -334,18 +417,21 @@ interface Lesson {
 ## Fase 6: Checklist de Implementação
 
 ### Setup Inicial
+
 - [ ] Criar branch `feature/3d-enviroment-1-body`
 - [ ] Criar estrutura de pastas
 - [ ] Instalar dependências (three, @react-three/fiber, @react-three/drei)
 - [ ] Criar componentes base (registry, loader, container)
 
 ### Modelo 3D
+
 - [ ] Pesquisar/adquirir modelo de corpo humano
 - [ ] Otimizar modelo para web
 - [ ] Testar carregamento no Three.js
 - [ ] Adicionar ao projeto em `public/models/`
 
 ### Componente do Ambiente
+
 - [ ] Criar `human-body/index.tsx`
 - [ ] Implementar carregamento do modelo
 - [ ] Adicionar controles (orbit, zoom)
@@ -353,6 +439,7 @@ interface Lesson {
 - [ ] Testar em diferentes dispositivos
 
 ### Integração na Página
+
 - [ ] Atualizar tipos da Lesson
 - [ ] Modificar LessonPageContent para detectar `type: ENVIRONMENT_3D`
 - [ ] Criar layout específico para aulas 3D
@@ -360,10 +447,12 @@ interface Lesson {
 - [ ] Testar navegação entre aulas
 
 ### Traduções
+
 - [ ] Adicionar traduções para controles 3D (pt, it, es)
 - [ ] Adicionar instruções de uso
 
 ### Testes e Deploy
+
 - [ ] Testar performance (FPS, carregamento)
 - [ ] Testar responsividade
 - [ ] Testar em dispositivos móveis (touch controls)
@@ -374,14 +463,14 @@ interface Lesson {
 
 ## Arquivos a Modificar
 
-| Arquivo | Ação |
-|---------|------|
-| `package.json` | Adicionar dependências Three.js |
-| `src/components/3d-environments/*` | Criar novos |
-| `src/components/LessonPageContent.tsx` | Adicionar condição para 3D |
-| `src/hooks/queries/useLesson.ts` | Atualizar interface Lesson |
-| `messages/*.json` | Adicionar traduções |
-| `public/models/` | Adicionar modelos 3D |
+| Arquivo                                | Ação                            |
+| -------------------------------------- | ------------------------------- |
+| `package.json`                         | Adicionar dependências Three.js |
+| `src/components/3d-environments/*`     | Criar novos                     |
+| `src/components/LessonPageContent.tsx` | Adicionar condição para 3D      |
+| `src/hooks/queries/useLesson.ts`       | Atualizar interface Lesson      |
+| `messages/*.json`                      | Adicionar traduções             |
+| `public/models/`                       | Adicionar modelos 3D            |
 
 ---
 

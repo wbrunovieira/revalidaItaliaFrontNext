@@ -20,6 +20,9 @@
       "notFound": "Ambiente 3D não encontrado",
       "loadFailed": "Falha ao carregar o ambiente 3D",
       "retry": "Tentar novamente"
+    },
+    "environments": {
+      "humanBody": "Corpo Humano - Anatomia"
     }
   },
   "Session": {

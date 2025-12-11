@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
@@ -8,9 +9,12 @@ import {
   ChevronLeft,
   BookOpen,
   User,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react';
 import Environment3DLoader from '@/components/3d-environments/Environment3DLoader';
 import LessonComments from '@/components/LessonComments';
+import { Button } from '@/components/ui/button';
 
 interface Translation {
   locale: string;
@@ -63,6 +67,25 @@ export default function Lesson3DPageContent({
   module,
 }: Lesson3DPageContentProps) {
   const tLesson = useTranslations('Lesson');
+  const t3D = useTranslations('Environment3D');
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  const handleMarkComplete = async () => {
+    if (isCompleted || isCompleting) return;
+
+    setIsCompleting(true);
+    try {
+      // TODO: Integrar com API real de progresso
+      console.log('Lesson completed:', lesson.id);
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simular delay
+      setIsCompleted(true);
+    } catch (error) {
+      console.error('Error completing lesson:', error);
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
   // Get translations
   const ct = course.translations.find(t => t.locale === locale) || course.translations[0];
@@ -154,8 +177,8 @@ export default function Lesson3DPageContent({
                 <h1 className="text-white font-semibold">{lt.title}</h1>
               </div>
 
-              {/* Navigation */}
-              <div className="flex items-center gap-2">
+              {/* Navigation & Complete */}
+              <div className="flex items-center gap-3">
                 <button
                   disabled
                   className="flex items-center gap-1 text-gray-600 text-sm cursor-not-allowed"
@@ -171,6 +194,34 @@ export default function Lesson3DPageContent({
                   <span className="hidden sm:inline">{tLesson('nextLesson')}</span>
                   <ChevronRight size={16} />
                 </button>
+                <div className="w-px h-4 bg-gray-700" />
+                <Button
+                  size="sm"
+                  onClick={handleMarkComplete}
+                  disabled={isCompleted || isCompleting}
+                  className={
+                    isCompleted
+                      ? 'bg-green-600 hover:bg-green-600 text-white cursor-default'
+                      : 'bg-secondary hover:bg-secondary/90 text-white'
+                  }
+                >
+                  {isCompleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t3D('controls.completing')}
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      {t3D('controls.completed')}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      {t3D('controls.markComplete')}
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 

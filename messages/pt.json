@@ -5,7 +5,10 @@
       "fullscreen": "Tela cheia",
       "exitFullscreen": "Sair da tela cheia",
       "zoomIn": "Aproximar",
-      "zoomOut": "Afastar"
+      "zoomOut": "Afastar",
+      "markComplete": "Marcar como concluído",
+      "completed": "Concluído",
+      "completing": "Concluindo..."
     },
     "instructions": {
       "dragToRotate": "Arraste para rotacionar",

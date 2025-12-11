@@ -5,7 +5,10 @@
       "fullscreen": "Schermo intero",
       "exitFullscreen": "Esci da schermo intero",
       "zoomIn": "Ingrandisci",
-      "zoomOut": "Riduci"
+      "zoomOut": "Riduci",
+      "markComplete": "Segna come completato",
+      "completed": "Completato",
+      "completing": "Completamento..."
     },
     "instructions": {
       "dragToRotate": "Trascina per ruotare",

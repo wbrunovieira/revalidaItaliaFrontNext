@@ -305,14 +305,19 @@ function IVStand() {
 }
 
 // Placeholder body model - will be replaced with actual GLTF model
-function PlaceholderBody() {
+interface PlaceholderBodyProps {
+  rotation: number;
+}
+
+function PlaceholderBody({ rotation }: PlaceholderBodyProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
-  // Subtle floating animation
+  // Subtle floating animation + horizontal rotation
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.03;
+      groupRef.current.rotation.y = rotation;
     }
   });
 
@@ -456,7 +461,11 @@ function PlaceholderBody() {
 }
 
 // Scene component with all 3D elements
-function Scene() {
+interface SceneProps {
+  bodyRotation: number;
+}
+
+function Scene({ bodyRotation }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -475,7 +484,7 @@ function Scene() {
         shadow-camera-bottom={-10}
       />
 
-      {/* Hospital environment */}
+      {/* Hospital environment (fixed) */}
       <HospitalFloor />
       <HospitalWalls />
       <CeilingLights />
@@ -484,60 +493,79 @@ function Scene() {
       <MedicalCabinet />
       <IVStand />
 
-      {/* Body placeholder */}
-      <PlaceholderBody />
+      {/* Body placeholder (rotates horizontally) */}
+      <PlaceholderBody rotation={bodyRotation} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
 
-      {/* Controls */}
+      {/* Zoom only controls - no rotation */}
       <OrbitControls
-        enablePan={true}
+        enablePan={false}
         enableZoom={true}
-        enableRotate={true}
+        enableRotate={false}
         minDistance={2}
-        maxDistance={10}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.2}
-        target={[0, 0.5, 0]}
+        maxDistance={8}
       />
     </>
   );
 }
 
-export default function HumanBodyEnvironment({ onComplete }: Environment3DProps) {
+export default function HumanBodyEnvironment({ lessonId }: Environment3DProps) {
   const t = useTranslations('Environment3D');
+  const [bodyRotation, setBodyRotation] = useState(0);
+  const isDragging = useRef(false);
+  const lastX = useRef(0);
 
   const handleReset = useCallback(() => {
-    // Reset is handled by OrbitControls internally when re-rendered
-    // For now, this is a placeholder for future implementation
+    setBodyRotation(0);
+    console.log(`[3D Environment] Reset body rotation for lesson: ${lessonId}`);
+  }, [lessonId]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDragging.current = true;
+    lastX.current = e.clientX;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }, []);
 
-  const handleComplete = useCallback(() => {
-    onComplete?.();
-  }, [onComplete]);
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    const deltaX = e.clientX - lastX.current;
+    lastX.current = e.clientX;
+    setBodyRotation(prev => prev + deltaX * 0.01);
+  }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    isDragging.current = false;
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+  }, []);
 
   return (
     <Environment3DContainer
       title={t('environments.humanBody') || 'Human Body - Anatomy'}
       onReset={handleReset}
     >
-      <Canvas
-        shadows
-        camera={{
-          position: [3, 2, 5],
-          fov: 50,
-          near: 0.1,
-          far: 100,
-        }}
-        onCreated={() => {
-          handleComplete();
-        }}
+      <div
+        style={{ width: '100%', height: '100%', cursor: isDragging.current ? 'grabbing' : 'grab' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
       >
-        <color attach="background" args={['#1a1a2e']} />
-        <fog attach="fog" args={['#1a1a2e', 8, 20]} />
-        <Scene />
-      </Canvas>
+        <Canvas
+          shadows
+          camera={{
+            position: [3, 2, 5],
+            fov: 50,
+            near: 0.1,
+            far: 100,
+          }}
+        >
+          <color attach="background" args={['#1a1a2e']} />
+          <fog attach="fog" args={['#1a1a2e', 8, 20]} />
+          <Scene bodyRotation={bodyRotation} />
+        </Canvas>
+      </div>
     </Environment3DContainer>
   );
 }

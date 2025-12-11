@@ -314,7 +314,7 @@ export default async function ModulePage({
               <div className="relative overflow-x-auto pb-2 custom-scrollbar">
                 <div className="flex items-start relative min-w-max px-2">
                   {/* Linha conectora de fundo */}
-                  <div className="absolute top-6 left-6 right-6 h-[2px] bg-gray-700"></div>
+                  <div className="absolute top-6 left-8 right-8 h-[2px] bg-gray-700"></div>
 
                   {/* Módulos */}
                   {moduleFound.map((mod, idx) => {
@@ -327,7 +327,7 @@ export default async function ModulePage({
                     const isCurrent = mod.id === moduleData.id;
 
                     return (
-                      <div key={mod.id} className="relative z-10 flex flex-col items-center w-20 flex-shrink-0">
+                      <div key={mod.id} className="relative z-10 flex flex-col items-center w-16 flex-shrink-0 group/item">
                         {/* Indicador "Você está aqui" */}
                         {isCurrent && (
                           <div className="absolute -top-8 whitespace-nowrap left-1/2 -translate-x-1/2">
@@ -340,7 +340,7 @@ export default async function ModulePage({
                         {/* Link do módulo */}
                         <Link
                           href={`/${locale}/courses/${slug}/modules/${mod.slug}`}
-                          className="group transition-all duration-300 flex flex-col items-center"
+                          className="relative transition-all duration-300 flex flex-col items-center"
                         >
                           {/* Círculo do módulo */}
                           <div className={`
@@ -352,18 +352,18 @@ export default async function ModulePage({
                               ? 'bg-secondary border-secondary text-primary animate-pulse'
                               : 'bg-gray-700 border-gray-600 text-gray-400 hover:bg-gray-600 hover:border-gray-500'
                             }
-                            group-hover:scale-110 group-hover:shadow-lg
+                            group-hover/item:scale-110 group-hover/item:shadow-lg
                           `}>
                             {mod.order}
                           </div>
 
-                          {/* Título do módulo */}
-                          <div className={`
-                            mt-2 text-center w-full px-1
-                            ${isCurrent ? 'text-white font-semibold' : 'text-gray-400'}
-                            group-hover:text-white
-                          `}>
-                            <p className="text-xs truncate">{modTrans.title}</p>
+                          {/* Tooltip com título - aparece no hover */}
+                          <div className="absolute top-14 left-1/2 -translate-x-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                            <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap max-w-[200px]">
+                              <p className="truncate font-medium">{modTrans.title}</p>
+                              {/* Seta do tooltip */}
+                              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                            </div>
                           </div>
                         </Link>
                       </div>
@@ -371,13 +371,13 @@ export default async function ModulePage({
                   })}
                 </div>
                 
-                {/* Linha de progresso - calculada com base na largura fixa de cada item (80px = w-20) */}
+                {/* Linha de progresso - calculada com base na largura fixa de cada item (64px = w-16) */}
                 <div
                   className="absolute top-6 h-[2px] bg-green-500 transition-all duration-500"
                   style={{
-                    left: '2.5rem', // Alinha com o centro do primeiro círculo (px-2 + w-12/2)
+                    left: '2rem', // Alinha com o centro do primeiro círculo
                     width: moduleFound.length > 1
-                      ? `calc(${(moduleData.order - 1) * 80}px)`
+                      ? `calc(${(moduleData.order - 1) * 64}px)`
                       : '0px'
                   }}
                 ></div>

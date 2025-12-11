@@ -1,4 +1,27 @@
 {
+  "Environment3D": {
+    "controls": {
+      "reset": "Restablecer",
+      "fullscreen": "Pantalla completa",
+      "exitFullscreen": "Salir de pantalla completa",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar"
+    },
+    "instructions": {
+      "dragToRotate": "Arrastra para rotar",
+      "scrollToZoom": "Scroll para zoom",
+      "clickToSelect": "Clic para seleccionar"
+    },
+    "loading": {
+      "message": "Cargando entorno 3D...",
+      "loadingModel": "Cargando modelo..."
+    },
+    "error": {
+      "notFound": "Entorno 3D no encontrado",
+      "loadFailed": "Error al cargar el entorno 3D",
+      "retry": "Reintentar"
+    }
+  },
   "Session": {
     "loginSuccess": {
       "title": "Inicio de sesión exitoso",

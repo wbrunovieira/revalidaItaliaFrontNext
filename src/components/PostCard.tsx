@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import ReportModal from '@/components/ReportModal';
 import EditPostModal from '@/components/EditPostModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { LinkifyText } from '@/components/ui/linkify-text';
 
 interface Author {
   id: string;
@@ -797,7 +798,7 @@ export default function PostCard({
 
         {/* Content */}
         <p className="text-gray-300 mb-4 whitespace-pre-wrap">
-          {post.content}
+          <LinkifyText text={post.content} />
         </p>
 
         {/* Attachments */}

@@ -21,6 +21,7 @@ import { useAuth } from '@/stores/auth.store';
 import ReportModal from '@/components/ReportModal';
 import EditCommentModal from '@/components/EditCommentModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { LinkifyText } from '@/components/ui/linkify-text';
 
 interface Author {
   id: string;
@@ -253,8 +254,8 @@ export default function ReplyCard({
         </div>
 
         {/* Content - No title for replies */}
-        <div className="text-gray-300 text-sm mb-3">
-          {reply.content}
+        <div className="text-gray-300 text-sm mb-3 whitespace-pre-wrap">
+          <LinkifyText text={reply.content} />
         </div>
 
         {/* Attachments - Compact */}

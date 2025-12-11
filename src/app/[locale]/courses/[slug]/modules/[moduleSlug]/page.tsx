@@ -312,9 +312,9 @@ export default async function ModulePage({
             <div className="space-y-6">
               {/* Timeline com scroll horizontal */}
               <div className="relative overflow-x-auto pb-2 custom-scrollbar">
-                <div className="flex items-center gap-4 relative min-w-max px-2">
+                <div className="flex items-start relative min-w-max px-2">
                   {/* Linha conectora de fundo */}
-                  <div className="absolute top-6 left-0 right-0 h-[2px] bg-gray-700"></div>
+                  <div className="absolute top-6 left-6 right-6 h-[2px] bg-gray-700"></div>
 
                   {/* Módulos */}
                   {moduleFound.map((mod, idx) => {
@@ -325,29 +325,29 @@ export default async function ModulePage({
                     };
                     const isCompleted = idx < moduleData.order - 1; // Módulos anteriores completos
                     const isCurrent = mod.id === moduleData.id;
-                    
+
                     return (
-                      <div key={mod.id} className="relative z-10 flex flex-col items-center">
+                      <div key={mod.id} className="relative z-10 flex flex-col items-center w-20 flex-shrink-0">
                         {/* Indicador "Você está aqui" */}
                         {isCurrent && (
-                          <div className="absolute -top-8 whitespace-nowrap">
+                          <div className="absolute -top-8 whitespace-nowrap left-1/2 -translate-x-1/2">
                             <div className="bg-secondary text-primary text-xs px-2 py-1 rounded-full font-semibold animate-pulse">
                               ↓ {tModule('youAreHere')}
                             </div>
                           </div>
                         )}
-                        
+
                         {/* Link do módulo */}
                         <Link
                           href={`/${locale}/courses/${slug}/modules/${mod.slug}`}
-                          className="group transition-all duration-300"
+                          className="group transition-all duration-300 flex flex-col items-center"
                         >
                           {/* Círculo do módulo */}
                           <div className={`
                             w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm
                             transition-all duration-300 border-2
-                            ${isCompleted 
-                              ? 'bg-green-500 border-green-500 text-white' 
+                            ${isCompleted
+                              ? 'bg-green-500 border-green-500 text-white'
                               : isCurrent
                               ? 'bg-secondary border-secondary text-primary animate-pulse'
                               : 'bg-gray-700 border-gray-600 text-gray-400 hover:bg-gray-600 hover:border-gray-500'
@@ -356,10 +356,10 @@ export default async function ModulePage({
                           `}>
                             {mod.order}
                           </div>
-                          
+
                           {/* Título do módulo */}
                           <div className={`
-                            mt-2 text-center max-w-[100px]
+                            mt-2 text-center w-full px-1
                             ${isCurrent ? 'text-white font-semibold' : 'text-gray-400'}
                             group-hover:text-white
                           `}>
@@ -371,11 +371,14 @@ export default async function ModulePage({
                   })}
                 </div>
                 
-                {/* Linha de progresso */}
-                <div 
-                  className="absolute top-6 left-0 h-[2px] bg-green-500 transition-all duration-500"
-                  style={{ 
-                    width: `${((moduleData.order - 1) / (moduleFound.length - 1)) * 100}%` 
+                {/* Linha de progresso - calculada com base na largura fixa de cada item (80px = w-20) */}
+                <div
+                  className="absolute top-6 h-[2px] bg-green-500 transition-all duration-500"
+                  style={{
+                    left: '2.5rem', // Alinha com o centro do primeiro círculo (px-2 + w-12/2)
+                    width: moduleFound.length > 1
+                      ? `calc(${(moduleData.order - 1) * 80}px)`
+                      : '0px'
                   }}
                 ></div>
               </div>

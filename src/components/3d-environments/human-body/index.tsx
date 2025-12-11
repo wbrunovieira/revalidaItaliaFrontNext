@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, Html, RoundedBox } from '@react-three/drei';
+import { OrbitControls, Environment, RoundedBox, useGLTF } from '@react-three/drei';
 import { useTranslations } from 'next-intl';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
@@ -304,14 +304,42 @@ function IVStand() {
   );
 }
 
-// Placeholder body model - will be replaced with actual GLTF model
-interface PlaceholderBodyProps {
+// Human body 3D model
+const MODEL_PATH = '/models/human-body/Body_high.glb';
+
+interface HumanBodyModelProps {
   rotation: number;
 }
 
-function PlaceholderBody({ rotation }: PlaceholderBodyProps) {
+function HumanBodyModel({ rotation }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState<string | null>(null);
+  const { scene } = useGLTF(MODEL_PATH);
+
+  // Skin-like material for human body
+  const skinMaterial = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#e8beac'), // Skin tone
+      roughness: 0.7,
+      metalness: 0.1,
+      side: THREE.DoubleSide,
+    });
+  }, []);
+
+  // Clone the scene and apply materials
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone();
+    clone.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        // Apply skin material if no texture exists
+        if (!child.material.map) {
+          child.material = skinMaterial;
+        }
+      }
+    });
+    return clone;
+  }, [scene, skinMaterial]);
 
   // Subtle floating animation + horizontal rotation
   useFrame((state) => {
@@ -322,143 +350,14 @@ function PlaceholderBody({ rotation }: PlaceholderBodyProps) {
   });
 
   return (
-    <group ref={groupRef} position={[0, 0.2, 0]}>
-      {/* Torso */}
-      <mesh
-        position={[0, 0.5, 0]}
-        onPointerOver={() => setHovered('torso')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <capsuleGeometry args={[0.35, 0.8, 8, 16]} />
-        <meshStandardMaterial
-          color={hovered === 'torso' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'torso' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Torso
-            </div>
-          </Html>
-        )}
-      </mesh>
-
-      {/* Head */}
-      <mesh
-        position={[0, 1.35, 0]}
-        onPointerOver={() => setHovered('head')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <sphereGeometry args={[0.25, 32, 32]} />
-        <meshStandardMaterial
-          color={hovered === 'head' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'head' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Head
-            </div>
-          </Html>
-        )}
-      </mesh>
-
-      {/* Left Arm */}
-      <mesh
-        position={[-0.55, 0.6, 0]}
-        rotation={[0, 0, 0.3]}
-        onPointerOver={() => setHovered('leftArm')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <capsuleGeometry args={[0.1, 0.6, 8, 16]} />
-        <meshStandardMaterial
-          color={hovered === 'leftArm' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'leftArm' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Left Arm
-            </div>
-          </Html>
-        )}
-      </mesh>
-
-      {/* Right Arm */}
-      <mesh
-        position={[0.55, 0.6, 0]}
-        rotation={[0, 0, -0.3]}
-        onPointerOver={() => setHovered('rightArm')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <capsuleGeometry args={[0.1, 0.6, 8, 16]} />
-        <meshStandardMaterial
-          color={hovered === 'rightArm' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'rightArm' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Right Arm
-            </div>
-          </Html>
-        )}
-      </mesh>
-
-      {/* Left Leg */}
-      <mesh
-        position={[-0.2, -0.5, 0]}
-        onPointerOver={() => setHovered('leftLeg')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <capsuleGeometry args={[0.12, 0.8, 8, 16]} />
-        <meshStandardMaterial
-          color={hovered === 'leftLeg' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'leftLeg' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Left Leg
-            </div>
-          </Html>
-        )}
-      </mesh>
-
-      {/* Right Leg */}
-      <mesh
-        position={[0.2, -0.5, 0]}
-        onPointerOver={() => setHovered('rightLeg')}
-        onPointerOut={() => setHovered(null)}
-        castShadow
-      >
-        <capsuleGeometry args={[0.12, 0.8, 8, 16]} />
-        <meshStandardMaterial
-          color={hovered === 'rightLeg' ? '#4a9eff' : '#e8d4c4'}
-          roughness={0.7}
-          metalness={0.1}
-        />
-        {hovered === 'rightLeg' && (
-          <Html center distanceFactor={10}>
-            <div className="bg-black/80 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-              Right Leg
-            </div>
-          </Html>
-        )}
-      </mesh>
+    <group ref={groupRef} position={[1.5, -2.0, 3]} scale={1.35}>
+      <primitive object={clonedScene} />
     </group>
   );
 }
+
+// Preload model for better performance
+useGLTF.preload(MODEL_PATH);
 
 // Scene component with all 3D elements
 interface SceneProps {
@@ -488,13 +387,12 @@ function Scene({ bodyRotation }: SceneProps) {
       <HospitalFloor />
       <HospitalWalls />
       <CeilingLights />
-      <ExaminationPedestal />
       <MedicalMonitor />
       <MedicalCabinet />
       <IVStand />
 
-      {/* Body placeholder (rotates horizontally) */}
-      <PlaceholderBody rotation={bodyRotation} />
+      {/* Human body model (rotates horizontally) */}
+      <HumanBodyModel rotation={bodyRotation} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />

@@ -8,7 +8,15 @@
       "zoomOut": "Alejar",
       "markComplete": "Marcar como completado",
       "completed": "Completado",
-      "completing": "Completando..."
+      "completing": "Completando...",
+      "loading": "Cargando...",
+      "anatomySystems": "Sistemas Anatómicos",
+      "skin": "Piel",
+      "muscles": "Músculos",
+      "skeleton": "Esqueleto",
+      "organs": "Órganos",
+      "circulatory": "Circulatorio",
+      "nervous": "Nervioso"
     },
     "instructions": {
       "dragToRotate": "Arrastra para rotar",

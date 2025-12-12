@@ -58,6 +58,18 @@
       become_user: ubuntu
       ignore_errors: yes
 
+    - name: "💾 BACKUP - Salvando .env.local antes do git reset"
+      shell: |
+        cd {{ app_dir }}
+        if [ -f .env.local ]; then
+          cp .env.local /tmp/.env.local.backup
+          echo "Backup criado"
+        else
+          echo "Arquivo .env.local não existe"
+        fi
+      become_user: ubuntu
+      register: env_backup
+
     - name: "📥 GIT FETCH - Buscando atualizações"
       shell: |
         cd {{ app_dir }}
@@ -71,6 +83,19 @@
         git reset --hard origin/main
       become_user: ubuntu
       register: git_result
+
+    - name: "♻️ RESTORE - Restaurando .env.local após git reset"
+      shell: |
+        cd {{ app_dir }}
+        if [ -f /tmp/.env.local.backup ]; then
+          cp /tmp/.env.local.backup .env.local
+          rm /tmp/.env.local.backup
+          echo "Restaurado com sucesso"
+        else
+          echo "Nenhum backup para restaurar"
+        fi
+      become_user: ubuntu
+      register: env_restore
 
     - name: "✅ GIT - Código atualizado"
       debug:

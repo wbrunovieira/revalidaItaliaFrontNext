@@ -1,4 +1,35 @@
 ---
+# Play 1: Sync local public/ to S3 (roda na máquina local)
+- name: Sync Local Assets to S3
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    aws_region: us-east-2
+    s3_bucket_name: revalida-documents-891ff933
+    local_public_dir: "{{ playbook_dir }}/../public"
+
+  tasks:
+    - name: "☁️ S3 SYNC - Sincronizando assets locais para S3"
+      shell: |
+        aws s3 sync "{{ local_public_dir }}/" s3://{{ s3_bucket_name }}/public/ \
+          --region {{ aws_region }} \
+          --profile bruno-admin-revalida-aws \
+          --exclude ".git/*" \
+          --exclude "*.md" \
+          --exclude ".gitkeep" \
+          --cache-control "public, max-age=86400" \
+          --metadata-directive REPLACE
+      register: s3_sync_result
+
+    - name: "✅ S3 - Resultado da sincronização"
+      debug:
+        msg:
+          - "Assets sincronizados para s3://{{ s3_bucket_name }}/public/"
+          - "{{ s3_sync_result.stdout_lines | default(['Nenhuma mudança']) }}"
+
+# Play 2: Deploy no servidor (sem baixar public/)
 - name: Quick Deploy - Update Code and Restart
   hosts: frontend
   become: true
@@ -8,28 +39,42 @@
     repo_url: https://github.com/wbrunovieira/revalidaItaliaFrontNext.git
     aws_region: us-east-2
     s3_bucket_name: revalida-documents-891ff933
+    s3_public_url: "https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com/public"
 
   tasks:
     - name: "🔄 INICIANDO - Atualização do código frontend"
       debug:
         msg: "Iniciando processo de atualização do código em {{ app_dir }}"
 
-    - name: "📥 GIT PULL - Atualizando código do repositório"
-      git:
-        repo: '{{ repo_url }}'
-        dest: '{{ app_dir }}'
-        version: main
-        force: yes
-        update: yes
+    - name: "⚙️ GIT - Configurando sparse-checkout para excluir public/models/"
+      shell: |
+        cd {{ app_dir }}
+        git config core.sparseCheckout true
+        mkdir -p .git/info
+        cat > .git/info/sparse-checkout << 'EOF'
+        /*
+        !/public/models/
+        EOF
+      become_user: ubuntu
+      ignore_errors: yes
+
+    - name: "📥 GIT FETCH - Buscando atualizações"
+      shell: |
+        cd {{ app_dir }}
+        git fetch origin main
+      become_user: ubuntu
+      register: git_fetch
+
+    - name: "📥 GIT RESET - Aplicando atualizações (exceto public/)"
+      shell: |
+        cd {{ app_dir }}
+        git reset --hard origin/main
       become_user: ubuntu
       register: git_result
 
-    - name: "✅ GIT - Mostrar mudanças obtidas"
+    - name: "✅ GIT - Código atualizado"
       debug:
-        msg:
-          - "Git pull concluído!"
-          - "Antes: {{ git_result.before | default('unknown') }}"
-          - "Depois: {{ git_result.after | default('unknown') }}"
+        msg: "Git atualizado com sucesso (public/ ignorado via sparse-checkout)"
 
     - name: "📦 NPM - Instalando dependências"
       command: npm install
@@ -59,23 +104,101 @@
       debug:
         msg: "Build concluído com sucesso!"
 
-    - name: "☁️ S3 SYNC - Sincronizando assets públicos para S3"
-      shell: |
-        aws s3 sync {{ app_dir }}/public/ s3://{{ s3_bucket_name }}/public/ \
-          --region {{ aws_region }} \
-          --delete \
-          --exclude ".git/*" \
-          --exclude "*.md" \
-          --cache-control "public, max-age=86400" \
-          --metadata-directive REPLACE
-      environment:
-        AWS_REGION: "{{ aws_region }}"
-      become_user: ubuntu
-      register: s3_sync_result
+    - name: "🌐 NGINX - Atualizando configuração para servir /public/ do S3"
+      copy:
+        content: |
+          server {
+              listen 443 ssl http2;
+              listen [::]:443 ssl http2;
+              server_name portalrevalida.com www.portalrevalida.com;
 
-    - name: "✅ S3 - Assets sincronizados"
-      debug:
-        msg: "Assets públicos atualizados em s3://{{ s3_bucket_name }}/public/"
+              # SSL Configuration
+              ssl_certificate /etc/nginx/ssl/portalrevalida.com.crt;
+              ssl_certificate_key /etc/nginx/ssl/portalrevalida.com.key;
+
+              # SSL Security Settings
+              ssl_protocols TLSv1.2 TLSv1.3;
+              ssl_ciphers HIGH:!aNULL:!MD5;
+              ssl_prefer_server_ciphers on;
+
+              # Security headers
+              add_header X-Frame-Options "SAMEORIGIN" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header X-Content-Type-Options "nosniff" always;
+              add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+              # Cloudflare Real IP
+              set_real_ip_from 173.245.48.0/20;
+              set_real_ip_from 103.21.244.0/22;
+              set_real_ip_from 103.22.200.0/22;
+              set_real_ip_from 103.31.4.0/22;
+              set_real_ip_from 141.101.64.0/18;
+              set_real_ip_from 108.162.192.0/18;
+              set_real_ip_from 190.93.240.0/20;
+              set_real_ip_from 188.114.96.0/20;
+              set_real_ip_from 197.234.240.0/22;
+              set_real_ip_from 198.41.128.0/17;
+              set_real_ip_from 162.158.0.0/15;
+              set_real_ip_from 104.16.0.0/13;
+              set_real_ip_from 104.24.0.0/14;
+              set_real_ip_from 172.64.0.0/13;
+              set_real_ip_from 131.0.72.0/22;
+              real_ip_header CF-Connecting-IP;
+
+              # Proxy para assets públicos do S3
+              location /public/ {
+                  proxy_pass https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com/public/;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host {{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com;
+                  proxy_cache_valid 200 7d;
+                  proxy_cache_valid 404 1m;
+                  expires 7d;
+                  add_header Cache-Control "public, immutable";
+              }
+
+              # Proxy para Next.js (aplicação)
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_cache_bypass $http_upgrade;
+
+                  # Timeouts
+                  proxy_connect_timeout 60s;
+                  proxy_send_timeout 60s;
+                  proxy_read_timeout 60s;
+
+                  # Buffer settings
+                  proxy_buffering off;
+                  proxy_buffer_size 4k;
+                  proxy_buffers 8 4k;
+                  proxy_busy_buffers_size 8k;
+
+                  # Max body size
+                  client_max_body_size 50M;
+              }
+          }
+        dest: /etc/nginx/sites-available/portalrevalida.com-ssl
+        owner: root
+        group: root
+        mode: '0644'
+      register: nginx_config
+
+    - name: "🔄 NGINX - Testando configuração"
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: "🔄 NGINX - Recarregando"
+      systemd:
+        name: nginx
+        state: reloaded
+      when: nginx_config.changed
 
     - name: "🔄 PM2 - Reiniciando aplicação"
       shell: |
@@ -103,4 +226,5 @@
       debug:
         msg:
           - "🎉 Atualização concluída com sucesso!"
-          - "Aplicação rodando em: http://portalrevalida.com"
+          - "📦 Assets públicos servidos de: {{ s3_public_url }}"
+          - "🌐 Aplicação rodando em: https://portalrevalida.com"

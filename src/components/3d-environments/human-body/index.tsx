@@ -532,7 +532,7 @@ function IVStand() {
 }
 
 // Human body 3D model (single model with system visibility)
-const MODEL_PATH = '/models/human-body/anatomy-internal.glb';
+const MODEL_PATH = '/public/models/human-body/anatomy-internal.glb';
 
 // Anatomical systems visibility state
 interface AnatomySystemsVisibility {

@@ -153,74 +153,6 @@ function CeilingLights() {
   );
 }
 
-// Medical monitor
-function MedicalMonitor() {
-  return (
-    <group position={[2.5, 0.5, -2]} rotation={[0, -0.4, 0]}>
-      {/* Stand */}
-      <mesh position={[0, -1, 0]}>
-        <cylinderGeometry args={[0.05, 0.08, 1.2, 16]} />
-        <meshStandardMaterial color="#333" metalness={0.8} roughness={0.3} />
-      </mesh>
-
-      {/* Base */}
-      <mesh position={[0, -1.55, 0]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.05, 32]} />
-        <meshStandardMaterial color="#333" metalness={0.8} roughness={0.3} />
-      </mesh>
-
-      {/* Screen frame */}
-      <RoundedBox args={[0.8, 0.6, 0.05]} radius={0.02} position={[0, 0, 0]}>
-        <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
-      </RoundedBox>
-
-      {/* Screen */}
-      <mesh position={[0, 0, 0.03]}>
-        <planeGeometry args={[0.7, 0.5]} />
-        <meshStandardMaterial color="#001a33" emissive="#003366" emissiveIntensity={0.3} />
-      </mesh>
-
-      {/* Screen content - heartbeat line */}
-      <mesh position={[0, 0, 0.035]}>
-        <planeGeometry args={[0.6, 0.02]} />
-        <meshStandardMaterial color="#00ff88" emissive="#00ff88" emissiveIntensity={1} />
-      </mesh>
-    </group>
-  );
-}
-
-// Medical cabinet
-function MedicalCabinet() {
-  return (
-    <group position={[-4, 0, -3]} rotation={[0, 0.3, 0]}>
-      {/* Cabinet body */}
-      <RoundedBox args={[1.2, 2, 0.5]} radius={0.02} position={[0, 0, 0]}>
-        <meshStandardMaterial color="#e8eef2" roughness={0.7} />
-      </RoundedBox>
-
-      {/* Glass doors */}
-      <mesh position={[0, 0.2, 0.26]}>
-        <planeGeometry args={[1.1, 1.5]} />
-        <meshStandardMaterial color="#a8c8d8" transparent opacity={0.3} metalness={0.9} roughness={0.1} />
-      </mesh>
-
-      {/* Shelves visible through glass */}
-      {[-0.4, 0, 0.4].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]}>
-          <boxGeometry args={[1.1, 0.02, 0.4]} />
-          <meshStandardMaterial color="#d0d8e0" />
-        </mesh>
-      ))}
-
-      {/* Handle */}
-      <mesh position={[0.45, 0.2, 0.28]}>
-        <boxGeometry args={[0.03, 0.2, 0.03]} />
-        <meshStandardMaterial color="#888" metalness={0.9} roughness={0.2} />
-      </mesh>
-    </group>
-  );
-}
-
 // Window with blinds
 function HospitalWindow() {
   const blindsCount = 12;
@@ -258,101 +190,6 @@ function HospitalWindow() {
         <boxGeometry args={[2.6, 0.08, 0.3]} />
         <meshStandardMaterial color="#e0e0e0" roughness={0.5} />
       </mesh>
-    </group>
-  );
-}
-
-// Small decorative plant
-function SmallPlant({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
-  const potColor = '#8B4513';
-  const leafColor = '#2d5a27';
-  const leafColorLight = '#3d7a37';
-
-  return (
-    <group position={position} scale={scale}>
-      {/* Pot */}
-      <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.15, 0.12, 0.3, 16]} />
-        <meshStandardMaterial color={potColor} roughness={0.8} />
-      </mesh>
-      {/* Pot rim */}
-      <mesh position={[0, 0.31, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.17, 0.15, 0.04, 16]} />
-        <meshStandardMaterial color={potColor} roughness={0.8} />
-      </mesh>
-      {/* Soil */}
-      <mesh position={[0, 0.32, 0]} receiveShadow>
-        <cylinderGeometry args={[0.14, 0.14, 0.02, 16]} />
-        <meshStandardMaterial color="#3a2a1a" roughness={1} />
-      </mesh>
-
-      {/* Main leaves - oval shaped using scaled spheres */}
-      {[0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4].map((angle, i) => (
-        <mesh
-          key={i}
-          castShadow
-          receiveShadow
-          position={[
-            Math.sin(angle) * 0.06,
-            0.42 + (i % 3) * 0.05,
-            Math.cos(angle) * 0.06,
-          ]}
-          rotation={[0.5 + (i % 3) * 0.15, angle, 0.3 - (i % 2) * 0.2]}
-          scale={[1, 2.5, 0.15]}
-        >
-          <sphereGeometry args={[0.045, 8, 6]} />
-          <meshStandardMaterial
-            color={i % 2 === 0 ? leafColor : leafColorLight}
-            roughness={0.6}
-          />
-        </mesh>
-      ))}
-
-      {/* Center stem */}
-      <mesh position={[0, 0.48, 0]} castShadow>
-        <cylinderGeometry args={[0.012, 0.018, 0.3, 8]} />
-        <meshStandardMaterial color="#2a4a22" roughness={0.7} />
-      </mesh>
-
-      {/* Top smaller leaves - teardrop shape */}
-      {[0, 1.0, 2.0, 3.0, 4.0, 5.0].map((angle, i) => (
-        <mesh
-          key={`top-${i}`}
-          castShadow
-          receiveShadow
-          position={[
-            Math.sin(angle) * 0.04,
-            0.58 + i * 0.025,
-            Math.cos(angle) * 0.04,
-          ]}
-          rotation={[0.6 + (i % 2) * 0.2, angle, 0.25]}
-          scale={[0.8, 2, 0.12]}
-        >
-          <sphereGeometry args={[0.035, 8, 6]} />
-          <meshStandardMaterial
-            color={i % 2 === 0 ? leafColorLight : leafColor}
-            roughness={0.5}
-          />
-        </mesh>
-      ))}
-
-      {/* Tiny accent leaves at top */}
-      {[0.5, 2.0, 3.5, 5.0].map((angle, i) => (
-        <mesh
-          key={`tiny-${i}`}
-          castShadow
-          position={[
-            Math.sin(angle) * 0.02,
-            0.72 + i * 0.01,
-            Math.cos(angle) * 0.02,
-          ]}
-          rotation={[0.3, angle, 0.4]}
-          scale={[0.6, 1.5, 0.1]}
-        >
-          <sphereGeometry args={[0.025, 6, 4]} />
-          <meshStandardMaterial color={leafColorLight} roughness={0.5} />
-        </mesh>
-      ))}
     </group>
   );
 }
@@ -494,45 +331,11 @@ function WallText() {
   );
 }
 
-// IV Stand decoration
-function IVStand() {
-  return (
-    <group position={[-3, -1.1, -3.5]}>
-      {/* Base */}
-      <mesh position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.3, 0.35, 0.1, 6]} />
-        <meshStandardMaterial color="#888" metalness={0.8} roughness={0.3} />
-      </mesh>
-
-      {/* Pole */}
-      <mesh position={[0, 1, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 2, 16]} />
-        <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
-      </mesh>
-
-      {/* Top hook holder */}
-      <mesh position={[0, 2, 0]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
-      </mesh>
-
-      {/* Hooks */}
-      {[0, Math.PI / 2, Math.PI, -Math.PI / 2].map((angle, i) => (
-        <mesh
-          key={i}
-          position={[Math.sin(angle) * 0.15, 1.95, Math.cos(angle) * 0.15]}
-          rotation={[0, angle, -Math.PI / 6]}
-        >
-          <cylinderGeometry args={[0.01, 0.01, 0.15, 8]} />
-          <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 // Human body 3D model (single model with system visibility)
-const MODEL_PATH = '/models/human-body/anatomy-internal.glb';
+// In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
+const MODEL_PATH = process.env.NODE_ENV === 'production'
+  ? '/public/models/human-body/anatomy-internal.glb'
+  : '/models/human-body/anatomy-internal.glb';
 
 // Anatomical systems visibility state
 interface AnatomySystemsVisibility {
@@ -856,11 +659,6 @@ function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
       <HospitalWindow />
       <AnatomyPoster />
       <CeilingLights />
-      <MedicalMonitor />
-      <MedicalCabinet />
-      <IVStand />
-      <SmallPlant position={[5.3, -1.1, 3.8]} scale={1.5} />
-      <SmallPlant position={[-5.3, -1.1, 3.8]} />
 
       {/* Human body model (rotates horizontally) */}
       <HumanBodyModel rotation={bodyRotation} systemsVisibility={systemsVisibility} />

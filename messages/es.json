@@ -16,7 +16,14 @@
       "skeleton": "Esqueleto",
       "organs": "Órganos",
       "circulatory": "Circulatorio",
-      "nervous": "Nervioso"
+      "nervous": "Nervioso",
+      "bodyParts": "Partes del Cuerpo",
+      "bodyFull": "Cuerpo Completo",
+      "head": "Cabeza",
+      "torso": "Torso",
+      "legs": "Piernas",
+      "hand": "Mano",
+      "volume": "Volumen"
     },
     "instructions": {
       "dragToRotate": "Arrastra para rotar",

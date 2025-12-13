@@ -1,12 +1,59 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, RoundedBox, useGLTF, Html, Text } from '@react-three/drei';
 import { useTranslations } from 'next-intl';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer from '../Environment3DContainer';
+
+// Body parts configuration for camera focus
+interface BodyPartConfig {
+  id: string;
+  labelKey: string;
+  cameraPosition: [number, number, number];
+  cameraTarget: [number, number, number];
+  icon: string;
+}
+
+const BODY_PARTS: BodyPartConfig[] = [
+  {
+    id: 'full',
+    labelKey: 'bodyFull',
+    cameraPosition: [0, 0.5, 5],
+    cameraTarget: [0, 0.5, 0],
+    icon: '👤',
+  },
+  {
+    id: 'head',
+    labelKey: 'head',
+    cameraPosition: [0, 1.1, 0.3],
+    cameraTarget: [0, 1.2, -0.5],
+    icon: '🧠',
+  },
+  {
+    id: 'torso',
+    labelKey: 'torso',
+    cameraPosition: [0, 0.3, 1.5],
+    cameraTarget: [0, 0.3, -1.5],
+    icon: '🫁',
+  },
+  {
+    id: 'legs',
+    labelKey: 'legs',
+    cameraPosition: [0, -0.5, 1.5],
+    cameraTarget: [0, -0.5, 0],
+    icon: '🦵',
+  },
+  {
+    id: 'hand',
+    labelKey: 'hand',
+    cameraPosition: [0.5, 0.1, 0.7],
+    cameraTarget: [0.7, 0, -2.2],
+    icon: '✋',
+  },
+];
 
 // Hospital room floor with tile pattern
 function HospitalFloor() {
@@ -97,6 +144,102 @@ function HospitalWalls() {
   );
 }
 
+// Chalkboard with instructions
+function InstructionsChalkboard() {
+  const primaryDark = '#0F2940';
+  const secondaryColor = '#3887A6';
+
+  return (
+    <group position={[-3, 2.5, -4.9]}>
+      {/* Chalkboard frame - secondary color */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[5, 3.2, 0.1]} />
+        <meshStandardMaterial color={secondaryColor} roughness={0.8} />
+      </mesh>
+
+      {/* Chalkboard surface - primary dark */}
+      <mesh position={[0, 0, 0.06]}>
+        <planeGeometry args={[4.7, 2.9]} />
+        <meshStandardMaterial color={primaryDark} roughness={0.95} />
+      </mesh>
+
+      {/* Chalk tray */}
+      <mesh position={[0, -1.5, 0.15]}>
+        <boxGeometry args={[4.2, 0.08, 0.15]} />
+        <meshStandardMaterial color="#0C3559" roughness={0.8} />
+      </mesh>
+
+      {/* Title */}
+      <Text
+        position={[0, 1.1, 0.07]}
+        fontSize={0.22}
+        color="#F5F5DC"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight={700}
+      >
+        Come usare
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 1 */}
+      <Text
+        position={[-2.1, 0.5, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        1. Scegli la parte del corpo nel pannello
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 2 */}
+      <Text
+        position={[-2.1, 0.05, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        2. Passa il mouse sui punti per vedere il nome
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 3 */}
+      <Text
+        position={[-2.1, -0.4, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        {"3. Clicca per ascoltare l'audio"}
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Closing message */}
+      <Text
+        position={[0, -1.0, 0.07]}
+        fontSize={0.18}
+        color="#90EE90"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight={700}
+      >
+        ❤️ Divertiti e impara! ❤️
+        <meshBasicMaterial color="#90EE90" />
+      </Text>
+    </group>
+  );
+}
+
 // Hospital ceiling
 function HospitalCeiling() {
   return (
@@ -168,11 +311,7 @@ function HospitalWindow() {
       {/* Venetian blinds */}
       <group position={[0, 0, 0.06]}>
         {Array.from({ length: blindsCount }).map((_, i) => (
-          <mesh
-            key={i}
-            position={[0, 0.85 - i * 0.15, 0]}
-            rotation={[0.3, 0, 0]}
-          >
+          <mesh key={i} position={[0, 0.85 - i * 0.15, 0]} rotation={[0.3, 0, 0]}>
             <boxGeometry args={[2.2, 0.08, 0.01]} />
             <meshStandardMaterial color="#e8e0d0" roughness={0.8} />
           </mesh>
@@ -317,13 +456,7 @@ function WallText() {
       </Text>
 
       {/* Main text */}
-      <Text
-        fontSize={0.7}
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.02}
-        fontWeight={700}
-      >
+      <Text fontSize={0.7} anchorX="center" anchorY="middle" letterSpacing={0.02} fontWeight={700}>
         Revalida Italia
         <meshStandardMaterial color="#0C3559" metalness={0.2} roughness={0.4} />
       </Text>
@@ -331,152 +464,290 @@ function WallText() {
   );
 }
 
-// Human body 3D model (single model with system visibility)
+// Human body 3D model (external only - skin, eyes, eyebrows, eyelashes)
 // In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
-const MODEL_PATH = process.env.NODE_ENV === 'production'
-  ? '/public/models/human-body/anatomy-internal.glb'
-  : '/models/human-body/anatomy-internal.glb';
-
-// Anatomical systems visibility state
-interface AnatomySystemsVisibility {
-  skin: boolean;
-  muscles: boolean;
-  skeleton: boolean;
-  organs: boolean;
-  circulatory: boolean;
-  nervous: boolean;
-}
-
-// Mesh names for each anatomical system
-const SKIN_MESHES = ['body', 'eyes', 'eyebrows', 'eyelashes'];
-
-const SKELETON_MESHES = [
-  'skull', 'jaw_bone', 'upper_teeth', 'lover_teeth', 'hyoid_bone', 'hyoid_bone_skeletal',
-  'cervical_spine', 'thoracic_spine', 'lumbar_spine', 'sacrum', 'coccyx', 'intervertebral_disks',
-  'thorax', 'sternum', 'costal_cartilage', 'ilium', 'pubic_symphysis',
-  'l_clavicle', 'l_scapula', 'l_humerus', 'l_radius', 'l_ulna', 'l_wrist', 'l_metacarpal_bones', 'l_finger_bones',
-  'r_clavicle', 'r_scapula', 'r_humerus', 'r_radius', 'r_ulna', 'r_wrist', 'r_metacarpal_bones', 'r_finger_bones',
-  'l_femur', 'l_patella', 'l_tibia', 'l_fibula', 'l_talus', 'l_calcaneum', 'l_tarsal_bones', 'l_metatarsal_bones', 'l_phalanges',
-  'r_femur', 'r_patella', 'r_tibia', 'r_fibula', 'r_talus', 'r_calcaneum', 'r_tarsal_bones', 'r_metatarsal_bones', 'r_phalanges',
-];
-
-const ORGAN_MESHES = [
-  'brain', 'esophagus', 'stomach', 'small_intestine', 'colon', 'appendix',
-  'liver_right', 'liver_left', 'gallbladder', 'hepatic_duct', 'pancreas', 'spleen',
-  'pharynx', 'lungs', 'bronch',
-  'kidneys', 'ureter', 'bladder', 'urethra', 'adrenal_glands',
-  'testis', 'epididymis', 'vas_deferens', 'seminal_vesicle', 'prostate',
-  'corpus_cavernosum', 'corpus_spongiosum', 'glans_penis',
-  'thyroid', 'thyroid_cartilage', 'cricoid_cartilage', 'arytenoid_cartilage',
-  'corniculate_cartilage', 'thyrohyoid_membrane',
-];
-
-const CIRCULATORY_MESHES = ['heart', 'vessels_red', 'vessels_blue'];
-
-const NERVOUS_MESHES = ['nerves'];
-
-// Function to check if mesh belongs to a system
-function getMeshSystem(meshName: string): keyof AnatomySystemsVisibility | 'muscle' | null {
-  const name = meshName.toLowerCase();
-
-  if (SKIN_MESHES.includes(name)) return 'skin';
-  if (SKELETON_MESHES.includes(name)) return 'skeleton';
-  if (ORGAN_MESHES.includes(name)) return 'organs';
-  if (CIRCULATORY_MESHES.includes(name)) return 'circulatory';
-  if (NERVOUS_MESHES.includes(name)) return 'nervous';
-
-  // Check if it's a muscle (most meshes with prefixes are muscles)
-  if (name.startsWith('l_') || name.startsWith('r_') ||
-      name.includes('muscle') || name.includes('_head') ||
-      name.includes('oblique') || name.includes('abdominis') ||
-      name.includes('spinalis') || name.includes('levator') ||
-      name.includes('orbicularis') || name.includes('frontalis') ||
-      name.includes('nasalis') || name.includes('coccygeus') ||
-      name.includes('pubococcygeus') || name === 'polysurface1') {
-    // But exclude skeleton meshes that also start with l_/r_
-    if (!SKELETON_MESHES.includes(name)) {
-      return 'muscle';
-    }
-  }
-
-  return null;
-}
+const MODEL_PATH =
+  process.env.NODE_ENV === 'production'
+    ? '/public/models/human-body/anatomy-internal.glb'
+    : '/models/human-body/anatomy-internal.glb';
 
 // Hotspot component for interactive anatomy points
 interface HotspotProps {
   position: [number, number, number];
   label: string;
+  size?: number;
+  audioUrl?: string;
+  volume?: number;
   onHover?: (isHovered: boolean) => void;
+  onAudioPlay?: () => void;
 }
 
-function Hotspot({ position, label, onHover }: HotspotProps) {
+function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onAudioPlay }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Update volume when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  // Show tooltip based on hover or touch
+  const tooltipVisible = showTooltip || hovered;
 
   const handlePointerOver = () => {
-    setHovered(true);
-    onHover?.(true);
+    if (!isTouchDevice) {
+      setHovered(true);
+      onHover?.(true);
+    }
   };
 
   const handlePointerOut = () => {
-    setHovered(false);
-    onHover?.(false);
+    if (!isTouchDevice) {
+      setHovered(false);
+      onHover?.(false);
+    }
   };
+
+  const playAudio = useCallback(() => {
+    if (!audioUrl) return;
+
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(audioUrl);
+    audio.volume = volume;
+    audioRef.current = audio;
+
+    audio.onplay = () => {
+      setIsPlaying(true);
+      onAudioPlay?.();
+    };
+
+    audio.onended = () => {
+      setIsPlaying(false);
+      setHasPlayed(true);
+    };
+
+    audio.onerror = () => {
+      setIsPlaying(false);
+      console.error('Error playing audio:', audioUrl);
+    };
+
+    audio.play().catch(err => {
+      console.error('Error playing audio:', err);
+      setIsPlaying(false);
+    });
+  }, [audioUrl, volume, onAudioPlay]);
+
+  const handleClick = useCallback(() => {
+    // On touch device: show tooltip for 3 seconds + play audio
+    if (isTouchDevice) {
+      // Clear any existing timeout
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+
+      // Show tooltip
+      setShowTooltip(true);
+      onHover?.(true);
+
+      // Hide tooltip after 3 seconds
+      tooltipTimeoutRef.current = setTimeout(() => {
+        setShowTooltip(false);
+        onHover?.(false);
+      }, 3000);
+    }
+
+    // Play audio (both desktop and mobile)
+    if (audioUrl) {
+      playAudio();
+    }
+  }, [isTouchDevice, audioUrl, playAudio, onHover]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <group position={position}>
-      {/* Hotspot point */}
-      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-        <sphereGeometry args={[0.03, 16, 16]} />
+      {/* Hotspot point - clickable */}
+      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
+        <sphereGeometry args={[size, 16, 16]} />
         <meshStandardMaterial
-          color={hovered ? '#3887A6' : '#0C3559'}
-          emissive={hovered ? '#3887A6' : '#0C3559'}
-          emissiveIntensity={hovered ? 1.2 : 0.6}
+          color={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissive={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissiveIntensity={isPlaying ? 1.5 : tooltipVisible ? 1.2 : 0.6}
         />
       </mesh>
 
-      {/* Pulsing ring */}
+      {/* Pulsing ring - animated when playing */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.04, 0.06, 32]} />
-        <meshStandardMaterial color="#3887A6" transparent opacity={hovered ? 0.9 : 0.5} />
+        <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
+        <meshStandardMaterial
+          color={isPlaying ? '#4CAF50' : '#3887A6'}
+          transparent
+          opacity={isPlaying ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+        />
       </mesh>
 
+      {/* Playing animation indicator */}
+      {isPlaying && (
+        <Html position={[size * 2, size * 1.5, 0]} distanceFactor={6} center>
+          <div
+            style={{
+              display: 'flex',
+              gap: '2px',
+              alignItems: 'flex-end',
+              height: '14px',
+            }}
+          >
+            {[1, 2, 3].map(i => (
+              <div
+                key={i}
+                style={{
+                  width: '3px',
+                  background: '#4CAF50',
+                  borderRadius: '1px',
+                  animation: `soundBar 0.5s ease-in-out infinite alternate`,
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
+          </div>
+          <style>{`
+            @keyframes soundBar {
+              0% { height: 4px; }
+              100% { height: 14px; }
+            }
+          `}</style>
+        </Html>
+      )}
+
       {/* Label tooltip - positioned to the right */}
-      {hovered && (
+      {tooltipVisible && (
         <Html
           position={[0, 0, 0]}
           distanceFactor={6}
           center={false}
           style={{
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
             transform: 'translate(0, -50%)',
           }}
         >
-          <div className="flex items-center">
-            {/* Connector line - full length */}
+          <div
+            className="flex items-center"
+            style={{
+              animation: 'tooltipAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            }}
+          >
+            {/* Connector line with gradient and rounded ends */}
             <div
               style={{
-                width: '80px',
+                width: '40px',
                 height: '2px',
-                backgroundColor: '#3887A6',
+                background: isPlaying
+                  ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
+                  : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
+                borderRadius: '2px',
+                boxShadow: isPlaying ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
               }}
             />
-            {/* Label box */}
+            {/* Rounded connector dot */}
             <div
-              className="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-xl"
               style={{
-                backgroundColor: '#0C3559',
-                border: '2px solid #3887A6',
+                width: '6px',
+                height: '6px',
+                background: isPlaying
+                  ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
+                  : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
+                borderRadius: '50%',
+                marginLeft: '-3px',
+                boxShadow: isPlaying ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
+              }}
+            />
+            {/* Label box with animation */}
+            <div
+              className="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2"
+              style={{
+                background: isPlaying
+                  ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
+                  : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
+                border: isPlaying ? '2px solid #4CAF50' : '2px solid #3887A6',
+                borderRadius: '12px',
                 color: '#ffffff',
+                boxShadow: isPlaying
+                  ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
+                  : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
+                marginLeft: '-2px',
+                cursor: audioUrl ? 'pointer' : 'default',
+              }}
+              onClick={e => {
+                e.stopPropagation();
+                if (audioUrl) playAudio();
               }}
             >
               {label}
+              {/* Audio controls in tooltip */}
+              {audioUrl && (
+                <span
+                  style={{
+                    marginLeft: '4px',
+                    fontSize: '14px',
+                    opacity: isPlaying ? 1 : 0.7,
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  {isPlaying ? '🔉' : hasPlayed ? '↻' : '🔊'}
+                </span>
+              )}
             </div>
           </div>
+          <style>{`
+            @keyframes tooltipAppear {
+              0% {
+                opacity: 0;
+                transform: translateX(-20px) scale(0.9);
+              }
+              100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+              }
+            }
+          `}</style>
         </Html>
       )}
     </group>
   );
 }
+
+// Audio path helper - handles dev vs production paths
+const getAudioPath = (filename: string) => {
+  return process.env.NODE_ENV === 'production' ? `/public/audios/${filename}` : `/audios/${filename}`;
+};
 
 // Anatomy hotspots data (positions relative to model)
 // yMin/yMax define the vertical range of meshes to highlight
@@ -486,14 +757,43 @@ const ANATOMY_HOTSPOTS: {
   label: string;
   yMin: number;
   yMax: number;
-}[] = [{ id: 'testa', position: [0, 1.65, 0.12], label: 'Testa', yMin: 1.4, yMax: 2.0 }];
+  size?: number;
+  audioUrl?: string;
+}[] = [
+  {
+    id: 'testa',
+    position: [0, 185, -5],
+    label: 'Testa',
+    yMin: 1.4,
+    yMax: 2.0,
+    size: 3,
+    audioUrl: getAudioPath('testa.wav'),
+  },
+  { id: 'fronte', position: [0, 178, 6], label: 'Fronte', yMin: 1.3, yMax: 1.6, size: 1.5 },
+  { id: 'sopracciglio', position: [4, 175, 5.5], label: 'Sopracciglio', yMin: 1.25, yMax: 1.45, size: 1.5 },
+  { id: 'occhio', position: [4, 173, 6], label: 'Occhio', yMin: 1.2, yMax: 1.4, size: 1 },
+  { id: 'naso', position: [0, 170, 12], label: 'Naso', yMin: 1.15, yMax: 1.35, size: 1 },
+  { id: 'labbro', position: [0.8, 166, 8], label: 'Labbro', yMin: 1.1, yMax: 1.25, size: 1 },
+  { id: 'bocca', position: [-1.2, 166, 8], label: 'Bocca', yMin: 1.05, yMax: 1.2, size: 1 },
+  { id: 'mento', position: [0, 162, 8], label: 'Mento', yMin: 1.0, yMax: 1.15, size: 1 },
+  { id: 'guancia', position: [6, 170, 4], label: 'Guancia', yMin: 1.2, yMax: 1.5, size: 1.5 },
+  { id: 'mandibola', position: [5, 162, 5], label: 'Mandibola', yMin: 1.0, yMax: 1.3, size: 1.5 },
+  { id: 'collo', position: [0, 157, 5], label: 'Collo', yMin: 0.8, yMax: 1.1, size: 1.5 },
+  { id: 'spalla', position: [17, 153, 3], label: 'Spalla', yMin: 0.6, yMax: 0.9, size: 1.5 },
+  // Dedos da mão esquerda (base)
+  { id: 'pollice', position: [38, 90, 12.5], label: 'Pollice', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'indice', position: [38, 80, 9.5], label: 'Indice', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'medio', position: [33, 77, 9.5], label: 'Medio', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'anulare', position: [29, 79, 9], label: 'Anulare', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'mignolo', position: [26, 82, 9], label: 'Mignolo', yMin: 0.3, yMax: 0.5, size: 0.8 },
+];
 
 interface HumanBodyModelProps {
   rotation: number;
-  systemsVisibility: AnatomySystemsVisibility;
+  audioVolume: number;
 }
 
-function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation, audioVolume }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -525,33 +825,6 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
     });
     return clone;
   }, [scene]);
-
-  // Update visibility based on systems visibility
-  const systemsRef = useRef(systemsVisibility);
-  systemsRef.current = systemsVisibility;
-
-  useFrame(() => {
-    // Traverse cloned scene directly to update visibility
-    clonedScene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const system = getMeshSystem(child.name);
-
-        if (system === 'skin') {
-          child.visible = systemsRef.current.skin;
-        } else if (system === 'muscle') {
-          child.visible = systemsRef.current.muscles;
-        } else if (system === 'skeleton') {
-          child.visible = systemsRef.current.skeleton;
-        } else if (system === 'organs') {
-          child.visible = systemsRef.current.organs;
-        } else if (system === 'circulatory') {
-          child.visible = systemsRef.current.circulatory;
-        } else if (system === 'nervous') {
-          child.visible = systemsRef.current.nervous;
-        }
-      }
-    });
-  });
 
   // Update mesh materials based on hover state
   useFrame(() => {
@@ -591,7 +864,7 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
   });
 
   // Model settings (single model now)
-  const modelSettings = { scale: 0.012, baseY: -1.0, rotationOffset: Math.PI };
+  const modelSettings = { scale: 0.012, baseY: -1.0, rotationOffset: 0 };
 
   // Subtle floating animation + horizontal rotation
   useFrame(state => {
@@ -610,12 +883,15 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
     <group ref={groupRef} position={[0, modelSettings.baseY, 0]} scale={modelSettings.scale}>
       <primitive object={clonedScene} />
 
-      {/* Anatomy hotspots - only show when skin is visible */}
-      {systemsVisibility.skin && ANATOMY_HOTSPOTS.map(hotspot => (
+      {/* Anatomy hotspots */}
+      {ANATOMY_HOTSPOTS.map(hotspot => (
         <Hotspot
           key={hotspot.id}
           position={hotspot.position}
           label={hotspot.label}
+          size={hotspot.size}
+          audioUrl={hotspot.audioUrl}
+          volume={audioVolume}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
         />
       ))}
@@ -626,13 +902,49 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
 // Preload model
 useGLTF.preload(MODEL_PATH);
 
+// Camera controller for smooth transitions
+interface CameraControllerProps {
+  focusedPart: string;
+  controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
+}
+
+function CameraController({ focusedPart, controlsRef }: CameraControllerProps) {
+  const { camera } = useThree();
+  const targetPosition = useRef(new THREE.Vector3(0, 0.5, 5));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0.5, 0));
+
+  useEffect(() => {
+    const part = BODY_PARTS.find(p => p.id === focusedPart);
+    if (part) {
+      targetPosition.current.set(...part.cameraPosition);
+      targetLookAt.current.set(...part.cameraTarget);
+    }
+  }, [focusedPart]);
+
+  useFrame(() => {
+    // Smoothly interpolate camera position
+    camera.position.lerp(targetPosition.current, 0.05);
+
+    // Update OrbitControls target
+    if (controlsRef.current) {
+      const controls = controlsRef.current;
+      controls.target.lerp(targetLookAt.current, 0.05);
+      controls.update();
+    }
+  });
+
+  return null;
+}
+
 // Scene component with all 3D elements
 interface SceneProps {
   bodyRotation: number;
-  systemsVisibility: AnatomySystemsVisibility;
+  focusedPart: string;
+  controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
+  audioVolume: number;
 }
 
-function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
+function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -658,86 +970,72 @@ function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
       <WallText />
       <HospitalWindow />
       <AnatomyPoster />
+      <InstructionsChalkboard />
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} systemsVisibility={systemsVisibility} />
+      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
 
+      {/* Camera controller for smooth transitions */}
+      <CameraController focusedPart={focusedPart} controlsRef={controlsRef} />
+
       {/* Zoom only controls - no rotation */}
       <OrbitControls
+        ref={controlsRef}
         target={[0, 0.5, 0]}
         enablePan={false}
         enableZoom={true}
         enableRotate={false}
-        minDistance={2}
+        minDistance={1.5}
         maxDistance={8}
       />
     </>
   );
 }
 
-// Default visibility state - skin visible, others hidden
-const DEFAULT_SYSTEMS_VISIBILITY: AnatomySystemsVisibility = {
-  skin: true,
-  muscles: false,
-  skeleton: false,
-  organs: false,
-  circulatory: false,
-  nervous: false,
-};
-
-// System toggle button component
-interface SystemToggleProps {
-  systemKey: keyof AnatomySystemsVisibility;
-  label: string;
+// Body part selection button
+interface BodyPartButtonProps {
+  part: BodyPartConfig;
   isActive: boolean;
-  onToggle: () => void;
-  color: string;
+  onClick: () => void;
+  label: string;
 }
 
-function SystemToggle({ label, isActive, onToggle, color }: SystemToggleProps) {
+function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps) {
   return (
     <button
-      onClick={onToggle}
+      onClick={onClick}
       className={`
-        w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-        flex items-center gap-2 border-2
-        ${isActive
-          ? 'text-white shadow-md'
-          : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
+        px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+        flex items-center gap-2 border-2 whitespace-nowrap
+        ${
+          isActive
+            ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
+            : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
         }
       `}
-      style={isActive ? { backgroundColor: color, borderColor: color } : {}}
     >
-      <span
-        className={`w-2.5 h-2.5 rounded-full transition-all ${isActive ? 'bg-white' : 'bg-white/40'}`}
-      />
+      <span className="text-base">{part.icon}</span>
       {label}
     </button>
   );
 }
 
-export default function HumanBodyEnvironment({ }: Environment3DProps) {
+export default function HumanBodyEnvironment({}: Environment3DProps) {
   const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
-  const [systemsVisibility, setSystemsVisibility] = useState<AnatomySystemsVisibility>(DEFAULT_SYSTEMS_VISIBILITY);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [focusedPart, setFocusedPart] = useState('full');
+  const [audioVolume, setAudioVolume] = useState(0.7);
+  const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
 
-  const toggleSystem = useCallback((system: keyof AnatomySystemsVisibility) => {
-    setSystemsVisibility(prev => ({
-      ...prev,
-      [system]: !prev[system],
-    }));
-  }, []);
-
   const handleReset = useCallback(() => {
     setBodyRotation(0);
-    setSystemsVisibility(DEFAULT_SYSTEMS_VISIBILITY);
+    setFocusedPart('full');
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -778,97 +1076,70 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
-          <Scene bodyRotation={bodyRotation} systemsVisibility={systemsVisibility} />
+          <Scene
+            bodyRotation={bodyRotation}
+            focusedPart={focusedPart}
+            controlsRef={controlsRef}
+            audioVolume={audioVolume}
+          />
         </Canvas>
 
-        {/* Anatomy Systems Panel */}
-        <div className="absolute top-4 right-4 z-20">
-          {/* Toggle panel button */}
-          <button
-            onClick={() => setIsPanelOpen(!isPanelOpen)}
-            className="mb-2 w-full px-3 py-2 rounded-lg bg-[#0C3559] hover:bg-[#0a2a47] text-white font-medium text-sm transition-all flex items-center justify-between gap-2 shadow-lg"
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4" />
-                <path d="M12 8h.01" />
-              </svg>
-              {t('controls.anatomySystems')}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`transition-transform ${isPanelOpen ? 'rotate-180' : ''}`}
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
-
-          {/* Systems toggles */}
-          {isPanelOpen && (
-            <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10 min-w-[140px]">
-              <SystemToggle
-                systemKey="skin"
-                label={t('controls.skin')}
-                isActive={systemsVisibility.skin}
-                onToggle={() => toggleSystem('skin')}
-                color="#f4a460"
-              />
-              <SystemToggle
-                systemKey="muscles"
-                label={t('controls.muscles')}
-                isActive={systemsVisibility.muscles}
-                onToggle={() => toggleSystem('muscles')}
-                color="#dc3545"
-              />
-              <SystemToggle
-                systemKey="skeleton"
-                label={t('controls.skeleton')}
-                isActive={systemsVisibility.skeleton}
-                onToggle={() => toggleSystem('skeleton')}
-                color="#f8f9fa"
-              />
-              <SystemToggle
-                systemKey="organs"
-                label={t('controls.organs')}
-                isActive={systemsVisibility.organs}
-                onToggle={() => toggleSystem('organs')}
-                color="#9b59b6"
-              />
-              <SystemToggle
-                systemKey="circulatory"
-                label={t('controls.circulatory')}
-                isActive={systemsVisibility.circulatory}
-                onToggle={() => toggleSystem('circulatory')}
-                color="#e74c3c"
-              />
-              <SystemToggle
-                systemKey="nervous"
-                label={t('controls.nervous')}
-                isActive={systemsVisibility.nervous}
-                onToggle={() => toggleSystem('nervous')}
-                color="#f1c40f"
-              />
+        {/* Body Parts Panel */}
+        <div className="absolute top-16 right-4 z-20">
+          <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10">
+            <div className="text-xs text-white/60 font-medium mb-2 px-1">{t('controls.bodyParts')}</div>
+            <div className="flex flex-col gap-2">
+              {BODY_PARTS.map(part => (
+                <BodyPartButton
+                  key={part.id}
+                  part={part}
+                  isActive={focusedPart === part.id}
+                  onClick={() => setFocusedPart(part.id)}
+                  label={t(`controls.${part.labelKey}`)}
+                />
+              ))}
             </div>
-          )}
+
+            {/* Volume Control */}
+            <div className="border-t border-white/10 pt-3 mt-3">
+              <div className="text-xs text-white/60 font-medium mb-2 px-1 flex items-center gap-2">
+                <span>🔊</span>
+                <span>{t('controls.volume') || 'Volume'}</span>
+              </div>
+              <div className="flex items-center gap-2 px-1">
+                <button
+                  onClick={() => setAudioVolume(0)}
+                  className="text-white/60 hover:text-white transition-colors"
+                  title="Mute"
+                >
+                  {audioVolume === 0 ? '🔇' : '🔈'}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={audioVolume}
+                  onChange={e => setAudioVolume(parseFloat(e.target.value))}
+                  className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:w-3
+                    [&::-webkit-slider-thumb]:h-3
+                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:bg-[#3887A6]
+                    [&::-webkit-slider-thumb]:shadow-md
+                    [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:w-3
+                    [&::-moz-range-thumb]:h-3
+                    [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:bg-[#3887A6]
+                    [&::-moz-range-thumb]:border-0
+                    [&::-moz-range-thumb]:cursor-pointer"
+                />
+                <span className="text-xs text-white/60 w-8 text-right">{Math.round(audioVolume * 100)}%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Environment3DContainer>

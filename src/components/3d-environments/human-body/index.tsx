@@ -531,227 +531,73 @@ function IVStand() {
   );
 }
 
-// Human body 3D model path
-// In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
-const MODEL_PATH = process.env.NODE_ENV === 'production'
-  ? '/public/models/human-body/anatomy-internal.glb'
-  : '/models/human-body/anatomy-internal.glb';
+// Human body 3D model (single model with system visibility)
+const MODEL_PATH = '/models/human-body/anatomy-internal.glb';
 
-// Complete mesh catalog organized by category
-const MESH_CATEGORIES = {
-  skin: {
-    label: 'Pele/Superfície',
-    color: '#f4a460',
-    meshes: ['body', 'eyes', 'eyebrows', 'eyelashes'],
-  },
-  skeleton_head: {
-    label: 'Esqueleto - Cabeça',
-    color: '#f8f9fa',
-    meshes: ['skull', 'jaw_bone', 'upper_teeth', 'lover_teeth', 'hyoid_bone', 'hyoid_bone_skeletal'],
-  },
-  skeleton_spine: {
-    label: 'Esqueleto - Coluna',
-    color: '#f8f9fa',
-    meshes: ['cervical_spine', 'thoracic_spine', 'lumbar_spine', 'sacrum', 'coccyx', 'intervertebral_disks'],
-  },
-  skeleton_torso: {
-    label: 'Esqueleto - Tórax/Pelve',
-    color: '#f8f9fa',
-    meshes: ['thorax', 'sternum', 'costal_cartilage', 'ilium', 'pubic_symphysis'],
-  },
-  skeleton_arm_left: {
-    label: 'Esqueleto - Braço Esq.',
-    color: '#f8f9fa',
-    meshes: ['l_clavicle', 'l_scapula', 'l_humerus', 'l_radius', 'l_ulna', 'l_wrist', 'l_metacarpal_bones', 'l_finger_bones'],
-  },
-  skeleton_arm_right: {
-    label: 'Esqueleto - Braço Dir.',
-    color: '#f8f9fa',
-    meshes: ['r_clavicle', 'r_scapula', 'r_humerus', 'r_radius', 'r_ulna', 'r_wrist', 'r_metacarpal_bones', 'r_finger_bones'],
-  },
-  skeleton_leg_left: {
-    label: 'Esqueleto - Perna Esq.',
-    color: '#f8f9fa',
-    meshes: ['l_femur', 'l_patella', 'l_tibia', 'l_fibula', 'l_talus', 'l_calcaneum', 'l_tarsal_bones', 'l_metatarsal_bones', 'l_phalanges'],
-  },
-  skeleton_leg_right: {
-    label: 'Esqueleto - Perna Dir.',
-    color: '#f8f9fa',
-    meshes: ['r_femur', 'r_patella', 'r_tibia', 'r_fibula', 'r_talus', 'r_calcaneum', 'r_tarsal_bones', 'r_metatarsal_bones', 'r_phalanges'],
-  },
-  organs_digestive: {
-    label: 'Órgãos - Digestivo',
-    color: '#9b59b6',
-    meshes: ['esophagus', 'stomach', 'small_intestine', 'colon', 'appendix', 'liver_right', 'liver_left', 'gallbladder', 'hepatic_duct', 'pancreas', 'spleen'],
-  },
-  organs_respiratory: {
-    label: 'Órgãos - Respiratório',
-    color: '#3498db',
-    meshes: ['pharynx', 'lungs', 'bronch'],
-  },
-  organs_urinary: {
-    label: 'Órgãos - Urinário',
-    color: '#f39c12',
-    meshes: ['kidneys', 'ureter', 'bladder', 'urethra', 'adrenal_glands'],
-  },
-  organs_reproductive: {
-    label: 'Órgãos - Reprodutor',
-    color: '#e91e63',
-    meshes: ['testis', 'epididymis', 'vas_deferens', 'seminal_vesicle', 'prostate', 'corpus_cavernosum', 'corpus_spongiosum', 'glans_penis'],
-  },
-  organs_glands: {
-    label: 'Órgãos - Glândulas',
-    color: '#00bcd4',
-    meshes: ['thyroid', 'thyroid_cartilage', 'cricoid_cartilage', 'arytenoid_cartilage', 'corniculate_cartilage', 'thyrohyoid_membrane'],
-  },
-  nervous: {
-    label: 'Sistema Nervoso',
-    color: '#f1c40f',
-    meshes: ['nerves', 'brain'],
-  },
-  circulatory: {
-    label: 'Sistema Circulatório',
-    color: '#e74c3c',
-    meshes: ['heart', 'vessels_red', 'vessels_blue'],
-  },
-  muscles_face: {
-    label: 'Músculos - Face',
-    color: '#dc3545',
-    meshes: [
-      'frontalis', 'orbicularis_oris', 'nose_muscle', 'nasalis_transverse',
-      'l_temporalis', 'r_temporalis', 'l_masseter_deep', 'r_masseter_deep', 'l_masseter_superior', 'r_masseter_superior',
-      'l_orbicularis_oculi', 'r_orbicularis_oculi', 'l_procerus', 'r_procerus',
-      'l_corrugator_supercilii', 'r_corrugator_supercilii', 'l_depressor_supercilii', 'r_depressor_supercilii',
-      'l_nasalis_alar', 'r_nasalis_alar', 'l_levator_labii_superioris', 'r_levator_labii_superioris',
-      'l_levator_labii_superioris_alaeque_nasi_muscle', 'r_levator_labii_superioris_alaeque_nasi_muscle',
-      'l_levator_anguli_oris', 'r_levator_anguli_oris', 'l_zygomaticus_major', 'r_zygomaticus_major',
-      'l_zygomaticus_minor', 'r_zygomaticus_minor', 'l_risorius', 'r_risorius',
-      'l_buccinator', 'r_buccinator', 'l_depressor_anguli_oris', 'r_depressor_anguli_oris',
-      'l_depressor_labii_inferioris', 'r_depressor_labii_inferioris', 'l_mentalis', 'r_mentalis',
-      'l_platysma', 'r_platysma',
-    ],
-  },
-  muscles_neck: {
-    label: 'Músculos - Pescoço',
-    color: '#dc3545',
-    meshes: [
-      'l_sternocleidomastoid', 'r_sternocleidomastoid', 'l_sternohyoid', 'r_sternohyoid',
-      'l_sternothyroid', 'r_sternothyroid', 'l_splenius_capitis', 'r_splenius_capitis',
-    ],
-  },
-  muscles_torso: {
-    label: 'Músculos - Tronco',
-    color: '#dc3545',
-    meshes: [
-      'rectus_abdominis', 'transverse_abdominis', 'external_oblique_001', 'external_oblique_002',
-      'l_internal_oblique', 'r_internal_oblique', 'l_quadratus_lumborum', 'r_quadratus_lumborum',
-      'spinalis', 'l_iliocostalis', 'r_iliocostalis', 'l_longissimus_thoracis', 'r_longissimus_thoracis',
-      'levator_ani', 'coccygeus', 'pubococcygeus',
-    ],
-  },
-  muscles_shoulder: {
-    label: 'Músculos - Ombro/Braço',
-    color: '#dc3545',
-    meshes: [
-      'l_trapezius', 'r_trapezius', 'l_deltoit', 'r_deltoit', 'l_supraspinatus', 'r_supraspinatus',
-      'l_infraspinatus', 'r_infraspinatus', 'l_teres_major', 'r_teres_major', 'l_teres_minor', 'r_teres_minor',
-      'l_subscapularis', 'r_subscapularis', 'l_rhomboid_major', 'r_rhomboid_major',
-      'l_rhomboid_minor', 'r_rhomboid_minor', 'l_serratus_anterior', 'r_serratus_anterior',
-      'l_pectoralis_major', 'r_pectoralis_major', 'l_pectoralis_minor', 'r_pectoralis_minor',
-      'l_subclavius', 'r_subclavius', 'l_latissimus_dorsi', 'r_latissimus_dorsi',
-      'l_bicep_brachii_long_head', 'r_bicep_brachii_long_head', 'l_bicep_brachii_short_head', 'r_bicep_brachii_short_head',
-      'l_bicipital_aponeurosis', 'r_bicipital_aponeurosis', 'l_brachialis', 'r_brachialis',
-      'l_brachioradialis', 'r_brachioradialis', 'l_triceps_long_head', 'r_triceps_long_head',
-      'l_triceps_lateral_head', 'r_triceps_lateral_head', 'l_triceps_medial_head', 'r_triceps_medial_head',
-      'l_triceps_tendon_medial_head', 'r_triceps_tendon_medial_head', 'l_anconeus', 'r_anconeus',
-    ],
-  },
-  muscles_forearm: {
-    label: 'Músculos - Antebraço',
-    color: '#dc3545',
-    meshes: [
-      'l_pronator_teres', 'r_pronator_teres', 'l_pronator_quadratus', 'r_pronator_quadratus',
-      'l_supinator', 'r_supinator', 'l_flexor_carpi_radialis', 'r_flexor_carpi_radialis',
-      'l_flexor_carpi_ulnaris', 'r_flexor_carpi_ulnaris', 'l_palmaris_longus', 'r_palmaris_longus',
-      'l_flexor_digitorum_superficialis', 'r_flexor_digitorum_superficialis',
-      'l_flexor_digitorum_profundus', 'r_flexor_digitorum_profundus',
-      'l_flexor_pollicis_longus', 'r_flexor_pollicis_longus',
-      'l_extensor_carpi_radialis_longus', 'r_extensor_carpi_radialis_longus',
-      'l_extensor_carpi_radialis_brevis', 'r_extensor_carpi_radialis_brevis',
-      'l_extensor_carpi_ulnaris', 'r_extensor_carpi_ulnaris',
-      'l_extensor_digitorum', 'r_extensor_digitorum', 'l_extensor_indicis', 'r_extensor_indicis',
-      'l_extensor_pollicis_longus', 'r_extensor_pollicis_longus',
-      'l_extensor_pollicis_brevis', 'r_extensor_pollicis_brevis',
-      'l_abductor_pollicis_longus', 'r_abductor_pollicis_longus', 'l_retinaculum', 'r_retinaculum',
-    ],
-  },
-  muscles_hand: {
-    label: 'Músculos - Mão',
-    color: '#dc3545',
-    meshes: [
-      'l_abductor_pollicis_brevis', 'r_abductor_pollicis_brevis',
-      'l_flexor_pollicis_brevis', 'r_flexor_pollicis_brevis',
-      'l_opponens_pollicis', 'r_opponens_pollicis', 'l_adductor_pollicis', 'r_adductor_pollicis',
-      'l_abductor_digiti_minimi', 'r_abductor_digiti_minimi',
-      'l_flexor_digiti_minimi_brevis', 'r_flexor_digiti_minimi_brevis',
-      'l_opponens_digiti_minimi', 'r_opponens_digiti_minimi',
-      'l_lumbrical_1', 'r_lumbrical_1', 'l_lumbrical_2', 'r_lumbrical_2',
-      'l_lumbrical_3', 'r_lumbrical_3', 'l_lumbrical_4', 'r_lumbrical_4',
-      'l_palmar_interossei_1', 'r_palmar_interossei_1', 'l_palmar_interossei_2', 'r_palmar_interossei_2',
-      'l_palmar_interossei_3', 'r_palmar_interossei_3', 'l_palmar_interossei_4', 'r_palmar_interossei_4',
-      'l_dorsal_interossei', 'r_dorsal_interossei', 'l_dorsal_interossei_2a', 'r_dorsal_interossei_2a',
-      'l_dorsal_interossei_2b', 'r_dorsal_interossei_2b', 'l_dorsal_interossei_3a', 'r_dorsal_interossei_3a',
-      'l_dorsal_interossei_3b', 'r_dorsal_interossei_3b', 'l_dorsal_interossei_4a', 'r_dorsal_interossei_4a',
-      'l_dorsal_interossei_4b', 'r_dorsal_interossei_4b',
-    ],
-  },
-  muscles_hip_thigh: {
-    label: 'Músculos - Quadril/Coxa',
-    color: '#dc3545',
-    meshes: [
-      'l_psoas_major', 'r_psoas_major', 'l_psoas_minor', 'r_psoas_minor', 'l_iliacus', 'r_iliacus',
-      'l_gluteus_maximus', 'r_gluteus_maximus', 'l_gluteus_medius', 'r_gluteus_medius',
-      'l_gluteus_minimus', 'r_gluteus_minimus', 'l_tensor_fasciae_latae', 'r_tensor_fasciae_latae',
-      'l_piriformis', 'r_piriformis', 'l_obturator_externus', 'r_obturator_externus',
-      'l_sacrotuberous_ligament_muscle', 'r_sacrotuberous_ligament_muscle',
-      'l_rectus_femoris', 'r_rectus_femoris', 'l_vastus_lateralis', 'r_vastus_lateralis',
-      'l_vastus_medialis', 'r_vastus_medialis', 'l_vastus_intermedius', 'r_vastus_intermedius',
-      'l_sartorius', 'r_sartorius', 'l_gracilis', 'r_gracilis', 'l_pectineus', 'r_pectineus',
-      'l_adductor_longus', 'r_adductor_longus', 'l_adductor_magnus', 'r_adductor_magnus',
-      'l_bicep_femoris_longus', 'r_bicep_femoris_longus', 'l_semitendinosus', 'r_semitendinosus',
-      'l_semimembranosus', 'r_semimembranosus', 'l_patellar_tendon', 'r_patellar_tendon',
-    ],
-  },
-  muscles_leg: {
-    label: 'Músculos - Perna',
-    color: '#dc3545',
-    meshes: [
-      'l_gastrocnemius_medial_head', 'r_gastrocnemius_medial_head',
-      'l_gastrocnemius_lateral_head', 'r_gastrocnemius_lateral_head',
-      'l_soleus', 'r_soleus', 'l_calcaneofibular_achilles_tendon', 'r_calcaneofibular_achilles_tendon',
-      'l_tibialis_anterior', 'r_tibialis_anterior', 'l_tibialis_posterior', 'r_tibialis_posterior',
-      'l_peroneus_longus', 'r_peroneus_longus', 'l_peroneus_brevis', 'r_peroneus_brevis',
-      'l_extensor_digitorum_longus', 'r_extensor_digitorum_longus',
-      'l_extensor_digitorum_brevis', 'r_extensor_digitorum_brevis',
-      'l_extensor_hallucis_longus', 'r_extensor_hallucis_longus',
-      'l_extensor_hallucis_brevis', 'r_extensor_hallucis_brevis',
-      'l_flexor_digitorum_longus', 'r_flexor_digitorum_longus',
-      'l_flexor_digitorum_brevis', 'r_flexor_digitorum_brevis',
-      'l_flexor_hallucis_longus', 'r_flexor_hallucis_longus',
-    ],
-  },
-  muscles_foot: {
-    label: 'Músculos - Pé',
-    color: '#dc3545',
-    meshes: [
-      'l_abductor_hallucis', 'r_abductor_hallucis',
-      'l_abductor_digiti_minimi_foot', 'r_abductor_digiti_minimi_foot',
-    ],
-  },
-};
+// Anatomical systems visibility state
+interface AnatomySystemsVisibility {
+  skin: boolean;
+  muscles: boolean;
+  skeleton: boolean;
+  organs: boolean;
+  circulatory: boolean;
+  nervous: boolean;
+}
 
-// Helper to get all meshes as flat array
-const ALL_MESHES = Object.values(MESH_CATEGORIES).flatMap(cat => cat.meshes);
+// Mesh names for each anatomical system
+const SKIN_MESHES = ['body', 'eyes', 'eyebrows', 'eyelashes'];
+
+const SKELETON_MESHES = [
+  'skull', 'jaw_bone', 'upper_teeth', 'lover_teeth', 'hyoid_bone', 'hyoid_bone_skeletal',
+  'cervical_spine', 'thoracic_spine', 'lumbar_spine', 'sacrum', 'coccyx', 'intervertebral_disks',
+  'thorax', 'sternum', 'costal_cartilage', 'ilium', 'pubic_symphysis',
+  'l_clavicle', 'l_scapula', 'l_humerus', 'l_radius', 'l_ulna', 'l_wrist', 'l_metacarpal_bones', 'l_finger_bones',
+  'r_clavicle', 'r_scapula', 'r_humerus', 'r_radius', 'r_ulna', 'r_wrist', 'r_metacarpal_bones', 'r_finger_bones',
+  'l_femur', 'l_patella', 'l_tibia', 'l_fibula', 'l_talus', 'l_calcaneum', 'l_tarsal_bones', 'l_metatarsal_bones', 'l_phalanges',
+  'r_femur', 'r_patella', 'r_tibia', 'r_fibula', 'r_talus', 'r_calcaneum', 'r_tarsal_bones', 'r_metatarsal_bones', 'r_phalanges',
+];
+
+const ORGAN_MESHES = [
+  'brain', 'esophagus', 'stomach', 'small_intestine', 'colon', 'appendix',
+  'liver_right', 'liver_left', 'gallbladder', 'hepatic_duct', 'pancreas', 'spleen',
+  'pharynx', 'lungs', 'bronch',
+  'kidneys', 'ureter', 'bladder', 'urethra', 'adrenal_glands',
+  'testis', 'epididymis', 'vas_deferens', 'seminal_vesicle', 'prostate',
+  'corpus_cavernosum', 'corpus_spongiosum', 'glans_penis',
+  'thyroid', 'thyroid_cartilage', 'cricoid_cartilage', 'arytenoid_cartilage',
+  'corniculate_cartilage', 'thyrohyoid_membrane',
+];
+
+const CIRCULATORY_MESHES = ['heart', 'vessels_red', 'vessels_blue'];
+
+const NERVOUS_MESHES = ['nerves'];
+
+// Function to check if mesh belongs to a system
+function getMeshSystem(meshName: string): keyof AnatomySystemsVisibility | 'muscle' | null {
+  const name = meshName.toLowerCase();
+
+  if (SKIN_MESHES.includes(name)) return 'skin';
+  if (SKELETON_MESHES.includes(name)) return 'skeleton';
+  if (ORGAN_MESHES.includes(name)) return 'organs';
+  if (CIRCULATORY_MESHES.includes(name)) return 'circulatory';
+  if (NERVOUS_MESHES.includes(name)) return 'nervous';
+
+  // Check if it's a muscle (most meshes with prefixes are muscles)
+  if (name.startsWith('l_') || name.startsWith('r_') ||
+      name.includes('muscle') || name.includes('_head') ||
+      name.includes('oblique') || name.includes('abdominis') ||
+      name.includes('spinalis') || name.includes('levator') ||
+      name.includes('orbicularis') || name.includes('frontalis') ||
+      name.includes('nasalis') || name.includes('coccygeus') ||
+      name.includes('pubococcygeus') || name === 'polysurface1') {
+    // But exclude skeleton meshes that also start with l_/r_
+    if (!SKELETON_MESHES.includes(name)) {
+      return 'muscle';
+    }
+  }
+
+  return null;
+}
 
 // Hotspot component for interactive anatomy points
 interface HotspotProps {
@@ -841,10 +687,10 @@ const ANATOMY_HOTSPOTS: {
 
 interface HumanBodyModelProps {
   rotation: number;
-  selectedMeshes: Set<string>;
+  systemsVisibility: AnatomySystemsVisibility;
 }
 
-function HumanBodyModel({ rotation, selectedMeshes }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -877,22 +723,28 @@ function HumanBodyModel({ rotation, selectedMeshes }: HumanBodyModelProps) {
     return clone;
   }, [scene]);
 
-  // Update visibility based on selected meshes
-  const selectedMeshesRef = useRef(selectedMeshes);
-  selectedMeshesRef.current = selectedMeshes;
+  // Update visibility based on systems visibility
+  const systemsRef = useRef(systemsVisibility);
+  systemsRef.current = systemsVisibility;
 
   useFrame(() => {
     // Traverse cloned scene directly to update visibility
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        const meshName = child.name.toLowerCase();
+        const system = getMeshSystem(child.name);
 
-        if (selectedMeshesRef.current.size === 0) {
-          // No mesh selected - show all
-          child.visible = true;
-        } else {
-          // Show only the selected meshes
-          child.visible = selectedMeshesRef.current.has(meshName);
+        if (system === 'skin') {
+          child.visible = systemsRef.current.skin;
+        } else if (system === 'muscle') {
+          child.visible = systemsRef.current.muscles;
+        } else if (system === 'skeleton') {
+          child.visible = systemsRef.current.skeleton;
+        } else if (system === 'organs') {
+          child.visible = systemsRef.current.organs;
+        } else if (system === 'circulatory') {
+          child.visible = systemsRef.current.circulatory;
+        } else if (system === 'nervous') {
+          child.visible = systemsRef.current.nervous;
         }
       }
     });
@@ -955,8 +807,8 @@ function HumanBodyModel({ rotation, selectedMeshes }: HumanBodyModelProps) {
     <group ref={groupRef} position={[0, modelSettings.baseY, 0]} scale={modelSettings.scale}>
       <primitive object={clonedScene} />
 
-      {/* Anatomy hotspots - only show when no mesh selected (all visible) */}
-      {selectedMeshes.size === 0 && ANATOMY_HOTSPOTS.map(hotspot => (
+      {/* Anatomy hotspots - only show when skin is visible */}
+      {systemsVisibility.skin && ANATOMY_HOTSPOTS.map(hotspot => (
         <Hotspot
           key={hotspot.id}
           position={hotspot.position}
@@ -974,11 +826,10 @@ useGLTF.preload(MODEL_PATH);
 // Scene component with all 3D elements
 interface SceneProps {
   bodyRotation: number;
-  selectedMeshes: Set<string>;
-  freeCameraMode: boolean;
+  systemsVisibility: AnatomySystemsVisibility;
 }
 
-function Scene({ bodyRotation, selectedMeshes, freeCameraMode }: SceneProps) {
+function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -1012,225 +863,83 @@ function Scene({ bodyRotation, selectedMeshes, freeCameraMode }: SceneProps) {
       <SmallPlant position={[-5.3, -1.1, 3.8]} />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} selectedMeshes={selectedMeshes} />
+      <HumanBodyModel rotation={bodyRotation} systemsVisibility={systemsVisibility} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
 
-      {/* Camera controls - restricted or free based on mode */}
+      {/* Zoom only controls - no rotation */}
       <OrbitControls
         target={[0, 0.5, 0]}
-        enablePan={freeCameraMode}
+        enablePan={false}
         enableZoom={true}
-        enableRotate={freeCameraMode}
-        minDistance={freeCameraMode ? 0.5 : 2}
-        maxDistance={freeCameraMode ? 20 : 8}
-        maxPolarAngle={freeCameraMode ? Math.PI : Math.PI / 2}
-        minPolarAngle={freeCameraMode ? 0 : Math.PI / 4}
+        enableRotate={false}
+        minDistance={2}
+        maxDistance={8}
       />
     </>
   );
 }
 
-// Mesh button component for individual mesh selection
-interface MeshButtonProps {
-  meshName: string;
-  isSelected: boolean;
-  onSelect: () => void;
+// Default visibility state - skin visible, others hidden
+const DEFAULT_SYSTEMS_VISIBILITY: AnatomySystemsVisibility = {
+  skin: true,
+  muscles: false,
+  skeleton: false,
+  organs: false,
+  circulatory: false,
+  nervous: false,
+};
+
+// System toggle button component
+interface SystemToggleProps {
+  systemKey: keyof AnatomySystemsVisibility;
+  label: string;
+  isActive: boolean;
+  onToggle: () => void;
   color: string;
 }
 
-function MeshButton({ meshName, isSelected, onSelect, color }: MeshButtonProps) {
-  // Format mesh name for display
-  const displayName = meshName
-    .replace(/^[lr]_/i, '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
-
+function SystemToggle({ label, isActive, onToggle, color }: SystemToggleProps) {
   return (
     <button
-      onClick={onSelect}
+      onClick={onToggle}
       className={`
-        px-2 py-1 rounded text-[10px] font-medium transition-all duration-200
-        border whitespace-nowrap
-        ${isSelected
-          ? 'text-white shadow-md border-transparent'
-          : 'bg-black/20 text-white/70 border-white/10 hover:bg-black/40 hover:text-white'
+        w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+        flex items-center gap-2 border-2
+        ${isActive
+          ? 'text-white shadow-md'
+          : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
         }
       `}
-      style={isSelected ? { backgroundColor: color, borderColor: color } : {}}
+      style={isActive ? { backgroundColor: color, borderColor: color } : {}}
     >
-      {displayName}
+      <span
+        className={`w-2.5 h-2.5 rounded-full transition-all ${isActive ? 'bg-white' : 'bg-white/40'}`}
+      />
+      {label}
     </button>
-  );
-}
-
-// Category accordion component
-interface CategoryAccordionProps {
-  categoryKey: string;
-  category: { label: string; color: string; meshes: string[] };
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-  selectedMeshes: Set<string>;
-  onSelectMesh: (mesh: string) => void;
-  onSelectCategory: (meshes: string[]) => void;
-}
-
-function CategoryAccordion({
-  category,
-  isExpanded,
-  onToggleExpand,
-  selectedMeshes,
-  onSelectMesh,
-  onSelectCategory,
-}: CategoryAccordionProps) {
-  // Count how many meshes from this category are selected
-  const selectedCount = category.meshes.filter(m => selectedMeshes.has(m)).length;
-  const isFullySelected = selectedCount === category.meshes.length && selectedCount > 0;
-  const isPartiallySelected = selectedCount > 0 && selectedCount < category.meshes.length;
-
-  const handleHeaderClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelectCategory(category.meshes);
-  };
-
-  return (
-    <div className="border-b border-white/10 last:border-b-0">
-      <div className="flex items-center">
-        {/* Category selection button */}
-        <button
-          onClick={handleHeaderClick}
-          className={`
-            px-2 py-1.5 text-left text-[11px] font-medium transition-all
-            flex items-center gap-1.5 flex-1
-            ${isFullySelected ? 'text-white bg-white/10' : isPartiallySelected ? 'text-white/90' : 'text-white/80 hover:text-white hover:bg-white/5'}
-          `}
-          title="Clique para selecionar todo o grupo"
-        >
-          {/* Selection indicator */}
-          <span
-            className={`w-3 h-3 rounded border-2 flex items-center justify-center transition-all flex-shrink-0`}
-            style={{
-              borderColor: category.color,
-              backgroundColor: isFullySelected ? category.color : 'transparent'
-            }}
-          >
-            {isFullySelected && (
-              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            )}
-            {isPartiallySelected && (
-              <span className="w-1.5 h-1.5 rounded-sm" style={{ backgroundColor: category.color }} />
-            )}
-          </span>
-          <span className="truncate">{category.label}</span>
-          <span className="text-white/40 text-[9px]">
-            {selectedCount > 0 ? `${selectedCount}/` : ''}{category.meshes.length}
-          </span>
-        </button>
-
-        {/* Expand/collapse button */}
-        <button
-          onClick={onToggleExpand}
-          className="px-2 py-1.5 text-white/60 hover:text-white transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
-      </div>
-
-      {isExpanded && (
-        <div className="px-2 pb-2 flex flex-wrap gap-1">
-          {category.meshes.map(mesh => (
-            <MeshButton
-              key={mesh}
-              meshName={mesh}
-              isSelected={selectedMeshes.has(mesh)}
-              onSelect={() => onSelectMesh(mesh)}
-              color={category.color}
-            />
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 
 export default function HumanBodyEnvironment({ }: Environment3DProps) {
   const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
-  const [selectedMeshes, setSelectedMeshes] = useState<Set<string>>(new Set());
+  const [systemsVisibility, setSystemsVisibility] = useState<AnatomySystemsVisibility>(DEFAULT_SYSTEMS_VISIBILITY);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [freeCameraMode, setFreeCameraMode] = useState(false);
   const isDragging = useRef(false);
   const lastX = useRef(0);
 
-  const toggleCategoryExpand = useCallback((categoryKey: string) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(categoryKey)) {
-        next.delete(categoryKey);
-      } else {
-        next.add(categoryKey);
-      }
-      return next;
-    });
-  }, []);
-
-  // Single mesh selection - clears previous and selects only this one
-  const handleSelectMesh = useCallback((mesh: string) => {
-    setSelectedMeshes(prev => {
-      // If already selected, deselect it
-      if (prev.has(mesh) && prev.size === 1) {
-        return new Set();
-      }
-      // Otherwise, select only this mesh
-      return new Set([mesh]);
-    });
-  }, []);
-
-  // Category selection - selects all meshes in the category
-  const handleSelectCategory = useCallback((meshes: string[]) => {
-    setSelectedMeshes(prev => {
-      // Check if all meshes in category are already selected
-      const allSelected = meshes.every(m => prev.has(m));
-      if (allSelected) {
-        // Deselect all from this category
-        const next = new Set(prev);
-        meshes.forEach(m => next.delete(m));
-        return next;
-      } else {
-        // Select all from this category (replace current selection)
-        return new Set(meshes);
-      }
-    });
-  }, []);
-
-  const handleClearSelection = useCallback(() => {
-    setSelectedMeshes(new Set());
+  const toggleSystem = useCallback((system: keyof AnatomySystemsVisibility) => {
+    setSystemsVisibility(prev => ({
+      ...prev,
+      [system]: !prev[system],
+    }));
   }, []);
 
   const handleReset = useCallback(() => {
     setBodyRotation(0);
-    setSelectedMeshes(new Set());
-    setExpandedCategories(new Set());
-    setSearchTerm('');
-    setFreeCameraMode(false);
+    setSystemsVisibility(DEFAULT_SYSTEMS_VISIBILITY);
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -1250,29 +959,6 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
     isDragging.current = false;
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
   }, []);
-
-  // Filter categories based on search
-  const filteredCategories = useMemo(() => {
-    if (!searchTerm.trim()) return MESH_CATEGORIES;
-
-    const term = searchTerm.toLowerCase();
-    const result: typeof MESH_CATEGORIES = {} as typeof MESH_CATEGORIES;
-
-    Object.entries(MESH_CATEGORIES).forEach(([key, cat]) => {
-      const filteredMeshes = cat.meshes.filter(m =>
-        m.toLowerCase().includes(term) ||
-        m.replace(/_/g, ' ').toLowerCase().includes(term)
-      );
-      if (filteredMeshes.length > 0) {
-        result[key as keyof typeof MESH_CATEGORIES] = {
-          ...cat,
-          meshes: filteredMeshes,
-        };
-      }
-    });
-
-    return result;
-  }, [searchTerm]);
 
   return (
     <Environment3DContainer title={t('environments.humanBody') || 'Human Body - Anatomy'} onReset={handleReset}>
@@ -1294,79 +980,11 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
-          <Scene bodyRotation={bodyRotation} selectedMeshes={selectedMeshes} freeCameraMode={freeCameraMode} />
+          <Scene bodyRotation={bodyRotation} systemsVisibility={systemsVisibility} />
         </Canvas>
 
-        {/* Camera Mode Toggle - Left Side */}
-        <div className="absolute top-4 left-4 z-20">
-          <button
-            onClick={() => setFreeCameraMode(!freeCameraMode)}
-            className={`
-              px-3 py-2 rounded-lg font-medium text-sm transition-all
-              flex items-center gap-2 shadow-lg
-              ${freeCameraMode
-                ? 'bg-[#3887A6] hover:bg-[#2d6d8a] text-white'
-                : 'bg-[#0C3559] hover:bg-[#0a2a47] text-white'
-              }
-            `}
-            title={freeCameraMode ? 'Voltar para câmera fixa' : 'Ativar câmera livre'}
-          >
-            {freeCameraMode ? (
-              // Unlock icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 9.9-1" />
-              </svg>
-            ) : (
-              // Lock icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            )}
-            <span className="hidden sm:inline">
-              {freeCameraMode ? 'Câmera Livre' : 'Câmera Fixa'}
-            </span>
-          </button>
-
-          {/* Instructions when free mode is active */}
-          {freeCameraMode && (
-            <div className="mt-2 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-lg text-[10px] text-white/70 max-w-[160px]">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[#3887A6]">●</span> Arraste: Rotacionar
-              </div>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[#3887A6]">●</span> Scroll: Zoom
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[#3887A6]">●</span> Shift+Arraste: Mover
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Anatomy Mesh Selector Panel */}
-        <div className="absolute top-4 right-4 z-20 w-64">
+        {/* Anatomy Systems Panel */}
+        <div className="absolute top-4 right-4 z-20">
           {/* Toggle panel button */}
           <button
             onClick={() => setIsPanelOpen(!isPanelOpen)}
@@ -1406,63 +1024,51 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
             </svg>
           </button>
 
-          {/* Mesh selector panel */}
+          {/* Systems toggles */}
           {isPanelOpen && (
-            <div className="bg-black/60 backdrop-blur-sm rounded-lg shadow-xl border border-white/10 overflow-hidden">
-              {/* Search input */}
-              <div className="p-2 border-b border-white/10">
-                <input
-                  type="text"
-                  placeholder="Buscar mesh..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-2 py-1 text-xs bg-black/30 border border-white/20 rounded text-white placeholder-white/40 focus:outline-none focus:border-[#3887A6]"
-                />
-              </div>
-
-              {/* Selected meshes indicator */}
-              {selectedMeshes.size > 0 && (
-                <div className="px-2 py-1.5 bg-[#0C3559]/50 border-b border-white/10 flex items-center justify-between">
-                  <span className="text-[10px] text-white/80">
-                    Selecionados: <strong className="text-white">{selectedMeshes.size}</strong>
-                    {selectedMeshes.size === 1 && (
-                      <span className="text-white/60 ml-1">
-                        ({Array.from(selectedMeshes)[0].replace(/_/g, ' ')})
-                      </span>
-                    )}
-                  </span>
-                  <button
-                    onClick={handleClearSelection}
-                    className="text-white/60 hover:text-white text-[10px] px-1.5 py-0.5 bg-black/30 rounded"
-                  >
-                    Limpar
-                  </button>
-                </div>
-              )}
-
-              {/* Categories accordion */}
-              <div className="max-h-[60vh] overflow-y-auto">
-                {Object.entries(filteredCategories).map(([key, category]) => (
-                  <CategoryAccordion
-                    key={key}
-                    categoryKey={key}
-                    category={category}
-                    isExpanded={expandedCategories.has(key) || searchTerm.trim().length > 0}
-                    onToggleExpand={() => toggleCategoryExpand(key)}
-                    selectedMeshes={selectedMeshes}
-                    onSelectMesh={handleSelectMesh}
-                    onSelectCategory={handleSelectCategory}
-                  />
-                ))}
-              </div>
-
-              {/* Total meshes count */}
-              <div className="px-2 py-1.5 border-t border-white/10 text-[9px] text-white/40 text-center">
-                {selectedMeshes.size > 0
-                  ? `${selectedMeshes.size} de ${ALL_MESHES.length} selecionados`
-                  : `${ALL_MESHES.length} meshes disponíveis`
-                }
-              </div>
+            <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10 min-w-[140px]">
+              <SystemToggle
+                systemKey="skin"
+                label={t('controls.skin')}
+                isActive={systemsVisibility.skin}
+                onToggle={() => toggleSystem('skin')}
+                color="#f4a460"
+              />
+              <SystemToggle
+                systemKey="muscles"
+                label={t('controls.muscles')}
+                isActive={systemsVisibility.muscles}
+                onToggle={() => toggleSystem('muscles')}
+                color="#dc3545"
+              />
+              <SystemToggle
+                systemKey="skeleton"
+                label={t('controls.skeleton')}
+                isActive={systemsVisibility.skeleton}
+                onToggle={() => toggleSystem('skeleton')}
+                color="#f8f9fa"
+              />
+              <SystemToggle
+                systemKey="organs"
+                label={t('controls.organs')}
+                isActive={systemsVisibility.organs}
+                onToggle={() => toggleSystem('organs')}
+                color="#9b59b6"
+              />
+              <SystemToggle
+                systemKey="circulatory"
+                label={t('controls.circulatory')}
+                isActive={systemsVisibility.circulatory}
+                onToggle={() => toggleSystem('circulatory')}
+                color="#e74c3c"
+              />
+              <SystemToggle
+                systemKey="nervous"
+                label={t('controls.nervous')}
+                isActive={systemsVisibility.nervous}
+                onToggle={() => toggleSystem('nervous')}
+                color="#f1c40f"
+              />
             </div>
           )}
         </div>

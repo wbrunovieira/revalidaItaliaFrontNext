@@ -16,10 +16,10 @@ import {
   Type,
   Image as ImageIcon,
   Tag,
-  List,
   BookOpen,
   Layers,
   FileText,
+  Trash2,
 } from 'lucide-react';
 import TagSelectionModal from '@/components/TagSelectionModal';
 import {
@@ -162,6 +162,8 @@ export default function EditFlashcardModal({
   });
 
   const [loading, setLoading] = useState(false);
+  const [loadingFlashcard, setLoadingFlashcard] = useState(false);
+  const [fullFlashcardData, setFullFlashcardData] = useState<FlashcardData | null>(null);
   const [uploadingQuestionImage, setUploadingQuestionImage] = useState(false);
   const [uploadingAnswerImage, setUploadingAnswerImage] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -181,6 +183,97 @@ export default function EditFlashcardModal({
       description: '',
     };
   };
+
+  // Load full flashcard details (including lessons)
+  const loadFlashcardDetails = useCallback(async (flashcardId: string) => {
+    setLoadingFlashcard(true);
+    console.log('[EditFlashcardModal] Loading flashcard details for ID:', flashcardId);
+    try {
+      if (!token || !isAuthenticated) {
+        throw new Error('No authentication token');
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${flashcardId}?includeLessons=true`;
+      console.log('[EditFlashcardModal] Fetching flashcard from:', url);
+
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      console.log('[EditFlashcardModal] Flashcard response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error('Failed to load flashcard details');
+      }
+
+      const data = await response.json();
+      console.log('[EditFlashcardModal] Flashcard API response:', JSON.stringify(data, null, 2));
+
+      // API returns { success: true, flashcard: {...} }
+      const rawFlashcard = data.flashcard || data;
+      console.log('[EditFlashcardModal] Raw flashcard data:', JSON.stringify(rawFlashcard, null, 2));
+
+      // Normalize the flashcard data to match expected format
+      // API returns question/answer as { type, content } objects
+      // API returns lessons as [{ id, title, order }]
+      console.log('[EditFlashcardModal] Raw lessons from API:', rawFlashcard.lessons);
+      console.log('[EditFlashcardModal] Raw lessons count:', rawFlashcard.lessons?.length || 0);
+
+      const normalizedLessons = (rawFlashcard.lessons || []).map((l: { id: string; title: string; order: number }, index: number) => {
+        console.log(`[EditFlashcardModal] Processing lesson ${index + 1}:`, l);
+        return {
+          id: l.id,
+          order: l.order,
+          lesson: {
+            id: l.id,
+            moduleId: '', // Will be resolved later if needed
+            order: l.order,
+            translations: [{ locale: 'pt', title: l.title, description: '' }],
+          },
+        };
+      });
+
+      console.log('[EditFlashcardModal] Normalized lessons count:', normalizedLessons.length);
+      console.log('[EditFlashcardModal] All normalized lessons:', normalizedLessons);
+
+      // Handle argumentId - API may return argumentId directly or argument: { id: '...' }
+      const argumentId = rawFlashcard.argumentId || rawFlashcard.argument?.id || '';
+      console.log('[EditFlashcardModal] Argument ID:', argumentId, 'from rawFlashcard.argumentId:', rawFlashcard.argumentId, 'from rawFlashcard.argument?.id:', rawFlashcard.argument?.id);
+
+      const flashcardData: FlashcardData = {
+        id: rawFlashcard.id,
+        slug: rawFlashcard.slug,
+        questionType: rawFlashcard.question?.type || rawFlashcard.questionType || 'TEXT',
+        questionText: rawFlashcard.question?.type === 'TEXT' ? rawFlashcard.question?.content : rawFlashcard.questionText || null,
+        questionImageUrl: rawFlashcard.question?.type === 'IMAGE' ? rawFlashcard.question?.content : rawFlashcard.questionImageUrl || null,
+        answerType: rawFlashcard.answer?.type || rawFlashcard.answerType || 'TEXT',
+        answerText: rawFlashcard.answer?.type === 'TEXT' ? rawFlashcard.answer?.content : rawFlashcard.answerText || null,
+        answerImageUrl: rawFlashcard.answer?.type === 'IMAGE' ? rawFlashcard.answer?.content : rawFlashcard.answerImageUrl || null,
+        argumentId: argumentId,
+        tags: rawFlashcard.tags || [],
+        lessons: normalizedLessons,
+      };
+
+      console.log('[EditFlashcardModal] Normalized flashcard data:', JSON.stringify(flashcardData, null, 2));
+      console.log('[EditFlashcardModal] Flashcard lessons:', flashcardData.lessons);
+
+      setFullFlashcardData(flashcardData);
+      return flashcardData;
+    } catch (error) {
+      console.error('Error loading flashcard details:', error);
+      toast({
+        title: t('errors.loadFlashcardTitle'),
+        description: t('errors.loadFlashcardDescription'),
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setLoadingFlashcard(false);
+    }
+  }, [token, isAuthenticated, t, toast]);
 
   // Load arguments
   const loadArguments = useCallback(async () => {
@@ -213,25 +306,102 @@ export default function EditFlashcardModal({
     }
   }, [t, toast]);
 
+  // Fetch lessons for a specific module
+  const fetchLessonsForModule = useCallback(
+    async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        console.error(`Error fetching lessons for module ${moduleId}:`, error);
+        return [];
+      }
+    },
+    []
+  );
+
+  // Fetch modules for a specific course
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
+        );
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const modules: Module[] = await response.json();
+
+        // Fetch lessons for each module
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(courseId, module.id);
+            return { ...module, lessons };
+          })
+        );
+
+        return modulesWithLessons;
+      } catch (error) {
+        console.error(`Error fetching modules for course ${courseId}:`, error);
+        return [];
+      }
+    },
+    [fetchLessonsForModule]
+  );
+
   // Load courses with modules and lessons
   const loadCourses = useCallback(async () => {
     setLoadingCourses(true);
+    console.log('[EditFlashcardModal] Loading courses with modules and lessons...');
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?isDeleted=false&include=modules.lessons`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`;
+      console.log('[EditFlashcardModal] Fetching courses from:', url);
+
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('[EditFlashcardModal] Courses response status:', response.status);
 
       if (!response.ok) {
         throw new Error('Failed to load courses');
       }
 
       const data = await response.json();
-      setCourses(data.courses || []);
+
+      // API pode retornar array direto ou { courses: [...] }
+      const coursesArray: Course[] = Array.isArray(data) ? data : (data.courses || []);
+      console.log('[EditFlashcardModal] Courses count:', coursesArray.length);
+
+      // Fetch modules and lessons for each course
+      const coursesWithData = await Promise.all(
+        coursesArray.map(async course => {
+          const modules = await fetchModulesForCourse(course.id);
+          return { ...course, modules };
+        })
+      );
+
+      console.log('[EditFlashcardModal] Courses loaded with modules:', coursesWithData.length);
+      if (coursesWithData.length > 0 && coursesWithData[0].modules) {
+        console.log('[EditFlashcardModal] First course modules count:', coursesWithData[0].modules.length);
+        if (coursesWithData[0].modules.length > 0 && coursesWithData[0].modules[0].lessons) {
+          console.log('[EditFlashcardModal] First module lessons count:', coursesWithData[0].modules[0].lessons.length);
+        }
+      }
+
+      setCourses(coursesWithData);
     } catch (error) {
       console.error('Error loading courses:', error);
       toast({
@@ -242,7 +412,7 @@ export default function EditFlashcardModal({
     } finally {
       setLoadingCourses(false);
     }
-  }, [t, toast]);
+  }, [t, toast, fetchModulesForCourse]);
 
   // Handler for course change
   const handleCourseChange = (courseId: string) => {
@@ -590,7 +760,7 @@ export default function EditFlashcardModal({
       argumentId: true,
     });
 
-    if (!validateForm() || !flashcard) {
+    if (!validateForm() || !fullFlashcardData) {
       toast({
         title: t('error.validationTitle'),
         description: t('error.validationDescription'),
@@ -631,58 +801,58 @@ export default function EditFlashcardModal({
       const imagesToDelete: string[] = [];
       
       // Only include fields that have changed
-      if (formData.questionType !== flashcard.questionType || 
-          formData.questionContent !== (flashcard.questionType === 'TEXT' ? flashcard.questionText : flashcard.questionImageUrl)) {
+      if (formData.questionType !== fullFlashcardData.questionType ||
+          formData.questionContent !== (fullFlashcardData.questionType === 'TEXT' ? fullFlashcardData.questionText : fullFlashcardData.questionImageUrl)) {
         updateData.question = {
           type: formData.questionType,
           content: formData.questionContent.trim(),
         };
-        
+
         // Mark old question image for deletion if type changed or image changed
-        if (flashcard.questionType === 'IMAGE' && flashcard.questionImageUrl && 
-            (formData.questionType === 'TEXT' || formData.questionContent !== flashcard.questionImageUrl)) {
-          imagesToDelete.push(flashcard.questionImageUrl);
+        if (fullFlashcardData.questionType === 'IMAGE' && fullFlashcardData.questionImageUrl &&
+            (formData.questionType === 'TEXT' || formData.questionContent !== fullFlashcardData.questionImageUrl)) {
+          imagesToDelete.push(fullFlashcardData.questionImageUrl);
         }
       }
-      
-      if (formData.answerType !== flashcard.answerType || 
-          formData.answerContent !== (flashcard.answerType === 'TEXT' ? flashcard.answerText : flashcard.answerImageUrl)) {
+
+      if (formData.answerType !== fullFlashcardData.answerType ||
+          formData.answerContent !== (fullFlashcardData.answerType === 'TEXT' ? fullFlashcardData.answerText : fullFlashcardData.answerImageUrl)) {
         updateData.answer = {
           type: formData.answerType,
           content: formData.answerContent.trim(),
         };
-        
+
         // Mark old answer image for deletion if type changed or image changed
-        if (flashcard.answerType === 'IMAGE' && flashcard.answerImageUrl && 
-            (formData.answerType === 'TEXT' || formData.answerContent !== flashcard.answerImageUrl)) {
-          imagesToDelete.push(flashcard.answerImageUrl);
+        if (fullFlashcardData.answerType === 'IMAGE' && fullFlashcardData.answerImageUrl &&
+            (formData.answerType === 'TEXT' || formData.answerContent !== fullFlashcardData.answerImageUrl)) {
+          imagesToDelete.push(fullFlashcardData.answerImageUrl);
         }
       }
-      
-      if (formData.slug !== flashcard.slug) {
+
+      if (formData.slug !== fullFlashcardData.slug) {
         updateData.slug = formData.slug.trim();
       }
-      
-      if (formData.argumentId !== flashcard.argumentId && formData.argumentId) {
+
+      if (formData.argumentId !== fullFlashcardData.argumentId && formData.argumentId) {
         updateData.argumentId = formData.argumentId;
       }
-      
+
       // Check if tags have changed
-      const currentTagIds = flashcard.tags.map(t => t.id).sort();
-      const newTagIds = formData.tags.map(t => t.id).sort();
+      const currentTagIds = fullFlashcardData.tags.map(t => t.id).sort();
+      const newTagIds = (formData.tags || []).map(t => t.id).sort();
       const tagsChanged = currentTagIds.join(',') !== newTagIds.join(',');
-      
+
       if (tagsChanged) {
-        updateData.tagIds = formData.tags.map(tag => tag.id);
+        updateData.tagIds = (formData.tags || []).map(tag => tag.id);
       }
-      
+
       // Check if lessons have changed
-      const currentLessonIds = flashcard.lessons?.map(l => l.lesson.id).sort() || [];
-      const newLessonIds = formData.lessons.map(l => l.lessonId).sort();
+      const currentLessonIds = fullFlashcardData.lessons?.map(l => l.lesson.id).sort() || [];
+      const newLessonIds = (formData.lessons || []).map(l => l.lessonId).sort();
       const lessonsChanged = currentLessonIds.join(',') !== newLessonIds.join(',');
-      
-      if (lessonsChanged && formData.lessons.length > 0) {
-        updateData.lessons = formData.lessons;
+
+      if (lessonsChanged || ((formData.lessons || []).length === 0 && currentLessonIds.length > 0)) {
+        updateData.lessons = formData.lessons || [];
       }
 
       // If no changes, just close
@@ -692,7 +862,7 @@ export default function EditFlashcardModal({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${flashcard.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${fullFlashcardData.id}`,
         {
           method: 'PUT',
           headers: {
@@ -771,20 +941,52 @@ export default function EditFlashcardModal({
     }
   };
 
-  // Update form when flashcard changes
+  // Initialize form data immediately when flashcard loads (without waiting for courses)
   useEffect(() => {
-    if (flashcard && isOpen) {
-      // Set selected lessons from flashcard data
-      const flashcardLessons = flashcard.lessons?.map(fl => fl.lesson) || [];
+    if (fullFlashcardData && isOpen) {
+      // Set lessons and basic form data immediately
+      const lessonsData = fullFlashcardData.lessons?.map(fl => ({
+        lessonId: fl.lesson.id,
+        order: fl.order,
+      })) || [];
+
+      setFormData(prev => ({
+        ...prev,
+        questionType: fullFlashcardData.questionType,
+        questionContent: fullFlashcardData.questionType === 'TEXT'
+          ? fullFlashcardData.questionText || ''
+          : fullFlashcardData.questionImageUrl || '',
+        answerType: fullFlashcardData.answerType,
+        answerContent: fullFlashcardData.answerType === 'TEXT'
+          ? fullFlashcardData.answerText || ''
+          : fullFlashcardData.answerImageUrl || '',
+        slug: fullFlashcardData.slug,
+        argumentId: fullFlashcardData.argumentId,
+        tags: fullFlashcardData.tags || [],
+        lessons: lessonsData,
+      }));
+
+      // Set selected lessons for the lesson picker
+      const flashcardLessons = fullFlashcardData.lessons?.map(fl => fl.lesson) || [];
       setSelectedLessons(flashcardLessons);
-      
+
+      setErrors({});
+      setTouched({});
+    }
+  }, [fullFlashcardData, isOpen]);
+
+  // Update course/module selection when courses are loaded
+  useEffect(() => {
+    if (fullFlashcardData && isOpen && courses.length > 0) {
+      const flashcardLessons = fullFlashcardData.lessons?.map(fl => fl.lesson) || [];
+
       // Find course and module IDs from the first lesson
       let courseId = '';
       let moduleId = '';
       if (flashcardLessons.length > 0) {
         const firstLesson = flashcardLessons[0];
         moduleId = firstLesson.moduleId;
-        
+
         // Find the course that contains this module
         courses.forEach(course => {
           if (course.modules?.some(m => m.id === moduleId)) {
@@ -792,38 +994,32 @@ export default function EditFlashcardModal({
           }
         });
       }
-      
-      setFormData({
-        questionType: flashcard.questionType,
-        questionContent: flashcard.questionType === 'TEXT' 
-          ? flashcard.questionText || '' 
-          : flashcard.questionImageUrl || '',
-        answerType: flashcard.answerType,
-        answerContent: flashcard.answerType === 'TEXT' 
-          ? flashcard.answerText || '' 
-          : flashcard.answerImageUrl || '',
-        slug: flashcard.slug,
-        argumentId: flashcard.argumentId,
-        tags: flashcard.tags,
-        courseId,
-        moduleId,
-        lessons: flashcard.lessons?.map(fl => ({
-          lessonId: fl.lesson.id,
-          order: fl.order,
-        })) || [],
-      });
-      setErrors({});
-      setTouched({});
-    }
-  }, [flashcard, isOpen, courses]);
 
-  // Load arguments and courses when modal opens
+      // Only update course/module if found
+      if (courseId || moduleId) {
+        setFormData(prev => ({
+          ...prev,
+          courseId,
+          moduleId,
+        }));
+      }
+    }
+  }, [fullFlashcardData, isOpen, courses]);
+
+  // Load arguments, courses, and flashcard details when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && flashcard) {
       loadArguments();
       loadCourses();
+      loadFlashcardDetails(flashcard.id);
     }
-  }, [isOpen, loadArguments, loadCourses]);
+
+    // Reset state when modal closes
+    if (!isOpen) {
+      setFullFlashcardData(null);
+      setSelectedLessons([]);
+    }
+  }, [isOpen, flashcard, loadArguments, loadCourses, loadFlashcardDetails]);
 
   if (!isOpen || !flashcard) return null;
 
@@ -847,7 +1043,14 @@ export default function EditFlashcardModal({
             </button>
           </div>
 
-          {/* Form */}
+          {/* Loading State */}
+          {loadingFlashcard ? (
+            <div className="p-12 flex flex-col items-center justify-center">
+              <Loader2 size={40} className="animate-spin text-secondary mb-4" />
+              <p className="text-gray-400">{t('loading')}</p>
+            </div>
+          ) : (
+          /* Form */
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Question Section */}
             <div className="space-y-4">
@@ -1116,38 +1319,34 @@ export default function EditFlashcardModal({
               <label className="block text-gray-300 mb-2">
                 {t('argument.label')}
               </label>
-              <Select
-                value={formData.argumentId}
-                onValueChange={(value) => handleInputChange('argumentId', value)}
-                disabled={loadingArguments}
-              >
-                <SelectTrigger className={`w-full bg-gray-700 border text-white ${
-                  errors.argumentId ? 'border-red-500' : 'border-gray-600'
-                }`}>
-                  <SelectValue placeholder={loadingArguments ? t('argument.loading') : t('argument.placeholder')}>
-                    {loadingArguments ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 size={16} className="animate-spin" />
-                        {t('argument.loading')}
-                      </span>
-                    ) : (
-                      argumentsList.find(arg => arg.id === formData.argumentId)?.title || formData.argumentId
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-gray-700 border-gray-600">
-                  {argumentsList.map(argument => (
-                    <SelectItem
-                      key={argument.id}
-                      value={argument.id}
-                      className="text-white hover:bg-gray-600 flex items-center gap-2"
-                    >
-                      <List size={16} className="text-gray-400" />
-                      {argument.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingArguments ? (
+                <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-400 flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {t('argument.loading')}
+                </div>
+              ) : (
+                <Select
+                  value={formData.argumentId}
+                  onValueChange={(value) => handleInputChange('argumentId', value)}
+                >
+                  <SelectTrigger className={`w-full bg-gray-700 border text-white ${
+                    errors.argumentId ? 'border-red-500' : 'border-gray-600'
+                  }`}>
+                    <SelectValue placeholder={t('argument.placeholder')} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600">
+                    {argumentsList.map(argument => (
+                      <SelectItem
+                        key={argument.id}
+                        value={argument.id}
+                        className="text-white hover:bg-gray-600"
+                      >
+                        {argument.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               {errors.argumentId && (
                 <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle size={14} />
@@ -1168,7 +1367,7 @@ export default function EditFlashcardModal({
               >
                 <span className="text-gray-300 flex items-center gap-2">
                   <Tag size={18} />
-                  {formData.tags.length > 0 ? (
+                  {formData.tags && formData.tags.length > 0 ? (
                     <span className="text-white">
                       {t('tags.selected', { count: formData.tags.length })}
                     </span>
@@ -1179,9 +1378,9 @@ export default function EditFlashcardModal({
                 <Check size={18} className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
               
-              {formData.tags.length > 0 && (
+              {formData.tags && formData.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {formData.tags.map(tag => (
+                  {(formData.tags || []).map(tag => (
                     <span
                       key={tag.id}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm text-purple-300"
@@ -1201,6 +1400,84 @@ export default function EditFlashcardModal({
                 {t('lessonAssociation.title')}
                 <span className="text-gray-400 text-sm ml-2">({t('lessonAssociation.optional')})</span>
               </h3>
+
+              {/* Currently Associated Lessons */}
+              {fullFlashcardData?.lessons && fullFlashcardData.lessons.length > 0 && (
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-green-400 text-sm font-medium flex items-center gap-2">
+                      <Check size={16} />
+                      {t('lessonAssociation.currentlyAssociated')}
+                    </p>
+                    {fullFlashcardData.lessons.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, lessons: [] }));
+                          setSelectedLessons([]);
+                        }}
+                        className="text-red-400 hover:text-red-300 text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-red-500/20 transition-colors"
+                        title={t('lessonAssociation.removeAll')}
+                      >
+                        <Trash2 size={14} />
+                        {t('lessonAssociation.removeAll')}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {fullFlashcardData.lessons.map((fl) => {
+                      const isMarkedForRemoval = !(formData.lessons || []).some(
+                        l => l.lessonId === fl.lesson.id
+                      );
+                      return (
+                        <span
+                          key={fl.lesson.id}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                            isMarkedForRemoval
+                              ? 'bg-red-500/20 border border-red-500/30 text-red-300 line-through'
+                              : 'bg-green-500/20 border border-green-500/30 text-green-300'
+                          }`}
+                        >
+                          <FileText size={12} />
+                          {fl.lesson.translations[0]?.title || fl.lesson.id}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isMarkedForRemoval) {
+                                // Re-add the lesson
+                                setFormData(prev => ({
+                                  ...prev,
+                                  lessons: [...(prev.lessons || []), { lessonId: fl.lesson.id, order: fl.order }],
+                                }));
+                              } else {
+                                // Remove the lesson
+                                setFormData(prev => ({
+                                  ...prev,
+                                  lessons: (prev.lessons || []).filter(l => l.lessonId !== fl.lesson.id),
+                                }));
+                              }
+                            }}
+                            className={`ml-1 p-0.5 rounded-full transition-colors ${
+                              isMarkedForRemoval
+                                ? 'hover:bg-green-500/30 text-green-400'
+                                : 'hover:bg-red-500/30 text-red-400'
+                            }`}
+                            title={isMarkedForRemoval ? t('lessonAssociation.restore') : t('lessonAssociation.remove')}
+                          >
+                            {isMarkedForRemoval ? <Check size={12} /> : <X size={12} />}
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {(formData.lessons || []).length !== fullFlashcardData.lessons.length && (
+                    <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
+                      <AlertCircle size={12} />
+                      {t('lessonAssociation.pendingChanges')}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Course Selection */}
@@ -1288,17 +1565,31 @@ export default function EditFlashcardModal({
                     {t('lessonAssociation.selectLessons')}
                   </label>
                   <div className="space-y-2 max-h-60 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
-                    {courses
-                      .find(c => c.id === formData.courseId)
-                      ?.modules?.find(m => m.id === formData.moduleId)
-                      ?.lessons?.map(lesson => {
+                    {(() => {
+                      const selectedModule = courses
+                        .find(c => c.id === formData.courseId)
+                        ?.modules?.find(m => m.id === formData.moduleId);
+                      const lessons = selectedModule?.lessons || [];
+
+                      if (lessons.length === 0) {
+                        return (
+                          <p className="text-gray-400 text-sm text-center py-4">
+                            {t('lessonAssociation.noLessons')}
+                          </p>
+                        );
+                      }
+
+                      return lessons.map(lesson => {
                         const lessonTranslation = getTranslationByLocale(
-                          lesson.translations,
+                          lesson.translations || [],
                           locale
                         );
                         const isSelected = selectedLessons.some(
                           l => l.id === lesson.id
                         );
+                        // Fallback para título se translations não tiver
+                        const lessonTitle = lessonTranslation?.title || `Aula ${lesson.order || ''}`;
+
                         return (
                           <div
                             key={lesson.id}
@@ -1314,11 +1605,12 @@ export default function EditFlashcardModal({
                               htmlFor={`lesson-${lesson.id}`}
                               className="text-sm text-gray-300 cursor-pointer flex-1"
                             >
-                              {lessonTranslation.title}
+                              {lessonTitle}
                             </label>
                           </div>
                         );
-                      })}
+                      });
+                    })()}
                   </div>
                   {selectedLessons.length > 0 && (
                     <p className="mt-2 text-sm text-gray-400">
@@ -1358,6 +1650,7 @@ export default function EditFlashcardModal({
               </button>
             </div>
           </form>
+          )}
         </div>
       </div>
 
@@ -1365,7 +1658,7 @@ export default function EditFlashcardModal({
       <TagSelectionModal
         isOpen={showTagModal}
         onClose={() => setShowTagModal(false)}
-        selectedTags={formData.tags.map(tag => ({
+        selectedTags={(formData.tags || []).map(tag => ({
           id: tag.id,
           name: tag.name,
           createdAt: new Date().toISOString(),

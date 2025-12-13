@@ -4089,6 +4089,7 @@
   
   "flashcardEdit": {
     "title": "Modifica Flashcard",
+    "loading": "Caricamento dettagli della flashcard...",
     "question": {
       "title": "Domanda",
       "text": "Testo della Domanda",
@@ -4125,12 +4126,18 @@
     "lessonAssociation": {
       "title": "Associazione con Lezioni",
       "optional": "Opzionale",
+      "currentlyAssociated": "Lezioni attualmente associate",
+      "removeAll": "Rimuovi tutte",
+      "remove": "Rimuovi questa lezione",
+      "restore": "Ripristina questa lezione",
+      "pendingChanges": "Modifiche in sospeso - clicca su Salva per applicare",
       "course": "Corso",
       "module": "Modulo",
       "selectCourse": "Seleziona un corso",
       "selectModule": "Seleziona un modulo",
       "selectLessons": "Seleziona le lezioni",
-      "selectedCount": "{count} lezioni selezionate"
+      "selectedCount": "{count} lezioni selezionate",
+      "noLessons": "Nessuna lezione disponibile in questo modulo"
     },
     "uploading": "Caricamento...",
     "save": "Salva",
@@ -4164,7 +4171,9 @@
       "tagNotFound": "Tag non trovato",
       "lessonNotFound": "Lezione non trovata",
       "loadCoursesTitle": "Errore nel caricamento dei corsi",
-      "loadCoursesDescription": "Impossibile caricare l'elenco dei corsi"
+      "loadCoursesDescription": "Impossibile caricare l'elenco dei corsi",
+      "loadFlashcardTitle": "Errore nel caricamento della flashcard",
+      "loadFlashcardDescription": "Impossibile caricare i dettagli della flashcard"
     },
     "success": {
       "title": "Successo",

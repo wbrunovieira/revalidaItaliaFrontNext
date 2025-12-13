@@ -242,20 +242,27 @@ export default async function LessonPage({
 
   // Buscar flashcards se a lesson tiver flashcardIds
   let flashcards: Flashcard[] = [];
+
   if (lesson.flashcardIds && lesson.flashcardIds.length > 0) {
     try {
       flashcards = await Promise.all(
-        lesson.flashcardIds.map(id =>
-          fetch(`${API_URL}/api/v1/flashcards/${id}`, {
+        lesson.flashcardIds.map(async (id) => {
+          const response = await fetch(`${API_URL}/api/v1/flashcards/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store'
-          }).then(r => r.ok ? r.json() : null)
-        )
+          });
+          if (response.ok) {
+            const data = await response.json();
+            // API retorna { success: true, flashcard: {...} }
+            return data.flashcard || data;
+          }
+          return null;
+        })
       );
       // Filtrar nulls caso algum flashcard não seja encontrado
       flashcards = flashcards.filter(f => f !== null);
     } catch (error) {
-      console.error('Error fetching flashcards:', error);
+      console.error('[Flashcards] Error fetching flashcards:', error);
     }
   }
 

@@ -133,9 +133,12 @@ export default function LessonPageContent({
   });
 
   // Fetch flashcards if lesson has them
+  // Use initialLesson.flashcardIds as fallback while lesson is loading
+  const flashcardIds = lesson?.flashcardIds || initialLesson?.flashcardIds || [];
+
   const { data: flashcards = [] } = useLessonFlashcards({
-    flashcardIds: lesson?.flashcardIds || [],
-    enabled: !!lesson?.flashcardIds && lesson.flashcardIds.length > 0,
+    flashcardIds,
+    enabled: flashcardIds.length > 0,
   });
 
   // Hydrate cache with initial data on mount
@@ -164,9 +167,10 @@ export default function LessonPageContent({
     if (initialDocuments) {
       queryClient.setQueryData(['lesson-documents', lessonId], initialDocuments);
     }
-    if (initialFlashcards && lesson?.flashcardIds && lesson.flashcardIds.length > 0) {
+    const hydrateFlashcardIds = initialLesson?.flashcardIds || lesson?.flashcardIds;
+    if (initialFlashcards && hydrateFlashcardIds && hydrateFlashcardIds.length > 0) {
       queryClient.setQueryData(
-        ['flashcards', lesson.flashcardIds.sort().join(',')],
+        ['flashcards', [...hydrateFlashcardIds].sort().join(',')],
         initialFlashcards
       );
     }
@@ -469,7 +473,7 @@ export default function LessonPageContent({
                 )}
 
                 {/* Flashcards */}
-                {flashcards.length > 0 && (
+                {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
                   <div className="mt-12">
                     <div className="mb-4">
                       <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
@@ -611,6 +615,24 @@ export default function LessonPageContent({
                           courses={courses}
                           modules={modules}
                         />
+                      </div>
+                    )}
+
+                    {/* Flashcards */}
+                    {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                      <div className="bg-primary/30 rounded-lg p-4 border border-secondary/20">
+                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                          <CreditCard size={18} className="text-secondary" />
+                          {tLesson('flashcards')}
+                        </h3>
+                        <Link
+                          href={`/${locale}/flashcards/study?lessonId=${lessonId}`}
+                          className="w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
+                        >
+                          <CreditCard size={18} />
+                          {tLesson('studyFlashcards')}
+                          <ExternalLink size={14} />
+                        </Link>
                       </div>
                     )}
 

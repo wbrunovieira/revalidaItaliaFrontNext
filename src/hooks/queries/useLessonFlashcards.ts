@@ -49,7 +49,9 @@ async function fetchFlashcards(flashcardIds: string[]): Promise<Flashcard[]> {
           return null;
         }
 
-        return response.json();
+        const data = await response.json();
+        // API retorna { success: true, flashcard: {...} }
+        return data.flashcard || data;
       })
     );
 

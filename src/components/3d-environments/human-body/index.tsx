@@ -32,6 +32,27 @@ const BODY_PARTS: BodyPartConfig[] = [
     cameraTarget: [0, 1.2, -0.5],
     icon: '🧠',
   },
+  {
+    id: 'torso',
+    labelKey: 'torso',
+    cameraPosition: [0, 0.3, 1.5],
+    cameraTarget: [0, 0.3, -1.5],
+    icon: '🫁',
+  },
+  {
+    id: 'legs',
+    labelKey: 'legs',
+    cameraPosition: [0, -0.5, 1.5],
+    cameraTarget: [0, -0.5, 0],
+    icon: '🦵',
+  },
+  {
+    id: 'hand',
+    labelKey: 'hand',
+    cameraPosition: [0.5, 0.1, 0.7],
+    cameraTarget: [0.7, 0, -2.2],
+    icon: '✋',
+  },
 ];
 
 // Hospital room floor with tile pattern
@@ -358,10 +379,11 @@ const MODEL_PATH =
 interface HotspotProps {
   position: [number, number, number];
   label: string;
+  size?: number;
   onHover?: (isHovered: boolean) => void;
 }
 
-function Hotspot({ position, label, onHover }: HotspotProps) {
+function Hotspot({ position, label, size = 3, onHover }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
 
   const handlePointerOver = () => {
@@ -378,7 +400,7 @@ function Hotspot({ position, label, onHover }: HotspotProps) {
     <group position={position}>
       {/* Hotspot point */}
       <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-        <sphereGeometry args={[0.03, 16, 16]} />
+        <sphereGeometry args={[size, 16, 16]} />
         <meshStandardMaterial
           color={hovered ? '#3887A6' : '#0C3559'}
           emissive={hovered ? '#3887A6' : '#0C3559'}
@@ -388,7 +410,7 @@ function Hotspot({ position, label, onHover }: HotspotProps) {
 
       {/* Pulsing ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.04, 0.06, 32]} />
+        <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
         <meshStandardMaterial color="#3887A6" transparent opacity={hovered ? 0.9 : 0.5} />
       </mesh>
 
@@ -403,27 +425,60 @@ function Hotspot({ position, label, onHover }: HotspotProps) {
             transform: 'translate(0, -50%)',
           }}
         >
-          <div className="flex items-center">
-            {/* Connector line - full length */}
+          <div
+            className="flex items-center"
+            style={{
+              animation: 'tooltipAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            }}
+          >
+            {/* Connector line with gradient and rounded ends */}
             <div
               style={{
-                width: '80px',
+                width: '40px',
                 height: '2px',
-                backgroundColor: '#3887A6',
+                background: 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
+                borderRadius: '2px',
+                boxShadow: '0 0 6px rgba(56, 135, 166, 0.4)',
               }}
             />
-            {/* Label box */}
+            {/* Rounded connector dot */}
             <div
-              className="px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-xl"
               style={{
-                backgroundColor: '#0C3559',
+                width: '6px',
+                height: '6px',
+                background: 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
+                borderRadius: '50%',
+                marginLeft: '-3px',
+                boxShadow: '0 0 8px rgba(56, 135, 166, 0.5)',
+              }}
+            />
+            {/* Label box with animation */}
+            <div
+              className="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap"
+              style={{
+                background: 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
                 border: '2px solid #3887A6',
+                borderRadius: '12px',
                 color: '#ffffff',
+                boxShadow: '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
+                marginLeft: '-2px',
               }}
             >
               {label}
             </div>
           </div>
+          <style>{`
+            @keyframes tooltipAppear {
+              0% {
+                opacity: 0;
+                transform: translateX(-20px) scale(0.9);
+              }
+              100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+              }
+            }
+          `}</style>
         </Html>
       )}
     </group>
@@ -438,7 +493,27 @@ const ANATOMY_HOTSPOTS: {
   label: string;
   yMin: number;
   yMax: number;
-}[] = [{ id: 'testa', position: [0, 1.65, 0.12], label: 'Testa', yMin: 1.4, yMax: 2.0 }];
+  size?: number;
+}[] = [
+  { id: 'testa', position: [0, 185, -5], label: 'Testa', yMin: 1.4, yMax: 2.0, size: 3 },
+  { id: 'fronte', position: [0, 178, 6], label: 'Fronte', yMin: 1.3, yMax: 1.6, size: 1.5 },
+  { id: 'sopracciglio', position: [4, 175, 5.5], label: 'Sopracciglio', yMin: 1.25, yMax: 1.45, size: 1.5 },
+  { id: 'occhio', position: [4, 173, 6], label: 'Occhio', yMin: 1.2, yMax: 1.4, size: 1 },
+  { id: 'naso', position: [0, 170, 12], label: 'Naso', yMin: 1.15, yMax: 1.35, size: 1 },
+  { id: 'labbro', position: [0.8, 166, 8], label: 'Labbro', yMin: 1.1, yMax: 1.25, size: 1 },
+  { id: 'bocca', position: [-1.2, 166, 8], label: 'Bocca', yMin: 1.05, yMax: 1.2, size: 1 },
+  { id: 'mento', position: [0, 162, 8], label: 'Mento', yMin: 1.0, yMax: 1.15, size: 1 },
+  { id: 'guancia', position: [6, 170, 4], label: 'Guancia', yMin: 1.2, yMax: 1.5, size: 1.5 },
+  { id: 'mandibola', position: [5, 162, 5], label: 'Mandibola', yMin: 1.0, yMax: 1.3, size: 1.5 },
+  { id: 'collo', position: [0, 157, 5], label: 'Collo', yMin: 0.8, yMax: 1.1, size: 1.5 },
+  { id: 'spalla', position: [17, 153, 3], label: 'Spalla', yMin: 0.6, yMax: 0.9, size: 1.5 },
+  // Dedos da mão esquerda (base)
+  { id: 'pollice', position: [38, 90, 12.5], label: 'Pollice', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'indice', position: [38, 80, 9.5], label: 'Indice', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'medio', position: [33, 77, 9.5], label: 'Medio', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'anulare', position: [29, 79, 9], label: 'Anulare', yMin: 0.3, yMax: 0.5, size: 0.8 },
+  { id: 'mignolo', position: [26, 82, 9], label: 'Mignolo', yMin: 0.3, yMax: 0.5, size: 0.8 },
+];
 
 interface HumanBodyModelProps {
   rotation: number;
@@ -540,6 +615,7 @@ function HumanBodyModel({ rotation }: HumanBodyModelProps) {
           key={hotspot.id}
           position={hotspot.position}
           label={hotspot.label}
+          size={hotspot.size}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
         />
       ))}
@@ -725,7 +801,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
         </Canvas>
 
         {/* Body Parts Panel */}
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-16 right-4 z-20">
           <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10">
             <div className="text-xs text-white/60 font-medium mb-2 px-1">{t('controls.bodyParts')}</div>
             <div className="flex flex-col gap-2">

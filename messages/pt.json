@@ -19,7 +19,10 @@
       "nervous": "Nervoso",
       "bodyParts": "Partes do Corpo",
       "bodyFull": "Corpo Inteiro",
-      "head": "Cabeça"
+      "head": "Cabeça",
+      "torso": "Tronco",
+      "legs": "Pernas",
+      "hand": "Mão"
     },
     "instructions": {
       "dragToRotate": "Arraste para rotacionar",

@@ -144,6 +144,102 @@ function HospitalWalls() {
   );
 }
 
+// Chalkboard with instructions
+function InstructionsChalkboard() {
+  const primaryDark = '#0F2940';
+  const secondaryColor = '#3887A6';
+
+  return (
+    <group position={[-3, 2.5, -4.9]}>
+      {/* Chalkboard frame - secondary color */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[5, 3.2, 0.1]} />
+        <meshStandardMaterial color={secondaryColor} roughness={0.8} />
+      </mesh>
+
+      {/* Chalkboard surface - primary dark */}
+      <mesh position={[0, 0, 0.06]}>
+        <planeGeometry args={[4.7, 2.9]} />
+        <meshStandardMaterial color={primaryDark} roughness={0.95} />
+      </mesh>
+
+      {/* Chalk tray */}
+      <mesh position={[0, -1.5, 0.15]}>
+        <boxGeometry args={[4.2, 0.08, 0.15]} />
+        <meshStandardMaterial color="#0C3559" roughness={0.8} />
+      </mesh>
+
+      {/* Title */}
+      <Text
+        position={[0, 1.1, 0.07]}
+        fontSize={0.22}
+        color="#F5F5DC"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight={700}
+      >
+        Come usare
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 1 */}
+      <Text
+        position={[-2.1, 0.5, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        1. Scegli la parte del corpo nel pannello
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 2 */}
+      <Text
+        position={[-2.1, 0.05, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        2. Passa il mouse sui punti per vedere il nome
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Instruction 3 */}
+      <Text
+        position={[-2.1, -0.4, 0.07]}
+        fontSize={0.15}
+        color="#F5F5DC"
+        anchorX="left"
+        anchorY="middle"
+        maxWidth={4.2}
+        fontWeight={700}
+      >
+        {"3. Clicca per ascoltare l'audio"}
+        <meshBasicMaterial color="#F5F5DC" />
+      </Text>
+
+      {/* Closing message */}
+      <Text
+        position={[0, -1.0, 0.07]}
+        fontSize={0.18}
+        color="#90EE90"
+        anchorX="center"
+        anchorY="middle"
+        fontWeight={700}
+      >
+        ❤️ Divertiti e impara! ❤️
+        <meshBasicMaterial color="#90EE90" />
+      </Text>
+    </group>
+  );
+}
+
 // Hospital ceiling
 function HospitalCeiling() {
   return (
@@ -380,48 +476,185 @@ interface HotspotProps {
   position: [number, number, number];
   label: string;
   size?: number;
+  audioUrl?: string;
+  volume?: number;
   onHover?: (isHovered: boolean) => void;
+  onAudioPlay?: () => void;
 }
 
-function Hotspot({ position, label, size = 3, onHover }: HotspotProps) {
+function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onAudioPlay }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Update volume when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  // Show tooltip based on hover or touch
+  const tooltipVisible = showTooltip || hovered;
 
   const handlePointerOver = () => {
-    setHovered(true);
-    onHover?.(true);
+    if (!isTouchDevice) {
+      setHovered(true);
+      onHover?.(true);
+    }
   };
 
   const handlePointerOut = () => {
-    setHovered(false);
-    onHover?.(false);
+    if (!isTouchDevice) {
+      setHovered(false);
+      onHover?.(false);
+    }
   };
+
+  const playAudio = useCallback(() => {
+    if (!audioUrl) return;
+
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(audioUrl);
+    audio.volume = volume;
+    audioRef.current = audio;
+
+    audio.onplay = () => {
+      setIsPlaying(true);
+      onAudioPlay?.();
+    };
+
+    audio.onended = () => {
+      setIsPlaying(false);
+      setHasPlayed(true);
+    };
+
+    audio.onerror = () => {
+      setIsPlaying(false);
+      console.error('Error playing audio:', audioUrl);
+    };
+
+    audio.play().catch(err => {
+      console.error('Error playing audio:', err);
+      setIsPlaying(false);
+    });
+  }, [audioUrl, volume, onAudioPlay]);
+
+  const handleClick = useCallback(() => {
+    // On touch device: show tooltip for 3 seconds + play audio
+    if (isTouchDevice) {
+      // Clear any existing timeout
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+
+      // Show tooltip
+      setShowTooltip(true);
+      onHover?.(true);
+
+      // Hide tooltip after 3 seconds
+      tooltipTimeoutRef.current = setTimeout(() => {
+        setShowTooltip(false);
+        onHover?.(false);
+      }, 3000);
+    }
+
+    // Play audio (both desktop and mobile)
+    if (audioUrl) {
+      playAudio();
+    }
+  }, [isTouchDevice, audioUrl, playAudio, onHover]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <group position={position}>
-      {/* Hotspot point */}
-      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
+      {/* Hotspot point - clickable */}
+      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
         <sphereGeometry args={[size, 16, 16]} />
         <meshStandardMaterial
-          color={hovered ? '#3887A6' : '#0C3559'}
-          emissive={hovered ? '#3887A6' : '#0C3559'}
-          emissiveIntensity={hovered ? 1.2 : 0.6}
+          color={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissive={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissiveIntensity={isPlaying ? 1.5 : tooltipVisible ? 1.2 : 0.6}
         />
       </mesh>
 
-      {/* Pulsing ring */}
+      {/* Pulsing ring - animated when playing */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
-        <meshStandardMaterial color="#3887A6" transparent opacity={hovered ? 0.9 : 0.5} />
+        <meshStandardMaterial
+          color={isPlaying ? '#4CAF50' : '#3887A6'}
+          transparent
+          opacity={isPlaying ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+        />
       </mesh>
 
+      {/* Playing animation indicator */}
+      {isPlaying && (
+        <Html position={[size * 2, size * 1.5, 0]} distanceFactor={6} center>
+          <div
+            style={{
+              display: 'flex',
+              gap: '2px',
+              alignItems: 'flex-end',
+              height: '14px',
+            }}
+          >
+            {[1, 2, 3].map(i => (
+              <div
+                key={i}
+                style={{
+                  width: '3px',
+                  background: '#4CAF50',
+                  borderRadius: '1px',
+                  animation: `soundBar 0.5s ease-in-out infinite alternate`,
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              />
+            ))}
+          </div>
+          <style>{`
+            @keyframes soundBar {
+              0% { height: 4px; }
+              100% { height: 14px; }
+            }
+          `}</style>
+        </Html>
+      )}
+
       {/* Label tooltip - positioned to the right */}
-      {hovered && (
+      {tooltipVisible && (
         <Html
           position={[0, 0, 0]}
           distanceFactor={6}
           center={false}
           style={{
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
             transform: 'translate(0, -50%)',
           }}
         >
@@ -436,9 +669,11 @@ function Hotspot({ position, label, size = 3, onHover }: HotspotProps) {
               style={{
                 width: '40px',
                 height: '2px',
-                background: 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
+                background: isPlaying
+                  ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
+                  : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
                 borderRadius: '2px',
-                boxShadow: '0 0 6px rgba(56, 135, 166, 0.4)',
+                boxShadow: isPlaying ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
               }}
             />
             {/* Rounded connector dot */}
@@ -446,25 +681,49 @@ function Hotspot({ position, label, size = 3, onHover }: HotspotProps) {
               style={{
                 width: '6px',
                 height: '6px',
-                background: 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
+                background: isPlaying
+                  ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
+                  : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
                 borderRadius: '50%',
                 marginLeft: '-3px',
-                boxShadow: '0 0 8px rgba(56, 135, 166, 0.5)',
+                boxShadow: isPlaying ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
               }}
             />
             {/* Label box with animation */}
             <div
-              className="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap"
+              className="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2"
               style={{
-                background: 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
-                border: '2px solid #3887A6',
+                background: isPlaying
+                  ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
+                  : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
+                border: isPlaying ? '2px solid #4CAF50' : '2px solid #3887A6',
                 borderRadius: '12px',
                 color: '#ffffff',
-                boxShadow: '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
+                boxShadow: isPlaying
+                  ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
+                  : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
                 marginLeft: '-2px',
+                cursor: audioUrl ? 'pointer' : 'default',
+              }}
+              onClick={e => {
+                e.stopPropagation();
+                if (audioUrl) playAudio();
               }}
             >
               {label}
+              {/* Audio controls in tooltip */}
+              {audioUrl && (
+                <span
+                  style={{
+                    marginLeft: '4px',
+                    fontSize: '14px',
+                    opacity: isPlaying ? 1 : 0.7,
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  {isPlaying ? '🔉' : hasPlayed ? '↻' : '🔊'}
+                </span>
+              )}
             </div>
           </div>
           <style>{`
@@ -485,6 +744,11 @@ function Hotspot({ position, label, size = 3, onHover }: HotspotProps) {
   );
 }
 
+// Audio path helper - handles dev vs production paths
+const getAudioPath = (filename: string) => {
+  return process.env.NODE_ENV === 'production' ? `/public/audios/${filename}` : `/audios/${filename}`;
+};
+
 // Anatomy hotspots data (positions relative to model)
 // yMin/yMax define the vertical range of meshes to highlight
 const ANATOMY_HOTSPOTS: {
@@ -494,8 +758,17 @@ const ANATOMY_HOTSPOTS: {
   yMin: number;
   yMax: number;
   size?: number;
+  audioUrl?: string;
 }[] = [
-  { id: 'testa', position: [0, 185, -5], label: 'Testa', yMin: 1.4, yMax: 2.0, size: 3 },
+  {
+    id: 'testa',
+    position: [0, 185, -5],
+    label: 'Testa',
+    yMin: 1.4,
+    yMax: 2.0,
+    size: 3,
+    audioUrl: getAudioPath('testa.wav'),
+  },
   { id: 'fronte', position: [0, 178, 6], label: 'Fronte', yMin: 1.3, yMax: 1.6, size: 1.5 },
   { id: 'sopracciglio', position: [4, 175, 5.5], label: 'Sopracciglio', yMin: 1.25, yMax: 1.45, size: 1.5 },
   { id: 'occhio', position: [4, 173, 6], label: 'Occhio', yMin: 1.2, yMax: 1.4, size: 1 },
@@ -517,9 +790,10 @@ const ANATOMY_HOTSPOTS: {
 
 interface HumanBodyModelProps {
   rotation: number;
+  audioVolume: number;
 }
 
-function HumanBodyModel({ rotation }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation, audioVolume }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -616,6 +890,8 @@ function HumanBodyModel({ rotation }: HumanBodyModelProps) {
           position={hotspot.position}
           label={hotspot.label}
           size={hotspot.size}
+          audioUrl={hotspot.audioUrl}
+          volume={audioVolume}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
         />
       ))}
@@ -665,9 +941,10 @@ interface SceneProps {
   bodyRotation: number;
   focusedPart: string;
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
+  audioVolume: number;
 }
 
-function Scene({ bodyRotation, focusedPart, controlsRef }: SceneProps) {
+function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -693,10 +970,11 @@ function Scene({ bodyRotation, focusedPart, controlsRef }: SceneProps) {
       <WallText />
       <HospitalWindow />
       <AnatomyPoster />
+      <InstructionsChalkboard />
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} />
+      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
@@ -750,6 +1028,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
+  const [audioVolume, setAudioVolume] = useState(0.7);
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
@@ -797,7 +1076,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
-          <Scene bodyRotation={bodyRotation} focusedPart={focusedPart} controlsRef={controlsRef} />
+          <Scene
+            bodyRotation={bodyRotation}
+            focusedPart={focusedPart}
+            controlsRef={controlsRef}
+            audioVolume={audioVolume}
+          />
         </Canvas>
 
         {/* Body Parts Panel */}
@@ -814,6 +1098,46 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   label={t(`controls.${part.labelKey}`)}
                 />
               ))}
+            </div>
+
+            {/* Volume Control */}
+            <div className="border-t border-white/10 pt-3 mt-3">
+              <div className="text-xs text-white/60 font-medium mb-2 px-1 flex items-center gap-2">
+                <span>🔊</span>
+                <span>{t('controls.volume') || 'Volume'}</span>
+              </div>
+              <div className="flex items-center gap-2 px-1">
+                <button
+                  onClick={() => setAudioVolume(0)}
+                  className="text-white/60 hover:text-white transition-colors"
+                  title="Mute"
+                >
+                  {audioVolume === 0 ? '🔇' : '🔈'}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={audioVolume}
+                  onChange={e => setAudioVolume(parseFloat(e.target.value))}
+                  className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:w-3
+                    [&::-webkit-slider-thumb]:h-3
+                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:bg-[#3887A6]
+                    [&::-webkit-slider-thumb]:shadow-md
+                    [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:w-3
+                    [&::-moz-range-thumb]:h-3
+                    [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:bg-[#3887A6]
+                    [&::-moz-range-thumb]:border-0
+                    [&::-moz-range-thumb]:cursor-pointer"
+                />
+                <span className="text-xs text-white/60 w-8 text-right">{Math.round(audioVolume * 100)}%</span>
+              </div>
             </div>
           </div>
         </div>

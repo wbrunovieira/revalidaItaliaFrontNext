@@ -22,7 +22,8 @@
       "head": "Testa",
       "torso": "Torso",
       "legs": "Gambe",
-      "hand": "Mano"
+      "hand": "Mano",
+      "volume": "Volume"
     },
     "instructions": {
       "dragToRotate": "Trascina per ruotare",

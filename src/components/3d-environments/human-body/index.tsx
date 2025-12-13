@@ -28,8 +28,8 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'head',
     labelKey: 'head',
-    cameraPosition: [0, 1.5, 2.5],
-    cameraTarget: [0, 1.4, 0],
+    cameraPosition: [0, 1.1, 0.3],
+    cameraTarget: [0, 1.2, -0.5],
     icon: '🧠',
   },
 ];
@@ -194,11 +194,7 @@ function HospitalWindow() {
       {/* Venetian blinds */}
       <group position={[0, 0, 0.06]}>
         {Array.from({ length: blindsCount }).map((_, i) => (
-          <mesh
-            key={i}
-            position={[0, 0.85 - i * 0.15, 0]}
-            rotation={[0.3, 0, 0]}
-          >
+          <mesh key={i} position={[0, 0.85 - i * 0.15, 0]} rotation={[0.3, 0, 0]}>
             <boxGeometry args={[2.2, 0.08, 0.01]} />
             <meshStandardMaterial color="#e8e0d0" roughness={0.8} />
           </mesh>
@@ -343,13 +339,7 @@ function WallText() {
       </Text>
 
       {/* Main text */}
-      <Text
-        fontSize={0.7}
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.02}
-        fontWeight={700}
-      >
+      <Text fontSize={0.7} anchorX="center" anchorY="middle" letterSpacing={0.02} fontWeight={700}>
         Revalida Italia
         <meshStandardMaterial color="#0C3559" metalness={0.2} roughness={0.4} />
       </Text>
@@ -359,9 +349,10 @@ function WallText() {
 
 // Human body 3D model (external only - skin, eyes, eyebrows, eyelashes)
 // In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
-const MODEL_PATH = process.env.NODE_ENV === 'production'
-  ? '/public/models/human-body/anatomy-internal.glb'
-  : '/models/human-body/anatomy-internal.glb';
+const MODEL_PATH =
+  process.env.NODE_ENV === 'production'
+    ? '/public/models/human-body/anatomy-internal.glb'
+    : '/models/human-body/anatomy-internal.glb';
 
 // Hotspot component for interactive anatomy points
 interface HotspotProps {
@@ -524,7 +515,7 @@ function HumanBodyModel({ rotation }: HumanBodyModelProps) {
   });
 
   // Model settings (single model now)
-  const modelSettings = { scale: 0.012, baseY: -1.0, rotationOffset: Math.PI };
+  const modelSettings = { scale: 0.012, baseY: -1.0, rotationOffset: 0 };
 
   // Subtle floating animation + horizontal rotation
   useFrame(state => {
@@ -666,9 +657,10 @@ function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps)
       className={`
         px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
         flex items-center gap-2 border-2 whitespace-nowrap
-        ${isActive
-          ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
-          : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
+        ${
+          isActive
+            ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
+            : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
         }
       `}
     >
@@ -678,7 +670,7 @@ function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps)
   );
 }
 
-export default function HumanBodyEnvironment({ }: Environment3DProps) {
+export default function HumanBodyEnvironment({}: Environment3DProps) {
   const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
@@ -735,9 +727,7 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
         {/* Body Parts Panel */}
         <div className="absolute top-4 right-4 z-20">
           <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10">
-            <div className="text-xs text-white/60 font-medium mb-2 px-1">
-              {t('controls.bodyParts')}
-            </div>
+            <div className="text-xs text-white/60 font-medium mb-2 px-1">{t('controls.bodyParts')}</div>
             <div className="flex flex-col gap-2">
               {BODY_PARTS.map(part => (
                 <BodyPartButton

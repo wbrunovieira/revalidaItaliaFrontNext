@@ -1,12 +1,38 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, RoundedBox, useGLTF, Html, Text } from '@react-three/drei';
 import { useTranslations } from 'next-intl';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer from '../Environment3DContainer';
+
+// Body parts configuration for camera focus
+interface BodyPartConfig {
+  id: string;
+  labelKey: string;
+  cameraPosition: [number, number, number];
+  cameraTarget: [number, number, number];
+  icon: string;
+}
+
+const BODY_PARTS: BodyPartConfig[] = [
+  {
+    id: 'full',
+    labelKey: 'bodyFull',
+    cameraPosition: [0, 0.5, 5],
+    cameraTarget: [0, 0.5, 0],
+    icon: '👤',
+  },
+  {
+    id: 'head',
+    labelKey: 'head',
+    cameraPosition: [0, 1.5, 2.5],
+    cameraTarget: [0, 1.4, 0],
+    icon: '🧠',
+  },
+];
 
 // Hospital room floor with tile pattern
 function HospitalFloor() {
@@ -331,76 +357,11 @@ function WallText() {
   );
 }
 
-// Human body 3D model (single model with system visibility)
+// Human body 3D model (external only - skin, eyes, eyebrows, eyelashes)
 // In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
 const MODEL_PATH = process.env.NODE_ENV === 'production'
   ? '/public/models/human-body/anatomy-internal.glb'
   : '/models/human-body/anatomy-internal.glb';
-
-// Anatomical systems visibility state
-interface AnatomySystemsVisibility {
-  skin: boolean;
-  muscles: boolean;
-  skeleton: boolean;
-  organs: boolean;
-  circulatory: boolean;
-  nervous: boolean;
-}
-
-// Mesh names for each anatomical system
-const SKIN_MESHES = ['body', 'eyes', 'eyebrows', 'eyelashes'];
-
-const SKELETON_MESHES = [
-  'skull', 'jaw_bone', 'upper_teeth', 'lover_teeth', 'hyoid_bone', 'hyoid_bone_skeletal',
-  'cervical_spine', 'thoracic_spine', 'lumbar_spine', 'sacrum', 'coccyx', 'intervertebral_disks',
-  'thorax', 'sternum', 'costal_cartilage', 'ilium', 'pubic_symphysis',
-  'l_clavicle', 'l_scapula', 'l_humerus', 'l_radius', 'l_ulna', 'l_wrist', 'l_metacarpal_bones', 'l_finger_bones',
-  'r_clavicle', 'r_scapula', 'r_humerus', 'r_radius', 'r_ulna', 'r_wrist', 'r_metacarpal_bones', 'r_finger_bones',
-  'l_femur', 'l_patella', 'l_tibia', 'l_fibula', 'l_talus', 'l_calcaneum', 'l_tarsal_bones', 'l_metatarsal_bones', 'l_phalanges',
-  'r_femur', 'r_patella', 'r_tibia', 'r_fibula', 'r_talus', 'r_calcaneum', 'r_tarsal_bones', 'r_metatarsal_bones', 'r_phalanges',
-];
-
-const ORGAN_MESHES = [
-  'brain', 'esophagus', 'stomach', 'small_intestine', 'colon', 'appendix',
-  'liver_right', 'liver_left', 'gallbladder', 'hepatic_duct', 'pancreas', 'spleen',
-  'pharynx', 'lungs', 'bronch',
-  'kidneys', 'ureter', 'bladder', 'urethra', 'adrenal_glands',
-  'testis', 'epididymis', 'vas_deferens', 'seminal_vesicle', 'prostate',
-  'corpus_cavernosum', 'corpus_spongiosum', 'glans_penis',
-  'thyroid', 'thyroid_cartilage', 'cricoid_cartilage', 'arytenoid_cartilage',
-  'corniculate_cartilage', 'thyrohyoid_membrane',
-];
-
-const CIRCULATORY_MESHES = ['heart', 'vessels_red', 'vessels_blue'];
-
-const NERVOUS_MESHES = ['nerves'];
-
-// Function to check if mesh belongs to a system
-function getMeshSystem(meshName: string): keyof AnatomySystemsVisibility | 'muscle' | null {
-  const name = meshName.toLowerCase();
-
-  if (SKIN_MESHES.includes(name)) return 'skin';
-  if (SKELETON_MESHES.includes(name)) return 'skeleton';
-  if (ORGAN_MESHES.includes(name)) return 'organs';
-  if (CIRCULATORY_MESHES.includes(name)) return 'circulatory';
-  if (NERVOUS_MESHES.includes(name)) return 'nervous';
-
-  // Check if it's a muscle (most meshes with prefixes are muscles)
-  if (name.startsWith('l_') || name.startsWith('r_') ||
-      name.includes('muscle') || name.includes('_head') ||
-      name.includes('oblique') || name.includes('abdominis') ||
-      name.includes('spinalis') || name.includes('levator') ||
-      name.includes('orbicularis') || name.includes('frontalis') ||
-      name.includes('nasalis') || name.includes('coccygeus') ||
-      name.includes('pubococcygeus') || name === 'polysurface1') {
-    // But exclude skeleton meshes that also start with l_/r_
-    if (!SKELETON_MESHES.includes(name)) {
-      return 'muscle';
-    }
-  }
-
-  return null;
-}
 
 // Hotspot component for interactive anatomy points
 interface HotspotProps {
@@ -490,10 +451,9 @@ const ANATOMY_HOTSPOTS: {
 
 interface HumanBodyModelProps {
   rotation: number;
-  systemsVisibility: AnatomySystemsVisibility;
 }
 
-function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -525,33 +485,6 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
     });
     return clone;
   }, [scene]);
-
-  // Update visibility based on systems visibility
-  const systemsRef = useRef(systemsVisibility);
-  systemsRef.current = systemsVisibility;
-
-  useFrame(() => {
-    // Traverse cloned scene directly to update visibility
-    clonedScene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const system = getMeshSystem(child.name);
-
-        if (system === 'skin') {
-          child.visible = systemsRef.current.skin;
-        } else if (system === 'muscle') {
-          child.visible = systemsRef.current.muscles;
-        } else if (system === 'skeleton') {
-          child.visible = systemsRef.current.skeleton;
-        } else if (system === 'organs') {
-          child.visible = systemsRef.current.organs;
-        } else if (system === 'circulatory') {
-          child.visible = systemsRef.current.circulatory;
-        } else if (system === 'nervous') {
-          child.visible = systemsRef.current.nervous;
-        }
-      }
-    });
-  });
 
   // Update mesh materials based on hover state
   useFrame(() => {
@@ -610,8 +543,8 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
     <group ref={groupRef} position={[0, modelSettings.baseY, 0]} scale={modelSettings.scale}>
       <primitive object={clonedScene} />
 
-      {/* Anatomy hotspots - only show when skin is visible */}
-      {systemsVisibility.skin && ANATOMY_HOTSPOTS.map(hotspot => (
+      {/* Anatomy hotspots */}
+      {ANATOMY_HOTSPOTS.map(hotspot => (
         <Hotspot
           key={hotspot.id}
           position={hotspot.position}
@@ -626,13 +559,48 @@ function HumanBodyModel({ rotation, systemsVisibility }: HumanBodyModelProps) {
 // Preload model
 useGLTF.preload(MODEL_PATH);
 
+// Camera controller for smooth transitions
+interface CameraControllerProps {
+  focusedPart: string;
+  controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
+}
+
+function CameraController({ focusedPart, controlsRef }: CameraControllerProps) {
+  const { camera } = useThree();
+  const targetPosition = useRef(new THREE.Vector3(0, 0.5, 5));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0.5, 0));
+
+  useEffect(() => {
+    const part = BODY_PARTS.find(p => p.id === focusedPart);
+    if (part) {
+      targetPosition.current.set(...part.cameraPosition);
+      targetLookAt.current.set(...part.cameraTarget);
+    }
+  }, [focusedPart]);
+
+  useFrame(() => {
+    // Smoothly interpolate camera position
+    camera.position.lerp(targetPosition.current, 0.05);
+
+    // Update OrbitControls target
+    if (controlsRef.current) {
+      const controls = controlsRef.current;
+      controls.target.lerp(targetLookAt.current, 0.05);
+      controls.update();
+    }
+  });
+
+  return null;
+}
+
 // Scene component with all 3D elements
 interface SceneProps {
   bodyRotation: number;
-  systemsVisibility: AnatomySystemsVisibility;
+  focusedPart: string;
+  controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
 }
 
-function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
+function Scene({ bodyRotation, focusedPart, controlsRef }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -661,60 +629,50 @@ function Scene({ bodyRotation, systemsVisibility }: SceneProps) {
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} systemsVisibility={systemsVisibility} />
+      <HumanBodyModel rotation={bodyRotation} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
 
+      {/* Camera controller for smooth transitions */}
+      <CameraController focusedPart={focusedPart} controlsRef={controlsRef} />
+
       {/* Zoom only controls - no rotation */}
       <OrbitControls
+        ref={controlsRef}
         target={[0, 0.5, 0]}
         enablePan={false}
         enableZoom={true}
         enableRotate={false}
-        minDistance={2}
+        minDistance={1.5}
         maxDistance={8}
       />
     </>
   );
 }
 
-// Default visibility state - skin visible, others hidden
-const DEFAULT_SYSTEMS_VISIBILITY: AnatomySystemsVisibility = {
-  skin: true,
-  muscles: false,
-  skeleton: false,
-  organs: false,
-  circulatory: false,
-  nervous: false,
-};
-
-// System toggle button component
-interface SystemToggleProps {
-  systemKey: keyof AnatomySystemsVisibility;
-  label: string;
+// Body part selection button
+interface BodyPartButtonProps {
+  part: BodyPartConfig;
   isActive: boolean;
-  onToggle: () => void;
-  color: string;
+  onClick: () => void;
+  label: string;
 }
 
-function SystemToggle({ label, isActive, onToggle, color }: SystemToggleProps) {
+function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps) {
   return (
     <button
-      onClick={onToggle}
+      onClick={onClick}
       className={`
-        w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-        flex items-center gap-2 border-2
+        px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+        flex items-center gap-2 border-2 whitespace-nowrap
         ${isActive
-          ? 'text-white shadow-md'
+          ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
           : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
         }
       `}
-      style={isActive ? { backgroundColor: color, borderColor: color } : {}}
     >
-      <span
-        className={`w-2.5 h-2.5 rounded-full transition-all ${isActive ? 'bg-white' : 'bg-white/40'}`}
-      />
+      <span className="text-base">{part.icon}</span>
       {label}
     </button>
   );
@@ -723,21 +681,14 @@ function SystemToggle({ label, isActive, onToggle, color }: SystemToggleProps) {
 export default function HumanBodyEnvironment({ }: Environment3DProps) {
   const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
-  const [systemsVisibility, setSystemsVisibility] = useState<AnatomySystemsVisibility>(DEFAULT_SYSTEMS_VISIBILITY);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [focusedPart, setFocusedPart] = useState('full');
+  const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
 
-  const toggleSystem = useCallback((system: keyof AnatomySystemsVisibility) => {
-    setSystemsVisibility(prev => ({
-      ...prev,
-      [system]: !prev[system],
-    }));
-  }, []);
-
   const handleReset = useCallback(() => {
     setBodyRotation(0);
-    setSystemsVisibility(DEFAULT_SYSTEMS_VISIBILITY);
+    setFocusedPart('full');
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -778,97 +729,27 @@ export default function HumanBodyEnvironment({ }: Environment3DProps) {
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
-          <Scene bodyRotation={bodyRotation} systemsVisibility={systemsVisibility} />
+          <Scene bodyRotation={bodyRotation} focusedPart={focusedPart} controlsRef={controlsRef} />
         </Canvas>
 
-        {/* Anatomy Systems Panel */}
+        {/* Body Parts Panel */}
         <div className="absolute top-4 right-4 z-20">
-          {/* Toggle panel button */}
-          <button
-            onClick={() => setIsPanelOpen(!isPanelOpen)}
-            className="mb-2 w-full px-3 py-2 rounded-lg bg-[#0C3559] hover:bg-[#0a2a47] text-white font-medium text-sm transition-all flex items-center justify-between gap-2 shadow-lg"
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4" />
-                <path d="M12 8h.01" />
-              </svg>
-              {t('controls.anatomySystems')}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`transition-transform ${isPanelOpen ? 'rotate-180' : ''}`}
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
-
-          {/* Systems toggles */}
-          {isPanelOpen && (
-            <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10 min-w-[140px]">
-              <SystemToggle
-                systemKey="skin"
-                label={t('controls.skin')}
-                isActive={systemsVisibility.skin}
-                onToggle={() => toggleSystem('skin')}
-                color="#f4a460"
-              />
-              <SystemToggle
-                systemKey="muscles"
-                label={t('controls.muscles')}
-                isActive={systemsVisibility.muscles}
-                onToggle={() => toggleSystem('muscles')}
-                color="#dc3545"
-              />
-              <SystemToggle
-                systemKey="skeleton"
-                label={t('controls.skeleton')}
-                isActive={systemsVisibility.skeleton}
-                onToggle={() => toggleSystem('skeleton')}
-                color="#f8f9fa"
-              />
-              <SystemToggle
-                systemKey="organs"
-                label={t('controls.organs')}
-                isActive={systemsVisibility.organs}
-                onToggle={() => toggleSystem('organs')}
-                color="#9b59b6"
-              />
-              <SystemToggle
-                systemKey="circulatory"
-                label={t('controls.circulatory')}
-                isActive={systemsVisibility.circulatory}
-                onToggle={() => toggleSystem('circulatory')}
-                color="#e74c3c"
-              />
-              <SystemToggle
-                systemKey="nervous"
-                label={t('controls.nervous')}
-                isActive={systemsVisibility.nervous}
-                onToggle={() => toggleSystem('nervous')}
-                color="#f1c40f"
-              />
+          <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10">
+            <div className="text-xs text-white/60 font-medium mb-2 px-1">
+              {t('controls.bodyParts')}
             </div>
-          )}
+            <div className="flex flex-col gap-2">
+              {BODY_PARTS.map(part => (
+                <BodyPartButton
+                  key={part.id}
+                  part={part}
+                  isActive={focusedPart === part.id}
+                  onClick={() => setFocusedPart(part.id)}
+                  label={t(`controls.${part.labelKey}`)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </Environment3DContainer>

@@ -532,7 +532,10 @@ function IVStand() {
 }
 
 // Human body 3D model (single model with system visibility)
-const MODEL_PATH = '/models/human-body/anatomy-internal.glb';
+// In production, Nginx proxies /public/ to S3; in dev, Next.js serves from public/ at root
+const MODEL_PATH = process.env.NODE_ENV === 'production'
+  ? '/public/models/human-body/anatomy-internal.glb'
+  : '/models/human-body/anatomy-internal.glb';
 
 // Anatomical systems visibility state
 interface AnatomySystemsVisibility {

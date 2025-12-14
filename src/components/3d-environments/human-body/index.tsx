@@ -485,6 +485,7 @@ interface HotspotProps {
   transcription?: string;
   volume?: number;
   isZoomedView?: boolean;
+  isActiveFromMenu?: boolean;
   onHover?: (isHovered: boolean) => void;
   onAudioPlay?: () => void;
 }
@@ -497,6 +498,7 @@ function Hotspot({
   transcription,
   volume = 1,
   isZoomedView = false,
+  isActiveFromMenu = false,
   onHover,
   onAudioPlay,
 }: HotspotProps) {
@@ -519,8 +521,11 @@ function Hotspot({
     }
   }, [volume]);
 
-  // Show tooltip based on hover, touch, or playing audio
-  const tooltipVisible = showTooltip || hovered || isPlaying;
+  // Show tooltip based on hover, touch, playing audio, or active from menu
+  const tooltipVisible = showTooltip || hovered || isPlaying || isActiveFromMenu;
+
+  // Combine playing states (local or from menu)
+  const isActive = isPlaying || isActiveFromMenu;
 
   const handlePointerOver = () => {
     if (!isTouchDevice) {
@@ -613,9 +618,9 @@ function Hotspot({
       <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
         <sphereGeometry args={[size, 16, 16]} />
         <meshStandardMaterial
-          color={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissive={isPlaying ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissiveIntensity={isPlaying ? 1.5 : tooltipVisible ? 1.2 : 0.6}
+          color={isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissive={isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
+          emissiveIntensity={isActive ? 1.5 : tooltipVisible ? 1.2 : 0.6}
         />
       </mesh>
 
@@ -623,9 +628,9 @@ function Hotspot({
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
         <meshStandardMaterial
-          color={isPlaying ? '#4CAF50' : '#3887A6'}
+          color={isActive ? '#4CAF50' : '#3887A6'}
           transparent
-          opacity={isPlaying ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+          opacity={isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5}
         />
       </mesh>
 
@@ -657,11 +662,11 @@ function Hotspot({
                 style={{
                   width: isZoomedView ? '25px' : '40px',
                   height: '2px',
-                  background: isPlaying
+                  background: isActive
                     ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
                     : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
                   borderRadius: '2px',
-                  boxShadow: isPlaying ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
+                  boxShadow: isActive ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
                 }}
               />
               {/* Rounded connector dot */}
@@ -669,31 +674,31 @@ function Hotspot({
                 style={{
                   width: isZoomedView ? '4px' : '6px',
                   height: isZoomedView ? '4px' : '6px',
-                  background: isPlaying
+                  background: isActive
                     ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
                     : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
                   borderRadius: '50%',
                   marginLeft: '-3px',
-                  boxShadow: isPlaying ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
+                  boxShadow: isActive ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
                 }}
               />
               {/* Label box with animation */}
               <div
                 className={`${isZoomedView ? 'px-2 py-1' : 'px-4 py-2'} rounded-xl font-semibold flex flex-col gap-1`}
                 style={{
-                  background: isPlaying
+                  background: isActive
                     ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
                     : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
-                  border: isPlaying ? '2px solid #4CAF50' : '2px solid #3887A6',
+                  border: isActive ? '2px solid #4CAF50' : '2px solid #3887A6',
                   borderRadius: isZoomedView ? '8px' : '12px',
                   color: '#ffffff',
                   fontSize: isZoomedView ? '10px' : '14px',
-                  boxShadow: isPlaying
+                  boxShadow: isActive
                     ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
                     : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
                   marginLeft: '-2px',
                   cursor: audioUrl ? 'pointer' : 'default',
-                  minWidth: isPlaying && transcription ? (isZoomedView ? '120px' : '180px') : 'auto',
+                  minWidth: isActive && transcription ? (isZoomedView ? '120px' : '180px') : 'auto',
                 }}
                 onClick={e => {
                   e.stopPropagation();
@@ -703,7 +708,7 @@ function Hotspot({
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   {label}
                   {/* Animated bars when playing */}
-                  {isPlaying && (
+                  {isActive && (
                     <div
                       style={{
                         display: 'flex',
@@ -729,7 +734,7 @@ function Hotspot({
                   )}
                 </div>
                 {/* Transcription shown when playing */}
-                {isPlaying && transcription && (
+                {isActive && transcription && (
                   <div
                     style={{
                       fontSize: isZoomedView ? '8px' : '12px',
@@ -1221,9 +1226,10 @@ interface HumanBodyModelProps {
   rotation: number;
   audioVolume: number;
   focusedPart: string;
+  activeHotspotId: string | null;
 }
 
-function HumanBodyModel({ rotation, audioVolume, focusedPart }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation, audioVolume, focusedPart, activeHotspotId }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -1324,6 +1330,7 @@ function HumanBodyModel({ rotation, audioVolume, focusedPart }: HumanBodyModelPr
           transcription={hotspot.transcription}
           volume={audioVolume}
           isZoomedView={focusedPart !== 'full'}
+          isActiveFromMenu={activeHotspotId === hotspot.id}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
         />
       ))}
@@ -1374,9 +1381,10 @@ interface SceneProps {
   focusedPart: string;
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
   audioVolume: number;
+  activeHotspotId: string | null;
 }
 
-function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: SceneProps) {
+function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume, activeHotspotId }: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -1406,7 +1414,7 @@ function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: ScenePro
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} focusedPart={focusedPart} />
+      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} focusedPart={focusedPart} activeHotspotId={activeHotspotId} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
@@ -1428,30 +1436,131 @@ function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: ScenePro
   );
 }
 
+// Head hotspots configuration
+const HEAD_HOTSPOTS = [
+  { id: 'testa', label: 'Testa' },
+  { id: 'fronte', label: 'Fronte' },
+  { id: 'sopracciglio', label: 'Sopracciglio' },
+  { id: 'occhio', label: 'Occhio' },
+  { id: 'naso', label: 'Naso' },
+  { id: 'labbro', label: 'Labbro' },
+  { id: 'bocca', label: 'Bocca' },
+  { id: 'mento', label: 'Mento' },
+  { id: 'guancia', label: 'Guancia' },
+  { id: 'mandibola', label: 'Mandibola' },
+  { id: 'collo', label: 'Collo' },
+];
+
 // Body part selection button
 interface BodyPartButtonProps {
   part: BodyPartConfig;
   isActive: boolean;
   onClick: () => void;
   label: string;
+  hasExpander?: boolean;
+  isExpanded?: boolean;
+  onExpandToggle?: () => void;
 }
 
-function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps) {
+function BodyPartButton({
+  part,
+  isActive,
+  onClick,
+  label,
+  hasExpander,
+  isExpanded,
+  onExpandToggle,
+}: BodyPartButtonProps) {
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={onClick}
+        className={`
+          flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+          flex items-center gap-2 border-2 whitespace-nowrap
+          ${
+            isActive
+              ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
+              : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+          }
+        `}
+      >
+        <span className="text-base">{part.icon}</span>
+        {label}
+      </button>
+      {hasExpander && (
+        <button
+          onClick={e => {
+            e.stopPropagation();
+            onExpandToggle?.();
+          }}
+          className={`
+            p-2 rounded-lg transition-all duration-300 border-2
+            ${
+              isExpanded
+                ? 'bg-[#3887A6] text-white border-[#3887A6]'
+                : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+            }
+          `}
+          title={isExpanded ? 'Chiudi dettagli' : 'Mostra dettagli'}
+        >
+          <svg
+            className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Hotspot menu item
+interface HotspotMenuItemProps {
+  hotspot: { id: string; label: string };
+  isPlaying: boolean;
+  transcription: string;
+  onPlay: () => void;
+}
+
+function HotspotMenuItem({ hotspot, isPlaying, transcription, onPlay }: HotspotMenuItemProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={onPlay}
       className={`
-        px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-        flex items-center gap-2 border-2 whitespace-nowrap
+        w-full px-2 py-1.5 rounded-md text-xs transition-all duration-200
+        flex items-center gap-2 text-left
         ${
-          isActive
-            ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
-            : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+          isPlaying
+            ? 'bg-[#2E7D32] text-white'
+            : 'bg-[#0a2a47] text-white/80 hover:bg-[#1a3a55] hover:text-white'
         }
       `}
     >
-      <span className="text-base">{part.icon}</span>
-      {label}
+      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="font-medium">{hotspot.label}</div>
+        {isPlaying && (
+          <div className="text-[10px] opacity-80 truncate italic mt-0.5">{transcription}</div>
+        )}
+      </div>
+      {isPlaying && (
+        <div className="flex gap-0.5 items-end h-3">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="w-0.5 bg-white rounded-sm"
+              style={{
+                animation: 'soundBar 0.5s ease-in-out infinite alternate',
+                animationDelay: `${i * 0.1}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
     </button>
   );
 }
@@ -1460,13 +1569,64 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
   const [audioVolume, setAudioVolume] = useState(0.7);
+  const [headExpanded, setHeadExpanded] = useState(false);
+  const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
+  const menuAudioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
 
   const handleReset = useCallback(() => {
     setBodyRotation(0);
     setFocusedPart('full');
+    setHeadExpanded(false);
+  }, []);
+
+  // Play audio from menu
+  const handlePlayFromMenu = useCallback(
+    (hotspotId: string) => {
+      const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
+      if (!hotspot?.audioUrl) return;
+
+      // Stop any currently playing audio
+      if (menuAudioRef.current) {
+        menuAudioRef.current.pause();
+        menuAudioRef.current.currentTime = 0;
+      }
+
+      const audio = new Audio(hotspot.audioUrl);
+      audio.volume = audioVolume;
+      menuAudioRef.current = audio;
+
+      audio.onplay = () => {
+        setPlayingHotspotId(hotspotId);
+      };
+
+      audio.onended = () => {
+        setPlayingHotspotId(null);
+      };
+
+      audio.onerror = () => {
+        setPlayingHotspotId(null);
+        console.error('Error playing audio:', hotspot.audioUrl);
+      };
+
+      audio.play().catch(err => {
+        console.error('Error playing audio:', err);
+        setPlayingHotspotId(null);
+      });
+    },
+    [audioVolume]
+  );
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (menuAudioRef.current) {
+        menuAudioRef.current.pause();
+        menuAudioRef.current = null;
+      }
+    };
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -1512,22 +1672,54 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             focusedPart={focusedPart}
             controlsRef={controlsRef}
             audioVolume={audioVolume}
+            activeHotspotId={playingHotspotId}
           />
         </Canvas>
 
         {/* Body Parts Panel */}
         <div className="absolute top-16 right-4 z-20">
-          <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30">
+          <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30 max-h-[70vh] overflow-y-auto">
             <div className="text-xs text-white/60 font-medium mb-2 px-1">Parti del corpo</div>
             <div className="flex flex-col gap-2">
               {BODY_PARTS.map(part => (
-                <BodyPartButton
-                  key={part.id}
-                  part={part}
-                  isActive={focusedPart === part.id}
-                  onClick={() => setFocusedPart(part.id)}
-                  label={part.label}
-                />
+                <div key={part.id}>
+                  <BodyPartButton
+                    part={part}
+                    isActive={focusedPart === part.id}
+                    onClick={() => setFocusedPart(part.id)}
+                    label={part.label}
+                    hasExpander={part.id === 'head'}
+                    isExpanded={part.id === 'head' && headExpanded}
+                    onExpandToggle={() => setHeadExpanded(!headExpanded)}
+                  />
+                  {/* Expandable head hotspots */}
+                  {part.id === 'head' && (
+                    <div
+                      className={`
+                        overflow-hidden transition-all duration-300 ease-in-out
+                        ${headExpanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
+                      `}
+                    >
+                      <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
+                        <div className="text-[10px] text-white/50 font-medium px-1 mb-1">
+                          Dettagli della testa
+                        </div>
+                        {HEAD_HOTSPOTS.map(hotspot => {
+                          const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
+                          return (
+                            <HotspotMenuItem
+                              key={hotspot.id}
+                              hotspot={hotspot}
+                              isPlaying={playingHotspotId === hotspot.id}
+                              transcription={anatomyHotspot?.transcription || ''}
+                              onPlay={() => handlePlayFromMenu(hotspot.id)}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -1572,6 +1764,14 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             </div>
           </div>
         </div>
+
+        {/* CSS for menu sound bar animation */}
+        <style>{`
+          @keyframes soundBar {
+            0% { height: 4px; }
+            100% { height: 12px; }
+          }
+        `}</style>
       </div>
     </Environment3DContainer>
   );

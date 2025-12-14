@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, RoundedBox, useGLTF, Html, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
-import Environment3DContainer from '../Environment3DContainer';
+import Environment3DContainer, { useFullscreen } from '../Environment3DContainer';
 
 // Body parts configuration for camera focus
 interface BodyPartConfig {
@@ -687,12 +687,19 @@ function Hotspot({
   const [showTooltip, setShowTooltip] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detect touch device
+  // Detect touch device and mobile screen
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+    // Check if mobile screen (< 768px)
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Update volume when it changes
@@ -835,6 +842,7 @@ function Hotspot({
       </mesh>
 
       {/* Label tooltip - positioned to the right (hidden in challenge mode unless showing correct answer) */}
+      {/* Mobile: Smaller and more compact */}
       {((!challengeMode && tooltipVisible) || showCorrectAnswer) && (
         <Html
           position={[0, 0, 0]}
@@ -847,7 +855,7 @@ function Hotspot({
         >
           <div
             style={{
-              transform: isZoomedView ? 'scale(0.5)' : 'scale(1)',
+              transform: isMobile ? 'scale(0.6)' : isZoomedView ? 'scale(0.5)' : 'scale(1)',
               transformOrigin: 'left center',
             }}
           >
@@ -860,8 +868,8 @@ function Hotspot({
               {/* Connector line with gradient and rounded ends */}
               <div
                 style={{
-                  width: isZoomedView ? '25px' : '40px',
-                  height: '2px',
+                  width: isMobile ? '15px' : isZoomedView ? '25px' : '40px',
+                  height: isMobile ? '1px' : '2px',
                   background: isActive
                     ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
                     : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
@@ -872,57 +880,58 @@ function Hotspot({
               {/* Rounded connector dot */}
               <div
                 style={{
-                  width: isZoomedView ? '4px' : '6px',
-                  height: isZoomedView ? '4px' : '6px',
+                  width: isMobile ? '3px' : isZoomedView ? '4px' : '6px',
+                  height: isMobile ? '3px' : isZoomedView ? '4px' : '6px',
                   background: isActive
                     ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
                     : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
                   borderRadius: '50%',
-                  marginLeft: '-3px',
+                  marginLeft: '-2px',
                   boxShadow: isActive ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
                 }}
               />
               {/* Label box with animation */}
               <div
-                className={`${isZoomedView ? 'px-2 py-1' : 'px-4 py-2'} rounded-xl font-semibold flex flex-col gap-1`}
+                className={`${isMobile ? 'px-1.5 py-0.5' : isZoomedView ? 'px-2 py-1' : 'px-4 py-2'} rounded-xl font-semibold flex flex-col gap-0.5`}
                 style={{
                   background: isActive
                     ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
                     : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
-                  border: isActive ? '2px solid #4CAF50' : '2px solid #3887A6',
-                  borderRadius: isZoomedView ? '8px' : '12px',
+                  border: isActive ? (isMobile ? '1px solid #4CAF50' : '2px solid #4CAF50') : (isMobile ? '1px solid #3887A6' : '2px solid #3887A6'),
+                  borderRadius: isMobile ? '6px' : isZoomedView ? '8px' : '12px',
                   color: '#ffffff',
-                  fontSize: isZoomedView ? '10px' : '14px',
+                  fontSize: isMobile ? '9px' : isZoomedView ? '10px' : '14px',
                   boxShadow: isActive
                     ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
                     : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
                   marginLeft: '-2px',
                   cursor: audioUrl ? 'pointer' : 'default',
-                  minWidth: isActive && transcription ? (isZoomedView ? '120px' : '180px') : 'auto',
+                  minWidth: isActive && transcription ? (isMobile ? '80px' : isZoomedView ? '120px' : '180px') : 'auto',
+                  maxWidth: isMobile ? '120px' : 'none',
                 }}
                 onClick={e => {
                   e.stopPropagation();
                   if (audioUrl) playAudio();
                 }}
               >
-                <div className="flex items-center gap-2 whitespace-nowrap">
+                <div className="flex items-center gap-1 whitespace-nowrap" style={{ gap: isMobile ? '2px' : '8px' }}>
                   {label}
                   {/* Animated bars when playing */}
                   {isActive && (
                     <div
                       style={{
                         display: 'flex',
-                        gap: '2px',
+                        gap: isMobile ? '1px' : '2px',
                         alignItems: 'flex-end',
-                        height: isZoomedView ? '10px' : '14px',
-                        marginLeft: '4px',
+                        height: isMobile ? '8px' : isZoomedView ? '10px' : '14px',
+                        marginLeft: isMobile ? '2px' : '4px',
                       }}
                     >
                       {[1, 2, 3].map(i => (
                         <div
                           key={i}
                           style={{
-                            width: '3px',
+                            width: isMobile ? '2px' : '3px',
                             background: '#fff',
                             borderRadius: '1px',
                             animation: `soundBarTooltip 0.5s ease-in-out infinite alternate`,
@@ -933,15 +942,18 @@ function Hotspot({
                     </div>
                   )}
                 </div>
-                {/* Transcription shown when playing */}
+                {/* Transcription shown when playing - truncated on mobile */}
                 {isActive && transcription && (
                   <div
                     style={{
-                      fontSize: isZoomedView ? '8px' : '12px',
+                      fontSize: isMobile ? '7px' : isZoomedView ? '8px' : '12px',
                       fontWeight: 400,
                       fontStyle: 'italic',
                       opacity: 0.9,
-                      whiteSpace: 'nowrap',
+                      whiteSpace: isMobile ? 'nowrap' : 'nowrap',
+                      overflow: isMobile ? 'hidden' : 'visible',
+                      textOverflow: isMobile ? 'ellipsis' : 'clip',
+                      maxWidth: isMobile ? '100px' : 'none',
                     }}
                   >
                     &ldquo;{transcription}&rdquo;
@@ -1855,6 +1867,40 @@ function HotspotMenuItem({ hotspot, isPlaying, transcription, onPlay }: HotspotM
   );
 }
 
+// Fullscreen button component that uses the context
+function FullscreenButton({ compact = false }: { compact?: boolean }) {
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  if (compact) {
+    return (
+      <button
+        onClick={toggleFullscreen}
+        className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+          isFullscreen
+            ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+            : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+        }`}
+        title={isFullscreen ? 'Esci Schermo Intero' : 'Schermo Intero'}
+      >
+        <span className="text-lg">{isFullscreen ? '🔲' : '⛶'}</span>
+        <span className="text-[10px] font-medium whitespace-nowrap">
+          {isFullscreen ? 'Esci' : 'Full'}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={toggleFullscreen}
+      className="w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-2 border-2 whitespace-nowrap bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white"
+    >
+      <span className="text-base">{isFullscreen ? '🔲' : '⛶'}</span>
+      {isFullscreen ? 'Esci Schermo Intero' : 'Schermo Intero'}
+    </button>
+  );
+}
+
 export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
@@ -1890,15 +1936,6 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
-
-  const handleReset = useCallback(() => {
-    setBodyRotation(0);
-    setFocusedPart('full');
-    setHeadExpanded(false);
-    setTorsoExpanded(false);
-    setLegsExpanded(false);
-    setHandExpanded(false);
-  }, []);
 
   // Get random hotspot from remaining ones
   const getNextRandomTarget = useCallback((completed: string[]) => {
@@ -2198,7 +2235,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   }, []);
 
   return (
-    <Environment3DContainer title="Corpo Umano - Anatomia" onReset={handleReset}>
+    <Environment3DContainer title="Corpo Umano - Anatomia">
       <div
         style={{ width: '100%', height: '100%', cursor: isDragging.current ? 'grabbing' : 'grab' }}
         onPointerDown={handlePointerDown}
@@ -2231,30 +2268,33 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
           />
         </Canvas>
 
-        {/* Mode Toggle - Enhanced Version */}
-        <div className="absolute top-64 left-4 z-20">
-          <div className="bg-[#0C3559]/95 backdrop-blur-md rounded-xl p-4 shadow-2xl border-2 border-[#3887A6]/40 min-w-[280px]">
-            {/* Header with label */}
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#3887A6]/30">
+        {/* Mode Toggle - Responsive Version */}
+        {/* Mobile: Compact horizontal bar at top-left */}
+        {/* Desktop: Full vertical panel */}
+        <div className="absolute top-4 left-4 md:top-64 z-20">
+          <div className="bg-[#0C3559]/95 backdrop-blur-md rounded-xl p-2 md:p-4 shadow-2xl border-2 border-[#3887A6]/40 md:min-w-[280px]">
+            {/* Header with label - Hidden on mobile */}
+            <div className="hidden md:flex items-center gap-2 mb-3 pb-2 border-b border-[#3887A6]/30">
               <div className="w-1.5 h-1.5 rounded-full bg-[#3887A6] animate-pulse"></div>
               <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
                 Modalità di Apprendimento
               </span>
             </div>
 
-            {/* Mode Buttons - Vertical Stack */}
-            <div className="flex flex-col gap-2.5">
+            {/* Mode Buttons - Horizontal on mobile, Vertical on desktop */}
+            <div className="flex flex-row md:flex-col gap-1.5 md:gap-2.5">
               <button
                 onClick={() => {
                   if (gameMode === 'challenge') exitChallenge();
                   else if (gameMode === 'consultation') exitConsultation();
                   else setGameMode('study');
                 }}
-                className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   gameMode === 'study'
                     ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
                     : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
                 }`}
+                title="Modalità Studio"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2265,7 +2305,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                     />
                   </svg>
-                  <div className="flex-1 text-left">
+                  <div className="hidden md:block flex-1 text-left">
                     <div className="font-bold">Modalità Studio</div>
                     <div
                       className={`text-xs mt-0.5 transition-opacity ${
@@ -2276,7 +2316,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     </div>
                   </div>
                   {gameMode === 'study' && (
-                    <span className="flex h-2.5 w-2.5">
+                    <span className="hidden md:flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                     </span>
@@ -2286,11 +2326,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
 
               <button
                 onClick={startChallenge}
-                className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   gameMode === 'challenge'
                     ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
                     : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
                 }`}
+                title="Modalità Sfida"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2301,7 +2342,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <div className="flex-1 text-left">
+                  <div className="hidden md:block flex-1 text-left">
                     <div className="font-bold">Modalità Sfida</div>
                     <div
                       className={`text-xs mt-0.5 transition-opacity ${
@@ -2312,7 +2353,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     </div>
                   </div>
                   {gameMode === 'challenge' && (
-                    <span className="flex h-2.5 w-2.5">
+                    <span className="hidden md:flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                     </span>
@@ -2322,11 +2363,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
 
               <button
                 onClick={startConsultation}
-                className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   gameMode === 'consultation'
                     ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
                     : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
                 }`}
+                title="Simulazione Medica"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2337,7 +2379,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                     />
                   </svg>
-                  <div className="flex-1 text-left">
+                  <div className="hidden md:block flex-1 text-left">
                     <div className="font-bold">Simulazione Medica</div>
                     <div
                       className={`text-xs mt-0.5 transition-opacity ${
@@ -2348,7 +2390,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     </div>
                   </div>
                   {gameMode === 'consultation' && (
-                    <span className="flex h-2.5 w-2.5">
+                    <span className="hidden md:flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
                     </span>
@@ -2362,8 +2404,32 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
         {/* Challenge Mode UI */}
         {gameMode === 'challenge' && (
           <>
-            {/* Challenge Body Parts Navigation */}
-            <div className="absolute top-16 right-4 z-20">
+            {/* Challenge Body Parts Navigation - Responsive */}
+            {/* Mobile: Bottom horizontal bar */}
+            <div className="md:hidden absolute bottom-16 left-0 right-0 z-20 px-2">
+              <div className="bg-[#0C3559]/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-[#3887A6]/30">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {BODY_PARTS.map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                        focusedPart === part.id
+                          ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                          : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                      }`}
+                      title={part.label}
+                    >
+                      <span className="text-lg">{part.icon}</span>
+                      <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop: Right side panel */}
+            <div className="hidden md:block absolute top-16 right-4 z-20">
               <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#3887A6]/30">
                 <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
                 <div className="flex flex-col gap-2">
@@ -2391,57 +2457,57 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               </div>
             </div>
 
-            {/* Challenge Prompt */}
+            {/* Challenge Prompt - Responsive */}
             {challengeState === 'playing' && currentTargetLabel && (
-              <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-[#0C3559] backdrop-blur-sm rounded-xl px-8 py-4 shadow-2xl border-2 border-[#3887A6]">
+              <div className="absolute top-16 md:top-32 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-xl px-4 md:px-8 py-2 md:py-4 shadow-2xl border-2 border-[#3887A6]">
                   <div className="text-center">
-                    <div className="text-white/60 text-sm mb-1">Clicca su:</div>
-                    <div className="text-white text-2xl font-bold">{currentTargetLabel}</div>
+                    <div className="text-white/60 text-xs md:text-sm mb-0.5 md:mb-1">Clicca su:</div>
+                    <div className="text-white text-lg md:text-2xl font-bold">{currentTargetLabel}</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Responsive */}
             {challengeState === 'playing' && (
-              <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-4 py-2 shadow-xl border border-[#3887A6]/30">
-                  <div className="flex items-center gap-4">
-                    <div className="text-white/60 text-sm">
+              <div className="absolute top-4 md:top-16 right-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 shadow-xl border border-[#3887A6]/30">
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <div className="text-white/60 text-xs md:text-sm">
                       {completedHotspots.length}/{ANATOMY_HOTSPOTS.length}
                     </div>
-                    <div className="w-48 h-2 bg-[#0F2940] rounded-full overflow-hidden">
+                    <div className="w-20 md:w-48 h-1.5 md:h-2 bg-[#0F2940] rounded-full overflow-hidden">
                       <div
                         className="h-full bg-[#4CAF50] transition-all duration-300"
                         style={{ width: `${(completedHotspots.length / ANATOMY_HOTSPOTS.length) * 100}%` }}
                       />
                     </div>
-                    <div className="text-white/60 text-sm">⏱ {getElapsedTime()}</div>
+                    <div className="text-white/60 text-xs md:text-sm">⏱ {getElapsedTime()}</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Lost Modal */}
+            {/* Lost Modal - Responsive */}
             {challengeState === 'lost' && !showCorrectAnswer && (
-              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
-                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-red-500 max-w-md text-center">
-                  <div className="text-6xl mb-4">😢</div>
-                  <h2 className="text-white text-2xl font-bold mb-2">Sbagliato!</h2>
-                  <p className="text-white/70 mb-4">
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 p-4">
+                <div className="bg-[#0C3559] rounded-2xl p-4 md:p-8 shadow-2xl border-2 border-red-500 max-w-md text-center">
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4">😢</div>
+                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">Sbagliato!</h2>
+                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">
                     Hai completato {score} su {ANATOMY_HOTSPOTS.length} parti.
                   </p>
-                  <div className="flex gap-4 justify-center">
+                  <div className="flex gap-2 md:gap-4 justify-center">
                     <button
                       onClick={restartChallenge}
-                      className="px-6 py-3 bg-[#3887A6] text-white rounded-lg font-medium hover:bg-[#2d6d8a] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#3887A6] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#2d6d8a] transition-all"
                     >
                       🔄 Riprova
                     </button>
                     <button
                       onClick={exitChallenge}
-                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#0F2940] text-white/70 rounded-lg text-sm md:text-base font-medium hover:bg-[#1a3a55] transition-all"
                     >
                       📚 Studio
                     </button>
@@ -2450,26 +2516,26 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               </div>
             )}
 
-            {/* Won Modal */}
+            {/* Won Modal - Responsive */}
             {challengeState === 'won' && (
-              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
-                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-[#4CAF50] max-w-md text-center">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-white text-2xl font-bold mb-2">Complimenti!</h2>
-                  <p className="text-white/70 mb-2">
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 p-4">
+                <div className="bg-[#0C3559] rounded-2xl p-4 md:p-8 shadow-2xl border-2 border-[#4CAF50] max-w-md text-center">
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4">🎉</div>
+                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">Complimenti!</h2>
+                  <p className="text-white/70 text-sm md:text-base mb-1 md:mb-2">
                     Hai completato tutte le {ANATOMY_HOTSPOTS.length} parti anatomiche!
                   </p>
-                  <p className="text-[#4CAF50] text-xl font-bold mb-4">Tempo: {getElapsedTime()}</p>
-                  <div className="flex gap-4 justify-center">
+                  <p className="text-[#4CAF50] text-lg md:text-xl font-bold mb-3 md:mb-4">Tempo: {getElapsedTime()}</p>
+                  <div className="flex gap-2 md:gap-4 justify-center">
                     <button
                       onClick={restartChallenge}
-                      className="px-6 py-3 bg-[#4CAF50] text-white rounded-lg font-medium hover:bg-[#3d8b40] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#4CAF50] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#3d8b40] transition-all"
                     >
-                      🔄 Gioca ancora
+                      🔄 <span className="hidden md:inline">Gioca ancora</span><span className="md:hidden">Riprova</span>
                     </button>
                     <button
                       onClick={exitChallenge}
-                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#0F2940] text-white/70 rounded-lg text-sm md:text-base font-medium hover:bg-[#1a3a55] transition-all"
                     >
                       📚 Studio
                     </button>
@@ -2483,8 +2549,32 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
         {/* Consultation Mode UI */}
         {gameMode === 'consultation' && (
           <>
-            {/* Consultation Body Parts Navigation */}
-            <div className="absolute top-16 right-4 z-20">
+            {/* Consultation Body Parts Navigation - Responsive */}
+            {/* Mobile: Bottom horizontal bar */}
+            <div className="md:hidden absolute bottom-16 left-0 right-0 z-20 px-2">
+              <div className="bg-[#0C3559]/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-[#3887A6]/30">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {BODY_PARTS.map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                        focusedPart === part.id
+                          ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                          : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                      }`}
+                      title={part.label}
+                    >
+                      <span className="text-lg">{part.icon}</span>
+                      <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop: Right side panel */}
+            <div className="hidden md:block absolute top-16 right-4 z-20">
               <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#3887A6]/30">
                 <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
                 <div className="flex flex-col gap-2">
@@ -2512,11 +2602,11 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               </div>
             </div>
 
-            {/* Patient Card - Audio indicator */}
+            {/* Patient Card - Audio indicator - Responsive */}
             {consultationState === 'playing' && (
-              <div className="absolute top-32 right-[200px] z-20">
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 md:top-32 md:left-auto md:translate-x-0 md:right-[200px] z-20">
                 <div
-                  className={`bg-[#0C3559] backdrop-blur-sm rounded-xl px-6 py-4 shadow-2xl border-2 transition-all duration-300 ${
+                  className={`bg-[#0C3559] backdrop-blur-sm rounded-xl px-4 md:px-6 py-3 md:py-4 shadow-2xl border-2 transition-all duration-300 ${
                     lastAnswerCorrect === true
                       ? 'border-[#4CAF50]'
                       : lastAnswerCorrect === false
@@ -2527,22 +2617,22 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   <div className="text-center">
                     {/* Feedback indicator */}
                     {lastAnswerCorrect !== null ? (
-                      <div className={`text-4xl mb-2 ${lastAnswerCorrect ? 'animate-bounce' : 'animate-pulse'}`}>
+                      <div className={`text-2xl md:text-4xl mb-1 md:mb-2 ${lastAnswerCorrect ? 'animate-bounce' : 'animate-pulse'}`}>
                         {lastAnswerCorrect ? '✅' : '❌'}
                       </div>
                     ) : (
-                      <div className="text-4xl mb-2">🏥</div>
+                      <div className="text-2xl md:text-4xl mb-1 md:mb-2">🏥</div>
                     )}
-                    <div className="text-white/60 text-sm mb-1">
+                    <div className="text-white/60 text-xs md:text-sm mb-0.5 md:mb-1">
                       {lastAnswerCorrect === true
                         ? 'Corretto!'
                         : lastAnswerCorrect === false
                         ? 'Sbagliato!'
                         : 'Il paziente parla...'}
                     </div>
-                    <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="flex items-center justify-center gap-2 mb-2 md:mb-3">
                       {isAudioPlaying ? (
-                        <div className="flex gap-1 items-end h-6">
+                        <div className="flex gap-1 items-end h-4 md:h-6">
                           {[1, 2, 3, 4, 5].map(i => (
                             <div
                               key={i}
@@ -2555,15 +2645,15 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                           ))}
                         </div>
                       ) : lastAnswerCorrect === null ? (
-                        <div className="text-white/40 text-sm">Audio terminato</div>
+                        <div className="text-white/40 text-xs md:text-sm">Audio terminato</div>
                       ) : null}
                     </div>
                     {lastAnswerCorrect === null && (
                       <button
                         onClick={replayConsultationAudio}
-                        className="px-4 py-2 bg-[#3887A6] text-white rounded-lg text-sm font-medium hover:bg-[#2d6d8a] transition-all flex items-center gap-2 mx-auto"
+                        className="px-3 md:px-4 py-1.5 md:py-2 bg-[#3887A6] text-white rounded-lg text-xs md:text-sm font-medium hover:bg-[#2d6d8a] transition-all flex items-center gap-2 mx-auto"
                       >
-                        🔄 Ascolta di nuovo
+                        🔄 <span className="hidden md:inline">Ascolta di nuovo</span><span className="md:hidden">Replay</span>
                       </button>
                     )}
                   </div>
@@ -2571,25 +2661,26 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               </div>
             )}
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Responsive */}
             {consultationState === 'playing' && (
-              <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl border border-[#3887A6]/30">
-                  <div className="flex flex-col gap-2">
+              <div className="absolute top-4 right-4 md:top-16 md:right-auto md:left-1/2 md:transform md:-translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-2 md:px-4 py-2 md:py-3 shadow-xl border border-[#3887A6]/30">
+                  <div className="flex flex-col gap-1.5 md:gap-2">
                     {/* General progress */}
-                    <div className="flex items-center gap-3">
-                      <div className="text-white/60 text-sm w-24">
-                        Consulta {consultationRound}/{CONSULTATION_ROUNDS}
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="text-white/60 text-xs md:text-sm">
+                        <span className="md:hidden">{consultationRound}/{CONSULTATION_ROUNDS}</span>
+                        <span className="hidden md:inline w-24">Consulta {consultationRound}/{CONSULTATION_ROUNDS}</span>
                       </div>
-                      <div className="w-40 h-2 bg-[#0F2940] rounded-full overflow-hidden">
+                      <div className="w-16 md:w-40 h-1.5 md:h-2 bg-[#0F2940] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-[#3887A6] transition-all duration-300"
                           style={{ width: `${(consultationRound / CONSULTATION_ROUNDS) * 100}%` }}
                         />
                       </div>
                     </div>
-                    {/* Correct/Wrong counts */}
-                    <div className="flex items-center gap-4 justify-center">
+                    {/* Correct/Wrong counts - Hidden on mobile for space */}
+                    <div className="hidden md:flex items-center gap-4 justify-center">
                       <div className="flex items-center gap-2">
                         <span className="text-[#4CAF50] text-sm">✅</span>
                         <div className="w-16 h-1.5 bg-[#0F2940] rounded-full overflow-hidden">
@@ -2615,31 +2706,36 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                         </span>
                       </div>
                     </div>
+                    {/* Mobile: Compact score */}
+                    <div className="flex md:hidden items-center gap-2 justify-center text-xs">
+                      <span className="text-[#4CAF50]">✅{consultationScore}</span>
+                      <span className="text-red-400">❌{Math.max(0, consultationRound - 1 - consultationScore)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Finished Modal */}
+            {/* Finished Modal - Responsive */}
             {consultationState === 'finished' && (
-              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
-                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-[#3887A6] max-w-md text-center">
-                  <div className="text-6xl mb-4">{getConsultationDiagnosis().emoji}</div>
-                  <h2 className="text-white text-2xl font-bold mb-2">{getConsultationDiagnosis().title}</h2>
-                  <p className="text-white/70 mb-4">{getConsultationDiagnosis().message}</p>
-                  <div className="text-[#4CAF50] text-xl font-bold mb-4">
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 p-4">
+                <div className="bg-[#0C3559] rounded-2xl p-4 md:p-8 shadow-2xl border-2 border-[#3887A6] max-w-md text-center">
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4">{getConsultationDiagnosis().emoji}</div>
+                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">{getConsultationDiagnosis().title}</h2>
+                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">{getConsultationDiagnosis().message}</p>
+                  <div className="text-[#4CAF50] text-lg md:text-xl font-bold mb-3 md:mb-4">
                     Punteggio: {consultationScore}/{CONSULTATION_ROUNDS}
                   </div>
-                  <div className="flex gap-4 justify-center">
+                  <div className="flex gap-2 md:gap-4 justify-center">
                     <button
                       onClick={startConsultation}
-                      className="px-6 py-3 bg-[#3887A6] text-white rounded-lg font-medium hover:bg-[#2d6d8a] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#3887A6] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#2d6d8a] transition-all"
                     >
-                      🔄 Gioca ancora
+                      🔄 <span className="hidden md:inline">Gioca ancora</span><span className="md:hidden">Riprova</span>
                     </button>
                     <button
                       onClick={exitConsultation}
-                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#0F2940] text-white/70 rounded-lg text-sm md:text-base font-medium hover:bg-[#1a3a55] transition-all"
                     >
                       📚 Studio
                     </button>
@@ -2650,143 +2746,185 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
           </>
         )}
 
-        {/* Body Parts Panel - Hidden in challenge mode */}
+        {/* Body Parts Panel - Responsive Version */}
+        {/* Mobile: Bottom horizontal bar with scroll */}
+        {/* Desktop: Right side vertical panel */}
         {gameMode === 'study' && (
-          <div className="absolute top-16 right-4 z-20">
-            <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30 max-h-[70vh] overflow-y-auto">
-              <div className="flex flex-col gap-2">
-                {BODY_PARTS.map((part, index) => {
-                  // Determine which hotspots and expanded state to use
-                  const getExpandConfig = () => {
-                    switch (part.id) {
-                      case 'head':
-                        return {
-                          hotspots: HEAD_HOTSPOTS,
-                          expanded: headExpanded,
-                          toggle: () => setHeadExpanded(!headExpanded),
-                          title: 'Dettagli della testa',
-                        };
-                      case 'torso':
-                        return {
-                          hotspots: TORSO_HOTSPOTS,
-                          expanded: torsoExpanded,
-                          toggle: () => setTorsoExpanded(!torsoExpanded),
-                          title: 'Dettagli del torso',
-                        };
-                      case 'legs':
-                        return {
-                          hotspots: LEGS_HOTSPOTS,
-                          expanded: legsExpanded,
-                          toggle: () => setLegsExpanded(!legsExpanded),
-                          title: 'Dettagli delle gambe',
-                        };
-                      case 'hand':
-                        return {
-                          hotspots: HAND_HOTSPOTS,
-                          expanded: handExpanded,
-                          toggle: () => setHandExpanded(!handExpanded),
-                          title: 'Dettagli della mano',
-                        };
-                      default:
-                        return null;
-                    }
-                  };
-
-                  const expandConfig = getExpandConfig();
-                  const hasExpander = expandConfig !== null;
-
-                  // In study mode, show "Istruzioni" instead of "Regole"
-                  const displayLabel = part.id === 'rules' ? 'Istruzioni' : part.label;
-
-                  return (
-                    <div key={part.id}>
-                      <BodyPartButton
-                        part={part}
-                        isActive={focusedPart === part.id}
+          <>
+            {/* Mobile Version - Bottom horizontal bar */}
+            <div className="md:hidden absolute bottom-16 left-0 right-0 z-20 px-2">
+              <div className="bg-[#0C3559]/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-[#3887A6]/30">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-[#3887A6]/50">
+                  {/* Fullscreen button first */}
+                  <FullscreenButton compact />
+                  {/* Separator */}
+                  <div className="w-px h-8 bg-white/20 flex-shrink-0" />
+                  {BODY_PARTS.map(part => {
+                    const displayLabel = part.id === 'rules' ? 'Istruzioni' : part.label;
+                    return (
+                      <button
+                        key={part.id}
                         onClick={() => setFocusedPart(part.id)}
-                        label={displayLabel}
-                        hasExpander={hasExpander}
-                        isExpanded={expandConfig?.expanded}
-                        onExpandToggle={expandConfig?.toggle}
-                      />
-                      {/* Separator and label after Istruzioni */}
-                      {index === 0 && (
-                        <>
-                          <div className="border-b border-white/10 my-2" />
-                          <div className="text-xs text-white/60 font-medium mb-1 px-1">Parti del corpo</div>
-                        </>
-                      )}
-                      {/* Expandable hotspots */}
-                      {hasExpander && expandConfig && (
-                        <div
-                          className={`
-                          overflow-hidden transition-all duration-300 ease-in-out
-                          ${expandConfig.expanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
-                        `}
-                        >
-                          <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
-                            <div className="text-[10px] text-white/50 font-medium px-1 mb-1">{expandConfig.title}</div>
-                            {expandConfig.hotspots.map(hotspot => {
-                              const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
-                              return (
-                                <HotspotMenuItem
-                                  key={hotspot.id}
-                                  hotspot={hotspot}
-                                  isPlaying={playingHotspotId === hotspot.id}
-                                  transcription={anatomyHotspot?.transcription || ''}
-                                  onPlay={() => handlePlayFromMenu(hotspot.id)}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Volume Control */}
-              <div className="border-t border-white/10 pt-3 mt-3">
-                <div className="text-xs text-white/60 font-medium mb-2 px-1 flex items-center gap-2">
-                  <span>🔊</span>
-                  <span>Volume</span>
-                </div>
-                <div className="flex items-center gap-2 px-1">
-                  <button
-                    onClick={() => setAudioVolume(0)}
-                    className="text-white/60 hover:text-white transition-colors"
-                    title="Mute"
-                  >
-                    {audioVolume === 0 ? '🔇' : '🔈'}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={audioVolume}
-                    onChange={e => setAudioVolume(parseFloat(e.target.value))}
-                    className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer
-                    [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:w-3
-                    [&::-webkit-slider-thumb]:h-3
-                    [&::-webkit-slider-thumb]:rounded-full
-                    [&::-webkit-slider-thumb]:bg-[#3887A6]
-                    [&::-webkit-slider-thumb]:shadow-md
-                    [&::-webkit-slider-thumb]:cursor-pointer
-                    [&::-moz-range-thumb]:w-3
-                    [&::-moz-range-thumb]:h-3
-                    [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:bg-[#3887A6]
-                    [&::-moz-range-thumb]:border-0
-                    [&::-moz-range-thumb]:cursor-pointer"
-                  />
-                  <span className="text-xs text-white/60 w-8 text-right">{Math.round(audioVolume * 100)}%</span>
+                        className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                          focusedPart === part.id
+                            ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                            : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                        }`}
+                        title={displayLabel}
+                      >
+                        <span className="text-lg">{part.icon}</span>
+                        <span className="text-[10px] font-medium whitespace-nowrap">{displayLabel}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-          </div>
+
+            {/* Desktop Version - Right side panel */}
+            <div className="hidden md:block absolute top-16 right-4 z-20">
+              <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30 max-h-[70vh] overflow-y-auto">
+                {/* Fullscreen Button Section */}
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs text-white/60 font-medium px-1">Visualizzazione</div>
+                  <FullscreenButton />
+                  <div className="border-b border-white/10 my-1" />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {BODY_PARTS.map((part, index) => {
+                    // Determine which hotspots and expanded state to use
+                    const getExpandConfig = () => {
+                      switch (part.id) {
+                        case 'head':
+                          return {
+                            hotspots: HEAD_HOTSPOTS,
+                            expanded: headExpanded,
+                            toggle: () => setHeadExpanded(!headExpanded),
+                            title: 'Dettagli della testa',
+                          };
+                        case 'torso':
+                          return {
+                            hotspots: TORSO_HOTSPOTS,
+                            expanded: torsoExpanded,
+                            toggle: () => setTorsoExpanded(!torsoExpanded),
+                            title: 'Dettagli del torso',
+                          };
+                        case 'legs':
+                          return {
+                            hotspots: LEGS_HOTSPOTS,
+                            expanded: legsExpanded,
+                            toggle: () => setLegsExpanded(!legsExpanded),
+                            title: 'Dettagli delle gambe',
+                          };
+                        case 'hand':
+                          return {
+                            hotspots: HAND_HOTSPOTS,
+                            expanded: handExpanded,
+                            toggle: () => setHandExpanded(!handExpanded),
+                            title: 'Dettagli della mano',
+                          };
+                        default:
+                          return null;
+                      }
+                    };
+
+                    const expandConfig = getExpandConfig();
+                    const hasExpander = expandConfig !== null;
+
+                    // In study mode, show "Istruzioni" instead of "Regole"
+                    const displayLabel = part.id === 'rules' ? 'Istruzioni' : part.label;
+
+                    return (
+                      <div key={part.id}>
+                        <BodyPartButton
+                          part={part}
+                          isActive={focusedPart === part.id}
+                          onClick={() => setFocusedPart(part.id)}
+                          label={displayLabel}
+                          hasExpander={hasExpander}
+                          isExpanded={expandConfig?.expanded}
+                          onExpandToggle={expandConfig?.toggle}
+                        />
+                        {/* Separator and label after Istruzioni */}
+                        {index === 0 && (
+                          <>
+                            <div className="border-b border-white/10 my-2" />
+                            <div className="text-xs text-white/60 font-medium mb-1 px-1">Parti del corpo</div>
+                          </>
+                        )}
+                        {/* Expandable hotspots */}
+                        {hasExpander && expandConfig && (
+                          <div
+                            className={`
+                            overflow-hidden transition-all duration-300 ease-in-out
+                            ${expandConfig.expanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
+                          `}
+                          >
+                            <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
+                              <div className="text-[10px] text-white/50 font-medium px-1 mb-1">{expandConfig.title}</div>
+                              {expandConfig.hotspots.map(hotspot => {
+                                const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
+                                return (
+                                  <HotspotMenuItem
+                                    key={hotspot.id}
+                                    hotspot={hotspot}
+                                    isPlaying={playingHotspotId === hotspot.id}
+                                    transcription={anatomyHotspot?.transcription || ''}
+                                    onPlay={() => handlePlayFromMenu(hotspot.id)}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Volume Control */}
+                <div className="border-t border-white/10 pt-3 mt-3">
+                  <div className="text-xs text-white/60 font-medium mb-2 px-1 flex items-center gap-2">
+                    <span>🔊</span>
+                    <span>Volume</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-1">
+                    <button
+                      onClick={() => setAudioVolume(0)}
+                      className="text-white/60 hover:text-white transition-colors"
+                      title="Mute"
+                    >
+                      {audioVolume === 0 ? '🔇' : '🔈'}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={audioVolume}
+                      onChange={e => setAudioVolume(parseFloat(e.target.value))}
+                      className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none
+                      [&::-webkit-slider-thumb]:w-3
+                      [&::-webkit-slider-thumb]:h-3
+                      [&::-webkit-slider-thumb]:rounded-full
+                      [&::-webkit-slider-thumb]:bg-[#3887A6]
+                      [&::-webkit-slider-thumb]:shadow-md
+                      [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-moz-range-thumb]:w-3
+                      [&::-moz-range-thumb]:h-3
+                      [&::-moz-range-thumb]:rounded-full
+                      [&::-moz-range-thumb]:bg-[#3887A6]
+                      [&::-moz-range-thumb]:border-0
+                      [&::-moz-range-thumb]:cursor-pointer"
+                    />
+                    <span className="text-xs text-white/60 w-8 text-right">{Math.round(audioVolume * 100)}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* CSS for menu sound bar animation */}

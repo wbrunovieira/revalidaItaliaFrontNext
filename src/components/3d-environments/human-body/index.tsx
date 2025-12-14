@@ -892,12 +892,20 @@ function Hotspot({
               />
               {/* Label box with animation */}
               <div
-                className={`${isMobile ? 'px-1.5 py-0.5' : isZoomedView ? 'px-2 py-1' : 'px-4 py-2'} rounded-xl font-semibold flex flex-col gap-0.5`}
+                className={`${
+                  isMobile ? 'px-1.5 py-0.5' : isZoomedView ? 'px-2 py-1' : 'px-4 py-2'
+                } rounded-xl font-semibold flex flex-col gap-0.5`}
                 style={{
                   background: isActive
                     ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
                     : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
-                  border: isActive ? (isMobile ? '1px solid #4CAF50' : '2px solid #4CAF50') : (isMobile ? '1px solid #3887A6' : '2px solid #3887A6'),
+                  border: isActive
+                    ? isMobile
+                      ? '1px solid #4CAF50'
+                      : '2px solid #4CAF50'
+                    : isMobile
+                    ? '1px solid #3887A6'
+                    : '2px solid #3887A6',
                   borderRadius: isMobile ? '6px' : isZoomedView ? '8px' : '12px',
                   color: '#ffffff',
                   fontSize: isMobile ? '9px' : isZoomedView ? '10px' : '14px',
@@ -1883,9 +1891,7 @@ function FullscreenButton({ compact = false }: { compact?: boolean }) {
         title={isFullscreen ? 'Esci Schermo Intero' : 'Schermo Intero'}
       >
         <span className="text-lg">{isFullscreen ? '🔲' : '⛶'}</span>
-        <span className="text-[10px] font-medium whitespace-nowrap">
-          {isFullscreen ? 'Esci' : 'Full'}
-        </span>
+        <span className="text-[10px] font-medium whitespace-nowrap">{isFullscreen ? 'Esci' : 'Full'}</span>
       </button>
     );
   }
@@ -1913,6 +1919,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
 
   // Challenge mode state
   const [gameMode, setGameMode] = useState<'study' | 'challenge' | 'consultation'>('study');
+  const [isModeMenuExpanded, setIsModeMenuExpanded] = useState(true);
   const [challengeState, setChallengeState] = useState<'idle' | 'playing' | 'won' | 'lost'>('idle');
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -2268,36 +2275,178 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
           />
         </Canvas>
 
-        {/* Mode Toggle - Responsive Version */}
-        {/* Mobile: Compact horizontal bar at top-left */}
-        {/* Desktop: Full vertical panel */}
-        <div className="absolute top-4 left-4 md:top-64 z-20">
-          <div className="bg-[#0C3559]/95 backdrop-blur-md rounded-xl p-2 md:p-4 shadow-2xl border-2 border-[#3887A6]/40 md:min-w-[280px]">
-            {/* Header with label - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-2 mb-3 pb-2 border-b border-[#3887A6]/30">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#3887A6] animate-pulse"></div>
-              <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
-                Modalità di Apprendimento
-              </span>
-            </div>
+        {/* Mode Toggle - Collapsible Version */}
+        <div className="absolute top-14 left-4 z-20">
+          {isModeMenuExpanded ? (
+            /* Expanded Version */
+            <div className="bg-[#0C3559]/95 backdrop-blur-md rounded-xl p-2 md:p-4 shadow-2xl border-2 border-[#3887A6]/40 md:min-w-[280px] transition-all duration-300">
+              {/* Header with label and collapse button */}
+              <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-[#3887A6]/30">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#3887A6] animate-pulse"></div>
+                  <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
+                    Modalità
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsModeMenuExpanded(false)}
+                  className="p-1 rounded-md hover:bg-[#3887A6]/30 transition-colors"
+                  title="Riduci menu"
+                >
+                  <svg className="w-4 h-4 text-white/60 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
 
-            {/* Mode Buttons - Horizontal on mobile, Vertical on desktop */}
-            <div className="flex flex-row md:flex-col gap-1.5 md:gap-2.5">
-              <button
-                onClick={() => {
-                  if (gameMode === 'challenge') exitChallenge();
-                  else if (gameMode === 'consultation') exitConsultation();
-                  else setGameMode('study');
-                }}
-                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  gameMode === 'study'
-                    ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
-                    : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
-                }`}
-                title="Modalità Studio"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {/* Mode Buttons - Vertical */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    if (gameMode === 'challenge') exitChallenge();
+                    else if (gameMode === 'consultation') exitConsultation();
+                    else setGameMode('study');
+                  }}
+                  className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                    gameMode === 'study'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
+                  }`}
+                  title="Modalità Studio"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
+                    </svg>
+                    <div className="flex-1 text-left">
+                      <div className="font-bold">Studio</div>
+                      <div
+                        className={`text-xs mt-0.5 transition-opacity ${
+                          gameMode === 'study' ? 'text-white/90' : 'text-white/40'
+                        }`}
+                      >
+                        Esplora l&apos;anatomia
+                      </div>
+                    </div>
+                    {gameMode === 'study' && (
+                      <span className="flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={startChallenge}
+                  className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                    gameMode === 'challenge'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
+                  }`}
+                  title="Modalità Sfida"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <div className="flex-1 text-left">
+                      <div className="font-bold">Sfida</div>
+                      <div
+                        className={`text-xs mt-0.5 transition-opacity ${
+                          gameMode === 'challenge' ? 'text-white/90' : 'text-white/40'
+                        }`}
+                      >
+                        Testa le conoscenze
+                      </div>
+                    </div>
+                    {gameMode === 'challenge' && (
+                      <span className="flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={startConsultation}
+                  className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                    gameMode === 'consultation'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
+                  }`}
+                  title="Simulazione Medica"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    <div className="flex-1 text-left">
+                      <div className="font-bold">Consulta</div>
+                      <div
+                        className={`text-xs mt-0.5 transition-opacity ${
+                          gameMode === 'consultation' ? 'text-white/90' : 'text-white/40'
+                        }`}
+                      >
+                        Pratica clinica
+                      </div>
+                    </div>
+                    {gameMode === 'consultation' && (
+                      <span className="flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                      </span>
+                    )}
+                  </div>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Collapsed Version - Minimal icons only */
+            <div className="bg-[#0C3559]/95 backdrop-blur-md rounded-xl p-2 shadow-2xl border-2 border-[#3887A6]/40 transition-all duration-300">
+              <div className="flex flex-col gap-1.5">
+                {/* Expand button */}
+                <button
+                  onClick={() => setIsModeMenuExpanded(true)}
+                  className="p-2 rounded-lg bg-[#3887A6]/30 hover:bg-[#3887A6]/50 transition-colors mb-1"
+                  title="Espandi menu"
+                >
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </button>
+
+                {/* Study Mode */}
+                <button
+                  onClick={() => {
+                    if (gameMode === 'challenge') exitChallenge();
+                    else if (gameMode === 'consultation') exitConsultation();
+                    else setGameMode('study');
+                  }}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    gameMode === 'study'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                  }`}
+                  title="Studio"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -2305,36 +2454,19 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                     />
                   </svg>
-                  <div className="hidden md:block flex-1 text-left">
-                    <div className="font-bold">Modalità Studio</div>
-                    <div
-                      className={`text-xs mt-0.5 transition-opacity ${
-                        gameMode === 'study' ? 'text-white/90' : 'text-white/40'
-                      }`}
-                    >
-                      Esplora liberamente l&apos;anatomia
-                    </div>
-                  </div>
-                  {gameMode === 'study' && (
-                    <span className="hidden md:flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                    </span>
-                  )}
-                </div>
-              </button>
+                </button>
 
-              <button
-                onClick={startChallenge}
-                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  gameMode === 'challenge'
-                    ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
-                    : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
-                }`}
-                title="Modalità Sfida"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* Challenge Mode */}
+                <button
+                  onClick={startChallenge}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    gameMode === 'challenge'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                  }`}
+                  title="Sfida"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -2342,36 +2474,19 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <div className="hidden md:block flex-1 text-left">
-                    <div className="font-bold">Modalità Sfida</div>
-                    <div
-                      className={`text-xs mt-0.5 transition-opacity ${
-                        gameMode === 'challenge' ? 'text-white/90' : 'text-white/40'
-                      }`}
-                    >
-                      Testa le tue conoscenze
-                    </div>
-                  </div>
-                  {gameMode === 'challenge' && (
-                    <span className="hidden md:flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                    </span>
-                  )}
-                </div>
-              </button>
+                </button>
 
-              <button
-                onClick={startConsultation}
-                className={`group relative p-2 md:px-4 md:py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  gameMode === 'consultation'
-                    ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
-                    : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
-                }`}
-                title="Simulazione Medica"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* Consultation Mode */}
+                <button
+                  onClick={startConsultation}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    gameMode === 'consultation'
+                      ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                  }`}
+                  title="Consulta"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -2379,26 +2494,10 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                     />
                   </svg>
-                  <div className="hidden md:block flex-1 text-left">
-                    <div className="font-bold">Simulazione Medica</div>
-                    <div
-                      className={`text-xs mt-0.5 transition-opacity ${
-                        gameMode === 'consultation' ? 'text-white/90' : 'text-white/40'
-                      }`}
-                    >
-                      Pratica clinica interattiva
-                    </div>
-                  </div>
-                  {gameMode === 'consultation' && (
-                    <span className="hidden md:flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                    </span>
-                  )}
-                </div>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Challenge Mode UI */}
@@ -2531,7 +2630,8 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       onClick={restartChallenge}
                       className="px-4 md:px-6 py-2 md:py-3 bg-[#4CAF50] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#3d8b40] transition-all"
                     >
-                      🔄 <span className="hidden md:inline">Gioca ancora</span><span className="md:hidden">Riprova</span>
+                      🔄 <span className="hidden md:inline">Gioca ancora</span>
+                      <span className="md:hidden">Riprova</span>
                     </button>
                     <button
                       onClick={exitChallenge}
@@ -2617,7 +2717,11 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   <div className="text-center">
                     {/* Feedback indicator */}
                     {lastAnswerCorrect !== null ? (
-                      <div className={`text-2xl md:text-4xl mb-1 md:mb-2 ${lastAnswerCorrect ? 'animate-bounce' : 'animate-pulse'}`}>
+                      <div
+                        className={`text-2xl md:text-4xl mb-1 md:mb-2 ${
+                          lastAnswerCorrect ? 'animate-bounce' : 'animate-pulse'
+                        }`}
+                      >
                         {lastAnswerCorrect ? '✅' : '❌'}
                       </div>
                     ) : (
@@ -2653,7 +2757,8 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                         onClick={replayConsultationAudio}
                         className="px-3 md:px-4 py-1.5 md:py-2 bg-[#3887A6] text-white rounded-lg text-xs md:text-sm font-medium hover:bg-[#2d6d8a] transition-all flex items-center gap-2 mx-auto"
                       >
-                        🔄 <span className="hidden md:inline">Ascolta di nuovo</span><span className="md:hidden">Replay</span>
+                        🔄 <span className="hidden md:inline">Ascolta di nuovo</span>
+                        <span className="md:hidden">Replay</span>
                       </button>
                     )}
                   </div>
@@ -2669,8 +2774,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     {/* General progress */}
                     <div className="flex items-center gap-2 md:gap-3">
                       <div className="text-white/60 text-xs md:text-sm">
-                        <span className="md:hidden">{consultationRound}/{CONSULTATION_ROUNDS}</span>
-                        <span className="hidden md:inline w-24">Consulta {consultationRound}/{CONSULTATION_ROUNDS}</span>
+                        <span className="md:hidden">
+                          {consultationRound}/{CONSULTATION_ROUNDS}
+                        </span>
+                        <span className="hidden md:inline w-24">
+                          Consulta {consultationRound}/{CONSULTATION_ROUNDS}
+                        </span>
                       </div>
                       <div className="w-16 md:w-40 h-1.5 md:h-2 bg-[#0F2940] rounded-full overflow-hidden">
                         <div
@@ -2721,8 +2830,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 p-4">
                 <div className="bg-[#0C3559] rounded-2xl p-4 md:p-8 shadow-2xl border-2 border-[#3887A6] max-w-md text-center">
                   <div className="text-4xl md:text-6xl mb-2 md:mb-4">{getConsultationDiagnosis().emoji}</div>
-                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">{getConsultationDiagnosis().title}</h2>
-                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">{getConsultationDiagnosis().message}</p>
+                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">
+                    {getConsultationDiagnosis().title}
+                  </h2>
+                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">
+                    {getConsultationDiagnosis().message}
+                  </p>
                   <div className="text-[#4CAF50] text-lg md:text-xl font-bold mb-3 md:mb-4">
                     Punteggio: {consultationScore}/{CONSULTATION_ROUNDS}
                   </div>
@@ -2731,7 +2844,8 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       onClick={startConsultation}
                       className="px-4 md:px-6 py-2 md:py-3 bg-[#3887A6] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#2d6d8a] transition-all"
                     >
-                      🔄 <span className="hidden md:inline">Gioca ancora</span><span className="md:hidden">Riprova</span>
+                      🔄 <span className="hidden md:inline">Gioca ancora</span>
+                      <span className="md:hidden">Riprova</span>
                     </button>
                     <button
                       onClick={exitConsultation}
@@ -2862,7 +2976,9 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                           `}
                           >
                             <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
-                              <div className="text-[10px] text-white/50 font-medium px-1 mb-1">{expandConfig.title}</div>
+                              <div className="text-[10px] text-white/50 font-medium px-1 mb-1">
+                                {expandConfig.title}
+                              </div>
                               {expandConfig.hotspots.map(hotspot => {
                                 const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
                                 return (

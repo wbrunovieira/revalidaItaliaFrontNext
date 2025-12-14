@@ -1461,14 +1461,17 @@ const TORSO_HOTSPOTS = [
   { id: 'addome', label: 'Addome' },
   { id: 'ombelico', label: 'Ombelico' },
   { id: 'fianco', label: 'Fianco' },
-];
-
-// Legs hotspots configuration
-const LEGS_HOTSPOTS = [
+  { id: 'braccio', label: 'Braccio' },
+  { id: 'gomito', label: 'Gomito' },
   { id: 'anca', label: 'Anca' },
   { id: 'natica', label: 'Natica' },
   { id: 'genitali', label: 'Genitali' },
   { id: 'inguine', label: 'Inguine' },
+  { id: 'avambraccio', label: 'Avambraccio' },
+];
+
+// Legs hotspots configuration
+const LEGS_HOTSPOTS = [
   { id: 'coscia', label: 'Coscia' },
   { id: 'ginocchio', label: 'Ginocchio' },
   { id: 'gamba', label: 'Gamba' },
@@ -1481,9 +1484,6 @@ const LEGS_HOTSPOTS = [
 
 // Hand hotspots configuration
 const HAND_HOTSPOTS = [
-  { id: 'braccio', label: 'Braccio' },
-  { id: 'gomito', label: 'Gomito' },
-  { id: 'avambraccio', label: 'Avambraccio' },
   { id: 'polso', label: 'Polso' },
   { id: 'mano', label: 'Mano' },
   { id: 'palmo', label: 'Palmo' },

@@ -1451,6 +1451,50 @@ const HEAD_HOTSPOTS = [
   { id: 'collo', label: 'Collo' },
 ];
 
+// Torso hotspots configuration
+const TORSO_HOTSPOTS = [
+  { id: 'spalla', label: 'Spalla' },
+  { id: 'torace', label: 'Torace' },
+  { id: 'ascella', label: 'Ascella' },
+  { id: 'seno', label: 'Seno' },
+  { id: 'capezzolo', label: 'Capezzolo' },
+  { id: 'addome', label: 'Addome' },
+  { id: 'ombelico', label: 'Ombelico' },
+  { id: 'fianco', label: 'Fianco' },
+];
+
+// Legs hotspots configuration
+const LEGS_HOTSPOTS = [
+  { id: 'anca', label: 'Anca' },
+  { id: 'natica', label: 'Natica' },
+  { id: 'genitali', label: 'Genitali' },
+  { id: 'inguine', label: 'Inguine' },
+  { id: 'coscia', label: 'Coscia' },
+  { id: 'ginocchio', label: 'Ginocchio' },
+  { id: 'gamba', label: 'Gamba' },
+  { id: 'tibia', label: 'Tibia' },
+  { id: 'polpaccio', label: 'Polpaccio' },
+  { id: 'caviglia', label: 'Caviglia' },
+  { id: 'piede', label: 'Piede' },
+  { id: 'tallone', label: 'Tallone' },
+];
+
+// Hand hotspots configuration
+const HAND_HOTSPOTS = [
+  { id: 'braccio', label: 'Braccio' },
+  { id: 'gomito', label: 'Gomito' },
+  { id: 'avambraccio', label: 'Avambraccio' },
+  { id: 'polso', label: 'Polso' },
+  { id: 'mano', label: 'Mano' },
+  { id: 'palmo', label: 'Palmo' },
+  { id: 'dito', label: 'Dito' },
+  { id: 'pollice', label: 'Pollice' },
+  { id: 'indice', label: 'Indice' },
+  { id: 'medio', label: 'Medio' },
+  { id: 'anulare', label: 'Anulare' },
+  { id: 'mignolo', label: 'Mignolo' },
+];
+
 // Body part selection button
 interface BodyPartButtonProps {
   part: BodyPartConfig;
@@ -1570,6 +1614,9 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [focusedPart, setFocusedPart] = useState('full');
   const [audioVolume, setAudioVolume] = useState(0.7);
   const [headExpanded, setHeadExpanded] = useState(false);
+  const [torsoExpanded, setTorsoExpanded] = useState(false);
+  const [legsExpanded, setLegsExpanded] = useState(false);
+  const [handExpanded, setHandExpanded] = useState(false);
   const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -1580,6 +1627,9 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     setBodyRotation(0);
     setFocusedPart('full');
     setHeadExpanded(false);
+    setTorsoExpanded(false);
+    setLegsExpanded(false);
+    setHandExpanded(false);
   }, []);
 
   // Play audio from menu
@@ -1681,46 +1731,87 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
           <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30 max-h-[70vh] overflow-y-auto">
             <div className="text-xs text-white/60 font-medium mb-2 px-1">Parti del corpo</div>
             <div className="flex flex-col gap-2">
-              {BODY_PARTS.map(part => (
-                <div key={part.id}>
-                  <BodyPartButton
-                    part={part}
-                    isActive={focusedPart === part.id}
-                    onClick={() => setFocusedPart(part.id)}
-                    label={part.label}
-                    hasExpander={part.id === 'head'}
-                    isExpanded={part.id === 'head' && headExpanded}
-                    onExpandToggle={() => setHeadExpanded(!headExpanded)}
-                  />
-                  {/* Expandable head hotspots */}
-                  {part.id === 'head' && (
-                    <div
-                      className={`
-                        overflow-hidden transition-all duration-300 ease-in-out
-                        ${headExpanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
-                      `}
-                    >
-                      <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
-                        <div className="text-[10px] text-white/50 font-medium px-1 mb-1">
-                          Dettagli della testa
+              {BODY_PARTS.map(part => {
+                // Determine which hotspots and expanded state to use
+                const getExpandConfig = () => {
+                  switch (part.id) {
+                    case 'head':
+                      return {
+                        hotspots: HEAD_HOTSPOTS,
+                        expanded: headExpanded,
+                        toggle: () => setHeadExpanded(!headExpanded),
+                        title: 'Dettagli della testa',
+                      };
+                    case 'torso':
+                      return {
+                        hotspots: TORSO_HOTSPOTS,
+                        expanded: torsoExpanded,
+                        toggle: () => setTorsoExpanded(!torsoExpanded),
+                        title: 'Dettagli del torso',
+                      };
+                    case 'legs':
+                      return {
+                        hotspots: LEGS_HOTSPOTS,
+                        expanded: legsExpanded,
+                        toggle: () => setLegsExpanded(!legsExpanded),
+                        title: 'Dettagli delle gambe',
+                      };
+                    case 'hand':
+                      return {
+                        hotspots: HAND_HOTSPOTS,
+                        expanded: handExpanded,
+                        toggle: () => setHandExpanded(!handExpanded),
+                        title: 'Dettagli della mano',
+                      };
+                    default:
+                      return null;
+                  }
+                };
+
+                const expandConfig = getExpandConfig();
+                const hasExpander = expandConfig !== null;
+
+                return (
+                  <div key={part.id}>
+                    <BodyPartButton
+                      part={part}
+                      isActive={focusedPart === part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      label={part.label}
+                      hasExpander={hasExpander}
+                      isExpanded={expandConfig?.expanded}
+                      onExpandToggle={expandConfig?.toggle}
+                    />
+                    {/* Expandable hotspots */}
+                    {hasExpander && expandConfig && (
+                      <div
+                        className={`
+                          overflow-hidden transition-all duration-300 ease-in-out
+                          ${expandConfig.expanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
+                        `}
+                      >
+                        <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
+                          <div className="text-[10px] text-white/50 font-medium px-1 mb-1">
+                            {expandConfig.title}
+                          </div>
+                          {expandConfig.hotspots.map(hotspot => {
+                            const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
+                            return (
+                              <HotspotMenuItem
+                                key={hotspot.id}
+                                hotspot={hotspot}
+                                isPlaying={playingHotspotId === hotspot.id}
+                                transcription={anatomyHotspot?.transcription || ''}
+                                onPlay={() => handlePlayFromMenu(hotspot.id)}
+                              />
+                            );
+                          })}
                         </div>
-                        {HEAD_HOTSPOTS.map(hotspot => {
-                          const anatomyHotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspot.id);
-                          return (
-                            <HotspotMenuItem
-                              key={hotspot.id}
-                              hotspot={hotspot}
-                              isPlaying={playingHotspotId === hotspot.id}
-                              transcription={anatomyHotspot?.transcription || ''}
-                              onPlay={() => handlePlayFromMenu(hotspot.id)}
-                            />
-                          );
-                        })}
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Volume Control */}

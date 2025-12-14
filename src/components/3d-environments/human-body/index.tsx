@@ -151,10 +151,10 @@ function HospitalWalls() {
 
 // Chalkboard with instructions
 interface InstructionsChalkboardProps {
-  challengeMode?: boolean;
+  gameMode?: 'study' | 'challenge' | 'consultation';
 }
 
-function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboardProps) {
+function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardProps) {
   const primaryDark = '#0F2940';
   const secondaryColor = '#3887A6';
 
@@ -178,7 +178,7 @@ function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboar
         <meshStandardMaterial color="#0C3559" roughness={0.8} />
       </mesh>
 
-      {challengeMode ? (
+      {gameMode === 'challenge' ? (
         <>
           {/* Challenge Mode Title */}
           <Text
@@ -259,6 +259,76 @@ function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboar
             fontWeight={700}
           >
             💪 Sei pronto? Buona fortuna! 💪
+            <meshBasicMaterial color="#90EE90" />
+          </Text>
+        </>
+      ) : gameMode === 'consultation' ? (
+        <>
+          {/* Consultation Mode Title */}
+          <Text
+            position={[0, 1.1, 0.07]}
+            fontSize={0.22}
+            color="#87CEEB"
+            anchorX="center"
+            anchorY="middle"
+            fontWeight={700}
+          >
+            🩺 Modalità Consulta
+            <meshBasicMaterial color="#87CEEB" />
+          </Text>
+
+          {/* Consultation Instruction 1 */}
+          <Text
+            position={[-2.1, 0.5, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            1. Ascolta il paziente che parla
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Consultation Instruction 2 */}
+          <Text
+            position={[-2.1, 0.05, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            2. Identifica la parte del corpo
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Consultation Instruction 3 */}
+          <Text
+            position={[-2.1, -0.4, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            3. Clicca sul punto corretto
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Consultation Closing message */}
+          <Text
+            position={[0, -1.0, 0.07]}
+            fontSize={0.16}
+            color="#90EE90"
+            anchorX="center"
+            anchorY="middle"
+            fontWeight={700}
+          >
+            🏥 Diventa un ottimo medico! 🏥
             <meshBasicMaterial color="#90EE90" />
           </Text>
         </>
@@ -1520,7 +1590,8 @@ interface SceneProps {
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
   audioVolume: number;
   activeHotspotId: string | null;
-  // Challenge mode props
+  // Game mode props
+  gameMode?: 'study' | 'challenge' | 'consultation';
   challengeMode?: boolean;
   challengeTargetId?: string | null;
   showCorrectAnswer?: boolean;
@@ -1533,6 +1604,7 @@ function Scene({
   controlsRef,
   audioVolume,
   activeHotspotId,
+  gameMode = 'study',
   challengeMode = false,
   challengeTargetId = null,
   showCorrectAnswer = false,
@@ -1563,7 +1635,7 @@ function Scene({
       <WallText />
       <HospitalWindow />
       <AnatomyPoster />
-      <InstructionsChalkboard challengeMode={challengeMode} />
+      <InstructionsChalkboard gameMode={gameMode} />
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
@@ -1782,7 +1854,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
 
   // Challenge mode state
-  const [gameMode, setGameMode] = useState<'study' | 'challenge'>('study');
+  const [gameMode, setGameMode] = useState<'study' | 'challenge' | 'consultation'>('study');
   const [challengeState, setChallengeState] = useState<'idle' | 'playing' | 'won' | 'lost'>('idle');
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -1790,6 +1862,17 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
+
+  // Consultation mode state
+  const CONSULTATION_ROUNDS = 10;
+  const [consultationState, setConsultationState] = useState<'idle' | 'playing' | 'finished'>('idle');
+  const [consultationRound, setConsultationRound] = useState(0);
+  const [consultationScore, setConsultationScore] = useState(0);
+  const [consultationTargetId, setConsultationTargetId] = useState<string | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [usedConsultationHotspots, setUsedConsultationHotspots] = useState<string[]>([]);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
+  const consultationAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -1876,6 +1959,131 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     setStartTime(null);
     setEndTime(null);
   }, []);
+
+  // Get random hotspot for consultation (avoiding repeats)
+  const getRandomConsultationTarget = useCallback((used: string[]) => {
+    const available = ANATOMY_HOTSPOTS.filter(h => !used.includes(h.id) && h.audioUrl);
+    if (available.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    return available[randomIndex].id;
+  }, []);
+
+  // Play consultation audio
+  const playConsultationAudio = useCallback((hotspotId: string) => {
+    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
+    if (!hotspot?.audioUrl) return;
+
+    // Stop any currently playing audio
+    if (consultationAudioRef.current) {
+      consultationAudioRef.current.pause();
+      consultationAudioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(hotspot.audioUrl);
+    audio.volume = audioVolume;
+    consultationAudioRef.current = audio;
+
+    audio.onplay = () => setIsAudioPlaying(true);
+    audio.onended = () => setIsAudioPlaying(false);
+    audio.onerror = () => setIsAudioPlaying(false);
+
+    audio.play().catch(() => setIsAudioPlaying(false));
+  }, [audioVolume]);
+
+  // Start consultation mode
+  const startConsultation = useCallback(() => {
+    setGameMode('consultation');
+    setConsultationState('playing');
+    setConsultationRound(1);
+    setConsultationScore(0);
+    setUsedConsultationHotspots([]);
+    setFocusedPart('full');
+
+    // Get first random target
+    const firstTarget = getRandomConsultationTarget([]);
+    setConsultationTargetId(firstTarget);
+
+    // Play audio after a short delay
+    if (firstTarget) {
+      setTimeout(() => playConsultationAudio(firstTarget), 500);
+    }
+  }, [getRandomConsultationTarget, playConsultationAudio]);
+
+  // Handle consultation click
+  const handleConsultationClick = useCallback((clickedId: string) => {
+    if (consultationState !== 'playing' || !consultationTargetId) return;
+
+    const isCorrect = clickedId === consultationTargetId;
+
+    // Set feedback
+    setLastAnswerCorrect(isCorrect);
+
+    if (isCorrect) {
+      setConsultationScore(prev => prev + 1);
+    }
+
+    // Show correct answer briefly
+    setShowCorrectAnswer(true);
+    setTimeout(() => {
+      setShowCorrectAnswer(false);
+      setLastAnswerCorrect(null);
+    }, 1500);
+
+    // Move to next round or finish
+    const newUsed = [...usedConsultationHotspots, consultationTargetId];
+    setUsedConsultationHotspots(newUsed);
+
+    if (consultationRound >= CONSULTATION_ROUNDS) {
+      // Finished all rounds
+      setTimeout(() => {
+        setConsultationState('finished');
+        setConsultationTargetId(null);
+      }, 1500);
+    } else {
+      // Next round
+      setTimeout(() => {
+        const nextTarget = getRandomConsultationTarget(newUsed);
+        setConsultationTargetId(nextTarget);
+        setConsultationRound(prev => prev + 1);
+
+        if (nextTarget) {
+          setTimeout(() => playConsultationAudio(nextTarget), 300);
+        }
+      }, 1500);
+    }
+  }, [consultationState, consultationTargetId, consultationRound, usedConsultationHotspots, getRandomConsultationTarget, playConsultationAudio]);
+
+  // Replay consultation audio
+  const replayConsultationAudio = useCallback(() => {
+    if (consultationTargetId) {
+      playConsultationAudio(consultationTargetId);
+    }
+  }, [consultationTargetId, playConsultationAudio]);
+
+  // Exit consultation mode
+  const exitConsultation = useCallback(() => {
+    if (consultationAudioRef.current) {
+      consultationAudioRef.current.pause();
+      consultationAudioRef.current = null;
+    }
+    setGameMode('study');
+    setConsultationState('idle');
+    setConsultationRound(0);
+    setConsultationScore(0);
+    setConsultationTargetId(null);
+    setUsedConsultationHotspots([]);
+    setIsAudioPlaying(false);
+  }, []);
+
+  // Get consultation diagnosis based on score
+  const getConsultationDiagnosis = useCallback(() => {
+    const percentage = (consultationScore / CONSULTATION_ROUNDS) * 100;
+    if (percentage === 100) return { emoji: '🏆', title: 'Medico Esperto!', message: 'Perfetto! Hai identificato tutte le parti!' };
+    if (percentage >= 80) return { emoji: '🌟', title: 'Ottimo lavoro!', message: 'Sei quasi un esperto!' };
+    if (percentage >= 60) return { emoji: '👍', title: 'Buon lavoro!', message: 'Continua a studiare!' };
+    if (percentage >= 40) return { emoji: '📚', title: 'Devi studiare!', message: 'Torna al modo studio per migliorare.' };
+    return { emoji: '💪', title: 'Non mollare!', message: 'La pratica rende perfetti!' };
+  }, [consultationScore]);
 
   // Get current target label
   const currentTargetLabel = useMemo(() => {
@@ -1985,10 +2193,11 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             controlsRef={controlsRef}
             audioVolume={audioVolume}
             activeHotspotId={playingHotspotId}
-            challengeMode={gameMode === 'challenge'}
-            challengeTargetId={currentTargetId}
+            gameMode={gameMode}
+            challengeMode={gameMode === 'challenge' || gameMode === 'consultation'}
+            challengeTargetId={gameMode === 'challenge' ? currentTargetId : consultationTargetId}
             showCorrectAnswer={showCorrectAnswer}
-            onChallengeClick={handleChallengeClick}
+            onChallengeClick={gameMode === 'challenge' ? handleChallengeClick : handleConsultationClick}
           />
         </Canvas>
 
@@ -1997,7 +2206,11 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
           <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-2 shadow-xl border border-[#3887A6]/30">
             <div className="flex gap-2">
               <button
-                onClick={() => gameMode === 'challenge' ? exitChallenge() : setGameMode('study')}
+                onClick={() => {
+                  if (gameMode === 'challenge') exitChallenge();
+                  else if (gameMode === 'consultation') exitConsultation();
+                  else setGameMode('study');
+                }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   gameMode === 'study'
                     ? 'bg-[#3887A6] text-white'
@@ -2015,6 +2228,16 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                 }`}
               >
                 🎯 Sfida
+              </button>
+              <button
+                onClick={startConsultation}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  gameMode === 'consultation'
+                    ? 'bg-[#3887A6] text-white'
+                    : 'bg-[#0F2940] text-white/70 hover:bg-[#1a3a55]'
+                }`}
+              >
+                🩺 Consulta
               </button>
             </div>
           </div>
@@ -2130,6 +2353,162 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     </button>
                     <button
                       onClick={exitChallenge}
+                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                    >
+                      📚 Studio
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Consultation Mode UI */}
+        {gameMode === 'consultation' && (
+          <>
+            {/* Consultation Body Parts Navigation */}
+            <div className="absolute top-16 right-4 z-20">
+              <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#3887A6]/30">
+                <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
+                <div className="flex flex-col gap-2">
+                  {BODY_PARTS.map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`
+                        px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                        flex items-center gap-2 border-2 whitespace-nowrap
+                        ${
+                          focusedPart === part.id
+                            ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
+                            : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+                        }
+                      `}
+                    >
+                      <span className="text-base">{part.icon}</span>
+                      {part.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Patient Card - Audio indicator */}
+            {consultationState === 'playing' && (
+              <div className="absolute top-[220px] left-4 z-20">
+                <div className={`bg-[#0C3559] backdrop-blur-sm rounded-xl px-6 py-4 shadow-2xl border-2 transition-all duration-300 ${
+                  lastAnswerCorrect === true ? 'border-[#4CAF50]' :
+                  lastAnswerCorrect === false ? 'border-red-500' : 'border-[#3887A6]'
+                }`}>
+                  <div className="text-center">
+                    {/* Feedback indicator */}
+                    {lastAnswerCorrect !== null ? (
+                      <div className={`text-4xl mb-2 ${lastAnswerCorrect ? 'animate-bounce' : 'animate-pulse'}`}>
+                        {lastAnswerCorrect ? '✅' : '❌'}
+                      </div>
+                    ) : (
+                      <div className="text-4xl mb-2">🏥</div>
+                    )}
+                    <div className="text-white/60 text-sm mb-1">
+                      {lastAnswerCorrect === true ? 'Corretto!' :
+                       lastAnswerCorrect === false ? 'Sbagliato!' : 'Il paziente parla...'}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      {isAudioPlaying ? (
+                        <div className="flex gap-1 items-end h-6">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <div
+                              key={i}
+                              className="w-1 bg-[#4CAF50] rounded-sm"
+                              style={{
+                                animation: 'soundBar 0.4s ease-in-out infinite alternate',
+                                animationDelay: `${i * 0.08}s`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : lastAnswerCorrect === null ? (
+                        <div className="text-white/40 text-sm">Audio terminato</div>
+                      ) : null}
+                    </div>
+                    {lastAnswerCorrect === null && (
+                      <button
+                        onClick={replayConsultationAudio}
+                        className="px-4 py-2 bg-[#3887A6] text-white rounded-lg text-sm font-medium hover:bg-[#2d6d8a] transition-all flex items-center gap-2 mx-auto"
+                      >
+                        🔄 Ascolta di nuovo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            {consultationState === 'playing' && (
+              <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl border border-[#3887A6]/30">
+                  <div className="flex flex-col gap-2">
+                    {/* General progress */}
+                    <div className="flex items-center gap-3">
+                      <div className="text-white/60 text-sm w-24">
+                        Consulta {consultationRound}/{CONSULTATION_ROUNDS}
+                      </div>
+                      <div className="w-40 h-2 bg-[#0F2940] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#3887A6] transition-all duration-300"
+                          style={{ width: `${(consultationRound / CONSULTATION_ROUNDS) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    {/* Correct/Wrong counts */}
+                    <div className="flex items-center gap-4 justify-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#4CAF50] text-sm">✅</span>
+                        <div className="w-16 h-1.5 bg-[#0F2940] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#4CAF50] transition-all duration-300"
+                            style={{ width: `${(consultationScore / CONSULTATION_ROUNDS) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[#4CAF50] text-sm font-medium">{consultationScore}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-red-400 text-sm">❌</span>
+                        <div className="w-16 h-1.5 bg-[#0F2940] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-red-500 transition-all duration-300"
+                            style={{ width: `${((consultationRound - 1 - consultationScore) / CONSULTATION_ROUNDS) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-red-400 text-sm font-medium">{Math.max(0, consultationRound - 1 - consultationScore)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Finished Modal */}
+            {consultationState === 'finished' && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
+                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-[#3887A6] max-w-md text-center">
+                  <div className="text-6xl mb-4">{getConsultationDiagnosis().emoji}</div>
+                  <h2 className="text-white text-2xl font-bold mb-2">{getConsultationDiagnosis().title}</h2>
+                  <p className="text-white/70 mb-4">{getConsultationDiagnosis().message}</p>
+                  <div className="text-[#4CAF50] text-xl font-bold mb-4">
+                    Punteggio: {consultationScore}/{CONSULTATION_ROUNDS}
+                  </div>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={startConsultation}
+                      className="px-6 py-3 bg-[#3887A6] text-white rounded-lg font-medium hover:bg-[#2d6d8a] transition-all"
+                    >
+                      🔄 Gioca ancora
+                    </button>
+                    <button
+                      onClick={exitConsultation}
                       className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
                     >
                       📚 Studio

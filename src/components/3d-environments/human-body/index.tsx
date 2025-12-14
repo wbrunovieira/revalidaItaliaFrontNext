@@ -482,16 +482,27 @@ interface HotspotProps {
   label: string;
   size?: number;
   audioUrl?: string;
+  transcription?: string;
   volume?: number;
+  isZoomedView?: boolean;
   onHover?: (isHovered: boolean) => void;
   onAudioPlay?: () => void;
 }
 
-function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onAudioPlay }: HotspotProps) {
+function Hotspot({
+  position,
+  label,
+  size = 3,
+  audioUrl,
+  transcription,
+  volume = 1,
+  isZoomedView = false,
+  onHover,
+  onAudioPlay,
+}: HotspotProps) {
   const [hovered, setHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -508,8 +519,8 @@ function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onA
     }
   }, [volume]);
 
-  // Show tooltip based on hover or touch
-  const tooltipVisible = showTooltip || hovered;
+  // Show tooltip based on hover, touch, or playing audio
+  const tooltipVisible = showTooltip || hovered || isPlaying;
 
   const handlePointerOver = () => {
     if (!isTouchDevice) {
@@ -545,7 +556,6 @@ function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onA
 
     audio.onended = () => {
       setIsPlaying(false);
-      setHasPlayed(true);
     };
 
     audio.onerror = () => {
@@ -619,39 +629,6 @@ function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onA
         />
       </mesh>
 
-      {/* Playing animation indicator */}
-      {isPlaying && (
-        <Html position={[size * 2, size * 1.5, 0]} distanceFactor={6} center>
-          <div
-            style={{
-              display: 'flex',
-              gap: '2px',
-              alignItems: 'flex-end',
-              height: '14px',
-            }}
-          >
-            {[1, 2, 3].map(i => (
-              <div
-                key={i}
-                style={{
-                  width: '3px',
-                  background: '#4CAF50',
-                  borderRadius: '1px',
-                  animation: `soundBar 0.5s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              />
-            ))}
-          </div>
-          <style>{`
-            @keyframes soundBar {
-              0% { height: 4px; }
-              100% { height: 14px; }
-            }
-          `}</style>
-        </Html>
-      )}
-
       {/* Label tooltip - positioned to the right */}
       {tooltipVisible && (
         <Html
@@ -664,83 +641,124 @@ function Hotspot({ position, label, size = 3, audioUrl, volume = 1, onHover, onA
           }}
         >
           <div
-            className="flex items-center"
             style={{
-              animation: 'tooltipAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              transform: isZoomedView ? 'scale(0.5)' : 'scale(1)',
+              transformOrigin: 'left center',
             }}
           >
-            {/* Connector line with gradient and rounded ends */}
             <div
+              className="flex items-center"
               style={{
-                width: '40px',
-                height: '2px',
-                background: isPlaying
-                  ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
-                  : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
-                borderRadius: '2px',
-                boxShadow: isPlaying ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
-              }}
-            />
-            {/* Rounded connector dot */}
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                background: isPlaying
-                  ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
-                  : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
-                borderRadius: '50%',
-                marginLeft: '-3px',
-                boxShadow: isPlaying ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
-              }}
-            />
-            {/* Label box with animation */}
-            <div
-              className="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex items-center gap-2"
-              style={{
-                background: isPlaying
-                  ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
-                  : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
-                border: isPlaying ? '2px solid #4CAF50' : '2px solid #3887A6',
-                borderRadius: '12px',
-                color: '#ffffff',
-                boxShadow: isPlaying
-                  ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
-                  : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
-                marginLeft: '-2px',
-                cursor: audioUrl ? 'pointer' : 'default',
-              }}
-              onClick={e => {
-                e.stopPropagation();
-                if (audioUrl) playAudio();
+                animation: 'tooltipAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               }}
             >
-              {label}
-              {/* Audio controls in tooltip */}
-              {audioUrl && (
-                <span
-                  style={{
-                    marginLeft: '4px',
-                    fontSize: '14px',
-                    opacity: isPlaying ? 1 : 0.7,
-                    transition: 'opacity 0.2s',
-                  }}
-                >
-                  {isPlaying ? '🔉' : hasPlayed ? '↻' : '🔊'}
-                </span>
-              )}
+              {/* Connector line with gradient and rounded ends */}
+              <div
+                style={{
+                  width: isZoomedView ? '25px' : '40px',
+                  height: '2px',
+                  background: isPlaying
+                    ? 'linear-gradient(90deg, #4CAF50 0%, #2E7D32 50%, #4CAF50 100%)'
+                    : 'linear-gradient(90deg, #3887A6 0%, #0C3559 50%, #3887A6 100%)',
+                  borderRadius: '2px',
+                  boxShadow: isPlaying ? '0 0 6px rgba(76, 175, 80, 0.4)' : '0 0 6px rgba(56, 135, 166, 0.4)',
+                }}
+              />
+              {/* Rounded connector dot */}
+              <div
+                style={{
+                  width: isZoomedView ? '4px' : '6px',
+                  height: isZoomedView ? '4px' : '6px',
+                  background: isPlaying
+                    ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
+                    : 'linear-gradient(135deg, #3887A6 0%, #0C3559 100%)',
+                  borderRadius: '50%',
+                  marginLeft: '-3px',
+                  boxShadow: isPlaying ? '0 0 8px rgba(76, 175, 80, 0.5)' : '0 0 8px rgba(56, 135, 166, 0.5)',
+                }}
+              />
+              {/* Label box with animation */}
+              <div
+                className={`${isZoomedView ? 'px-2 py-1' : 'px-4 py-2'} rounded-xl font-semibold flex flex-col gap-1`}
+                style={{
+                  background: isPlaying
+                    ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
+                    : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
+                  border: isPlaying ? '2px solid #4CAF50' : '2px solid #3887A6',
+                  borderRadius: isZoomedView ? '8px' : '12px',
+                  color: '#ffffff',
+                  fontSize: isZoomedView ? '10px' : '14px',
+                  boxShadow: isPlaying
+                    ? '0 4px 20px rgba(46, 125, 50, 0.4), 0 0 15px rgba(76, 175, 80, 0.3)'
+                    : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
+                  marginLeft: '-2px',
+                  cursor: audioUrl ? 'pointer' : 'default',
+                  minWidth: isPlaying && transcription ? (isZoomedView ? '120px' : '180px') : 'auto',
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (audioUrl) playAudio();
+                }}
+              >
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  {label}
+                  {/* Animated bars when playing */}
+                  {isPlaying && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '2px',
+                        alignItems: 'flex-end',
+                        height: isZoomedView ? '10px' : '14px',
+                        marginLeft: '4px',
+                      }}
+                    >
+                      {[1, 2, 3].map(i => (
+                        <div
+                          key={i}
+                          style={{
+                            width: '3px',
+                            background: '#fff',
+                            borderRadius: '1px',
+                            animation: `soundBarTooltip 0.5s ease-in-out infinite alternate`,
+                            animationDelay: `${i * 0.1}s`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Transcription shown when playing */}
+                {isPlaying && transcription && (
+                  <div
+                    style={{
+                      fontSize: isZoomedView ? '8px' : '12px',
+                      fontWeight: 400,
+                      fontStyle: 'italic',
+                      opacity: 0.9,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    &ldquo;{transcription}&rdquo;
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <style>{`
             @keyframes tooltipAppear {
               0% {
                 opacity: 0;
-                transform: translateX(-20px) scale(0.9);
+                transform: translateX(-20px);
               }
               100% {
                 opacity: 1;
-                transform: translateX(0) scale(1);
+                transform: translateX(0);
               }
+            }
+            @keyframes soundBarTooltip {
+              0% { height: 4px; }
+              100% { height: 14px; }
             }
           `}</style>
         </Html>
@@ -764,15 +782,17 @@ const ANATOMY_HOTSPOTS: {
   yMax: number;
   size?: number;
   audioUrl?: string;
+  transcription?: string;
 }[] = [
   {
     id: 'testa',
-    position: [0, 185, -5],
+    position: [0, 185, 3],
     label: 'Testa',
     yMin: 1.4,
     yMax: 2.0,
     size: 3,
     audioUrl: getAudioPath('testa.wav'),
+    transcription: 'Questa è la mia testa.',
   },
   { id: 'fronte', position: [0, 178, 6], label: 'Fronte', yMin: 1.3, yMax: 1.6, size: 1.5 },
   { id: 'sopracciglio', position: [4, 175, 5.5], label: 'Sopracciglio', yMin: 1.25, yMax: 1.45, size: 1.5 },
@@ -825,9 +845,10 @@ const ANATOMY_HOTSPOTS: {
 interface HumanBodyModelProps {
   rotation: number;
   audioVolume: number;
+  focusedPart: string;
 }
 
-function HumanBodyModel({ rotation, audioVolume }: HumanBodyModelProps) {
+function HumanBodyModel({ rotation, audioVolume, focusedPart }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -925,7 +946,9 @@ function HumanBodyModel({ rotation, audioVolume }: HumanBodyModelProps) {
           label={hotspot.label}
           size={hotspot.size}
           audioUrl={hotspot.audioUrl}
+          transcription={hotspot.transcription}
           volume={audioVolume}
+          isZoomedView={focusedPart !== 'full'}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
         />
       ))}
@@ -1008,7 +1031,7 @@ function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume }: ScenePro
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} />
+      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} focusedPart={focusedPart} />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />

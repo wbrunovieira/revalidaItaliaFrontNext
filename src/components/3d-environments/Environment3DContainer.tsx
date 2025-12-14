@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { useTranslations } from 'next-intl';
 import { Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +15,6 @@ export default function Environment3DContainer({
   title,
   onReset,
 }: Environment3DContainerProps) {
-  const t = useTranslations('Environment3D');
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -54,26 +52,26 @@ export default function Environment3DContainer({
               variant="ghost"
               size="sm"
               onClick={handleReset}
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="bg-[#0C3559] text-white hover:bg-[#0F2940] hover:text-white"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              {t('controls.reset')}
+              Ripristina
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleFullscreen}
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="bg-[#0C3559] text-white hover:bg-[#0F2940] hover:text-white"
             >
               {isFullscreen ? (
                 <>
                   <Minimize2 className="w-4 h-4 mr-2" />
-                  {t('controls.exitFullscreen')}
+                  Esci dallo schermo intero
                 </>
               ) : (
                 <>
                   <Maximize2 className="w-4 h-4 mr-2" />
-                  {t('controls.fullscreen')}
+                  Schermo intero
                 </>
               )}
             </Button>
@@ -89,7 +87,7 @@ export default function Environment3DContainer({
         <div className="flex justify-center">
           <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
             <p className="text-white/60 text-sm text-center">
-              {t('instructions.dragToRotate')} • {t('instructions.scrollToZoom')} • {t('instructions.clickToSelect')}
+              Trascina per ruotare • Scorri per ingrandire • Clicca per selezionare
             </p>
           </div>
         </div>

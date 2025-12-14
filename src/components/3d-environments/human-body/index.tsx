@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, RoundedBox, useGLTF, Html, Text } from '@react-three/drei';
-import { useTranslations } from 'next-intl';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer from '../Environment3DContainer';
@@ -12,6 +11,7 @@ import Environment3DContainer from '../Environment3DContainer';
 interface BodyPartConfig {
   id: string;
   labelKey: string;
+  label: string;
   cameraPosition: [number, number, number];
   cameraTarget: [number, number, number];
   icon: string;
@@ -21,6 +21,7 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'full',
     labelKey: 'bodyFull',
+    label: 'Corpo intero',
     cameraPosition: [0, 0.5, 5],
     cameraTarget: [0, 0.5, 0],
     icon: '👤',
@@ -28,6 +29,7 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'head',
     labelKey: 'head',
+    label: 'Testa',
     cameraPosition: [0, 1.1, 0.3],
     cameraTarget: [0, 1.2, -0.5],
     icon: '🧠',
@@ -35,6 +37,7 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'torso',
     labelKey: 'torso',
+    label: 'Torso',
     cameraPosition: [0, 0.3, 1.5],
     cameraTarget: [0, 0.3, -1.5],
     icon: '🫁',
@@ -42,6 +45,7 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'legs',
     labelKey: 'legs',
+    label: 'Gambe',
     cameraPosition: [0, -0.5, 1.5],
     cameraTarget: [0, -0.5, 0],
     icon: '🦵',
@@ -49,6 +53,7 @@ const BODY_PARTS: BodyPartConfig[] = [
   {
     id: 'hand',
     labelKey: 'hand',
+    label: 'Mano',
     cameraPosition: [0.5, 0.1, 0.7],
     cameraTarget: [0.7, 0, -2.2],
     icon: '✋',
@@ -777,9 +782,9 @@ const ANATOMY_HOTSPOTS: {
   { id: 'bocca', position: [-1.2, 166, 8], label: 'Bocca', yMin: 1.05, yMax: 1.2, size: 1 },
   { id: 'mento', position: [0, 162, 8], label: 'Mento', yMin: 1.0, yMax: 1.15, size: 1 },
   { id: 'guancia', position: [6, 170, 4], label: 'Guancia', yMin: 1.2, yMax: 1.5, size: 1.5 },
-  { id: 'mandibola', position: [5, 162, 5], label: 'Mandibola', yMin: 1.0, yMax: 1.3, size: 1.5 },
+  { id: 'mandibola', position: [5, 162, 5], label: 'Mandibola', yMin: 1.0, yMax: 1.3, size: 1 },
   { id: 'collo', position: [0, 157, 5], label: 'Collo', yMin: 0.8, yMax: 1.1, size: 1.5 },
-  { id: 'spalla', position: [17, 153, 3], label: 'Spalla', yMin: 0.6, yMax: 0.9, size: 1.5 },
+  { id: 'spalla', position: [17, 153, -1], label: 'Spalla', yMin: 0.6, yMax: 0.9, size: 1.5 },
   { id: 'torace', position: [0, 140, 10], label: 'Torace', yMin: 0.6, yMax: 0.9, size: 1.5 },
   { id: 'ascella', position: [17, 135, 2], label: 'Ascella', yMin: 0.5, yMax: 0.8, size: 1.5 },
   { id: 'seno', position: [10, 130, 12], label: 'Seno', yMin: 0.5, yMax: 0.8, size: 1 },
@@ -1043,7 +1048,7 @@ function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps)
         ${
           isActive
             ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
-            : 'bg-black/30 text-white/70 border-transparent hover:bg-black/40 hover:text-white'
+            : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
         }
       `}
     >
@@ -1054,7 +1059,6 @@ function BodyPartButton({ part, isActive, onClick, label }: BodyPartButtonProps)
 }
 
 export default function HumanBodyEnvironment({}: Environment3DProps) {
-  const t = useTranslations('Environment3D');
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
   const [audioVolume, setAudioVolume] = useState(0.7);
@@ -1086,7 +1090,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   }, []);
 
   return (
-    <Environment3DContainer title={t('environments.humanBody') || 'Human Body - Anatomy'} onReset={handleReset}>
+    <Environment3DContainer title="Corpo Umano - Anatomia" onReset={handleReset}>
       <div
         style={{ width: '100%', height: '100%', cursor: isDragging.current ? 'grabbing' : 'grab' }}
         onPointerDown={handlePointerDown}
@@ -1115,8 +1119,8 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
 
         {/* Body Parts Panel */}
         <div className="absolute top-16 right-4 z-20">
-          <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-white/10">
-            <div className="text-xs text-white/60 font-medium mb-2 px-1">{t('controls.bodyParts')}</div>
+          <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30">
+            <div className="text-xs text-white/60 font-medium mb-2 px-1">Parti del corpo</div>
             <div className="flex flex-col gap-2">
               {BODY_PARTS.map(part => (
                 <BodyPartButton
@@ -1124,7 +1128,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   part={part}
                   isActive={focusedPart === part.id}
                   onClick={() => setFocusedPart(part.id)}
-                  label={t(`controls.${part.labelKey}`)}
+                  label={part.label}
                 />
               ))}
             </div>
@@ -1133,7 +1137,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             <div className="border-t border-white/10 pt-3 mt-3">
               <div className="text-xs text-white/60 font-medium mb-2 px-1 flex items-center gap-2">
                 <span>🔊</span>
-                <span>{t('controls.volume') || 'Volume'}</span>
+                <span>Volume</span>
               </div>
               <div className="flex items-center gap-2 px-1">
                 <button

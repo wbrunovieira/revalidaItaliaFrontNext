@@ -480,27 +480,36 @@ const MODEL_PATH =
 interface HotspotProps {
   position: [number, number, number];
   label: string;
+  hotspotId: string;
   size?: number;
   audioUrl?: string;
   transcription?: string;
   volume?: number;
   isZoomedView?: boolean;
   isActiveFromMenu?: boolean;
+  // Challenge mode props
+  challengeMode?: boolean;
+  showCorrectAnswer?: boolean;
   onHover?: (isHovered: boolean) => void;
   onAudioPlay?: () => void;
+  onChallengeClick?: (hotspotId: string) => void;
 }
 
 function Hotspot({
   position,
   label,
+  hotspotId,
   size = 3,
   audioUrl,
   transcription,
   volume = 1,
   isZoomedView = false,
   isActiveFromMenu = false,
+  challengeMode = false,
+  showCorrectAnswer = false,
   onHover,
   onAudioPlay,
+  onChallengeClick,
 }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -575,6 +584,12 @@ function Hotspot({
   }, [audioUrl, volume, onAudioPlay]);
 
   const handleClick = useCallback(() => {
+    // In challenge mode, notify parent of click
+    if (challengeMode) {
+      onChallengeClick?.(hotspotId);
+      return;
+    }
+
     // On touch device: show tooltip for 3 seconds + play audio
     if (isTouchDevice) {
       // Clear any existing timeout
@@ -597,7 +612,7 @@ function Hotspot({
     if (audioUrl) {
       playAudio();
     }
-  }, [isTouchDevice, audioUrl, playAudio, onHover]);
+  }, [isTouchDevice, audioUrl, playAudio, onHover, challengeMode, hotspotId, onChallengeClick]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -612,30 +627,43 @@ function Hotspot({
     };
   }, []);
 
+  // Challenge mode colors and visibility
+  const getChallengeColor = () => {
+    if (showCorrectAnswer) return '#4CAF50'; // Green flash for correct answer
+    if (hovered) return '#3887A6'; // Show hover feedback
+    return '#1a1a2e'; // Nearly invisible (match background)
+  };
+
+  const getChallengeEmissive = () => {
+    if (showCorrectAnswer) return 1.5;
+    if (hovered) return 0.8;
+    return 0.1;
+  };
+
   return (
     <group position={position}>
       {/* Hotspot point - clickable */}
       <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
         <sphereGeometry args={[size, 16, 16]} />
         <meshStandardMaterial
-          color={isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissive={isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissiveIntensity={isActive ? 1.5 : tooltipVisible ? 1.2 : 0.6}
+          color={challengeMode ? getChallengeColor() : (isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559')}
+          emissive={challengeMode ? getChallengeColor() : (isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559')}
+          emissiveIntensity={challengeMode ? getChallengeEmissive() : (isActive ? 1.5 : tooltipVisible ? 1.2 : 0.6)}
         />
       </mesh>
 
-      {/* Pulsing ring - animated when playing */}
+      {/* Pulsing ring - hidden in challenge mode unless showing answer */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
         <meshStandardMaterial
-          color={isActive ? '#4CAF50' : '#3887A6'}
+          color={challengeMode ? (showCorrectAnswer ? '#4CAF50' : '#1a1a2e') : (isActive ? '#4CAF50' : '#3887A6')}
           transparent
-          opacity={isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+          opacity={challengeMode ? (showCorrectAnswer ? 0.9 : 0.1) : (isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5)}
         />
       </mesh>
 
-      {/* Label tooltip - positioned to the right */}
-      {tooltipVisible && (
+      {/* Label tooltip - positioned to the right (hidden in challenge mode unless showing correct answer) */}
+      {((!challengeMode && tooltipVisible) || showCorrectAnswer) && (
         <Html
           position={[0, 0, 0]}
           distanceFactor={6}
@@ -1227,9 +1255,23 @@ interface HumanBodyModelProps {
   audioVolume: number;
   focusedPart: string;
   activeHotspotId: string | null;
+  // Challenge mode props
+  challengeMode?: boolean;
+  challengeTargetId?: string | null;
+  showCorrectAnswer?: boolean;
+  onChallengeClick?: (hotspotId: string) => void;
 }
 
-function HumanBodyModel({ rotation, audioVolume, focusedPart, activeHotspotId }: HumanBodyModelProps) {
+function HumanBodyModel({
+  rotation,
+  audioVolume,
+  focusedPart,
+  activeHotspotId,
+  challengeMode = false,
+  challengeTargetId = null,
+  showCorrectAnswer = false,
+  onChallengeClick,
+}: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH);
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
@@ -1323,6 +1365,7 @@ function HumanBodyModel({ rotation, audioVolume, focusedPart, activeHotspotId }:
       {ANATOMY_HOTSPOTS.map(hotspot => (
         <Hotspot
           key={hotspot.id}
+          hotspotId={hotspot.id}
           position={hotspot.position}
           label={hotspot.label}
           size={hotspot.size}
@@ -1331,7 +1374,10 @@ function HumanBodyModel({ rotation, audioVolume, focusedPart, activeHotspotId }:
           volume={audioVolume}
           isZoomedView={focusedPart !== 'full'}
           isActiveFromMenu={activeHotspotId === hotspot.id}
+          challengeMode={challengeMode}
+          showCorrectAnswer={showCorrectAnswer && challengeTargetId === hotspot.id}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
+          onChallengeClick={onChallengeClick}
         />
       ))}
     </group>
@@ -1382,9 +1428,24 @@ interface SceneProps {
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
   audioVolume: number;
   activeHotspotId: string | null;
+  // Challenge mode props
+  challengeMode?: boolean;
+  challengeTargetId?: string | null;
+  showCorrectAnswer?: boolean;
+  onChallengeClick?: (hotspotId: string) => void;
 }
 
-function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume, activeHotspotId }: SceneProps) {
+function Scene({
+  bodyRotation,
+  focusedPart,
+  controlsRef,
+  audioVolume,
+  activeHotspotId,
+  challengeMode = false,
+  challengeTargetId = null,
+  showCorrectAnswer = false,
+  onChallengeClick,
+}: SceneProps) {
   return (
     <>
       {/* Ambient lighting */}
@@ -1414,7 +1475,16 @@ function Scene({ bodyRotation, focusedPart, controlsRef, audioVolume, activeHots
       <CeilingLights />
 
       {/* Human body model (rotates horizontally) */}
-      <HumanBodyModel rotation={bodyRotation} audioVolume={audioVolume} focusedPart={focusedPart} activeHotspotId={activeHotspotId} />
+      <HumanBodyModel
+        rotation={bodyRotation}
+        audioVolume={audioVolume}
+        focusedPart={focusedPart}
+        activeHotspotId={activeHotspotId}
+        challengeMode={challengeMode}
+        challengeTargetId={challengeTargetId}
+        showCorrectAnswer={showCorrectAnswer}
+        onChallengeClick={onChallengeClick}
+      />
 
       {/* Environment for subtle reflections */}
       <Environment preset="apartment" />
@@ -1618,6 +1688,17 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [legsExpanded, setLegsExpanded] = useState(false);
   const [handExpanded, setHandExpanded] = useState(false);
   const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
+
+  // Challenge mode state
+  const [gameMode, setGameMode] = useState<'study' | 'challenge'>('study');
+  const [challengeState, setChallengeState] = useState<'idle' | 'playing' | 'won' | 'lost'>('idle');
+  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
+  const [completedHotspots, setCompletedHotspots] = useState<string[]>([]);
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [endTime, setEndTime] = useState<number | null>(null);
+
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef(false);
@@ -1631,6 +1712,95 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     setLegsExpanded(false);
     setHandExpanded(false);
   }, []);
+
+  // Get random hotspot from remaining ones
+  const getNextRandomTarget = useCallback((completed: string[]) => {
+    const remaining = ANATOMY_HOTSPOTS.filter(h => !completed.includes(h.id));
+    if (remaining.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * remaining.length);
+    return remaining[randomIndex].id;
+  }, []);
+
+  // Start challenge
+  const startChallenge = useCallback(() => {
+    setGameMode('challenge');
+    setChallengeState('playing');
+    setScore(0);
+    setCompletedHotspots([]);
+    setShowCorrectAnswer(false);
+    setStartTime(Date.now());
+    setEndTime(null);
+    setFocusedPart('full');
+    // Get first random target
+    const firstTarget = getNextRandomTarget([]);
+    setCurrentTargetId(firstTarget);
+  }, [getNextRandomTarget]);
+
+  // Handle challenge click
+  const handleChallengeClick = useCallback((clickedId: string) => {
+    if (challengeState !== 'playing' || !currentTargetId) return;
+
+    if (clickedId === currentTargetId) {
+      // Correct!
+      const newCompleted = [...completedHotspots, currentTargetId];
+      setCompletedHotspots(newCompleted);
+      setScore(prev => prev + 1);
+
+      // Check if all completed
+      if (newCompleted.length === ANATOMY_HOTSPOTS.length) {
+        setChallengeState('won');
+        setEndTime(Date.now());
+        setCurrentTargetId(null);
+      } else {
+        // Get next target
+        const nextTarget = getNextRandomTarget(newCompleted);
+        setCurrentTargetId(nextTarget);
+      }
+    } else {
+      // Wrong! Show correct answer and reset
+      setShowCorrectAnswer(true);
+      setChallengeState('lost');
+
+      // After 2 seconds, show the lost state
+      setTimeout(() => {
+        setShowCorrectAnswer(false);
+      }, 2000);
+    }
+  }, [challengeState, currentTargetId, completedHotspots, getNextRandomTarget]);
+
+  // Restart challenge after losing
+  const restartChallenge = useCallback(() => {
+    startChallenge();
+  }, [startChallenge]);
+
+  // Exit challenge mode
+  const exitChallenge = useCallback(() => {
+    setGameMode('study');
+    setChallengeState('idle');
+    setCurrentTargetId(null);
+    setScore(0);
+    setCompletedHotspots([]);
+    setShowCorrectAnswer(false);
+    setStartTime(null);
+    setEndTime(null);
+  }, []);
+
+  // Get current target label
+  const currentTargetLabel = useMemo(() => {
+    if (!currentTargetId) return '';
+    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === currentTargetId);
+    return hotspot?.label || '';
+  }, [currentTargetId]);
+
+  // Calculate elapsed time
+  const getElapsedTime = useCallback(() => {
+    if (!startTime) return '0:00';
+    const end = endTime || Date.now();
+    const seconds = Math.floor((end - startTime) / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, [startTime, endTime]);
 
   // Play audio from menu
   const handlePlayFromMenu = useCallback(
@@ -1723,10 +1893,164 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             controlsRef={controlsRef}
             audioVolume={audioVolume}
             activeHotspotId={playingHotspotId}
+            challengeMode={gameMode === 'challenge'}
+            challengeTargetId={currentTargetId}
+            showCorrectAnswer={showCorrectAnswer}
+            onChallengeClick={handleChallengeClick}
           />
         </Canvas>
 
-        {/* Body Parts Panel */}
+        {/* Mode Toggle - Top Left */}
+        <div className="absolute top-16 left-4 z-20">
+          <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-2 shadow-xl border border-[#3887A6]/30">
+            <div className="flex gap-2">
+              <button
+                onClick={() => gameMode === 'challenge' ? exitChallenge() : setGameMode('study')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  gameMode === 'study'
+                    ? 'bg-[#3887A6] text-white'
+                    : 'bg-[#0F2940] text-white/70 hover:bg-[#1a3a55]'
+                }`}
+              >
+                📚 Studio
+              </button>
+              <button
+                onClick={startChallenge}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  gameMode === 'challenge'
+                    ? 'bg-[#3887A6] text-white'
+                    : 'bg-[#0F2940] text-white/70 hover:bg-[#1a3a55]'
+                }`}
+              >
+                🎯 Sfida
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Challenge Mode UI */}
+        {gameMode === 'challenge' && (
+          <>
+            {/* Challenge Body Parts Navigation */}
+            <div className="absolute top-16 right-4 z-20">
+              <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#3887A6]/30">
+                <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
+                <div className="flex flex-col gap-2">
+                  {BODY_PARTS.map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`
+                        px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                        flex items-center gap-2 border-2 whitespace-nowrap
+                        ${
+                          focusedPart === part.id
+                            ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
+                            : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+                        }
+                      `}
+                    >
+                      <span className="text-base">{part.icon}</span>
+                      {part.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Challenge Prompt */}
+            {challengeState === 'playing' && currentTargetLabel && (
+              <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-xl px-8 py-4 shadow-2xl border-2 border-[#3887A6]">
+                  <div className="text-center">
+                    <div className="text-white/60 text-sm mb-1">Clicca su:</div>
+                    <div className="text-white text-2xl font-bold">{currentTargetLabel}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            {challengeState === 'playing' && (
+              <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-4 py-2 shadow-xl border border-[#3887A6]/30">
+                  <div className="flex items-center gap-4">
+                    <div className="text-white/60 text-sm">
+                      {completedHotspots.length}/{ANATOMY_HOTSPOTS.length}
+                    </div>
+                    <div className="w-48 h-2 bg-[#0F2940] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#4CAF50] transition-all duration-300"
+                        style={{ width: `${(completedHotspots.length / ANATOMY_HOTSPOTS.length) * 100}%` }}
+                      />
+                    </div>
+                    <div className="text-white/60 text-sm">⏱ {getElapsedTime()}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lost Modal */}
+            {challengeState === 'lost' && !showCorrectAnswer && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
+                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-red-500 max-w-md text-center">
+                  <div className="text-6xl mb-4">😢</div>
+                  <h2 className="text-white text-2xl font-bold mb-2">Sbagliato!</h2>
+                  <p className="text-white/70 mb-4">
+                    Hai completato {score} su {ANATOMY_HOTSPOTS.length} parti.
+                  </p>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={restartChallenge}
+                      className="px-6 py-3 bg-[#3887A6] text-white rounded-lg font-medium hover:bg-[#2d6d8a] transition-all"
+                    >
+                      🔄 Riprova
+                    </button>
+                    <button
+                      onClick={exitChallenge}
+                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                    >
+                      📚 Studio
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Won Modal */}
+            {challengeState === 'won' && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50">
+                <div className="bg-[#0C3559] rounded-2xl p-8 shadow-2xl border-2 border-[#4CAF50] max-w-md text-center">
+                  <div className="text-6xl mb-4">🎉</div>
+                  <h2 className="text-white text-2xl font-bold mb-2">Complimenti!</h2>
+                  <p className="text-white/70 mb-2">
+                    Hai completato tutte le {ANATOMY_HOTSPOTS.length} parti anatomiche!
+                  </p>
+                  <p className="text-[#4CAF50] text-xl font-bold mb-4">
+                    Tempo: {getElapsedTime()}
+                  </p>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={restartChallenge}
+                      className="px-6 py-3 bg-[#4CAF50] text-white rounded-lg font-medium hover:bg-[#3d8b40] transition-all"
+                    >
+                      🔄 Gioca ancora
+                    </button>
+                    <button
+                      onClick={exitChallenge}
+                      className="px-6 py-3 bg-[#0F2940] text-white/70 rounded-lg font-medium hover:bg-[#1a3a55] transition-all"
+                    >
+                      📚 Studio
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Body Parts Panel - Hidden in challenge mode */}
+        {gameMode === 'study' && (
         <div className="absolute top-16 right-4 z-20">
           <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 space-y-2 shadow-xl border border-[#3887A6]/30 max-h-[70vh] overflow-y-auto">
             <div className="text-xs text-white/60 font-medium mb-2 px-1">Parti del corpo</div>
@@ -1855,6 +2179,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             </div>
           </div>
         </div>
+        )}
 
         {/* CSS for menu sound bar animation */}
         <style>{`

@@ -223,7 +223,7 @@ function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboar
 
           {/* Challenge Instruction 3 */}
           <Text
-            position={[-2.1, -0.4, 0.07]}
+            position={[-2.1, -0.25, 0.07]}
             fontSize={0.15}
             color="#F5F5DC"
             anchorX="left"
@@ -235,9 +235,23 @@ function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboar
             <meshBasicMaterial color="#F5F5DC" />
           </Text>
 
+          {/* Challenge Instruction 4 */}
+          <Text
+            position={[-2.1, -0.6, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            4. Attenzione: se sbagli, ricominci da zero!
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
           {/* Challenge Closing message */}
           <Text
-            position={[0, -1.0, 0.07]}
+            position={[0, -1.1, 0.07]}
             fontSize={0.16}
             color="#90EE90"
             anchorX="center"
@@ -259,7 +273,7 @@ function InstructionsChalkboard({ challengeMode = false }: InstructionsChalkboar
             anchorY="middle"
             fontWeight={700}
           >
-            Come usare
+            Come studiare
             <meshBasicMaterial color="#F5F5DC" />
           </Text>
 

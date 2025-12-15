@@ -7,7 +7,6 @@ import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
   Box,
-  RefreshCw,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
@@ -79,19 +78,11 @@ export default function ListEnvironments3D() {
     <div className="space-y-6">
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h3 className="text-xl font-semibold text-white flex items-center gap-2">
             <Box size={24} className="text-secondary" />
             {t('title')}
           </h3>
-          <button
-            onClick={fetchEnvironments}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 text-sm"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            {t('refresh')}
-          </button>
         </div>
 
         {/* Content */}
@@ -117,9 +108,12 @@ export default function ListEnvironments3D() {
                   <span className="text-white font-medium">
                     {translation?.title || 'Sem título'}
                   </span>
-                  <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
-                    {env.slug}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">slug:</span>
+                    <span className="text-sm text-secondary font-mono bg-gray-800 px-2 py-1 rounded">
+                      {env.slug}
+                    </span>
+                  </div>
                 </div>
               );
             })}

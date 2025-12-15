@@ -1054,15 +1054,8 @@ export default function AdminPage() {
           {/* Apenas renderiza o conteúdo de environments3d para admins */}
           {isAdmin && (
             <TabsContent value="environments3d">
-              <Tabs defaultValue="list" className="w-full">
+              <Tabs defaultValue="create" className="w-full">
                 <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
-                  <TabsTrigger
-                    value="list"
-                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
-                  >
-                    <List className="mr-2" size={16} />
-                    {t('environments3d.list')}
-                  </TabsTrigger>
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
@@ -1070,12 +1063,19 @@ export default function AdminPage() {
                     <Box className="mr-2" size={16} />
                     {t('environments3d.create')}
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('environments3d.list')}
+                  </TabsTrigger>
                 </TabsList>
-                <TabsContent value="list">
-                  <ListEnvironments3D />
-                </TabsContent>
                 <TabsContent value="create">
                   <CreateEnvironment3DForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <ListEnvironments3D />
                 </TabsContent>
               </Tabs>
             </TabsContent>

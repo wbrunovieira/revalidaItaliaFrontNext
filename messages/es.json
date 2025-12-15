@@ -4990,6 +4990,35 @@
       "translations": "Traducciones",
       "noDescription": "Sin descripción",
       "close": "Cerrar"
+    },
+    "edit": {
+      "button": "Editar",
+      "title": "Editar Ambiente 3D",
+      "slugHint": "Solo letras minúsculas, números y guiones",
+      "titleLabel": "Título",
+      "descriptionLabel": "Descripción",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "successTitle": "Ambiente actualizado",
+      "successDescription": "¡El ambiente 3D se ha actualizado exitosamente!",
+      "errorTitle": "Error al actualizar",
+      "errorDescription": "No se pudo actualizar el ambiente 3D",
+      "conflictDescription": "Ya existe un ambiente con este slug"
+    },
+    "delete": {
+      "button": "Eliminar",
+      "title": "Eliminar Ambiente 3D",
+      "confirmation": "¿Estás seguro de que deseas eliminar este ambiente?",
+      "warning": "Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar",
+      "deleting": "Eliminando...",
+      "successTitle": "Ambiente eliminado",
+      "successDescription": "¡El ambiente 3D se ha eliminado exitosamente!",
+      "errorTitle": "Error al eliminar",
+      "errorDescription": "No se pudo eliminar el ambiente 3D",
+      "inUseDescription": "Este ambiente está siendo utilizado por lecciones y no se puede eliminar"
     }
   },
 

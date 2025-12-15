@@ -2569,6 +2569,58 @@
   "description": "Gerencie usuários, cursos e configurações do sistema",
   "comingSoon": "Em breve...",
 
+  "uploadAudio": {
+    "title": "Upload de Áudio",
+    "description": "Envie arquivos de áudio para associar a uma aula específica.",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Aula",
+      "file": "Arquivo de Áudio",
+      "translations": "Traduções",
+      "title": "Título",
+      "description": "Descrição"
+    },
+    "placeholders": {
+      "course": "Selecione um curso",
+      "module": "Selecione um módulo",
+      "lesson": "Selecione uma aula",
+      "title": "Digite o título do áudio",
+      "description": "Descrição opcional do áudio"
+    },
+    "uploadHint": "Clique para selecionar ou arraste um arquivo de áudio",
+    "supportedFormats": "Formatos suportados: MP3, WAV, OGG, AAC, M4A, WebM",
+    "maxSize": "Tamanho máximo: 200MB",
+    "calculatingDuration": "Calculando duração...",
+    "loading": "Carregando...",
+    "uploading": "Enviando...",
+    "submit": "Enviar Áudio",
+    "success": {
+      "title": "Áudio enviado",
+      "description": "O áudio foi enviado com sucesso!"
+    },
+    "error": {
+      "fetchCoursesTitle": "Erro ao carregar cursos",
+      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos",
+      "validationTitle": "Erro de validação",
+      "validationDescription": "Por favor, preencha todos os campos obrigatórios",
+      "uploadTitle": "Erro no upload",
+      "uploadDescription": "Não foi possível enviar o áudio",
+      "lessonNotFound": "A aula selecionada não foi encontrada",
+      "fileTooLarge": "O arquivo é muito grande. Tamanho máximo: 200MB"
+    },
+    "errors": {
+      "courseRequired": "Por favor, selecione um curso",
+      "moduleRequired": "Por favor, selecione um módulo",
+      "lessonRequired": "Por favor, selecione uma aula",
+      "fileRequired": "Por favor, selecione um arquivo de áudio",
+      "titleRequired": "O título é obrigatório",
+      "invalidFileType": "Tipo de arquivo não suportado. Use MP3, WAV, OGG, AAC, M4A ou WebM",
+      "fileTooLarge": "O arquivo é muito grande. Tamanho máximo: 200MB",
+      "durationCalculationFailed": "Não foi possível calcular a duração do áudio"
+    }
+  },
+
   "studentDocuments": {
     "pageTitle": "Documentos de Estudantes",
     "pageDescription": "Visualize e gerencie os documentos enviados pelos estudantes",
@@ -4993,7 +5045,8 @@
     "transactions": "Transações",
     "tutor": "Tutor",
     "studentDocuments": "Análise Docs",
-    "environments3d": "Ambientes 3D"
+    "environments3d": "Ambientes 3D",
+    "audios": "Áudios"
   },
 
   "environments3d": {

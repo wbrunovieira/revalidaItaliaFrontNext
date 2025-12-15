@@ -2567,6 +2567,58 @@
   "description": "Gestiona usuarios, cursos y configuraciones del sistema",
   "comingSoon": "Próximamente...",
 
+  "uploadAudio": {
+    "title": "Subir Audio",
+    "description": "Sube archivos de audio para asociar a una lección específica.",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Lección",
+      "file": "Archivo de Audio",
+      "translations": "Traducciones",
+      "title": "Título",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "course": "Selecciona un curso",
+      "module": "Selecciona un módulo",
+      "lesson": "Selecciona una lección",
+      "title": "Ingresa el título del audio",
+      "description": "Descripción opcional del audio"
+    },
+    "uploadHint": "Haz clic para seleccionar o arrastra un archivo de audio",
+    "supportedFormats": "Formatos soportados: MP3, WAV, OGG, AAC, M4A, WebM",
+    "maxSize": "Tamaño máximo: 200MB",
+    "calculatingDuration": "Calculando duración...",
+    "loading": "Cargando...",
+    "uploading": "Subiendo...",
+    "submit": "Subir Audio",
+    "success": {
+      "title": "Audio subido",
+      "description": "¡El audio se ha subido exitosamente!"
+    },
+    "error": {
+      "fetchCoursesTitle": "Error al cargar cursos",
+      "fetchCoursesDescription": "No se pudo cargar la lista de cursos",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Por favor, completa todos los campos obligatorios",
+      "uploadTitle": "Error en la subida",
+      "uploadDescription": "No se pudo subir el audio",
+      "lessonNotFound": "La lección seleccionada no fue encontrada",
+      "fileTooLarge": "El archivo es muy grande. Tamaño máximo: 200MB"
+    },
+    "errors": {
+      "courseRequired": "Por favor, selecciona un curso",
+      "moduleRequired": "Por favor, selecciona un módulo",
+      "lessonRequired": "Por favor, selecciona una lección",
+      "fileRequired": "Por favor, selecciona un archivo de audio",
+      "titleRequired": "El título es obligatorio",
+      "invalidFileType": "Tipo de archivo no soportado. Usa MP3, WAV, OGG, AAC, M4A o WebM",
+      "fileTooLarge": "El archivo es muy grande. Tamaño máximo: 200MB",
+      "durationCalculationFailed": "No se pudo calcular la duración del audio"
+    }
+  },
+
   "MyCreatedRecordingsList": {
     "title": "Mis Grabaciones",
     "totalRecordings": "grabaciones",
@@ -4962,7 +5014,8 @@
     "transactions": "Transacciones",
     "tutor": "Tutor",
     "studentDocuments": "Análisis Docs",
-    "environments3d": "Ambientes 3D"
+    "environments3d": "Ambientes 3D",
+    "audios": "Audios"
   },
 
   "environments3d": {

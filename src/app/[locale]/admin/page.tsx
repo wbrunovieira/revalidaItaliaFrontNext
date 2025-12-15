@@ -28,6 +28,7 @@ import {
   FolderSearch,
   UserCheck,
   Box,
+  Music,
 } from 'lucide-react';
 
 import {
@@ -78,6 +79,7 @@ import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 import CreateEnvironment3DForm from '@/components/CreateEnvironment3DForm';
 import ListEnvironments3D from '@/components/ListEnvironments3D';
+import UploadAudioForm from '@/components/UploadAudioForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -355,6 +357,21 @@ export default function AdminPage() {
                   aria-hidden="true"
                 />
                 {t('tabs.environments3d')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba audios para admins e tutors */}
+            {(isAdmin || isTutor) && (
+              <TabsTrigger
+                value="audios"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Music
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.audios')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -1078,6 +1095,13 @@ export default function AdminPage() {
                   <ListEnvironments3D />
                 </TabsContent>
               </Tabs>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de audios para admins e tutors */}
+          {(isAdmin || isTutor) && (
+            <TabsContent value="audios">
+              <UploadAudioForm />
             </TabsContent>
           )}
         </div>

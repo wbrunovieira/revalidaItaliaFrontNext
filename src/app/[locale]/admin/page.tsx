@@ -77,6 +77,7 @@ import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
 import CreateEnvironment3DForm from '@/components/CreateEnvironment3DForm';
+import ListEnvironments3D from '@/components/ListEnvironments3D';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -1053,8 +1054,15 @@ export default function AdminPage() {
           {/* Apenas renderiza o conteúdo de environments3d para admins */}
           {isAdmin && (
             <TabsContent value="environments3d">
-              <Tabs defaultValue="create" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-1 bg-gray-700">
+              <Tabs defaultValue="list" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('environments3d.list')}
+                  </TabsTrigger>
                   <TabsTrigger
                     value="create"
                     className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
@@ -1063,6 +1071,9 @@ export default function AdminPage() {
                     {t('environments3d.create')}
                   </TabsTrigger>
                 </TabsList>
+                <TabsContent value="list">
+                  <ListEnvironments3D />
+                </TabsContent>
                 <TabsContent value="create">
                   <CreateEnvironment3DForm />
                 </TabsContent>

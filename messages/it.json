@@ -4924,7 +4924,24 @@
   },
 
   "environments3d": {
-    "create": "Crea Ambiente"
+    "create": "Crea Ambiente",
+    "list": "Lista Ambienti"
+  },
+
+  "listEnvironments3D": {
+    "title": "Ambienti 3D",
+    "description": "Visualizza tutti gli ambienti 3D registrati nel sistema.",
+    "loading": "Caricamento ambienti...",
+    "noEnvironments": "Nessun ambiente 3D registrato",
+    "noResults": "Nessun ambiente trovato con i filtri applicati",
+    "searchPlaceholder": "Cerca per nome o slug...",
+    "showing": "Mostrando {count} di {total} ambienti",
+    "refresh": "Aggiorna",
+    "allTranslations": "Tutte le traduzioni",
+    "error": {
+      "fetchTitle": "Errore nel caricamento degli ambienti",
+      "fetchDescription": "Non è stato possibile caricare la lista degli ambienti 3D"
+    }
   },
 
   "createEnvironment3D": {

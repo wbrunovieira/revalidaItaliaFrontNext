@@ -4952,8 +4952,8 @@
     "tracks": "Rutas",
     "modules": "Módulos",
     "lessons": "Lecciones",
-     "videos": "Videos",
-      "documents": "Documentos",
+    "videos": "Videos",
+    "documents": "Documentos",
     "assessments": "Evaluaciones",
     "arguments": "Argumentos",
     "flashcards": "Flashcards",
@@ -4961,7 +4961,57 @@
     "personalSessions": "Clases 1:1",
     "transactions": "Transacciones",
     "tutor": "Tutor",
-    "studentDocuments": "Análisis Docs"
+    "studentDocuments": "Análisis Docs",
+    "environments3d": "Ambientes 3D"
+  },
+
+  "environments3d": {
+    "create": "Crear Ambiente"
+  },
+
+  "createEnvironment3D": {
+    "title": "Crear Ambiente 3D",
+    "description": "Configura un nuevo ambiente 3D con traducciones para todos los idiomas soportados.",
+    "fields": {
+      "slug": "Identificador (slug)",
+      "title": "Título",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "slug": "ej: clinic-environment",
+      "title": "Ingresa el título del ambiente",
+      "description": "Descripción opcional del ambiente"
+    },
+    "hints": {
+      "slug": "Solo letras minúsculas, números y guiones. Se usará en la URL."
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "italian": "Italiano",
+      "spanish": "Español"
+    },
+    "errors": {
+      "slugRequired": "El slug es obligatorio",
+      "slugMax": "El slug no puede exceder 100 caracteres",
+      "slugInvalid": "Solo se permiten letras minúsculas, números y guiones",
+      "titleRequired": "El título es obligatorio",
+      "titleMax": "El título no puede exceder 200 caracteres",
+      "descriptionMax": "La descripción no puede exceder 1000 caracteres"
+    },
+    "error": {
+      "title": "Error al crear ambiente",
+      "description": "No se pudo crear el ambiente 3D. Inténtalo de nuevo.",
+      "validationTitle": "Error de validación",
+      "validationDescription": "Por favor, verifica los campos del formulario.",
+      "conflictDescription": "Ya existe un ambiente 3D con este slug."
+    },
+    "success": {
+      "title": "Ambiente creado",
+      "description": "¡El ambiente 3D se ha creado exitosamente!"
+    },
+    "create": "Crear Ambiente",
+    "creating": "Creando..."
   },
 
   "personalSessions": {

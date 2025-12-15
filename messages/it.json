@@ -4919,7 +4919,57 @@
     "personalSessions": "Lezioni 1:1",
     "transactions": "Transazioni",
     "tutor": "Tutor",
-    "studentDocuments": "Analisi Docs"
+    "studentDocuments": "Analisi Docs",
+    "environments3d": "Ambienti 3D"
+  },
+
+  "environments3d": {
+    "create": "Crea Ambiente"
+  },
+
+  "createEnvironment3D": {
+    "title": "Crea Ambiente 3D",
+    "description": "Configura un nuovo ambiente 3D con traduzioni per tutte le lingue supportate.",
+    "fields": {
+      "slug": "Identificatore (slug)",
+      "title": "Titolo",
+      "description": "Descrizione"
+    },
+    "placeholders": {
+      "slug": "es: clinic-environment",
+      "title": "Inserisci il titolo dell'ambiente",
+      "description": "Descrizione opzionale dell'ambiente"
+    },
+    "hints": {
+      "slug": "Solo lettere minuscole, numeri e trattini. Verrà usato nell'URL."
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "italian": "Italiano",
+      "spanish": "Spagnolo"
+    },
+    "errors": {
+      "slugRequired": "Lo slug è obbligatorio",
+      "slugMax": "Lo slug non può superare 100 caratteri",
+      "slugInvalid": "Sono ammessi solo lettere minuscole, numeri e trattini",
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMax": "Il titolo non può superare 200 caratteri",
+      "descriptionMax": "La descrizione non può superare 1000 caratteri"
+    },
+    "error": {
+      "title": "Errore nella creazione dell'ambiente",
+      "description": "Impossibile creare l'ambiente 3D. Riprova.",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Controlla i campi del modulo.",
+      "conflictDescription": "Esiste già un ambiente 3D con questo slug."
+    },
+    "success": {
+      "title": "Ambiente creato",
+      "description": "L'ambiente 3D è stato creato con successo!"
+    },
+    "create": "Crea Ambiente",
+    "creating": "Creazione in corso..."
   },
 
   "personalSessions": {

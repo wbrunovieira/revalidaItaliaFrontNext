@@ -27,6 +27,7 @@ import {
   Upload,
   FolderSearch,
   UserCheck,
+  Box,
 } from 'lucide-react';
 
 import {
@@ -75,6 +76,7 @@ import MyCreatedRecordingsList from '@/components/MyCreatedRecordingsList';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
+import CreateEnvironment3DForm from '@/components/CreateEnvironment3DForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -337,6 +339,21 @@ export default function AdminPage() {
                   aria-hidden="true"
                 />
                 {t('tabs.studentDocuments')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba environments3d para admins */}
+            {isAdmin && (
+              <TabsTrigger
+                value="environments3d"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Box
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.environments3d')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -1030,6 +1047,26 @@ export default function AdminPage() {
                   </a>
                 </div>
               </div>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de environments3d para admins */}
+          {isAdmin && (
+            <TabsContent value="environments3d">
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-1 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Box className="mr-2" size={16} />
+                    {t('environments3d.create')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                  <CreateEnvironment3DForm />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
         </div>

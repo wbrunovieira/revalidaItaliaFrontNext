@@ -7,10 +7,7 @@ import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
   Box,
-  Search,
   RefreshCw,
-  Calendar,
-  Globe,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
@@ -37,7 +34,6 @@ export default function ListEnvironments3D() {
 
   const [environments, setEnvironments] = useState<Environment3D[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchEnvironments = useCallback(async () => {
     setLoading(true);
@@ -79,153 +75,51 @@ export default function ListEnvironments3D() {
     []
   );
 
-  const filteredEnvironments = environments.filter(env => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    const translation = getTranslationByLocale(env.translations, locale);
-    return (
-      env.slug.toLowerCase().includes(query) ||
-      translation?.title.toLowerCase().includes(query) ||
-      translation?.description?.toLowerCase().includes(query)
-    );
-  });
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   return (
     <div className="space-y-6">
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-              <Box size={24} className="text-secondary" />
-              {t('title')}
-            </h3>
-            <p className="text-gray-400 text-sm mt-1">
-              {t('description')}
-            </p>
-          </div>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Box size={24} className="text-secondary" />
+            {t('title')}
+          </h3>
           <button
             onClick={fetchEnvironments}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 text-sm"
           >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             {t('refresh')}
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-secondary"
-          />
-        </div>
-
-        {/* Stats */}
-        <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
-          <p className="text-gray-300">
-            {t('showing', { count: filteredEnvironments.length, total: environments.length })}
-          </p>
-        </div>
-
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-secondary animate-spin" />
-            <span className="ml-3 text-gray-400">{t('loading')}</span>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-secondary animate-spin" />
+            <span className="ml-2 text-gray-400 text-sm">{t('loading')}</span>
           </div>
-        ) : filteredEnvironments.length === 0 ? (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto mb-4 text-gray-500" size={48} />
-            <p className="text-gray-400">
-              {environments.length === 0 ? t('noEnvironments') : t('noResults')}
-            </p>
+        ) : environments.length === 0 ? (
+          <div className="text-center py-8">
+            <AlertCircle className="mx-auto mb-3 text-gray-500" size={32} />
+            <p className="text-gray-400 text-sm">{t('noEnvironments')}</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredEnvironments.map(env => {
+          <div className="space-y-2">
+            {environments.map(env => {
               const translation = getTranslationByLocale(env.translations, locale);
               return (
                 <div
                   key={env.id}
-                  className="p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-secondary/50 transition-colors"
+                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600"
                 >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-white">
-                        {translation?.title || 'Sem título'}
-                      </h4>
-                      {translation?.description && (
-                        <p className="text-gray-400 text-sm mt-1">
-                          {translation.description}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap items-center gap-4 mt-3">
-                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
-                          {env.slug}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs text-gray-500">
-                          <Calendar size={12} />
-                          {formatDate(env.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Translation badges */}
-                    <div className="flex items-center gap-2">
-                      <Globe size={14} className="text-gray-500" />
-                      {env.translations.map(tr => (
-                        <span
-                          key={tr.locale}
-                          className={`text-xs px-2 py-1 rounded ${
-                            tr.locale === locale
-                              ? 'bg-secondary/20 text-secondary'
-                              : 'bg-gray-800 text-gray-400'
-                          }`}
-                        >
-                          {tr.locale.toUpperCase()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* All translations preview */}
-                  <div className="mt-4 pt-4 border-t border-gray-600">
-                    <p className="text-xs text-gray-500 mb-2">{t('allTranslations')}</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {env.translations.map(tr => (
-                        <div
-                          key={tr.locale}
-                          className="p-2 bg-gray-800 rounded text-sm"
-                        >
-                          <span className="text-gray-500 text-xs uppercase">
-                            {tr.locale === 'pt' ? '🇧🇷' : tr.locale === 'it' ? '🇮🇹' : '🇪🇸'} {tr.locale}
-                          </span>
-                          <p className="text-white text-sm mt-1">{tr.title}</p>
-                          {tr.description && (
-                            <p className="text-gray-400 text-xs mt-0.5 line-clamp-2">
-                              {tr.description}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <span className="text-white font-medium">
+                    {translation?.title || 'Sem título'}
+                  </span>
+                  <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                    {env.slug}
+                  </span>
                 </div>
               );
             })}

@@ -27,6 +27,7 @@ import {
   Clock,
   FileAudio,
   AlertCircle,
+  FileText,
 } from 'lucide-react';
 
 interface Translation {
@@ -77,6 +78,7 @@ interface FormData {
   lessonId: string;
   file: File | null;
   durationInSeconds: number;
+  transcription: string;
   translations: {
     pt: Translation;
     es: Translation;
@@ -125,6 +127,7 @@ export default function UploadAudioForm() {
     lessonId: '',
     file: null,
     durationInSeconds: 0,
+    transcription: '',
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
@@ -451,6 +454,9 @@ export default function UploadAudioForm() {
       formDataToSend.append('file', formData.file!);
       formDataToSend.append('lessonId', formData.lessonId);
       formDataToSend.append('durationInSeconds', formData.durationInSeconds.toString());
+      if (formData.transcription.trim()) {
+        formDataToSend.append('transcription', formData.transcription.trim());
+      }
       formDataToSend.append(
         'translations',
         JSON.stringify([
@@ -512,6 +518,7 @@ export default function UploadAudioForm() {
         lessonId: '',
         file: null,
         durationInSeconds: 0,
+        transcription: '',
         translations: {
           pt: { locale: 'pt', title: '', description: '' },
           es: { locale: 'es', title: '', description: '' },
@@ -798,6 +805,22 @@ export default function UploadAudioForm() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Transcription */}
+          <div className="space-y-2">
+            <Label className="text-gray-300 flex items-center gap-2">
+              <FileText size={16} className="text-secondary" />
+              {t('fields.transcription')}
+            </Label>
+            <textarea
+              value={formData.transcription}
+              onChange={(e) => setFormData(prev => ({ ...prev, transcription: e.target.value }))}
+              placeholder={t('placeholders.transcription')}
+              rows={4}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent resize-y min-h-[100px]"
+            />
+            <p className="text-gray-500 text-xs">{t('transcriptionHint')}</p>
           </div>
 
           {/* Submit Button */}

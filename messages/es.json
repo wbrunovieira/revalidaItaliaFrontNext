@@ -2577,18 +2577,21 @@
       "file": "Archivo de Audio",
       "translations": "Traducciones",
       "title": "Título",
-      "description": "Descripción"
+      "description": "Descripción",
+      "transcription": "Transcripción"
     },
     "placeholders": {
       "course": "Selecciona un curso",
       "module": "Selecciona un módulo",
       "lesson": "Selecciona una lección",
       "title": "Ingresa el título del audio",
-      "description": "Descripción opcional del audio"
+      "description": "Descripción opcional del audio",
+      "transcription": "Ingresa o pega el texto de la transcripción del audio..."
     },
     "uploadHint": "Haz clic para seleccionar un archivo de audio",
     "supportedFormats": "Formatos soportados: MP3, WAV, OGG, AAC, M4A, WebM",
     "maxSize": "Tamaño máximo: 200MB",
+    "transcriptionHint": "Opcional: texto de la transcripción del contenido del audio",
     "calculatingDuration": "Calculando duración...",
     "loading": "Cargando...",
     "uploading": "Subiendo...",

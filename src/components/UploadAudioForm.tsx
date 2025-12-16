@@ -135,7 +135,54 @@ export default function UploadAudioForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({});
 
-  // Fetch courses
+  // Fetch lessons for a specific module
+  const fetchLessonsForModule = useCallback(
+    async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) return [];
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        console.error('Error fetching lessons for module:', error);
+        return [];
+      }
+    },
+    []
+  );
+
+  // Fetch modules for a specific course
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) return [];
+        const modules: Module[] = await response.json();
+        // Fetch lessons for each module
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(courseId, module.id);
+            return { ...module, lessons };
+          })
+        );
+        return modulesWithLessons;
+      } catch (error) {
+        console.error('Error fetching modules for course:', error);
+        return [];
+      }
+    },
+    [fetchLessonsForModule]
+  );
+
+  // Fetch courses with modules and lessons
   const fetchCourses = useCallback(async () => {
     setLoadingCourses(true);
     try {
@@ -148,8 +195,15 @@ export default function UploadAudioForm() {
         throw new Error('Failed to fetch courses');
       }
 
-      const data = await response.json();
-      setCourses(data);
+      const coursesData: Course[] = await response.json();
+      // Fetch modules and lessons for each course
+      const coursesWithData = await Promise.all(
+        coursesData.map(async course => {
+          const modules = await fetchModulesForCourse(course.id);
+          return { ...course, modules };
+        })
+      );
+      setCourses(coursesWithData);
     } catch (error) {
       console.error('Error fetching courses:', error);
       toast({
@@ -160,7 +214,7 @@ export default function UploadAudioForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [t, toast]);
+  }, [t, toast, fetchModulesForCourse]);
 
   useEffect(() => {
     fetchCourses();

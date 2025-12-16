@@ -5054,6 +5054,47 @@
     "list": "Listar Ambientes"
   },
 
+  "audios": {
+    "upload": "Enviar Áudio",
+    "list": "Listar Áudios"
+  },
+
+  "listAudios": {
+    "title": "Lista de Áudios",
+    "description": "Visualize os áudios cadastrados por aula.",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Aula"
+    },
+    "placeholders": {
+      "course": "Selecione um curso",
+      "module": "Selecione um módulo",
+      "lesson": "Selecione uma aula"
+    },
+    "loading": "Carregando áudios...",
+    "selectLesson": "Selecione uma aula para visualizar os áudios",
+    "noAudios": "Nenhum áudio cadastrado para esta aula",
+    "view": "Visualizar",
+    "error": {
+      "fetchCoursesTitle": "Erro ao carregar cursos",
+      "fetchCoursesDescription": "Não foi possível carregar a lista de cursos",
+      "fetchTitle": "Erro ao carregar áudios",
+      "fetchDescription": "Não foi possível carregar a lista de áudios"
+    },
+    "modal": {
+      "title": "Detalhes do Áudio",
+      "duration": "Duração",
+      "size": "Tamanho",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "transcription": "Transcrição",
+      "translations": "Traduções",
+      "noDescription": "Sem descrição",
+      "close": "Fechar"
+    }
+  },
+
   "listEnvironments3D": {
     "title": "Ambientes 3D",
     "loading": "Carregando ambientes...",

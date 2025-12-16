@@ -85,7 +85,7 @@ export default function EditAudioModal({
   onClose,
   onSave,
 }: EditAudioModalProps) {
-  const t = useTranslations('editAudio');
+  const t = useTranslations('Admin.editAudio');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({

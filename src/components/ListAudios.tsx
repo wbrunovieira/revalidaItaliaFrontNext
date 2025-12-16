@@ -1,36 +1,35 @@
 // /src/components/ListAudios.tsx
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Music,
   Loader2,
-  AlertCircle,
   Eye,
   X,
   Calendar,
   Globe,
   Clock,
   FileAudio,
-  BookOpen,
   Layers,
   Play,
   HardDrive,
   Hash,
+  Search,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
+import Image from 'next/image';
 
-interface Translation {
+interface AudioTranslation {
   locale: 'pt' | 'it' | 'es';
   title: string;
   description?: string;
@@ -46,20 +45,24 @@ interface Audio {
   mimeType: string;
   order: number;
   transcription?: string;
-  translations: Translation[];
+  translations: AudioTranslation[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface Translation {
+  locale: string;
+  title: string;
+  description: string;
 }
 
 interface Lesson {
   id: string;
   moduleId: string;
   order: number;
-  translations: Array<{
-    locale: string;
-    title: string;
-    description: string;
-  }>;
+  imageUrl?: string;
+  translations: Translation[];
+  audios?: Audio[];
 }
 
 interface Module {
@@ -67,11 +70,7 @@ interface Module {
   slug: string;
   imageUrl: string | null;
   order: number;
-  translations: Array<{
-    locale: string;
-    title: string;
-    description: string;
-  }>;
+  translations: Translation[];
   lessons?: Lesson[];
 }
 
@@ -79,12 +78,19 @@ interface Course {
   id: string;
   slug: string;
   imageUrl: string;
-  translations: Array<{
-    locale: string;
-    title: string;
-    description: string;
-  }>;
+  translations: Translation[];
   modules?: Module[];
+}
+
+interface CourseStats {
+  moduleCount: number;
+  lessonCount: number;
+  audioCount: number;
+}
+
+interface ModuleStats {
+  lessonCount: number;
+  audioCount: number;
 }
 
 export default function ListAudios() {
@@ -93,26 +99,76 @@ export default function ListAudios() {
   const locale = params.locale as string;
   const { toast } = useToast();
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [selectedModuleId, setSelectedModuleId] = useState('');
-  const [selectedLessonId, setSelectedLessonId] = useState('');
+  const [coursesWithAudios, setCoursesWithAudios] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
 
-  const [audios, setAudios] = useState<Audio[]>([]);
-  const [loading, setLoading] = useState(false);
-
+  // Modal de visualização
   const [selectedAudio, setSelectedAudio] = useState<Audio | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch lessons for a specific module
+  // Função para tratamento de erros
+  const handleApiError = useCallback(
+    (error: unknown, context: string) => {
+      console.error(`${context}:`, error);
+    },
+    []
+  );
+
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
+  // Buscar áudios de uma aula específica
+  const fetchAudiosForLesson = useCallback(
+    async (lessonId: string): Promise<Audio[]> => {
+      try {
+        const token = getToken();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const url = `${apiUrl}/api/v1/audios?lessonId=${lessonId}`;
+
+        const response = await fetch(url, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const data = await response.json();
+        return data.audios || [];
+      } catch (error) {
+        handleApiError(error, `Error fetching audios for lesson ${lessonId}`);
+        return [];
+      }
+    },
+    [handleApiError, getToken]
+  );
+
+  // Buscar aulas de um módulo
   const fetchLessonsForModule = useCallback(
     async (courseId: string, moduleId: string): Promise<Lesson[]> => {
       try {
+        const token = getToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
-          { credentials: 'include' }
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+            credentials: 'include',
+          }
         );
 
         if (!response.ok) {
@@ -120,23 +176,39 @@ export default function ListAudios() {
         }
 
         const lessonsData = await response.json();
-        return lessonsData.lessons || [];
+        const lessons = lessonsData.lessons || [];
+
+        // Buscar áudios para cada aula
+        const lessonsWithAudios = await Promise.all(
+          lessons.map(async (lesson: Lesson) => {
+            const audios = await fetchAudiosForLesson(lesson.id);
+            return { ...lesson, audios };
+          })
+        );
+
+        return lessonsWithAudios.sort((a: Lesson, b: Lesson) => a.order - b.order);
       } catch (error) {
-        console.error(`Error fetching lessons for module ${moduleId}:`, error);
+        handleApiError(error, `Error fetching lessons for module ${moduleId}`);
         return [];
       }
     },
-    []
+    [handleApiError, fetchAudiosForLesson, getToken]
   );
 
-  // Fetch modules for a specific course
+  // Buscar módulos de um curso
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
+        const token = getToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules`,
-          { credentials: 'include' }
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+            credentials: 'include',
+          }
         );
 
         if (!response.ok) {
@@ -145,159 +217,172 @@ export default function ListAudios() {
 
         const modules: Module[] = await response.json();
 
-        // Fetch lessons for each module
-        const modulesWithLessons = await Promise.all(
-          modules.map(async module => {
-            const lessons = await fetchLessonsForModule(courseId, module.id);
-            return { ...module, lessons };
+        // Buscar aulas e áudios para cada módulo
+        const modulesWithData = await Promise.all(
+          modules.map(async moduleItem => {
+            const lessons = await fetchLessonsForModule(courseId, moduleItem.id);
+            return { ...moduleItem, lessons };
           })
         );
 
-        return modulesWithLessons;
+        return modulesWithData.sort((a, b) => a.order - b.order);
       } catch (error) {
-        console.error(`Error fetching modules for course ${courseId}:`, error);
+        handleApiError(error, `Error fetching modules for course ${courseId}`);
         return [];
       }
     },
-    [fetchLessonsForModule]
+    [handleApiError, fetchLessonsForModule, getToken]
   );
 
-  // Fetch courses with modules and lessons
-  const fetchCourses = useCallback(async () => {
-    setLoadingCourses(true);
+  // Buscar todos os dados
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+
     try {
+      const token = getToken();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
       const response = await fetch(`${apiUrl}/api/v1/courses`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
         credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error(`Failed to fetch courses: ${response.status}`);
       }
 
-      const coursesData: Course[] = await response.json();
+      const courses: Course[] = await response.json();
 
-      // Fetch modules and lessons for each course
       const coursesWithData = await Promise.all(
-        coursesData.map(async course => {
+        courses.map(async course => {
           const modules = await fetchModulesForCourse(course.id);
           return { ...course, modules };
         })
       );
 
-      setCourses(coursesWithData);
+      setCoursesWithAudios(coursesWithData);
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      handleApiError(error, 'Courses fetch error');
       toast({
         title: t('error.fetchCoursesTitle'),
         description: t('error.fetchCoursesDescription'),
         variant: 'destructive',
       });
     } finally {
-      setLoadingCourses(false);
-    }
-  }, [t, toast, fetchModulesForCourse]);
-
-  useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
-
-  // Get translation by locale
-  const getTranslation = useCallback(
-    (translations: Array<{ locale: string; title: string }>) => {
-      return (
-        translations.find(tr => tr.locale === locale) ||
-        translations.find(tr => tr.locale === 'pt') ||
-        translations[0]
-      );
-    },
-    [locale]
-  );
-
-  // Get audio translation by locale
-  const getAudioTranslation = useCallback(
-    (translations: Translation[]) => {
-      return (
-        translations.find(tr => tr.locale === locale) ||
-        translations.find(tr => tr.locale === 'pt') ||
-        translations[0]
-      );
-    },
-    [locale]
-  );
-
-  // Get selected course
-  const selectedCourse = courses.find(c => c.id === selectedCourseId);
-
-  // Get modules for selected course
-  const modules = selectedCourse?.modules || [];
-
-  // Get selected module
-  const selectedModule = modules.find(m => m.id === selectedModuleId);
-
-  // Get lessons for selected module
-  const lessons = selectedModule?.lessons || [];
-
-  // Handle course change
-  const handleCourseChange = (courseId: string) => {
-    setSelectedCourseId(courseId);
-    setSelectedModuleId('');
-    setSelectedLessonId('');
-    setAudios([]);
-  };
-
-  // Handle module change
-  const handleModuleChange = (moduleId: string) => {
-    setSelectedModuleId(moduleId);
-    setSelectedLessonId('');
-    setAudios([]);
-  };
-
-  // Handle lesson change
-  const handleLessonChange = async (lessonId: string) => {
-    setSelectedLessonId(lessonId);
-    if (lessonId) {
-      await fetchAudios(lessonId);
-    } else {
-      setAudios([]);
-    }
-  };
-
-  // Fetch audios for lesson
-  const fetchAudios = useCallback(async (lessonId: string) => {
-    setLoading(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
-      const response = await fetch(`${apiUrl}/api/v1/audios?lessonId=${lessonId}`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch audios');
-      }
-
-      const data = await response.json();
-      setAudios(data.audios || []);
-    } catch (error) {
-      console.error('Error fetching audios:', error);
-      toast({
-        title: t('error.fetchTitle'),
-        description: t('error.fetchDescription'),
-        variant: 'destructive',
-      });
-    } finally {
       setLoading(false);
     }
-  }, [t, toast]);
+  }, [toast, t, handleApiError, fetchModulesForCourse, getToken]);
 
-  // Format file size
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Obter tradução por locale
+  const getTranslationByLocale = useCallback(
+    (translations: Translation[], targetLocale: string) => {
+      return (
+        translations.find(tr => tr.locale === targetLocale) ||
+        translations.find(tr => tr.locale === 'pt') ||
+        translations[0]
+      );
+    },
+    []
+  );
+
+  // Obter tradução de áudio por locale
+  const getAudioTranslation = useCallback(
+    (translations: AudioTranslation[]) => {
+      return (
+        translations.find(tr => tr.locale === locale) ||
+        translations.find(tr => tr.locale === 'pt') ||
+        translations[0]
+      );
+    },
+    [locale]
+  );
+
+  // Toggle funções
+  const toggleCourse = useCallback((courseId: string) => {
+    setExpandedCourses(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(courseId)) {
+        newExpanded.delete(courseId);
+      } else {
+        newExpanded.add(courseId);
+      }
+      return newExpanded;
+    });
+  }, []);
+
+  const toggleModule = useCallback((moduleId: string) => {
+    setExpandedModules(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(moduleId)) {
+        newExpanded.delete(moduleId);
+      } else {
+        newExpanded.add(moduleId);
+      }
+      return newExpanded;
+    });
+  }, []);
+
+  const toggleLesson = useCallback((lessonId: string) => {
+    setExpandedLessons(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(lessonId)) {
+        newExpanded.delete(lessonId);
+      } else {
+        newExpanded.add(lessonId);
+      }
+      return newExpanded;
+    });
+  }, []);
+
+  // Calcular estatísticas de curso
+  const getCourseStats = useCallback(
+    (course: Course): CourseStats => {
+      const moduleCount = course.modules?.length || 0;
+      const lessonCount = course.modules?.reduce(
+        (sum, module) => sum + (module.lessons?.length || 0),
+        0
+      ) || 0;
+      const audioCount = course.modules?.reduce(
+        (sum, module) =>
+          sum + (module.lessons?.reduce(
+            (lessonSum, lesson) => lessonSum + (lesson.audios?.length || 0),
+            0
+          ) || 0),
+        0
+      ) || 0;
+
+      return { moduleCount, lessonCount, audioCount };
+    },
+    []
+  );
+
+  // Calcular estatísticas de módulo
+  const getModuleStats = useCallback(
+    (module: Module): ModuleStats => {
+      const lessonCount = module.lessons?.length || 0;
+      const audioCount = module.lessons?.reduce(
+        (sum, lesson) => sum + (lesson.audios?.length || 0),
+        0
+      ) || 0;
+
+      return { lessonCount, audioCount };
+    },
+    []
+  );
+
+  // Formatar tamanho de arquivo
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // Format date
+  // Formatar data
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(locale, {
       day: '2-digit',
@@ -308,168 +393,404 @@ export default function ListAudios() {
     });
   };
 
-  // Open view modal
+  // Abrir modal
   const openViewModal = (audio: Audio) => {
     setSelectedAudio(audio);
     setIsModalOpen(true);
   };
 
-  // Close modal
+  // Fechar modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedAudio(null);
   };
 
-  return (
-    <div className="space-y-6">
+  // Filtrar cursos
+  const filteredCourses = useMemo(() => {
+    return coursesWithAudios.filter(course => {
+      const courseTranslation = getTranslationByLocale(course.translations, locale);
+      const courseMatches =
+        course.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        courseTranslation?.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+      if (courseMatches) return true;
+
+      return course.modules?.some(module => {
+        const moduleTranslation = getTranslationByLocale(module.translations, locale);
+        const moduleMatches =
+          module.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          moduleTranslation?.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+        if (moduleMatches) return true;
+
+        return module.lessons?.some(lesson => {
+          const lessonTranslation = getTranslationByLocale(lesson.translations, locale);
+          const lessonMatches =
+            lessonTranslation?.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+          if (lessonMatches) return true;
+
+          return lesson.audios?.some(audio => {
+            const audioTranslation = getAudioTranslation(audio.translations);
+            return (
+              audio.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              audioTranslation?.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          });
+        });
+      });
+    });
+  }, [coursesWithAudios, searchTerm, getTranslationByLocale, getAudioTranslation, locale]);
+
+  // Estatísticas gerais
+  const totalStats = useMemo(() => {
+    const totalCourses = coursesWithAudios.length;
+    const totalModules = coursesWithAudios.reduce(
+      (sum, course) => sum + (course.modules?.length || 0),
+      0
+    );
+    const totalLessons = coursesWithAudios.reduce(
+      (sum, course) =>
+        sum + (course.modules?.reduce(
+          (moduleSum, module) => moduleSum + (module.lessons?.length || 0),
+          0
+        ) || 0),
+      0
+    );
+    const totalAudios = coursesWithAudios.reduce(
+      (sum, course) =>
+        sum + (course.modules?.reduce(
+          (moduleSum, module) =>
+            moduleSum + (module.lessons?.reduce(
+              (lessonSum, lesson) => lessonSum + (lesson.audios?.length || 0),
+              0
+            ) || 0),
+          0
+        ) || 0),
+      0
+    );
+
+    return { totalCourses, totalModules, totalLessons, totalAudios };
+  }, [coursesWithAudios]);
+
+  if (loading) {
+    return (
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-        {/* Header */}
-        <div className="mb-6 border-b border-gray-700 pb-4">
-          <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-            <Music size={24} className="text-secondary" />
-            {t('title')}
-          </h3>
-          <p className="text-gray-400 text-sm mt-1">{t('description')}</p>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-secondary animate-spin" />
+          <span className="ml-3 text-gray-400">{t('loading')}</span>
         </div>
+      </div>
+    );
+  }
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {/* Course Select */}
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <BookOpen size={16} className="text-secondary" />
-              {t('fields.course')}
-            </Label>
-            <Select
-              value={selectedCourseId}
-              onValueChange={handleCourseChange}
-              disabled={loadingCourses}
-            >
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                <SelectValue placeholder={loadingCourses ? t('loading') : t('placeholders.course')} />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                {courses.map(course => (
-                  <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-600">
-                    {getTranslation(course.translations)?.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+  return (
+    <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+          <Music size={24} className="text-secondary" />
+          {t('title')}
+        </h3>
 
-          {/* Module Select */}
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <Layers size={16} className="text-secondary" />
-              {t('fields.module')}
-            </Label>
-            <Select
-              value={selectedModuleId}
-              onValueChange={handleModuleChange}
-              disabled={!selectedCourseId || modules.length === 0}
-            >
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                <SelectValue placeholder={t('placeholders.module')} />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                {modules.map(module => (
-                  <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                    {getTranslation(module.translations)?.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Lesson Select */}
-          <div className="space-y-2">
-            <Label className="text-gray-300 flex items-center gap-2">
-              <Play size={16} className="text-secondary" />
-              {t('fields.lesson')}
-            </Label>
-            <Select
-              value={selectedLessonId}
-              onValueChange={handleLessonChange}
-              disabled={!selectedModuleId || lessons.length === 0}
-            >
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                <SelectValue placeholder={t('placeholders.lesson')} />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-700 border-gray-600">
-                {lessons.map(lesson => (
-                  <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
-                    {getTranslation(lesson.translations)?.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Barra de busca */}
+        <div className="relative">
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            placeholder={t('searchPlaceholder')}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+          />
         </div>
-
-        {/* Content */}
-        {!selectedLessonId ? (
-          <div className="text-center py-8">
-            <Music className="mx-auto mb-3 text-gray-500" size={32} />
-            <p className="text-gray-400 text-sm">{t('selectLesson')}</p>
-          </div>
-        ) : loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 text-secondary animate-spin" />
-            <span className="ml-2 text-gray-400 text-sm">{t('loading')}</span>
-          </div>
-        ) : audios.length === 0 ? (
-          <div className="text-center py-8">
-            <AlertCircle className="mx-auto mb-3 text-gray-500" size={32} />
-            <p className="text-gray-400 text-sm">{t('noAudios')}</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {audios.map(audio => {
-              const translation = getAudioTranslation(audio.translations);
-              return (
-                <div
-                  key={audio.id}
-                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 rounded-lg text-secondary font-bold text-sm">
-                      {audio.order}
-                    </div>
-                    <FileAudio size={24} className="text-secondary" />
-                    <div>
-                      <p className="text-white font-medium">{translation?.title}</p>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Hash size={12} />
-                          {t('order')}: {audio.order}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {audio.formattedDuration}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <HardDrive size={12} />
-                          {formatFileSize(audio.fileSize)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => openViewModal(audio)}
-                    className="p-2 text-gray-400 hover:text-secondary hover:bg-gray-700 rounded-lg transition-colors"
-                    title={t('view')}
-                  >
-                    <Eye size={18} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* View Modal */}
+      {/* Estatísticas */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalCourses}</p>
+          <p className="text-sm text-gray-400">{t('stats.courses')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalModules}</p>
+          <p className="text-sm text-gray-400">{t('stats.modules')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalLessons}</p>
+          <p className="text-sm text-gray-400">{t('stats.lessons')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalAudios}</p>
+          <p className="text-sm text-gray-400">{t('stats.audios')}</p>
+        </div>
+      </div>
+
+      {filteredCourses.length > 0 ? (
+        <div className="space-y-4">
+          {filteredCourses.map(course => {
+            const courseTranslation = getTranslationByLocale(course.translations, locale);
+            const isCourseExpanded = expandedCourses.has(course.id);
+            const courseStats = getCourseStats(course);
+
+            return (
+              <div key={course.id} className="border border-gray-700 rounded-lg overflow-hidden">
+                {/* Cabeçalho do curso */}
+                <div
+                  onClick={() => toggleCourse(course.id)}
+                  className="flex items-center gap-4 p-4 bg-gray-700/50 hover:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <button type="button" className="text-gray-400 hover:text-white transition-colors">
+                    {isCourseExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </button>
+
+                  <div className="relative w-16 h-12 rounded overflow-hidden flex-shrink-0">
+                    <Image
+                      src={course.imageUrl}
+                      alt={courseTranslation?.title || ''}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-white">
+                      {courseTranslation?.title || t('noTitle')}
+                    </h4>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>{t('slug')}: {course.slug}</span>
+                      <span className="flex items-center gap-1">
+                        <Layers size={12} />
+                        {courseStats.moduleCount} {t('modules')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Play size={12} />
+                        {courseStats.lessonCount} {t('lessons')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Music size={12} />
+                        {courseStats.audioCount} {t('audios')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Módulos do curso */}
+                {isCourseExpanded && (
+                  <div className="bg-gray-800/50 p-4">
+                    {courseStats.moduleCount > 0 ? (
+                      <div className="space-y-3">
+                        {course.modules?.map(module => {
+                          const moduleTranslation = getTranslationByLocale(module.translations, locale);
+                          const isModuleExpanded = expandedModules.has(module.id);
+                          const moduleStats = getModuleStats(module);
+
+                          return (
+                            <div key={module.id} className="border border-gray-600 rounded-lg overflow-hidden">
+                              {/* Cabeçalho do módulo */}
+                              <div
+                                onClick={() => toggleModule(module.id)}
+                                className="flex items-center gap-4 p-3 bg-gray-700/30 hover:bg-gray-700/50 transition-colors cursor-pointer"
+                              >
+                                <button type="button" className="text-gray-400 hover:text-white transition-colors">
+                                  {isModuleExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                </button>
+
+                                <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
+                                  {module.order}
+                                </div>
+
+                                {module.imageUrl ? (
+                                  <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
+                                    <Image
+                                      src={module.imageUrl}
+                                      alt={moduleTranslation?.title || ''}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                    <Layers size={12} className="text-gray-400" />
+                                  </div>
+                                )}
+
+                                <div className="flex-1">
+                                  <h5 className="text-white font-medium">
+                                    {moduleTranslation?.title || t('noTitle')}
+                                  </h5>
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span>{t('slug')}: {module.slug}</span>
+                                    <span className="flex items-center gap-1">
+                                      <Play size={10} />
+                                      {moduleStats.lessonCount} {t('lessons')}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Music size={10} />
+                                      {moduleStats.audioCount} {t('audios')}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Aulas do módulo */}
+                              {isModuleExpanded && (
+                                <div className="bg-gray-800/30 p-4">
+                                  {moduleStats.lessonCount > 0 ? (
+                                    <div className="space-y-3 pl-2">
+                                      {module.lessons?.map(lesson => {
+                                        const lessonTranslation = getTranslationByLocale(lesson.translations, locale);
+                                        const isLessonExpanded = expandedLessons.has(lesson.id);
+                                        const audioCount = lesson.audios?.length || 0;
+
+                                        return (
+                                          <div key={lesson.id} className="border border-gray-600 rounded-lg overflow-hidden">
+                                            {/* Cabeçalho da aula */}
+                                            <div
+                                              onClick={() => toggleLesson(lesson.id)}
+                                              className="flex items-center gap-4 p-3 bg-gray-700/30 border border-gray-700/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                            >
+                                              <button type="button" className="text-gray-400 hover:text-white transition-colors">
+                                                {isLessonExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                              </button>
+
+                                              <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 text-secondary rounded-full font-bold text-sm">
+                                                {lesson.order}
+                                              </div>
+
+                                              {lesson.imageUrl ? (
+                                                <div className="relative w-10 h-6 rounded overflow-hidden flex-shrink-0">
+                                                  <Image
+                                                    src={lesson.imageUrl}
+                                                    alt={lessonTranslation?.title || ''}
+                                                    fill
+                                                    className="object-cover"
+                                                  />
+                                                </div>
+                                              ) : (
+                                                <div className="w-10 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                                  <Play size={14} className="text-gray-400" />
+                                                </div>
+                                              )}
+
+                                              <div className="flex-1">
+                                                <h6 className="text-white text-base font-medium">
+                                                  {lessonTranslation?.title || t('noTitle')}
+                                                </h6>
+                                                <div className="flex items-center gap-3 text-sm text-gray-500">
+                                                  <span className="flex items-center gap-1.5">
+                                                    <Music size={12} />
+                                                    {audioCount} {t('audios')}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            {/* Áudios da aula */}
+                                            {isLessonExpanded && (
+                                              <div className="bg-gray-800/20 p-3">
+                                                {audioCount > 0 ? (
+                                                  <div className="space-y-2 pl-2">
+                                                    {lesson.audios?.map(audio => {
+                                                      const audioTranslation = getAudioTranslation(audio.translations);
+
+                                                      return (
+                                                        <div
+                                                          key={audio.id}
+                                                          className="flex items-center gap-3 p-2 bg-gray-700/20 rounded hover:bg-gray-700/40 transition-colors"
+                                                        >
+                                                          <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 rounded-lg text-secondary font-bold text-sm">
+                                                            {audio.order}
+                                                          </div>
+
+                                                          <div className="w-8 h-6 bg-secondary/30 rounded flex items-center justify-center flex-shrink-0">
+                                                            <FileAudio size={12} className="text-secondary" />
+                                                          </div>
+
+                                                          <div className="flex-1 min-w-0">
+                                                            <p className="text-white text-sm font-medium truncate">
+                                                              {audioTranslation?.title || t('noTitle')}
+                                                            </p>
+                                                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                              <span className="flex items-center gap-1">
+                                                                <Hash size={10} />
+                                                                {t('order')}: {audio.order}
+                                                              </span>
+                                                              <span className="flex items-center gap-1">
+                                                                <Clock size={10} />
+                                                                {audio.formattedDuration}
+                                                              </span>
+                                                              <span className="flex items-center gap-1">
+                                                                <HardDrive size={10} />
+                                                                {formatFileSize(audio.fileSize)}
+                                                              </span>
+                                                            </div>
+                                                          </div>
+
+                                                          {/* Ações */}
+                                                          <button
+                                                            type="button"
+                                                            onClick={e => {
+                                                              e.stopPropagation();
+                                                              openViewModal(audio);
+                                                            }}
+                                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                                                            title={t('view')}
+                                                          >
+                                                            <Eye size={16} />
+                                                          </button>
+                                                        </div>
+                                                      );
+                                                    })}
+                                                  </div>
+                                                ) : (
+                                                  <div className="text-center py-4">
+                                                    <Music size={32} className="text-gray-500 mx-auto mb-2" />
+                                                    <p className="text-gray-400 text-sm">{t('noAudios')}</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <div className="text-center py-4">
+                                      <Play size={32} className="text-gray-500 mx-auto mb-2" />
+                                      <p className="text-gray-400 text-sm">{t('noLessons')}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Layers size={48} className="text-gray-500 mx-auto mb-2" />
+                        <p className="text-gray-400">{t('noModules')}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Music size={64} className="text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">
+            {searchTerm ? t('noResults') : t('noCourses')}
+          </p>
+        </div>
+      )}
+
+      {/* Modal de Visualização */}
       {isModalOpen && selectedAudio && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}

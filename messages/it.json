@@ -4990,21 +4990,26 @@
   "listAudios": {
     "title": "Lista Audio",
     "description": "Visualizza gli audio registrati per lezione.",
-    "fields": {
-      "course": "Corso",
-      "module": "Modulo",
-      "lesson": "Lezione"
-    },
-    "placeholders": {
-      "course": "Seleziona un corso",
-      "module": "Seleziona un modulo",
-      "lesson": "Seleziona una lezione"
-    },
+    "searchPlaceholder": "Cerca per corso, modulo, lezione o audio...",
     "loading": "Caricamento audio...",
-    "selectLesson": "Seleziona una lezione per visualizzare gli audio",
     "noAudios": "Nessun audio registrato per questa lezione",
+    "noLessons": "Nessuna lezione trovata",
+    "noModules": "Nessun modulo trovato",
+    "noCourses": "Nessun corso trovato",
+    "noResults": "Nessun risultato trovato",
+    "noTitle": "Senza titolo",
     "view": "Visualizza",
     "order": "Ordine",
+    "slug": "Slug",
+    "modules": "moduli",
+    "lessons": "lezioni",
+    "audios": "audio",
+    "stats": {
+      "courses": "Corsi",
+      "modules": "Moduli",
+      "lessons": "Lezioni",
+      "audios": "Audio"
+    },
     "error": {
       "fetchCoursesTitle": "Errore nel caricamento dei corsi",
       "fetchCoursesDescription": "Non è stato possibile caricare la lista dei corsi",

@@ -5018,6 +5018,7 @@
     },
     "modal": {
       "title": "Dettagli Audio",
+      "player": "Riproduci Audio",
       "order": "Ordine",
       "duration": "Durata",
       "size": "Dimensione",

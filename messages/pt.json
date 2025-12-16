@@ -5091,6 +5091,7 @@
     },
     "modal": {
       "title": "Detalhes do Áudio",
+      "player": "Reproduzir Áudio",
       "order": "Ordem",
       "duration": "Duração",
       "size": "Tamanho",

@@ -5060,6 +5060,7 @@
     },
     "modal": {
       "title": "Detalles del Audio",
+      "player": "Reproducir Audio",
       "order": "Orden",
       "duration": "Duración",
       "size": "Tamaño",

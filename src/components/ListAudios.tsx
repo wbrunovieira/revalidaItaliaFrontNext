@@ -39,6 +39,7 @@ interface Audio {
   id: string;
   lessonId: string;
   filename: string;
+  url: string;
   durationInSeconds: number;
   formattedDuration: string;
   fileSize: number;
@@ -844,6 +845,27 @@ export default function ListAudios() {
                   </div>
                 </div>
               </div>
+
+              {/* Audio Player */}
+              {selectedAudio.url && (
+                <div>
+                  <label className="text-xs text-gray-500 uppercase tracking-wider flex items-center gap-1 mb-3">
+                    <Play size={12} />
+                    {t('modal.player')}
+                  </label>
+                  <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
+                    <audio
+                      src={selectedAudio.url}
+                      controls
+                      className="w-full"
+                      style={{
+                        backgroundColor: 'transparent',
+                        borderRadius: '8px',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Dates */}
               <div className="grid grid-cols-2 gap-4">

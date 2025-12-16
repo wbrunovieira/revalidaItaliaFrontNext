@@ -5068,6 +5068,7 @@
       "createdAt": "Creado el",
       "updatedAt": "Actualizado el",
       "transcription": "Transcripción",
+      "noTranscription": "Sin transcripción",
       "translations": "Traducciones",
       "noDescription": "Sin descripción",
       "close": "Cerrar"

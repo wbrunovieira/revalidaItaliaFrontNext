@@ -925,16 +925,18 @@ export default function ListAudios() {
               </div>
 
               {/* Transcription */}
-              {selectedAudio.transcription && (
-                <div>
-                  <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">
-                    {t('modal.transcription')}
-                  </label>
-                  <div className="bg-gray-700/50 rounded-lg p-3 border border-gray-600">
+              <div>
+                <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">
+                  {t('modal.transcription')}
+                </label>
+                <div className="bg-gray-700/50 rounded-lg p-3 border border-gray-600">
+                  {selectedAudio.transcription ? (
                     <p className="text-gray-300 text-sm whitespace-pre-wrap">{selectedAudio.transcription}</p>
-                  </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">{t('modal.noTranscription')}</p>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Translations */}
               <div>

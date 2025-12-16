@@ -5026,6 +5026,7 @@
       "createdAt": "Creato il",
       "updatedAt": "Aggiornato il",
       "transcription": "Trascrizione",
+      "noTranscription": "Nessuna trascrizione",
       "translations": "Traduzioni",
       "noDescription": "Nessuna descrizione",
       "close": "Chiudi"

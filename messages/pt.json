@@ -5099,6 +5099,7 @@
       "createdAt": "Criado em",
       "updatedAt": "Atualizado em",
       "transcription": "Transcrição",
+      "noTranscription": "Sem transcrição",
       "translations": "Traduções",
       "noDescription": "Sem descrição",
       "close": "Fechar"

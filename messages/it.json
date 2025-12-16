@@ -4999,6 +4999,7 @@
     "noResults": "Nessun risultato trovato",
     "noTitle": "Senza titolo",
     "view": "Visualizza",
+    "edit": "Modifica",
     "order": "Ordine",
     "slug": "Slug",
     "modules": "moduli",
@@ -5029,6 +5030,55 @@
       "noDescription": "Nessuna descrizione",
       "close": "Chiudi"
     }
+  },
+
+  "editAudio": {
+    "title": "Modifica Audio",
+    "loadingOrders": "Caricamento ordini...",
+    "noOrdersAvailable": "Nessun ordine disponibile",
+    "current": "attuale",
+    "usedOrders": "Ordini occupati",
+    "fields": {
+      "order": "Ordine",
+      "replaceFile": "Sostituisci File",
+      "transcription": "Trascrizione",
+      "title": "Titolo",
+      "description": "Descrizione"
+    },
+    "placeholders": {
+      "order": "Seleziona l'ordine",
+      "transcription": "Inserisci la trascrizione dell'audio...",
+      "title": "Inserisci il titolo",
+      "description": "Inserisci la descrizione (opzionale)"
+    },
+    "upload": {
+      "click": "Clicca per selezionare un nuovo file",
+      "formats": "MP3, WAV, OGG, AAC, M4A, WebM (max. 200MB)"
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "spanish": "Spagnolo",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "title": "Errore nell'aggiornamento",
+      "orderRequired": "L'ordine è obbligatorio",
+      "orderExists": "Questo ordine è già in uso",
+      "titleRequired": "Il titolo è obbligatorio",
+      "fileTooLarge": "File troppo grande (max. 200MB)",
+      "invalidFileType": "Tipo di file non supportato",
+      "durationCalculation": "Errore nel calcolo della durata dell'audio",
+      "orderConflict": "Questo ordine esiste già per un altro audio",
+      "saveFailed": "Errore nel salvataggio delle modifiche"
+    },
+    "success": {
+      "title": "Audio aggiornato",
+      "description": "Le modifiche sono state salvate con successo"
+    },
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio..."
   },
 
   "listEnvironments3D": {

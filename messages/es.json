@@ -5041,6 +5041,7 @@
     "noResults": "Ningún resultado encontrado",
     "noTitle": "Sin título",
     "view": "Visualizar",
+    "edit": "Editar",
     "order": "Orden",
     "slug": "Slug",
     "modules": "módulos",
@@ -5071,6 +5072,55 @@
       "noDescription": "Sin descripción",
       "close": "Cerrar"
     }
+  },
+
+  "editAudio": {
+    "title": "Editar Audio",
+    "loadingOrders": "Cargando órdenes...",
+    "noOrdersAvailable": "Ningún orden disponible",
+    "current": "actual",
+    "usedOrders": "Órdenes ocupados",
+    "fields": {
+      "order": "Orden",
+      "replaceFile": "Reemplazar Archivo",
+      "transcription": "Transcripción",
+      "title": "Título",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "order": "Selecciona el orden",
+      "transcription": "Ingresa la transcripción del audio...",
+      "title": "Ingresa el título",
+      "description": "Ingresa la descripción (opcional)"
+    },
+    "upload": {
+      "click": "Haz clic para seleccionar un nuevo archivo",
+      "formats": "MP3, WAV, OGG, AAC, M4A, WebM (máx. 200MB)"
+    },
+    "translations": {
+      "title": "Traducciones",
+      "portuguese": "Portugués",
+      "spanish": "Español",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "title": "Error al actualizar",
+      "orderRequired": "El orden es obligatorio",
+      "orderExists": "Este orden ya está en uso",
+      "titleRequired": "El título es obligatorio",
+      "fileTooLarge": "Archivo muy grande (máx. 200MB)",
+      "invalidFileType": "Tipo de archivo no soportado",
+      "durationCalculation": "Error al calcular la duración del audio",
+      "orderConflict": "Este orden ya existe para otro audio",
+      "saveFailed": "Error al guardar los cambios"
+    },
+    "success": {
+      "title": "Audio actualizado",
+      "description": "Los cambios se guardaron exitosamente"
+    },
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando..."
   },
 
   "listEnvironments3D": {

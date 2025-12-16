@@ -26,8 +26,10 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  Pencil,
 } from 'lucide-react';
 import Image from 'next/image';
+import EditAudioModal from './EditAudioModal';
 
 interface AudioTranslation {
   locale: 'pt' | 'it' | 'es';
@@ -110,6 +112,11 @@ export default function ListAudios() {
   // Modal de visualização
   const [selectedAudio, setSelectedAudio] = useState<Audio | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modal de edição
+  const [editingAudio, setEditingAudio] = useState<Audio | null>(null);
+  const [editingLessonId, setEditingLessonId] = useState<string>('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Função para tratamento de erros
   const handleApiError = useCallback(
@@ -394,16 +401,35 @@ export default function ListAudios() {
     });
   };
 
-  // Abrir modal
+  // Abrir modal de visualização
   const openViewModal = (audio: Audio) => {
     setSelectedAudio(audio);
     setIsModalOpen(true);
   };
 
-  // Fechar modal
+  // Fechar modal de visualização
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedAudio(null);
+  };
+
+  // Abrir modal de edição
+  const openEditModal = (audio: Audio, lessonId: string) => {
+    setEditingAudio(audio);
+    setEditingLessonId(lessonId);
+    setIsEditModalOpen(true);
+  };
+
+  // Fechar modal de edição
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingAudio(null);
+    setEditingLessonId('');
+  };
+
+  // Callback após salvar edição
+  const handleEditSave = () => {
+    fetchData();
   };
 
   // Filtrar cursos
@@ -731,17 +757,30 @@ export default function ListAudios() {
                                                           </div>
 
                                                           {/* Ações */}
-                                                          <button
-                                                            type="button"
-                                                            onClick={e => {
-                                                              e.stopPropagation();
-                                                              openViewModal(audio);
-                                                            }}
-                                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
-                                                            title={t('view')}
-                                                          >
-                                                            <Eye size={16} />
-                                                          </button>
+                                                          <div className="flex items-center gap-1">
+                                                            <button
+                                                              type="button"
+                                                              onClick={e => {
+                                                                e.stopPropagation();
+                                                                openViewModal(audio);
+                                                              }}
+                                                              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                                                              title={t('view')}
+                                                            >
+                                                              <Eye size={16} />
+                                                            </button>
+                                                            <button
+                                                              type="button"
+                                                              onClick={e => {
+                                                                e.stopPropagation();
+                                                                openEditModal(audio, lesson.id);
+                                                              }}
+                                                              className="p-1.5 text-gray-400 hover:text-secondary hover:bg-gray-600 rounded transition-all"
+                                                              title={t('edit')}
+                                                            >
+                                                              <Pencil size={16} />
+                                                            </button>
+                                                          </div>
                                                         </div>
                                                       );
                                                     })}
@@ -942,6 +981,15 @@ export default function ListAudios() {
           </div>
         </div>
       )}
+
+      {/* Modal de Edição */}
+      <EditAudioModal
+        audio={editingAudio}
+        lessonId={editingLessonId}
+        isOpen={isEditModalOpen}
+        onClose={closeEditModal}
+        onSave={handleEditSave}
+      />
     </div>
   );
 }

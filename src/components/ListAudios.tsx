@@ -112,6 +112,7 @@ export default function ListAudios() {
   // Modal de visualização
   const [selectedAudio, setSelectedAudio] = useState<Audio | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingAudioDetails, setLoadingAudioDetails] = useState(false);
 
   // Modal de edição
   const [editingAudio, setEditingAudio] = useState<Audio | null>(null);
@@ -401,10 +402,58 @@ export default function ListAudios() {
     });
   };
 
+  // Buscar detalhes do áudio por ID
+  const fetchAudioById = useCallback(
+    async (audioId: string): Promise<Audio | null> => {
+      try {
+        const token = getToken();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const url = `${apiUrl}/api/v1/audios/${audioId}`;
+
+        const response = await fetch(url, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        // A API retorna { audio: {...} }, extrair o objeto audio
+        return data.audio || data;
+      } catch (error) {
+        handleApiError(error, `Error fetching audio ${audioId}`);
+        return null;
+      }
+    },
+    [handleApiError, getToken]
+  );
+
   // Abrir modal de visualização
-  const openViewModal = (audio: Audio) => {
-    setSelectedAudio(audio);
+  const openViewModal = async (audio: Audio) => {
     setIsModalOpen(true);
+    setLoadingAudioDetails(true);
+
+    // Buscar detalhes completos do áudio (inclui transcription)
+    const audioDetails = await fetchAudioById(audio.id);
+
+    if (audioDetails) {
+      // Mesclar dados: usar transcription do detalhe mas manter translations da lista
+      // pois a API de detalhe pode não retornar translations no mesmo formato
+      setSelectedAudio({
+        ...audio,
+        ...audioDetails,
+        translations: audioDetails.translations || audio.translations,
+      });
+    } else {
+      // Fallback para dados da lista se falhar
+      setSelectedAudio(audio);
+    }
+
+    setLoadingAudioDetails(false);
   };
 
   // Fechar modal de visualização
@@ -831,7 +880,7 @@ export default function ListAudios() {
       )}
 
       {/* Modal de Visualização */}
-      {isModalOpen && selectedAudio && (
+      {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
           <div
@@ -856,6 +905,12 @@ export default function ListAudios() {
             </div>
 
             {/* Modal Body */}
+            {loadingAudioDetails ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-secondary animate-spin" />
+                <span className="ml-3 text-gray-400">{t('loading')}</span>
+              </div>
+            ) : selectedAudio ? (
             <div className="p-6 space-y-6">
               {/* File Info */}
               <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
@@ -970,6 +1025,7 @@ export default function ListAudios() {
                 </div>
               </div>
             </div>
+            ) : null}
 
             {/* Modal Footer */}
             <div className="flex justify-end p-4 border-t border-gray-700 sticky bottom-0 bg-gray-800">

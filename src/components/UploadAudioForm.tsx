@@ -429,6 +429,22 @@ export default function UploadAudioForm() {
     setLoading(true);
 
     try {
+      // Get token from cookies
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        toast({
+          title: t('error.uploadTitle'),
+          description: t('error.authRequired'),
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
       const formDataToSend = new FormData();
@@ -458,6 +474,10 @@ export default function UploadAudioForm() {
 
       const response = await fetch(`${apiUrl}/api/v1/audios/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // DO NOT set Content-Type - FormData sets it automatically with boundary
+        },
         credentials: 'include',
         body: formDataToSend,
       });

@@ -2586,7 +2586,7 @@
       "title": "Ingresa el título del audio",
       "description": "Descripción opcional del audio"
     },
-    "uploadHint": "Haz clic para seleccionar o arrastra un archivo de audio",
+    "uploadHint": "Haz clic para seleccionar un archivo de audio",
     "supportedFormats": "Formatos soportados: MP3, WAV, OGG, AAC, M4A, WebM",
     "maxSize": "Tamaño máximo: 200MB",
     "calculatingDuration": "Calculando duración...",
@@ -2605,7 +2605,8 @@
       "uploadTitle": "Error en la subida",
       "uploadDescription": "No se pudo subir el audio",
       "lessonNotFound": "La lección seleccionada no fue encontrada",
-      "fileTooLarge": "El archivo es muy grande. Tamaño máximo: 200MB"
+      "fileTooLarge": "El archivo es muy grande. Tamaño máximo: 200MB",
+      "authRequired": "Sesión expirada. Por favor, inicia sesión nuevamente."
     },
     "errors": {
       "courseRequired": "Por favor, selecciona un curso",
@@ -5045,6 +5046,7 @@
     "selectLesson": "Selecciona una lección para ver los audios",
     "noAudios": "Ningún audio registrado para esta lección",
     "view": "Visualizar",
+    "order": "Orden",
     "error": {
       "fetchCoursesTitle": "Error al cargar cursos",
       "fetchCoursesDescription": "No se pudo cargar la lista de cursos",
@@ -5053,6 +5055,7 @@
     },
     "modal": {
       "title": "Detalles del Audio",
+      "order": "Orden",
       "duration": "Duración",
       "size": "Tamaño",
       "createdAt": "Creado el",

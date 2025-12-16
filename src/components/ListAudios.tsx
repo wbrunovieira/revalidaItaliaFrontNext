@@ -27,6 +27,7 @@ import {
   Layers,
   Play,
   HardDrive,
+  Hash,
 } from 'lucide-react';
 
 interface Translation {
@@ -432,10 +433,17 @@ export default function ListAudios() {
                   className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600"
                 >
                   <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 rounded-lg text-secondary font-bold text-sm">
+                      {audio.order}
+                    </div>
                     <FileAudio size={24} className="text-secondary" />
                     <div>
                       <p className="text-white font-medium">{translation?.title}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Hash size={12} />
+                          {t('order')}: {audio.order}
+                        </span>
                         <span className="flex items-center gap-1">
                           <Clock size={12} />
                           {audio.formattedDuration}
@@ -491,13 +499,20 @@ export default function ListAudios() {
               {/* File Info */}
               <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
                 <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center justify-center w-10 h-10 bg-secondary/20 rounded-lg text-secondary font-bold">
+                    {selectedAudio.order}
+                  </div>
                   <FileAudio size={32} className="text-secondary" />
                   <div>
                     <p className="text-white font-medium">{selectedAudio.filename}</p>
                     <p className="text-xs text-gray-400">{selectedAudio.mimeType}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Hash size={14} />
+                    <span>{t('modal.order')}: {selectedAudio.order}</span>
+                  </div>
                   <div className="flex items-center gap-2 text-gray-400">
                     <Clock size={14} />
                     <span>{t('modal.duration')}: {selectedAudio.formattedDuration}</span>

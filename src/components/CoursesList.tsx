@@ -13,6 +13,7 @@ import {
   Search,
   Globe,
   Loader2,
+  Hash,
 } from 'lucide-react';
 import Image from 'next/image';
 import CourseViewModal from './CourseViewModal';
@@ -29,6 +30,7 @@ interface Course {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
 }
 
@@ -463,6 +465,10 @@ export default function CoursesList() {
 
                     {/* Course Details */}
                     <div className="space-y-1 text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Hash size={12} />
+                        <span>{t('order')}: {course.order}</span>
+                      </div>
                       <div>Slug: {course.slug}</div>
                       <div>ID: {course.id.slice(0, 8)}…</div>
                       <div className="flex items-center gap-1">
@@ -527,6 +533,10 @@ export default function CoursesList() {
                         {tr.description}
                       </p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Hash size={12} />
+                          {t('order')}: {course.order}
+                        </span>
                         <span>Slug: {course.slug}</span>
                         <span>
                           ID: {course.id.slice(0, 8)}…

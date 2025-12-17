@@ -40,6 +40,7 @@ interface TrackViewData {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   courseIds: string[];
   translations: Translation[];
   courses?: Course[];
@@ -302,6 +303,22 @@ export default function TrackViewModal({
                       <Copy size={14} />
                     </button>
                   </div>
+                </div>
+
+                {/* Order */}
+                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Hash
+                      size={16}
+                      className="text-gray-400"
+                    />
+                    <span className="text-sm font-medium text-gray-300">
+                      {t('fields.order')}
+                    </span>
+                  </div>
+                  <span className="text-sm text-white font-mono">
+                    {track.order}
+                  </span>
                 </div>
 
                 {/* URL da Imagem */}

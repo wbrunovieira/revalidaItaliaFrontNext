@@ -2777,6 +2777,7 @@
     "searchPlaceholder": "Cerca percorsi...",
     "languages": "lingue",
     "courses": "corsi",
+    "order": "Ordine",
     "coursesInTrack": "Corsi in questo percorso",
     "created": "Creato",
     "noResults": "Nessun percorso trovato con questo termine.",
@@ -5796,6 +5797,7 @@
     "searchPlaceholder": "Cerca corsi...",
     "loading": "Caricamento corsi...",
     "languages": "lingue",
+    "order": "Ordine",
     "noResults": "Nessun corso trovato con questo termine.",
     "noCourses": "Nessun corso registrato ancora.",
     "deleteConfirm": "Sei sicuro di voler eliminare questo corso?",
@@ -6725,6 +6727,7 @@
   "fields": {
     "id": "ID del Corso",
     "slug": "Slug (URL)",
+    "order": "Ordine",
     "imageUrl": "URL dell'Immagine",
     "createdAt": "Data di Creazione",
     "updatedAt": "Ultimo Aggiornamento",
@@ -6849,6 +6852,7 @@
   "fields": {
     "id": "ID del Percorso",
     "slug": "Slug (URL)",
+    "order": "Ordine",
     "imageUrl": "URL dell'Immagine",
     "createdAt": "Data di Creazione",
     "updatedAt": "Ultimo Aggiornamento",

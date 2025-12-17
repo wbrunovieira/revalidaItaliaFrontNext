@@ -2781,6 +2781,7 @@
     "searchPlaceholder": "Buscar trilhas...",
     "languages": "idiomas",
     "courses": "cursos",
+    "order": "Ordem",
     "coursesInTrack": "Cursos nesta trilha",
     "created": "Criado",
     "noResults": "Nenhuma trilha encontrada com este termo.",
@@ -5832,6 +5833,7 @@
     "searchPlaceholder": "Buscar cursos...",
     "loading": "Carregando cursos...",
     "languages": "idiomas",
+    "order": "Ordem",
     "noResults": "Nenhum curso encontrado com este termo.",
     "noCourses": "Nenhum curso cadastrado ainda.",
     "deleteConfirm": "Tem certeza que deseja excluir este curso?",
@@ -7080,6 +7082,7 @@
   "fields": {
     "id": "ID do Curso",
     "slug": "Slug (URL)",
+    "order": "Ordem",
     "imageUrl": "URL da Imagem",
     "createdAt": "Data de Criação",
     "updatedAt": "Última Atualização",
@@ -7204,6 +7207,7 @@
   "fields": {
     "id": "ID da Trilha",
     "slug": "Slug (URL)",
+    "order": "Ordem",
     "imageUrl": "URL da Imagem",
     "createdAt": "Data de Criação",
     "updatedAt": "Última Atualização",

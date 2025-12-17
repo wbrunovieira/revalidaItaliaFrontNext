@@ -2821,6 +2821,7 @@
     "searchPlaceholder": "Buscar rutas...",
     "languages": "idiomas",
     "courses": "cursos",
+    "order": "Orden",
     "coursesInTrack": "Cursos en esta ruta",
     "created": "Creado",
     "noResults": "Ninguna ruta encontrada con este término.",
@@ -5834,6 +5835,7 @@
     "searchPlaceholder": "Buscar cursos...",
     "loading": "Cargando cursos...",
     "languages": "idiomas",
+    "order": "Orden",
     "noResults": "Ningún curso encontrado con este término.",
     "noCourses": "Ningún curso registrado aún.",
     "deleteConfirm": "¿Está seguro que desea eliminar este curso?",
@@ -6756,6 +6758,7 @@
   "fields": {
     "id": "ID del Curso",
     "slug": "Slug (URL)",
+    "order": "Orden",
     "imageUrl": "URL de la Imagen",
     "createdAt": "Fecha de Creación",
     "updatedAt": "Última Actualización",
@@ -6880,6 +6883,7 @@
   "fields": {
     "id": "ID de la Ruta",
     "slug": "Slug (URL)",
+    "order": "Orden",
     "imageUrl": "URL de la Imagen",
     "createdAt": "Fecha de Creación",
     "updatedAt": "Última Actualización",

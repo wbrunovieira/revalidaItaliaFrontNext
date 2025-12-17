@@ -14,6 +14,7 @@ import {
   Globe,
   Type,
   FileText,
+  Hash,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -27,6 +28,7 @@ interface CourseDetails {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
 }
 
@@ -288,6 +290,28 @@ export default function CourseViewModal({
                         <Copy size={16} />
                       )}
                     </button>
+                  </div>
+                </div>
+
+                {/* Order */}
+                <div className="bg-gray-700/50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                        <Hash
+                          size={20}
+                          className="text-secondary"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-400">
+                          {t('fields.order')}
+                        </p>
+                        <p className="text-white font-mono">
+                          {course.order}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

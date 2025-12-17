@@ -13,6 +13,7 @@ import {
   Search,
   BookOpen,
   Loader2,
+  Hash,
 } from 'lucide-react';
 import Image from 'next/image';
 import TrackViewModal from './TrackViewModal';
@@ -45,6 +46,7 @@ interface Track {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
   courses?: Course[];
   courseIds?: string[];
@@ -57,6 +59,7 @@ interface TrackForEdit {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
   courses?: Course[];
   courseIds: string[];
@@ -554,6 +557,10 @@ export default function TracksList() {
                         'Sem descrição'}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Hash size={12} />
+                        {t('order')}: {track.order}
+                      </span>
                       <span>Slug: {track.slug}</span>
                       <span className="flex items-center gap-1">
                         <BookOpen size={12} />

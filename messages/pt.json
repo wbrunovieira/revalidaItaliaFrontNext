@@ -7161,8 +7161,14 @@
     "occupiedHint": "Ordens ocupadas",
     "none": "nenhuma"
   },
+  "loadingOrders": "Carregando ordens...",
+  "currentOrder": "atual",
+  "occupiedOrders": "Ordens ocupadas",
+  "noOrdersAvailable": "Nenhuma ordem disponível",
+  "none": "nenhuma",
   "hints": {
-    "slug": "Use apenas letras minúsculas, números e hífens"
+    "slug": "Use apenas letras minúsculas, números e hífens",
+    "order": "Selecione a ordem de exibição do curso"
   },
   "translations": {
     "title": "Traduções",

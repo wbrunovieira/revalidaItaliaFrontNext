@@ -34,6 +34,7 @@ interface CourseProgress {
 interface Course {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   moduleCount: number;
   translations?: Translation[];
@@ -203,7 +204,7 @@ export default async function CoursesPage({
           >
             {courses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {courses.map((course, index) => (
+                {[...courses].sort((a, b) => a.order - b.order).map((course, index) => (
                   <CourseCard
                     key={course.id}
                     course={course}

@@ -28,6 +28,7 @@ interface TrackProgress {
 interface Track {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   courseCount: number;
   translations?: Translation[];
@@ -169,7 +170,7 @@ export default async function TracksPage({ params }: { params: Promise<{ locale:
         <div className="px-6 pb-40 sm:pb-8">
           {tracks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {tracks.map((track, index) => (
+              {[...tracks].sort((a, b) => a.order - b.order).map((track, index) => (
                 <TrackCard key={track.id} track={track} locale={locale} index={index} />
               ))}
             </div>

@@ -36,6 +36,7 @@ interface TrackProgress {
 interface Track {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   courseCount: number;
   courses?: Course[];
@@ -46,6 +47,7 @@ interface Track {
 interface EnrichedTrack {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   courseCount: number;
   courses?: { id: string; title: string }[];
@@ -64,6 +66,7 @@ interface CourseProgress {
 interface Course {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   moduleCount: number;
   translations?: Translation[];
@@ -123,23 +126,25 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
     showToastOnError: false,
   });
 
-  // Enrich tracks with course data
+  // Enrich tracks with course data and sort by order
   const enrichedTracks: EnrichedTrack[] =
-    tracks?.map(track => {
-      const trackWithIds = track as Track & { courseIds?: string[] };
-      const courseIds = trackWithIds.courseIds || [];
-      const trackCourses = courses?.filter(course => courseIds.includes(course.id)) || [];
+    tracks
+      ?.map(track => {
+        const trackWithIds = track as Track & { courseIds?: string[] };
+        const courseIds = trackWithIds.courseIds || [];
+        const trackCourses = courses?.filter(course => courseIds.includes(course.id)) || [];
 
-      return {
-        ...track,
-        courseCount: track.courseCount || courseIds.length,
-        courses: trackCourses.map(course => ({
-          id: course.id,
-          title: course.translations?.[0]?.title || course.slug || '',
-        })),
-        progress: track.progress,
-      };
-    }) || [];
+        return {
+          ...track,
+          courseCount: track.courseCount || courseIds.length,
+          courses: trackCourses.map(course => ({
+            id: course.id,
+            title: course.translations?.[0]?.title || course.slug || '',
+          })),
+          progress: track.progress,
+        };
+      })
+      .sort((a, b) => a.order - b.order) || [];
 
   const isLoading = tracksLoading || coursesLoading;
 
@@ -266,9 +271,9 @@ export default function DashboardClient({ locale, initialTracks = [], initialCou
         </div>
       ) : (
         <div className="mt-6 sm:mt-8 w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12 lg:mb-16">
-          {courses?.map((course, index) => (
+          {[...(courses || [])].sort((a, b) => a.order - b.order).map((course, index) => (
             <CourseCard key={course.id} course={course} locale={locale} index={index} />
-          )) || []}
+          ))}
         </div>
       )}
 

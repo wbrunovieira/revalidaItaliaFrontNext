@@ -25,6 +25,7 @@ interface TrackProgress {
 interface Track {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   courseCount: number;
   courses?: Course[];
@@ -43,6 +44,7 @@ interface CourseProgress {
 interface Course {
   id: string;
   slug: string;
+  order: number;
   imageUrl: string;
   moduleCount: number;
   translations?: Translation[];

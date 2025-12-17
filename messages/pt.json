@@ -7146,13 +7146,20 @@
     "imageUrl": "URL da Imagem",
     "courseImage": "Imagem do Curso",
     "title": "Título",
-    "description": "Descrição"
+    "description": "Descrição",
+    "order": "Ordem"
   },
   "placeholders": {
     "slug": "matematica-basica",
     "imageUrl": "/images/curso-matematica.jpg",
     "title": "Digite o título do curso",
-    "description": "Digite a descrição do curso"
+    "description": "Digite a descrição do curso",
+    "order": "Selecione a ordem"
+  },
+  "order": {
+    "current": "atual",
+    "occupiedHint": "Ordens ocupadas",
+    "none": "nenhuma"
   },
   "hints": {
     "slug": "Use apenas letras minúsculas, números e hífens"
@@ -7169,6 +7176,7 @@
     "imageRequired": "URL da imagem é obrigatória",
     "titleRequired": "Título é obrigatório",
     "descriptionRequired": "Descrição é obrigatória",
+    "orderExists": "Esta ordem já está em uso por outro curso",
     "invalidImageType": "Tipo de arquivo inválido. Use JPG, PNG, GIF ou WebP",
     "imageTooLarge": "Arquivo muito grande. O tamanho máximo é 5MB",
     "uploadFailed": "Erro ao fazer upload da imagem"
@@ -7179,7 +7187,9 @@
   },
   "error": {
     "title": "Erro ao atualizar",
-    "description": "Não foi possível atualizar as informações do curso."
+    "description": "Não foi possível atualizar as informações do curso.",
+    "fetchOrdersTitle": "Erro ao carregar ordens",
+    "fetchOrdersDescription": "Não foi possível carregar a lista de ordens disponíveis"
   },
   "save": "Salvar",
   "saving": "Salvando...",
@@ -7243,13 +7253,20 @@
     "imageUrl": "URL da Imagem",
     "trackImage": "Imagem da Trilha",
     "title": "Título",
-    "description": "Descrição"
+    "description": "Descrição",
+    "order": "Ordem"
   },
   "placeholders": {
     "slug": "trilha-iniciantes",
     "imageUrl": "/images/trilha-exemplo.jpg",
     "title": "Digite o título da trilha",
-    "description": "Digite a descrição da trilha"
+    "description": "Digite a descrição da trilha",
+    "order": "Selecione a ordem"
+  },
+  "order": {
+    "current": "atual",
+    "occupiedHint": "Ordens ocupadas",
+    "none": "nenhuma"
   },
   "hints": {
     "slug": "Use apenas letras minúsculas, números e hífens"
@@ -7272,6 +7289,7 @@
     "coursesRequired": "Selecione pelo menos um curso",
     "titleRequired": "Título é obrigatório",
     "descriptionRequired": "Descrição é obrigatória",
+    "orderExists": "Esta ordem já está em uso por outra trilha",
     "fetchCoursesTitle": "Erro ao carregar cursos",
     "fetchCoursesDescription": "Não foi possível carregar a lista de cursos disponíveis",
     "invalidImageType": "Tipo de arquivo inválido. Use JPG, PNG, GIF ou WebP",
@@ -7284,7 +7302,9 @@
   },
   "error": {
     "title": "Erro ao atualizar",
-    "description": "Não foi possível atualizar as informações da trilha."
+    "description": "Não foi possível atualizar as informações da trilha.",
+    "fetchOrdersTitle": "Erro ao carregar ordens",
+    "fetchOrdersDescription": "Não foi possível carregar a lista de ordens disponíveis"
   },
   "save": "Salvar",
   "saving": "Salvando...",

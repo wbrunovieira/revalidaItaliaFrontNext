@@ -6822,13 +6822,20 @@
     "imageUrl": "URL de la Imagen",
     "courseImage": "Imagen del Curso",
     "title": "Título",
-    "description": "Descripción"
+    "description": "Descripción",
+    "order": "Orden"
   },
   "placeholders": {
     "slug": "matematica-basica",
     "imageUrl": "/images/curso-matematica.jpg",
     "title": "Ingrese el título del curso",
-    "description": "Ingrese la descripción del curso"
+    "description": "Ingrese la descripción del curso",
+    "order": "Seleccione el orden"
+  },
+  "order": {
+    "current": "actual",
+    "occupiedHint": "Órdenes ocupados",
+    "none": "ninguno"
   },
   "hints": {
     "slug": "Use solo letras minúsculas, números y guiones"
@@ -6845,6 +6852,7 @@
     "imageRequired": "URL de la imagen es obligatoria",
     "titleRequired": "Título es obligatorio",
     "descriptionRequired": "Descripción es obligatoria",
+    "orderExists": "Este orden ya está en uso por otro curso",
     "invalidImageType": "Tipo de archivo inválido. Use JPG, PNG, GIF o WebP",
     "imageTooLarge": "Archivo demasiado grande. El tamaño máximo es 5MB",
     "uploadFailed": "Error al cargar la imagen"
@@ -6855,7 +6863,9 @@
   },
   "error": {
     "title": "Error al actualizar",
-    "description": "No fue posible actualizar la información del curso."
+    "description": "No fue posible actualizar la información del curso.",
+    "fetchOrdersTitle": "Error al cargar órdenes",
+    "fetchOrdersDescription": "No fue posible cargar la lista de órdenes disponibles"
   },
   "save": "Guardar",
   "saving": "Guardando...",
@@ -6919,13 +6929,20 @@
     "imageUrl": "URL de la Imagen",
     "trackImage": "Imagen de la Ruta",
     "title": "Título",
-    "description": "Descripción"
+    "description": "Descripción",
+    "order": "Orden"
   },
   "placeholders": {
     "slug": "ruta-principiantes",
     "imageUrl": "/images/ruta-ejemplo.jpg",
     "title": "Ingrese el título de la ruta",
-    "description": "Ingrese la descripción de la ruta"
+    "description": "Ingrese la descripción de la ruta",
+    "order": "Seleccione el orden"
+  },
+  "order": {
+    "current": "actual",
+    "occupiedHint": "Órdenes ocupados",
+    "none": "ninguno"
   },
   "hints": {
     "slug": "Use solo letras minúsculas, números y guiones"
@@ -6948,6 +6965,7 @@
     "coursesRequired": "Seleccione al menos un curso",
     "titleRequired": "Título es obligatorio",
     "descriptionRequired": "Descripción es obligatoria",
+    "orderExists": "Este orden ya está en uso por otra ruta",
     "fetchCoursesTitle": "Error al cargar cursos",
     "fetchCoursesDescription": "No fue posible cargar la lista de cursos disponibles",
     "invalidImageType": "Tipo de archivo inválido. Use JPG, PNG, GIF o WebP",
@@ -6960,7 +6978,9 @@
   },
   "error": {
     "title": "Error al actualizar",
-    "description": "No fue posible actualizar la información de la ruta."
+    "description": "No fue posible actualizar la información de la ruta.",
+    "fetchOrdersTitle": "Error al cargar órdenes",
+    "fetchOrdersDescription": "No fue posible cargar la lista de órdenes disponibles"
   },
   "save": "Guardar",
   "saving": "Guardando...",

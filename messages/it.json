@@ -6791,13 +6791,20 @@
     "imageUrl": "URL dell'Immagine",
     "courseImage": "Immagine del Corso",
     "title": "Titolo",
-    "description": "Descrizione"
+    "description": "Descrizione",
+    "order": "Ordine"
   },
   "placeholders": {
     "slug": "matematica-base",
     "imageUrl": "/images/corso-matematica.jpg",
     "title": "Inserisci il titolo del corso",
-    "description": "Inserisci la descrizione del corso"
+    "description": "Inserisci la descrizione del corso",
+    "order": "Seleziona l'ordine"
+  },
+  "order": {
+    "current": "attuale",
+    "occupiedHint": "Ordini occupati",
+    "none": "nessuno"
   },
   "hints": {
     "slug": "Usa solo lettere minuscole, numeri e trattini"
@@ -6814,6 +6821,7 @@
     "imageRequired": "URL dell'immagine è obbligatoria",
     "titleRequired": "Titolo è obbligatorio",
     "descriptionRequired": "Descrizione è obbligatoria",
+    "orderExists": "Questo ordine è già in uso da un altro corso",
     "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
     "imageTooLarge": "File troppo grande. La dimensione massima è 5MB",
     "uploadFailed": "Errore nel caricamento dell'immagine"
@@ -6824,7 +6832,9 @@
   },
   "error": {
     "title": "Errore nell'aggiornamento",
-    "description": "Non è stato possibile aggiornare le informazioni del corso."
+    "description": "Non è stato possibile aggiornare le informazioni del corso.",
+    "fetchOrdersTitle": "Errore nel caricamento degli ordini",
+    "fetchOrdersDescription": "Non è stato possibile caricare l'elenco degli ordini disponibili"
   },
   "save": "Salva",
   "saving": "Salvataggio...",
@@ -6887,13 +6897,20 @@
     "imageUrl": "URL dell'Immagine",
     "trackImage": "Immagine del Percorso",
     "title": "Titolo",
-    "description": "Descrizione"
+    "description": "Descrizione",
+    "order": "Ordine"
   },
   "placeholders": {
     "slug": "percorso-principianti",
     "imageUrl": "/images/percorso-esempio.jpg",
     "title": "Inserisci il titolo del percorso",
-    "description": "Inserisci la descrizione del percorso"
+    "description": "Inserisci la descrizione del percorso",
+    "order": "Seleziona l'ordine"
+  },
+  "order": {
+    "current": "attuale",
+    "occupiedHint": "Ordini occupati",
+    "none": "nessuno"
   },
   "hints": {
     "slug": "Usa solo lettere minuscole, numeri e trattini"
@@ -6916,6 +6933,7 @@
     "coursesRequired": "Seleziona almeno un corso",
     "titleRequired": "Titolo è obbligatorio",
     "descriptionRequired": "Descrizione è obbligatoria",
+    "orderExists": "Questo ordine è già in uso da un altro percorso",
     "fetchCoursesTitle": "Errore nel caricamento dei corsi",
     "fetchCoursesDescription": "Non è stato possibile caricare l'elenco dei corsi disponibili",
     "invalidImageType": "Tipo di file non valido. Usa JPG, PNG, GIF o WebP",
@@ -6928,7 +6946,9 @@
   },
   "error": {
     "title": "Errore nell'aggiornamento",
-    "description": "Non è stato possibile aggiornare le informazioni del percorso."
+    "description": "Non è stato possibile aggiornare le informazioni del percorso.",
+    "fetchOrdersTitle": "Errore nel caricamento degli ordini",
+    "fetchOrdersDescription": "Non è stato possibile caricare l'elenco degli ordini disponibili"
   },
   "save": "Salva",
   "saving": "Salvataggio...",

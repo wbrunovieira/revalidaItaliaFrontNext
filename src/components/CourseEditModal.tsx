@@ -17,7 +17,15 @@ import {
   Upload,
   ArrowRight,
   RefreshCw,
+  Hash,
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Translation {
   locale: string;
@@ -25,10 +33,19 @@ interface Translation {
   description: string;
 }
 
+interface Course {
+  id: string;
+  slug: string;
+  order: number;
+  imageUrl?: string;
+  translations: Translation[];
+}
+
 interface CourseEditData {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   translations: Translation[];
 }
 
@@ -53,6 +70,7 @@ export default function CourseEditModal({
     imageUrl: '',
     newImageUrl: '',
     newImageFile: undefined as File | undefined,
+    order: 1,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
@@ -65,6 +83,11 @@ export default function CourseEditModal({
   const [errors, setErrors] = useState<
     Record<string, string>
   >({});
+
+  // Estados para gerenciar orders
+  const [existingOrders, setExistingOrders] = useState<number[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [originalOrder, setOriginalOrder] = useState<number | null>(null);
 
   // Função para obter o token
   const getAuthToken = () => {
@@ -84,6 +107,69 @@ export default function CourseEditModal({
     );
   };
 
+
+  // Função para buscar cursos existentes
+  const fetchExistingCourses = useCallback(async () => {
+    setLoadingOrders(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/api/v1/courses`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch courses: ${response.status}`);
+      }
+
+      const courses: Course[] = await response.json();
+      const orders = courses.map((course: Course) => course.order);
+      setExistingOrders(orders);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setExistingOrders([]);
+      toast({
+        title: t('error.fetchOrdersTitle'),
+        description: t('error.fetchOrdersDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, [toast, t]);
+
+  // Função para gerar lista de ordens disponíveis
+  const getAvailableOrders = useCallback((): number[] => {
+    const maxOrder = 50;
+    const availableOrders = [];
+
+    for (let i = 1; i <= maxOrder; i++) {
+      if (!existingOrders.includes(i) || i === originalOrder) {
+        availableOrders.push(i);
+      }
+    }
+
+    return availableOrders;
+  }, [existingOrders, originalOrder]);
+
+  // Handler para mudança de order
+  const handleOrderChange = useCallback(
+    (value: string) => {
+      const order = parseInt(value) || 1;
+      setFormData(prev => ({ ...prev, order }));
+
+      if (existingOrders.includes(order) && order !== originalOrder) {
+        setErrors(prev => ({
+          ...prev,
+          order: t('errors.orderExists'),
+        }));
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.order;
+          return newErrors;
+        });
+      }
+    },
+    [existingOrders, originalOrder, t]
+  );
 
   // Delete image from storage
   const deleteImage = useCallback(async (imageUrl: string) => {
@@ -189,6 +275,18 @@ export default function CourseEditModal({
       newErrors.imageUrl = t('errors.imageRequired');
     }
 
+    // Validar order
+    if (formData.order < 1) {
+      newErrors.order = t('errors.orderRequired');
+    } else if (formData.order > 999) {
+      newErrors.order = t('errors.orderMax');
+    } else if (
+      existingOrders.includes(formData.order) &&
+      formData.order !== originalOrder
+    ) {
+      newErrors.order = t('errors.orderExists');
+    }
+
     // Validar traduções
     const locales = ['pt', 'es', 'it'] as const;
     locales.forEach(locale => {
@@ -266,6 +364,7 @@ export default function CourseEditModal({
           body: JSON.stringify({
             slug: course.slug, // Mantém o slug original, sem permitir edição
             imageUrl: finalImageUrl.trim(),
+            order: formData.order,
             translations,
           }),
         }
@@ -359,12 +458,19 @@ export default function CourseEditModal({
         imageUrl: course.imageUrl,
         newImageUrl: '',
         newImageFile: undefined,
+        order: course.order || 1,
         translations: translationsObj,
       });
+
+      // Armazenar o order original
+      setOriginalOrder(course.order || 1);
       setErrors({});
       setSavedImageName(null);
+
+      // Buscar cursos existentes para validação de order
+      fetchExistingCourses();
     }
-  }, [course, isOpen]);
+  }, [course, isOpen, fetchExistingCourses]);
 
   // Fechar modal com ESC
   useEffect(() => {
@@ -435,6 +541,64 @@ export default function CourseEditModal({
           className="flex-1 overflow-y-auto p-6"
         >
           <div className="space-y-6">
+
+            {/* Order */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <Hash size={16} className="inline mr-2" />
+                {t('fields.order')}
+              </label>
+              {loadingOrders ? (
+                <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                  <Loader2 size={16} className="animate-spin inline mr-2" />
+                  {t('loadingOrders')}
+                </div>
+              ) : (
+                <Select
+                  value={formData.order.toString()}
+                  onValueChange={handleOrderChange}
+                  disabled={loadingOrders}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white w-full md:w-48">
+                    <SelectValue placeholder={t('placeholders.order')} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                    {getAvailableOrders().length === 0 ? (
+                      <div className="px-2 py-4 text-center text-gray-400 text-sm">
+                        {t('noOrdersAvailable')}
+                      </div>
+                    ) : (
+                      getAvailableOrders().map(order => (
+                        <SelectItem
+                          key={order}
+                          value={order.toString()}
+                          className="text-white hover:bg-gray-600"
+                        >
+                          {order}
+                          {order === originalOrder && (
+                            <span className="text-xs text-gray-400 ml-2">
+                              ({t('currentOrder')})
+                            </span>
+                          )}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+              {errors.order && (
+                <p className="text-red-400 text-sm mt-1">{errors.order}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">{t('hints.order')}</p>
+              {existingOrders.length > 0 && !loadingOrders && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {t('occupiedOrders')}: {existingOrders
+                    .filter(o => o !== originalOrder)
+                    .sort((a, b) => a - b)
+                    .join(', ') || t('none')}
+                </p>
+              )}
+            </div>
 
             {/* Seção de Upload de Imagem */}
             <div className="space-y-4">
@@ -810,7 +974,7 @@ export default function CourseEditModal({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || uploadingImage}
+            disabled={loading || uploadingImage || loadingOrders}
             className="px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading || uploadingImage ? (

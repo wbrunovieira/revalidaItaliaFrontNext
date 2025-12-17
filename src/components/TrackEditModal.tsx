@@ -20,8 +20,16 @@ import {
   Upload,
   ArrowRight,
   RefreshCw,
+  Hash,
 } from 'lucide-react';
 import Image from 'next/image';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Translation {
   locale: string;
@@ -36,6 +44,14 @@ interface Course {
   translations: Translation[];
 }
 
+interface Track {
+  id: string;
+  slug: string;
+  order: number;
+  imageUrl?: string;
+  translations: Translation[];
+}
+
 interface TrackCourse {
   courseId: string;
   course?: Course;
@@ -45,6 +61,7 @@ interface TrackEditData {
   id: string;
   slug: string;
   imageUrl: string;
+  order: number;
   courseIds?: string[];
   trackCourses?: TrackCourse[];
   courses?: Course[];
@@ -69,6 +86,7 @@ interface FormData {
   imageUrl: string;
   newImageUrl: string;
   newImageFile: File | undefined;
+  order: number;
   courseIds: string[];
   translations: FormTranslations;
 }
@@ -93,6 +111,7 @@ export default function TrackEditModal({
     imageUrl: '',
     newImageUrl: '',
     newImageFile: undefined,
+    order: 1,
     courseIds: [],
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
@@ -111,6 +130,11 @@ export default function TrackEditModal({
   const [loadingCourses, setLoadingCourses] =
     useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Estados para gerenciar orders
+  const [existingOrders, setExistingOrders] = useState<number[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [originalOrder, setOriginalOrder] = useState<number | null>(null);
 
   // Função para obter o token
   const getAuthToken = (): string | null => {
@@ -142,6 +166,69 @@ export default function TrackEditModal({
     );
   };
 
+
+  // Função para buscar tracks existentes
+  const fetchExistingTracks = useCallback(async () => {
+    setLoadingOrders(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/api/v1/tracks`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tracks: ${response.status}`);
+      }
+
+      const tracks: Track[] = await response.json();
+      const orders = tracks.map((track: Track) => track.order);
+      setExistingOrders(orders);
+    } catch (error) {
+      console.error('Error fetching tracks:', error);
+      setExistingOrders([]);
+      toast({
+        title: t('error.fetchOrdersTitle'),
+        description: t('error.fetchOrdersDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, [toast, t]);
+
+  // Função para gerar lista de ordens disponíveis
+  const getAvailableOrders = useCallback((): number[] => {
+    const maxOrder = 50;
+    const availableOrders = [];
+
+    for (let i = 1; i <= maxOrder; i++) {
+      if (!existingOrders.includes(i) || i === originalOrder) {
+        availableOrders.push(i);
+      }
+    }
+
+    return availableOrders;
+  }, [existingOrders, originalOrder]);
+
+  // Handler para mudança de order
+  const handleOrderChange = useCallback(
+    (value: string) => {
+      const order = parseInt(value) || 1;
+      setFormData(prev => ({ ...prev, order }));
+
+      if (existingOrders.includes(order) && order !== originalOrder) {
+        setErrors(prev => ({
+          ...prev,
+          order: t('errors.orderExists'),
+        }));
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.order;
+          return newErrors;
+        });
+      }
+    },
+    [existingOrders, originalOrder, t]
+  );
 
   // Delete image from storage
   const deleteImage = useCallback(async (imageUrl: string) => {
@@ -285,6 +372,11 @@ export default function TrackEditModal({
       newErrors.courseIds = t('errors.coursesRequired');
     }
 
+    // Validar order
+    if (existingOrders.includes(formData.order) && formData.order !== originalOrder) {
+      newErrors.order = t('errors.orderExists');
+    }
+
     // Validar traduções
     const locales = ['pt', 'es', 'it'] as const;
     locales.forEach(locale => {
@@ -404,6 +496,7 @@ export default function TrackEditModal({
           body: JSON.stringify({
             slug: track.slug, // Mantém o slug original, sem permitir edição
             imageUrl: finalImageUrl.trim(),
+            order: formData.order,
             courseIds: formData.courseIds,
             translations,
           }),
@@ -527,13 +620,16 @@ export default function TrackEditModal({
         imageUrl: track.imageUrl || '',
         newImageUrl: '',
         newImageFile: undefined,
+        order: track.order || 1,
         courseIds: courseIds,
         translations: translationsObj,
       });
+      setOriginalOrder(track.order || null);
       setErrors({});
       setSavedImageName(null);
+      fetchExistingTracks();
     }
-  }, [track, isOpen, formData.newImageUrl]);
+  }, [track, isOpen, formData.newImageUrl, fetchExistingTracks]);
 
   // Buscar cursos quando abrir o modal
   useEffect(() => {
@@ -757,6 +853,51 @@ export default function TrackEditModal({
                   {errors.imageUrl}
                 </p>
               )}
+            </div>
+
+            {/* Order Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                <Hash size={16} className="inline mr-2" />
+                {t('fields.order')}
+              </label>
+              <Select
+                value={formData.order.toString()}
+                onValueChange={handleOrderChange}
+                disabled={loadingOrders}
+              >
+                <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
+                  <SelectValue placeholder={t('placeholders.order')} />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  {loadingOrders ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                    </div>
+                  ) : (
+                    getAvailableOrders().map((order) => (
+                      <SelectItem
+                        key={order}
+                        value={order.toString()}
+                        className="text-white hover:bg-gray-600"
+                      >
+                        {order}
+                        {order === originalOrder && (
+                          <span className="ml-2 text-xs text-gray-400">
+                            ({t('order.current')})
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.order && (
+                <p className="text-red-400 text-xs mt-1">{errors.order}</p>
+              )}
+              <p className="text-xs text-gray-500">
+                {t('order.occupiedHint')}: {existingOrders.filter(o => o !== originalOrder).sort((a, b) => a - b).join(', ') || t('order.none')}
+              </p>
             </div>
 
             {/* Seleção de Cursos */}
@@ -1108,7 +1249,7 @@ export default function TrackEditModal({
             </button>
             <button
               onClick={handleSubmit}
-              disabled={loading || uploadingImage}
+              disabled={loading || uploadingImage || loadingOrders}
               className="px-6 py-2 bg-secondary text-primary font-medium rounded-lg hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {loading || uploadingImage ? (

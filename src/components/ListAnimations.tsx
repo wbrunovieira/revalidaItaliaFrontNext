@@ -371,9 +371,67 @@ export default function ListAnimations() {
     setEditForm({ order: 0 });
   }, []);
 
+  // Validate form before submission
+  const validateForm = useCallback((): string | null => {
+    if (!editingAnimation) return 'No animation selected';
+
+    if (editingAnimation.type === 'CompleteSentence') {
+      const sentences = editForm.sentences || [];
+
+      if (sentences.length === 0) {
+        return t('edit.validation.noSentences');
+      }
+
+      for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i];
+
+        if (!sentence.fullSentence?.trim()) {
+          return t('edit.validation.emptySentence', { index: i + 1 });
+        }
+
+        if (!sentence.targetWord?.trim()) {
+          return t('edit.validation.emptyTargetWord', { index: i + 1 });
+        }
+
+        // Check if targetWord exists in fullSentence
+        if (!sentence.fullSentence.includes(sentence.targetWord)) {
+          return t('edit.validation.targetWordNotInSentence', {
+            targetWord: sentence.targetWord,
+            index: i + 1
+          });
+        }
+      }
+    } else {
+      // MultipleChoice validation
+      if (!editForm.question?.trim()) {
+        return t('edit.validation.emptyQuestion');
+      }
+
+      const options = editForm.options || ['', '', ''];
+      for (let i = 0; i < options.length; i++) {
+        if (!options[i]?.trim()) {
+          return t('edit.validation.emptyOption', { index: i + 1 });
+        }
+      }
+    }
+
+    return null;
+  }, [editingAnimation, editForm, t]);
+
   // Update animation via API
   const updateAnimation = useCallback(async () => {
     if (!editingAnimation) return;
+
+    // Validate form first
+    const validationError = validateForm();
+    if (validationError) {
+      toast({
+        title: t('edit.validation.title'),
+        description: validationError,
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -383,18 +441,26 @@ export default function ListAnimations() {
       let content: CompleteSentenceContent | MultipleChoiceContent;
 
       if (editingAnimation.type === 'CompleteSentence') {
+        // Clean up optional fields
+        const cleanDistractors = (editForm.distractors || []).filter(d => d?.trim());
+
         content = {
           gameType: editForm.gameType!,
-          sentences: editForm.sentences!,
-          distractors: editForm.distractors,
-          shuffleWords: editForm.shuffleWords,
+          sentences: editForm.sentences!.map(s => ({
+            fullSentence: s.fullSentence,
+            targetWord: s.targetWord,
+            wordPosition: s.wordPosition,
+            ...(s.hint?.trim() && { hint: s.hint }),
+          })),
+          ...(cleanDistractors.length > 0 && { distractors: cleanDistractors }),
+          ...(editForm.shuffleWords !== undefined && { shuffleWords: editForm.shuffleWords }),
         };
       } else {
         content = {
           question: editForm.question!,
           options: editForm.options!,
           correctOptionIndex: editForm.correctOptionIndex!,
-          explanation: editForm.explanation,
+          ...(editForm.explanation?.trim() && { explanation: editForm.explanation }),
         };
       }
 
@@ -433,13 +499,13 @@ export default function ListAnimations() {
       console.error('Error updating animation:', error);
       toast({
         title: t('edit.errorTitle'),
-        description: t('edit.errorDescription'),
+        description: error instanceof Error ? error.message : t('edit.errorDescription'),
         variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
     }
-  }, [editingAnimation, editForm, getToken, toast, t, closeEditModal]);
+  }, [editingAnimation, editForm, getToken, toast, t, closeEditModal, validateForm]);
 
   // Edit form handlers
   const updateSentence = useCallback((index: number, field: keyof Sentence, value: string | number) => {

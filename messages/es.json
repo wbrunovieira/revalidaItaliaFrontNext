@@ -5311,7 +5311,16 @@
       "successTitle": "Animación actualizada",
       "successDescription": "Los cambios se guardaron exitosamente",
       "errorTitle": "Error al actualizar",
-      "errorDescription": "No se pudieron guardar los cambios"
+      "errorDescription": "No se pudieron guardar los cambios",
+      "validation": {
+        "title": "Error de validación",
+        "noSentences": "Agregue al menos una frase",
+        "emptySentence": "La frase {index} está vacía",
+        "emptyTargetWord": "La palabra objetivo de la frase {index} está vacía",
+        "targetWordNotInSentence": "La palabra \"{targetWord}\" no existe en la frase {index}",
+        "emptyQuestion": "La pregunta está vacía",
+        "emptyOption": "La opción {index} está vacía"
+      }
     }
   },
 

@@ -5269,7 +5269,16 @@
       "successTitle": "Animazione aggiornata",
       "successDescription": "Le modifiche sono state salvate con successo",
       "errorTitle": "Errore nell'aggiornamento",
-      "errorDescription": "Non è stato possibile salvare le modifiche"
+      "errorDescription": "Non è stato possibile salvare le modifiche",
+      "validation": {
+        "title": "Errore di validazione",
+        "noSentences": "Aggiungi almeno una frase",
+        "emptySentence": "La frase {index} è vuota",
+        "emptyTargetWord": "La parola obiettivo della frase {index} è vuota",
+        "targetWordNotInSentence": "La parola \"{targetWord}\" non esiste nella frase {index}",
+        "emptyQuestion": "La domanda è vuota",
+        "emptyOption": "L'opzione {index} è vuota"
+      }
     }
   },
 

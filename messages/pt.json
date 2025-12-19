@@ -5342,7 +5342,16 @@
       "successTitle": "Animação atualizada",
       "successDescription": "As alterações foram salvas com sucesso",
       "errorTitle": "Erro ao atualizar",
-      "errorDescription": "Não foi possível salvar as alterações"
+      "errorDescription": "Não foi possível salvar as alterações",
+      "validation": {
+        "title": "Erro de validação",
+        "noSentences": "Adicione pelo menos uma frase",
+        "emptySentence": "A frase {index} está vazia",
+        "emptyTargetWord": "A palavra alvo da frase {index} está vazia",
+        "targetWordNotInSentence": "A palavra \"{targetWord}\" não existe na frase {index}",
+        "emptyQuestion": "A pergunta está vazia",
+        "emptyOption": "A opção {index} está vazia"
+      }
     }
   },
 

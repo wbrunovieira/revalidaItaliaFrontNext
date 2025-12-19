@@ -1,10 +1,11 @@
 // /src/components/CreateVideoForm.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useCourseHierarchy, getTranslationByLocale } from '@/hooks/useCourseHierarchy';
 import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
@@ -26,36 +27,13 @@ import {
   Layers,
   Check,
   X,
+  Loader2,
 } from 'lucide-react';
 
 interface Translation {
   locale: string;
   title: string;
   description: string;
-}
-
-interface Lesson {
-  id: string;
-  moduleId: string;
-  order: number;
-  translations: Translation[];
-}
-
-interface Module {
-  id: string;
-  slug: string;
-  imageUrl: string | null;
-  order: number;
-  translations: Translation[];
-  lessons?: Lesson[];
-}
-
-interface Course {
-  id: string;
-  slug: string;
-  imageUrl: string;
-  translations: Translation[];
-  modules?: Module[];
 }
 
 interface FormData {
@@ -103,10 +81,19 @@ export default function CreateVideoForm() {
   const locale = params.locale as string;
   const { toast } = useToast();
 
+  // Hook compartilhado para cursos, módulos e aulas (lazy loading)
+  const {
+    courses,
+    modules,
+    lessons,
+    loadingCourses,
+    loadingModules,
+    loadingLessons,
+    selectCourse,
+    selectModule,
+  } = useCourseHierarchy({ fetchLessons: true });
+
   const [loading, setLoading] = useState(false);
-  const [loadingCourses, setLoadingCourses] =
-    useState(true);
-  const [courses, setCourses] = useState<Course[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     courseId: '',
@@ -353,115 +340,6 @@ export default function CreateVideoForm() {
     [toast, t]
   );
 
-  // Função para buscar aulas de um módulo específico
-  const fetchLessonsForModule = useCallback(
-    async (
-      courseId: string,
-      moduleId: string
-    ): Promise<Lesson[]> => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
-        );
-
-        if (!response.ok) {
-          return [];
-        }
-
-        const lessonsData = await response.json();
-        return lessonsData.lessons || [];
-      } catch (error) {
-        handleApiError(
-          error,
-          `Error fetching lessons for module ${moduleId}`
-        );
-        return [];
-      }
-    },
-    [handleApiError]
-  );
-
-  // Função para buscar módulos de um curso específico
-  const fetchModulesForCourse = useCallback(
-    async (courseId: string): Promise<Module[]> => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
-        );
-
-        if (!response.ok) {
-          return [];
-        }
-
-        const modules: Module[] = await response.json();
-
-        // Buscar aulas para cada módulo
-        const modulesWithLessons = await Promise.all(
-          modules.map(async module => {
-            const lessons = await fetchLessonsForModule(
-              courseId,
-              module.id
-            );
-            return { ...module, lessons };
-          })
-        );
-
-        return modulesWithLessons;
-      } catch (error) {
-        handleApiError(
-          error,
-          `Error fetching modules for course ${courseId}`
-        );
-        return [];
-      }
-    },
-    [handleApiError, fetchLessonsForModule]
-  );
-
-  // Função para buscar cursos com módulos e aulas
-  const fetchCourses = useCallback(async () => {
-    setLoadingCourses(true);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch courses: ${response.status}`
-        );
-      }
-
-      const coursesData: Course[] = await response.json();
-
-      // Buscar módulos e aulas para cada curso
-      const coursesWithData = await Promise.all(
-        coursesData.map(async course => {
-          const modules = await fetchModulesForCourse(
-            course.id
-          );
-          return { ...course, modules };
-        })
-      );
-
-      setCourses(coursesWithData);
-    } catch (error) {
-      handleApiError(error, 'Courses fetch error');
-      toast({
-        title: t('error.fetchCoursesTitle'),
-        description: t('error.fetchCoursesDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingCourses(false);
-    }
-  }, [toast, t, handleApiError, fetchModulesForCourse]);
-
-  useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
-
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
@@ -667,8 +545,10 @@ export default function CreateVideoForm() {
       }));
       setTouched(prev => ({ ...prev, courseId: true }));
       handleFieldValidation('courseId', courseId);
+      // Buscar módulos via hook (lazy loading)
+      selectCourse(courseId);
     },
-    [handleFieldValidation]
+    [handleFieldValidation, selectCourse]
   );
 
   const handleModuleChange = useCallback(
@@ -680,8 +560,10 @@ export default function CreateVideoForm() {
       }));
       setTouched(prev => ({ ...prev, moduleId: true }));
       handleFieldValidation('moduleId', moduleId);
+      // Buscar aulas via hook (lazy loading)
+      selectModule(moduleId);
     },
-    [handleFieldValidation]
+    [handleFieldValidation, selectModule]
   );
 
   const handleLessonChange = useCallback(
@@ -741,26 +623,6 @@ export default function CreateVideoForm() {
     },
     [errors, touched, formData.translations]
   );
-
-  const getTranslationByLocale = useCallback(
-    (translations: Translation[], targetLocale: string) => {
-      return (
-        translations.find(
-          tr => tr.locale === targetLocale
-        ) || translations[0]
-      );
-    },
-    []
-  );
-
-  const selectedCourse = courses.find(
-    course => course.id === formData.courseId
-  );
-  const availableModules = selectedCourse?.modules || [];
-  const selectedModule = availableModules.find(
-    module => module.id === formData.moduleId
-  );
-  const availableLessons = selectedModule?.lessons || [];
 
   return (
     <form
@@ -838,19 +700,22 @@ export default function CreateVideoForm() {
               <Layers size={16} />
               {t('fields.module')}
               <span className="text-red-400">*</span>
+              {loadingModules && (
+                <Loader2 size={14} className="animate-spin text-secondary" />
+              )}
             </Label>
             <Select
               value={formData.moduleId}
               onValueChange={handleModuleChange}
-              disabled={!formData.courseId}
+              disabled={!formData.courseId || loadingModules}
             >
               <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
                 <SelectValue
-                  placeholder={t('placeholders.module')}
+                  placeholder={loadingModules ? t('loading') : t('placeholders.module')}
                 />
               </SelectTrigger>
               <SelectContent className="bg-gray-700 border-gray-600">
-                {availableModules.map(module => {
+                {modules.map(module => {
                   const moduleTranslation =
                     getTranslationByLocale(
                       module.translations,
@@ -890,19 +755,22 @@ export default function CreateVideoForm() {
               <Play size={16} />
               {t('fields.lesson')}
               <span className="text-red-400">*</span>
+              {loadingLessons && (
+                <Loader2 size={14} className="animate-spin text-secondary" />
+              )}
             </Label>
             <Select
               value={formData.lessonId}
               onValueChange={handleLessonChange}
-              disabled={!formData.moduleId}
+              disabled={!formData.moduleId || loadingLessons}
             >
               <SelectTrigger className="bg-gray-700 border-gray-600 text-white disabled:opacity-50">
                 <SelectValue
-                  placeholder={t('placeholders.lesson')}
+                  placeholder={loadingLessons ? t('loading') : t('placeholders.lesson')}
                 />
               </SelectTrigger>
               <SelectContent className="bg-gray-700 border-gray-600">
-                {availableLessons.map(lesson => {
+                {lessons.map(lesson => {
                   const lessonTranslation =
                     getTranslationByLocale(
                       lesson.translations,

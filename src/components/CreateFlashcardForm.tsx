@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'next/navigation';
+import { useCourseHierarchy, getTranslationByLocale, LessonItem } from '@/hooks/useCourseHierarchy';
 import NextImage from 'next/image';
 import {
   Select,
@@ -29,6 +30,7 @@ import {
   BookOpen,
   Layers,
   FileText,
+  Loader2,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import TagSelectionModal from '@/components/TagSelectionModal';
@@ -88,36 +90,6 @@ interface UploadedFile {
   url: string;
 }
 
-interface Translation {
-  locale: string;
-  title: string;
-  description: string;
-}
-
-interface Lesson {
-  id: string;
-  moduleId: string;
-  order: number;
-  translations: Translation[];
-}
-
-interface Module {
-  id: string;
-  slug: string;
-  imageUrl: string | null;
-  order: number;
-  translations: Translation[];
-  lessons?: Lesson[];
-}
-
-interface Course {
-  id: string;
-  slug: string;
-  imageUrl: string;
-  translations: Translation[];
-  modules?: Module[];
-}
-
 export default function CreateFlashcardForm({
   onFlashcardCreated,
 }: CreateFlashcardFormProps) {
@@ -125,6 +97,19 @@ export default function CreateFlashcardForm({
   const params = useParams();
   const locale = params.locale as string;
   const { toast } = useToast();
+
+  // Hook compartilhado para cursos, módulos e aulas (lazy loading)
+  const {
+    courses,
+    modules,
+    lessons,
+    loadingCourses,
+    loadingModules,
+    loadingLessons,
+    selectCourse,
+    selectModule,
+  } = useCourseHierarchy({ fetchLessons: true });
+
   const [loading, setLoading] = useState(false);
   const [argumentsList, setArgumentsList] = useState<
     Argument[]
@@ -143,11 +128,9 @@ export default function CreateFlashcardForm({
   ] = useState(false);
   const [uploadingAnswerImage, setUploadingAnswerImage] =
     useState(false);
-  
-  // Estados para curso, módulo e aulas
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
-  const [selectedLessons, setSelectedLessons] = useState<Lesson[]>([]);
+
+  // Estado para aulas selecionadas (multi-seleção)
+  const [selectedLessons, setSelectedLessons] = useState<LessonItem[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     questionType: 'TEXT',
@@ -200,114 +183,6 @@ export default function CreateFlashcardForm({
   useEffect(() => {
     loadArguments();
   }, [loadArguments]);
-
-  // Helper function to get translation by locale
-  const getTranslationByLocale = (
-    translations: Translation[],
-    locale: string
-  ): Translation => {
-    return (
-      translations.find(t => t.locale === locale) ||
-      translations[0] || {
-        locale: '',
-        title: '',
-        description: '',
-      }
-    );
-  };
-
-  // Função para buscar aulas de um módulo específico
-  const fetchLessonsForModule = useCallback(
-    async (courseId: string, moduleId: string): Promise<Lesson[]> => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
-        );
-
-        if (!response.ok) {
-          return [];
-        }
-
-        const lessonsData = await response.json();
-        return lessonsData.lessons || [];
-      } catch (error) {
-        console.error(`Error fetching lessons for module ${moduleId}:`, error);
-        return [];
-      }
-    },
-    []
-  );
-
-  // Função para buscar módulos de um curso específico
-  const fetchModulesForCourse = useCallback(
-    async (courseId: string): Promise<Module[]> => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
-        );
-
-        if (!response.ok) {
-          return [];
-        }
-
-        const modules: Module[] = await response.json();
-
-        // Buscar aulas para cada módulo
-        const modulesWithLessons = await Promise.all(
-          modules.map(async module => {
-            const lessons = await fetchLessonsForModule(courseId, module.id);
-            return { ...module, lessons };
-          })
-        );
-
-        return modulesWithLessons;
-      } catch (error) {
-        console.error(`Error fetching modules for course ${courseId}:`, error);
-        return [];
-      }
-    },
-    [fetchLessonsForModule]
-  );
-
-  // Função para buscar cursos com módulos e aulas
-  const fetchCourses = useCallback(async () => {
-    setLoadingCourses(true);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch courses: ${response.status}`);
-      }
-
-      const coursesData: Course[] = await response.json();
-
-      // Buscar módulos e aulas para cada curso
-      const coursesWithData = await Promise.all(
-        coursesData.map(async course => {
-          const modules = await fetchModulesForCourse(course.id);
-          return { ...course, modules };
-        })
-      );
-
-      setCourses(coursesWithData);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      toast({
-        title: t('errors.loadCoursesTitle'),
-        description: t('errors.loadCoursesDescription'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingCourses(false);
-    }
-  }, [toast, t, fetchModulesForCourse]);
-
-  useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
 
   const validateField = (
     name: keyof FormData,
@@ -408,6 +283,8 @@ export default function CreateFlashcardForm({
       lessons: [],
     }));
     setSelectedLessons([]);
+    // Buscar módulos via hook (lazy loading)
+    selectCourse(courseId);
   };
 
   // Handler para mudança de módulo
@@ -418,12 +295,14 @@ export default function CreateFlashcardForm({
       lessons: [],
     }));
     setSelectedLessons([]);
+    // Buscar aulas via hook (lazy loading)
+    selectModule(moduleId);
   };
 
   // Handler para seleção/deseleção de aulas
-  const handleLessonToggle = (lesson: Lesson) => {
+  const handleLessonToggle = (lesson: LessonItem) => {
     const isSelected = selectedLessons.some(l => l.id === lesson.id);
-    
+
     if (isSelected) {
       setSelectedLessons(prev => prev.filter(l => l.id !== lesson.id));
       setFormData(prev => ({
@@ -1175,34 +1054,34 @@ export default function CreateFlashcardForm({
                 <Label className="text-gray-300 flex items-center gap-2">
                   <Layers size={16} />
                   {t('module')}
+                  {loadingModules && (
+                    <Loader2 size={14} className="animate-spin text-secondary" />
+                  )}
                 </Label>
                 <Select
                   value={formData.moduleId}
                   onValueChange={handleModuleChange}
-                  disabled={!formData.courseId}
+                  disabled={!formData.courseId || loadingModules}
                 >
                   <SelectTrigger className="mt-1 bg-gray-700 border-gray-600 text-white disabled:opacity-50">
-                    <SelectValue placeholder={t('selectModule')} />
+                    <SelectValue placeholder={loadingModules ? t('loading') : t('selectModule')} />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-700 border-gray-600">
-                    {formData.courseId &&
-                      courses
-                        .find(c => c.id === formData.courseId)
-                        ?.modules?.map(module => {
-                          const moduleTranslation = getTranslationByLocale(
-                            module.translations,
-                            locale
-                          );
-                          return (
-                            <SelectItem
-                              key={module.id}
-                              value={module.id}
-                              className="text-white hover:bg-gray-600"
-                            >
-                              {moduleTranslation?.title || module.slug}
-                            </SelectItem>
-                          );
-                        })}
+                    {modules.map(module => {
+                      const moduleTranslation = getTranslationByLocale(
+                        module.translations,
+                        locale
+                      );
+                      return (
+                        <SelectItem
+                          key={module.id}
+                          value={module.id}
+                          className="text-white hover:bg-gray-600"
+                        >
+                          {moduleTranslation?.title || module.slug}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -1214,12 +1093,19 @@ export default function CreateFlashcardForm({
                 <Label className="text-gray-300 flex items-center gap-2 mb-3">
                   <FileText size={16} />
                   {t('selectLessons')}
+                  {loadingLessons && (
+                    <Loader2 size={14} className="animate-spin text-secondary" />
+                  )}
                 </Label>
                 <div className="space-y-2 max-h-60 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
-                  {courses
-                    .find(c => c.id === formData.courseId)
-                    ?.modules?.find(m => m.id === formData.moduleId)
-                    ?.lessons?.map(lesson => {
+                  {loadingLessons ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 size={20} className="animate-spin text-secondary" />
+                    </div>
+                  ) : lessons.length === 0 ? (
+                    <p className="text-gray-400 text-sm text-center py-4">{t('noLessons')}</p>
+                  ) : (
+                    lessons.map(lesson => {
                       const lessonTranslation = getTranslationByLocale(
                         lesson.translations,
                         locale
@@ -1246,7 +1132,8 @@ export default function CreateFlashcardForm({
                           </label>
                         </div>
                       );
-                    })}
+                    })
+                  )}
                 </div>
                 {selectedLessons.length > 0 && (
                   <p className="mt-2 text-sm text-gray-400">

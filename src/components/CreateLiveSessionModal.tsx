@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCourseHierarchy, getTranslationByLocale } from '@/hooks/useCourseHierarchy';
 import {
   Form,
   FormControl,
@@ -38,7 +39,8 @@ import {
   RotateCcw,
   Info,
   Radio,
-  GraduationCap
+  GraduationCap,
+  Loader2,
 } from 'lucide-react';
 
 const liveSessionSchema = z.object({
@@ -103,35 +105,6 @@ interface CreateLiveSessionModalProps {
   onSuccess?: () => void;
 }
 
-interface Course {
-  id: string;
-  slug: string;
-  translations: Array<{
-    locale: string;
-    title: string;
-  }>;
-  modules?: Module[];
-}
-
-interface Lesson {
-  id: string;
-  slug: string;
-  translations: Array<{
-    locale: string;
-    title: string;
-  }>;
-}
-
-interface Module {
-  id: string;
-  slug: string;
-  translations: Array<{
-    locale: string;
-    title: string;
-  }>;
-  lessons?: Lesson[];
-}
-
 interface User {
   id?: string;
   identityId: string;
@@ -149,10 +122,19 @@ export default function CreateLiveSessionModal({
   const { toast } = useToast();
   const { token } = useAuth();
 
+  // Hook compartilhado para cursos, módulos e aulas (lazy loading)
+  const {
+    courses,
+    modules,
+    lessons,
+    loadingModules,
+    loadingLessons,
+    selectCourse,
+    selectModule,
+  } = useCourseHierarchy({ fetchLessons: true });
+
   const [loading, setLoading] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [, setLoadingCourses] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Filtros de roles para co-apresentadores
@@ -186,101 +168,19 @@ export default function CreateLiveSessionModal({
   const selectedCourseId = form.watch('courseId');
   const selectedLessonModuleId = form.watch('lessonModuleId');
 
-  // Compute available modules and lessons based on selection
-  const selectedCourse = courses.find(c => c.id === selectedCourseId);
-
-  // For required section (Course Info)
-  const availableModules = selectedCourse?.modules || [];
-
-  // For optional section (Lesson Association)
-  const availableLessonModules = selectedCourse?.modules || [];
-  const selectedLessonModule = availableLessonModules.find(m => m.id === selectedLessonModuleId);
-  const availableLessons = selectedLessonModule?.lessons || [];
-
-
-  const fetchLessonsForModule = useCallback(async (courseId: string, moduleId: string): Promise<Lesson[]> => {
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) return [];
-
-      const data = await response.json();
-      return data.lessons || data || [];
-    } catch (error) {
-      console.error(`Error fetching lessons for module ${moduleId}:`, error);
-      return [];
+  // Trigger course selection when courseId changes (to fetch modules)
+  useEffect(() => {
+    if (selectedCourseId) {
+      selectCourse(selectedCourseId);
     }
-  }, [token]);
+  }, [selectedCourseId, selectCourse]);
 
-  const fetchModulesForCourse = useCallback(async (courseId: string): Promise<Module[]> => {
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses/${courseId}/modules`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) return [];
-
-      const modules: Module[] = await response.json();
-
-      // Fetch lessons for each module
-      const modulesWithLessons = await Promise.all(
-        modules.map(async (module) => {
-          const lessons = await fetchLessonsForModule(courseId, module.id);
-          return { ...module, lessons };
-        })
-      );
-
-      return modulesWithLessons;
-    } catch (error) {
-      console.error(`Error fetching modules for course ${courseId}:`, error);
-      return [];
+  // Trigger module selection when lessonModuleId changes (to fetch lessons for association)
+  useEffect(() => {
+    if (selectedLessonModuleId) {
+      selectModule(selectedLessonModuleId);
     }
-  }, [token, fetchLessonsForModule]);
-
-  const fetchCourses = useCallback(async () => {
-    setLoadingCourses(true);
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/api/v1/courses`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch courses: ${response.status}`);
-      }
-
-      const coursesData: Course[] = await response.json();
-
-      // Fetch modules and lessons for each course
-      const coursesWithData = await Promise.all(
-        coursesData.map(async (course) => {
-          const modules = await fetchModulesForCourse(course.id);
-          return { ...course, modules };
-        })
-      );
-
-      setCourses(coursesWithData);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      toast({
-        title: 'Erro ao carregar cursos',
-        description: 'Não foi possível carregar os cursos disponíveis',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingCourses(false);
-    }
-  }, [token, fetchModulesForCourse, toast]);
+  }, [selectedLessonModuleId, selectModule]);
 
   const fetchUsers = useCallback(async (roles: string[]) => {
     if (roles.length === 0) {
@@ -335,13 +235,6 @@ export default function CreateLiveSessionModal({
       }
     });
   }, []);
-
-  // Load courses when modal opens
-  useEffect(() => {
-    if (open) {
-      fetchCourses();
-    }
-  }, [open, fetchCourses]);
 
   // Refetch users when role filters change
   useEffect(() => {
@@ -640,20 +533,23 @@ export default function CreateLiveSessionModal({
                           <FormLabel className="text-gray-300 flex items-center gap-2">
                             {t('fields.module.label')}
                             <span className="text-red-400">*</span>
+                            {loadingModules && (
+                              <Loader2 size={14} className="animate-spin text-secondary" />
+                            )}
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={!selectedCourseId} className="bg-gray-700 border-gray-600 text-white">
-                                <SelectValue placeholder={t('fields.module.placeholder')} />
+                              <SelectTrigger disabled={!selectedCourseId || loadingModules} className="bg-gray-700 border-gray-600 text-white">
+                                <SelectValue placeholder={loadingModules ? t('loading') : t('fields.module.placeholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-gray-700 border-gray-600">
-                              {availableModules.map((module) => (
+                              {modules.map((module) => (
                                 <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                                  {module.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt')?.title || module.slug}
+                                  {getTranslationByLocale(module.translations, 'pt')?.title || module.slug}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -741,23 +637,26 @@ export default function CreateLiveSessionModal({
                         <FormItem>
                           <FormLabel className="text-gray-300">
                             {t('fields.lessonModule.label')}
+                            {loadingModules && (
+                              <Loader2 size={14} className="ml-2 animate-spin text-secondary" />
+                            )}
                           </FormLabel>
                           <Select
                             onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                             value={field.value || 'none'}
                           >
                             <FormControl>
-                              <SelectTrigger disabled={!selectedCourseId} className="bg-gray-700 border-gray-600 text-white">
-                                <SelectValue placeholder={t('fields.lessonModule.placeholder')} />
+                              <SelectTrigger disabled={!selectedCourseId || loadingModules} className="bg-gray-700 border-gray-600 text-white">
+                                <SelectValue placeholder={loadingModules ? t('loading') : t('fields.lessonModule.placeholder')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-gray-700 border-gray-600">
                               <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
                                 {t('fields.lessonModule.none')}
                               </SelectItem>
-                              {availableLessonModules.map((module) => (
+                              {modules.map((module) => (
                                 <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                                  {module.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt')?.title || module.slug}
+                                  {getTranslationByLocale(module.translations, 'pt')?.title || module.slug}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -773,30 +672,30 @@ export default function CreateLiveSessionModal({
                           name="lessonId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">
+                              <FormLabel className="text-gray-300 flex items-center gap-2">
                                 {t('fields.lesson.label')}
+                                {loadingLessons && (
+                                  <Loader2 size={14} className="animate-spin text-secondary" />
+                                )}
                               </FormLabel>
                             <Select
                               onValueChange={(value) => field.onChange(value === 'none' ? '' : value)}
                               value={field.value || 'none'}
                             >
                               <FormControl>
-                                <SelectTrigger disabled={!selectedLessonModuleId || selectedLessonModuleId === 'none'} className="bg-gray-700 border-gray-600 text-white">
-                                  <SelectValue placeholder={t('fields.lesson.placeholder')} />
+                                <SelectTrigger disabled={!selectedLessonModuleId || selectedLessonModuleId === 'none' || loadingLessons} className="bg-gray-700 border-gray-600 text-white">
+                                  <SelectValue placeholder={loadingLessons ? t('loading') : t('fields.lesson.placeholder')} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="bg-gray-700 border-gray-600">
                                 <SelectItem value="none" className="text-gray-400 hover:bg-gray-600">
                                   {t('fields.lesson.none')}
                                 </SelectItem>
-                                {availableLessons.map((lesson) => {
-                                  const lessonTranslation = lesson.translations.find(t => t.locale === 'pt_BR' || t.locale === 'pt');
-                                  return (
-                                    <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
-                                      {lessonTranslation?.title || lesson.slug}
-                                    </SelectItem>
-                                  );
-                                })}
+                                {lessons.map((lesson) => (
+                                  <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
+                                    {getTranslationByLocale(lesson.translations, 'pt')?.title || `Aula ${lesson.order}`}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />

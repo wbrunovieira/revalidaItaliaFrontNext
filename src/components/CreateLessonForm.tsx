@@ -29,7 +29,32 @@ import {
   X,
   AlertCircle,
   Upload,
+  Loader2,
 } from 'lucide-react';
+
+// Helper: fetch com retry automático
+async function fetchWithRetry(
+  url: string,
+  options?: RequestInit,
+  retries = 3,
+  delay = 1000
+): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) return response;
+      // Se não for erro de rede, não faz retry
+      if (response.status >= 400 && response.status < 500) {
+        return response;
+      }
+      throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+  throw new Error('Max retries reached');
+}
 import Image from 'next/image';
 
 interface Translation {
@@ -108,9 +133,11 @@ export default function CreateLessonForm() {
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] =
     useState(true);
+  const [loadingModules, setLoadingModules] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   const [courses, setCourses] = useState<CourseItem[]>([]);
+  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [existingOrders, setExistingOrders] = useState<
     number[]
   >([]);
@@ -549,11 +576,13 @@ export default function CreateLessonForm() {
     []
   );
 
-  // Função para buscar módulos de um curso específico
+  // Função para buscar módulos de um curso específico (chamada apenas quando curso é selecionado)
   const fetchModulesForCourse = useCallback(
-    async (courseId: string): Promise<ModuleItem[]> => {
+    async (courseId: string): Promise<void> => {
+      setLoadingModules(true);
+      setModules([]);
       try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
         );
 
@@ -563,21 +592,24 @@ export default function CreateLessonForm() {
           );
         }
 
-        return await response.json();
+        const data: ModuleItem[] = await response.json();
+        setModules(data);
       } catch (error) {
         handleApiError(error, 'Module fetch error');
-        return [];
+        setModules([]);
+      } finally {
+        setLoadingModules(false);
       }
     },
     [handleApiError]
   );
 
-  // Função para buscar cursos com seus módulos
+  // Função para buscar apenas os cursos (módulos são carregados sob demanda)
   const fetchCourses = useCallback(async () => {
     setLoadingCourses(true);
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
       );
 
@@ -588,17 +620,7 @@ export default function CreateLessonForm() {
       }
 
       const data: CourseItem[] = await response.json();
-
-      const coursesWithModules = await Promise.all(
-        data.map(async course => {
-          const modules = await fetchModulesForCourse(
-            course.id
-          );
-          return { ...course, modules };
-        })
-      );
-
-      setCourses(coursesWithModules);
+      setCourses(data);
     } catch (error) {
       handleApiError(error, 'Courses fetch error');
       toast({
@@ -609,7 +631,7 @@ export default function CreateLessonForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [toast, t, handleApiError, fetchModulesForCourse]);
+  }, [toast, t, handleApiError]);
 
 
   useEffect(() => {
@@ -904,8 +926,14 @@ export default function CreateLessonForm() {
       setTouched(prev => ({ ...prev, courseId: true }));
       handleFieldValidation('courseId', courseId);
       setExistingOrders([]); // Clear existing orders
+      setModules([]); // Clear modules from previous course
+
+      // Fetch modules for selected course
+      if (courseId) {
+        fetchModulesForCourse(courseId);
+      }
     },
-    [handleFieldValidation]
+    [handleFieldValidation, fetchModulesForCourse]
   );
 
   const handleModuleChange = useCallback(
@@ -975,10 +1003,8 @@ export default function CreateLessonForm() {
     []
   );
 
-  const selectedCourse = courses.find(
-    course => course.id === formData.courseId
-  );
-  const availableModules = selectedCourse?.modules || [];
+  // Módulos agora vêm do state separado (carregados sob demanda)
+  const availableModules = modules;
 
   const selectedModule = availableModules.find(
     module => module.id === formData.moduleId
@@ -1003,8 +1029,11 @@ export default function CreateLessonForm() {
               <span className="text-red-400">*</span>
             </Label>
             {loadingCourses ? (
-              <div className="animate-pulse">
-                <div className="h-10 bg-gray-700 rounded"></div>
+              <div className="flex items-center gap-2 h-10 px-3 bg-gray-700 border border-gray-600 rounded-md">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <span className="text-gray-400 text-sm">
+                  {t('validation.loadingCourses') || 'Carregando cursos...'}
+                </span>
               </div>
             ) : (
               <Select
@@ -1057,7 +1086,14 @@ export default function CreateLessonForm() {
               <Package size={16} /> {t('fields.module')}
               <span className="text-red-400">*</span>
             </Label>
-            {formData.courseId &&
+            {loadingModules ? (
+              <div className="flex items-center gap-2 h-10 px-3 bg-gray-700 border border-gray-600 rounded-md">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <span className="text-gray-400 text-sm">
+                  {t('validation.loadingModules') || 'Carregando módulos...'}
+                </span>
+              </div>
+            ) : formData.courseId &&
             availableModules.length === 0 ? (
               <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
                 <div className="flex items-start gap-3">

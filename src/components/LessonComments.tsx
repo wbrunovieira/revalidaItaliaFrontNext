@@ -83,6 +83,7 @@ interface Comment {
   replyCount?: number;
   attachments?: Attachment[];
   hashtags?: string[];
+  isPinned?: boolean;
 }
 
 // Mock data
@@ -325,7 +326,8 @@ export default function LessonComments({ lessonId, courseId, moduleId }: LessonC
             replyCount: replies.length,
             attachments: (post.attachments as Attachment[]) || [],
             hashtags: (post.hashtags as string[]) || [],
-            replies: replies
+            replies: replies,
+            isPinned: (post.isPinned as boolean) || false
           };
         })
       );

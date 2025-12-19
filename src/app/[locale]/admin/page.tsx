@@ -29,6 +29,7 @@ import {
   UserCheck,
   Box,
   Music,
+  Gamepad2,
 } from 'lucide-react';
 
 import {
@@ -81,6 +82,7 @@ import CreateEnvironment3DForm from '@/components/CreateEnvironment3DForm';
 import ListEnvironments3D from '@/components/ListEnvironments3D';
 import UploadAudioForm from '@/components/UploadAudioForm';
 import ListAudios from '@/components/ListAudios';
+import CreateAnimationForm from '@/components/CreateAnimationForm';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -373,6 +375,21 @@ export default function AdminPage() {
                   aria-hidden="true"
                 />
                 {t('tabs.audios')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba animations para admins e tutors */}
+            {(isAdmin || isTutor) && (
+              <TabsTrigger
+                value="animations"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Gamepad2
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.animations')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -1126,6 +1143,13 @@ export default function AdminPage() {
                   <ListAudios />
                 </TabsContent>
               </Tabs>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de animations para admins e tutors */}
+          {(isAdmin || isTutor) && (
+            <TabsContent value="animations">
+              <CreateAnimationForm />
             </TabsContent>
           )}
         </div>

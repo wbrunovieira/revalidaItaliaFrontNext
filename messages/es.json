@@ -5019,7 +5019,8 @@
     "tutor": "Tutor",
     "studentDocuments": "Análisis Docs",
     "environments3d": "Ambientes 3D",
-    "audios": "Audios"
+    "audios": "Audios",
+    "animations": "Animaciones"
   },
 
   "environments3d": {
@@ -5142,6 +5143,80 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "Guardando..."
+  },
+
+  "createAnimation": {
+    "title": "Crear Animación Interactiva",
+    "description": "Crea animaciones interactivas para involucrar a los estudiantes en las lecciones.",
+    "loading": "Cargando...",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Lección",
+      "animationType": "Tipo de Animación",
+      "gameType": "Tipo de Juego",
+      "sentences": "Frases",
+      "sentence": "Frase",
+      "fullSentence": "Frase Completa",
+      "targetWord": "Palabra Objetivo",
+      "wordPosition": "Posición de la Palabra",
+      "hint": "Pista",
+      "distractors": "Palabras Distractoras",
+      "shuffleWords": "Mezclar Palabras",
+      "question": "Pregunta",
+      "options": "Opciones de Respuesta",
+      "explanation": "Explicación"
+    },
+    "placeholders": {
+      "course": "Seleccione un curso",
+      "module": "Seleccione un módulo",
+      "lesson": "Seleccione una lección",
+      "fullSentence": "Ej: Il gatto mangia il pesce",
+      "targetWord": "Ej: gatto",
+      "hint": "Ej: Animal doméstico (opcional)",
+      "distractor": "Palabra distractora",
+      "question": "Ingrese la pregunta",
+      "option": "Opción",
+      "explanation": "Explicación de la respuesta correcta (opcional)"
+    },
+    "types": {
+      "completeSentence": "Completar Frase",
+      "completeSentenceDesc": "El estudiante completa frases arrastrando o escribiendo palabras",
+      "multipleChoice": "Opción Múltiple",
+      "multipleChoiceDesc": "El estudiante selecciona la respuesta correcta entre 3 opciones"
+    },
+    "gameTypes": {
+      "dragWord": "Arrastrar Palabra",
+      "reorderWords": "Reordenar Palabras",
+      "typeCompletion": "Escribir Palabra",
+      "multipleBlanks": "Espacios Múltiples"
+    },
+    "actions": {
+      "addSentence": "Agregar Frase",
+      "addDistractor": "Agregar Distractora",
+      "create": "Crear Animación",
+      "creating": "Creando..."
+    },
+    "hints": {
+      "distractors": "Palabras extra que se mostrarán como opciones incorrectas",
+      "correctOption": "Haga clic en el número para marcar la opción correcta",
+      "markCorrect": "Marcar como correcta"
+    },
+    "errors": {
+      "lessonRequired": "Seleccione una lección",
+      "gameTypeRequired": "Seleccione un tipo de juego",
+      "sentenceRequired": "Agregue al menos una frase con palabra objetivo",
+      "questionRequired": "Ingrese una pregunta",
+      "threeOptionsRequired": "Complete las 3 opciones"
+    },
+    "success": {
+      "title": "Animación creada",
+      "description": "La animación se creó exitosamente"
+    },
+    "error": {
+      "title": "Error al crear animación",
+      "description": "No se pudo crear la animación"
+    }
   },
 
   "listEnvironments3D": {

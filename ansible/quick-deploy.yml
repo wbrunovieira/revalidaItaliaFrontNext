@@ -123,6 +123,31 @@
       debug:
         msg: "Git atualizado com sucesso (public/ ignorado via sparse-checkout)"
 
+    - name: "🧹 DISK - Limpando espaço em disco antes do build"
+      shell: |
+        # Limpar logs do journal (manter só 3 dias)
+        journalctl --vacuum-time=3d 2>/dev/null || true
+        # Limpar cache do apt
+        apt clean 2>/dev/null || true
+        apt autoclean 2>/dev/null || true
+        # Limpar logs antigos de login
+        truncate -s 0 /var/log/btmp.1 2>/dev/null || true
+        truncate -s 0 /var/log/wtmp.1 2>/dev/null || true
+        # Limpar snaps antigos (versões desabilitadas)
+        snap list --all 2>/dev/null | awk '/disabled/{print $1, $3}' | while read snapname revision; do
+          snap remove "$snapname" --revision="$revision" 2>/dev/null || true
+        done
+        # Limpar cache do npm global
+        npm cache clean --force 2>/dev/null || true
+        # Mostrar espaço disponível
+        df -h / | tail -1
+      register: disk_cleanup
+      ignore_errors: yes
+
+    - name: "✅ DISK - Espaço em disco após limpeza"
+      debug:
+        msg: "{{ disk_cleanup.stdout_lines | default(['Limpeza concluída']) }}"
+
     - name: "📦 NPM - Instalando dependências"
       command: npm install
       args:

@@ -5281,6 +5281,37 @@
     "error": {
       "fetchTitle": "Error al cargar animaciones",
       "fetchDescription": "No se pudo cargar la lista de animaciones"
+    },
+    "edit": {
+      "button": "Editar",
+      "title": "Editar Animación",
+      "typeReadOnly": "(el tipo no se puede cambiar)",
+      "order": "Orden",
+      "gameType": "Tipo de Juego",
+      "sentences": "Frases",
+      "sentence": "Frase",
+      "addSentence": "Agregar Frase",
+      "fullSentence": "Frase Completa",
+      "targetWord": "Palabra Objetivo",
+      "position": "Posición",
+      "hint": "Pista",
+      "distractors": "Distractores",
+      "addDistractor": "Agregar",
+      "distractorPlaceholder": "Palabra",
+      "shuffleWords": "Mezclar Palabras",
+      "question": "Pregunta",
+      "options": "Opciones",
+      "option": "Opción",
+      "markCorrect": "Marcar como correcta",
+      "explanation": "Explicación",
+      "explanationPlaceholder": "Explicación de la respuesta correcta (opcional)",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "successTitle": "Animación actualizada",
+      "successDescription": "Los cambios se guardaron exitosamente",
+      "errorTitle": "Error al actualizar",
+      "errorDescription": "No se pudieron guardar los cambios"
     }
   },
 

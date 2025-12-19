@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronRight,
   Eye,
+  Pencil,
   Type,
   HelpCircle,
   GripHorizontal,
@@ -32,6 +33,9 @@ import {
   Calendar,
   Filter,
   X,
+  Plus,
+  Trash2,
+  Save,
 } from 'lucide-react';
 
 type AnimationType = 'CompleteSentence' | 'MultipleChoice';
@@ -100,6 +104,24 @@ export default function ListAnimations() {
   const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
   const [selectedAnimation, setSelectedAnimation] = useState<Animation | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Edit modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAnimation, setEditingAnimation] = useState<Animation | null>(null);
+  const [editForm, setEditForm] = useState<{
+    order: number;
+    // CompleteSentence fields
+    gameType?: GameType;
+    sentences?: Sentence[];
+    distractors?: string[];
+    shuffleWords?: boolean;
+    // MultipleChoice fields
+    question?: string;
+    options?: [string, string, string];
+    correctOptionIndex?: 0 | 1 | 2;
+    explanation?: string;
+  }>({ order: 0 });
+  const [isSaving, setIsSaving] = useState(false);
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -314,6 +336,162 @@ export default function ListAnimations() {
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedAnimation(null);
+  }, []);
+
+  // Edit modal handlers
+  const openEditModal = useCallback((animation: Animation) => {
+    setEditingAnimation(animation);
+
+    if (animation.type === 'CompleteSentence') {
+      const content = animation.content as CompleteSentenceContent;
+      setEditForm({
+        order: animation.order,
+        gameType: content.gameType,
+        sentences: [...content.sentences],
+        distractors: content.distractors ? [...content.distractors] : [],
+        shuffleWords: content.shuffleWords ?? false,
+      });
+    } else {
+      const content = animation.content as MultipleChoiceContent;
+      setEditForm({
+        order: animation.order,
+        question: content.question,
+        options: [...content.options],
+        correctOptionIndex: content.correctOptionIndex,
+        explanation: content.explanation || '',
+      });
+    }
+
+    setIsEditModalOpen(true);
+  }, []);
+
+  const closeEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditingAnimation(null);
+    setEditForm({ order: 0 });
+  }, []);
+
+  // Update animation via API
+  const updateAnimation = useCallback(async () => {
+    if (!editingAnimation) return;
+
+    setIsSaving(true);
+    try {
+      const token = getToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      let content: CompleteSentenceContent | MultipleChoiceContent;
+
+      if (editingAnimation.type === 'CompleteSentence') {
+        content = {
+          gameType: editForm.gameType!,
+          sentences: editForm.sentences!,
+          distractors: editForm.distractors,
+          shuffleWords: editForm.shuffleWords,
+        };
+      } else {
+        content = {
+          question: editForm.question!,
+          options: editForm.options!,
+          correctOptionIndex: editForm.correctOptionIndex!,
+          explanation: editForm.explanation,
+        };
+      }
+
+      const response = await fetch(`${apiUrl}/api/v1/animations/${editingAnimation.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ content, order: editForm.order }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update animation');
+      }
+
+      const updatedAnimation = await response.json();
+
+      // Update local state
+      setAllAnimations(prev => prev.map(lessonGroup => ({
+        ...lessonGroup,
+        animations: lessonGroup.animations.map(anim =>
+          anim.id === updatedAnimation.id ? updatedAnimation : anim
+        ),
+      })));
+
+      toast({
+        title: t('edit.successTitle'),
+        description: t('edit.successDescription'),
+      });
+
+      closeEditModal();
+    } catch (error) {
+      console.error('Error updating animation:', error);
+      toast({
+        title: t('edit.errorTitle'),
+        description: t('edit.errorDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editingAnimation, editForm, getToken, toast, t, closeEditModal]);
+
+  // Edit form handlers
+  const updateSentence = useCallback((index: number, field: keyof Sentence, value: string | number) => {
+    setEditForm(prev => {
+      const sentences = [...(prev.sentences || [])];
+      sentences[index] = { ...sentences[index], [field]: value };
+      return { ...prev, sentences };
+    });
+  }, []);
+
+  const addSentence = useCallback(() => {
+    setEditForm(prev => ({
+      ...prev,
+      sentences: [...(prev.sentences || []), { fullSentence: '', targetWord: '', wordPosition: 0 }],
+    }));
+  }, []);
+
+  const removeSentence = useCallback((index: number) => {
+    setEditForm(prev => ({
+      ...prev,
+      sentences: (prev.sentences || []).filter((_, i) => i !== index),
+    }));
+  }, []);
+
+  const addDistractor = useCallback(() => {
+    setEditForm(prev => ({
+      ...prev,
+      distractors: [...(prev.distractors || []), ''],
+    }));
+  }, []);
+
+  const removeDistractor = useCallback((index: number) => {
+    setEditForm(prev => ({
+      ...prev,
+      distractors: (prev.distractors || []).filter((_, i) => i !== index),
+    }));
+  }, []);
+
+  const updateDistractor = useCallback((index: number, value: string) => {
+    setEditForm(prev => {
+      const distractors = [...(prev.distractors || [])];
+      distractors[index] = value;
+      return { ...prev, distractors };
+    });
+  }, []);
+
+  const updateOption = useCallback((index: number, value: string) => {
+    setEditForm(prev => {
+      const options = [...(prev.options || ['', '', ''])] as [string, string, string];
+      options[index] = value;
+      return { ...prev, options };
+    });
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -662,17 +840,30 @@ export default function ListAnimations() {
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={e => {
-                            e.stopPropagation();
-                            openViewModal(animation);
-                          }}
-                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
-                          title={t('view')}
-                        >
-                          <Eye size={16} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              openViewModal(animation);
+                            }}
+                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                            title={t('view')}
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              openEditModal(animation);
+                            }}
+                            className="p-2 text-gray-400 hover:text-secondary hover:bg-secondary/20 rounded transition-all"
+                            title={t('edit.button')}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -826,6 +1017,296 @@ export default function ListAnimations() {
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
                 {t('modal.close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && editingAnimation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeEditModal} />
+          <div className="relative z-10 w-full max-w-3xl mx-4 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 sticky top-0 bg-gray-800 z-10">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Pencil size={20} className="text-secondary" />
+                {t('edit.title')}
+              </h3>
+              <button
+                onClick={closeEditModal}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Type Badge (read-only) */}
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  editingAnimation.type === 'CompleteSentence'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-purple-500/20 text-purple-400'
+                }`}>
+                  {editingAnimation.type === 'CompleteSentence' ? t('types.completeSentence') : t('types.multipleChoice')}
+                </span>
+                <span className="text-xs text-gray-500">{t('edit.typeReadOnly')}</span>
+              </div>
+
+              {/* Order Field */}
+              <div>
+                <Label className="text-gray-300 text-sm">{t('edit.order')}</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={editForm.order}
+                  onChange={e => setEditForm(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                  className="mt-1 w-24 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                />
+              </div>
+
+              {/* CompleteSentence Form */}
+              {editingAnimation.type === 'CompleteSentence' && (
+                <div className="space-y-6">
+                  {/* Game Type */}
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('edit.gameType')}</Label>
+                    <Select
+                      value={editForm.gameType}
+                      onValueChange={(value: GameType) => setEditForm(prev => ({ ...prev, gameType: value }))}
+                    >
+                      <SelectTrigger className="mt-1 bg-gray-700 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="DRAG_WORD" className="text-white hover:bg-gray-700">{t('gameTypes.dragWord')}</SelectItem>
+                        <SelectItem value="REORDER_WORDS" className="text-white hover:bg-gray-700">{t('gameTypes.reorderWords')}</SelectItem>
+                        <SelectItem value="TYPE_COMPLETION" className="text-white hover:bg-gray-700">{t('gameTypes.typeCompletion')}</SelectItem>
+                        <SelectItem value="MULTIPLE_BLANKS" className="text-white hover:bg-gray-700">{t('gameTypes.multipleBlanks')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Sentences */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-gray-300 text-sm">{t('edit.sentences')}</Label>
+                      <button
+                        type="button"
+                        onClick={addSentence}
+                        className="flex items-center gap-1 text-sm text-secondary hover:text-secondary/80"
+                      >
+                        <Plus size={14} />
+                        {t('edit.addSentence')}
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {editForm.sentences?.map((sentence, idx) => (
+                        <div key={idx} className="bg-gray-700/50 p-4 rounded-lg space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-400">{t('edit.sentence')} {idx + 1}</span>
+                            {(editForm.sentences?.length || 0) > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSentence(idx)}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                          <div>
+                            <Label className="text-gray-400 text-xs">{t('edit.fullSentence')}</Label>
+                            <input
+                              type="text"
+                              value={sentence.fullSentence}
+                              onChange={e => updateSentence(idx, 'fullSentence', e.target.value)}
+                              className="mt-1 w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <Label className="text-gray-400 text-xs">{t('edit.targetWord')}</Label>
+                              <input
+                                type="text"
+                                value={sentence.targetWord}
+                                onChange={e => updateSentence(idx, 'targetWord', e.target.value)}
+                                className="mt-1 w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-gray-400 text-xs">{t('edit.position')}</Label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={sentence.wordPosition}
+                                onChange={e => updateSentence(idx, 'wordPosition', parseInt(e.target.value) || 0)}
+                                className="mt-1 w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-gray-400 text-xs">{t('edit.hint')}</Label>
+                              <input
+                                type="text"
+                                value={sentence.hint || ''}
+                                onChange={e => updateSentence(idx, 'hint', e.target.value)}
+                                className="mt-1 w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Distractors */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-gray-300 text-sm">{t('edit.distractors')}</Label>
+                      <button
+                        type="button"
+                        onClick={addDistractor}
+                        className="flex items-center gap-1 text-sm text-secondary hover:text-secondary/80"
+                      >
+                        <Plus size={14} />
+                        {t('edit.addDistractor')}
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {editForm.distractors?.map((distractor, idx) => (
+                        <div key={idx} className="flex items-center gap-1 bg-gray-700 rounded-lg">
+                          <input
+                            type="text"
+                            value={distractor}
+                            onChange={e => updateDistractor(idx, e.target.value)}
+                            className="w-32 px-3 py-1.5 bg-transparent text-white text-sm focus:outline-none"
+                            placeholder={t('edit.distractorPlaceholder')}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeDistractor(idx)}
+                            className="p-1.5 text-red-400 hover:text-red-300"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Shuffle Words */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="shuffleWords"
+                      checked={editForm.shuffleWords || false}
+                      onChange={e => setEditForm(prev => ({ ...prev, shuffleWords: e.target.checked }))}
+                      className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-secondary focus:ring-secondary"
+                    />
+                    <Label htmlFor="shuffleWords" className="text-gray-300 text-sm cursor-pointer">
+                      {t('edit.shuffleWords')}
+                    </Label>
+                  </div>
+                </div>
+              )}
+
+              {/* MultipleChoice Form */}
+              {editingAnimation.type === 'MultipleChoice' && (
+                <div className="space-y-6">
+                  {/* Question */}
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('edit.question')}</Label>
+                    <textarea
+                      value={editForm.question || ''}
+                      onChange={e => setEditForm(prev => ({ ...prev, question: e.target.value }))}
+                      rows={3}
+                      className="mt-1 w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary resize-none"
+                    />
+                  </div>
+
+                  {/* Options */}
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('edit.options')}</Label>
+                    <div className="mt-2 space-y-3">
+                      {editForm.options?.map((option, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex items-center gap-3 p-3 rounded-lg ${
+                            idx === editForm.correctOptionIndex
+                              ? 'bg-green-500/20 border border-green-500/50'
+                              : 'bg-gray-700/50'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setEditForm(prev => ({ ...prev, correctOptionIndex: idx as 0 | 1 | 2 }))}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${
+                              idx === editForm.correctOptionIndex
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                            }`}
+                            title={t('edit.markCorrect')}
+                          >
+                            {idx + 1}
+                          </button>
+                          <input
+                            type="text"
+                            value={option}
+                            onChange={e => updateOption(idx, e.target.value)}
+                            className="flex-1 px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                            placeholder={`${t('edit.option')} ${idx + 1}`}
+                          />
+                          {idx === editForm.correctOptionIndex && (
+                            <span className="text-green-400 text-xs">{t('modal.correct')}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Explanation */}
+                  <div>
+                    <Label className="text-gray-300 text-sm">{t('edit.explanation')}</Label>
+                    <textarea
+                      value={editForm.explanation || ''}
+                      onChange={e => setEditForm(prev => ({ ...prev, explanation: e.target.value }))}
+                      rows={2}
+                      className="mt-1 w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary resize-none"
+                      placeholder={t('edit.explanationPlaceholder')}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-700 sticky bottom-0 bg-gray-800">
+              <button
+                onClick={closeEditModal}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                disabled={isSaving}
+              >
+                {t('edit.cancel')}
+              </button>
+              <button
+                onClick={updateAnimation}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-primary font-medium rounded-lg transition-colors disabled:opacity-50"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    {t('edit.saving')}
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {t('edit.save')}
+                  </>
+                )}
               </button>
             </div>
           </div>

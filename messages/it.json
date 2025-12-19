@@ -5239,6 +5239,37 @@
     "error": {
       "fetchTitle": "Errore nel caricamento delle animazioni",
       "fetchDescription": "Non è stato possibile caricare la lista delle animazioni"
+    },
+    "edit": {
+      "button": "Modifica",
+      "title": "Modifica Animazione",
+      "typeReadOnly": "(il tipo non può essere modificato)",
+      "order": "Ordine",
+      "gameType": "Tipo di Gioco",
+      "sentences": "Frasi",
+      "sentence": "Frase",
+      "addSentence": "Aggiungi Frase",
+      "fullSentence": "Frase Completa",
+      "targetWord": "Parola Obiettivo",
+      "position": "Posizione",
+      "hint": "Suggerimento",
+      "distractors": "Distrattori",
+      "addDistractor": "Aggiungi",
+      "distractorPlaceholder": "Parola",
+      "shuffleWords": "Mescola Parole",
+      "question": "Domanda",
+      "options": "Opzioni",
+      "option": "Opzione",
+      "markCorrect": "Segna come corretta",
+      "explanation": "Spiegazione",
+      "explanationPlaceholder": "Spiegazione della risposta corretta (opzionale)",
+      "cancel": "Annulla",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "successTitle": "Animazione aggiornata",
+      "successDescription": "Le modifiche sono state salvate con successo",
+      "errorTitle": "Errore nell'aggiornamento",
+      "errorDescription": "Non è stato possibile salvare le modifiche"
     }
   },
 

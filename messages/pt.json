@@ -5064,6 +5064,11 @@
     "list": "Listar Áudios"
   },
 
+  "animations": {
+    "create": "Criar",
+    "list": "Listar"
+  },
+
   "listAudios": {
     "title": "Lista de Áudios",
     "description": "Visualize os áudios cadastrados por aula.",
@@ -5247,6 +5252,66 @@
     "error": {
       "title": "Erro ao criar animação",
       "description": "Não foi possível criar a animação"
+    }
+  },
+
+  "listAnimations": {
+    "title": "Lista de Animações",
+    "loading": "Carregando animações...",
+    "searchPlaceholder": "Buscar animações...",
+    "filters": "Filtros",
+    "filterBy": "Filtrar por",
+    "clearFilters": "Limpar filtros",
+    "noAnimations": "Nenhuma animação cadastrada",
+    "noResults": "Nenhuma animação encontrada",
+    "animations": "animações",
+    "view": "Visualizar",
+    "order": "Ordem",
+    "questions": "questões",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Aula"
+    },
+    "placeholders": {
+      "allCourses": "Todos os cursos",
+      "allModules": "Todos os módulos",
+      "allLessons": "Todas as aulas"
+    },
+    "stats": {
+      "lessons": "Aulas",
+      "animations": "Animações",
+      "completeSentence": "Completar Frase",
+      "multipleChoice": "Múltipla Escolha"
+    },
+    "types": {
+      "completeSentence": "Completar Frase",
+      "multipleChoice": "Múltipla Escolha"
+    },
+    "gameTypes": {
+      "dragWord": "Arrastar Palavra",
+      "reorderWords": "Reordenar Palavras",
+      "typeCompletion": "Digitar Palavra",
+      "multipleBlanks": "Múltiplos Espaços"
+    },
+    "modal": {
+      "title": "Detalhes da Animação",
+      "sentences": "Frases",
+      "targetWord": "Palavra Alvo",
+      "position": "Posição",
+      "hint": "Dica",
+      "distractors": "Distratores",
+      "question": "Pergunta",
+      "options": "Opções",
+      "correct": "Correta",
+      "explanation": "Explicação",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "close": "Fechar"
+    },
+    "error": {
+      "fetchTitle": "Erro ao carregar animações",
+      "fetchDescription": "Não foi possível carregar a lista de animações"
     }
   },
 

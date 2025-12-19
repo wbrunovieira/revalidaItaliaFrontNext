@@ -83,6 +83,7 @@ import ListEnvironments3D from '@/components/ListEnvironments3D';
 import UploadAudioForm from '@/components/UploadAudioForm';
 import ListAudios from '@/components/ListAudios';
 import CreateAnimationForm from '@/components/CreateAnimationForm';
+import ListAnimations from '@/components/ListAnimations';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -1149,7 +1150,30 @@ export default function AdminPage() {
           {/* Apenas renderiza o conteúdo de animations para admins e tutors */}
           {(isAdmin || isTutor) && (
             <TabsContent value="animations">
-              <CreateAnimationForm />
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Gamepad2 className="mr-2" size={16} />
+                    {t('animations.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('animations.list')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                  <CreateAnimationForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <ListAnimations />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
         </div>

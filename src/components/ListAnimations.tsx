@@ -1,0 +1,836 @@
+// /src/components/ListAnimations.tsx
+'use client';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { useCourseHierarchy, getTranslationByLocale } from '@/hooks/useCourseHierarchy';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Gamepad2,
+  BookOpen,
+  Layers,
+  Play,
+  Loader2,
+  Search,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  Type,
+  HelpCircle,
+  GripHorizontal,
+  ListOrdered,
+  Hash,
+  Calendar,
+  Filter,
+  X,
+} from 'lucide-react';
+
+type AnimationType = 'CompleteSentence' | 'MultipleChoice';
+type GameType = 'DRAG_WORD' | 'REORDER_WORDS' | 'TYPE_COMPLETION' | 'MULTIPLE_BLANKS';
+
+interface Sentence {
+  fullSentence: string;
+  targetWord: string;
+  wordPosition: number;
+  hint?: string;
+}
+
+interface CompleteSentenceContent {
+  gameType: GameType;
+  sentences: Sentence[];
+  distractors?: string[];
+  shuffleWords?: boolean;
+}
+
+interface MultipleChoiceContent {
+  question: string;
+  options: [string, string, string];
+  correctOptionIndex: 0 | 1 | 2;
+  explanation?: string;
+}
+
+interface Animation {
+  id: string;
+  lessonId: string;
+  type: AnimationType;
+  content: CompleteSentenceContent | MultipleChoiceContent;
+  order: number;
+  totalQuestions: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface LessonWithAnimations {
+  lessonId: string;
+  lessonTitle: string;
+  moduleTitle: string;
+  courseTitle: string;
+  animations: Animation[];
+}
+
+export default function ListAnimations() {
+  const t = useTranslations('Admin.listAnimations');
+  const params = useParams();
+  const locale = params.locale as string;
+  const { toast } = useToast();
+
+  const {
+    courses,
+    modules,
+    lessons,
+    loadingCourses,
+    loadingModules,
+    loadingLessons,
+    selectCourse,
+    selectModule,
+  } = useCourseHierarchy({ fetchLessons: true });
+
+  const [loading, setLoading] = useState(true);
+  const [allAnimations, setAllAnimations] = useState<LessonWithAnimations[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
+  const [selectedAnimation, setSelectedAnimation] = useState<Animation | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Filter states
+  const [filterCourseId, setFilterCourseId] = useState('');
+  const [filterModuleId, setFilterModuleId] = useState('');
+  const [filterLessonId, setFilterLessonId] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
+  // Fetch all animations for all lessons
+  const fetchAllAnimations = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = getToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      // First, get all courses with their modules and lessons
+      const coursesResponse = await fetch(`${apiUrl}/api/v1/courses`, {
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        credentials: 'include',
+      });
+
+      if (!coursesResponse.ok) throw new Error('Failed to fetch courses');
+      const coursesData = await coursesResponse.json();
+
+      const lessonsWithAnimations: LessonWithAnimations[] = [];
+
+      // For each course, get modules and lessons
+      for (const course of coursesData) {
+        const courseTranslation = getTranslationByLocale(course.translations, locale);
+
+        const modulesResponse = await fetch(`${apiUrl}/api/v1/courses/${course.id}/modules`, {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+          credentials: 'include',
+        });
+
+        if (!modulesResponse.ok) continue;
+        const modulesData = await modulesResponse.json();
+
+        for (const moduleItem of modulesData) {
+          const moduleTranslation = getTranslationByLocale(moduleItem.translations, locale);
+
+          const lessonsResponse = await fetch(
+            `${apiUrl}/api/v1/courses/${course.id}/modules/${moduleItem.id}/lessons?limit=100`,
+            {
+              headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+              credentials: 'include',
+            }
+          );
+
+          if (!lessonsResponse.ok) continue;
+          const lessonsData = await lessonsResponse.json();
+          const lessonsList = lessonsData.lessons || [];
+
+          for (const lesson of lessonsList) {
+            const lessonTranslation = getTranslationByLocale(lesson.translations, locale);
+
+            // Fetch animations for this lesson
+            const animationsResponse = await fetch(
+              `${apiUrl}/api/v1/animations?lessonId=${lesson.id}`,
+              {
+                headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+                credentials: 'include',
+              }
+            );
+
+            if (animationsResponse.ok) {
+              const animationsData = await animationsResponse.json();
+              const animations = animationsData.animations || [];
+
+              if (animations.length > 0) {
+                lessonsWithAnimations.push({
+                  lessonId: lesson.id,
+                  lessonTitle: lessonTranslation?.title || `Lesson ${lesson.order}`,
+                  moduleTitle: moduleTranslation?.title || moduleItem.slug,
+                  courseTitle: courseTranslation?.title || course.slug,
+                  animations,
+                });
+              }
+            }
+          }
+        }
+      }
+
+      setAllAnimations(lessonsWithAnimations);
+    } catch (error) {
+      console.error('Error fetching animations:', error);
+      toast({
+        title: t('error.fetchTitle'),
+        description: t('error.fetchDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken, locale, toast, t]);
+
+  // Fetch animations for a specific lesson (when filter is applied)
+  const fetchAnimationsForLesson = useCallback(async (lessonId: string) => {
+    setLoading(true);
+    try {
+      const token = getToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      const response = await fetch(`${apiUrl}/api/v1/animations?lessonId=${lessonId}`, {
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch animations');
+
+      const data = await response.json();
+      const animations = data.animations || [];
+
+      // Find lesson details from the hierarchy
+      const lesson = lessons.find(l => l.id === lessonId);
+      const lessonTranslation = lesson ? getTranslationByLocale(lesson.translations, locale) : null;
+
+      // Find module and course details
+      const moduleItem = modules.find(m => m.id === (lesson as { moduleId?: string })?.moduleId);
+      const moduleTranslation = moduleItem ? getTranslationByLocale(moduleItem.translations, locale) : null;
+
+      const course = courses.find(c => c.id === filterCourseId);
+      const courseTranslation = course ? getTranslationByLocale(course.translations, locale) : null;
+
+      if (animations.length > 0) {
+        setAllAnimations([{
+          lessonId,
+          lessonTitle: lessonTranslation?.title || `Lesson`,
+          moduleTitle: moduleTranslation?.title || 'Module',
+          courseTitle: courseTranslation?.title || 'Course',
+          animations,
+        }]);
+      } else {
+        setAllAnimations([]);
+      }
+    } catch (error) {
+      console.error('Error fetching animations:', error);
+      toast({
+        title: t('error.fetchTitle'),
+        description: t('error.fetchDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken, locale, toast, t, lessons, modules, courses, filterCourseId]);
+
+  useEffect(() => {
+    if (filterLessonId) {
+      fetchAnimationsForLesson(filterLessonId);
+    } else {
+      fetchAllAnimations();
+    }
+  }, [filterLessonId, fetchAnimationsForLesson, fetchAllAnimations]);
+
+  // Initial load
+  useEffect(() => {
+    fetchAllAnimations();
+  }, [fetchAllAnimations]);
+
+  const handleFilterCourseChange = useCallback((courseId: string) => {
+    setFilterCourseId(courseId);
+    setFilterModuleId('');
+    setFilterLessonId('');
+    if (courseId) {
+      selectCourse(courseId);
+    }
+  }, [selectCourse]);
+
+  const handleFilterModuleChange = useCallback((moduleId: string) => {
+    setFilterModuleId(moduleId);
+    setFilterLessonId('');
+    if (moduleId) {
+      selectModule(moduleId);
+    }
+  }, [selectModule]);
+
+  const handleFilterLessonChange = useCallback((lessonId: string) => {
+    setFilterLessonId(lessonId);
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setFilterCourseId('');
+    setFilterModuleId('');
+    setFilterLessonId('');
+    fetchAllAnimations();
+  }, [fetchAllAnimations]);
+
+  const toggleLesson = useCallback((lessonId: string) => {
+    setExpandedLessons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(lessonId)) {
+        newSet.delete(lessonId);
+      } else {
+        newSet.add(lessonId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const openViewModal = useCallback((animation: Animation) => {
+    setSelectedAnimation(animation);
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedAnimation(null);
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getGameTypeLabel = (gameType: GameType) => {
+    const labels: Record<GameType, string> = {
+      DRAG_WORD: t('gameTypes.dragWord'),
+      REORDER_WORDS: t('gameTypes.reorderWords'),
+      TYPE_COMPLETION: t('gameTypes.typeCompletion'),
+      MULTIPLE_BLANKS: t('gameTypes.multipleBlanks'),
+    };
+    return labels[gameType] || gameType;
+  };
+
+  const getGameTypeIcon = (gameType: GameType) => {
+    const icons: Record<GameType, React.ReactNode> = {
+      DRAG_WORD: <GripHorizontal size={14} />,
+      REORDER_WORDS: <ListOrdered size={14} />,
+      TYPE_COMPLETION: <Type size={14} />,
+      MULTIPLE_BLANKS: <Layers size={14} />,
+    };
+    return icons[gameType] || <Gamepad2 size={14} />;
+  };
+
+  // Filter animations by search term
+  const filteredAnimations = useMemo(() => {
+    if (!searchTerm) return allAnimations;
+
+    return allAnimations.filter(lesson => {
+      const matchesLesson = lesson.lessonTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesModule = lesson.moduleTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCourse = lesson.courseTitle.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesContent = lesson.animations.some(anim => {
+        if (anim.type === 'MultipleChoice') {
+          const content = anim.content as MultipleChoiceContent;
+          return content.question.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        if (anim.type === 'CompleteSentence') {
+          const content = anim.content as CompleteSentenceContent;
+          return content.sentences.some(s =>
+            s.fullSentence.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        return false;
+      });
+
+      return matchesLesson || matchesModule || matchesCourse || matchesContent;
+    });
+  }, [allAnimations, searchTerm]);
+
+  // Stats
+  const totalStats = useMemo(() => {
+    const totalLessons = filteredAnimations.length;
+    const totalAnimations = filteredAnimations.reduce((sum, l) => sum + l.animations.length, 0);
+    const completeSentence = filteredAnimations.reduce(
+      (sum, l) => sum + l.animations.filter(a => a.type === 'CompleteSentence').length, 0
+    );
+    const multipleChoice = filteredAnimations.reduce(
+      (sum, l) => sum + l.animations.filter(a => a.type === 'MultipleChoice').length, 0
+    );
+    return { totalLessons, totalAnimations, completeSentence, multipleChoice };
+  }, [filteredAnimations]);
+
+  if (loading && allAnimations.length === 0) {
+    return (
+      <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-secondary animate-spin" />
+          <span className="ml-3 text-gray-400">{t('loading')}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+          <Gamepad2 size={24} className="text-secondary" />
+          {t('title')}
+        </h3>
+
+        {/* Search and Filter Toggle */}
+        <div className="flex gap-4 mb-4">
+          <div className="relative flex-1">
+            <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder={t('searchPlaceholder')}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary"
+            />
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+              showFilters || filterCourseId
+                ? 'bg-secondary/20 border-secondary text-secondary'
+                : 'bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500'
+            }`}
+          >
+            <Filter size={18} />
+            {t('filters')}
+            {filterCourseId && (
+              <span className="ml-1 px-1.5 py-0.5 bg-secondary text-primary text-xs rounded-full">
+                {filterLessonId ? '3' : filterModuleId ? '2' : '1'}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Filters */}
+        {showFilters && (
+          <div className="bg-gray-700/50 rounded-lg p-4 mb-4 border border-gray-600">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-gray-400">{t('filterBy')}</span>
+              {filterCourseId && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300"
+                >
+                  <X size={14} />
+                  {t('clearFilters')}
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Course Filter */}
+              <div className="space-y-1">
+                <Label className="text-gray-400 text-xs flex items-center gap-1">
+                  <BookOpen size={12} />
+                  {t('fields.course')}
+                </Label>
+                <Select value={filterCourseId} onValueChange={handleFilterCourseChange}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white h-9">
+                    <SelectValue placeholder={loadingCourses ? t('loading') : t('placeholders.allCourses')} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {courses.map(course => {
+                      const translation = getTranslationByLocale(course.translations, locale);
+                      return (
+                        <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-700">
+                          {translation?.title || course.slug}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Module Filter */}
+              <div className="space-y-1">
+                <Label className="text-gray-400 text-xs flex items-center gap-1">
+                  <Layers size={12} />
+                  {t('fields.module')}
+                </Label>
+                <Select
+                  value={filterModuleId}
+                  onValueChange={handleFilterModuleChange}
+                  disabled={!filterCourseId}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white h-9">
+                    {loadingModules ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                      </span>
+                    ) : (
+                      <SelectValue placeholder={t('placeholders.allModules')} />
+                    )}
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {modules.map(module => {
+                      const translation = getTranslationByLocale(module.translations, locale);
+                      return (
+                        <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-700">
+                          {translation?.title || module.slug}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Lesson Filter */}
+              <div className="space-y-1">
+                <Label className="text-gray-400 text-xs flex items-center gap-1">
+                  <Play size={12} />
+                  {t('fields.lesson')}
+                </Label>
+                <Select
+                  value={filterLessonId}
+                  onValueChange={handleFilterLessonChange}
+                  disabled={!filterModuleId}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white h-9">
+                    {loadingLessons ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                      </span>
+                    ) : (
+                      <SelectValue placeholder={t('placeholders.allLessons')} />
+                    )}
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {lessons.map(lesson => {
+                      const translation = getTranslationByLocale(lesson.translations, locale);
+                      return (
+                        <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-700">
+                          {translation?.title || `Lesson ${lesson.order}`}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalLessons}</p>
+          <p className="text-sm text-gray-400">{t('stats.lessons')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.totalAnimations}</p>
+          <p className="text-sm text-gray-400">{t('stats.animations')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.completeSentence}</p>
+          <p className="text-sm text-gray-400">{t('stats.completeSentence')}</p>
+        </div>
+        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{totalStats.multipleChoice}</p>
+          <p className="text-sm text-gray-400">{t('stats.multipleChoice')}</p>
+        </div>
+      </div>
+
+      {/* Animations List */}
+      {filteredAnimations.length > 0 ? (
+        <div className="space-y-4">
+          {filteredAnimations.map(lessonGroup => {
+            const isExpanded = expandedLessons.has(lessonGroup.lessonId);
+
+            return (
+              <div key={lessonGroup.lessonId} className="border border-gray-700 rounded-lg overflow-hidden">
+                {/* Lesson Header */}
+                <div
+                  onClick={() => toggleLesson(lessonGroup.lessonId)}
+                  className="flex items-center gap-4 p-4 bg-gray-700/50 hover:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <button type="button" className="text-gray-400 hover:text-white transition-colors">
+                    {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </button>
+
+                  <div className="flex items-center justify-center w-10 h-10 bg-secondary/20 rounded-lg">
+                    <Play size={20} className="text-secondary" />
+                  </div>
+
+                  <div className="flex-1">
+                    <h4 className="text-white font-medium">{lessonGroup.lessonTitle}</h4>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <BookOpen size={12} />
+                        {lessonGroup.courseTitle}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Layers size={12} />
+                        {lessonGroup.moduleTitle}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Gamepad2 size={12} />
+                        {lessonGroup.animations.length} {t('animations')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Animations */}
+                {isExpanded && (
+                  <div className="bg-gray-800/50 p-4 space-y-2">
+                    {lessonGroup.animations.map(animation => (
+                      <div
+                        key={animation.id}
+                        className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 rounded text-secondary font-bold text-sm">
+                          {animation.order}
+                        </div>
+
+                        <div className={`flex items-center justify-center w-8 h-8 rounded ${
+                          animation.type === 'CompleteSentence'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-purple-500/20 text-purple-400'
+                        }`}>
+                          {animation.type === 'CompleteSentence' ? <Type size={16} /> : <HelpCircle size={16} />}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              animation.type === 'CompleteSentence'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : 'bg-purple-500/20 text-purple-400'
+                            }`}>
+                              {animation.type === 'CompleteSentence' ? t('types.completeSentence') : t('types.multipleChoice')}
+                            </span>
+                            {animation.type === 'CompleteSentence' && (
+                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                                {getGameTypeIcon((animation.content as CompleteSentenceContent).gameType)}
+                                {getGameTypeLabel((animation.content as CompleteSentenceContent).gameType)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-white text-sm mt-1 truncate">
+                            {animation.type === 'MultipleChoice'
+                              ? (animation.content as MultipleChoiceContent).question
+                              : (animation.content as CompleteSentenceContent).sentences[0]?.fullSentence || '-'
+                            }
+                          </p>
+                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                            <span className="flex items-center gap-1">
+                              <Hash size={10} />
+                              {t('order')}: {animation.order}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <HelpCircle size={10} />
+                              {animation.totalQuestions} {t('questions')}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar size={10} />
+                              {formatDate(animation.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            openViewModal(animation);
+                          }}
+                          className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-all"
+                          title={t('view')}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <Gamepad2 size={64} className="text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">
+            {searchTerm || filterLessonId ? t('noResults') : t('noAnimations')}
+          </p>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {isModalOpen && selectedAnimation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative z-10 w-full max-w-2xl mx-4 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 sticky top-0 bg-gray-800">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Gamepad2 size={20} className="text-secondary" />
+                {t('modal.title')}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Type Badge */}
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  selectedAnimation.type === 'CompleteSentence'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-purple-500/20 text-purple-400'
+                }`}>
+                  {selectedAnimation.type === 'CompleteSentence' ? t('types.completeSentence') : t('types.multipleChoice')}
+                </span>
+                {selectedAnimation.type === 'CompleteSentence' && (
+                  <span className="flex items-center gap-1 text-gray-400 text-sm">
+                    {getGameTypeIcon((selectedAnimation.content as CompleteSentenceContent).gameType)}
+                    {getGameTypeLabel((selectedAnimation.content as CompleteSentenceContent).gameType)}
+                  </span>
+                )}
+              </div>
+
+              {/* Content Details */}
+              {selectedAnimation.type === 'CompleteSentence' ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-gray-400 text-xs uppercase">{t('modal.sentences')}</Label>
+                    <div className="mt-2 space-y-2">
+                      {(selectedAnimation.content as CompleteSentenceContent).sentences.map((sentence, idx) => (
+                        <div key={idx} className="bg-gray-700/50 p-3 rounded-lg">
+                          <p className="text-white">{sentence.fullSentence}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                            <span>{t('modal.targetWord')}: <strong className="text-secondary">{sentence.targetWord}</strong></span>
+                            <span>{t('modal.position')}: {sentence.wordPosition}</span>
+                            {sentence.hint && <span>{t('modal.hint')}: {sentence.hint}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {(selectedAnimation.content as CompleteSentenceContent).distractors?.length ? (
+                    <div>
+                      <Label className="text-gray-400 text-xs uppercase">{t('modal.distractors')}</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {(selectedAnimation.content as CompleteSentenceContent).distractors?.map((d, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-700 text-gray-300 rounded text-sm">
+                            {d}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-gray-400 text-xs uppercase">{t('modal.question')}</Label>
+                    <p className="text-white mt-1">{(selectedAnimation.content as MultipleChoiceContent).question}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-400 text-xs uppercase">{t('modal.options')}</Label>
+                    <div className="mt-2 space-y-2">
+                      {(selectedAnimation.content as MultipleChoiceContent).options.map((option, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex items-center gap-3 p-3 rounded-lg ${
+                            idx === (selectedAnimation.content as MultipleChoiceContent).correctOptionIndex
+                              ? 'bg-green-500/20 border border-green-500/50'
+                              : 'bg-gray-700/50'
+                          }`}
+                        >
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                            idx === (selectedAnimation.content as MultipleChoiceContent).correctOptionIndex
+                              ? 'bg-green-500 text-white'
+                              : 'bg-gray-600 text-gray-300'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <span className="text-white">{option}</span>
+                          {idx === (selectedAnimation.content as MultipleChoiceContent).correctOptionIndex && (
+                            <span className="ml-auto text-green-400 text-xs">{t('modal.correct')}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {(selectedAnimation.content as MultipleChoiceContent).explanation && (
+                    <div>
+                      <Label className="text-gray-400 text-xs uppercase">{t('modal.explanation')}</Label>
+                      <p className="text-gray-300 mt-1 bg-gray-700/50 p-3 rounded-lg">
+                        {(selectedAnimation.content as MultipleChoiceContent).explanation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Metadata */}
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
+                <div>
+                  <Label className="text-gray-400 text-xs uppercase">{t('modal.createdAt')}</Label>
+                  <p className="text-gray-300 text-sm mt-1">{formatDate(selectedAnimation.createdAt)}</p>
+                </div>
+                <div>
+                  <Label className="text-gray-400 text-xs uppercase">{t('modal.updatedAt')}</Label>
+                  <p className="text-gray-300 text-sm mt-1">{formatDate(selectedAnimation.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end p-4 border-t border-gray-700 sticky bottom-0 bg-gray-800">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                {t('modal.close')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

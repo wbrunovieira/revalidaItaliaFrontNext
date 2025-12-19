@@ -5033,6 +5033,11 @@
     "list": "Listar Audios"
   },
 
+  "animations": {
+    "create": "Crear",
+    "list": "Listar"
+  },
+
   "listAudios": {
     "title": "Lista de Audios",
     "description": "Visualiza los audios registrados por lección.",
@@ -5216,6 +5221,66 @@
     "error": {
       "title": "Error al crear animación",
       "description": "No se pudo crear la animación"
+    }
+  },
+
+  "listAnimations": {
+    "title": "Lista de Animaciones",
+    "loading": "Cargando animaciones...",
+    "searchPlaceholder": "Buscar animaciones...",
+    "filters": "Filtros",
+    "filterBy": "Filtrar por",
+    "clearFilters": "Limpiar filtros",
+    "noAnimations": "Ninguna animación registrada",
+    "noResults": "Ninguna animación encontrada",
+    "animations": "animaciones",
+    "view": "Visualizar",
+    "order": "Orden",
+    "questions": "preguntas",
+    "fields": {
+      "course": "Curso",
+      "module": "Módulo",
+      "lesson": "Lección"
+    },
+    "placeholders": {
+      "allCourses": "Todos los cursos",
+      "allModules": "Todos los módulos",
+      "allLessons": "Todas las lecciones"
+    },
+    "stats": {
+      "lessons": "Lecciones",
+      "animations": "Animaciones",
+      "completeSentence": "Completar Frase",
+      "multipleChoice": "Opción Múltiple"
+    },
+    "types": {
+      "completeSentence": "Completar Frase",
+      "multipleChoice": "Opción Múltiple"
+    },
+    "gameTypes": {
+      "dragWord": "Arrastrar Palabra",
+      "reorderWords": "Reordenar Palabras",
+      "typeCompletion": "Escribir Palabra",
+      "multipleBlanks": "Múltiples Espacios"
+    },
+    "modal": {
+      "title": "Detalles de la Animación",
+      "sentences": "Frases",
+      "targetWord": "Palabra Objetivo",
+      "position": "Posición",
+      "hint": "Pista",
+      "distractors": "Distractores",
+      "question": "Pregunta",
+      "options": "Opciones",
+      "correct": "Correcta",
+      "explanation": "Explicación",
+      "createdAt": "Creado el",
+      "updatedAt": "Actualizado el",
+      "close": "Cerrar"
+    },
+    "error": {
+      "fetchTitle": "Error al cargar animaciones",
+      "fetchDescription": "No se pudo cargar la lista de animaciones"
     }
   },
 

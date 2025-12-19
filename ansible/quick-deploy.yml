@@ -97,6 +97,28 @@
       become_user: ubuntu
       register: env_restore
 
+    - name: "🔧 ENV - Garantindo variáveis S3 no .env.local"
+      shell: |
+        cd {{ app_dir }}
+        # Remove variáveis S3 antigas (se existirem com valores incorretos)
+        sed -i '/^S3_BUCKET=/d' .env.local 2>/dev/null || true
+        sed -i '/^AWS_REGION=/d' .env.local 2>/dev/null || true
+        sed -i '/^NODE_ENV=/d' .env.local 2>/dev/null || true
+        sed -i '/^CDN_URL=/d' .env.local 2>/dev/null || true
+        # Adiciona variáveis S3 corretas
+        echo "" >> .env.local
+        echo "# S3 Storage Configuration (auto-added by quick-deploy)" >> .env.local
+        echo "S3_BUCKET={{ s3_bucket_name }}" >> .env.local
+        echo "AWS_REGION={{ aws_region }}" >> .env.local
+        echo "CDN_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
+        echo "NODE_ENV=production" >> .env.local
+      become_user: ubuntu
+      register: env_s3_update
+
+    - name: "✅ ENV - Variáveis S3 configuradas"
+      debug:
+        msg: "Variáveis S3_BUCKET, AWS_REGION, CDN_URL e NODE_ENV adicionadas ao .env.local"
+
     - name: "✅ GIT - Código atualizado"
       debug:
         msg: "Git atualizado com sucesso (public/ ignorado via sparse-checkout)"

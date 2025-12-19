@@ -27,6 +27,7 @@ import {
   ChevronDown,
   ChevronRight,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import Image from 'next/image';
 import EditAudioModal from './EditAudioModal';
@@ -481,6 +482,98 @@ export default function ListAudios() {
     fetchData();
   };
 
+  // Função para deletar áudio
+  const deleteAudio = useCallback(
+    async (audioId: string) => {
+      try {
+        const token = getToken();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(`${apiUrl}/api/v1/audios/${audioId}`, {
+          method: 'DELETE',
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to delete audio: ${response.status}`);
+        }
+
+        toast({
+          title: t('success.deleteTitle'),
+          description: t('success.deleteDescription'),
+          variant: 'default',
+        });
+
+        await fetchData();
+      } catch (error) {
+        handleApiError(error, 'Audio deletion error');
+        toast({
+          title: t('error.deleteTitle'),
+          description: t('error.deleteDescription'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [t, toast, fetchData, handleApiError, getToken]
+  );
+
+  // Função para mostrar confirmação de deleção usando toast
+  const handleDeleteAudio = useCallback(
+    (audio: Audio, lessonTitle: string) => {
+      const audioTranslation = getAudioTranslation(audio.translations);
+
+      toast({
+        title: t('deleteConfirmation.title'),
+        description: (
+          <div className="space-y-3">
+            <p className="text-sm">
+              {t('deleteConfirmation.message', {
+                audioName: audioTranslation?.title || t('noTitle'),
+              })}
+            </p>
+            <div className="bg-gray-700/50 p-3 rounded-lg">
+              <div className="text-xs text-gray-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <FileAudio size={14} />
+                  {t('deleteConfirmation.audio')}: {audioTranslation?.title || t('noTitle')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Play size={14} />
+                  {t('deleteConfirmation.lesson')}: {lessonTitle}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} />
+                  {t('deleteConfirmation.duration')}: {audio.formattedDuration}
+                </div>
+                <div className="flex items-center gap-2">
+                  <HardDrive size={14} />
+                  {t('deleteConfirmation.size')}: {formatFileSize(audio.fileSize)}
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-red-300 font-medium">
+              {t('deleteConfirmation.warning')}
+            </p>
+          </div>
+        ),
+        variant: 'destructive',
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() => deleteAudio(audio.id)}
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('deleteConfirmation.confirm')}
+            </button>
+          </div>
+        ),
+      });
+    },
+    [toast, deleteAudio, t, getAudioTranslation]
+  );
+
   // Filtrar cursos
   const filteredCourses = useMemo(() => {
     return coursesWithAudios.filter(course => {
@@ -828,6 +921,17 @@ export default function ListAudios() {
                                                               title={t('edit')}
                                                             >
                                                               <Pencil size={16} />
+                                                            </button>
+                                                            <button
+                                                              type="button"
+                                                              onClick={e => {
+                                                                e.stopPropagation();
+                                                                handleDeleteAudio(audio, lessonTranslation?.title || t('noTitle'));
+                                                              }}
+                                                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-gray-600 rounded transition-all"
+                                                              title={t('delete')}
+                                                            >
+                                                              <Trash2 size={16} />
                                                             </button>
                                                           </div>
                                                         </div>

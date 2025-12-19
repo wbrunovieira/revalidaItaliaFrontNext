@@ -5045,6 +5045,7 @@
     "noTitle": "Sin título",
     "view": "Visualizar",
     "edit": "Editar",
+    "delete": "Eliminar",
     "order": "Orden",
     "slug": "Slug",
     "modules": "módulos",
@@ -5060,7 +5061,23 @@
       "fetchCoursesTitle": "Error al cargar cursos",
       "fetchCoursesDescription": "No se pudo cargar la lista de cursos",
       "fetchTitle": "Error al cargar audios",
-      "fetchDescription": "No se pudo cargar la lista de audios"
+      "fetchDescription": "No se pudo cargar la lista de audios",
+      "deleteTitle": "Error al eliminar",
+      "deleteDescription": "No se pudo eliminar el audio"
+    },
+    "success": {
+      "deleteTitle": "Audio eliminado",
+      "deleteDescription": "El audio se eliminó correctamente"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar eliminación",
+      "message": "¿Desea realmente eliminar el audio \"{audioName}\"?",
+      "audio": "Audio",
+      "lesson": "Lección",
+      "duration": "Duración",
+      "size": "Tamaño",
+      "warning": "⚠️ Esta acción no se puede deshacer. El archivo se eliminará permanentemente.",
+      "confirm": "Eliminar"
     },
     "modal": {
       "title": "Detalles del Audio",

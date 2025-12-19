@@ -5076,6 +5076,7 @@
     "noTitle": "Sem título",
     "view": "Visualizar",
     "edit": "Editar",
+    "delete": "Excluir",
     "order": "Ordem",
     "slug": "Slug",
     "modules": "módulos",
@@ -5091,7 +5092,23 @@
       "fetchCoursesTitle": "Erro ao carregar cursos",
       "fetchCoursesDescription": "Não foi possível carregar a lista de cursos",
       "fetchTitle": "Erro ao carregar áudios",
-      "fetchDescription": "Não foi possível carregar a lista de áudios"
+      "fetchDescription": "Não foi possível carregar a lista de áudios",
+      "deleteTitle": "Erro ao excluir",
+      "deleteDescription": "Não foi possível excluir o áudio"
+    },
+    "success": {
+      "deleteTitle": "Áudio excluído",
+      "deleteDescription": "O áudio foi excluído com sucesso"
+    },
+    "deleteConfirmation": {
+      "title": "Confirmar exclusão",
+      "message": "Deseja realmente excluir o áudio \"{audioName}\"?",
+      "audio": "Áudio",
+      "lesson": "Aula",
+      "duration": "Duração",
+      "size": "Tamanho",
+      "warning": "⚠️ Esta ação não pode ser desfeita. O arquivo será removido permanentemente.",
+      "confirm": "Excluir"
     },
     "modal": {
       "title": "Detalhes do Áudio",

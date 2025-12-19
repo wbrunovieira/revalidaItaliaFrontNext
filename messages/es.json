@@ -1962,6 +1962,8 @@
         "forbidden": "No tienes permiso para fijar publicaciones",
         "notFound": "Publicación no encontrada",
         "limitExceeded": "Límite de publicaciones fijadas alcanzado (máximo 3)",
+        "limitExceededGlobal": "Ya tienes {limit} temas generales fijados. Desfija uno para fijar otro.",
+        "limitExceededLesson": "Ya tienes {limit} comentarios fijados en esta lección. Desfija uno para fijar otro.",
         "failed": "Error al fijar/desfijar la publicación"
       }
     },

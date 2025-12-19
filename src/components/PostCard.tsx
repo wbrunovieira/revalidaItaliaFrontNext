@@ -265,15 +265,21 @@ export default function PostCard({
 
       if (!response.ok) {
         const errorData = await response.json();
-        
-        if (response.status === 400 && errorData.detail?.includes('Maximum')) {
-          throw new Error(t('pinPost.errors.limitExceeded'));
+
+        // Handle pin limit exceeded error
+        if (response.status === 400 && errorData.type === 'pin-limit-exceeded') {
+          const isLessonContext = errorData.context === 'lesson';
+          throw new Error(
+            isLessonContext
+              ? t('pinPost.errors.limitExceededLesson', { limit: errorData.limit || 3 })
+              : t('pinPost.errors.limitExceededGlobal', { limit: errorData.limit || 3 })
+          );
         } else if (response.status === 403) {
           throw new Error(t('pinPost.errors.forbidden'));
         } else if (response.status === 404) {
           throw new Error(t('pinPost.errors.notFound'));
         }
-        
+
         throw new Error(errorData.detail || t('pinPost.errors.failed'));
       }
 

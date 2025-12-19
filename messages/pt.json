@@ -1964,6 +1964,8 @@
         "forbidden": "Você não tem permissão para fixar posts",
         "notFound": "Post não encontrado",
         "limitExceeded": "Limite de posts fixados atingido (máximo 3)",
+        "limitExceededGlobal": "Você já tem {limit} tópicos gerais fixados. Desfixe um para fixar outro.",
+        "limitExceededLesson": "Você já tem {limit} comentários fixados nesta aula. Desfixe um para fixar outro.",
         "failed": "Falha ao fixar/desfixar o post"
       }
     },

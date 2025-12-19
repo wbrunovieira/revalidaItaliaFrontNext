@@ -1959,6 +1959,8 @@
         "forbidden": "Non hai il permesso di fissare i post",
         "notFound": "Post non trovato",
         "limitExceeded": "Limite di post fissati raggiunto (massimo 3)",
+        "limitExceededGlobal": "Hai già {limit} argomenti generali fissati. Rimuovine uno per fissarne un altro.",
+        "limitExceededLesson": "Hai già {limit} commenti fissati in questa lezione. Rimuovine uno per fissarne un altro.",
         "failed": "Impossibile fissare/rimuovere il post"
       }
     },

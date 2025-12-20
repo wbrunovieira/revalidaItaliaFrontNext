@@ -5363,6 +5363,22 @@
       "disabledDescription": "A animação não está mais visível para os alunos",
       "errorTitle": "Erro ao alterar status",
       "errorDescription": "Não foi possível alterar o status da animação"
+    },
+    "delete": {
+      "button": "Excluir animação",
+      "confirmTitle": "Confirmar exclusão",
+      "confirmMessage": "Tem certeza que deseja excluir esta animação?",
+      "type": "Tipo",
+      "lesson": "Aula",
+      "order": "Ordem",
+      "warning": "Esta ação não pode ser desfeita. A animação será removida permanentemente.",
+      "confirm": "Excluir",
+      "successTitle": "Animação excluída",
+      "successDescription": "A animação foi removida com sucesso",
+      "errorTitle": "Erro ao excluir",
+      "errorDescription": "Não foi possível excluir a animação",
+      "conflictTitle": "Não é possível excluir",
+      "conflictDescription": "Esta animação possui registros de progresso de alunos. Desabilite-a em vez de excluir."
     }
   },
 

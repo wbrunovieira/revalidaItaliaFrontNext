@@ -5332,6 +5332,22 @@
       "disabledDescription": "La animación ya no es visible para los estudiantes",
       "errorTitle": "Error al cambiar estado",
       "errorDescription": "No se pudo cambiar el estado de la animación"
+    },
+    "delete": {
+      "button": "Eliminar animación",
+      "confirmTitle": "Confirmar eliminación",
+      "confirmMessage": "¿Está seguro de que desea eliminar esta animación?",
+      "type": "Tipo",
+      "lesson": "Lección",
+      "order": "Orden",
+      "warning": "Esta acción no se puede deshacer. La animación será eliminada permanentemente.",
+      "confirm": "Eliminar",
+      "successTitle": "Animación eliminada",
+      "successDescription": "La animación se ha eliminado correctamente",
+      "errorTitle": "Error al eliminar",
+      "errorDescription": "No se pudo eliminar la animación",
+      "conflictTitle": "No se puede eliminar",
+      "conflictDescription": "Esta animación tiene registros de progreso de estudiantes. Desactívela en lugar de eliminarla."
     }
   },
 

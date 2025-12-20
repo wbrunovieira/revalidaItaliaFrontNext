@@ -127,6 +127,7 @@ export default function ListAnimations() {
   }>({ order: 0 });
   const [isSaving, setIsSaving] = useState(false);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -569,6 +570,110 @@ export default function ListAnimations() {
     }
   }, [getToken, toast, t]);
 
+  // Delete animation
+  const deleteAnimation = useCallback(async (animationId: string) => {
+    setDeletingIds(prev => new Set(prev).add(animationId));
+
+    try {
+      const token = getToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      const response = await fetch(`${apiUrl}/api/v1/animations/${animationId}`, {
+        method: 'DELETE',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+
+        // Handle 409 Conflict - animation has progress records
+        if (response.status === 409) {
+          toast({
+            title: t('delete.conflictTitle'),
+            description: t('delete.conflictDescription'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        throw new Error(errorData.message || 'Failed to delete animation');
+      }
+
+      // Remove from local state
+      setAllAnimations(prev => prev.map(lessonGroup => ({
+        ...lessonGroup,
+        animations: lessonGroup.animations.filter(anim => anim.id !== animationId),
+      })).filter(lessonGroup => lessonGroup.animations.length > 0));
+
+      toast({
+        title: t('delete.successTitle'),
+        description: t('delete.successDescription'),
+      });
+    } catch (error) {
+      console.error('Error deleting animation:', error);
+      toast({
+        title: t('delete.errorTitle'),
+        description: t('delete.errorDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(animationId);
+        return newSet;
+      });
+    }
+  }, [getToken, toast, t]);
+
+  // Handle delete confirmation with toast
+  const handleDeleteAnimation = useCallback((animation: Animation, lessonTitle: string) => {
+    const animationType = animation.type === 'CompleteSentence'
+      ? t('types.completeSentence')
+      : t('types.multipleChoice');
+
+    toast({
+      title: t('delete.confirmTitle'),
+      description: (
+        <div className="space-y-3">
+          <p className="text-sm">
+            {t('delete.confirmMessage')}
+          </p>
+          <div className="bg-gray-700/50 p-3 rounded-lg">
+            <div className="text-xs text-gray-300 space-y-1">
+              <div className="flex items-center gap-2">
+                <Gamepad2 size={14} />
+                {t('delete.type')}: {animationType}
+              </div>
+              <div className="flex items-center gap-2">
+                <BookOpen size={14} />
+                {t('delete.lesson')}: {lessonTitle}
+              </div>
+              <div className="flex items-center gap-2">
+                <Hash size={14} />
+                {t('delete.order')}: {animation.order}
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-red-300 font-medium">
+            {t('delete.warning')}
+          </p>
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={() => deleteAnimation(animation.id)}
+              className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-red-600 bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-600"
+            >
+              {t('delete.confirm')}
+            </button>
+          </div>
+        </div>
+      ),
+      variant: 'destructive',
+    });
+  }, [toast, deleteAnimation, t]);
+
   // Edit form handlers
   const updateSentence = useCallback((index: number, field: keyof Sentence, value: string | number) => {
     setEditForm(prev => {
@@ -915,6 +1020,7 @@ export default function ListAnimations() {
                   <div className="bg-gray-800/50 p-4 space-y-2">
                     {lessonGroup.animations.map(animation => {
                       const isToggling = togglingIds.has(animation.id);
+                      const isDeleting = deletingIds.has(animation.id);
                       const isDisabled = animation.enabled === false;
 
                       return (
@@ -1033,6 +1139,26 @@ export default function ListAnimations() {
                             title={t('edit.button')}
                           >
                             <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleDeleteAnimation(animation, lessonGroup.lessonTitle);
+                            }}
+                            disabled={isDeleting || isToggling}
+                            className={`p-2 rounded transition-all ${
+                              isDeleting
+                                ? 'text-gray-500 cursor-wait'
+                                : 'text-gray-400 hover:text-red-400 hover:bg-red-500/20'
+                            }`}
+                            title={t('delete.button')}
+                          >
+                            {isDeleting ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
                           </button>
                         </div>
                       </div>

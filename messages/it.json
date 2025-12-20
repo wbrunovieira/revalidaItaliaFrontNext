@@ -5290,6 +5290,22 @@
       "disabledDescription": "L'animazione non è più visibile agli studenti",
       "errorTitle": "Errore nel cambio stato",
       "errorDescription": "Non è stato possibile cambiare lo stato dell'animazione"
+    },
+    "delete": {
+      "button": "Elimina animazione",
+      "confirmTitle": "Conferma eliminazione",
+      "confirmMessage": "Sei sicuro di voler eliminare questa animazione?",
+      "type": "Tipo",
+      "lesson": "Lezione",
+      "order": "Ordine",
+      "warning": "Questa azione non può essere annullata. L'animazione sarà eliminata permanentemente.",
+      "confirm": "Elimina",
+      "successTitle": "Animazione eliminata",
+      "successDescription": "L'animazione è stata rimossa con successo",
+      "errorTitle": "Errore nell'eliminazione",
+      "errorDescription": "Non è stato possibile eliminare l'animazione",
+      "conflictTitle": "Impossibile eliminare",
+      "conflictDescription": "Questa animazione ha registri di progresso degli studenti. Disabilitala invece di eliminarla."
     }
   },
 

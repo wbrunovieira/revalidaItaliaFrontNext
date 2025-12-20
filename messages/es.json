@@ -5321,6 +5321,17 @@
         "emptyQuestion": "La pregunta está vacía",
         "emptyOption": "La opción {index} está vacía"
       }
+    },
+    "toggle": {
+      "enable": "Habilitar",
+      "disable": "Deshabilitar",
+      "disabled": "Deshabilitado",
+      "enabledTitle": "Animación habilitada",
+      "enabledDescription": "La animación es visible para los estudiantes",
+      "disabledTitle": "Animación deshabilitada",
+      "disabledDescription": "La animación ya no es visible para los estudiantes",
+      "errorTitle": "Error al cambiar estado",
+      "errorDescription": "No se pudo cambiar el estado de la animación"
     }
   },
 

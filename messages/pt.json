@@ -5352,6 +5352,17 @@
         "emptyQuestion": "A pergunta está vazia",
         "emptyOption": "A opção {index} está vazia"
       }
+    },
+    "toggle": {
+      "enable": "Habilitar",
+      "disable": "Desabilitar",
+      "disabled": "Desabilitado",
+      "enabledTitle": "Animação habilitada",
+      "enabledDescription": "A animação está visível para os alunos",
+      "disabledTitle": "Animação desabilitada",
+      "disabledDescription": "A animação não está mais visível para os alunos",
+      "errorTitle": "Erro ao alterar status",
+      "errorDescription": "Não foi possível alterar o status da animação"
     }
   },
 

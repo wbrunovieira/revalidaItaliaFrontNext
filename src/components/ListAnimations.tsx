@@ -36,6 +36,8 @@ import {
   Plus,
   Trash2,
   Save,
+  Power,
+  Ban,
 } from 'lucide-react';
 
 type AnimationType = 'CompleteSentence' | 'MultipleChoice';
@@ -69,6 +71,8 @@ interface Animation {
   content: CompleteSentenceContent | MultipleChoiceContent;
   order: number;
   totalQuestions: number;
+  enabled: boolean;
+  disabledAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -122,6 +126,7 @@ export default function ListAnimations() {
     explanation?: string;
   }>({ order: 0 });
   const [isSaving, setIsSaving] = useState(false);
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
   // Filter states
   const [filterCourseId, setFilterCourseId] = useState('');
@@ -507,6 +512,63 @@ export default function ListAnimations() {
     }
   }, [editingAnimation, editForm, getToken, toast, t, closeEditModal, validateForm]);
 
+  // Toggle animation enabled/disabled
+  const toggleAnimationEnabled = useCallback(async (animation: Animation) => {
+    const newEnabled = !animation.enabled;
+
+    // Add to toggling set
+    setTogglingIds(prev => new Set(prev).add(animation.id));
+
+    try {
+      const token = getToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+
+      const response = await fetch(`${apiUrl}/api/v1/animations/${animation.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ enabled: newEnabled }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to toggle animation');
+      }
+
+      const updatedAnimation = await response.json();
+
+      // Update local state
+      setAllAnimations(prev => prev.map(lessonGroup => ({
+        ...lessonGroup,
+        animations: lessonGroup.animations.map(anim =>
+          anim.id === updatedAnimation.id ? updatedAnimation : anim
+        ),
+      })));
+
+      toast({
+        title: newEnabled ? t('toggle.enabledTitle') : t('toggle.disabledTitle'),
+        description: newEnabled ? t('toggle.enabledDescription') : t('toggle.disabledDescription'),
+      });
+    } catch (error) {
+      console.error('Error toggling animation:', error);
+      toast({
+        title: t('toggle.errorTitle'),
+        description: t('toggle.errorDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      // Remove from toggling set
+      setTogglingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(animation.id);
+        return newSet;
+      });
+    }
+  }, [getToken, toast, t]);
+
   // Edit form handlers
   const updateSentence = useCallback((index: number, field: keyof Sentence, value: string | number) => {
     setEditForm(prev => {
@@ -851,29 +913,43 @@ export default function ListAnimations() {
                 {/* Animations */}
                 {isExpanded && (
                   <div className="bg-gray-800/50 p-4 space-y-2">
-                    {lessonGroup.animations.map(animation => (
+                    {lessonGroup.animations.map(animation => {
+                      const isToggling = togglingIds.has(animation.id);
+                      const isDisabled = animation.enabled === false;
+
+                      return (
                       <div
                         key={animation.id}
-                        className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
+                        className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                          isDisabled
+                            ? 'bg-gray-800/50 border border-red-500/20'
+                            : 'bg-gray-700/30 hover:bg-gray-700/50'
+                        }`}
                       >
-                        <div className="flex items-center justify-center w-8 h-8 bg-secondary/20 rounded text-secondary font-bold text-sm">
+                        <div className={`flex items-center justify-center w-8 h-8 rounded font-bold text-sm ${
+                          isDisabled ? 'bg-gray-600/50 text-gray-500' : 'bg-secondary/20 text-secondary'
+                        }`}>
                           {animation.order}
                         </div>
 
                         <div className={`flex items-center justify-center w-8 h-8 rounded ${
-                          animation.type === 'CompleteSentence'
-                            ? 'bg-blue-500/20 text-blue-400'
-                            : 'bg-purple-500/20 text-purple-400'
+                          isDisabled
+                            ? 'bg-gray-600/30 text-gray-500'
+                            : animation.type === 'CompleteSentence'
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : 'bg-purple-500/20 text-purple-400'
                         }`}>
                           {animation.type === 'CompleteSentence' ? <Type size={16} /> : <HelpCircle size={16} />}
                         </div>
 
-                        <div className="flex-1 min-w-0">
+                        <div className={`flex-1 min-w-0 ${isDisabled ? 'opacity-60' : ''}`}>
                           <div className="flex items-center gap-2">
                             <span className={`text-xs px-2 py-0.5 rounded ${
-                              animation.type === 'CompleteSentence'
-                                ? 'bg-blue-500/20 text-blue-400'
-                                : 'bg-purple-500/20 text-purple-400'
+                              isDisabled
+                                ? 'bg-gray-600/30 text-gray-500'
+                                : animation.type === 'CompleteSentence'
+                                  ? 'bg-blue-500/20 text-blue-400'
+                                  : 'bg-purple-500/20 text-purple-400'
                             }`}>
                               {animation.type === 'CompleteSentence' ? t('types.completeSentence') : t('types.multipleChoice')}
                             </span>
@@ -883,8 +959,14 @@ export default function ListAnimations() {
                                 {getGameTypeLabel((animation.content as CompleteSentenceContent).gameType)}
                               </span>
                             )}
+                            {isDisabled && (
+                              <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400">
+                                <Ban size={10} />
+                                {t('toggle.disabled')}
+                              </span>
+                            )}
                           </div>
-                          <p className="text-white text-sm mt-1 truncate">
+                          <p className={`text-sm mt-1 truncate ${isDisabled ? 'text-gray-400' : 'text-white'}`}>
                             {animation.type === 'MultipleChoice'
                               ? (animation.content as MultipleChoiceContent).question
                               : (animation.content as CompleteSentenceContent).sentences[0]?.fullSentence || '-'
@@ -907,6 +989,29 @@ export default function ListAnimations() {
                         </div>
 
                         <div className="flex items-center gap-1">
+                          {/* Toggle Enable/Disable Button */}
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              toggleAnimationEnabled(animation);
+                            }}
+                            disabled={isToggling}
+                            className={`p-2 rounded transition-all ${
+                              isToggling
+                                ? 'text-gray-500 cursor-wait'
+                                : isDisabled
+                                  ? 'text-red-400 hover:text-green-400 hover:bg-green-500/20'
+                                  : 'text-green-400 hover:text-red-400 hover:bg-red-500/20'
+                            }`}
+                            title={isDisabled ? t('toggle.enable') : t('toggle.disable')}
+                          >
+                            {isToggling ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Power size={16} />
+                            )}
+                          </button>
                           <button
                             type="button"
                             onClick={e => {
@@ -931,7 +1036,8 @@ export default function ListAnimations() {
                           </button>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

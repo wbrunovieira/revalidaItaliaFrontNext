@@ -643,14 +643,18 @@ export default function LessonEditModal({
   const fetchAvailableAudios = useCallback(async () => {
     setLoadingAudios(true);
     try {
-      const response = await fetch(`${apiUrl}/api/v1/audios`, {
-        headers: {
-          Accept: 'application/json',
-        },
-      });
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        Accept: 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${apiUrl}/api/v1/audios`, { headers });
 
       if (!response.ok) {
-        if (response.status === 404) {
+        if (response.status === 404 || response.status === 401) {
           setAvailableAudios([]);
           return;
         }
@@ -663,28 +667,27 @@ export default function LessonEditModal({
     } catch (error) {
       console.error('Error fetching audios:', error);
       setAvailableAudios([]);
-      toast({
-        title: 'Erro ao carregar áudios',
-        description: 'Não foi possível carregar os áudios disponíveis.',
-        variant: 'destructive',
-      });
     } finally {
       setLoadingAudios(false);
     }
-  }, [apiUrl, toast]);
+  }, [apiUrl]);
 
   // Função para buscar animações disponíveis
   const fetchAvailableAnimations = useCallback(async () => {
     setLoadingAnimations(true);
     try {
-      const response = await fetch(`${apiUrl}/api/v1/animations`, {
-        headers: {
-          Accept: 'application/json',
-        },
-      });
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        Accept: 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${apiUrl}/api/v1/animations`, { headers });
 
       if (!response.ok) {
-        if (response.status === 404) {
+        if (response.status === 404 || response.status === 401) {
           setAvailableAnimations([]);
           return;
         }
@@ -697,15 +700,10 @@ export default function LessonEditModal({
     } catch (error) {
       console.error('Error fetching animations:', error);
       setAvailableAnimations([]);
-      toast({
-        title: 'Erro ao carregar animações',
-        description: 'Não foi possível carregar as animações disponíveis.',
-        variant: 'destructive',
-      });
     } finally {
       setLoadingAnimations(false);
     }
-  }, [apiUrl, toast]);
+  }, [apiUrl]);
 
   // Função para gerar lista de ordens disponíveis
   const getAvailableOrders = useCallback((): number[] => {

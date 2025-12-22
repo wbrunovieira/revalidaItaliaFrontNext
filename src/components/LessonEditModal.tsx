@@ -80,18 +80,36 @@ interface Environment3DItem {
 
 interface AudioItem {
   id: string;
-  slug: string;
+  lessonId: string;
+  filename: string;
+  durationInSeconds: number;
+  formattedDuration?: string;
+  fileSize: number;
+  mimeType: string;
   order: number;
+  transcription?: string;
   translations: Translation[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AnimationItem {
   id: string;
-  type: 'COMPLETE_SENTENCE' | 'MULTIPLE_CHOICE';
-  targetWord: string;
-  fullSentence?: string;
-  enabled: boolean;
-  translations: Translation[];
+  lessonId: string;
+  type: 'CompleteSentence' | 'MultipleChoice';
+  content?: {
+    gameType?: string;
+    sentences?: Array<{
+      fullSentence: string;
+      targetWord: string;
+      wordPosition: number;
+    }>;
+    distractors?: string[];
+  };
+  order: number;
+  totalQuestions?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface Lesson {
@@ -639,8 +657,8 @@ export default function LessonEditModal({
     }
   }, [apiUrl, toast]);
 
-  // Função para buscar áudios disponíveis
-  const fetchAvailableAudios = useCallback(async () => {
+  // Função para buscar áudios da aula
+  const fetchLessonAudios = useCallback(async (lessonId: string) => {
     setLoadingAudios(true);
     try {
       const token = getAuthToken();
@@ -651,10 +669,10 @@ export default function LessonEditModal({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${apiUrl}/api/v1/audios`, { headers });
+      const response = await fetch(`${apiUrl}/api/v1/audios?lessonId=${lessonId}`, { headers });
 
       if (!response.ok) {
-        if (response.status === 404 || response.status === 401) {
+        if (response.status === 404 || response.status === 400) {
           setAvailableAudios([]);
           return;
         }
@@ -662,8 +680,8 @@ export default function LessonEditModal({
       }
 
       const data = await response.json();
-      setAvailableAudios(data.audios || data || []);
-      console.log('Áudios disponíveis:', data);
+      setAvailableAudios(data.audios || []);
+      console.log('Áudios da aula:', data);
     } catch (error) {
       console.error('Error fetching audios:', error);
       setAvailableAudios([]);
@@ -672,8 +690,8 @@ export default function LessonEditModal({
     }
   }, [apiUrl]);
 
-  // Função para buscar animações disponíveis
-  const fetchAvailableAnimations = useCallback(async () => {
+  // Função para buscar animações da aula
+  const fetchLessonAnimations = useCallback(async (lessonId: string) => {
     setLoadingAnimations(true);
     try {
       const token = getAuthToken();
@@ -684,10 +702,10 @@ export default function LessonEditModal({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${apiUrl}/api/v1/animations`, { headers });
+      const response = await fetch(`${apiUrl}/api/v1/animations?lessonId=${lessonId}`, { headers });
 
       if (!response.ok) {
-        if (response.status === 404 || response.status === 401) {
+        if (response.status === 404 || response.status === 400) {
           setAvailableAnimations([]);
           return;
         }
@@ -695,8 +713,8 @@ export default function LessonEditModal({
       }
 
       const data = await response.json();
-      setAvailableAnimations(data.animations || data || []);
-      console.log('Animações disponíveis:', data);
+      setAvailableAnimations(data.animations || []);
+      console.log('Animações da aula:', data);
     } catch (error) {
       console.error('Error fetching animations:', error);
       setAvailableAnimations([]);
@@ -1224,8 +1242,8 @@ export default function LessonEditModal({
 
       // Buscar dados para Interactive Lessons
       fetchEnvironments3D();
-      fetchAvailableAudios();
-      fetchAvailableAnimations();
+      fetchLessonAudios(lesson.id);
+      fetchLessonAnimations(lesson.id);
     }
   }, [
     lesson,
@@ -1237,8 +1255,8 @@ export default function LessonEditModal({
     fetchAvailableAssessments,
     fetchLinkedAssessments,
     fetchEnvironments3D,
-    fetchAvailableAudios,
-    fetchAvailableAnimations,
+    fetchLessonAudios,
+    fetchLessonAnimations,
   ]);
 
   // Cleanup blob URLs when modal closes
@@ -1774,70 +1792,57 @@ export default function LessonEditModal({
                     </div>
                   )}
 
-                  {/* Audio Selection (only for STANDARD type) */}
-                  {formData.lessonType === 'STANDARD' && (
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        <Music size={16} className="inline mr-2" />
-                        {t('interactiveLessons.audios')}
-                      </label>
-                      {loadingAudios ? (
-                        <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
-                          <Loader2 size={16} className="animate-spin inline mr-2" />
-                          {t('interactiveLessons.loadingAudios')}
-                        </div>
-                      ) : availableAudios.length === 0 ? (
-                        <div className="bg-gray-700/50 rounded-lg px-4 py-3 text-gray-400 text-sm">
-                          {t('interactiveLessons.noAudiosAvailable')}
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-40 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
-                          {availableAudios.map(audio => {
-                            const translation = getTranslationByLocale(audio.translations, 'pt');
-                            const isSelected = formData.audioIds.includes(audio.id);
-                            return (
-                              <label
-                                key={audio.id}
-                                className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
-                                  isSelected ? 'bg-secondary/20 border border-secondary' : 'hover:bg-gray-600'
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        audioIds: [...prev.audioIds, audio.id],
-                                      }));
-                                    } else {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        audioIds: prev.audioIds.filter(id => id !== audio.id),
-                                      }));
-                                    }
-                                  }}
-                                  className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-secondary focus:ring-secondary"
-                                />
-                                <Music size={14} className="text-blue-400" />
+                  {/* Audios da Aula (somente leitura) */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <Music size={16} className="inline mr-2" />
+                      {t('interactiveLessons.audios')}
+                    </label>
+                    {loadingAudios ? (
+                      <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                        <Loader2 size={16} className="animate-spin inline mr-2" />
+                        {t('interactiveLessons.loadingAudios')}
+                      </div>
+                    ) : availableAudios.length === 0 ? (
+                      <div className="bg-gray-700/50 rounded-lg px-4 py-3 text-gray-400 text-sm">
+                        {t('interactiveLessons.noAudiosInLesson')}
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-40 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                        {availableAudios.map(audio => {
+                          const translation = getTranslationByLocale(audio.translations, 'pt');
+                          return (
+                            <div
+                              key={audio.id}
+                              className="flex items-center gap-3 p-2 rounded bg-blue-500/10 border border-blue-500/30"
+                            >
+                              <Music size={14} className="text-blue-400" />
+                              <div className="flex-1">
                                 <span className="text-white text-sm">
-                                  {translation?.title || audio.slug}
+                                  {translation?.title || audio.filename}
                                 </span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        {formData.audioIds.length > 0
-                          ? t('interactiveLessons.selectedAudios', { count: formData.audioIds.length })
-                          : t('interactiveLessons.audiosHint')}
-                      </p>
-                    </div>
-                  )}
+                                {audio.formattedDuration && (
+                                  <span className="text-xs text-gray-400 ml-2">
+                                    ({audio.formattedDuration})
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-400">
+                                #{audio.order}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {availableAudios.length > 0
+                        ? t('interactiveLessons.audiosCount', { count: availableAudios.length })
+                        : t('interactiveLessons.audiosHintReadOnly')}
+                    </p>
+                  </div>
 
-                  {/* Animations Selection (for all lesson types) */}
+                  {/* Animações da Aula (somente leitura) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       <Gamepad2 size={16} className="inline mr-2" />
@@ -1850,58 +1855,37 @@ export default function LessonEditModal({
                       </div>
                     ) : availableAnimations.length === 0 ? (
                       <div className="bg-gray-700/50 rounded-lg px-4 py-3 text-gray-400 text-sm">
-                        {t('interactiveLessons.noAnimationsAvailable')}
+                        {t('interactiveLessons.noAnimationsInLesson')}
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-40 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
-                        {availableAnimations.filter(a => a.enabled).map(animation => {
-                          const translation = getTranslationByLocale(animation.translations, 'pt');
-                          const isSelected = formData.animationIds.includes(animation.id);
+                        {availableAnimations.map(animation => {
+                          const animationType = animation.type === 'CompleteSentence'
+                            ? t('interactiveLessons.animationTypes.completeSentence')
+                            : t('interactiveLessons.animationTypes.multipleChoice');
                           return (
-                            <label
+                            <div
                               key={animation.id}
-                              className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
-                                isSelected ? 'bg-secondary/20 border border-secondary' : 'hover:bg-gray-600'
-                              }`}
+                              className="flex items-center gap-3 p-2 rounded bg-green-500/10 border border-green-500/30"
                             >
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFormData(prev => ({
-                                      ...prev,
-                                      animationIds: [...prev.animationIds, animation.id],
-                                    }));
-                                  } else {
-                                    setFormData(prev => ({
-                                      ...prev,
-                                      animationIds: prev.animationIds.filter(id => id !== animation.id),
-                                    }));
-                                  }
-                                }}
-                                className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-secondary focus:ring-secondary"
-                              />
                               <Gamepad2 size={14} className="text-green-400" />
                               <div className="flex-1">
                                 <span className="text-white text-sm">
-                                  {translation?.title || animation.targetWord}
-                                </span>
-                                <span className="text-xs text-gray-400 ml-2">
-                                  ({animation.type === 'COMPLETE_SENTENCE'
-                                    ? t('interactiveLessons.animationTypes.completeSentence')
-                                    : t('interactiveLessons.animationTypes.multipleChoice')})
+                                  {animationType}
                                 </span>
                               </div>
-                            </label>
+                              <span className="text-xs text-gray-400">
+                                #{animation.order}
+                              </span>
+                            </div>
                           );
                         })}
                       </div>
                     )}
                     <p className="text-xs text-gray-500 mt-1">
-                      {formData.animationIds.length > 0
-                        ? t('interactiveLessons.selectedAnimations', { count: formData.animationIds.length })
-                        : t('interactiveLessons.animationsHint')}
+                      {availableAnimations.length > 0
+                        ? t('interactiveLessons.animationsCount', { count: availableAnimations.length })
+                        : t('interactiveLessons.animationsHintReadOnly')}
                     </p>
                   </div>
                 </div>

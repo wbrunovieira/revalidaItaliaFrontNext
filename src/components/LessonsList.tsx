@@ -74,11 +74,14 @@ interface Lesson {
   video?: VideoData;
   createdAt: string;
   updatedAt: string;
-  // Interactive Lessons fields
+  // Interactive Lessons fields - from list route (booleans)
   type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
+  // From detail route (arrays) - optional for view modal
   audios?: AudioData[];
   animations?: AnimationData[];
-  environment3dId?: string;
 }
 
 interface LessonForEdit {
@@ -1155,18 +1158,16 @@ export default function LessonsList() {
                                                       )}
                                                     </span>
                                                   )}
-                                                  {/* Audio count badge */}
-                                                  {lesson.audios && lesson.audios.length > 0 && (
+                                                  {/* Audio badge */}
+                                                  {lesson.hasAudios && (
                                                     <span className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">
                                                       <Music size={10} />
-                                                      {lesson.audios.length}
                                                     </span>
                                                   )}
-                                                  {/* Animation count badge */}
-                                                  {lesson.animations && lesson.animations.length > 0 && (
+                                                  {/* Animation badge */}
+                                                  {lesson.hasAnimations && (
                                                     <span className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-medium">
                                                       <Gamepad2 size={10} />
-                                                      {lesson.animations.length}
                                                     </span>
                                                   )}
                                                   <span className="flex items-center gap-1.5">

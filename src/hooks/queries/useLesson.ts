@@ -80,15 +80,21 @@ export interface Lesson {
   id: string;
   moduleId: string;
   courseId?: string;
+  slug?: string;
+  order?: number;
   imageUrl?: string;
+  videoId?: string | null;
   // Lesson type for interactive lessons
   type?: LessonType;
   // Standard video content
   video?: Video;
-  // Interactive Lessons: Audio content (for STANDARD type)
+  // Interactive Lessons: Audio content (for STANDARD type) - from detail route
   audios?: Audio[];
-  // Interactive Lessons: Animation exercises (for STANDARD type)
+  // Interactive Lessons: Animation exercises (for STANDARD type) - from detail route
   animations?: Animation[];
+  // Interactive Lessons: Boolean flags - from list route
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
   // Interactive Lessons: 3D environment (for ENVIRONMENT_3D type)
   environment3dId?: string;
   environment3d?: Environment3D;

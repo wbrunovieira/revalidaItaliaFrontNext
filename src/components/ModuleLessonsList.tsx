@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, ChevronLeft, ChevronRight, Music, Gamepad2, Box } from 'lucide-react';
 import { normalizeLocale } from '@/lib/normalizelocale';
 
 interface Translation {
@@ -19,6 +19,11 @@ interface Lesson {
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
 }
 
 interface ModuleLessonsListProps {
@@ -227,6 +232,18 @@ export default function ModuleLessonsList({
                   <span className="flex-1 truncate">
                     {lessonTranslation?.title}
                   </span>
+                  {/* Interactive Lessons badges */}
+                  <div className="flex items-center gap-1">
+                    {lesson.type === 'ENVIRONMENT_3D' && (
+                      <Box size={12} className="text-purple-400" />
+                    )}
+                    {lesson.hasAudios && (
+                      <Music size={12} className="text-blue-400" />
+                    )}
+                    {lesson.hasAnimations && (
+                      <Gamepad2 size={12} className="text-green-400" />
+                    )}
+                  </div>
                   {isCurrentLesson && (
                     <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                   )}

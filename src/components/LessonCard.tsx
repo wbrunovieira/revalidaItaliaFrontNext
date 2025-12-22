@@ -1,7 +1,7 @@
 // src/components/LessonCard.tsx
 "use client";
 
-import { PlayCircle, Clock, FileText, CheckCircle } from 'lucide-react';
+import { PlayCircle, Clock, FileText, CheckCircle, Music, Gamepad2, Box } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -30,6 +30,11 @@ interface Lesson {
   videoId?: string;
   translations?: Translation[];
   video?: Video;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
 }
 
 interface LessonCardProps {
@@ -178,12 +183,30 @@ export default function LessonCard({
             
             {/* Ícone de tipo de conteúdo */}
             <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm transform group-hover:scale-110 transition-transform duration-300">
-              {hasVideo ? (
+              {lesson.type === 'ENVIRONMENT_3D' ? (
+                <Box size={14} className="text-purple-500" />
+              ) : hasVideo ? (
                 <PlayCircle size={14} className="text-accent" />
               ) : (
                 <FileText size={14} className="text-accent-warm" />
               )}
             </div>
+
+            {/* Interactive Lessons badges */}
+            {(lesson.hasAudios || lesson.hasAnimations) && (
+              <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                {lesson.hasAudios && (
+                  <div className="w-5 h-5 rounded-full bg-blue-500/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                    <Music size={10} className="text-white" />
+                  </div>
+                )}
+                {lesson.hasAnimations && (
+                  <div className="w-5 h-5 rounded-full bg-green-500/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                    <Gamepad2 size={10} className="text-white" />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Conteúdo do card */}

@@ -54,6 +54,11 @@ interface Lesson {
   createdAt: string;
   updatedAt: string;
   video?: Video;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
 }
 interface LessonsResponse {
   lessons: Lesson[];

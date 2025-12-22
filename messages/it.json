@@ -6670,8 +6670,30 @@
     "video": "Video",
     "title": "Titolo",
     "description": "Descrizione",
-    "order": "Ordine"
+    "order": "Ordine",
+    "lessonType": "Tipo di Lezione",
+    "contentType": "Tipo di Contenuto",
+    "environment3D": "Ambiente 3D",
+    "audios": "Audio",
+    "animations": "Animazioni Interattive"
   },
+  "lessonTypes": {
+    "standard": "Lezione Standard",
+    "standardDesc": "Lezione con video o audio, documenti, flashcard e animazioni interattive",
+    "environment3D": "Ambiente 3D",
+    "environment3DDesc": "Lezione con simulazione 3D immersiva (contenuto esclusivo)"
+  },
+  "contentTypes": {
+    "video": "Video",
+    "videoDesc": "Lezione principale con contenuto video",
+    "audio": "Audio",
+    "audioDesc": "Lezione principale con contenuto audio",
+    "xorInfo": "Una lezione può avere video O audio, ma non entrambi contemporaneamente"
+  },
+  "loading": "Caricamento...",
+  "optional": "opzionale",
+  "noAudiosAvailable": "Nessun audio disponibile. Carica prima degli audio.",
+  "noAnimationsAvailable": "Nessuna animazione disponibile. Crea prima delle animazioni.",
   "placeholders": {
     "course": "Seleziona un corso",
     "module": "Seleziona un modulo",
@@ -6680,7 +6702,8 @@
     "noVideo": "Senza video",
     "title": "Inserisci il titolo della lezione",
     "description": "Inserisci la descrizione della lezione",
-    "order": "Numero dell'ordine"
+    "order": "Numero dell'ordine",
+    "environment3D": "Seleziona un ambiente 3D"
   },
   "hints": {
     "imageUrl": "URL dell'immagine di copertina della lezione",

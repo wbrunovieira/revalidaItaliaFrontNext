@@ -6707,8 +6707,30 @@
     "video": "Vídeo",
     "title": "Título",
     "description": "Descrição",
-    "order": "Ordem"
+    "order": "Ordem",
+    "lessonType": "Tipo de Aula",
+    "contentType": "Tipo de Conteúdo",
+    "environment3D": "Ambiente 3D",
+    "audios": "Áudios",
+    "animations": "Animações Interativas"
   },
+  "lessonTypes": {
+    "standard": "Aula Padrão",
+    "standardDesc": "Aula com vídeo ou áudio, documentos, flashcards e animações interativas",
+    "environment3D": "Ambiente 3D",
+    "environment3DDesc": "Aula com simulação 3D imersiva (conteúdo exclusivo)"
+  },
+  "contentTypes": {
+    "video": "Vídeo",
+    "videoDesc": "Aula principal com conteúdo em vídeo",
+    "audio": "Áudio",
+    "audioDesc": "Aula principal com conteúdo em áudio",
+    "xorInfo": "Uma aula pode ter vídeo OU áudio, mas não ambos ao mesmo tempo"
+  },
+  "loading": "Carregando...",
+  "optional": "opcional",
+  "noAudiosAvailable": "Nenhum áudio disponível. Faça upload de áudios primeiro.",
+  "noAnimationsAvailable": "Nenhuma animação disponível. Crie animações primeiro.",
   "placeholders": {
     "course": "Selecione um curso",
     "module": "Selecione um módulo",
@@ -6717,7 +6739,8 @@
     "noVideo": "Sem vídeo",
     "title": "Digite o título da aula",
     "description": "Digite a descrição da aula",
-    "order": "Número da ordem"
+    "order": "Número da ordem",
+    "environment3D": "Selecione um ambiente 3D"
   },
   "hints": {
     "imageUrl": "URL da imagem de capa da aula",

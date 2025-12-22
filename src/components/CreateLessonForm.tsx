@@ -29,6 +29,11 @@ import {
   X,
   AlertCircle,
   Upload,
+  Video,
+  Music,
+  Box,
+  Gamepad2,
+  Info,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -63,12 +68,38 @@ interface LessonItem {
   translations: Translation[];
 }
 
+type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
+type ContentType = 'VIDEO' | 'AUDIO';
+
+interface Environment3D {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface AudioItem {
+  id: string;
+  translations: Translation[];
+}
+
+interface AnimationItem {
+  id: string;
+  type: string;
+  order: number;
+}
+
 interface FormData {
   courseId: string;
   moduleId: string;
   imageUrl: string;
   order: number;
   translations: Record<'pt' | 'es' | 'it', Translation>;
+  // New fields
+  lessonType: LessonType;
+  contentType: ContentType;
+  environment3dId: string;
+  audioIds: string[];
+  animationIds: string[];
 }
 
 interface FormErrors {
@@ -82,6 +113,8 @@ interface FormErrors {
   description_pt?: string;
   description_es?: string;
   description_it?: string;
+  environment3dId?: string;
+  audioIds?: string;
 }
 
 interface ValidationResult {
@@ -91,9 +124,13 @@ interface ValidationResult {
 
 interface CreateLessonPayload {
   slug: string;
-  imageUrl: string;
+  imageUrl?: string;
   order: number;
   translations: Translation[];
+  type?: LessonType;
+  environment3dId?: string;
+  audioIds?: string[];
+  animationIds?: string[];
 }
 
 type Locale = 'pt' | 'es' | 'it';
@@ -125,7 +162,21 @@ export default function CreateLessonForm() {
       es: { locale: 'es', title: '', description: '' },
       it: { locale: 'it', title: '', description: '' },
     },
+    // New fields for interactive lessons
+    lessonType: 'STANDARD',
+    contentType: 'VIDEO',
+    environment3dId: '',
+    audioIds: [],
+    animationIds: [],
   });
+
+  // New states for interactive lessons
+  const [environments3D, setEnvironments3D] = useState<Environment3D[]>([]);
+  const [availableAudios, setAvailableAudios] = useState<AudioItem[]>([]);
+  const [availableAnimations, setAvailableAnimations] = useState<AnimationItem[]>([]);
+  const [loadingEnvironments, setLoadingEnvironments] = useState(false);
+  const [loadingAudios, setLoadingAudios] = useState(false);
+  const [loadingAnimations, setLoadingAnimations] = useState(false);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<
@@ -549,6 +600,73 @@ export default function CreateLessonForm() {
     []
   );
 
+  // Fetch environments 3D
+  const fetchEnvironments3D = useCallback(async () => {
+    setLoadingEnvironments(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/environments-3d`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setEnvironments3D(data.environments || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching environments 3D:', error);
+    } finally {
+      setLoadingEnvironments(false);
+    }
+  }, []);
+
+  // Fetch available audios (all audios without lesson assignment)
+  const fetchAvailableAudios = useCallback(async () => {
+    setLoadingAudios(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/audios?unassigned=true`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableAudios(data.audios || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching audios:', error);
+    } finally {
+      setLoadingAudios(false);
+    }
+  }, []);
+
+  // Fetch available animations (all animations without lesson assignment)
+  const fetchAvailableAnimations = useCallback(async () => {
+    setLoadingAnimations(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/animations?unassigned=true`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableAnimations(data.animations || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching animations:', error);
+    } finally {
+      setLoadingAnimations(false);
+    }
+  }, []);
+
+  // Fetch interactive content when lesson type changes
+  useEffect(() => {
+    if (formData.lessonType === 'ENVIRONMENT_3D') {
+      fetchEnvironments3D();
+    } else if (formData.contentType === 'AUDIO') {
+      fetchAvailableAudios();
+    }
+    // Always fetch animations for STANDARD lessons
+    if (formData.lessonType === 'STANDARD') {
+      fetchAvailableAnimations();
+    }
+  }, [formData.lessonType, formData.contentType, fetchEnvironments3D, fetchAvailableAudios, fetchAvailableAnimations]);
+
   // Função para buscar módulos de um curso específico
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<ModuleItem[]> => {
@@ -717,12 +835,18 @@ export default function CreateLessonForm() {
     setFormData(prev => ({
       ...prev,
       imageUrl: '',
-        order: nextOrder,
+      order: nextOrder,
       translations: {
         pt: { locale: 'pt', title: '', description: '' },
         es: { locale: 'es', title: '', description: '' },
         it: { locale: 'it', title: '', description: '' },
       },
+      // Reset new fields
+      lessonType: 'STANDARD',
+      contentType: 'VIDEO',
+      environment3dId: '',
+      audioIds: [],
+      animationIds: [],
     }));
     setErrors({});
     setTouched({});
@@ -841,10 +965,34 @@ export default function CreateLessonForm() {
       const payload: CreateLessonPayload = {
         slug: generateSlug(formData.translations.pt.title),
         order: formData.order,
-        imageUrl: formData.imageUrl.trim(),
         translations: translations,
       };
 
+      // Add imageUrl only if provided
+      if (formData.imageUrl.trim()) {
+        payload.imageUrl = formData.imageUrl.trim();
+      }
+
+      // Add type-specific fields
+      if (formData.lessonType === 'ENVIRONMENT_3D') {
+        payload.type = 'ENVIRONMENT_3D';
+        payload.environment3dId = formData.environment3dId;
+      } else {
+        // STANDARD lesson
+        if (formData.lessonType !== 'STANDARD') {
+          payload.type = formData.lessonType;
+        }
+
+        // Add audioIds if content type is AUDIO
+        if (formData.contentType === 'AUDIO' && formData.audioIds.length > 0) {
+          payload.audioIds = formData.audioIds;
+        }
+
+        // Add animationIds if any selected
+        if (formData.animationIds.length > 0) {
+          payload.animationIds = formData.animationIds;
+        }
+      }
 
       await createLesson(payload);
 
@@ -1145,6 +1293,293 @@ export default function CreateLessonForm() {
             <p className="text-xs text-gray-500 mt-1">
               ID: {selectedModule.id}
             </p>
+          </div>
+        )}
+
+        {/* Tipo de Aula */}
+        <div className="mb-8">
+          <Label className="text-gray-300 flex items-center gap-2 mb-4">
+            <Play size={16} /> {t('fields.lessonType')}
+            <span className="text-red-400">*</span>
+          </Label>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* STANDARD Card */}
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({
+                ...prev,
+                lessonType: 'STANDARD',
+                environment3dId: '',
+              }))}
+              className={`p-4 rounded-lg border-2 transition-all text-left ${
+                formData.lessonType === 'STANDARD'
+                  ? 'border-secondary bg-secondary/10'
+                  : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-2 rounded-lg ${
+                  formData.lessonType === 'STANDARD' ? 'bg-secondary/20' : 'bg-gray-600'
+                }`}>
+                  <Video size={20} className={formData.lessonType === 'STANDARD' ? 'text-secondary' : 'text-gray-400'} />
+                </div>
+                <div>
+                  <h4 className={`font-medium ${formData.lessonType === 'STANDARD' ? 'text-white' : 'text-gray-300'}`}>
+                    {t('lessonTypes.standard')}
+                  </h4>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                {t('lessonTypes.standardDesc')}
+              </p>
+            </button>
+
+            {/* ENVIRONMENT_3D Card */}
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({
+                ...prev,
+                lessonType: 'ENVIRONMENT_3D',
+                contentType: 'VIDEO',
+                audioIds: [],
+                animationIds: [],
+              }))}
+              className={`p-4 rounded-lg border-2 transition-all text-left ${
+                formData.lessonType === 'ENVIRONMENT_3D'
+                  ? 'border-secondary bg-secondary/10'
+                  : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-2 rounded-lg ${
+                  formData.lessonType === 'ENVIRONMENT_3D' ? 'bg-secondary/20' : 'bg-gray-600'
+                }`}>
+                  <Box size={20} className={formData.lessonType === 'ENVIRONMENT_3D' ? 'text-secondary' : 'text-gray-400'} />
+                </div>
+                <div>
+                  <h4 className={`font-medium ${formData.lessonType === 'ENVIRONMENT_3D' ? 'text-white' : 'text-gray-300'}`}>
+                    {t('lessonTypes.environment3D')}
+                  </h4>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                {t('lessonTypes.environment3DDesc')}
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* Tipo de Conteúdo (apenas para STANDARD) */}
+        {formData.lessonType === 'STANDARD' && (
+          <div className="mb-8">
+            <Label className="text-gray-300 flex items-center gap-2 mb-4">
+              <FileText size={16} /> {t('fields.contentType')}
+              <span className="text-red-400">*</span>
+            </Label>
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* VIDEO Card */}
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  contentType: 'VIDEO',
+                  audioIds: [],
+                }))}
+                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  formData.contentType === 'VIDEO'
+                    ? 'border-secondary bg-secondary/10'
+                    : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`p-2 rounded-lg ${
+                    formData.contentType === 'VIDEO' ? 'bg-secondary/20' : 'bg-gray-600'
+                  }`}>
+                    <Video size={20} className={formData.contentType === 'VIDEO' ? 'text-secondary' : 'text-gray-400'} />
+                  </div>
+                  <div>
+                    <h4 className={`font-medium ${formData.contentType === 'VIDEO' ? 'text-white' : 'text-gray-300'}`}>
+                      {t('contentTypes.video')}
+                    </h4>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400">
+                  {t('contentTypes.videoDesc')}
+                </p>
+              </button>
+
+              {/* AUDIO Card */}
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  contentType: 'AUDIO',
+                }))}
+                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  formData.contentType === 'AUDIO'
+                    ? 'border-secondary bg-secondary/10'
+                    : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`p-2 rounded-lg ${
+                    formData.contentType === 'AUDIO' ? 'bg-secondary/20' : 'bg-gray-600'
+                  }`}>
+                    <Music size={20} className={formData.contentType === 'AUDIO' ? 'text-secondary' : 'text-gray-400'} />
+                  </div>
+                  <div>
+                    <h4 className={`font-medium ${formData.contentType === 'AUDIO' ? 'text-white' : 'text-gray-300'}`}>
+                      {t('contentTypes.audio')}
+                    </h4>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400">
+                  {t('contentTypes.audioDesc')}
+                </p>
+              </button>
+            </div>
+
+            {/* Info about XOR rule */}
+            <div className="mt-3 flex items-start gap-2 text-xs text-gray-400">
+              <Info size={14} className="mt-0.5 flex-shrink-0" />
+              <span>{t('contentTypes.xorInfo')}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Ambiente 3D Selection (apenas para ENVIRONMENT_3D) */}
+        {formData.lessonType === 'ENVIRONMENT_3D' && (
+          <div className="mb-8">
+            <Label className="text-gray-300 flex items-center gap-2 mb-2">
+              <Box size={16} /> {t('fields.environment3D')}
+              <span className="text-red-400">*</span>
+            </Label>
+            {loadingEnvironments ? (
+              <div className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-400">
+                {t('loading')}
+              </div>
+            ) : (
+              <Select
+                value={formData.environment3dId}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, environment3dId: value }))}
+              >
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectValue placeholder={t('placeholders.environment3D')} />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  {environments3D.map(env => (
+                    <SelectItem
+                      key={env.id}
+                      value={env.id}
+                      className="text-white hover:bg-gray-600"
+                    >
+                      {env.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {errors.environment3dId && touched.environment3dId && (
+              <p className="text-xs text-red-500 mt-1">{errors.environment3dId}</p>
+            )}
+          </div>
+        )}
+
+        {/* Audio Selection (apenas para STANDARD com AUDIO) */}
+        {formData.lessonType === 'STANDARD' && formData.contentType === 'AUDIO' && (
+          <div className="mb-8">
+            <Label className="text-gray-300 flex items-center gap-2 mb-2">
+              <Music size={16} /> {t('fields.audios')}
+            </Label>
+            {loadingAudios ? (
+              <div className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-400">
+                {t('loading')}
+              </div>
+            ) : availableAudios.length === 0 ? (
+              <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 text-center">
+                <Music size={24} className="text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">{t('noAudiosAvailable')}</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                {availableAudios.map(audio => {
+                  const audioTranslation = getTranslationByLocale(audio.translations, locale);
+                  const isSelected = formData.audioIds.includes(audio.id);
+                  return (
+                    <label
+                      key={audio.id}
+                      className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
+                        isSelected ? 'bg-secondary/20 border border-secondary/50' : 'hover:bg-gray-600/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ ...prev, audioIds: [...prev.audioIds, audio.id] }));
+                          } else {
+                            setFormData(prev => ({ ...prev, audioIds: prev.audioIds.filter(id => id !== audio.id) }));
+                          }
+                        }}
+                        className="rounded border-gray-500"
+                      />
+                      <span className="text-white text-sm">{audioTranslation?.title || audio.id}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Animations Selection (apenas para STANDARD) */}
+        {formData.lessonType === 'STANDARD' && (
+          <div className="mb-8">
+            <Label className="text-gray-300 flex items-center gap-2 mb-2">
+              <Gamepad2 size={16} /> {t('fields.animations')}
+              <span className="text-xs text-gray-500 ml-2">({t('optional')})</span>
+            </Label>
+            {loadingAnimations ? (
+              <div className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-400">
+                {t('loading')}
+              </div>
+            ) : availableAnimations.length === 0 ? (
+              <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 text-center">
+                <Gamepad2 size={24} className="text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">{t('noAnimationsAvailable')}</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                {availableAnimations.map(animation => {
+                  const isSelected = formData.animationIds.includes(animation.id);
+                  return (
+                    <label
+                      key={animation.id}
+                      className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
+                        isSelected ? 'bg-secondary/20 border border-secondary/50' : 'hover:bg-gray-600/50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData(prev => ({ ...prev, animationIds: [...prev.animationIds, animation.id] }));
+                          } else {
+                            setFormData(prev => ({ ...prev, animationIds: prev.animationIds.filter(id => id !== animation.id) }));
+                          }
+                        }}
+                        className="rounded border-gray-500"
+                      />
+                      <span className="text-white text-sm">
+                        {animation.type} - #{animation.order}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

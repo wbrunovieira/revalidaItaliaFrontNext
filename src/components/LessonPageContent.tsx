@@ -20,6 +20,7 @@ import LessonCompletionButton from '@/components/LessonCompletionButton';
 import ModuleLessonsList from '@/components/ModuleLessonsList';
 import AudioPlayerSection from '@/components/AudioPlayerSection';
 import AnimationsSection from '@/components/AnimationsSection';
+import Environment3DLoader from '@/components/3d-environments/Environment3DLoader';
 import {
   ArrowLeft,
   ChevronRight,
@@ -310,7 +311,133 @@ export default function LessonPageContent({
 
         {/* Main content */}
         <div className="flex-1">
-          {(lesson.video?.providerVideoId || pandaData?.video_external_id) ? (
+          {lesson.type === 'ENVIRONMENT_3D' && lesson.environment3d?.slug ? (
+            // Layout for 3D Environment
+            <div className="lg:flex">
+              {/* Left column - 3D Environment */}
+              <div className="flex-1 bg-primary">
+                <div className="bg-primary lg:ml-4">
+                  <Environment3DLoader
+                    slug={lesson.environment3d.slug}
+                    lessonId={lessonId}
+                    locale={locale}
+                  />
+                </div>
+
+                <div className="lg:ml-4 mt-8">
+                  <LessonComments
+                    lessonId={lessonId}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    locale={locale}
+                    lessonTitle={lt.title}
+                  />
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <aside className="bg-primary-dark p-6 overflow-y-auto lg:w-96">
+                {/* Course hierarchy */}
+                <div className="mb-6">
+                  <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                        <User size={14} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('course')}</p>
+                        <p className="text-white font-medium">{ct.title}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <BookOpen size={14} className="text-secondary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('module')}</p>
+                        <p className="text-white font-medium">{mt.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lesson info */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="inline-flex items-center bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold">
+                      3D
+                    </div>
+                    <div className="inline-flex items-center bg-accent-light text-white px-3 py-1 rounded-full text-xs font-bold">
+                      {tLesson('lessonNumber', { number: idx + 1 })}
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">{lt.title}</h2>
+                  <p className="text-gray-400 text-sm mb-4">{lt.description}</p>
+
+                  <LessonCompletionButton
+                    lessonId={lesson.id}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    hasVideo={false}
+                  />
+                </div>
+
+                {/* Documents */}
+                <DocumentsSection
+                  documents={documents}
+                  locale={locale}
+                  lessonId={lessonId}
+                />
+
+                {/* Flashcards */}
+                {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                  <div className="mt-6">
+                    <div className="mb-4">
+                      <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                        <div className="p-2 bg-secondary/20 rounded-lg">
+                          <CreditCard size={20} className="text-secondary" />
+                        </div>
+                        {tLesson('flashcards')}
+                      </h4>
+                      <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
+                    </div>
+
+                    <Link
+                      href={`/${locale}/flashcards/study?lessonId=${lessonId}`}
+                      className="w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
+                    >
+                      <CreditCard size={18} />
+                      {tLesson('studyFlashcards')}
+                      <ExternalLink size={14} />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Assessments */}
+                {assessments.length > 0 && (
+                  <CollapsibleAssessments
+                    assessments={assessments}
+                    locale={locale}
+                    lessonId={lessonId}
+                  />
+                )}
+
+                {/* Module lessons list */}
+                <ModuleLessonsList
+                  lessons={sorted}
+                  currentLessonId={lessonId}
+                  moduleId={moduleFound.id}
+                  courseSlug={courseSlug}
+                  moduleSlug={moduleSlug}
+                  locale={locale}
+                  courseId={course.id}
+                  initialPage={lessonsResponse?.pagination.page || 1}
+                  initialTotalPages={lessonsResponse?.pagination.totalPages || 1}
+                  initialTotal={lessonsResponse?.pagination.total || 0}
+                />
+              </aside>
+            </div>
+          ) : (lesson.video?.providerVideoId || pandaData?.video_external_id) ? (
             // Layout WITH video
             <div className="lg:flex">
               {/* Left column - Video and Comments */}

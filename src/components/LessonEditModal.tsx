@@ -24,6 +24,10 @@ import {
   FileText,
   Upload,
   ArrowRight,
+  Music,
+  Box,
+  Gamepad2,
+  Info,
 } from 'lucide-react';
 import {
   Select,
@@ -60,11 +64,41 @@ interface AvailableVideo {
   translations: Translation[];
 }
 
+type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
+
+interface Environment3DItem {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  thumbnailUrl?: string;
+}
+
+interface AudioItem {
+  id: string;
+  slug: string;
+  order: number;
+  translations: Translation[];
+}
+
+interface AnimationItem {
+  id: string;
+  type: 'COMPLETE_SENTENCE' | 'MULTIPLE_CHOICE';
+  targetWord: string;
+  fullSentence?: string;
+  enabled: boolean;
+  translations: Translation[];
+}
+
 interface Lesson {
   id: string;
   moduleId: string;
   order: number;
+  type?: LessonType;
   videoId?: string;
+  environment3dId?: string;
+  audioIds?: string[];
+  animationIds?: string[];
   flashcardIds: string[];
   commentIds: string[];
   imageUrl?: string;
@@ -86,7 +120,11 @@ interface LessonEditData {
   id: string;
   moduleId: string;
   order: number;
+  type?: LessonType;
   videoId?: string;
+  environment3dId?: string;
+  audioIds?: string[];
+  animationIds?: string[];
   flashcardIds: string[];
   commentIds: string[];
   imageUrl: string;
@@ -114,7 +152,11 @@ interface FormData {
   newImageUrl: string;
   newImageFile: File | undefined;
   order: number;
+  lessonType: LessonType;
   videoId: string;
+  environment3dId: string;
+  audioIds: string[];
+  animationIds: string[];
   flashcardIds: string;
   commentIds: string;
   selectedAssessmentId: string;
@@ -203,7 +245,11 @@ export default function LessonEditModal({
       newImageUrl: '',
       newImageFile: undefined,
       order: 1, // ✅ Sempre começar com 1
+      lessonType: 'STANDARD' as LessonType,
       videoId: 'no-video', // ✅ Valor padrão seguro
+      environment3dId: '',
+      audioIds: [],
+      animationIds: [],
       flashcardIds: '',
       commentIds: '',
       selectedAssessmentId: '',
@@ -241,6 +287,14 @@ export default function LessonEditModal({
     useState<Assessment[]>([]);
   const [loadingAssessments, setLoadingAssessments] =
     useState(false);
+
+  // Estados para Interactive Lessons
+  const [environments3D, setEnvironments3D] = useState<Environment3DItem[]>([]);
+  const [loadingEnvironments, setLoadingEnvironments] = useState(false);
+  const [availableAudios, setAvailableAudios] = useState<AudioItem[]>([]);
+  const [loadingAudios, setLoadingAudios] = useState(false);
+  const [availableAnimations, setAvailableAnimations] = useState<AnimationItem[]>([]);
+  const [loadingAnimations, setLoadingAnimations] = useState(false);
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -547,6 +601,108 @@ export default function LessonEditModal({
     [apiUrl]
   );
 
+  // Função para buscar ambientes 3D disponíveis
+  const fetchEnvironments3D = useCallback(async () => {
+    setLoadingEnvironments(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/environments3d`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setEnvironments3D([]);
+          return;
+        }
+        throw new Error(`Failed to fetch environments: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setEnvironments3D(data || []);
+      console.log('Environments 3D disponíveis:', data);
+    } catch (error) {
+      console.error('Error fetching environments 3D:', error);
+      setEnvironments3D([]);
+      toast({
+        title: 'Erro ao carregar ambientes 3D',
+        description: 'Não foi possível carregar os ambientes disponíveis.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingEnvironments(false);
+    }
+  }, [apiUrl, toast]);
+
+  // Função para buscar áudios disponíveis
+  const fetchAvailableAudios = useCallback(async () => {
+    setLoadingAudios(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/audios`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAvailableAudios([]);
+          return;
+        }
+        throw new Error(`Failed to fetch audios: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAvailableAudios(data.audios || data || []);
+      console.log('Áudios disponíveis:', data);
+    } catch (error) {
+      console.error('Error fetching audios:', error);
+      setAvailableAudios([]);
+      toast({
+        title: 'Erro ao carregar áudios',
+        description: 'Não foi possível carregar os áudios disponíveis.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingAudios(false);
+    }
+  }, [apiUrl, toast]);
+
+  // Função para buscar animações disponíveis
+  const fetchAvailableAnimations = useCallback(async () => {
+    setLoadingAnimations(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/animations`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAvailableAnimations([]);
+          return;
+        }
+        throw new Error(`Failed to fetch animations: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAvailableAnimations(data.animations || data || []);
+      console.log('Animações disponíveis:', data);
+    } catch (error) {
+      console.error('Error fetching animations:', error);
+      setAvailableAnimations([]);
+      toast({
+        title: 'Erro ao carregar animações',
+        description: 'Não foi possível carregar as animações disponíveis.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingAnimations(false);
+    }
+  }, [apiUrl, toast]);
+
   // Função para gerar lista de ordens disponíveis
   const getAvailableOrders = useCallback((): number[] => {
     const maxOrder = 50; // Limite máximo de ordem
@@ -757,6 +913,9 @@ export default function LessonEditModal({
         order: number;
         translations: Translation[];
         videoId?: string;
+        environment3dId?: string;
+        audioIds?: string[];
+        animationIds?: string[];
         flashcardIds?: string[];
         quizIds?: string[];
         commentIds?: string[];
@@ -773,6 +932,19 @@ export default function LessonEditModal({
         formData.videoId.trim()
       ) {
         requestData.videoId = formData.videoId.trim();
+      }
+
+      // Adicionar campos de Interactive Lessons
+      if (formData.lessonType === 'ENVIRONMENT_3D' && formData.environment3dId) {
+        requestData.environment3dId = formData.environment3dId;
+      }
+
+      if (formData.audioIds.length > 0) {
+        requestData.audioIds = formData.audioIds;
+      }
+
+      if (formData.animationIds.length > 0) {
+        requestData.animationIds = formData.animationIds;
       }
 
       const flashcardIds = stringToArray(
@@ -1008,9 +1180,16 @@ export default function LessonEditModal({
       const processedOrder =
         lesson.order && lesson.order > 0 ? lesson.order : 1;
 
+      // ✅ Processamento do tipo da lição
+      const processedLessonType: LessonType = lesson.type === 'ENVIRONMENT_3D' ? 'ENVIRONMENT_3D' : 'STANDARD';
+
       console.log('Dados processados:', {
         processedVideoId,
         processedOrder,
+        processedLessonType,
+        environment3dId: lesson.environment3dId,
+        audioIds: lesson.audioIds,
+        animationIds: lesson.animationIds,
       });
 
       setFormData({
@@ -1018,7 +1197,11 @@ export default function LessonEditModal({
         newImageUrl: '',
         newImageFile: undefined,
         order: processedOrder,
+        lessonType: processedLessonType,
         videoId: processedVideoId,
+        environment3dId: lesson.environment3dId || '',
+        audioIds: lesson.audioIds || [],
+        animationIds: lesson.animationIds || [],
         flashcardIds: arrayToString(
           lesson.flashcardIds || []
         ),
@@ -1036,6 +1219,11 @@ export default function LessonEditModal({
       fetchAvailableVideos(courseId, lesson.id);
       fetchAvailableAssessments();
       fetchLinkedAssessments(lesson.id);
+
+      // Buscar dados para Interactive Lessons
+      fetchEnvironments3D();
+      fetchAvailableAudios();
+      fetchAvailableAnimations();
     }
   }, [
     lesson,
@@ -1046,6 +1234,9 @@ export default function LessonEditModal({
     fetchAvailableVideos,
     fetchAvailableAssessments,
     fetchLinkedAssessments,
+    fetchEnvironments3D,
+    fetchAvailableAudios,
+    fetchAvailableAnimations,
   ]);
 
   // Cleanup blob URLs when modal closes
@@ -1491,6 +1682,223 @@ export default function LessonEditModal({
                   <p className="text-xs text-gray-500 mt-1">
                     {t('hints.videoSelection')}
                   </p>
+                </div>
+
+                {/* Interactive Lessons Section */}
+                <div className="md:col-span-2 border border-gray-700 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                    <Gamepad2 size={20} className="text-secondary" />
+                    {t('interactiveLessons.title')}
+                  </h3>
+
+                  {/* Lesson Type (Read-only) */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <Info size={16} className="inline mr-2" />
+                      {t('interactiveLessons.lessonType')}
+                    </label>
+                    <div className="flex items-center gap-3 bg-gray-700/50 px-4 py-3 rounded-lg">
+                      {formData.lessonType === 'ENVIRONMENT_3D' ? (
+                        <>
+                          <Box size={20} className="text-purple-400" />
+                          <span className="text-white font-medium">
+                            {t('interactiveLessons.types.environment3d')}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Video size={20} className="text-blue-400" />
+                          <span className="text-white font-medium">
+                            {t('interactiveLessons.types.standard')}
+                          </span>
+                        </>
+                      )}
+                      <span className="text-xs text-gray-400 ml-2">
+                        ({t('interactiveLessons.typeReadOnly')})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Environment 3D Selection (only for ENVIRONMENT_3D type) */}
+                  {formData.lessonType === 'ENVIRONMENT_3D' && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <Box size={16} className="inline mr-2" />
+                        {t('interactiveLessons.environment3d')}
+                      </label>
+                      {loadingEnvironments ? (
+                        <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                          <Loader2 size={16} className="animate-spin inline mr-2" />
+                          {t('interactiveLessons.loadingEnvironments')}
+                        </div>
+                      ) : (
+                        <Select
+                          value={formData.environment3dId || 'none'}
+                          onValueChange={(value) => {
+                            setFormData(prev => ({
+                              ...prev,
+                              environment3dId: value === 'none' ? '' : value,
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                            <SelectValue placeholder={t('interactiveLessons.selectEnvironment')} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                            <SafeSelectItem value="none" className="text-gray-400 hover:bg-gray-600">
+                              {t('interactiveLessons.noEnvironment')}
+                            </SafeSelectItem>
+                            {environments3D.map(env => (
+                              <SafeSelectItem
+                                key={env.id}
+                                value={env.id}
+                                className="text-white hover:bg-gray-600"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Box size={14} className="text-purple-400" />
+                                  <span>{env.name}</span>
+                                </div>
+                              </SafeSelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t('interactiveLessons.environment3dHint')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Audio Selection (only for STANDARD type) */}
+                  {formData.lessonType === 'STANDARD' && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <Music size={16} className="inline mr-2" />
+                        {t('interactiveLessons.audios')}
+                      </label>
+                      {loadingAudios ? (
+                        <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                          <Loader2 size={16} className="animate-spin inline mr-2" />
+                          {t('interactiveLessons.loadingAudios')}
+                        </div>
+                      ) : availableAudios.length === 0 ? (
+                        <div className="bg-gray-700/50 rounded-lg px-4 py-3 text-gray-400 text-sm">
+                          {t('interactiveLessons.noAudiosAvailable')}
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-40 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                          {availableAudios.map(audio => {
+                            const translation = getTranslationByLocale(audio.translations, 'pt');
+                            const isSelected = formData.audioIds.includes(audio.id);
+                            return (
+                              <label
+                                key={audio.id}
+                                className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
+                                  isSelected ? 'bg-secondary/20 border border-secondary' : 'hover:bg-gray-600'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        audioIds: [...prev.audioIds, audio.id],
+                                      }));
+                                    } else {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        audioIds: prev.audioIds.filter(id => id !== audio.id),
+                                      }));
+                                    }
+                                  }}
+                                  className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-secondary focus:ring-secondary"
+                                />
+                                <Music size={14} className="text-blue-400" />
+                                <span className="text-white text-sm">
+                                  {translation?.title || audio.slug}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formData.audioIds.length > 0
+                          ? t('interactiveLessons.selectedAudios', { count: formData.audioIds.length })
+                          : t('interactiveLessons.audiosHint')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Animations Selection (for all lesson types) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <Gamepad2 size={16} className="inline mr-2" />
+                      {t('interactiveLessons.animations')}
+                    </label>
+                    {loadingAnimations ? (
+                      <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                        <Loader2 size={16} className="animate-spin inline mr-2" />
+                        {t('interactiveLessons.loadingAnimations')}
+                      </div>
+                    ) : availableAnimations.length === 0 ? (
+                      <div className="bg-gray-700/50 rounded-lg px-4 py-3 text-gray-400 text-sm">
+                        {t('interactiveLessons.noAnimationsAvailable')}
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-40 overflow-y-auto bg-gray-700/50 rounded-lg p-3">
+                        {availableAnimations.filter(a => a.enabled).map(animation => {
+                          const translation = getTranslationByLocale(animation.translations, 'pt');
+                          const isSelected = formData.animationIds.includes(animation.id);
+                          return (
+                            <label
+                              key={animation.id}
+                              className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
+                                isSelected ? 'bg-secondary/20 border border-secondary' : 'hover:bg-gray-600'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      animationIds: [...prev.animationIds, animation.id],
+                                    }));
+                                  } else {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      animationIds: prev.animationIds.filter(id => id !== animation.id),
+                                    }));
+                                  }
+                                }}
+                                className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-secondary focus:ring-secondary"
+                              />
+                              <Gamepad2 size={14} className="text-green-400" />
+                              <div className="flex-1">
+                                <span className="text-white text-sm">
+                                  {translation?.title || animation.targetWord}
+                                </span>
+                                <span className="text-xs text-gray-400 ml-2">
+                                  ({animation.type === 'COMPLETE_SENTENCE'
+                                    ? t('interactiveLessons.animationTypes.completeSentence')
+                                    : t('interactiveLessons.animationTypes.multipleChoice')})
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.animationIds.length > 0
+                        ? t('interactiveLessons.selectedAnimations', { count: formData.animationIds.length })
+                        : t('interactiveLessons.animationsHint')}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Flashcard IDs */}

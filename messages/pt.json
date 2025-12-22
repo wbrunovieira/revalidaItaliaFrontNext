@@ -7029,7 +7029,35 @@
       "occupiedOrders": "Ordens ocupadas",
       "cancel": "Cancelar",
       "save": "Salvar",
-      "saving": "Salvando..."
+      "saving": "Salvando...",
+      "interactiveLessons": {
+        "title": "Aulas Interativas",
+        "lessonType": "Tipo de Aula",
+        "typeReadOnly": "não pode ser alterado",
+        "types": {
+          "standard": "Padrão",
+          "environment3d": "Ambiente 3D"
+        },
+        "environment3d": "Ambiente 3D",
+        "loadingEnvironments": "Carregando ambientes...",
+        "selectEnvironment": "Selecione um ambiente...",
+        "noEnvironment": "Nenhum ambiente",
+        "environment3dHint": "Selecione o ambiente 3D para esta aula interativa",
+        "audios": "Áudios",
+        "loadingAudios": "Carregando áudios...",
+        "noAudiosAvailable": "Nenhum áudio disponível",
+        "audiosHint": "Selecione os áudios para esta aula",
+        "selectedAudios": "{count} áudio(s) selecionado(s)",
+        "animations": "Animações",
+        "loadingAnimations": "Carregando animações...",
+        "noAnimationsAvailable": "Nenhuma animação disponível",
+        "animationsHint": "Selecione as animações para esta aula",
+        "selectedAnimations": "{count} animação(ões) selecionada(s)",
+        "animationTypes": {
+          "completeSentence": "Completar Frase",
+          "multipleChoice": "Múltipla Escolha"
+        }
+      }
     },
     "lessonsList": {
       "title": "Lista de Aulas",

@@ -2084,6 +2084,36 @@
     "imageContent": "Contenido de imagen",
     "answerType": "Tipo de respuesta",
     "studyFlashcards": "Estudiar flashcards",
+    "audios": {
+      "title": "Audios",
+      "description": "Escucha los audios de esta lección",
+      "nowPlaying": "Reproduciendo ahora",
+      "duration": "Duración",
+      "track": "Pista {current} de {total}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "mute": "Silenciar",
+      "unmute": "Activar sonido",
+      "playlist": "Lista de pistas"
+    },
+    "animations": {
+      "title": "Ejercicios Interactivos",
+      "description": "Completa los ejercicios para fijar el contenido",
+      "questions": "{count} preguntas",
+      "start": "Iniciar",
+      "continue": "Continuar",
+      "completed": "Completado",
+      "locked": "Bloqueado",
+      "disabled": "Deshabilitado",
+      "available": "disponibles",
+      "exercise": "Ejercicio {number}",
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Opción Múltiple"
+      }
+    },
     "markAsComplete": "Marcar como completada",
     "markAsIncomplete": "Desmarcar como completada",
     "lessonCompleted": "¡Lección completada!",
@@ -6924,6 +6954,7 @@
       "description": "Descripción",
       "imageUrl": "URL de la Imagen",
       "order": "Orden",
+      "lessonType": "Tipo de Lección",
       "flashcards": "Flashcards",
       "flashcardsCount": "tarjetas de estudio",
       "assessments": "Evaluaciones",
@@ -6932,6 +6963,31 @@
       "commentsCount": "comentarios",
       "createdAt": "Fecha de Creación",
       "updatedAt": "Última Actualización"
+    },
+    "types": {
+      "standard": "Estándar",
+      "environment3d": "Ambiente 3D"
+    },
+    "audios": {
+      "title": "Audios de la Lección",
+      "count": "audios",
+      "duration": "Duración",
+      "fileSize": "Tamaño"
+    },
+    "animations": {
+      "title": "Animaciones Interactivas",
+      "count": "animaciones",
+      "questions": "preguntas",
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Opción Múltiple"
+      },
+      "enabled": "Activo",
+      "disabled": "Inactivo"
+    },
+    "environment3d": {
+      "title": "Ambiente 3D",
+      "slug": "Slug"
     },
     "video": {
       "title": "Información del Video",

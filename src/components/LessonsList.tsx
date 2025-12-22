@@ -23,6 +23,9 @@ import {
   MessageSquare,
   CreditCard,
   Radio,
+  Music,
+  Gamepad2,
+  Box,
 } from 'lucide-react';
 import Image from 'next/image';
 import LessonViewModal from './LessonViewModal';
@@ -46,6 +49,17 @@ interface VideoData {
   updatedAt: string;
 }
 
+interface AudioData {
+  id: string;
+  order: number;
+}
+
+interface AnimationData {
+  id: string;
+  type: 'CompleteSentence' | 'MultipleChoice';
+  enabled: boolean;
+}
+
 interface Lesson {
   id: string;
   moduleId: string;
@@ -60,6 +74,11 @@ interface Lesson {
   video?: VideoData;
   createdAt: string;
   updatedAt: string;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  audios?: AudioData[];
+  animations?: AnimationData[];
+  environment3dId?: string;
 }
 
 interface LessonForEdit {
@@ -1117,6 +1136,13 @@ export default function LessonsList() {
                                                     'Sem descrição'}
                                                 </p>
                                                 <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                                  {/* Type badge for 3D Environment */}
+                                                  {lesson.type === 'ENVIRONMENT_3D' && (
+                                                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs font-medium">
+                                                      <Box size={10} />
+                                                      3D
+                                                    </span>
+                                                  )}
                                                   {lesson.videoId && (
                                                     <span className="flex items-center gap-1.5">
                                                       <Video
@@ -1127,6 +1153,20 @@ export default function LessonsList() {
                                                       {t(
                                                         'hasVideo'
                                                       )}
+                                                    </span>
+                                                  )}
+                                                  {/* Audio count badge */}
+                                                  {lesson.audios && lesson.audios.length > 0 && (
+                                                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">
+                                                      <Music size={10} />
+                                                      {lesson.audios.length}
+                                                    </span>
+                                                  )}
+                                                  {/* Animation count badge */}
+                                                  {lesson.animations && lesson.animations.length > 0 && (
+                                                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-medium">
+                                                      <Gamepad2 size={10} />
+                                                      {lesson.animations.length}
                                                     </span>
                                                   )}
                                                   <span className="flex items-center gap-1.5">

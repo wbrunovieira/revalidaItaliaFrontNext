@@ -2086,6 +2086,36 @@
     "imageContent": "Conteúdo em imagem",
     "answerType": "Tipo de resposta",
     "studyFlashcards": "Estudar flashcards",
+    "audios": {
+      "title": "Áudios",
+      "description": "Ouça os áudios desta aula",
+      "nowPlaying": "Tocando agora",
+      "duration": "Duração",
+      "track": "Faixa {current} de {total}",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "mute": "Silenciar",
+      "unmute": "Ativar som",
+      "playlist": "Lista de faixas"
+    },
+    "animations": {
+      "title": "Exercícios Interativos",
+      "description": "Complete os exercícios para fixar o conteúdo",
+      "questions": "{count} questões",
+      "start": "Iniciar",
+      "continue": "Continuar",
+      "completed": "Concluído",
+      "locked": "Bloqueado",
+      "disabled": "Desabilitado",
+      "available": "disponíveis",
+      "exercise": "Exercício {number}",
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Múltipla Escolha"
+      }
+    },
     "markAsComplete": "Marcar como concluída",
     "markAsIncomplete": "Desmarcar como concluída",
     "lessonCompleted": "Aula concluída!",
@@ -6901,6 +6931,7 @@
       "description": "Descrição",
       "imageUrl": "URL da Imagem",
       "order": "Ordem",
+      "lessonType": "Tipo de Aula",
       "flashcards": "Flashcards",
       "flashcardsCount": "flashcards",
       "assessments": "Avaliações",
@@ -6909,6 +6940,31 @@
       "commentsCount": "comentários",
       "createdAt": "Data de Criação",
       "updatedAt": "Última Atualização"
+    },
+    "types": {
+      "standard": "Padrão",
+      "environment3d": "Ambiente 3D"
+    },
+    "audios": {
+      "title": "Áudios da Aula",
+      "count": "áudios",
+      "duration": "Duração",
+      "fileSize": "Tamanho"
+    },
+    "animations": {
+      "title": "Animações Interativas",
+      "count": "animações",
+      "questions": "questões",
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Múltipla Escolha"
+      },
+      "enabled": "Ativo",
+      "disabled": "Inativo"
+    },
+    "environment3d": {
+      "title": "Ambiente 3D",
+      "slug": "Slug"
     },
     "video": {
       "title": "Informações do Vídeo",

@@ -18,6 +18,8 @@ import LessonAccessTracker from '@/components/LessonAccessTracker';
 import CollapsibleAssessments from '@/components/CollapsibleAssessments';
 import LessonCompletionButton from '@/components/LessonCompletionButton';
 import ModuleLessonsList from '@/components/ModuleLessonsList';
+import AudioPlayerSection from '@/components/AudioPlayerSection';
+import AnimationsSection from '@/components/AnimationsSection';
 import {
   ArrowLeft,
   ChevronRight,
@@ -460,6 +462,25 @@ export default function LessonPageContent({
                   lessonId={lessonId}
                 />
 
+                {/* Audio Player - Interactive Lessons */}
+                {lesson.audios && lesson.audios.length > 0 && (
+                  <AudioPlayerSection
+                    audios={lesson.audios}
+                    locale={locale}
+                  />
+                )}
+
+                {/* Animations - Interactive Lessons */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <AnimationsSection
+                    animations={lesson.animations}
+                    locale={locale}
+                    courseSlug={courseSlug}
+                    moduleSlug={moduleSlug}
+                    lessonId={lessonId}
+                  />
+                )}
+
                 {/* Live Sessions */}
                 {lesson.liveSessionRecordings && lesson.liveSessionRecordings.length > 0 && (
                   <div className="mt-12">
@@ -601,6 +622,29 @@ export default function LessonPageContent({
                         <DocumentsSection
                           documents={documents}
                           locale={locale}
+                          lessonId={lessonId}
+                        />
+                      </div>
+                    )}
+
+                    {/* Audio Player - Interactive Lessons */}
+                    {lesson.audios && lesson.audios.length > 0 && (
+                      <div>
+                        <AudioPlayerSection
+                          audios={lesson.audios}
+                          locale={locale}
+                        />
+                      </div>
+                    )}
+
+                    {/* Animations - Interactive Lessons */}
+                    {lesson.animations && lesson.animations.length > 0 && (
+                      <div>
+                        <AnimationsSection
+                          animations={lesson.animations}
+                          locale={locale}
+                          courseSlug={courseSlug}
+                          moduleSlug={moduleSlug}
                           lessonId={lessonId}
                         />
                       </div>

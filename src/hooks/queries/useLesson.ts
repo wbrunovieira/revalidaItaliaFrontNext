@@ -20,12 +20,79 @@ interface Video {
 
 import type { LiveSessionRecording } from '@/components/LiveSessionsSection';
 
+// ============ Interactive Lessons Types ============
+
+export type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
+
+export interface AudioTranslation {
+  locale: string;
+  title: string;
+  description?: string;
+}
+
+export interface Audio {
+  id: string;
+  lessonId?: string;
+  filename: string;
+  url: string;
+  s3Key?: string;
+  durationInSeconds: number;
+  formattedDuration?: string;
+  fileSize: number;
+  mimeType: string;
+  order: number;
+  transcription?: string;
+  translations: AudioTranslation[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type AnimationType = 'CompleteSentence' | 'MultipleChoice';
+
+export interface Animation {
+  id: string;
+  lessonId?: string;
+  type: AnimationType;
+  order: number;
+  totalQuestions?: number;
+  enabled: boolean;
+  disabledAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Environment3DTranslation {
+  locale: string;
+  name?: string;
+  title?: string;
+  description?: string;
+}
+
+export interface Environment3D {
+  id: string;
+  slug: string;
+  translations: Environment3DTranslation[];
+}
+
+// ============ Main Lesson Interface ============
+
 export interface Lesson {
   id: string;
   moduleId: string;
   courseId?: string;
   imageUrl?: string;
+  // Lesson type for interactive lessons
+  type?: LessonType;
+  // Standard video content
   video?: Video;
+  // Interactive Lessons: Audio content (for STANDARD type)
+  audios?: Audio[];
+  // Interactive Lessons: Animation exercises (for STANDARD type)
+  animations?: Animation[];
+  // Interactive Lessons: 3D environment (for ENVIRONMENT_3D type)
+  environment3dId?: string;
+  environment3d?: Environment3D;
+  // Existing fields
   translations: Translation[];
   flashcardIds?: string[];
   liveSessionRecordings?: LiveSessionRecording[];

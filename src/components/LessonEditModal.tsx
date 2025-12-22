@@ -1604,105 +1604,107 @@ export default function LessonEditModal({
                   )}
                 </div>
 
-                {/* Video Selection */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <Video
-                      size={16}
-                      className="inline mr-2"
-                    />
-                    {t('fields.video')}
-                  </label>
-                  {loadingVideos ? (
-                    <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
-                      <Loader2
+                {/* Video Selection - Only for STANDARD lessons */}
+                {formData.lessonType !== 'ENVIRONMENT_3D' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <Video
                         size={16}
-                        className="animate-spin inline mr-2"
+                        className="inline mr-2"
                       />
-                      {t('loadingVideos')}
-                    </div>
-                  ) : (
-                    <Select
-                      value={safeFormData.videoId} // ✅ Usar safeFormData (já garantido como válido)
-                      onValueChange={handleVideoChange}
-                      disabled={loadingVideos}
-                    >
-                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                        <SelectValue
-                          placeholder={t(
-                            'placeholders.selectVideo'
-                          )}
+                      {t('fields.video')}
+                    </label>
+                    {loadingVideos ? (
+                      <div className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                        <Loader2
+                          size={16}
+                          className="animate-spin inline mr-2"
                         />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
-                        {/* Opção para não selecionar nenhum vídeo */}
-                        <SafeSelectItem
-                          value="no-video"
-                          className="text-gray-400 hover:bg-gray-600"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>🚫</span>
-                            <span>
-                              {t('fields.noVideo')}
-                            </span>
-                          </div>
-                        </SafeSelectItem>
+                        {t('loadingVideos')}
+                      </div>
+                    ) : (
+                      <Select
+                        value={safeFormData.videoId}
+                        onValueChange={handleVideoChange}
+                        disabled={loadingVideos}
+                      >
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                          <SelectValue
+                            placeholder={t(
+                              'placeholders.selectVideo'
+                            )}
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-700 border-gray-600 max-h-60 overflow-y-auto">
+                          {/* Opção para não selecionar nenhum vídeo */}
+                          <SafeSelectItem
+                            value="no-video"
+                            className="text-gray-400 hover:bg-gray-600"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>🚫</span>
+                              <span>
+                                {t('fields.noVideo')}
+                              </span>
+                            </div>
+                          </SafeSelectItem>
 
-                        {availableVideos.length === 0 ? (
-                          <div className="px-2 py-4 text-center text-gray-400 text-sm">
-                            {t('fields.noVideosAvailable')}
-                          </div>
-                        ) : (
-                          availableVideos.map(video => {
-                            const translation =
-                              getTranslationByLocale(
-                                video.translations,
-                                'pt'
+                          {availableVideos.length === 0 ? (
+                            <div className="px-2 py-4 text-center text-gray-400 text-sm">
+                              {t('fields.noVideosAvailable')}
+                            </div>
+                          ) : (
+                            availableVideos.map(video => {
+                              const translation =
+                                getTranslationByLocale(
+                                  video.translations,
+                                  'pt'
+                                );
+                              return (
+                                <SafeSelectItem
+                                  key={video.id}
+                                  value={video.id}
+                                  className="text-white hover:bg-gray-600"
+                                >
+                                  <div className="flex items-center gap-3 w-full">
+                                    <div className="flex items-center gap-2">
+                                      <Play
+                                        size={14}
+                                        className="text-secondary"
+                                      />
+                                      <span className="font-medium">
+                                        {translation?.title ||
+                                          video.slug}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                      <Clock size={12} />
+                                      <span>
+                                        {formatDuration(
+                                          video.durationInSeconds
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {translation?.description && (
+                                    <div className="text-xs text-gray-400 mt-1 line-clamp-1">
+                                      {
+                                        translation.description
+                                      }
+                                    </div>
+                                  )}
+                                </SafeSelectItem>
                               );
-                            return (
-                              <SafeSelectItem
-                                key={video.id}
-                                value={video.id}
-                                className="text-white hover:bg-gray-600"
-                              >
-                                <div className="flex items-center gap-3 w-full">
-                                  <div className="flex items-center gap-2">
-                                    <Play
-                                      size={14}
-                                      className="text-secondary"
-                                    />
-                                    <span className="font-medium">
-                                      {translation?.title ||
-                                        video.slug}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <Clock size={12} />
-                                    <span>
-                                      {formatDuration(
-                                        video.durationInSeconds
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                                {translation?.description && (
-                                  <div className="text-xs text-gray-400 mt-1 line-clamp-1">
-                                    {
-                                      translation.description
-                                    }
-                                  </div>
-                                )}
-                              </SafeSelectItem>
-                            );
-                          })
-                        )}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t('hints.videoSelection')}
-                  </p>
-                </div>
+                            })
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('hints.videoSelection')}
+                    </p>
+                  </div>
+                )}
 
                 {/* Interactive Lessons Section */}
                 <div className="md:col-span-2 border border-gray-700 rounded-lg p-4">

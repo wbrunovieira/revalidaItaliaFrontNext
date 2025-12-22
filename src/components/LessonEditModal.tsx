@@ -66,12 +66,16 @@ interface AvailableVideo {
 
 type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
 
+interface Environment3DTranslation {
+  locale: string;
+  title: string;
+  description?: string;
+}
+
 interface Environment3DItem {
   id: string;
   slug: string;
-  name: string;
-  description?: string;
-  thumbnailUrl?: string;
+  translations: Environment3DTranslation[];
 }
 
 interface AudioItem {
@@ -605,7 +609,7 @@ export default function LessonEditModal({
   const fetchEnvironments3D = useCallback(async () => {
     setLoadingEnvironments(true);
     try {
-      const response = await fetch(`${apiUrl}/api/v1/environments3d`, {
+      const response = await fetch(`${apiUrl}/api/v1/environments-3d`, {
         headers: {
           Accept: 'application/json',
         },
@@ -1748,18 +1752,21 @@ export default function LessonEditModal({
                             <SafeSelectItem value="none" className="text-gray-400 hover:bg-gray-600">
                               {t('interactiveLessons.noEnvironment')}
                             </SafeSelectItem>
-                            {environments3D.map(env => (
-                              <SafeSelectItem
-                                key={env.id}
-                                value={env.id}
-                                className="text-white hover:bg-gray-600"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Box size={14} className="text-purple-400" />
-                                  <span>{env.name}</span>
-                                </div>
-                              </SafeSelectItem>
-                            ))}
+                            {environments3D.map(env => {
+                              const envTranslation = env.translations?.[0];
+                              return (
+                                <SafeSelectItem
+                                  key={env.id}
+                                  value={env.id}
+                                  className="text-white hover:bg-gray-600"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Box size={14} className="text-purple-400" />
+                                    <span>{envTranslation?.title || env.slug}</span>
+                                  </div>
+                                </SafeSelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       )}

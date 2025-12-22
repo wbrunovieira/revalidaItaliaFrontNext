@@ -71,10 +71,16 @@ interface LessonItem {
 type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
 type ContentType = 'VIDEO' | 'AUDIO';
 
+interface Environment3DTranslation {
+  locale: string;
+  title: string;
+  description?: string;
+}
+
 interface Environment3D {
   id: string;
-  name: string;
-  description?: string;
+  slug: string;
+  translations: Environment3DTranslation[];
 }
 
 interface AudioItem {
@@ -1467,15 +1473,18 @@ export default function CreateLessonForm() {
                   <SelectValue placeholder={t('placeholders.environment3D')} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-700 border-gray-600">
-                  {environments3D.map(env => (
-                    <SelectItem
-                      key={env.id}
-                      value={env.id}
-                      className="text-white hover:bg-gray-600"
-                    >
-                      {env.name}
-                    </SelectItem>
-                  ))}
+                  {environments3D.map(env => {
+                    const envTranslation = env.translations?.find(tr => tr.locale === locale) || env.translations?.[0];
+                    return (
+                      <SelectItem
+                        key={env.id}
+                        value={env.id}
+                        className="text-white hover:bg-gray-600"
+                      >
+                        {envTranslation?.title || env.slug}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             )}

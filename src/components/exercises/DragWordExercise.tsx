@@ -12,14 +12,11 @@ import {
   GripHorizontal,
 } from 'lucide-react';
 import type { AnimationSentence } from '@/hooks/queries/useLesson';
-import { useRecordAnimationAttempt } from '@/hooks/queries/useLesson';
 
 interface DragWordExerciseProps {
-  lessonId: string;
-  animationId: string;
   sentences: AnimationSentence[];
   distractors: string[];
-  onComplete?: (success: boolean, score: number, isFirstCompletion?: boolean) => void;
+  onComplete?: (success: boolean, score: number) => void;
 }
 
 interface WordOption {
@@ -58,15 +55,12 @@ const shakeAnimation = {
 };
 
 export default function DragWordExercise({
-  lessonId,
-  animationId,
   sentences,
   distractors,
   onComplete,
 }: DragWordExerciseProps) {
   const t = useTranslations('Lesson.exercises');
   const dropZoneControls = useAnimation();
-  const recordAttempt = useRecordAnimationAttempt();
 
   // Detect if touch device
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -171,11 +165,8 @@ export default function DragWordExercise({
     setIsDragOver(false);
   }, []);
 
-  // Track first completion for celebration
-  const [isFirstCompletion, setIsFirstCompletion] = useState(false);
-
-  // Check answer and show feedback
-  const checkAnswer = useCallback(async (word: WordOption) => {
+  // Check answer and show feedback (local validation only, API call happens on complete)
+  const checkAnswer = useCallback((word: WordOption) => {
     const correct = word.isCorrect;
     setIsCorrect(correct);
     setShowFeedback(true);
@@ -191,23 +182,6 @@ export default function DragWordExercise({
 
     if (correct) {
       setScore(prev => prev + 1);
-    }
-
-    // Record the attempt to API
-    try {
-      const result = await recordAttempt.mutateAsync({
-        lessonId,
-        animationId,
-        isCorrect: correct,
-      });
-
-      // Track if this was the first completion
-      if (result.isFirstCompletion) {
-        setIsFirstCompletion(true);
-      }
-    } catch (error) {
-      console.error('Failed to record attempt:', error);
-      // Continue with the exercise even if API fails
     }
 
     // Auto-advance after feedback
@@ -234,12 +208,12 @@ export default function DragWordExercise({
             .sort(() => Math.random() - 0.5)
         );
       } else {
-        // Exercise complete
+        // Exercise complete - notify parent (API call happens there)
         const finalScore = score + (correct ? 1 : 0);
-        onComplete?.(finalScore === sentences.length, finalScore, isFirstCompletion);
+        onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 1500);
-  }, [currentIndex, sentences, distractors, score, onComplete, dropZoneControls, lessonId, animationId, recordAttempt, isFirstCompletion]);
+  }, [currentIndex, sentences, distractors, score, onComplete, dropZoneControls]);
 
   // Handle drop on drop zone
   const handleDrop = useCallback((e: React.DragEvent) => {

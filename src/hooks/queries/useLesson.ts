@@ -330,10 +330,81 @@ async function recordAnimationAttempt({
 }
 
 /**
- * Hook to record animation attempt
+ * Hook to record animation attempt (for incorrect answers)
  */
 export function useRecordAnimationAttempt() {
   return useMutation({
     mutationFn: recordAnimationAttempt,
+  });
+}
+
+interface CompleteAnimationParams {
+  lessonId: string;
+  animationId: string;
+}
+
+/**
+ * Mark an animation as complete (successful completion)
+ */
+async function completeAnimation({
+  lessonId,
+  animationId,
+}: CompleteAnimationParams): Promise<RecordAttemptResponse> {
+  const token = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+
+  if (!token) {
+    console.warn('[AnimationComplete] No auth token found');
+    throw new Error('Not authenticated');
+  }
+
+  const url = `${apiUrl}/api/v1/lessons/${lessonId}/animations/${animationId}/complete`;
+
+  console.log('[AnimationComplete] Sending request:', {
+    url,
+    lessonId,
+    animationId,
+  });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error('[AnimationComplete] API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+    });
+
+    let errorMessage = `HTTP ${response.status}`;
+    try {
+      const errorJson = JSON.parse(errorBody);
+      errorMessage = errorJson.message || errorMessage;
+    } catch {
+      // Body is not JSON
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const result = await response.json();
+  console.log('[AnimationComplete] Success:', result);
+  return result;
+}
+
+/**
+ * Hook to mark animation as complete (for successful completions)
+ */
+export function useCompleteAnimation() {
+  return useMutation({
+    mutationFn: completeAnimation,
   });
 }

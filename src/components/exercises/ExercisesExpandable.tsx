@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import DragWordExercise from './DragWordExercise';
 import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
+import { useCompleteAnimation } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
   lessonId: string;
@@ -45,6 +46,7 @@ export default function ExercisesExpandable({
   animations,
 }: ExercisesExpandableProps) {
   const t = useTranslations('Lesson.exercises');
+  const completeAnimation = useCompleteAnimation();
 
   // Expanded state
   const [isExpanded, setIsExpanded] = useState(false);
@@ -145,13 +147,12 @@ export default function ExercisesExpandable({
   const totalAvailable = exerciseStates.filter(e => e.status === 'available').length;
 
   // Handle exercise completion - auto advance to next
-  const handleExerciseComplete = useCallback((
+  const handleExerciseComplete = useCallback(async (
     animationId: string,
     success: boolean,
-    score: number,
-    isFirstCompletion?: boolean
+    score: number
   ) => {
-    // Mark current as completed
+    // Mark current as completed locally
     setExerciseStates(prev =>
       prev.map(e =>
         e.animationId === animationId
@@ -160,9 +161,21 @@ export default function ExercisesExpandable({
       )
     );
 
-    // Log first completion for potential celebration/gamification
-    if (isFirstCompletion) {
-      console.log('[Exercise] First completion!', { animationId, score });
+    // Record completion to API (single call per animation)
+    if (success) {
+      try {
+        const result = await completeAnimation.mutateAsync({
+          lessonId,
+          animationId,
+        });
+
+        if (result.isFirstCompletion) {
+          console.log('[Exercise] First completion! 🎉', { animationId, score });
+        }
+      } catch (error) {
+        console.error('[Exercise] Failed to record completion:', error);
+        // Continue with the exercise even if API fails
+      }
     }
 
     // Check if there are more exercises of this type
@@ -179,7 +192,7 @@ export default function ExercisesExpandable({
         setCurrentExerciseIndex(0);
       }, 500);
     }
-  }, [currentExerciseIndex, activeTypeAnimations.length]);
+  }, [currentExerciseIndex, activeTypeAnimations.length, lessonId, completeAnimation]);
 
   // Handle start type
   const handleStartType = useCallback((type: AnimationType) => {
@@ -408,12 +421,10 @@ export default function ExercisesExpandable({
                     >
                       {currentAnimation.content?.gameType === 'DRAG_WORD' && (
                         <DragWordExercise
-                          lessonId={lessonId}
-                          animationId={currentAnimation.id}
                           sentences={currentAnimation.content.sentences}
                           distractors={currentAnimation.content.distractors}
-                          onComplete={(success, score, isFirstCompletion) =>
-                            handleExerciseComplete(currentAnimation.id, success, score, isFirstCompletion)
+                          onComplete={(success, score) =>
+                            handleExerciseComplete(currentAnimation.id, success, score)
                           }
                         />
                       )}

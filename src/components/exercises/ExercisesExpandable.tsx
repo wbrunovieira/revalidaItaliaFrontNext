@@ -20,6 +20,7 @@ import {
 import DragWordExercise from './DragWordExercise';
 import ReorderWordsExercise from './ReorderWordsExercise';
 import TypeCompletionExercise from './TypeCompletionExercise';
+import MultipleBlanksExercise from './MultipleBlanksExercise';
 import type { Animation, GameType } from '@/hooks/queries/useLesson';
 import { useCompleteAnimation } from '@/hooks/queries/useLesson';
 
@@ -464,9 +465,18 @@ export default function ExercisesExpandable({
                         />
                       )}
 
+                      {currentAnimation.content?.gameType === 'MULTIPLE_BLANKS' && (
+                        <MultipleBlanksExercise
+                          sentences={currentAnimation.content.sentences}
+                          onComplete={(success, score) =>
+                            handleExerciseComplete(currentAnimation.id, success, score)
+                          }
+                        />
+                      )}
+
                       {/* Placeholder for other game types */}
                       {currentAnimation.content?.gameType &&
-                       !['DRAG_WORD', 'REORDER_WORDS', 'TYPE_COMPLETION'].includes(currentAnimation.content.gameType) && (
+                       !['DRAG_WORD', 'REORDER_WORDS', 'TYPE_COMPLETION', 'MULTIPLE_BLANKS'].includes(currentAnimation.content.gameType) && (
                         <div className="text-center py-12 text-gray-400">
                           <Gamepad2 size={48} className="mx-auto mb-4 opacity-50" />
                           <p>{t('comingSoon')}</p>

@@ -67,6 +67,14 @@ export interface AnimationContent {
   distractors: string[];
 }
 
+// MultipleChoice animation content (quiz format)
+export interface MultipleChoiceContent {
+  question: string;
+  options: [string, string, string];
+  correctOptionIndex: 0 | 1 | 2;
+  explanation?: string;
+}
+
 export interface Animation {
   id: string;
   lessonId?: string;
@@ -75,7 +83,10 @@ export interface Animation {
   totalQuestions?: number;
   enabled: boolean;
   disabledAt?: string | null;
-  content?: AnimationContent;
+  // Content varies based on type:
+  // - CompleteSentence: AnimationContent
+  // - MultipleChoice: MultipleChoiceContent
+  content?: AnimationContent | MultipleChoiceContent;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -2143,7 +2143,13 @@
         "fillBlank": "Preencher Lacuna",
         "selectOption": "Selecionar Opção",
         "typeCompletion": "Digitar Resposta",
-        "multipleBlanks": "Múltiplas Lacunas"
+        "multipleBlanks": "Múltiplas Lacunas",
+        "multipleChoice": "Quiz"
+      },
+      "quiz": {
+        "explanation": "Explicação",
+        "next": "Próxima",
+        "finish": "Finalizar"
       },
       "reorderInstruction": "Arraste as palavras para formar a frase correta",
       "tapToSwap": "Toque em uma palavra, depois em outra para trocar",

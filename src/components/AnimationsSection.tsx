@@ -66,9 +66,15 @@ export default function AnimationsSection({
     return Object.entries(groups).map(([type, anims]) => {
       const availableCount = anims.filter(a => a.enabled !== false).length;
       const lockedCount = anims.filter(a => a.enabled === false).length;
-      const totalQuestions = anims.reduce((sum, a) =>
-        sum + (a.content?.sentences?.length || 1), 0
-      );
+      const totalQuestions = anims.reduce((sum, a) => {
+        // MultipleChoice: each animation is 1 question
+        if (a.type === 'MultipleChoice') {
+          return sum + 1;
+        }
+        // CompleteSentence: count sentences
+        const content = a.content as { sentences?: unknown[] } | undefined;
+        return sum + (content?.sentences?.length || 1);
+      }, 0);
 
       return {
         type: type as AnimationType,

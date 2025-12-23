@@ -2138,7 +2138,13 @@
         "fillBlank": "Compila lo Spazio",
         "selectOption": "Seleziona Opzione",
         "typeCompletion": "Digita la Risposta",
-        "multipleBlanks": "Spazi Multipli"
+        "multipleBlanks": "Spazi Multipli",
+        "multipleChoice": "Quiz"
+      },
+      "quiz": {
+        "explanation": "Spiegazione",
+        "next": "Avanti",
+        "finish": "Termina"
       },
       "reorderInstruction": "Trascina le parole per formare la frase corretta",
       "tapToSwap": "Tocca una parola, poi un'altra per scambiarle",

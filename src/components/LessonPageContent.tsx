@@ -145,6 +145,15 @@ export default function LessonPageContent({
     enabled: flashcardIds.length > 0,
   });
 
+  // DEBUG: Log lesson data including animations
+  useEffect(() => {
+    if (lesson) {
+      console.log('📚 LessonPageContent - lesson data:', lesson);
+      console.log('📚 LessonPageContent - lesson.animations:', lesson.animations);
+      console.log('📚 LessonPageContent - animations count:', lesson.animations?.length);
+    }
+  }, [lesson]);
+
   // Hydrate cache with initial data on mount
   useEffect(() => {
     if (initialCourse) {
@@ -607,13 +616,7 @@ export default function LessonPageContent({
 
                 {/* Animations - Interactive Lessons */}
                 {lesson.animations && lesson.animations.length > 0 && (
-                  <AnimationsSection
-                    animations={lesson.animations}
-                    locale={locale}
-                    courseSlug={courseSlug}
-                    moduleSlug={moduleSlug}
-                    lessonId={lessonId}
-                  />
+                  <AnimationsSection animations={lesson.animations} />
                 )}
 
                 {/* Live Sessions */}
@@ -775,13 +778,7 @@ export default function LessonPageContent({
                     {/* Animations - Interactive Lessons */}
                     {lesson.animations && lesson.animations.length > 0 && (
                       <div>
-                        <AnimationsSection
-                          animations={lesson.animations}
-                          locale={locale}
-                          courseSlug={courseSlug}
-                          moduleSlug={moduleSlug}
-                          lessonId={lessonId}
-                        />
+                        <AnimationsSection animations={lesson.animations} />
                       </div>
                     )}
 

@@ -1,7 +1,7 @@
 // src/components/exercises/ExercisesExpandable.tsx
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import {
@@ -39,11 +39,11 @@ export default function ExercisesExpandable({
   // Active exercise
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
 
-  // Exercise states
+  // Exercise states (treat enabled === false as locked, undefined = enabled)
   const [exerciseStates, setExerciseStates] = useState<ExerciseState[]>(() =>
     animations.map(anim => ({
       animationId: anim.id,
-      status: anim.enabled ? 'available' : 'locked',
+      status: anim.enabled === false ? 'locked' : 'available',
     }))
   );
 
@@ -52,6 +52,33 @@ export default function ExercisesExpandable({
     () => [...animations].sort((a, b) => a.order - b.order),
     [animations]
   );
+
+  // Listen for custom event to open the expandable
+  useEffect(() => {
+    const handleOpenEvent = (event: CustomEvent<{ animationId?: string }>) => {
+      setIsExpanded(true);
+
+      // If a specific animation was requested, start it
+      if (event.detail?.animationId) {
+        const animation = sortedAnimations.find(a => a.id === event.detail.animationId);
+        const state = exerciseStates.find(e => e.animationId === event.detail.animationId);
+
+        // Only start if animation exists and is not locked
+        if (animation && state?.status !== 'locked') {
+          // Small delay to allow expansion animation to complete
+          setTimeout(() => {
+            setActiveExerciseId(event.detail.animationId!);
+          }, 350);
+        }
+      }
+    };
+
+    window.addEventListener('openExercisesExpandable', handleOpenEvent as EventListener);
+
+    return () => {
+      window.removeEventListener('openExercisesExpandable', handleOpenEvent as EventListener);
+    };
+  }, [sortedAnimations, exerciseStates]);
 
   // Get active animation
   const activeAnimation = useMemo(
@@ -112,21 +139,24 @@ export default function ExercisesExpandable({
   if (!sortedAnimations.length) return null;
 
   return (
-    <div className="mt-6 border border-gray-700/50 rounded-xl overflow-hidden bg-gradient-to-br from-gray-900/50 to-primary/30">
+    <div
+      id="exercises-expandable"
+      className="mt-6 border border-gray-700/50 rounded-xl overflow-hidden bg-gradient-to-br from-gray-900/50 to-primary/30"
+    >
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between p-4 hover:bg-gray-800/30 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-500/20 rounded-lg">
-            <Gamepad2 size={24} className="text-green-400" />
+          <div className="p-2 bg-secondary/20 rounded-lg">
+            <Gamepad2 size={24} className="text-secondary" />
           </div>
           <div className="text-left">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               {t('title')}
               {completedCount > 0 && (
-                <span className="flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
                   <Sparkles size={12} />
                   {completedCount}/{sortedAnimations.length}
                 </span>
@@ -138,7 +168,7 @@ export default function ExercisesExpandable({
 
         <div className="flex items-center gap-3">
           <div className="text-right text-sm">
-            <span className="text-green-400">{availableCount} {t('available')}</span>
+            <span className="text-secondary">{availableCount} {t('available')}</span>
           </div>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}

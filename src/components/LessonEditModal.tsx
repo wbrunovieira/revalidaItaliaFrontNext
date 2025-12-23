@@ -1868,9 +1868,9 @@ export default function LessonEditModal({
                           return (
                             <div
                               key={animation.id}
-                              className="flex items-center gap-3 p-2 rounded bg-green-500/10 border border-green-500/30"
+                              className="flex items-center gap-3 p-2 rounded bg-secondary/10 border border-secondary/30"
                             >
-                              <Gamepad2 size={14} className="text-green-400" />
+                              <Gamepad2 size={14} className="text-secondary" />
                               <div className="flex-1">
                                 <span className="text-white text-sm">
                                   {animationType}

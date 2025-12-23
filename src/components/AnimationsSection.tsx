@@ -1,35 +1,41 @@
 // src/components/AnimationsSection.tsx
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import {
   Gamepad2,
   CheckCircle,
   Lock,
-  PlayCircle,
   MessageSquareText,
   ListChecks,
+  ChevronDown,
 } from 'lucide-react';
 import type { Animation } from '@/hooks/queries/useLesson';
 
 interface AnimationsSectionProps {
   animations: Animation[];
-  locale: string;
-  courseSlug: string;
-  moduleSlug: string;
-  lessonId: string;
 }
 
 export default function AnimationsSection({
   animations,
-  locale,
-  courseSlug,
-  moduleSlug,
-  lessonId,
 }: AnimationsSectionProps) {
   const t = useTranslations('Lesson.animations');
+
+  // Function to scroll to and open the exercises expandable
+  const handleOpenExercises = useCallback((animationId?: string) => {
+    // Dispatch custom event to open the expandable section
+    const event = new CustomEvent('openExercisesExpandable', {
+      detail: { animationId },
+    });
+    window.dispatchEvent(event);
+
+    // Scroll to the exercises section
+    const exercisesSection = document.getElementById('exercises-expandable');
+    if (exercisesSection) {
+      exercisesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
   // Sort animations by order
   const sortedAnimations = useMemo(
@@ -45,7 +51,7 @@ export default function AnimationsSection({
       case 'MultipleChoice':
         return <ListChecks size={18} className="text-purple-400" />;
       default:
-        return <Gamepad2 size={18} className="text-green-400" />;
+        return <Gamepad2 size={18} className="text-secondary" />;
     }
   };
 
@@ -69,7 +75,7 @@ export default function AnimationsSection({
       case 'MultipleChoice':
         return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
       default:
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
+        return 'bg-secondary/20 text-secondary border-secondary/30';
     }
   };
 
@@ -79,19 +85,19 @@ export default function AnimationsSection({
     <div className="mt-6">
       <div className="mb-4">
         <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-          <div className="p-2 bg-green-500/20 rounded-lg">
-            <Gamepad2 size={20} className="text-green-400" />
+          <div className="p-2 bg-secondary/20 rounded-lg">
+            <Gamepad2 size={20} className="text-secondary" />
           </div>
           {t('title')}
         </h4>
-        <div className="h-0.5 w-16 bg-gradient-to-r from-green-500 to-transparent rounded-full ml-11"></div>
+        <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
         <p className="text-gray-400 text-sm mt-2 ml-11">{t('description')}</p>
       </div>
 
       <div className="space-y-2">
         {sortedAnimations.map(animation => {
-          const isDisabled = !animation.enabled;
-          const animationUrl = `/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lessonId}/animations/${animation.id}`;
+          // Treat undefined as enabled (default behavior)
+          const isDisabled = animation.enabled === false;
 
           return (
             <div
@@ -99,7 +105,7 @@ export default function AnimationsSection({
               className={`rounded-lg border transition-all ${
                 isDisabled
                   ? 'bg-primary/20 border-gray-700/50 opacity-60'
-                  : 'bg-primary/30 border-green-500/20 hover:border-green-500/40'
+                  : 'bg-primary/30 border-secondary/20 hover:border-secondary/40'
               }`}
             >
               {isDisabled ? (
@@ -126,11 +132,12 @@ export default function AnimationsSection({
                   </div>
                 </div>
               ) : (
-                <Link
-                  href={animationUrl}
-                  className="flex items-center gap-3 p-4 group"
+                <button
+                  type="button"
+                  onClick={() => handleOpenExercises(animation.id)}
+                  className="w-full flex items-center gap-3 p-4 group text-left"
                 >
-                  <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                  <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center group-hover:bg-secondary/30 transition-colors">
                     {getTypeIcon(animation.type)}
                   </div>
                   <div className="flex-1">
@@ -148,15 +155,15 @@ export default function AnimationsSection({
                         </span>
                       )}
                     </div>
-                    <p className="text-white text-sm font-medium group-hover:text-green-400 transition-colors">
+                    <p className="text-white text-sm font-medium group-hover:text-secondary transition-colors">
                       {t('exercise', { number: animation.order })}
                     </p>
                   </div>
-                  <PlayCircle
-                    size={24}
-                    className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  <ChevronDown
+                    size={20}
+                    className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
                   />
-                </Link>
+                </button>
               )}
             </div>
           );
@@ -166,16 +173,16 @@ export default function AnimationsSection({
       {/* Summary */}
       <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
         <div className="flex items-center gap-1">
-          <CheckCircle size={12} className="text-green-400" />
+          <CheckCircle size={12} className="text-secondary" />
           <span>
-            {sortedAnimations.filter(a => a.enabled).length} {t('available')}
+            {sortedAnimations.filter(a => a.enabled !== false).length} {t('available')}
           </span>
         </div>
-        {sortedAnimations.some(a => !a.enabled) && (
+        {sortedAnimations.some(a => a.enabled === false) && (
           <div className="flex items-center gap-1">
             <Lock size={12} className="text-gray-500" />
             <span>
-              {sortedAnimations.filter(a => !a.enabled).length} {t('locked')}
+              {sortedAnimations.filter(a => a.enabled === false).length} {t('locked')}
             </span>
           </div>
         )}

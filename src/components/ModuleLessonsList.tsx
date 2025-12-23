@@ -241,7 +241,7 @@ export default function ModuleLessonsList({
                       <Music size={12} className="text-blue-400" />
                     )}
                     {lesson.hasAnimations && (
-                      <Gamepad2 size={12} className="text-green-400" />
+                      <Gamepad2 size={12} className="text-secondary" />
                     )}
                   </div>
                   {isCurrentLesson && (

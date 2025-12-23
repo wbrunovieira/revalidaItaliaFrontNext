@@ -1,7 +1,7 @@
 // src/components/exercises/DragWordExercise.tsx
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import {
@@ -58,6 +58,11 @@ export default function DragWordExercise({
   // Selected word in the blank
   const [selectedWord, setSelectedWord] = useState<WordOption | null>(null);
 
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const draggedWordRef = useRef<WordOption | null>(null);
+
   // Feedback state
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -82,37 +87,51 @@ export default function DragWordExercise({
     };
   }, [currentSentence]);
 
-  // Handle word selection
-  const handleWordSelect = useCallback((option: WordOption) => {
-    if (showFeedback || option.isUsed) return;
+  // Handle drag start
+  const handleDragStart = useCallback((e: React.DragEvent, option: WordOption) => {
+    if (showFeedback || option.isUsed) {
+      e.preventDefault();
+      return;
+    }
 
-    setSelectedWord(option);
-    setWordOptions(prev =>
-      prev.map(w => ({
-        ...w,
-        isUsed: w.id === option.id ? true : w.isUsed,
-      }))
-    );
+    draggedWordRef.current = option;
+    setIsDragging(true);
+
+    // Set drag data
+    e.dataTransfer.setData('text/plain', option.id);
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Add drag image styling
+    const target = e.target as HTMLElement;
+    target.style.opacity = '0.5';
   }, [showFeedback]);
 
-  // Handle word removal from blank
-  const handleRemoveWord = useCallback(() => {
-    if (showFeedback || !selectedWord) return;
+  // Handle drag end
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    setIsDragging(false);
+    setIsDragOver(false);
+    draggedWordRef.current = null;
 
-    setWordOptions(prev =>
-      prev.map(w => ({
-        ...w,
-        isUsed: w.id === selectedWord.id ? false : w.isUsed,
-      }))
-    );
-    setSelectedWord(null);
-  }, [showFeedback, selectedWord]);
+    // Reset opacity
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+  }, []);
 
-  // Check answer
-  const handleCheckAnswer = useCallback(() => {
-    if (!selectedWord) return;
+  // Handle drag over on drop zone
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  }, []);
 
-    const correct = selectedWord.isCorrect;
+  // Handle drag leave on drop zone
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false);
+  }, []);
+
+  // Check answer and show feedback
+  const checkAnswer = useCallback((word: WordOption) => {
+    const correct = word.isCorrect;
     setIsCorrect(correct);
     setShowFeedback(true);
 
@@ -135,20 +154,85 @@ export default function DragWordExercise({
 
         setWordOptions(
           allWords
-            .map(word => ({
-              id: `${word}-${Math.random()}`,
-              word,
-              isCorrect: word === correctWord,
+            .map(w => ({
+              id: `${w}-${Math.random()}`,
+              word: w,
+              isCorrect: w === correctWord,
               isUsed: false,
             }))
             .sort(() => Math.random() - 0.5)
         );
       } else {
         // Exercise complete
-        onComplete?.(score + (correct ? 1 : 0) === sentences.length, score + (correct ? 1 : 0));
+        const finalScore = score + (correct ? 1 : 0);
+        onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 1500);
-  }, [selectedWord, currentIndex, sentences, distractors, score, onComplete]);
+  }, [currentIndex, sentences, distractors, score, onComplete]);
+
+  // Handle drop on drop zone
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    setIsDragging(false);
+
+    const droppedWord = draggedWordRef.current;
+    if (!droppedWord || showFeedback) return;
+
+    // If there's already a selected word, put it back
+    if (selectedWord) {
+      setWordOptions(prev =>
+        prev.map(w => ({
+          ...w,
+          isUsed: w.id === selectedWord.id ? false : w.isUsed,
+        }))
+      );
+    }
+
+    // Set the new word and mark as used
+    setSelectedWord(droppedWord);
+    setWordOptions(prev =>
+      prev.map(w => ({
+        ...w,
+        isUsed: w.id === droppedWord.id ? true : w.isUsed,
+      }))
+    );
+
+    draggedWordRef.current = null;
+
+    // Auto-check after a brief moment for visual feedback
+    setTimeout(() => {
+      checkAnswer(droppedWord);
+    }, 300);
+  }, [showFeedback, selectedWord, checkAnswer]);
+
+  // Handle word selection (click)
+  const handleWordSelect = useCallback((option: WordOption) => {
+    if (showFeedback || option.isUsed) return;
+
+    // If there's already a selected word, put it back
+    if (selectedWord) {
+      setWordOptions(prev =>
+        prev.map(w => ({
+          ...w,
+          isUsed: w.id === selectedWord.id ? false : w.isUsed,
+        }))
+      );
+    }
+
+    setSelectedWord(option);
+    setWordOptions(prev =>
+      prev.map(w => ({
+        ...w,
+        isUsed: w.id === option.id ? true : w.isUsed,
+      }))
+    );
+
+    // Auto-check after a brief moment for visual feedback
+    setTimeout(() => {
+      checkAnswer(option);
+    }, 300);
+  }, [showFeedback, selectedWord, checkAnswer]);
 
   // Reset exercise
   const handleReset = useCallback(() => {
@@ -201,7 +285,7 @@ export default function DragWordExercise({
       {/* Progress bar */}
       <div className="h-1 bg-gray-700 rounded-full mb-8 overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
+          className="h-full bg-gradient-to-r from-secondary to-primary"
           initial={{ width: 0 }}
           animate={{ width: `${((currentIndex + 1) / sentences.length) * 100}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -220,20 +304,25 @@ export default function DragWordExercise({
         <p className="text-xl md:text-2xl text-white leading-relaxed">
           <span>{sentenceParts.before}</span>
 
-          {/* Blank / Selected word */}
+          {/* Drop zone / Selected word */}
           <motion.span
-            onClick={handleRemoveWord}
-            className={`inline-flex items-center justify-center min-w-[120px] mx-1 px-4 py-2 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`inline-flex items-center justify-center min-w-[120px] mx-1 px-4 py-2 rounded-lg border-2 transition-all ${
               selectedWord
                 ? showFeedback
                   ? isCorrect
-                    ? 'bg-green-500/20 border-green-500 text-green-400'
-                    : 'bg-red-500/20 border-red-500 text-red-400'
-                  : 'bg-secondary/20 border-secondary text-white'
-                : 'bg-gray-700/50 border-gray-500 text-gray-400'
+                    ? 'bg-green-500/20 border-green-500 text-green-400 border-solid'
+                    : 'bg-red-500/20 border-red-500 text-red-400 border-solid'
+                  : 'bg-secondary/20 border-secondary text-white border-solid'
+                : isDragOver
+                ? 'bg-secondary/30 border-secondary border-solid scale-105'
+                : isDragging
+                ? 'bg-gray-600/50 border-secondary/50 border-dashed animate-pulse'
+                : 'bg-gray-700/50 border-gray-500 border-dashed text-gray-400'
             }`}
-            whileHover={!showFeedback && selectedWord ? { scale: 1.02 } : {}}
-            whileTap={!showFeedback && selectedWord ? { scale: 0.98 } : {}}
+            animate={isDragOver ? { scale: 1.05 } : { scale: 1 }}
           >
             {selectedWord ? (
               <motion.span
@@ -244,7 +333,9 @@ export default function DragWordExercise({
                 {selectedWord.word}
               </motion.span>
             ) : (
-              <span className="text-sm">{t('dropHere')}</span>
+              <span className="text-sm">
+                {isDragOver ? '🎯' : isDragging ? t('dropHere') : t('dropHere')}
+              </span>
             )}
           </motion.span>
 
@@ -256,11 +347,13 @@ export default function DragWordExercise({
       <div className="flex flex-wrap justify-center gap-3 mb-8">
         <AnimatePresence mode="popLayout">
           {wordOptions.map(option => (
-            <motion.button
+            <motion.div
               key={option.id}
+              draggable={!option.isUsed && !showFeedback}
+              onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, option)}
+              onDragEnd={(e) => handleDragEnd(e as unknown as React.DragEvent)}
               onClick={() => handleWordSelect(option)}
-              disabled={option.isUsed || showFeedback}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all select-none ${
                 option.isUsed
                   ? 'opacity-30 cursor-not-allowed bg-gray-700 text-gray-500'
                   : 'bg-gradient-to-br from-gray-700 to-gray-800 text-white hover:from-secondary/30 hover:to-secondary/20 hover:shadow-lg hover:shadow-secondary/20 cursor-grab active:cursor-grabbing'
@@ -274,26 +367,9 @@ export default function DragWordExercise({
             >
               <GripHorizontal size={14} className="text-gray-400" />
               {option.word}
-            </motion.button>
+            </motion.div>
           ))}
         </AnimatePresence>
-      </div>
-
-      {/* Check button */}
-      <div className="flex justify-center">
-        <motion.button
-          onClick={handleCheckAnswer}
-          disabled={!selectedWord || showFeedback}
-          className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all ${
-            selectedWord && !showFeedback
-              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/30'
-              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-          }`}
-          whileHover={selectedWord && !showFeedback ? { scale: 1.02 } : {}}
-          whileTap={selectedWord && !showFeedback ? { scale: 0.98 } : {}}
-        >
-          {t('check')}
-        </motion.button>
       </div>
 
       {/* Feedback overlay */}

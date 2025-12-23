@@ -150,7 +150,9 @@ async function fetchLesson(
     throw new Error('Failed to fetch lesson');
   }
 
-  return response.json();
+  const data = await response.json();
+
+  return data;
 }
 
 /**

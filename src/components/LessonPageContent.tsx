@@ -477,7 +477,10 @@ export default function LessonPageContent({
                 {/* Interactive Exercises - Expandable section below video */}
                 {lesson.animations && lesson.animations.length > 0 && (
                   <div className="lg:ml-4 mt-6">
-                    <ExercisesExpandable animations={lesson.animations} />
+                    <ExercisesExpandable
+                      lessonId={lessonId}
+                      animations={lesson.animations}
+                    />
                   </div>
                 )}
 

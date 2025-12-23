@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 interface Translation {
   locale: string;
@@ -248,5 +248,69 @@ export function useModuleLessons({
     gcTime: 15 * 60 * 1000, // 15 minutes
     refetchOnWindowFocus: false,
     retry: 2,
+  });
+}
+
+// ============ Animation Attempt Types ============
+
+export interface RecordAttemptResponse {
+  progressId: string;
+  animationId: string;
+  lessonId: string;
+  completed: boolean;
+  completedAt: string | null;
+  attempts: number;
+  isFirstCompletion: boolean;
+}
+
+interface RecordAttemptParams {
+  lessonId: string;
+  animationId: string;
+  isCorrect: boolean;
+}
+
+/**
+ * Record an animation attempt
+ */
+async function recordAnimationAttempt({
+  lessonId,
+  animationId,
+  isCorrect,
+}: RecordAttemptParams): Promise<RecordAttemptResponse> {
+  const token = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+
+  if (!token) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(
+    `${apiUrl}/api/v1/lessons/${lessonId}/animations/${animationId}/attempt`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ isCorrect }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Hook to record animation attempt
+ */
+export function useRecordAnimationAttempt() {
+  return useMutation({
+    mutationFn: recordAnimationAttempt,
   });
 }

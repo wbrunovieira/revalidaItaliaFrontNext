@@ -19,6 +19,7 @@ import DragWordExercise from './DragWordExercise';
 import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
+  lessonId: string;
   animations: Animation[];
 }
 
@@ -40,6 +41,7 @@ interface TypeGroup {
 }
 
 export default function ExercisesExpandable({
+  lessonId,
   animations,
 }: ExercisesExpandableProps) {
   const t = useTranslations('Lesson.exercises');
@@ -143,7 +145,12 @@ export default function ExercisesExpandable({
   const totalAvailable = exerciseStates.filter(e => e.status === 'available').length;
 
   // Handle exercise completion - auto advance to next
-  const handleExerciseComplete = useCallback((animationId: string, success: boolean, score: number) => {
+  const handleExerciseComplete = useCallback((
+    animationId: string,
+    success: boolean,
+    score: number,
+    isFirstCompletion?: boolean
+  ) => {
     // Mark current as completed
     setExerciseStates(prev =>
       prev.map(e =>
@@ -152,6 +159,11 @@ export default function ExercisesExpandable({
           : e
       )
     );
+
+    // Log first completion for potential celebration/gamification
+    if (isFirstCompletion) {
+      console.log('[Exercise] First completion!', { animationId, score });
+    }
 
     // Check if there are more exercises of this type
     const nextIndex = currentExerciseIndex + 1;
@@ -396,10 +408,12 @@ export default function ExercisesExpandable({
                     >
                       {currentAnimation.content?.gameType === 'DRAG_WORD' && (
                         <DragWordExercise
+                          lessonId={lessonId}
+                          animationId={currentAnimation.id}
                           sentences={currentAnimation.content.sentences}
                           distractors={currentAnimation.content.distractors}
-                          onComplete={(success, score) =>
-                            handleExerciseComplete(currentAnimation.id, success, score)
+                          onComplete={(success, score, isFirstCompletion) =>
+                            handleExerciseComplete(currentAnimation.id, success, score, isFirstCompletion)
                           }
                         />
                       )}

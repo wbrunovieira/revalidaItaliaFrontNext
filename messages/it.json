@@ -2119,11 +2119,14 @@
       "questions": "{count} domande",
       "start": "Inizia",
       "continue": "Continua",
-      "completed": "Completato",
+      "completed": "completati",
+      "of": "di",
       "locked": "Bloccato",
       "disabled": "Disabilitato",
       "available": "disponibili",
       "exercise": "Esercizio {number}",
+      "continueFromHere": "Continua da qui",
+      "allCompleted": "Tutti completati!",
       "types": {
         "completeSentence": "Completa la Frase",
         "multipleChoice": "Scelta Multipla"

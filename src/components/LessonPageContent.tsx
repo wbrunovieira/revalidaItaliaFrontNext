@@ -620,7 +620,7 @@ export default function LessonPageContent({
 
                 {/* Animations - Interactive Lessons */}
                 {lesson.animations && lesson.animations.length > 0 && (
-                  <AnimationsSection animations={lesson.animations} />
+                  <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
                 )}
 
                 {/* Live Sessions */}
@@ -827,7 +827,7 @@ export default function LessonPageContent({
 
                 {/* Animations section (summary) */}
                 {lesson.animations && lesson.animations.length > 0 && (
-                  <AnimationsSection animations={lesson.animations} />
+                  <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
                 )}
 
                 {/* Live Sessions */}
@@ -993,7 +993,7 @@ export default function LessonPageContent({
                     {/* Animations - Interactive Lessons */}
                     {lesson.animations && lesson.animations.length > 0 && (
                       <div>
-                        <AnimationsSection animations={lesson.animations} />
+                        <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
                       </div>
                     )}
 

@@ -2122,11 +2122,14 @@
       "questions": "{count} preguntas",
       "start": "Iniciar",
       "continue": "Continuar",
-      "completed": "Completado",
+      "completed": "completados",
+      "of": "de",
       "locked": "Bloqueado",
       "disabled": "Deshabilitado",
       "available": "disponibles",
       "exercise": "Ejercicio {number}",
+      "continueFromHere": "Continuar desde aquí",
+      "allCompleted": "¡Todos completados!",
       "types": {
         "completeSentence": "Completar Frase",
         "multipleChoice": "Opción Múltiple"

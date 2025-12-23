@@ -424,3 +424,96 @@ export function useCompleteAnimation() {
     mutationFn: completeAnimation,
   });
 }
+
+// ============ Animation Progress Types ============
+
+export interface AnimationProgressItem {
+  animationId: string;
+  completed: boolean;
+  attempts: number;
+  completedAt: string | null;
+}
+
+export interface AnimationsProgressResponse {
+  lessonId: string;
+  totalAnimations: number;
+  completedAnimations: number;
+  totalAttempts: number;
+  percentComplete: number;
+  progress: AnimationProgressItem[];
+}
+
+/**
+ * Fetch animations progress for a lesson
+ */
+async function fetchAnimationsProgress(
+  lessonId: string
+): Promise<AnimationsProgressResponse> {
+  const token = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+
+  if (!token) {
+    console.warn('[AnimationsProgress] No auth token found');
+    throw new Error('Not authenticated');
+  }
+
+  const url = `${apiUrl}/api/v1/lessons/${lessonId}/animations/progress`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error('[AnimationsProgress] API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+    });
+
+    let errorMessage = `HTTP ${response.status}`;
+    try {
+      const errorJson = JSON.parse(errorBody);
+      errorMessage = errorJson.message || errorMessage;
+    } catch {
+      // Body is not JSON
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+interface UseAnimationsProgressOptions {
+  lessonId: string;
+  enabled?: boolean;
+}
+
+/**
+ * Hook to fetch animations progress for a lesson
+ *
+ * Cache strategy:
+ * - staleTime: 1 minute (progress changes frequently as user completes exercises)
+ * - gcTime: 5 minutes
+ * - refetchOnWindowFocus: true (user might complete exercise in another tab)
+ */
+export function useAnimationsProgress({
+  lessonId,
+  enabled = true,
+}: UseAnimationsProgressOptions) {
+  return useQuery({
+    queryKey: ['animations-progress', lessonId],
+    queryFn: () => fetchAnimationsProgress(lessonId),
+    enabled: enabled && !!lessonId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
+    retry: 1,
+  });
+}

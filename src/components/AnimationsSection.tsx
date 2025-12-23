@@ -9,11 +9,16 @@ import {
   MessageSquareText,
   ListChecks,
   ChevronDown,
+  CheckCircle,
+  Circle,
+  Trophy,
 } from 'lucide-react';
+import { useAnimationsProgress } from '@/hooks/queries/useLesson';
 import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
 
 interface AnimationsSectionProps {
   animations: Animation[];
+  lessonId?: string;
 }
 
 interface TypeGroup {
@@ -27,9 +32,34 @@ interface TypeGroup {
 
 export default function AnimationsSection({
   animations,
+  lessonId,
 }: AnimationsSectionProps) {
   const t = useTranslations('Lesson.animations');
   const tExercises = useTranslations('Lesson.exercises');
+
+  // Fetch progress data
+  const { data: progressData } = useAnimationsProgress({
+    lessonId: lessonId || '',
+    enabled: !!lessonId,
+  });
+
+  // Check if an animation is completed
+  const isAnimationCompleted = useCallback(
+    (animationId: string): boolean => {
+      if (!progressData?.progress) return false;
+      const progress = progressData.progress.find(p => p.animationId === animationId);
+      return progress?.completed ?? false;
+    },
+    [progressData]
+  );
+
+  // Get completion count for a group of animations
+  const getGroupCompletionCount = useCallback(
+    (anims: Animation[]): number => {
+      return anims.filter(a => isAnimationCompleted(a.id)).length;
+    },
+    [isAnimationCompleted]
+  );
 
   // Function to scroll to and open the exercises expandable
   const handleOpenExercises = useCallback(() => {
@@ -125,6 +155,8 @@ export default function AnimationsSection({
 
   if (!sortedAnimations.length) return null;
 
+  const isAllCompleted = progressData?.percentComplete === 100;
+
   return (
     <div className="mt-6">
       <div className="mb-4">
@@ -133,10 +165,37 @@ export default function AnimationsSection({
             <Gamepad2 size={20} className="text-secondary" />
           </div>
           {t('title')}
+          {isAllCompleted && (
+            <Trophy size={18} className="text-yellow-400 ml-auto" />
+          )}
         </h4>
         <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
         <p className="text-gray-400 text-sm mt-2 ml-11">{t('description')}</p>
       </div>
+
+      {/* Progress bar */}
+      {progressData && lessonId && (
+        <div className="mb-4 ml-11">
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span className="text-gray-400">
+              {progressData.completedAnimations} {t('of')} {progressData.totalAnimations} {t('completed')}
+            </span>
+            <span className={`font-medium ${isAllCompleted ? 'text-green-400' : 'text-secondary'}`}>
+              {progressData.percentComplete}%
+            </span>
+          </div>
+          <div className="h-2 bg-primary/50 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isAllCompleted
+                  ? 'bg-gradient-to-r from-green-500 to-green-400'
+                  : 'bg-gradient-to-r from-secondary to-accent'
+              }`}
+              style={{ width: `${progressData.percentComplete}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         {typeGroups.map(group => (
@@ -192,6 +251,36 @@ export default function AnimationsSection({
                       : tExercises('questionPlural')}
                   </p>
                 </div>
+                {/* Completion status */}
+                {lessonId && progressData && (
+                  <div className="flex items-center gap-1 mr-2">
+                    {(() => {
+                      const completedCount = getGroupCompletionCount(group.animations);
+                      const totalCount = group.animations.length;
+                      const isGroupComplete = completedCount === totalCount;
+
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          {isGroupComplete ? (
+                            <CheckCircle size={16} className="text-green-400" />
+                          ) : (
+                            <>
+                              {group.animations.map((anim) => (
+                                <div key={anim.id} className="w-2 h-2">
+                                  {isAnimationCompleted(anim.id) ? (
+                                    <div className="w-2 h-2 rounded-full bg-green-400" />
+                                  ) : (
+                                    <Circle size={8} className="text-gray-500" />
+                                  )}
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
                 <ChevronDown
                   size={20}
                   className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity"

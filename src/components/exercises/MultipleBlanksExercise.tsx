@@ -22,10 +22,11 @@ interface MultipleBlanksExerciseProps {
 interface BlankInfo {
   index: number;
   answer: string;
+  position: number;
 }
 
 interface ParsedSentence {
-  parts: string[];
+  parts: (string | { blankIndex: number })[];
   blanks: BlankInfo[];
 }
 
@@ -63,40 +64,77 @@ function normalizeText(text: string): string {
     .trim();
 }
 
-// Parse sentence to find blanks (marked with ___ or [BLANK])
+// Escape special regex characters
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Parse sentence to create blanks from target words
+// targetWord format: "word1|word2|word3" - these words will be replaced with blanks
 function parseSentence(fullSentence: string, targetWord: string): ParsedSentence {
-  // Split answers by | delimiter
-  const answers = targetWord.split('|').map(a => a.trim());
+  // Split target words by | delimiter
+  const targetWords = targetWord.split('|').map(w => w.trim()).filter(w => w.length > 0);
 
-  // Find blank markers (3+ underscores or [BLANK])
-  const blankPattern = /_{3,}|\[BLANK\]/gi;
-  const parts: string[] = [];
+  if (targetWords.length === 0) {
+    return { parts: [fullSentence], blanks: [] };
+  }
+
+  // Find all occurrences of target words and their positions
+  const occurrences: { word: string; start: number; end: number }[] = [];
+
+  targetWords.forEach(word => {
+    // Create regex to find word (case insensitive, word boundaries)
+    const regex = new RegExp(`\\b${escapeRegex(word)}\\b`, 'gi');
+    let match;
+
+    while ((match = regex.exec(fullSentence)) !== null) {
+      occurrences.push({
+        word: fullSentence.substring(match.index, match.index + word.length), // Keep original case
+        start: match.index,
+        end: match.index + word.length
+      });
+    }
+  });
+
+  // Sort by position
+  occurrences.sort((a, b) => a.start - b.start);
+
+  // Remove overlapping occurrences (keep first)
+  const filteredOccurrences = occurrences.filter((occ, index) => {
+    if (index === 0) return true;
+    const prev = occurrences[index - 1];
+    return occ.start >= prev.end;
+  });
+
+  if (filteredOccurrences.length === 0) {
+    return { parts: [fullSentence], blanks: [] };
+  }
+
+  // Build parts array and blanks
+  const parts: (string | { blankIndex: number })[] = [];
   const blanks: BlankInfo[] = [];
+  let lastEnd = 0;
 
-  let lastIndex = 0;
-  let match;
-  let blankIndex = 0;
-
-  while ((match = blankPattern.exec(fullSentence)) !== null) {
-    // Add text before the blank
-    if (match.index > lastIndex) {
-      parts.push(fullSentence.substring(lastIndex, match.index));
+  filteredOccurrences.forEach((occ, index) => {
+    // Add text before this blank
+    if (occ.start > lastEnd) {
+      parts.push(fullSentence.substring(lastEnd, occ.start));
     }
 
     // Add blank marker
-    parts.push('__BLANK__');
+    parts.push({ blankIndex: index });
     blanks.push({
-      index: blankIndex,
-      answer: answers[blankIndex] || ''
+      index,
+      answer: occ.word,
+      position: occ.start
     });
 
-    blankIndex++;
-    lastIndex = match.index + match[0].length;
-  }
+    lastEnd = occ.end;
+  });
 
   // Add remaining text
-  if (lastIndex < fullSentence.length) {
-    parts.push(fullSentence.substring(lastIndex));
+  if (lastEnd < fullSentence.length) {
+    parts.push(fullSentence.substring(lastEnd));
   }
 
   return { parts, blanks };
@@ -167,9 +205,9 @@ export default function MultipleBlanksExercise({
         checkAnswer();
       }
     } else if (e.key === 'Tab' && !e.shiftKey && index === parsedSentence.blanks.length - 1) {
-      // Prevent tab from leaving the last input
-      e.preventDefault();
+      // Prevent tab from leaving the last input if all are filled
       if (userInputs.every(input => input.trim())) {
+        e.preventDefault();
         checkAnswer();
       }
     }
@@ -233,35 +271,38 @@ export default function MultipleBlanksExercise({
 
   // Render the sentence with input blanks
   const renderSentence = () => {
-    let blankCounter = 0;
-
     return parsedSentence.parts.map((part, partIndex) => {
-      if (part === '__BLANK__') {
-        const currentBlankIndex = blankCounter;
-        blankCounter++;
+      if (typeof part === 'object' && 'blankIndex' in part) {
+        const blankIndex = part.blankIndex;
+        const blank = parsedSentence.blanks[blankIndex];
+
+        // Calculate input width based on answer length
+        const minWidth = Math.max(blank.answer.length * 12, 60);
+        const maxWidth = Math.min(minWidth + 40, 200);
 
         return (
           <motion.span
             key={`blank-${partIndex}`}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex mx-1"
+            className="inline-flex mx-1 my-1"
           >
             <input
-              ref={(el) => { inputRefs.current[currentBlankIndex] = el; }}
+              ref={(el) => { inputRefs.current[blankIndex] = el; }}
               type="text"
-              value={userInputs[currentBlankIndex] || ''}
-              onChange={(e) => handleInputChange(currentBlankIndex, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, currentBlankIndex)}
+              value={userInputs[blankIndex] || ''}
+              onChange={(e) => handleInputChange(blankIndex, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, blankIndex)}
               disabled={hasChecked}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              placeholder={`${currentBlankIndex + 1}`}
-              className={`w-24 sm:w-32 px-2 py-1 text-center font-semibold rounded-lg border-2 bg-gray-900/50 outline-none transition-all text-sm sm:text-base ${
+              placeholder={`${blankIndex + 1}`}
+              style={{ width: `${maxWidth}px` }}
+              className={`px-2 py-1 text-center font-semibold rounded-lg border-2 bg-gray-900/50 outline-none transition-all text-sm sm:text-base ${
                 hasChecked
-                  ? correctBlanks[currentBlankIndex]
+                  ? correctBlanks[blankIndex]
                     ? 'border-green-500 text-green-400 bg-green-500/10'
                     : 'border-red-500 text-red-400 bg-red-500/10'
                   : 'border-secondary/50 text-white focus:border-secondary focus:bg-secondary/10'
@@ -317,9 +358,11 @@ export default function MultipleBlanksExercise({
         className="text-center mb-6"
       >
         <p className="text-gray-400 text-sm mb-2">{t('multipleBlanksInstruction')}</p>
-        <p className="text-secondary/70 text-xs">
-          {t('blanksCount', { count: parsedSentence.blanks.length })}
-        </p>
+        {parsedSentence.blanks.length > 0 && (
+          <p className="text-secondary/70 text-xs">
+            {t('blanksCount', { count: parsedSentence.blanks.length })}
+          </p>
+        )}
       </motion.div>
 
       {/* Hint button (only if hint exists) */}
@@ -374,7 +417,7 @@ export default function MultipleBlanksExercise({
         className="mb-8"
       >
         <div className="p-6 bg-gray-800/50 rounded-xl border border-gray-700/50">
-          <p className="text-lg sm:text-xl text-white leading-relaxed text-center flex flex-wrap items-center justify-center gap-1">
+          <p className="text-lg sm:text-xl text-white leading-relaxed text-center flex flex-wrap items-center justify-center">
             {renderSentence()}
           </p>
         </div>

@@ -277,19 +277,19 @@ export default function ExercisesExpandable({
     };
   }, [sortedAnimations, exerciseStates, handleStartGroup]);
 
-  // Get group icon
+  // Get group icon - using project colors (secondary/accent)
   const getGroupIcon = (groupType: ExerciseGroupType) => {
     switch (groupType) {
       case 'DRAG_WORD':
-        return <GripHorizontal size={24} className="text-blue-400" />;
+        return <GripHorizontal size={24} className="text-secondary" />;
       case 'REORDER_WORDS':
-        return <ListOrdered size={24} className="text-teal-400" />;
+        return <ListOrdered size={24} className="text-accent" />;
       case 'TYPE_COMPLETION':
-        return <Type size={24} className="text-orange-400" />;
+        return <Type size={24} className="text-secondary" />;
       case 'MULTIPLE_BLANKS':
-        return <Layers size={24} className="text-purple-400" />;
+        return <Layers size={24} className="text-accent" />;
       case 'MULTIPLE_CHOICE':
-        return <CircleHelp size={24} className="text-pink-400" />;
+        return <CircleHelp size={24} className="text-secondary" />;
       default:
         return <Gamepad2 size={24} className="text-secondary" />;
     }
@@ -313,21 +313,15 @@ export default function ExercisesExpandable({
     }
   };
 
-  // Get group color
-  const getGroupColor = (groupType: ExerciseGroupType): string => {
+  // Get group gradient style index (0-4) for visual variety
+  const getGroupStyleIndex = (groupType: ExerciseGroupType): number => {
     switch (groupType) {
-      case 'DRAG_WORD':
-        return 'from-blue-500/20 to-blue-600/10 border-blue-500/30 hover:border-blue-500/50';
-      case 'REORDER_WORDS':
-        return 'from-teal-500/20 to-teal-600/10 border-teal-500/30 hover:border-teal-500/50';
-      case 'TYPE_COMPLETION':
-        return 'from-orange-500/20 to-orange-600/10 border-orange-500/30 hover:border-orange-500/50';
-      case 'MULTIPLE_BLANKS':
-        return 'from-purple-500/20 to-purple-600/10 border-purple-500/30 hover:border-purple-500/50';
-      case 'MULTIPLE_CHOICE':
-        return 'from-pink-500/20 to-pink-600/10 border-pink-500/30 hover:border-pink-500/50';
-      default:
-        return 'from-secondary/20 to-secondary/10 border-secondary/30 hover:border-secondary/50';
+      case 'DRAG_WORD': return 0;
+      case 'REORDER_WORDS': return 1;
+      case 'TYPE_COMPLETION': return 2;
+      case 'MULTIPLE_BLANKS': return 3;
+      case 'MULTIPLE_CHOICE': return 4;
+      default: return 0;
     }
   };
 
@@ -381,84 +375,184 @@ export default function ExercisesExpandable({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <div className="p-4 pt-0 border-t border-gray-700/50">
+            <div className="p-4 pt-0 border-t border-secondary/20">
               {/* Exercise group selector - when no active group */}
               {!activeGroupType && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="grid gap-3 mt-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="grid gap-4 mt-4"
                 >
-                  {exerciseGroups.map(group => (
-                    <motion.button
-                      key={group.groupType}
-                      onClick={() => handleStartGroup(group.groupType)}
-                      disabled={group.isLocked}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all bg-gradient-to-r ${
-                        group.isLocked
-                          ? 'from-gray-800/30 to-gray-800/20 border-gray-700/50 cursor-not-allowed opacity-50'
-                          : group.isCompleted
-                          ? 'from-green-500/10 to-green-600/5 border-green-500/30 hover:border-green-500/50'
-                          : getGroupColor(group.groupType)
-                      }`}
-                      whileHover={!group.isLocked ? { scale: 1.01 } : {}}
-                      whileTap={!group.isLocked ? { scale: 0.99 } : {}}
+                  {/* Animated intro sparkles */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                    className="flex items-center justify-center gap-2 py-2"
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 15, -15, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                        group.isLocked
-                          ? 'bg-gray-700/50'
-                          : group.isCompleted
-                          ? 'bg-green-500/20'
-                          : 'bg-white/10'
-                      }`}>
-                        {group.isLocked ? (
-                          <Lock size={24} className="text-gray-500" />
-                        ) : group.isCompleted ? (
-                          <CheckCircle size={24} className="text-green-400" />
-                        ) : (
-                          getGroupIcon(group.groupType)
-                        )}
-                      </div>
+                      <Sparkles size={20} className="text-secondary" />
+                    </motion.div>
+                    <span className="text-sm text-gray-400">{t('expandToStart')}</span>
+                    <motion.div
+                      animate={{ rotate: [0, -15, 15, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                    >
+                      <Sparkles size={20} className="text-accent" />
+                    </motion.div>
+                  </motion.div>
 
-                      <div className="flex-1 text-left">
-                        <p className={`text-lg font-semibold ${
+                  {exerciseGroups.map((group, index) => {
+                    const styleIndex = getGroupStyleIndex(group.groupType);
+                    // Gradient variations using project colors
+                    const gradientRotations = [
+                      'bg-gradient-to-br from-primary/30 via-secondary/20 to-primary/10',
+                      'bg-gradient-to-tr from-secondary/30 via-accent/20 to-secondary/10',
+                      'bg-gradient-to-bl from-accent/30 via-primary/20 to-accent/10',
+                      'bg-gradient-to-tl from-primary/25 via-accent/15 to-secondary/10',
+                      'bg-gradient-to-r from-secondary/30 via-primary/20 to-accent/10',
+                    ];
+                    const gradient = gradientRotations[styleIndex % gradientRotations.length];
+
+                    return (
+                      <motion.button
+                        key={group.groupType}
+                        onClick={() => handleStartGroup(group.groupType)}
+                        disabled={group.isLocked}
+                        initial={{ opacity: 0, x: -30, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{
+                          delay: 0.15 + index * 0.1,
+                          type: 'spring',
+                          stiffness: 100,
+                          damping: 15,
+                        }}
+                        whileHover={!group.isLocked ? {
+                          scale: 1.02,
+                          x: 8,
+                          transition: { type: 'spring', stiffness: 400 }
+                        } : {}}
+                        whileTap={!group.isLocked ? { scale: 0.98 } : {}}
+                        className={`relative w-full flex items-center gap-4 p-5 rounded-2xl border-2 transition-all overflow-hidden ${
                           group.isLocked
-                            ? 'text-gray-500'
+                            ? 'bg-gray-800/30 border-gray-700/30 cursor-not-allowed opacity-50'
                             : group.isCompleted
-                            ? 'text-green-400'
-                            : 'text-white'
-                        }`}>
-                          {getGroupLabel(group.groupType)}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          {group.animations.length} {group.animations.length === 1 ? t('exerciseSingular') : t('exercisePlural')}
-                          {' • '}
-                          {group.totalQuestions} {group.totalQuestions === 1 ? t('questionSingular') : t('questionPlural')}
-                        </p>
-                        {group.isCompleted && (
-                          <p className="text-xs text-green-400/70 mt-1 flex items-center gap-1">
-                            <CheckCircle size={12} />
-                            {t('allCompleted')}
-                          </p>
+                            ? 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/5 border-green-500/40 hover:border-green-400/60 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]'
+                            : `${gradient} border-secondary/30 hover:border-secondary/60 hover:shadow-[0_0_30px_rgba(56,135,166,0.2)]`
+                        }`}
+                      >
+                        {/* Animated shimmer effect for available exercises */}
+                        {!group.isLocked && !group.isCompleted && (
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full"
+                            animate={{ translateX: ['−100%', '200%'] }}
+                            transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              repeatDelay: 2,
+                              ease: 'easeInOut',
+                            }}
+                          />
                         )}
-                      </div>
 
-                      {!group.isLocked && !group.isCompleted && (
-                        <div className="flex items-center gap-2">
-                          <PlayCircle size={24} className="text-white/70" />
-                        </div>
-                      )}
+                        {/* Icon container with glow effect */}
+                        <motion.div
+                          className={`relative w-16 h-16 rounded-2xl flex items-center justify-center ${
+                            group.isLocked
+                              ? 'bg-gray-700/50'
+                              : group.isCompleted
+                              ? 'bg-green-500/20'
+                              : 'bg-gradient-to-br from-secondary/30 to-primary/20'
+                          }`}
+                          whileHover={!group.isLocked ? { rotate: [0, -5, 5, 0] } : {}}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {/* Glow ring */}
+                          {!group.isLocked && !group.isCompleted && (
+                            <motion.div
+                              className="absolute inset-0 rounded-2xl border-2 border-secondary/40"
+                              animate={{
+                                boxShadow: [
+                                  '0 0 0 0 rgba(56, 135, 166, 0)',
+                                  '0 0 20px 2px rgba(56, 135, 166, 0.3)',
+                                  '0 0 0 0 rgba(56, 135, 166, 0)',
+                                ],
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            />
+                          )}
+                          {group.isLocked ? (
+                            <Lock size={28} className="text-gray-500" />
+                          ) : group.isCompleted ? (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 300 }}
+                            >
+                              <CheckCircle size={28} className="text-green-400" />
+                            </motion.div>
+                          ) : (
+                            getGroupIcon(group.groupType)
+                          )}
+                        </motion.div>
 
-                      {group.isCompleted && (
-                        <div className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded">
-                          {t('replay')}
+                        <div className="flex-1 text-left z-10">
+                          <p className={`text-lg font-bold ${
+                            group.isLocked
+                              ? 'text-gray-500'
+                              : group.isCompleted
+                              ? 'text-green-400'
+                              : 'text-white'
+                          }`}>
+                            {getGroupLabel(group.groupType)}
+                          </p>
+                          <p className="text-sm text-gray-400 mt-0.5">
+                            {group.animations.length} {group.animations.length === 1 ? t('exerciseSingular') : t('exercisePlural')}
+                            {' • '}
+                            {group.totalQuestions} {group.totalQuestions === 1 ? t('questionSingular') : t('questionPlural')}
+                          </p>
+                          {group.isCompleted && (
+                            <motion.p
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="text-xs text-green-400/80 mt-1.5 flex items-center gap-1"
+                            >
+                              <CheckCircle size={12} />
+                              {t('allCompleted')}
+                            </motion.p>
+                          )}
                         </div>
-                      )}
-                    </motion.button>
-                  ))}
+
+                        {!group.isLocked && !group.isCompleted && (
+                          <motion.div
+                            className="flex items-center gap-2"
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                          >
+                            <PlayCircle size={28} className="text-secondary" />
+                          </motion.div>
+                        )}
+
+                        {group.isCompleted && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.3, type: 'spring' }}
+                            className="text-xs font-medium text-green-400 bg-green-500/20 px-3 py-1.5 rounded-full border border-green-500/30"
+                          >
+                            {t('replay')}
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
                 </motion.div>
               )}
 

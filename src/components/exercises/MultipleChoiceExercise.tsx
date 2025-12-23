@@ -45,35 +45,42 @@ const triggerHapticFeedback = (type: 'success' | 'error' | 'light') => {
   }
 };
 
-// Confetti particle component
-const ConfettiParticle = ({ delay }: { delay: number }) => (
-  <motion.div
-    className="absolute pointer-events-none"
-    initial={{
-      opacity: 1,
-      scale: 0,
-      x: 0,
-      y: 0,
-    }}
-    animate={{
-      opacity: [1, 1, 0],
-      scale: [0, 1.5, 1],
-      x: Math.random() * 200 - 100,
-      y: Math.random() * -150 - 50,
-      rotate: Math.random() * 360,
-    }}
-    transition={{
-      duration: 1,
-      delay,
-      ease: 'easeOut',
-    }}
-  >
-    <Star
-      size={Math.random() * 12 + 8}
-      className="text-yellow-400 fill-yellow-400"
-    />
-  </motion.div>
-);
+// Confetti particle component - using project colors
+const ConfettiParticle = ({ delay, colorIndex }: { delay: number; colorIndex: number }) => {
+  const colors = [
+    'text-secondary fill-secondary',
+    'text-accent fill-accent',
+    'text-green-400 fill-green-400',
+  ];
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      initial={{
+        opacity: 1,
+        scale: 0,
+        x: 0,
+        y: 0,
+      }}
+      animate={{
+        opacity: [1, 1, 0],
+        scale: [0, 1.5, 1],
+        x: Math.random() * 200 - 100,
+        y: Math.random() * -150 - 50,
+        rotate: Math.random() * 360,
+      }}
+      transition={{
+        duration: 1,
+        delay,
+        ease: 'easeOut',
+      }}
+    >
+      <Star
+        size={Math.random() * 12 + 8}
+        className={colors[colorIndex % colors.length]}
+      />
+    </motion.div>
+  );
+};
 
 // Shake animation variants
 const shakeAnimation = {
@@ -83,33 +90,21 @@ const shakeAnimation = {
   },
 };
 
-// Option card colors
-const optionColors = [
-  {
-    bg: 'from-blue-600/20 to-blue-700/10',
-    border: 'border-blue-500/40',
-    hoverBorder: 'hover:border-blue-400',
-    selected: 'border-blue-400 bg-blue-500/30',
-    text: 'text-blue-300',
-    icon: 'bg-blue-500',
-  },
-  {
-    bg: 'from-purple-600/20 to-purple-700/10',
-    border: 'border-purple-500/40',
-    hoverBorder: 'hover:border-purple-400',
-    selected: 'border-purple-400 bg-purple-500/30',
-    text: 'text-purple-300',
-    icon: 'bg-purple-500',
-  },
-  {
-    bg: 'from-teal-600/20 to-teal-700/10',
-    border: 'border-teal-500/40',
-    hoverBorder: 'hover:border-teal-400',
-    selected: 'border-teal-400 bg-teal-500/30',
-    text: 'text-teal-300',
-    icon: 'bg-teal-500',
-  },
-];
+// Option card styles using project colors (primary/secondary/accent)
+const optionStyles = {
+  // All options share the same elegant gradient style
+  bg: 'from-primary/20 via-secondary/15 to-primary/10',
+  border: 'border-secondary/40',
+  hoverBorder: 'hover:border-secondary/70',
+  selected: 'border-secondary bg-secondary/25',
+  text: 'text-gray-200',
+  // Different icon backgrounds for visual variety
+  iconBgs: [
+    'bg-gradient-to-br from-secondary to-primary',
+    'bg-gradient-to-br from-accent to-secondary',
+    'bg-gradient-to-br from-primary to-accent',
+  ],
+};
 
 export default function MultipleChoiceExercise({
   questions,
@@ -234,7 +229,7 @@ export default function MultipleChoiceExercise({
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1">
-            <Sparkles size={14} className="text-yellow-400 sm:w-4 sm:h-4" />
+            <Sparkles size={14} className="text-secondary sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium text-white">
               {score}
             </span>
@@ -290,34 +285,34 @@ export default function MultipleChoiceExercise({
         {showConfetti && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
             {Array.from({ length: 12 }).map((_, i) => (
-              <ConfettiParticle key={i} delay={i * 0.05} />
+              <ConfettiParticle key={i} delay={i * 0.05} colorIndex={i} />
             ))}
           </div>
         )}
 
         {currentQuestion.options.map((option, index) => {
-          const colors = optionColors[index];
           const isSelected = selectedOption === index;
           const isCorrectOption =
             index === currentQuestion.correctOptionIndex;
           const showResult = hasAnswered;
+          const iconBgBase = optionStyles.iconBgs[index];
 
           // Determine styling based on state
-          let optionStyle = `bg-gradient-to-r ${colors.bg} ${colors.border} ${colors.hoverBorder}`;
-          let iconBg = colors.icon;
+          let optionStyle = `bg-gradient-to-r ${optionStyles.bg} ${optionStyles.border} ${optionStyles.hoverBorder}`;
+          let iconBg = iconBgBase;
 
           if (showResult) {
             if (isCorrectOption) {
               optionStyle =
-                'bg-gradient-to-r from-green-600/30 to-green-700/20 border-green-500';
-              iconBg = 'bg-green-500';
+                'bg-gradient-to-r from-green-600/25 via-emerald-500/20 to-green-700/15 border-green-500';
+              iconBg = 'bg-gradient-to-br from-green-500 to-emerald-600';
             } else if (isSelected && !isCorrectOption) {
               optionStyle =
-                'bg-gradient-to-r from-red-600/30 to-red-700/20 border-red-500';
-              iconBg = 'bg-red-500';
+                'bg-gradient-to-r from-red-600/25 via-rose-500/20 to-red-700/15 border-red-500';
+              iconBg = 'bg-gradient-to-br from-red-500 to-rose-600';
             }
           } else if (isSelected) {
-            optionStyle = `bg-gradient-to-r ${colors.selected}`;
+            optionStyle = `bg-gradient-to-r ${optionStyles.selected} shadow-[0_0_20px_rgba(56,135,166,0.2)]`;
           }
 
           return (
@@ -325,18 +320,28 @@ export default function MultipleChoiceExercise({
               key={index}
               onClick={() => handleOptionSelect(index as 0 | 1 | 2)}
               disabled={hasAnswered}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.3 }}
-              whileHover={!hasAnswered ? { scale: 1.02, x: 5 } : {}}
+              initial={{ opacity: 0, x: -30, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ delay: index * 0.12, duration: 0.4, type: 'spring', stiffness: 100 }}
+              whileHover={!hasAnswered ? { scale: 1.02, x: 8, transition: { type: 'spring', stiffness: 400 } } : {}}
               whileTap={!hasAnswered ? { scale: 0.98 } : {}}
-              className={`w-full flex items-center gap-4 p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 ${optionStyle} ${
+              className={`relative w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 overflow-hidden ${optionStyle} ${
                 hasAnswered ? 'cursor-default' : 'cursor-pointer'
               }`}
             >
+              {/* Shimmer effect on hover */}
+              {!hasAnswered && !isSelected && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+              )}
+
               {/* Option letter badge */}
               <motion.div
-                className={`shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg transition-all ${iconBg}`}
+                className={`shrink-0 w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-all ${iconBg}`}
                 animate={
                   showResult && isCorrectOption
                     ? {
@@ -364,7 +369,7 @@ export default function MultipleChoiceExercise({
                       : isSelected
                       ? 'text-red-300'
                       : 'text-gray-400'
-                    : 'text-white'
+                    : optionStyles.text
                 }`}
               >
                 {option}

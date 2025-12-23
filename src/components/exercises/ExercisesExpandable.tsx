@@ -12,11 +12,14 @@ import {
   Lock,
   CheckCircle,
   PlayCircle,
-  MessageSquareText,
-  ListChecks,
+  GripHorizontal,
+  ListOrdered,
+  Type,
+  Layers,
 } from 'lucide-react';
 import DragWordExercise from './DragWordExercise';
-import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
+import ReorderWordsExercise from './ReorderWordsExercise';
+import type { Animation, GameType } from '@/hooks/queries/useLesson';
 import { useCompleteAnimation } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
@@ -32,8 +35,8 @@ interface ExerciseState {
   score?: number;
 }
 
-interface TypeGroup {
-  type: AnimationType;
+interface GameTypeGroup {
+  gameType: GameType;
   animations: Animation[];
   totalQuestions: number;
   completedCount: number;
@@ -51,10 +54,10 @@ export default function ExercisesExpandable({
   // Expanded state
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Active type being played
-  const [activeType, setActiveType] = useState<AnimationType | null>(null);
+  // Active game type being played
+  const [activeGameType, setActiveGameType] = useState<GameType | null>(null);
 
-  // Current exercise index within the active type
+  // Current exercise index within the active game type
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
 
   // Exercise states (treat enabled === false as locked, undefined = enabled)
@@ -71,18 +74,19 @@ export default function ExercisesExpandable({
     [animations]
   );
 
-  // Group animations by type
-  const typeGroups = useMemo((): TypeGroup[] => {
+  // Group animations by gameType
+  const gameTypeGroups = useMemo((): GameTypeGroup[] => {
     const groups: Record<string, Animation[]> = {};
 
     sortedAnimations.forEach(anim => {
-      if (!groups[anim.type]) {
-        groups[anim.type] = [];
+      const gameType = anim.content?.gameType || 'DRAG_WORD';
+      if (!groups[gameType]) {
+        groups[gameType] = [];
       }
-      groups[anim.type].push(anim);
+      groups[gameType].push(anim);
     });
 
-    return Object.entries(groups).map(([type, anims]) => {
+    return Object.entries(groups).map(([gameType, anims]) => {
       const completedCount = anims.filter(a =>
         exerciseStates.find(e => e.animationId === a.id)?.status === 'completed'
       ).length;
@@ -96,7 +100,7 @@ export default function ExercisesExpandable({
       );
 
       return {
-        type: type as AnimationType,
+        gameType: gameType as GameType,
         animations: anims,
         totalQuestions,
         completedCount,
@@ -106,30 +110,30 @@ export default function ExercisesExpandable({
     });
   }, [sortedAnimations, exerciseStates]);
 
-  // Get animations for active type
-  const activeTypeAnimations = useMemo(() => {
-    if (!activeType) return [];
-    return typeGroups.find(g => g.type === activeType)?.animations || [];
-  }, [activeType, typeGroups]);
+  // Get animations for active game type
+  const activeGameTypeAnimations = useMemo(() => {
+    if (!activeGameType) return [];
+    return gameTypeGroups.find(g => g.gameType === activeGameType)?.animations || [];
+  }, [activeGameType, gameTypeGroups]);
 
   // Get current animation
   const currentAnimation = useMemo(() => {
-    return activeTypeAnimations[currentExerciseIndex];
-  }, [activeTypeAnimations, currentExerciseIndex]);
+    return activeGameTypeAnimations[currentExerciseIndex];
+  }, [activeGameTypeAnimations, currentExerciseIndex]);
 
   // Listen for custom event to open the expandable
   useEffect(() => {
     const handleOpenEvent = (event: CustomEvent<{ animationId?: string }>) => {
       setIsExpanded(true);
 
-      // If a specific animation was requested, find its type and start
+      // If a specific animation was requested, find its game type and start
       if (event.detail?.animationId) {
         const animation = sortedAnimations.find(a => a.id === event.detail.animationId);
         const state = exerciseStates.find(e => e.animationId === event.detail.animationId);
 
-        if (animation && state?.status !== 'locked') {
+        if (animation && state?.status !== 'locked' && animation.content?.gameType) {
           setTimeout(() => {
-            handleStartType(animation.type);
+            handleStartGameType(animation.content!.gameType);
           }, 350);
         }
       }
@@ -178,25 +182,25 @@ export default function ExercisesExpandable({
       }
     }
 
-    // Check if there are more exercises of this type
+    // Check if there are more exercises of this game type
     const nextIndex = currentExerciseIndex + 1;
-    if (nextIndex < activeTypeAnimations.length) {
+    if (nextIndex < activeGameTypeAnimations.length) {
       // Auto advance to next exercise after a brief delay
       setTimeout(() => {
         setCurrentExerciseIndex(nextIndex);
       }, 500);
     } else {
-      // All exercises of this type completed - go back to list
+      // All exercises of this game type completed - go back to list
       setTimeout(() => {
-        setActiveType(null);
+        setActiveGameType(null);
         setCurrentExerciseIndex(0);
       }, 500);
     }
-  }, [currentExerciseIndex, activeTypeAnimations.length, lessonId, completeAnimation]);
+  }, [currentExerciseIndex, activeGameTypeAnimations.length, lessonId, completeAnimation]);
 
-  // Handle start type
-  const handleStartType = useCallback((type: AnimationType) => {
-    const group = typeGroups.find(g => g.type === type);
+  // Handle start game type
+  const handleStartGameType = useCallback((gameType: GameType) => {
+    const group = gameTypeGroups.find(g => g.gameType === gameType);
     if (!group || group.isLocked) return;
 
     // Find the first non-completed exercise
@@ -205,40 +209,52 @@ export default function ExercisesExpandable({
       return state?.status === 'available';
     });
 
-    setActiveType(type);
+    setActiveGameType(gameType);
     setCurrentExerciseIndex(firstAvailableIndex >= 0 ? firstAvailableIndex : 0);
-  }, [typeGroups, exerciseStates]);
+  }, [gameTypeGroups, exerciseStates]);
 
-  // Get type icon
-  const getTypeIcon = (type: AnimationType) => {
-    switch (type) {
-      case 'CompleteSentence':
-        return <MessageSquareText size={24} className="text-blue-400" />;
-      case 'MultipleChoice':
-        return <ListChecks size={24} className="text-purple-400" />;
+  // Get game type icon
+  const getGameTypeIcon = (gameType: GameType) => {
+    switch (gameType) {
+      case 'DRAG_WORD':
+        return <GripHorizontal size={24} className="text-blue-400" />;
+      case 'REORDER_WORDS':
+        return <ListOrdered size={24} className="text-teal-400" />;
+      case 'TYPE_COMPLETION':
+        return <Type size={24} className="text-orange-400" />;
+      case 'MULTIPLE_BLANKS':
+        return <Layers size={24} className="text-purple-400" />;
       default:
         return <Gamepad2 size={24} className="text-secondary" />;
     }
   };
 
-  // Get type label
-  const getTypeLabel = (type: AnimationType): string => {
-    switch (type) {
-      case 'CompleteSentence':
-        return t('types.completeSentence');
-      case 'MultipleChoice':
-        return t('types.multipleChoice');
+  // Get game type label
+  const getGameTypeLabel = (gameType: GameType): string => {
+    switch (gameType) {
+      case 'DRAG_WORD':
+        return t('gameTypes.dragWord');
+      case 'REORDER_WORDS':
+        return t('gameTypes.reorderWords');
+      case 'TYPE_COMPLETION':
+        return t('gameTypes.typeCompletion');
+      case 'MULTIPLE_BLANKS':
+        return t('gameTypes.multipleBlanks');
       default:
-        return type;
+        return gameType;
     }
   };
 
-  // Get type color
-  const getTypeColor = (type: AnimationType): string => {
-    switch (type) {
-      case 'CompleteSentence':
+  // Get game type color
+  const getGameTypeColor = (gameType: GameType): string => {
+    switch (gameType) {
+      case 'DRAG_WORD':
         return 'from-blue-500/20 to-blue-600/10 border-blue-500/30 hover:border-blue-500/50';
-      case 'MultipleChoice':
+      case 'REORDER_WORDS':
+        return 'from-teal-500/20 to-teal-600/10 border-teal-500/30 hover:border-teal-500/50';
+      case 'TYPE_COMPLETION':
+        return 'from-orange-500/20 to-orange-600/10 border-orange-500/30 hover:border-orange-500/50';
+      case 'MULTIPLE_BLANKS':
         return 'from-purple-500/20 to-purple-600/10 border-purple-500/30 hover:border-purple-500/50';
       default:
         return 'from-secondary/20 to-secondary/10 border-secondary/30 hover:border-secondary/50';
@@ -299,24 +315,24 @@ export default function ExercisesExpandable({
             className="overflow-hidden"
           >
             <div className="p-4 pt-0 border-t border-gray-700/50">
-              {/* Type selector - when no active type */}
-              {!activeType && (
+              {/* Game type selector - when no active game type */}
+              {!activeGameType && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="grid gap-3 mt-4"
                 >
-                  {typeGroups.map(group => (
+                  {gameTypeGroups.map(group => (
                     <motion.button
-                      key={group.type}
-                      onClick={() => handleStartType(group.type)}
+                      key={group.gameType}
+                      onClick={() => handleStartGameType(group.gameType)}
                       disabled={group.isLocked}
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all bg-gradient-to-r ${
                         group.isLocked
                           ? 'from-gray-800/30 to-gray-800/20 border-gray-700/50 cursor-not-allowed opacity-50'
                           : group.isCompleted
                           ? 'from-green-500/10 to-green-600/5 border-green-500/30 hover:border-green-500/50'
-                          : getTypeColor(group.type)
+                          : getGameTypeColor(group.gameType)
                       }`}
                       whileHover={!group.isLocked ? { scale: 1.01 } : {}}
                       whileTap={!group.isLocked ? { scale: 0.99 } : {}}
@@ -333,7 +349,7 @@ export default function ExercisesExpandable({
                         ) : group.isCompleted ? (
                           <CheckCircle size={24} className="text-green-400" />
                         ) : (
-                          getTypeIcon(group.type)
+                          getGameTypeIcon(group.gameType)
                         )}
                       </div>
 
@@ -345,7 +361,7 @@ export default function ExercisesExpandable({
                             ? 'text-green-400'
                             : 'text-white'
                         }`}>
-                          {getTypeLabel(group.type)}
+                          {getGameTypeLabel(group.gameType)}
                         </p>
                         <p className="text-sm text-gray-400">
                           {group.animations.length} {group.animations.length === 1 ? t('exerciseSingular') : t('exercisePlural')}
@@ -377,7 +393,7 @@ export default function ExercisesExpandable({
               )}
 
               {/* Active exercise */}
-              {activeType && currentAnimation && (
+              {activeGameType && currentAnimation && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -388,7 +404,7 @@ export default function ExercisesExpandable({
                   <div className="flex items-center justify-between mb-6">
                     <button
                       onClick={() => {
-                        setActiveType(null);
+                        setActiveGameType(null);
                         setCurrentExerciseIndex(0);
                       }}
                       className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
@@ -399,12 +415,12 @@ export default function ExercisesExpandable({
 
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-gray-400">
-                        {currentExerciseIndex + 1} / {activeTypeAnimations.length}
+                        {currentExerciseIndex + 1} / {activeGameTypeAnimations.length}
                       </span>
                       <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-secondary transition-all duration-300"
-                          style={{ width: `${((currentExerciseIndex + 1) / activeTypeAnimations.length) * 100}%` }}
+                          style={{ width: `${((currentExerciseIndex + 1) / activeGameTypeAnimations.length) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -429,9 +445,18 @@ export default function ExercisesExpandable({
                         />
                       )}
 
+                      {currentAnimation.content?.gameType === 'REORDER_WORDS' && (
+                        <ReorderWordsExercise
+                          sentences={currentAnimation.content.sentences}
+                          onComplete={(success, score) =>
+                            handleExerciseComplete(currentAnimation.id, success, score)
+                          }
+                        />
+                      )}
+
                       {/* Placeholder for other game types */}
                       {currentAnimation.content?.gameType &&
-                       currentAnimation.content.gameType !== 'DRAG_WORD' && (
+                       !['DRAG_WORD', 'REORDER_WORDS'].includes(currentAnimation.content.gameType) && (
                         <div className="text-center py-12 text-gray-400">
                           <Gamepad2 size={48} className="mx-auto mb-4 opacity-50" />
                           <p>{t('comingSoon')}</p>

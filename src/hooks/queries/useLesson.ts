@@ -48,12 +48,13 @@ export interface Audio {
 }
 
 export type AnimationType = 'CompleteSentence' | 'MultipleChoice';
-export type GameType = 'DRAG_WORD' | 'FILL_BLANK' | 'SELECT_OPTION';
+export type GameType = 'DRAG_WORD' | 'REORDER_WORDS' | 'FILL_BLANK' | 'SELECT_OPTION' | 'TYPE_COMPLETION' | 'MULTIPLE_BLANKS';
 
 export interface AnimationSentence {
   fullSentence: string;
   targetWord: string;
   wordPosition: number;
+  hint?: string;
 }
 
 export interface AnimationContent {

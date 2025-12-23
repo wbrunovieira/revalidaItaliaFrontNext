@@ -2134,9 +2134,14 @@
       },
       "gameTypes": {
         "dragWord": "Trascina la Parola",
+        "reorderWords": "Riordina le Parole",
         "fillBlank": "Compila lo Spazio",
-        "selectOption": "Seleziona Opzione"
+        "selectOption": "Seleziona Opzione",
+        "typeCompletion": "Digita la Risposta",
+        "multipleBlanks": "Spazi Multipli"
       },
+      "reorderInstruction": "Trascina le parole per formare la frase corretta",
+      "checkOrder": "Verifica Ordine",
       "exerciseSingular": "esercizio",
       "exercisePlural": "esercizi",
       "questionSingular": "domanda",

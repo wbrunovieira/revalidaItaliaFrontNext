@@ -2139,9 +2139,14 @@
       },
       "gameTypes": {
         "dragWord": "Arrastar Palavra",
+        "reorderWords": "Reordenar Palavras",
         "fillBlank": "Preencher Lacuna",
-        "selectOption": "Selecionar Opção"
+        "selectOption": "Selecionar Opção",
+        "typeCompletion": "Digitar Resposta",
+        "multipleBlanks": "Múltiplas Lacunas"
       },
+      "reorderInstruction": "Arraste as palavras para formar a frase correta",
+      "checkOrder": "Verificar Ordem",
       "exerciseSingular": "exercício",
       "exercisePlural": "exercícios",
       "questionSingular": "questão",

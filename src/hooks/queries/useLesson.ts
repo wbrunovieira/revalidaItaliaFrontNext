@@ -283,27 +283,50 @@ async function recordAnimationAttempt({
     ?.split('=')[1];
 
   if (!token) {
+    console.warn('[AnimationAttempt] No auth token found');
     throw new Error('Not authenticated');
   }
 
-  const response = await fetch(
-    `${apiUrl}/api/v1/lessons/${lessonId}/animations/${animationId}/attempt`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ isCorrect }),
-    }
-  );
+  const url = `${apiUrl}/api/v1/lessons/${lessonId}/animations/${animationId}/attempt`;
+
+  console.log('[AnimationAttempt] Sending request:', {
+    url,
+    lessonId,
+    animationId,
+    isCorrect,
+  });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ isCorrect }),
+  });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP ${response.status}`);
+    const errorBody = await response.text();
+    console.error('[AnimationAttempt] API Error:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+    });
+
+    let errorMessage = `HTTP ${response.status}`;
+    try {
+      const errorJson = JSON.parse(errorBody);
+      errorMessage = errorJson.message || errorMessage;
+    } catch {
+      // Body is not JSON
+    }
+
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log('[AnimationAttempt] Success:', result);
+  return result;
 }
 
 /**

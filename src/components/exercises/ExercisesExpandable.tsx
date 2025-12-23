@@ -70,6 +70,26 @@ export default function ExercisesExpandable({
     }))
   );
 
+  // Sync exercise states when animations change (e.g., new data from API)
+  useEffect(() => {
+    setExerciseStates(prev => {
+      // Create a map of existing states to preserve completed status
+      const existingStates = new Map(prev.map(e => [e.animationId, e]));
+
+      return animations.map(anim => {
+        const existing = existingStates.get(anim.id);
+        // Preserve completed status, otherwise check enabled
+        if (existing?.status === 'completed') {
+          return existing;
+        }
+        return {
+          animationId: anim.id,
+          status: anim.enabled === false ? 'locked' : 'available',
+        };
+      });
+    });
+  }, [animations]);
+
   // Sort animations by order
   const sortedAnimations = useMemo(
     () => [...animations].sort((a, b) => a.order - b.order),

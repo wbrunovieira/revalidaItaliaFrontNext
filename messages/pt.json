@@ -2141,7 +2141,13 @@
         "dragWord": "Arrastar Palavra",
         "fillBlank": "Preencher Lacuna",
         "selectOption": "Selecionar Opção"
-      }
+      },
+      "exerciseSingular": "exercício",
+      "exercisePlural": "exercícios",
+      "questionSingular": "questão",
+      "questionPlural": "questões",
+      "allCompleted": "Tudo concluído!",
+      "replay": "Refazer"
     },
     "markAsComplete": "Marcar como concluída",
     "markAsIncomplete": "Desmarcar como concluída",

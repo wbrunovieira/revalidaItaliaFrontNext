@@ -2139,7 +2139,13 @@
         "dragWord": "Arrastrar Palabra",
         "fillBlank": "Rellenar Espacio",
         "selectOption": "Seleccionar Opción"
-      }
+      },
+      "exerciseSingular": "ejercicio",
+      "exercisePlural": "ejercicios",
+      "questionSingular": "pregunta",
+      "questionPlural": "preguntas",
+      "allCompleted": "¡Todo completado!",
+      "replay": "Repetir"
     },
     "markAsComplete": "Marcar como completada",
     "markAsIncomplete": "Desmarcar como completada",

@@ -12,9 +12,11 @@ import {
   Lock,
   CheckCircle,
   PlayCircle,
+  MessageSquareText,
+  ListChecks,
 } from 'lucide-react';
 import DragWordExercise from './DragWordExercise';
-import type { Animation } from '@/hooks/queries/useLesson';
+import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
   animations: Animation[];
@@ -28,6 +30,15 @@ interface ExerciseState {
   score?: number;
 }
 
+interface TypeGroup {
+  type: AnimationType;
+  animations: Animation[];
+  totalQuestions: number;
+  completedCount: number;
+  isLocked: boolean;
+  isCompleted: boolean;
+}
+
 export default function ExercisesExpandable({
   animations,
 }: ExercisesExpandableProps) {
@@ -36,8 +47,11 @@ export default function ExercisesExpandable({
   // Expanded state
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Active exercise
-  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+  // Active type being played
+  const [activeType, setActiveType] = useState<AnimationType | null>(null);
+
+  // Current exercise index within the active type
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
 
   // Exercise states (treat enabled === false as locked, undefined = enabled)
   const [exerciseStates, setExerciseStates] = useState<ExerciseState[]>(() =>
@@ -53,21 +67,65 @@ export default function ExercisesExpandable({
     [animations]
   );
 
+  // Group animations by type
+  const typeGroups = useMemo((): TypeGroup[] => {
+    const groups: Record<string, Animation[]> = {};
+
+    sortedAnimations.forEach(anim => {
+      if (!groups[anim.type]) {
+        groups[anim.type] = [];
+      }
+      groups[anim.type].push(anim);
+    });
+
+    return Object.entries(groups).map(([type, anims]) => {
+      const completedCount = anims.filter(a =>
+        exerciseStates.find(e => e.animationId === a.id)?.status === 'completed'
+      ).length;
+
+      const isLocked = anims.every(a =>
+        exerciseStates.find(e => e.animationId === a.id)?.status === 'locked'
+      );
+
+      const totalQuestions = anims.reduce((sum, a) =>
+        sum + (a.content?.sentences?.length || 1), 0
+      );
+
+      return {
+        type: type as AnimationType,
+        animations: anims,
+        totalQuestions,
+        completedCount,
+        isLocked,
+        isCompleted: completedCount === anims.length && anims.length > 0,
+      };
+    });
+  }, [sortedAnimations, exerciseStates]);
+
+  // Get animations for active type
+  const activeTypeAnimations = useMemo(() => {
+    if (!activeType) return [];
+    return typeGroups.find(g => g.type === activeType)?.animations || [];
+  }, [activeType, typeGroups]);
+
+  // Get current animation
+  const currentAnimation = useMemo(() => {
+    return activeTypeAnimations[currentExerciseIndex];
+  }, [activeTypeAnimations, currentExerciseIndex]);
+
   // Listen for custom event to open the expandable
   useEffect(() => {
     const handleOpenEvent = (event: CustomEvent<{ animationId?: string }>) => {
       setIsExpanded(true);
 
-      // If a specific animation was requested, start it
+      // If a specific animation was requested, find its type and start
       if (event.detail?.animationId) {
         const animation = sortedAnimations.find(a => a.id === event.detail.animationId);
         const state = exerciseStates.find(e => e.animationId === event.detail.animationId);
 
-        // Only start if animation exists and is not locked
         if (animation && state?.status !== 'locked') {
-          // Small delay to allow expansion animation to complete
           setTimeout(() => {
-            setActiveExerciseId(event.detail.animationId!);
+            handleStartType(animation.type);
           }, 350);
         }
       }
@@ -80,18 +138,13 @@ export default function ExercisesExpandable({
     };
   }, [sortedAnimations, exerciseStates]);
 
-  // Get active animation
-  const activeAnimation = useMemo(
-    () => sortedAnimations.find(a => a.id === activeExerciseId),
-    [sortedAnimations, activeExerciseId]
-  );
+  // Count totals
+  const totalCompleted = exerciseStates.filter(e => e.status === 'completed').length;
+  const totalAvailable = exerciseStates.filter(e => e.status === 'available').length;
 
-  // Count available and completed
-  const availableCount = exerciseStates.filter(e => e.status === 'available').length;
-  const completedCount = exerciseStates.filter(e => e.status === 'completed').length;
-
-  // Handle exercise completion
+  // Handle exercise completion - auto advance to next
   const handleExerciseComplete = useCallback((animationId: string, success: boolean, score: number) => {
+    // Mark current as completed
     setExerciseStates(prev =>
       prev.map(e =>
         e.animationId === animationId
@@ -99,19 +152,52 @@ export default function ExercisesExpandable({
           : e
       )
     );
-    setActiveExerciseId(null);
-  }, []);
 
-  // Handle start exercise
-  const handleStartExercise = useCallback((animationId: string) => {
-    const state = exerciseStates.find(e => e.animationId === animationId);
-    if (state?.status === 'locked') return;
+    // Check if there are more exercises of this type
+    const nextIndex = currentExerciseIndex + 1;
+    if (nextIndex < activeTypeAnimations.length) {
+      // Auto advance to next exercise after a brief delay
+      setTimeout(() => {
+        setCurrentExerciseIndex(nextIndex);
+      }, 500);
+    } else {
+      // All exercises of this type completed - go back to list
+      setTimeout(() => {
+        setActiveType(null);
+        setCurrentExerciseIndex(0);
+      }, 500);
+    }
+  }, [currentExerciseIndex, activeTypeAnimations.length]);
 
-    setActiveExerciseId(animationId);
-  }, [exerciseStates]);
+  // Handle start type
+  const handleStartType = useCallback((type: AnimationType) => {
+    const group = typeGroups.find(g => g.type === type);
+    if (!group || group.isLocked) return;
 
-  // Get exercise type label
-  const getTypeLabel = (type: string): string => {
+    // Find the first non-completed exercise
+    const firstAvailableIndex = group.animations.findIndex(a => {
+      const state = exerciseStates.find(e => e.animationId === a.id);
+      return state?.status === 'available';
+    });
+
+    setActiveType(type);
+    setCurrentExerciseIndex(firstAvailableIndex >= 0 ? firstAvailableIndex : 0);
+  }, [typeGroups, exerciseStates]);
+
+  // Get type icon
+  const getTypeIcon = (type: AnimationType) => {
+    switch (type) {
+      case 'CompleteSentence':
+        return <MessageSquareText size={24} className="text-blue-400" />;
+      case 'MultipleChoice':
+        return <ListChecks size={24} className="text-purple-400" />;
+      default:
+        return <Gamepad2 size={24} className="text-secondary" />;
+    }
+  };
+
+  // Get type label
+  const getTypeLabel = (type: AnimationType): string => {
     switch (type) {
       case 'CompleteSentence':
         return t('types.completeSentence');
@@ -122,17 +208,15 @@ export default function ExercisesExpandable({
     }
   };
 
-  // Get game type label
-  const getGameTypeLabel = (gameType?: string): string => {
-    switch (gameType) {
-      case 'DRAG_WORD':
-        return t('gameTypes.dragWord');
-      case 'FILL_BLANK':
-        return t('gameTypes.fillBlank');
-      case 'SELECT_OPTION':
-        return t('gameTypes.selectOption');
+  // Get type color
+  const getTypeColor = (type: AnimationType): string => {
+    switch (type) {
+      case 'CompleteSentence':
+        return 'from-blue-500/20 to-blue-600/10 border-blue-500/30 hover:border-blue-500/50';
+      case 'MultipleChoice':
+        return 'from-purple-500/20 to-purple-600/10 border-purple-500/30 hover:border-purple-500/50';
       default:
-        return '';
+        return 'from-secondary/20 to-secondary/10 border-secondary/30 hover:border-secondary/50';
     }
   };
 
@@ -155,10 +239,10 @@ export default function ExercisesExpandable({
           <div className="text-left">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               {t('title')}
-              {completedCount > 0 && (
+              {totalCompleted > 0 && (
                 <span className="flex items-center gap-1 text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
                   <Sparkles size={12} />
-                  {completedCount}/{sortedAnimations.length}
+                  {totalCompleted}/{sortedAnimations.length}
                 </span>
               )}
             </h3>
@@ -168,7 +252,7 @@ export default function ExercisesExpandable({
 
         <div className="flex items-center gap-3">
           <div className="text-right text-sm">
-            <span className="text-secondary">{availableCount} {t('available')}</span>
+            <span className="text-secondary">{totalAvailable} {t('available')}</span>
           </div>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -190,117 +274,146 @@ export default function ExercisesExpandable({
             className="overflow-hidden"
           >
             <div className="p-4 pt-0 border-t border-gray-700/50">
-              {/* Exercise selector - when no active exercise */}
-              {!activeExerciseId && (
+              {/* Type selector - when no active type */}
+              {!activeType && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-3 mt-4"
+                  className="grid gap-3 mt-4"
                 >
-                  {sortedAnimations.map(animation => {
-                    const state = exerciseStates.find(e => e.animationId === animation.id);
-                    const isLocked = state?.status === 'locked';
-                    const isCompleted = state?.status === 'completed';
-
-                    return (
-                      <motion.button
-                        key={animation.id}
-                        onClick={() => handleStartExercise(animation.id)}
-                        disabled={isLocked}
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all ${
-                          isLocked
-                            ? 'bg-gray-800/30 cursor-not-allowed opacity-50'
-                            : isCompleted
-                            ? 'bg-green-500/10 border border-green-500/30 hover:bg-green-500/20'
-                            : 'bg-gray-800/50 hover:bg-secondary/20 hover:border-secondary/30 border border-transparent'
-                        }`}
-                        whileHover={!isLocked ? { scale: 1.01 } : {}}
-                        whileTap={!isLocked ? { scale: 0.99 } : {}}
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          isLocked
-                            ? 'bg-gray-700/50'
-                            : isCompleted
-                            ? 'bg-green-500/20'
-                            : 'bg-secondary/20'
-                        }`}>
-                          {isLocked ? (
-                            <Lock size={20} className="text-gray-500" />
-                          ) : isCompleted ? (
-                            <CheckCircle size={20} className="text-green-400" />
-                          ) : (
-                            <PlayCircle size={20} className="text-secondary" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 text-left">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                              {getTypeLabel(animation.type)}
-                            </span>
-                            {animation.content?.gameType && (
-                              <span className="text-xs text-gray-500">
-                                {getGameTypeLabel(animation.content.gameType)}
-                              </span>
-                            )}
-                          </div>
-                          <p className={`font-medium ${
-                            isLocked ? 'text-gray-500' : isCompleted ? 'text-green-400' : 'text-white'
-                          }`}>
-                            {t('exercise', { number: animation.order })}
-                          </p>
-                          {isCompleted && state?.score !== undefined && (
-                            <p className="text-xs text-green-400/70 mt-1">
-                              {t('score')}: {state.score}/{animation.content?.sentences?.length || 1}
-                            </p>
-                          )}
-                        </div>
-
-                        {!isLocked && !isCompleted && (
-                          <ChevronUp size={20} className="text-gray-400 rotate-90" />
+                  {typeGroups.map(group => (
+                    <motion.button
+                      key={group.type}
+                      onClick={() => handleStartType(group.type)}
+                      disabled={group.isLocked}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all bg-gradient-to-r ${
+                        group.isLocked
+                          ? 'from-gray-800/30 to-gray-800/20 border-gray-700/50 cursor-not-allowed opacity-50'
+                          : group.isCompleted
+                          ? 'from-green-500/10 to-green-600/5 border-green-500/30 hover:border-green-500/50'
+                          : getTypeColor(group.type)
+                      }`}
+                      whileHover={!group.isLocked ? { scale: 1.01 } : {}}
+                      whileTap={!group.isLocked ? { scale: 0.99 } : {}}
+                    >
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                        group.isLocked
+                          ? 'bg-gray-700/50'
+                          : group.isCompleted
+                          ? 'bg-green-500/20'
+                          : 'bg-white/10'
+                      }`}>
+                        {group.isLocked ? (
+                          <Lock size={24} className="text-gray-500" />
+                        ) : group.isCompleted ? (
+                          <CheckCircle size={24} className="text-green-400" />
+                        ) : (
+                          getTypeIcon(group.type)
                         )}
-                      </motion.button>
-                    );
-                  })}
+                      </div>
+
+                      <div className="flex-1 text-left">
+                        <p className={`text-lg font-semibold ${
+                          group.isLocked
+                            ? 'text-gray-500'
+                            : group.isCompleted
+                            ? 'text-green-400'
+                            : 'text-white'
+                        }`}>
+                          {getTypeLabel(group.type)}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {group.animations.length} {group.animations.length === 1 ? t('exerciseSingular') : t('exercisePlural')}
+                          {' • '}
+                          {group.totalQuestions} {group.totalQuestions === 1 ? t('questionSingular') : t('questionPlural')}
+                        </p>
+                        {group.isCompleted && (
+                          <p className="text-xs text-green-400/70 mt-1 flex items-center gap-1">
+                            <CheckCircle size={12} />
+                            {t('allCompleted')}
+                          </p>
+                        )}
+                      </div>
+
+                      {!group.isLocked && !group.isCompleted && (
+                        <div className="flex items-center gap-2">
+                          <PlayCircle size={24} className="text-white/70" />
+                        </div>
+                      )}
+
+                      {group.isCompleted && (
+                        <div className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded">
+                          {t('replay')}
+                        </div>
+                      )}
+                    </motion.button>
+                  ))}
                 </motion.div>
               )}
 
               {/* Active exercise */}
-              {activeExerciseId && activeAnimation && (
+              {activeType && currentAnimation && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="mt-4"
                 >
-                  {/* Back button */}
-                  <button
-                    onClick={() => setActiveExerciseId(null)}
-                    className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
-                  >
-                    <ChevronUp size={18} className="-rotate-90" />
-                    <span>{t('backToList')}</span>
-                  </button>
+                  {/* Header with progress */}
+                  <div className="flex items-center justify-between mb-6">
+                    <button
+                      onClick={() => {
+                        setActiveType(null);
+                        setCurrentExerciseIndex(0);
+                      }}
+                      className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      <ChevronUp size={18} className="-rotate-90" />
+                      <span>{t('backToList')}</span>
+                    </button>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-400">
+                        {currentExerciseIndex + 1} / {activeTypeAnimations.length}
+                      </span>
+                      <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-secondary transition-all duration-300"
+                          style={{ width: `${((currentExerciseIndex + 1) / activeTypeAnimations.length) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Exercise content */}
-                  {activeAnimation.content?.gameType === 'DRAG_WORD' && (
-                    <DragWordExercise
-                      sentences={activeAnimation.content.sentences}
-                      distractors={activeAnimation.content.distractors}
-                      onComplete={(success, score) =>
-                        handleExerciseComplete(activeAnimation.id, success, score)
-                      }
-                    />
-                  )}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentAnimation.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {currentAnimation.content?.gameType === 'DRAG_WORD' && (
+                        <DragWordExercise
+                          sentences={currentAnimation.content.sentences}
+                          distractors={currentAnimation.content.distractors}
+                          onComplete={(success, score) =>
+                            handleExerciseComplete(currentAnimation.id, success, score)
+                          }
+                        />
+                      )}
 
-                  {/* Placeholder for other game types */}
-                  {activeAnimation.content?.gameType &&
-                   activeAnimation.content.gameType !== 'DRAG_WORD' && (
-                    <div className="text-center py-12 text-gray-400">
-                      <Gamepad2 size={48} className="mx-auto mb-4 opacity-50" />
-                      <p>{t('comingSoon')}</p>
-                    </div>
-                  )}
+                      {/* Placeholder for other game types */}
+                      {currentAnimation.content?.gameType &&
+                       currentAnimation.content.gameType !== 'DRAG_WORD' && (
+                        <div className="text-center py-12 text-gray-400">
+                          <Gamepad2 size={48} className="mx-auto mb-4 opacity-50" />
+                          <p>{t('comingSoon')}</p>
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
                 </motion.div>
               )}
             </div>

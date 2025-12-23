@@ -2136,7 +2136,13 @@
         "dragWord": "Trascina la Parola",
         "fillBlank": "Compila lo Spazio",
         "selectOption": "Seleziona Opzione"
-      }
+      },
+      "exerciseSingular": "esercizio",
+      "exercisePlural": "esercizi",
+      "questionSingular": "domanda",
+      "questionPlural": "domande",
+      "allCompleted": "Tutto completato!",
+      "replay": "Ripeti"
     },
     "markAsComplete": "Segna come completata",
     "markAsIncomplete": "Rimuovi completamento",

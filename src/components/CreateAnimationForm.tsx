@@ -36,9 +36,13 @@ type GameType = 'DRAG_WORD' | 'REORDER_WORDS' | 'TYPE_COMPLETION' | 'MULTIPLE_BL
 
 interface Sentence {
   fullSentence: string;
-  targetWord: string;
-  wordPosition: number;
+  // For single target word games (DRAG_WORD, REORDER_WORDS, TYPE_COMPLETION)
+  targetWord?: string;
+  wordPosition?: number;
   hint?: string;
+  // For MULTIPLE_BLANKS - multiple target words per sentence
+  targetWords?: string[];
+  wordPositions?: number[];
 }
 
 interface CompleteSentenceContent {
@@ -91,6 +95,20 @@ export default function CreateAnimationForm() {
   const [sentences, setSentences] = useState<Sentence[]>([
     { fullSentence: '', targetWord: '', wordPosition: 0, hint: '' }
   ]);
+
+  // Handle gameType change - initialize with correct structure
+  const handleGameTypeChange = useCallback((newGameType: GameType) => {
+    setGameType(newGameType);
+
+    // When switching to MULTIPLE_BLANKS, ensure we have targetWords array with minimum 2 items
+    if (newGameType === 'MULTIPLE_BLANKS') {
+      setSentences(prev => prev.map(sentence => ({
+        ...sentence,
+        targetWords: sentence.targetWords?.length ? sentence.targetWords : ['', ''],
+        wordPositions: sentence.wordPositions?.length ? sentence.wordPositions : [0, 0],
+      })));
+    }
+  }, []);
   const [distractors, setDistractors] = useState<string[]>(['']);
   const [shuffleWords, setShuffleWords] = useState(true);
 
@@ -127,8 +145,19 @@ export default function CreateAnimationForm() {
 
   // Sentence handlers
   const addSentence = useCallback(() => {
-    setSentences(prev => [...prev, { fullSentence: '', targetWord: '', wordPosition: 0, hint: '' }]);
-  }, []);
+    if (gameType === 'MULTIPLE_BLANKS') {
+      setSentences(prev => [...prev, {
+        fullSentence: '',
+        targetWord: '',
+        wordPosition: 0,
+        hint: '',
+        targetWords: ['', ''],
+        wordPositions: [0, 0],
+      }]);
+    } else {
+      setSentences(prev => [...prev, { fullSentence: '', targetWord: '', wordPosition: 0, hint: '' }]);
+    }
+  }, [gameType]);
 
   const removeSentence = useCallback((index: number) => {
     setSentences(prev => prev.filter((_, i) => i !== index));
@@ -136,6 +165,49 @@ export default function CreateAnimationForm() {
 
   const updateSentence = useCallback((index: number, field: keyof Sentence, value: string | number) => {
     setSentences(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
+  }, []);
+
+  // Target words handlers for MULTIPLE_BLANKS
+  const addTargetWord = useCallback((sentenceIndex: number) => {
+    setSentences(prev => prev.map((s, i) => {
+      if (i !== sentenceIndex) return s;
+      return {
+        ...s,
+        targetWords: [...(s.targetWords || []), ''],
+        wordPositions: [...(s.wordPositions || []), 0],
+      };
+    }));
+  }, []);
+
+  const removeTargetWord = useCallback((sentenceIndex: number, wordIndex: number) => {
+    setSentences(prev => prev.map((s, i) => {
+      if (i !== sentenceIndex) return s;
+      const newTargetWords = (s.targetWords || []).filter((_, wi) => wi !== wordIndex);
+      const newWordPositions = (s.wordPositions || []).filter((_, wi) => wi !== wordIndex);
+      return {
+        ...s,
+        targetWords: newTargetWords.length >= 2 ? newTargetWords : s.targetWords, // Keep minimum 2
+        wordPositions: newWordPositions.length >= 2 ? newWordPositions : s.wordPositions,
+      };
+    }));
+  }, []);
+
+  const updateTargetWord = useCallback((sentenceIndex: number, wordIndex: number, value: string) => {
+    setSentences(prev => prev.map((s, i) => {
+      if (i !== sentenceIndex) return s;
+      const newTargetWords = [...(s.targetWords || [])];
+      newTargetWords[wordIndex] = value;
+      return { ...s, targetWords: newTargetWords };
+    }));
+  }, []);
+
+  const updateWordPosition = useCallback((sentenceIndex: number, wordIndex: number, value: number) => {
+    setSentences(prev => prev.map((s, i) => {
+      if (i !== sentenceIndex) return s;
+      const newWordPositions = [...(s.wordPositions || [])];
+      newWordPositions[wordIndex] = value;
+      return { ...s, wordPositions: newWordPositions };
+    }));
   }, []);
 
   // Distractor handlers
@@ -172,9 +244,22 @@ export default function CreateAnimationForm() {
         newErrors.gameType = t('errors.gameTypeRequired');
       }
 
-      const validSentences = sentences.filter(s => s.fullSentence.trim() && s.targetWord.trim());
-      if (validSentences.length === 0) {
-        newErrors.sentences = t('errors.sentenceRequired');
+      if (gameType === 'MULTIPLE_BLANKS') {
+        // For MULTIPLE_BLANKS, validate targetWords array (minimum 2 words per sentence)
+        const validSentences = sentences.filter(s => {
+          const hasFullSentence = s.fullSentence.trim();
+          const validTargetWords = (s.targetWords || []).filter(w => w.trim());
+          return hasFullSentence && validTargetWords.length >= 2;
+        });
+        if (validSentences.length === 0) {
+          newErrors.sentences = t('errors.multipleBlanksRequired');
+        }
+      } else {
+        // For other game types, validate single targetWord
+        const validSentences = sentences.filter(s => s.fullSentence.trim() && s.targetWord?.trim());
+        if (validSentences.length === 0) {
+          newErrors.sentences = t('errors.sentenceRequired');
+        }
       }
     } else {
       if (!question.trim()) {
@@ -207,20 +292,43 @@ export default function CreateAnimationForm() {
       let content: CompleteSentenceContent | MultipleChoiceContent;
 
       if (animationType === 'CompleteSentence') {
-        const validSentences = sentences.filter(s => s.fullSentence.trim() && s.targetWord.trim());
         const validDistractors = distractors.filter(d => d.trim());
 
-        content = {
-          gameType,
-          sentences: validSentences.map(s => ({
-            fullSentence: s.fullSentence.trim(),
-            targetWord: s.targetWord.trim(),
-            wordPosition: s.wordPosition,
-            ...(s.hint?.trim() && { hint: s.hint.trim() }),
-          })),
-          ...(validDistractors.length > 0 && { distractors: validDistractors }),
-          shuffleWords,
-        };
+        if (gameType === 'MULTIPLE_BLANKS') {
+          // For MULTIPLE_BLANKS, use targetWords array
+          const validSentences = sentences.filter(s => {
+            const hasFullSentence = s.fullSentence.trim();
+            const validTargetWords = (s.targetWords || []).filter(w => w.trim());
+            return hasFullSentence && validTargetWords.length >= 2;
+          });
+
+          content = {
+            gameType,
+            sentences: validSentences.map(s => ({
+              fullSentence: s.fullSentence.trim(),
+              targetWords: (s.targetWords || []).filter(w => w.trim()).map(w => w.trim()),
+              wordPositions: s.wordPositions || [],
+              ...(s.hint?.trim() && { hint: s.hint.trim() }),
+            })),
+            ...(validDistractors.length > 0 && { distractors: validDistractors }),
+            shuffleWords,
+          };
+        } else {
+          // For other game types, use single targetWord
+          const validSentences = sentences.filter(s => s.fullSentence.trim() && s.targetWord?.trim());
+
+          content = {
+            gameType,
+            sentences: validSentences.map(s => ({
+              fullSentence: s.fullSentence.trim(),
+              targetWord: s.targetWord!.trim(),
+              wordPosition: s.wordPosition ?? 0,
+              ...(s.hint?.trim() && { hint: s.hint.trim() }),
+            })),
+            ...(validDistractors.length > 0 && { distractors: validDistractors }),
+            shuffleWords,
+          };
+        }
       } else {
         content = {
           question: question.trim(),
@@ -442,7 +550,7 @@ export default function CreateAnimationForm() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setGameType(option.value)}
+                    onClick={() => handleGameTypeChange(option.value)}
                     className={`p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${
                       gameType === option.value
                         ? 'border-secondary bg-secondary/20 text-white'
@@ -493,21 +601,70 @@ export default function CreateAnimationForm() {
                     placeholder={t('placeholders.fullSentence')}
                   />
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <TextField
-                      label={t('fields.targetWord')}
-                      value={sentence.targetWord}
-                      onChange={e => updateSentence(index, 'targetWord', e.target.value)}
-                      placeholder={t('placeholders.targetWord')}
-                    />
-                    <TextField
-                      label={t('fields.wordPosition')}
-                      type="number"
-                      value={sentence.wordPosition.toString()}
-                      onChange={e => updateSentence(index, 'wordPosition', parseInt(e.target.value) || 0)}
-                      placeholder="0"
-                    />
-                  </div>
+                  {gameType === 'MULTIPLE_BLANKS' ? (
+                    /* Multiple target words for MULTIPLE_BLANKS */
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-gray-400 text-sm">{t('fields.targetWords')}</Label>
+                        <button
+                          type="button"
+                          onClick={() => addTargetWord(index)}
+                          className="flex items-center gap-1 text-secondary hover:text-secondary/80 text-xs"
+                        >
+                          <Plus size={14} />
+                          {t('actions.addTargetWord')}
+                        </button>
+                      </div>
+                      {(sentence.targetWords || ['', '']).map((word, wordIndex) => (
+                        <div key={wordIndex} className="flex gap-2 items-end">
+                          <div className="flex-1">
+                            <TextField
+                              label={`${t('fields.targetWord')} ${wordIndex + 1}`}
+                              value={word}
+                              onChange={e => updateTargetWord(index, wordIndex, e.target.value)}
+                              placeholder={t('placeholders.targetWord')}
+                            />
+                          </div>
+                          <div className="w-24">
+                            <TextField
+                              label={t('fields.position')}
+                              type="number"
+                              value={(sentence.wordPositions?.[wordIndex] || 0).toString()}
+                              onChange={e => updateWordPosition(index, wordIndex, parseInt(e.target.value) || 0)}
+                              placeholder="0"
+                            />
+                          </div>
+                          {(sentence.targetWords?.length || 0) > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTargetWord(index, wordIndex)}
+                              className="text-red-400 hover:text-red-300 p-2 mb-1"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <p className="text-gray-500 text-xs">{t('hints.multipleBlanks')}</p>
+                    </div>
+                  ) : (
+                    /* Single target word for other game types */
+                    <div className="grid grid-cols-2 gap-3">
+                      <TextField
+                        label={t('fields.targetWord')}
+                        value={sentence.targetWord || ''}
+                        onChange={e => updateSentence(index, 'targetWord', e.target.value)}
+                        placeholder={t('placeholders.targetWord')}
+                      />
+                      <TextField
+                        label={t('fields.wordPosition')}
+                        type="number"
+                        value={(sentence.wordPosition ?? 0).toString()}
+                        onChange={e => updateSentence(index, 'wordPosition', parseInt(e.target.value) || 0)}
+                        placeholder="0"
+                      />
+                    </div>
+                  )}
 
                   <TextField
                     label={t('fields.hint')}

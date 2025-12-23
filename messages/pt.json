@@ -5269,7 +5269,9 @@
       "sentence": "Frase",
       "fullSentence": "Frase Completa",
       "targetWord": "Palavra Alvo",
+      "targetWords": "Palavras Alvo",
       "wordPosition": "Posição da Palavra",
+      "position": "Posição",
       "hint": "Dica",
       "distractors": "Palavras Distratoras",
       "shuffleWords": "Embaralhar Palavras",
@@ -5304,18 +5306,21 @@
     "actions": {
       "addSentence": "Adicionar Frase",
       "addDistractor": "Adicionar Distratora",
+      "addTargetWord": "Adicionar Palavra",
       "create": "Criar Animação",
       "creating": "Criando..."
     },
     "hints": {
       "distractors": "Palavras extras que serão exibidas como opções incorretas",
       "correctOption": "Clique no número para marcar a opção correta",
-      "markCorrect": "Marcar como correta"
+      "markCorrect": "Marcar como correta",
+      "multipleBlanks": "Mínimo de 2 palavras alvo por frase"
     },
     "errors": {
       "lessonRequired": "Selecione uma aula",
       "gameTypeRequired": "Selecione um tipo de jogo",
       "sentenceRequired": "Adicione pelo menos uma frase com palavra alvo",
+      "multipleBlanksRequired": "Adicione pelo menos uma frase com 2 palavras alvo",
       "questionRequired": "Digite uma pergunta",
       "threeOptionsRequired": "Preencha todas as 3 opções"
     },

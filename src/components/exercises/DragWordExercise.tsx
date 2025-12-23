@@ -1,8 +1,8 @@
 // src/components/exercises/DragWordExercise.tsx
 'use client';
 
-import { useState, useCallback, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import {
   CheckCircle,
@@ -26,12 +26,48 @@ interface WordOption {
   isUsed: boolean;
 }
 
+// Haptic feedback utility
+const triggerHapticFeedback = (type: 'success' | 'error' | 'light') => {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    switch (type) {
+      case 'success':
+        // Short double vibration for success
+        navigator.vibrate([50, 50, 50]);
+        break;
+      case 'error':
+        // Longer vibration pattern for error
+        navigator.vibrate([100, 50, 100, 50, 100]);
+        break;
+      case 'light':
+        // Light tap
+        navigator.vibrate(30);
+        break;
+    }
+  }
+};
+
+// Shake animation variants
+const shakeAnimation = {
+  shake: {
+    x: [0, -10, 10, -10, 10, -5, 5, 0],
+    transition: { duration: 0.5 }
+  }
+};
+
 export default function DragWordExercise({
   sentences,
   distractors,
   onComplete,
 }: DragWordExerciseProps) {
   const t = useTranslations('Lesson.exercises');
+  const dropZoneControls = useAnimation();
+
+  // Detect if touch device
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Current sentence index
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -135,6 +171,15 @@ export default function DragWordExercise({
     setIsCorrect(correct);
     setShowFeedback(true);
 
+    // Trigger haptic feedback
+    if (correct) {
+      triggerHapticFeedback('success');
+    } else {
+      triggerHapticFeedback('error');
+      // Trigger shake animation on drop zone
+      dropZoneControls.start('shake');
+    }
+
     if (correct) {
       setScore(prev => prev + 1);
     }
@@ -168,7 +213,7 @@ export default function DragWordExercise({
         onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 1500);
-  }, [currentIndex, sentences, distractors, score, onComplete]);
+  }, [currentIndex, sentences, distractors, score, onComplete, dropZoneControls]);
 
   // Handle drop on drop zone
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -206,9 +251,12 @@ export default function DragWordExercise({
     }, 300);
   }, [showFeedback, selectedWord, checkAnswer]);
 
-  // Handle word selection (click)
+  // Handle word selection (click/tap)
   const handleWordSelect = useCallback((option: WordOption) => {
     if (showFeedback || option.isUsed) return;
+
+    // Light haptic on tap
+    triggerHapticFeedback('light');
 
     // If there's already a selected word, put it back
     if (selectedWord) {
@@ -259,31 +307,31 @@ export default function DragWordExercise({
   if (!currentSentence) return null;
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
       {/* Progress indicator */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">
+          <span className="text-xs sm:text-sm text-gray-400">
             {t('question')} {currentIndex + 1} {t('of')} {sentences.length}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1">
-            <Sparkles size={16} className="text-yellow-400" />
-            <span className="text-sm font-medium text-white">{score}</span>
+            <Sparkles size={14} className="text-yellow-400 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm font-medium text-white">{score}</span>
           </div>
           <button
             onClick={handleReset}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors active:scale-95"
             title={t('reset')}
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-gray-700 rounded-full mb-8 overflow-hidden">
+      <div className="h-1 bg-gray-700 rounded-full mb-6 sm:mb-8 overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-secondary to-primary"
           initial={{ width: 0 }}
@@ -299,17 +347,19 @@ export default function DragWordExercise({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.4 }}
-        className="text-center mb-8"
+        className="text-center mb-6 sm:mb-8"
       >
-        <p className="text-xl md:text-2xl text-white leading-relaxed">
+        <p className="text-lg sm:text-xl md:text-2xl text-white leading-relaxed">
           <span>{sentenceParts.before}</span>
 
-          {/* Drop zone / Selected word */}
+          {/* Drop zone / Selected word with shake animation */}
           <motion.span
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`inline-flex items-center justify-center min-w-[120px] mx-1 px-4 py-2 rounded-lg border-2 transition-all ${
+            variants={shakeAnimation}
+            animate={dropZoneControls}
+            className={`inline-flex items-center justify-center min-w-[100px] sm:min-w-[120px] mx-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 transition-all ${
               selectedWord
                 ? showFeedback
                   ? isCorrect
@@ -322,19 +372,18 @@ export default function DragWordExercise({
                 ? 'bg-gray-600/50 border-secondary/50 border-dashed animate-pulse'
                 : 'bg-gray-700/50 border-gray-500 border-dashed text-gray-400'
             }`}
-            animate={isDragOver ? { scale: 1.05 } : { scale: 1 }}
           >
             {selectedWord ? (
               <motion.span
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="font-semibold"
+                className="font-semibold text-sm sm:text-base"
               >
                 {selectedWord.word}
               </motion.span>
             ) : (
-              <span className="text-sm">
-                {isDragOver ? '🎯' : isDragging ? t('dropHere') : t('dropHere')}
+              <span className="text-xs sm:text-sm">
+                {isDragOver ? '🎯' : t('dropHere')}
               </span>
             )}
           </motion.span>
@@ -343,20 +392,27 @@ export default function DragWordExercise({
         </p>
       </motion.div>
 
+      {/* Instruction for mobile */}
+      {isTouchDevice && (
+        <p className="text-center text-xs text-gray-500 mb-4">
+          {t('tapToSelect')}
+        </p>
+      )}
+
       {/* Word options */}
-      <div className="flex flex-wrap justify-center gap-3 mb-8">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
         <AnimatePresence mode="popLayout">
           {wordOptions.map(option => (
             <motion.div
               key={option.id}
-              draggable={!option.isUsed && !showFeedback}
+              draggable={!option.isUsed && !showFeedback && !isTouchDevice}
               onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, option)}
               onDragEnd={(e) => handleDragEnd(e as unknown as React.DragEvent)}
               onClick={() => handleWordSelect(option)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all select-none ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium transition-all select-none touch-manipulation ${
                 option.isUsed
                   ? 'opacity-30 cursor-not-allowed bg-gray-700 text-gray-500'
-                  : 'bg-gradient-to-br from-gray-700 to-gray-800 text-white hover:from-secondary/30 hover:to-secondary/20 hover:shadow-lg hover:shadow-secondary/20 cursor-grab active:cursor-grabbing'
+                  : 'bg-gradient-to-br from-gray-700 to-gray-800 text-white hover:from-secondary/30 hover:to-secondary/20 hover:shadow-lg hover:shadow-secondary/20 cursor-pointer active:scale-95'
               }`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -365,8 +421,11 @@ export default function DragWordExercise({
               whileTap={!option.isUsed && !showFeedback ? { scale: 0.95 } : {}}
               layout
             >
-              <GripHorizontal size={14} className="text-gray-400" />
-              {option.word}
+              {/* Hide grip icon on touch devices */}
+              {!isTouchDevice && (
+                <GripHorizontal size={14} className="text-gray-400 hidden sm:block" />
+              )}
+              <span className="text-sm sm:text-base">{option.word}</span>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -379,34 +438,35 @@ export default function DragWordExercise({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm`}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           >
             <motion.div
-              initial={{ y: 50 }}
-              animate={{ y: 0 }}
-              className={`p-8 rounded-2xl ${
+              initial={{ y: 50, scale: 0.9 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 50, scale: 0.9 }}
+              className={`p-6 sm:p-8 rounded-2xl max-w-sm w-full ${
                 isCorrect
                   ? 'bg-gradient-to-br from-green-600 to-emerald-700'
                   : 'bg-gradient-to-br from-red-600 to-rose-700'
               }`}
             >
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-3 sm:gap-4">
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                 >
                   {isCorrect ? (
-                    <CheckCircle size={64} className="text-white" />
+                    <CheckCircle size={48} className="text-white sm:w-16 sm:h-16" />
                   ) : (
-                    <XCircle size={64} className="text-white" />
+                    <XCircle size={48} className="text-white sm:w-16 sm:h-16" />
                   )}
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white">
+                <h3 className="text-xl sm:text-2xl font-bold text-white">
                   {isCorrect ? t('correct') : t('incorrect')}
                 </h3>
                 {!isCorrect && (
-                  <p className="text-white/80">
+                  <p className="text-white/80 text-center text-sm sm:text-base">
                     {t('correctAnswer')}: <strong>{currentSentence.targetWord}</strong>
                   </p>
                 )}

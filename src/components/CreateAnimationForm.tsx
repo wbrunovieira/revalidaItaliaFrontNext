@@ -232,6 +232,52 @@ export default function CreateAnimationForm() {
     });
   }, []);
 
+  // Parse API error messages to user-friendly format
+  const parseApiError = useCallback((message: string): string => {
+    // Extract sentence number
+    const sentenceMatch = message.match(/^Sentence (\d+):/);
+    const sentenceNum = sentenceMatch ? sentenceMatch[1] : null;
+    const sentencePrefix = sentenceNum ? t('apiErrors.sentencePrefix', { number: sentenceNum }) : '';
+
+    // targetWord not found in fullSentence
+    const wordNotFoundMatch = message.match(/targetWord "(.+)" not found in fullSentence/);
+    if (wordNotFoundMatch) {
+      return `${sentencePrefix}${t('apiErrors.wordNotFound', { word: wordNotFoundMatch[1] })}`;
+    }
+
+    // MULTIPLE_BLANKS requires targetWords array
+    if (message.includes('requires targetWords array, not single targetWord')) {
+      return `${sentencePrefix}${t('apiErrors.requiresTargetWordsArray')}`;
+    }
+
+    // MULTIPLE_BLANKS requires at least 2 words
+    if (message.includes('requires targetWords array with at least 2 words')) {
+      return `${sentencePrefix}${t('apiErrors.requiresAtLeast2Words')}`;
+    }
+
+    // wordPositions array must have same length
+    if (message.includes('wordPositions array must have same length')) {
+      return `${sentencePrefix}${t('apiErrors.positionsLengthMismatch')}`;
+    }
+
+    // targetWords[n] cannot be empty
+    const emptyWordMatch = message.match(/targetWords\[(\d+)\] cannot be empty/);
+    if (emptyWordMatch) {
+      const wordIndex = parseInt(emptyWordMatch[1]) + 1;
+      return `${sentencePrefix}${t('apiErrors.emptyTargetWord', { index: wordIndex })}`;
+    }
+
+    // wordPositions[n] must be >= 0
+    const invalidPositionMatch = message.match(/wordPositions\[(\d+)\] must be >= 0/);
+    if (invalidPositionMatch) {
+      const posIndex = parseInt(invalidPositionMatch[1]) + 1;
+      return `${sentencePrefix}${t('apiErrors.invalidPosition', { index: posIndex })}`;
+    }
+
+    // Return original message if no pattern matched
+    return message;
+  }, [t]);
+
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
@@ -380,9 +426,12 @@ export default function CreateAnimationForm() {
 
     } catch (error) {
       console.error('Error creating animation:', error);
+      const errorMessage = error instanceof Error ? error.message : t('error.description');
+      const parsedError = parseApiError(errorMessage);
+
       toast({
         title: t('error.title'),
-        description: error instanceof Error ? error.message : t('error.description'),
+        description: parsedError,
         variant: 'destructive',
       });
     } finally {

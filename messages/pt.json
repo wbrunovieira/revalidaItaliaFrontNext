@@ -5324,6 +5324,15 @@
       "questionRequired": "Digite uma pergunta",
       "threeOptionsRequired": "Preencha todas as 3 opções"
     },
+    "apiErrors": {
+      "sentencePrefix": "Frase {number}: ",
+      "wordNotFound": "A palavra \"{word}\" não foi encontrada na frase. Verifique a ortografia.",
+      "requiresTargetWordsArray": "Este tipo de jogo requer múltiplas palavras-alvo.",
+      "requiresAtLeast2Words": "Este tipo de jogo requer no mínimo 2 palavras-alvo.",
+      "positionsLengthMismatch": "O número de posições deve ser igual ao número de palavras-alvo.",
+      "emptyTargetWord": "A palavra-alvo {index} não pode estar vazia.",
+      "invalidPosition": "A posição {index} deve ser um número maior ou igual a zero."
+    },
     "success": {
       "title": "Animação criada",
       "description": "A animação foi criada com sucesso"

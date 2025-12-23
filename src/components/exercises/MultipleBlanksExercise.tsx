@@ -69,13 +69,9 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// Parse sentence to create blanks from target words
-// targetWord format: "word1|word2|word3" - these words will be replaced with blanks
-function parseSentence(fullSentence: string, targetWord: string): ParsedSentence {
-  // Split target words by | delimiter
-  const targetWords = targetWord.split('|').map(w => w.trim()).filter(w => w.length > 0);
-
-  if (targetWords.length === 0) {
+// Parse sentence to create blanks from targetWords array
+function parseSentence(fullSentence: string, targetWords: string[]): ParsedSentence {
+  if (!targetWords || targetWords.length === 0) {
     return { parts: [fullSentence], blanks: [] };
   }
 
@@ -93,20 +89,15 @@ function parseSentence(fullSentence: string, targetWord: string): ParsedSentence
         start: match.index,
         end: match.index + word.length
       });
+      // Only find first occurrence of each word
+      break;
     }
   });
 
   // Sort by position
   occurrences.sort((a, b) => a.start - b.start);
 
-  // Remove overlapping occurrences (keep first)
-  const filteredOccurrences = occurrences.filter((occ, index) => {
-    if (index === 0) return true;
-    const prev = occurrences[index - 1];
-    return occ.start >= prev.end;
-  });
-
-  if (filteredOccurrences.length === 0) {
+  if (occurrences.length === 0) {
     return { parts: [fullSentence], blanks: [] };
   }
 
@@ -115,7 +106,7 @@ function parseSentence(fullSentence: string, targetWord: string): ParsedSentence
   const blanks: BlankInfo[] = [];
   let lastEnd = 0;
 
-  filteredOccurrences.forEach((occ, index) => {
+  occurrences.forEach((occ, index) => {
     // Add text before this blank
     if (occ.start > lastEnd) {
       parts.push(fullSentence.substring(lastEnd, occ.start));
@@ -152,10 +143,12 @@ export default function MultipleBlanksExercise({
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentSentence = sentences[currentIndex];
 
-  // Parse sentence to get blanks
+  // Parse sentence to get blanks using targetWords array
   const parsedSentence = useMemo(() => {
     if (!currentSentence) return { parts: [], blanks: [] };
-    return parseSentence(currentSentence.fullSentence, currentSentence.targetWord);
+    // Use targetWords array for MULTIPLE_BLANKS
+    const targetWords = currentSentence.targetWords || [];
+    return parseSentence(currentSentence.fullSentence, targetWords);
   }, [currentSentence]);
 
   // User inputs for each blank
@@ -194,25 +187,6 @@ export default function MultipleBlanksExercise({
     });
   }, [hasChecked]);
 
-  // Handle key press
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Enter') {
-      // If not last blank, move to next
-      if (index < parsedSentence.blanks.length - 1) {
-        inputRefs.current[index + 1]?.focus();
-      } else if (userInputs.every(input => input.trim())) {
-        // If all filled, check answer
-        checkAnswer();
-      }
-    } else if (e.key === 'Tab' && !e.shiftKey && index === parsedSentence.blanks.length - 1) {
-      // Prevent tab from leaving the last input if all are filled
-      if (userInputs.every(input => input.trim())) {
-        e.preventDefault();
-        checkAnswer();
-      }
-    }
-  }, [parsedSentence.blanks.length, userInputs]);
-
   // Check answer
   const checkAnswer = useCallback(() => {
     if (hasChecked) return;
@@ -250,6 +224,25 @@ export default function MultipleBlanksExercise({
       }
     }, 2000);
   }, [hasChecked, parsedSentence.blanks, userInputs, currentIndex, sentences.length, score, onComplete, containerControls]);
+
+  // Handle key press
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'Enter') {
+      // If not last blank, move to next
+      if (index < parsedSentence.blanks.length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      } else if (userInputs.every(input => input.trim())) {
+        // If all filled, check answer
+        checkAnswer();
+      }
+    } else if (e.key === 'Tab' && !e.shiftKey && index === parsedSentence.blanks.length - 1) {
+      // Prevent tab from leaving the last input if all are filled
+      if (userInputs.every(input => input.trim())) {
+        e.preventDefault();
+        checkAnswer();
+      }
+    }
+  }, [parsedSentence.blanks.length, userInputs, checkAnswer]);
 
   // Reset exercise
   const handleReset = useCallback(() => {

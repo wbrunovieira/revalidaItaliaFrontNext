@@ -52,8 +52,12 @@ export type GameType = 'DRAG_WORD' | 'REORDER_WORDS' | 'FILL_BLANK' | 'SELECT_OP
 
 export interface AnimationSentence {
   fullSentence: string;
-  targetWord: string;
-  wordPosition: number;
+  // For DRAG_WORD, REORDER_WORDS, TYPE_COMPLETION
+  targetWord?: string;
+  wordPosition?: number;
+  // For MULTIPLE_BLANKS (minimum 2 words)
+  targetWords?: string[];
+  wordPositions?: number[];
   hint?: string;
 }
 

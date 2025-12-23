@@ -111,6 +111,11 @@ export default function DragWordExercise({
     if (!currentSentence) return { before: '', after: '' };
 
     const { fullSentence, targetWord } = currentSentence;
+
+    if (!targetWord) {
+      return { before: fullSentence, after: '' };
+    }
+
     const wordIndex = fullSentence.toLowerCase().indexOf(targetWord.toLowerCase());
 
     if (wordIndex === -1) {

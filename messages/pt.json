@@ -2100,6 +2100,24 @@
       "unmute": "Ativar som",
       "playlist": "Lista de faixas"
     },
+    "audioPlayer": {
+      "track": "Faixa {current} de {total}",
+      "trackSingular": "faixa",
+      "trackPlural": "faixas",
+      "total": "total",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "mute": "Silenciar",
+      "unmute": "Ativar som",
+      "playlist": "Playlist",
+      "shuffle": "Aleatório",
+      "repeat": "Repetir",
+      "speed": "Velocidade",
+      "transcription": "Transcrição",
+      "keyboardHint": "Atalhos: Espaço (play/pause) • ← → (anterior/próxima) • M (mudo)"
+    },
     "animations": {
       "title": "Exercícios Interativos",
       "description": "Complete os exercícios para fixar o conteúdo",

@@ -2095,6 +2095,24 @@
       "unmute": "Attiva audio",
       "playlist": "Lista delle tracce"
     },
+    "audioPlayer": {
+      "track": "Traccia {current} di {total}",
+      "trackSingular": "traccia",
+      "trackPlural": "tracce",
+      "total": "totale",
+      "previous": "Precedente",
+      "next": "Successiva",
+      "play": "Riproduci",
+      "pause": "Pausa",
+      "mute": "Disattiva audio",
+      "unmute": "Attiva audio",
+      "playlist": "Playlist",
+      "shuffle": "Casuale",
+      "repeat": "Ripeti",
+      "speed": "Velocità",
+      "transcription": "Trascrizione",
+      "keyboardHint": "Scorciatoie: Spazio (play/pausa) • ← → (precedente/successiva) • M (muto)"
+    },
     "animations": {
       "title": "Esercizi Interattivi",
       "description": "Completa gli esercizi per fissare il contenuto",

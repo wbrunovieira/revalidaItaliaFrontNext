@@ -2146,6 +2146,8 @@
         "multipleBlanks": "Múltiplas Lacunas"
       },
       "reorderInstruction": "Arraste as palavras para formar a frase correta",
+      "tapToSwap": "Toque em uma palavra, depois em outra para trocar",
+      "showHint": "Ver dica",
       "checkOrder": "Verificar Ordem",
       "exerciseSingular": "exercício",
       "exercisePlural": "exercícios",

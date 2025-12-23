@@ -2144,6 +2144,8 @@
         "multipleBlanks": "Múltiples Espacios"
       },
       "reorderInstruction": "Arrastra las palabras para formar la oración correcta",
+      "tapToSwap": "Toca una palabra, luego otra para intercambiar",
+      "showHint": "Ver pista",
       "checkOrder": "Verificar Orden",
       "exerciseSingular": "ejercicio",
       "exercisePlural": "ejercicios",

@@ -2141,6 +2141,8 @@
         "multipleBlanks": "Spazi Multipli"
       },
       "reorderInstruction": "Trascina le parole per formare la frase corretta",
+      "tapToSwap": "Tocca una parola, poi un'altra per scambiarle",
+      "showHint": "Mostra suggerimento",
       "checkOrder": "Verifica Ordine",
       "exerciseSingular": "esercizio",
       "exercisePlural": "esercizi",

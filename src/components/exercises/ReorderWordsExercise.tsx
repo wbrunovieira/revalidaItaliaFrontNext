@@ -1,8 +1,8 @@
 // src/components/exercises/ReorderWordsExercise.tsx
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence, Reorder, useAnimation } from 'framer-motion';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import {
   CheckCircle,
@@ -10,6 +10,8 @@ import {
   RotateCcw,
   Sparkles,
   GripVertical,
+  Lightbulb,
+  ChevronDown,
 } from 'lucide-react';
 import type { AnimationSentence } from '@/hooks/queries/useLesson';
 
@@ -49,7 +51,7 @@ const shakeAnimation = {
   }
 };
 
-// Fisher-Yates shuffle
+// Fisher-Yates shuffle that ensures array is actually shuffled
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -65,6 +67,7 @@ export default function ReorderWordsExercise({
 }: ReorderWordsExerciseProps) {
   const t = useTranslations('Lesson.exercises');
   const containerControls = useAnimation();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Detect if touch device
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -76,6 +79,9 @@ export default function ReorderWordsExercise({
   // Current sentence index
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentSentence = sentences[currentIndex];
+
+  // Hint visibility state
+  const [showHint, setShowHint] = useState(false);
 
   // Get words from sentence and create shuffled array
   const correctWords = useMemo(() => {
@@ -102,6 +108,8 @@ export default function ReorderWordsExercise({
       originalIndex: index,
     }));
     setWordItems(shuffleArray(items));
+    setSelectedIndex(null);
+    setShowHint(false);
   }, [correctWords]);
 
   // Feedback state
@@ -112,38 +120,42 @@ export default function ReorderWordsExercise({
   // Score tracking
   const [score, setScore] = useState(0);
 
-  // Check if current order is correct
-  const checkAnswer = useCallback(() => {
+  // Selected word index for tap-to-swap
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  // Drag state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Auto-check function - called after each reorder
+  const checkIfCorrect = useCallback((items: WordItem[]) => {
     if (hasChecked) return;
 
-    const currentOrder = wordItems.map(item => item.word).join(' ');
+    const currentOrder = items.map(item => item.word).join(' ');
     const correct = currentOrder === currentSentence?.fullSentence;
 
-    setIsCorrect(correct);
-    setShowFeedback(true);
-    setHasChecked(true);
-
     if (correct) {
+      // Correct! Show success feedback
+      setIsCorrect(true);
+      setShowFeedback(true);
+      setHasChecked(true);
       triggerHapticFeedback('success');
       setScore(prev => prev + 1);
-    } else {
-      triggerHapticFeedback('error');
-      containerControls.start('shake');
-    }
 
-    // Auto-advance after feedback
-    setTimeout(() => {
-      if (currentIndex < sentences.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-        setShowFeedback(false);
-        setHasChecked(false);
-      } else {
-        // Exercise complete
-        const finalScore = score + (correct ? 1 : 0);
-        onComplete?.(finalScore === sentences.length, finalScore);
-      }
-    }, 1500);
-  }, [wordItems, currentSentence, hasChecked, currentIndex, sentences.length, score, onComplete, containerControls]);
+      // Auto-advance after feedback
+      setTimeout(() => {
+        if (currentIndex < sentences.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+          setShowFeedback(false);
+          setHasChecked(false);
+        } else {
+          // Exercise complete
+          const finalScore = score + 1;
+          onComplete?.(finalScore === sentences.length, finalScore);
+        }
+      }, 1500);
+    }
+  }, [hasChecked, currentSentence, currentIndex, sentences.length, score, onComplete]);
 
   // Reset exercise
   const handleReset = useCallback(() => {
@@ -151,6 +163,8 @@ export default function ReorderWordsExercise({
     setScore(0);
     setShowFeedback(false);
     setHasChecked(false);
+    setSelectedIndex(null);
+    setShowHint(false);
 
     const items = sentences[0]?.fullSentence.split(/\s+/).filter(w => w.length > 0).map((word, index) => ({
       id: `${word}-${index}-${Math.random()}`,
@@ -160,13 +174,155 @@ export default function ReorderWordsExercise({
     setWordItems(shuffleArray(items));
   }, [sentences]);
 
-  // Handle reorder
-  const handleReorder = useCallback((newOrder: WordItem[]) => {
-    if (!hasChecked) {
-      triggerHapticFeedback('light');
-      setWordItems(newOrder);
+  // Handle word tap (for mobile tap-to-swap)
+  const handleWordTap = useCallback((index: number) => {
+    if (hasChecked) return;
+
+    triggerHapticFeedback('light');
+
+    if (selectedIndex === null) {
+      // First tap - select the word
+      setSelectedIndex(index);
+    } else if (selectedIndex === index) {
+      // Tap same word - deselect
+      setSelectedIndex(null);
+    } else {
+      // Second tap - swap words
+      setWordItems(prev => {
+        const newItems = [...prev];
+        [newItems[selectedIndex], newItems[index]] = [newItems[index], newItems[selectedIndex]];
+        // Check after swap
+        setTimeout(() => checkIfCorrect(newItems), 100);
+        return newItems;
+      });
+      setSelectedIndex(null);
     }
+  }, [hasChecked, selectedIndex, checkIfCorrect]);
+
+  // Drag handlers for desktop
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    if (hasChecked) return;
+
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+
+    // Make drag image slightly transparent
+    const target = e.target as HTMLElement;
+    setTimeout(() => {
+      target.style.opacity = '0.5';
+    }, 0);
   }, [hasChecked]);
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  }, [draggedIndex]);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+
+    if (draggedIndex === null || draggedIndex === targetIndex || hasChecked) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    triggerHapticFeedback('light');
+
+    // Swap the words
+    setWordItems(prev => {
+      const newItems = [...prev];
+      [newItems[draggedIndex], newItems[targetIndex]] = [newItems[targetIndex], newItems[draggedIndex]];
+      // Check after swap
+      setTimeout(() => checkIfCorrect(newItems), 100);
+      return newItems;
+    });
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  }, [draggedIndex, hasChecked, checkIfCorrect]);
+
+  // Touch drag handlers for mobile
+  const touchStartPos = useRef<{ x: number; y: number; index: number } | null>(null);
+  const [touchDragIndex, setTouchDragIndex] = useState<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
+    if (hasChecked) return;
+
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY, index };
+
+    // Long press to start drag
+    const timer = setTimeout(() => {
+      if (touchStartPos.current?.index === index) {
+        setTouchDragIndex(index);
+        triggerHapticFeedback('light');
+      }
+    }, 200);
+
+    // Store timer to cancel if touch ends quickly
+    (e.target as HTMLElement).dataset.touchTimer = timer.toString();
+  }, [hasChecked]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchDragIndex === null || !containerRef.current) return;
+
+    const touch = e.touches[0];
+    const elements = containerRef.current.querySelectorAll('[data-word-index]');
+
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const index = parseInt(el.getAttribute('data-word-index') || '-1');
+
+      if (
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom &&
+        index !== touchDragIndex
+      ) {
+        setDragOverIndex(index);
+      }
+    });
+  }, [touchDragIndex]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const timer = (e.target as HTMLElement).dataset.touchTimer;
+    if (timer) {
+      clearTimeout(parseInt(timer));
+    }
+
+    if (touchDragIndex !== null && dragOverIndex !== null && touchDragIndex !== dragOverIndex) {
+      triggerHapticFeedback('light');
+
+      setWordItems(prev => {
+        const newItems = [...prev];
+        [newItems[touchDragIndex], newItems[dragOverIndex]] = [newItems[dragOverIndex], newItems[touchDragIndex]];
+        // Check after swap
+        setTimeout(() => checkIfCorrect(newItems), 100);
+        return newItems;
+      });
+    }
+
+    touchStartPos.current = null;
+    setTouchDragIndex(null);
+    setDragOverIndex(null);
+  }, [touchDragIndex, dragOverIndex, checkIfCorrect]);
 
   if (!currentSentence) return null;
 
@@ -212,75 +368,110 @@ export default function ReorderWordsExercise({
         className="text-center mb-6"
       >
         <p className="text-gray-400 text-sm mb-2">{t('reorderInstruction')}</p>
-        {currentSentence.hint && (
-          <p className="text-secondary text-xs italic">{currentSentence.hint}</p>
+        {isTouchDevice && (
+          <p className="text-secondary/70 text-xs">{t('tapToSwap')}</p>
         )}
       </motion.div>
 
+      {/* Hint button (only if hint exists) */}
+      {currentSentence.hint && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-4"
+        >
+          <button
+            onClick={() => setShowHint(!showHint)}
+            className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-all ${
+              showHint
+                ? 'bg-secondary/20 text-secondary'
+                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
+            }`}
+          >
+            <Lightbulb size={16} className={showHint ? 'text-secondary' : ''} />
+            <span className="text-sm">{t('showHint')}</span>
+            <motion.div
+              animate={{ rotate: showHint ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown size={16} />
+            </motion.div>
+          </button>
+
+          <AnimatePresence>
+            {showHint && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 p-3 bg-secondary/10 border border-secondary/30 rounded-lg">
+                  <p className="text-secondary text-sm italic text-center">
+                    {currentSentence.hint}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
+
       {/* Reorderable words */}
       <motion.div
+        ref={containerRef}
         variants={shakeAnimation}
         animate={containerControls}
         className="mb-8"
       >
-        <Reorder.Group
-          axis="x"
-          values={wordItems}
-          onReorder={handleReorder}
-          className="flex flex-wrap justify-center gap-2 sm:gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 min-h-[80px]"
-        >
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 min-h-[80px]">
           <AnimatePresence mode="popLayout">
-            {wordItems.map((item) => (
-              <Reorder.Item
+            {wordItems.map((item, index) => (
+              <motion.div
                 key={item.id}
-                value={item}
-                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium select-none touch-manipulation cursor-grab active:cursor-grabbing ${
+                data-word-index={index}
+                layout
+                layoutId={item.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: draggedIndex === index || touchDragIndex === index ? 0.5 : 1,
+                  scale: dragOverIndex === index ? 1.1 : 1,
+                  y: dragOverIndex === index ? -4 : 0
+                }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                draggable={!hasChecked && !isTouchDevice}
+                onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, index)}
+                onDragEnd={(e) => handleDragEnd(e as unknown as React.DragEvent)}
+                onDragOver={(e) => handleDragOver(e as unknown as React.DragEvent, index)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e as unknown as React.DragEvent, index)}
+                onTouchStart={(e) => handleTouchStart(e, index)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onClick={() => handleWordTap(index)}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-medium select-none touch-none cursor-pointer transition-colors ${
                   hasChecked
                     ? isCorrect
                       ? 'bg-green-500/20 border border-green-500/50 text-green-400'
                       : 'bg-red-500/20 border border-red-500/50 text-red-400'
-                    : 'bg-gradient-to-br from-gray-700 to-gray-800 text-white hover:from-secondary/30 hover:to-secondary/20 hover:shadow-lg hover:shadow-secondary/20'
+                    : selectedIndex === index
+                    ? 'bg-secondary/40 border-2 border-secondary text-white shadow-lg shadow-secondary/30'
+                    : dragOverIndex === index
+                    ? 'bg-secondary/30 border-2 border-secondary/50 text-white'
+                    : 'bg-gradient-to-br from-gray-700 to-gray-800 text-white hover:from-secondary/30 hover:to-secondary/20 border border-transparent'
                 }`}
-                whileHover={!hasChecked ? { scale: 1.05, y: -2 } : {}}
-                whileTap={!hasChecked ? { scale: 0.95 } : {}}
-                whileDrag={{ scale: 1.1, zIndex: 50 }}
-                dragListener={!hasChecked}
               >
                 {!isTouchDevice && !hasChecked && (
-                  <GripVertical size={14} className="text-gray-400" />
+                  <GripVertical size={14} className="text-gray-400 cursor-grab active:cursor-grabbing" />
                 )}
                 <span className="text-sm sm:text-base">{item.word}</span>
-              </Reorder.Item>
+              </motion.div>
             ))}
           </AnimatePresence>
-        </Reorder.Group>
-      </motion.div>
-
-      {/* Check button */}
-      {!hasChecked && (
-        <div className="flex justify-center">
-          <motion.button
-            onClick={checkAnswer}
-            className="px-8 py-3 bg-secondary hover:bg-secondary/90 text-primary font-semibold rounded-xl transition-colors"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {t('checkOrder')}
-          </motion.button>
         </div>
-      )}
-
-      {/* Correct answer hint (when wrong) */}
-      {showFeedback && !isCorrect && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-4 bg-gray-800/80 rounded-xl border border-gray-700"
-        >
-          <p className="text-gray-400 text-sm mb-2">{t('correctAnswer')}:</p>
-          <p className="text-white font-medium">{currentSentence.fullSentence}</p>
-        </motion.div>
-      )}
+      </motion.div>
 
       {/* Feedback overlay */}
       <AnimatePresence>

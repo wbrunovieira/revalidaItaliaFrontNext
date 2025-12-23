@@ -5,28 +5,37 @@ import { useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Gamepad2,
-  CheckCircle,
   Lock,
   MessageSquareText,
   ListChecks,
   ChevronDown,
 } from 'lucide-react';
-import type { Animation } from '@/hooks/queries/useLesson';
+import type { Animation, AnimationType } from '@/hooks/queries/useLesson';
 
 interface AnimationsSectionProps {
   animations: Animation[];
+}
+
+interface TypeGroup {
+  type: AnimationType;
+  animations: Animation[];
+  totalQuestions: number;
+  availableCount: number;
+  lockedCount: number;
+  isLocked: boolean;
 }
 
 export default function AnimationsSection({
   animations,
 }: AnimationsSectionProps) {
   const t = useTranslations('Lesson.animations');
+  const tExercises = useTranslations('Lesson.exercises');
 
   // Function to scroll to and open the exercises expandable
-  const handleOpenExercises = useCallback((animationId?: string) => {
+  const handleOpenExercises = useCallback(() => {
     // Dispatch custom event to open the expandable section
     const event = new CustomEvent('openExercisesExpandable', {
-      detail: { animationId },
+      detail: {},
     });
     window.dispatchEvent(event);
 
@@ -43,15 +52,44 @@ export default function AnimationsSection({
     [animations]
   );
 
+  // Group animations by type
+  const typeGroups = useMemo((): TypeGroup[] => {
+    const groups: Record<string, Animation[]> = {};
+
+    sortedAnimations.forEach(anim => {
+      if (!groups[anim.type]) {
+        groups[anim.type] = [];
+      }
+      groups[anim.type].push(anim);
+    });
+
+    return Object.entries(groups).map(([type, anims]) => {
+      const availableCount = anims.filter(a => a.enabled !== false).length;
+      const lockedCount = anims.filter(a => a.enabled === false).length;
+      const totalQuestions = anims.reduce((sum, a) =>
+        sum + (a.content?.sentences?.length || 1), 0
+      );
+
+      return {
+        type: type as AnimationType,
+        animations: anims,
+        totalQuestions,
+        availableCount,
+        lockedCount,
+        isLocked: anims.every(a => a.enabled === false),
+      };
+    });
+  }, [sortedAnimations]);
+
   // Get icon based on animation type
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string, size: number = 20) => {
     switch (type) {
       case 'CompleteSentence':
-        return <MessageSquareText size={18} className="text-blue-400" />;
+        return <MessageSquareText size={size} className="text-blue-400" />;
       case 'MultipleChoice':
-        return <ListChecks size={18} className="text-purple-400" />;
+        return <ListChecks size={size} className="text-purple-400" />;
       default:
-        return <Gamepad2 size={18} className="text-secondary" />;
+        return <Gamepad2 size={size} className="text-secondary" />;
     }
   };
 
@@ -59,23 +97,23 @@ export default function AnimationsSection({
   const getTypeLabel = (type: string): string => {
     switch (type) {
       case 'CompleteSentence':
-        return t('types.completeSentence');
+        return tExercises('types.completeSentence');
       case 'MultipleChoice':
-        return t('types.multipleChoice');
+        return tExercises('types.multipleChoice');
       default:
         return type;
     }
   };
 
-  // Get badge color based on type
-  const getTypeBadgeColor = (type: string): string => {
+  // Get card color based on type
+  const getTypeCardColor = (type: string): string => {
     switch (type) {
       case 'CompleteSentence':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+        return 'border-blue-500/30 hover:border-blue-500/50';
       case 'MultipleChoice':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+        return 'border-purple-500/30 hover:border-purple-500/50';
       default:
-        return 'bg-secondary/20 text-secondary border-secondary/30';
+        return 'border-secondary/30 hover:border-secondary/50';
     }
   };
 
@@ -95,97 +133,67 @@ export default function AnimationsSection({
       </div>
 
       <div className="space-y-2">
-        {sortedAnimations.map(animation => {
-          // Treat undefined as enabled (default behavior)
-          const isDisabled = animation.enabled === false;
-
-          return (
-            <div
-              key={animation.id}
-              className={`rounded-lg border transition-all ${
-                isDisabled
-                  ? 'bg-primary/20 border-gray-700/50 opacity-60'
-                  : 'bg-primary/30 border-secondary/20 hover:border-secondary/40'
-              }`}
-            >
-              {isDisabled ? (
-                <div className="flex items-center gap-3 p-4">
-                  <div className="w-10 h-10 bg-gray-700/50 rounded-lg flex items-center justify-center">
-                    <Lock size={20} className="text-gray-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded border ${getTypeBadgeColor(
-                          animation.type
-                        )}`}
-                      >
-                        {getTypeLabel(animation.type)}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {t('disabled')}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-sm">
-                      {t('exercise', { number: animation.order })}
-                    </p>
-                  </div>
+        {typeGroups.map(group => (
+          <div
+            key={group.type}
+            className={`rounded-lg border transition-all ${
+              group.isLocked
+                ? 'bg-primary/20 border-gray-700/50 opacity-60'
+                : `bg-primary/30 ${getTypeCardColor(group.type)}`
+            }`}
+          >
+            {group.isLocked ? (
+              <div className="flex items-center gap-3 p-4">
+                <div className="w-10 h-10 bg-gray-700/50 rounded-lg flex items-center justify-center">
+                  <Lock size={20} className="text-gray-500" />
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleOpenExercises(animation.id)}
-                  className="w-full flex items-center gap-3 p-4 group text-left"
-                >
-                  <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center group-hover:bg-secondary/30 transition-colors">
-                    {getTypeIcon(animation.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded border ${getTypeBadgeColor(
-                          animation.type
-                        )}`}
-                      >
-                        {getTypeLabel(animation.type)}
-                      </span>
-                      {animation.totalQuestions && (
-                        <span className="text-xs text-gray-500">
-                          {t('questions', { count: animation.totalQuestions })}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-white text-sm font-medium group-hover:text-secondary transition-colors">
-                      {t('exercise', { number: animation.order })}
-                    </p>
-                  </div>
-                  <ChevronDown
-                    size={20}
-                    className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
-                  />
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Summary */}
-      <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
-        <div className="flex items-center gap-1">
-          <CheckCircle size={12} className="text-secondary" />
-          <span>
-            {sortedAnimations.filter(a => a.enabled !== false).length} {t('available')}
-          </span>
-        </div>
-        {sortedAnimations.some(a => a.enabled === false) && (
-          <div className="flex items-center gap-1">
-            <Lock size={12} className="text-gray-500" />
-            <span>
-              {sortedAnimations.filter(a => a.enabled === false).length} {t('locked')}
-            </span>
+                <div className="flex-1">
+                  <p className="text-gray-400 text-sm font-medium">
+                    {getTypeLabel(group.type)}
+                  </p>
+                  <p className="text-gray-500 text-xs">
+                    {group.animations.length}{' '}
+                    {group.animations.length === 1
+                      ? tExercises('exerciseSingular')
+                      : tExercises('exercisePlural')}
+                    {' • '}
+                    {t('locked')}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleOpenExercises}
+                className="w-full flex items-center gap-3 p-4 group text-left"
+              >
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/15 transition-colors">
+                  {getTypeIcon(group.type)}
+                </div>
+                <div className="flex-1">
+                  <p className="text-white text-sm font-medium group-hover:text-secondary transition-colors">
+                    {getTypeLabel(group.type)}
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    {group.animations.length}{' '}
+                    {group.animations.length === 1
+                      ? tExercises('exerciseSingular')
+                      : tExercises('exercisePlural')}
+                    {' • '}
+                    {group.totalQuestions}{' '}
+                    {group.totalQuestions === 1
+                      ? tExercises('questionSingular')
+                      : tExercises('questionPlural')}
+                  </p>
+                </div>
+                <ChevronDown
+                  size={20}
+                  className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+              </button>
+            )}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

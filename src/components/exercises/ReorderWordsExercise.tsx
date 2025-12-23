@@ -17,6 +17,7 @@ import type { AnimationSentence } from '@/hooks/queries/useLesson';
 
 interface ReorderWordsExerciseProps {
   sentences: AnimationSentence[];
+  onAttempt?: (isCorrect: boolean) => void;
   onComplete?: (success: boolean, score: number) => void;
 }
 
@@ -63,6 +64,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function ReorderWordsExercise({
   sentences,
+  onAttempt,
   onComplete,
 }: ReorderWordsExerciseProps) {
   const t = useTranslations('Lesson.exercises');
@@ -134,7 +136,10 @@ export default function ReorderWordsExercise({
     const currentOrder = items.map(item => item.word).join(' ');
     const correct = currentOrder === currentSentence?.fullSentence;
 
+    // Record attempt when correct (reorder exercises auto-verify on each change)
     if (correct) {
+      onAttempt?.(true);
+
       // Correct! Show success feedback
       setIsCorrect(true);
       setShowFeedback(true);
@@ -155,7 +160,7 @@ export default function ReorderWordsExercise({
         }
       }, 1500);
     }
-  }, [hasChecked, currentSentence, currentIndex, sentences.length, score, onComplete]);
+  }, [hasChecked, currentSentence, currentIndex, sentences.length, score, onAttempt, onComplete]);
 
   // Reset exercise
   const handleReset = useCallback(() => {

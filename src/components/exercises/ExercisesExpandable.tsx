@@ -22,7 +22,7 @@ import ReorderWordsExercise from './ReorderWordsExercise';
 import TypeCompletionExercise from './TypeCompletionExercise';
 import MultipleBlanksExercise from './MultipleBlanksExercise';
 import type { Animation, GameType } from '@/hooks/queries/useLesson';
-import { useCompleteAnimation } from '@/hooks/queries/useLesson';
+import { useCompleteAnimation, useRecordAnimationAttempt } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
   lessonId: string;
@@ -52,6 +52,7 @@ export default function ExercisesExpandable({
 }: ExercisesExpandableProps) {
   const t = useTranslations('Lesson.exercises');
   const completeAnimation = useCompleteAnimation();
+  const recordAttempt = useRecordAnimationAttempt();
 
   // Expanded state
   const [isExpanded, setIsExpanded] = useState(false);
@@ -219,6 +220,24 @@ export default function ExercisesExpandable({
       }, 500);
     }
   }, [currentExerciseIndex, activeGameTypeAnimations.length, lessonId, completeAnimation]);
+
+  // Handle individual attempt (called for each answer, correct or incorrect)
+  const handleAttempt = useCallback(async (
+    animationId: string,
+    isCorrect: boolean
+  ) => {
+    try {
+      await recordAttempt.mutateAsync({
+        lessonId,
+        animationId,
+        isCorrect,
+      });
+      console.log('[Exercise] Attempt recorded:', { animationId, isCorrect });
+    } catch (error) {
+      console.error('[Exercise] Failed to record attempt:', error);
+      // Continue with the exercise even if API fails
+    }
+  }, [lessonId, recordAttempt]);
 
   // Handle start game type
   const handleStartGameType = useCallback((gameType: GameType) => {
@@ -461,6 +480,9 @@ export default function ExercisesExpandable({
                         <DragWordExercise
                           sentences={currentAnimation.content.sentences}
                           distractors={currentAnimation.content.distractors}
+                          onAttempt={(isCorrect) =>
+                            handleAttempt(currentAnimation.id, isCorrect)
+                          }
                           onComplete={(success, score) =>
                             handleExerciseComplete(currentAnimation.id, success, score)
                           }
@@ -470,6 +492,9 @@ export default function ExercisesExpandable({
                       {currentAnimation.content?.gameType === 'REORDER_WORDS' && (
                         <ReorderWordsExercise
                           sentences={currentAnimation.content.sentences}
+                          onAttempt={(isCorrect) =>
+                            handleAttempt(currentAnimation.id, isCorrect)
+                          }
                           onComplete={(success, score) =>
                             handleExerciseComplete(currentAnimation.id, success, score)
                           }
@@ -479,6 +504,9 @@ export default function ExercisesExpandable({
                       {currentAnimation.content?.gameType === 'TYPE_COMPLETION' && (
                         <TypeCompletionExercise
                           sentences={currentAnimation.content.sentences}
+                          onAttempt={(isCorrect) =>
+                            handleAttempt(currentAnimation.id, isCorrect)
+                          }
                           onComplete={(success, score) =>
                             handleExerciseComplete(currentAnimation.id, success, score)
                           }
@@ -488,6 +516,9 @@ export default function ExercisesExpandable({
                       {currentAnimation.content?.gameType === 'MULTIPLE_BLANKS' && (
                         <MultipleBlanksExercise
                           sentences={currentAnimation.content.sentences}
+                          onAttempt={(isCorrect) =>
+                            handleAttempt(currentAnimation.id, isCorrect)
+                          }
                           onComplete={(success, score) =>
                             handleExerciseComplete(currentAnimation.id, success, score)
                           }

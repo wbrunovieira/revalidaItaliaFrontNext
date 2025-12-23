@@ -16,6 +16,7 @@ import type { AnimationSentence } from '@/hooks/queries/useLesson';
 
 interface TypeCompletionExerciseProps {
   sentences: AnimationSentence[];
+  onAttempt?: (isCorrect: boolean) => void;
   onComplete?: (success: boolean, score: number) => void;
 }
 
@@ -55,6 +56,7 @@ function normalizeText(text: string): string {
 
 export default function TypeCompletionExercise({
   sentences,
+  onAttempt,
   onComplete,
 }: TypeCompletionExerciseProps) {
   const t = useTranslations('Lesson.exercises');
@@ -118,6 +120,9 @@ export default function TypeCompletionExercise({
     const normalizedTarget = normalizeText(currentSentence?.targetWord || '');
     const correct = normalizedInput === normalizedTarget;
 
+    // Record attempt to API
+    onAttempt?.(correct);
+
     setIsCorrect(correct);
     setShowFeedback(true);
     setHasChecked(true);
@@ -142,7 +147,7 @@ export default function TypeCompletionExercise({
         onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 1500);
-  }, [userInput, currentSentence, hasChecked, currentIndex, sentences.length, score, onComplete, inputControls]);
+  }, [userInput, currentSentence, hasChecked, currentIndex, sentences.length, score, onAttempt, onComplete, inputControls]);
 
   // Handle key press
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {

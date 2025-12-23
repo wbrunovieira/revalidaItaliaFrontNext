@@ -16,6 +16,7 @@ import type { AnimationSentence } from '@/hooks/queries/useLesson';
 
 interface MultipleBlanksExerciseProps {
   sentences: AnimationSentence[];
+  onAttempt?: (isCorrect: boolean) => void;
   onComplete?: (success: boolean, score: number) => void;
 }
 
@@ -133,6 +134,7 @@ function parseSentence(fullSentence: string, targetWords: string[]): ParsedSente
 
 export default function MultipleBlanksExercise({
   sentences,
+  onAttempt,
   onComplete,
 }: MultipleBlanksExerciseProps) {
   const t = useTranslations('Lesson.exercises');
@@ -198,6 +200,10 @@ export default function MultipleBlanksExercise({
     });
 
     const allCorrect = results.every(r => r);
+
+    // Record attempt to API
+    onAttempt?.(allCorrect);
+
     setCorrectBlanks(results);
     setIsCorrect(allCorrect);
     setShowFeedback(true);
@@ -223,7 +229,7 @@ export default function MultipleBlanksExercise({
         onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 2000);
-  }, [hasChecked, parsedSentence.blanks, userInputs, currentIndex, sentences.length, score, onComplete, containerControls]);
+  }, [hasChecked, parsedSentence.blanks, userInputs, currentIndex, sentences.length, score, onAttempt, onComplete, containerControls]);
 
   // Handle key press
   const handleKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {

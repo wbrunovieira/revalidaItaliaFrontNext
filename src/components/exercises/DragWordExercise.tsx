@@ -16,6 +16,7 @@ import type { AnimationSentence } from '@/hooks/queries/useLesson';
 interface DragWordExerciseProps {
   sentences: AnimationSentence[];
   distractors: string[];
+  onAttempt?: (isCorrect: boolean) => void;
   onComplete?: (success: boolean, score: number) => void;
 }
 
@@ -57,6 +58,7 @@ const shakeAnimation = {
 export default function DragWordExercise({
   sentences,
   distractors,
+  onAttempt,
   onComplete,
 }: DragWordExerciseProps) {
   const t = useTranslations('Lesson.exercises');
@@ -176,6 +178,9 @@ export default function DragWordExercise({
     setIsCorrect(correct);
     setShowFeedback(true);
 
+    // Record attempt to API
+    onAttempt?.(correct);
+
     // Trigger haptic feedback
     if (correct) {
       triggerHapticFeedback('success');
@@ -218,7 +223,7 @@ export default function DragWordExercise({
         onComplete?.(finalScore === sentences.length, finalScore);
       }
     }, 1500);
-  }, [currentIndex, sentences, distractors, score, onComplete, dropZoneControls]);
+  }, [currentIndex, sentences, distractors, score, onAttempt, onComplete, dropZoneControls]);
 
   // Handle drop on drop zone
   const handleDrop = useCallback((e: React.DragEvent) => {

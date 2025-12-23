@@ -53,13 +53,36 @@ const shakeAnimation = {
   }
 };
 
-// Fisher-Yates shuffle that ensures array is actually shuffled
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+// Fisher-Yates shuffle that ensures array is never in original order
+function shuffleArray<T>(array: T[], getKey?: (item: T) => number): T[] {
+  // If array has 1 or fewer elements, can't shuffle differently
+  if (array.length <= 1) return [...array];
+
+  const shuffle = (): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Check if shuffled array is in original order
+  const isOriginalOrder = (shuffled: T[]): boolean => {
+    if (getKey) {
+      return shuffled.every((item, index) => getKey(item) === index);
+    }
+    return shuffled.every((item, index) => item === array[index]);
+  };
+
+  // Keep shuffling until we get a different order (max 10 attempts)
+  let shuffled = shuffle();
+  let attempts = 0;
+  while (isOriginalOrder(shuffled) && attempts < 10) {
+    shuffled = shuffle();
+    attempts++;
   }
+
   return shuffled;
 }
 
@@ -139,7 +162,7 @@ export default function ReorderWordsExercise({
       word,
       originalIndex: index,
     }));
-    return shuffleArray(items);
+    return shuffleArray(items, (item) => item.originalIndex);
   });
 
   // Reset words when sentence changes
@@ -149,7 +172,7 @@ export default function ReorderWordsExercise({
       word,
       originalIndex: index,
     }));
-    setWordItems(shuffleArray(items));
+    setWordItems(shuffleArray(items, (item) => item.originalIndex));
     setSelectedIndex(null);
     setShowHint(false);
   }, [correctWords]);
@@ -222,7 +245,7 @@ export default function ReorderWordsExercise({
       word,
       originalIndex: index,
     })) || [];
-    setWordItems(shuffleArray(items));
+    setWordItems(shuffleArray(items, (item) => item.originalIndex));
   }, [sentences]);
 
   // Handle word tap (for mobile tap-to-swap)

@@ -9,6 +9,7 @@ import {
   XCircle,
   RotateCcw,
   Sparkles,
+  Star,
   GripVertical,
   Lightbulb,
   ChevronDown,
@@ -61,6 +62,45 @@ function shuffleArray<T>(array: T[]): T[] {
   }
   return shuffled;
 }
+
+// Confetti particle component
+const ConfettiParticle = ({ delay, colorIndex }: { delay: number; colorIndex: number }) => {
+  const colors = [
+    'text-secondary fill-secondary',
+    'text-accent fill-accent',
+    'text-green-400 fill-green-400',
+  ];
+
+  const randomX = Math.random() * 200 - 100;
+  const randomRotation = Math.random() * 720 - 360;
+
+  return (
+    <motion.div
+      className="absolute"
+      initial={{
+        opacity: 1,
+        scale: 0,
+        x: 0,
+        y: 0,
+        rotate: 0
+      }}
+      animate={{
+        opacity: [1, 1, 0],
+        scale: [0, 1, 0.5],
+        x: randomX,
+        y: -150 - Math.random() * 100,
+        rotate: randomRotation
+      }}
+      transition={{
+        duration: 1.2,
+        delay,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
+    >
+      <Star size={12} className={colors[colorIndex % colors.length]} />
+    </motion.div>
+  );
+};
 
 export default function ReorderWordsExercise({
   sentences,
@@ -122,6 +162,9 @@ export default function ReorderWordsExercise({
   // Score tracking
   const [score, setScore] = useState(0);
 
+  // Confetti state
+  const [showConfetti, setShowConfetti] = useState(false);
+
   // Selected word index for tap-to-swap
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -144,11 +187,13 @@ export default function ReorderWordsExercise({
       setIsCorrect(true);
       setShowFeedback(true);
       setHasChecked(true);
+      setShowConfetti(true);
       triggerHapticFeedback('success');
       setScore(prev => prev + 1);
 
       // Auto-advance after feedback
       setTimeout(() => {
+        setShowConfetti(false);
         if (currentIndex < sentences.length - 1) {
           setCurrentIndex(prev => prev + 1);
           setShowFeedback(false);
@@ -170,6 +215,7 @@ export default function ReorderWordsExercise({
     setHasChecked(false);
     setSelectedIndex(null);
     setShowHint(false);
+    setShowConfetti(false);
 
     const items = sentences[0]?.fullSentence.split(/\s+/).filter(w => w.length > 0).map((word, index) => ({
       id: `${word}-${index}-${Math.random()}`,
@@ -342,7 +388,7 @@ export default function ReorderWordsExercise({
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1">
-            <Sparkles size={14} className="text-yellow-400 sm:w-4 sm:h-4" />
+            <Sparkles size={14} className="text-secondary sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium text-white">{score}</span>
           </div>
           <button
@@ -497,7 +543,19 @@ export default function ReorderWordsExercise({
                   : 'bg-gradient-to-br from-red-600 to-rose-700'
               }`}
             >
-              <div className="flex flex-col items-center gap-3 sm:gap-4">
+              <div className="flex flex-col items-center gap-3 sm:gap-4 relative">
+                {/* Confetti particles */}
+                {showConfetti && isCorrect && (
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <ConfettiParticle
+                        key={`confetti-${i}`}
+                        delay={i * 0.05}
+                        colorIndex={i}
+                      />
+                    ))}
+                  </div>
+                )}
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}

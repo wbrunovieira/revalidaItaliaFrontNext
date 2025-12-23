@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Sparkles,
   GripHorizontal,
+  Star,
 } from 'lucide-react';
 import type { AnimationSentence } from '@/hooks/queries/useLesson';
 
@@ -53,6 +54,31 @@ const shakeAnimation = {
     x: [0, -10, 10, -10, 10, -5, 5, 0],
     transition: { duration: 0.5 }
   }
+};
+
+// Confetti particle component - using project colors
+const ConfettiParticle = ({ delay, colorIndex }: { delay: number; colorIndex: number }) => {
+  const colors = [
+    'text-secondary fill-secondary',
+    'text-accent fill-accent',
+    'text-green-400 fill-green-400',
+  ];
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
+      animate={{
+        opacity: [1, 1, 0],
+        scale: [0, 1.5, 1],
+        x: Math.random() * 200 - 100,
+        y: Math.random() * -150 - 50,
+        rotate: Math.random() * 360,
+      }}
+      transition={{ duration: 1, delay, ease: 'easeOut' }}
+    >
+      <Star size={Math.random() * 12 + 8} className={colors[colorIndex % colors.length]} />
+    </motion.div>
+  );
 };
 
 export default function DragWordExercise({
@@ -104,6 +130,7 @@ export default function DragWordExercise({
   // Feedback state
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Score tracking
   const [score, setScore] = useState(0);
@@ -184,6 +211,7 @@ export default function DragWordExercise({
     // Trigger haptic feedback
     if (correct) {
       triggerHapticFeedback('success');
+      setShowConfetti(true);
     } else {
       triggerHapticFeedback('error');
       // Trigger shake animation on drop zone
@@ -297,6 +325,7 @@ export default function DragWordExercise({
     setCurrentIndex(0);
     setScore(0);
     setShowFeedback(false);
+    setShowConfetti(false);
     setSelectedWord(null);
 
     const correctWord = sentences[0]?.targetWord || '';
@@ -327,7 +356,7 @@ export default function DragWordExercise({
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1">
-            <Sparkles size={14} className="text-yellow-400 sm:w-4 sm:h-4" />
+            <Sparkles size={14} className="text-secondary sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium text-white">{score}</span>
           </div>
           <button
@@ -450,6 +479,15 @@ export default function DragWordExercise({
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           >
+            {/* Confetti */}
+            {showConfetti && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                {Array.from({ length: 15 }).map((_, i) => (
+                  <ConfettiParticle key={i} delay={i * 0.04} colorIndex={i} />
+                ))}
+              </div>
+            )}
+
             <motion.div
               initial={{ y: 50, scale: 0.9 }}
               animate={{ y: 0, scale: 1 }}

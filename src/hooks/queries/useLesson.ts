@@ -48,6 +48,19 @@ export interface Audio {
 }
 
 export type AnimationType = 'CompleteSentence' | 'MultipleChoice';
+export type GameType = 'DRAG_WORD' | 'FILL_BLANK' | 'SELECT_OPTION';
+
+export interface AnimationSentence {
+  fullSentence: string;
+  targetWord: string;
+  wordPosition: number;
+}
+
+export interface AnimationContent {
+  gameType: GameType;
+  sentences: AnimationSentence[];
+  distractors: string[];
+}
 
 export interface Animation {
   id: string;
@@ -57,6 +70,7 @@ export interface Animation {
   totalQuestions?: number;
   enabled: boolean;
   disabledAt?: string | null;
+  content?: AnimationContent;
   createdAt?: string;
   updatedAt?: string;
 }

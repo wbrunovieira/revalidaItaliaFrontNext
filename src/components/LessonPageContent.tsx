@@ -20,6 +20,7 @@ import LessonCompletionButton from '@/components/LessonCompletionButton';
 import ModuleLessonsList from '@/components/ModuleLessonsList';
 import AudioPlayerSection from '@/components/AudioPlayerSection';
 import AnimationsSection from '@/components/AnimationsSection';
+import ExercisesExpandable from '@/components/exercises/ExercisesExpandable';
 import Environment3DLoader from '@/components/3d-environments/Environment3DLoader';
 import {
   ArrowLeft,
@@ -463,6 +464,13 @@ export default function LessonPageContent({
                     lessonImageUrl={lessonImageUrl}
                   />
                 </div>
+
+                {/* Interactive Exercises - Expandable section below video */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <div className="lg:ml-4 mt-6">
+                    <ExercisesExpandable animations={lesson.animations} />
+                  </div>
+                )}
 
                 <div className="lg:ml-4 mt-8">
                   <LessonComments

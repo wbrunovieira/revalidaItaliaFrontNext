@@ -2114,6 +2114,32 @@
         "multipleChoice": "Opción Múltiple"
       }
     },
+    "exercises": {
+      "title": "Ejercicios Interactivos",
+      "expandToStart": "Haz clic para ver los ejercicios disponibles",
+      "available": "disponibles",
+      "backToList": "Volver a la lista",
+      "score": "Puntuación",
+      "comingSoon": "¡Próximamente!",
+      "question": "Pregunta",
+      "of": "de",
+      "reset": "Reiniciar",
+      "dropHere": "Arrastra aquí",
+      "check": "Verificar",
+      "correct": "¡Correcto!",
+      "incorrect": "¡Ups! Intenta de nuevo",
+      "correctAnswer": "Respuesta correcta",
+      "exercise": "Ejercicio {number}",
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Opción Múltiple"
+      },
+      "gameTypes": {
+        "dragWord": "Arrastrar Palabra",
+        "fillBlank": "Rellenar Espacio",
+        "selectOption": "Seleccionar Opción"
+      }
+    },
     "markAsComplete": "Marcar como completada",
     "markAsIncomplete": "Desmarcar como completada",
     "lessonCompleted": "¡Lección completada!",

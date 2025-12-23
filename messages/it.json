@@ -2111,6 +2111,32 @@
         "multipleChoice": "Scelta Multipla"
       }
     },
+    "exercises": {
+      "title": "Esercizi Interattivi",
+      "expandToStart": "Clicca per vedere gli esercizi disponibili",
+      "available": "disponibili",
+      "backToList": "Torna alla lista",
+      "score": "Punteggio",
+      "comingSoon": "Prossimamente!",
+      "question": "Domanda",
+      "of": "di",
+      "reset": "Ricomincia",
+      "dropHere": "Trascina qui",
+      "check": "Verifica",
+      "correct": "Corretto!",
+      "incorrect": "Ops! Riprova",
+      "correctAnswer": "Risposta corretta",
+      "exercise": "Esercizio {number}",
+      "types": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      },
+      "gameTypes": {
+        "dragWord": "Trascina la Parola",
+        "fillBlank": "Compila lo Spazio",
+        "selectOption": "Seleziona Opzione"
+      }
+    },
     "markAsComplete": "Segna come completata",
     "markAsIncomplete": "Rimuovi completamento",
     "lessonCompleted": "Lezione completata!",

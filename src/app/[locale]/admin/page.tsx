@@ -27,6 +27,9 @@ import {
   Upload,
   FolderSearch,
   UserCheck,
+  Box,
+  Music,
+  Gamepad2,
 } from 'lucide-react';
 
 import {
@@ -75,6 +78,12 @@ import MyCreatedRecordingsList from '@/components/MyCreatedRecordingsList';
 import MyHostedSessionsList from '@/components/MyHostedSessionsList';
 import LiveSessionsList from '@/components/LiveSessionsList';
 import RecordingsList from '@/components/RecordingsList';
+import CreateEnvironment3DForm from '@/components/CreateEnvironment3DForm';
+import ListEnvironments3D from '@/components/ListEnvironments3D';
+import UploadAudioForm from '@/components/UploadAudioForm';
+import ListAudios from '@/components/ListAudios';
+import CreateAnimationForm from '@/components/CreateAnimationForm';
+import ListAnimations from '@/components/ListAnimations';
 
 export default function AdminPage() {
   const t = useTranslations('Admin');
@@ -337,6 +346,51 @@ export default function AdminPage() {
                   aria-hidden="true"
                 />
                 {t('tabs.studentDocuments')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba environments3d para admins */}
+            {isAdmin && (
+              <TabsTrigger
+                value="environments3d"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Box
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.environments3d')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba audios para admins e tutors */}
+            {(isAdmin || isTutor) && (
+              <TabsTrigger
+                value="audios"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Music
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.audios')}
+              </TabsTrigger>
+            )}
+
+            {/* Apenas mostra a aba animations para admins e tutors */}
+            {(isAdmin || isTutor) && (
+              <TabsTrigger
+                value="animations"
+                className="relative overflow-hidden rounded-t-lg border border-gray-700 bg-gray-800 px-6 py-3 text-gray-300 hover:bg-gray-700 data-[state=active]:border-secondary data-[state=active]:bg-secondary/20 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <Gamepad2
+                  className="-ms-0.5 me-2 opacity-60"
+                  size={18}
+                  aria-hidden="true"
+                />
+                {t('tabs.animations')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -1030,6 +1084,96 @@ export default function AdminPage() {
                   </a>
                 </div>
               </div>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de environments3d para admins */}
+          {isAdmin && (
+            <TabsContent value="environments3d">
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Box className="mr-2" size={16} />
+                    {t('environments3d.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('environments3d.list')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                  <CreateEnvironment3DForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <ListEnvironments3D />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de audios para admins e tutors */}
+          {(isAdmin || isTutor) && (
+            <TabsContent value="audios">
+              <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="upload"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Upload className="mr-2" size={16} />
+                    {t('audios.upload')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('audios.list')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload">
+                  <UploadAudioForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <ListAudios />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
+
+          {/* Apenas renderiza o conteúdo de animations para admins e tutors */}
+          {(isAdmin || isTutor) && (
+            <TabsContent value="animations">
+              <Tabs defaultValue="create" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 bg-gray-700">
+                  <TabsTrigger
+                    value="create"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <Gamepad2 className="mr-2" size={16} />
+                    {t('animations.create')}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-primary"
+                  >
+                    <List className="mr-2" size={16} />
+                    {t('animations.list')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="create">
+                  <CreateAnimationForm />
+                </TabsContent>
+                <TabsContent value="list">
+                  <ListAnimations />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
         </div>

@@ -1,7 +1,7 @@
 // src/components/LessonCard.tsx
 "use client";
 
-import { PlayCircle, Clock, FileText, CheckCircle } from 'lucide-react';
+import { PlayCircle, Clock, FileText, CheckCircle, Music, Gamepad2, Box } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -30,6 +30,11 @@ interface Lesson {
   videoId?: string;
   translations?: Translation[];
   video?: Video;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
 }
 
 interface LessonCardProps {
@@ -178,12 +183,25 @@ export default function LessonCard({
             
             {/* Ícone de tipo de conteúdo */}
             <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm transform group-hover:scale-110 transition-transform duration-300">
-              {hasVideo ? (
-                <PlayCircle size={14} className="text-accent" />
+              {lesson.type === 'ENVIRONMENT_3D' ? (
+                <Box size={14} className="text-purple-600" />
+              ) : hasVideo ? (
+                <PlayCircle size={14} className="text-primary" />
+              ) : lesson.hasAudios ? (
+                <Music size={14} className="text-blue-600" />
               ) : (
-                <FileText size={14} className="text-accent-warm" />
+                <FileText size={14} className="text-orange-600" />
               )}
             </div>
+
+            {/* Interactive Lessons badges */}
+            {lesson.hasAnimations && (
+              <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center shadow-md border border-accent">
+                  <Gamepad2 size={12} className="text-white" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Conteúdo do card */}

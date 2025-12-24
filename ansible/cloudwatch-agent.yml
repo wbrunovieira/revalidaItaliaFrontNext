@@ -1,0 +1,207 @@
+---
+# ansible/cloudwatch-agent.yml
+# Instala e configura o CloudWatch Agent para monitoramento de CPU, Memoria e Disco
+# Uso: ansible-playbook -i inventory_frontend.yml cloudwatch-agent.yml
+
+- name: Install and Configure CloudWatch Agent
+  hosts: frontend
+  become: true
+
+  vars:
+    aws_region: us-east-2
+    cloudwatch_namespace: RevalidaItalia
+
+  tasks:
+    - name: "1/8 - Verificando se CloudWatch Agent ja esta instalado"
+      stat:
+        path: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+      register: cw_agent_installed
+
+    - name: "2/8 - Baixando CloudWatch Agent (Ubuntu/Debian)"
+      get_url:
+        url: "https://amazoncloudwatch-agent-{{ aws_region }}.s3.{{ aws_region }}.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
+        dest: /tmp/amazon-cloudwatch-agent.deb
+        mode: '0644'
+      when: not cw_agent_installed.stat.exists
+
+    - name: "3/8 - Instalando CloudWatch Agent"
+      apt:
+        deb: /tmp/amazon-cloudwatch-agent.deb
+        state: present
+      when: not cw_agent_installed.stat.exists
+
+    - name: "4/8 - Limpando arquivo de instalacao"
+      file:
+        path: /tmp/amazon-cloudwatch-agent.deb
+        state: absent
+      when: not cw_agent_installed.stat.exists
+
+    - name: "5/8 - Criando arquivo de configuracao do CloudWatch Agent"
+      copy:
+        content: |
+          {
+            "agent": {
+              "metrics_collection_interval": 60,
+              "run_as_user": "root",
+              "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
+            },
+            "metrics": {
+              "namespace": "{{ cloudwatch_namespace }}",
+              "append_dimensions": {
+                "InstanceId": "${aws:InstanceId}"
+              },
+              "metrics_collected": {
+                "cpu": {
+                  "measurement": [
+                    "cpu_usage_idle",
+                    "cpu_usage_iowait",
+                    "cpu_usage_user",
+                    "cpu_usage_system"
+                  ],
+                  "metrics_collection_interval": 60,
+                  "totalcpu": true
+                },
+                "disk": {
+                  "measurement": [
+                    "used_percent",
+                    "free",
+                    "used"
+                  ],
+                  "metrics_collection_interval": 60,
+                  "resources": ["/"],
+                  "ignore_file_system_types": ["sysfs", "devtmpfs", "tmpfs", "squashfs", "overlay"]
+                },
+                "diskio": {
+                  "measurement": [
+                    "io_time",
+                    "write_bytes",
+                    "read_bytes"
+                  ],
+                  "metrics_collection_interval": 60,
+                  "resources": ["*"]
+                },
+                "mem": {
+                  "measurement": [
+                    "mem_used_percent",
+                    "mem_available",
+                    "mem_used",
+                    "mem_total"
+                  ],
+                  "metrics_collection_interval": 60
+                },
+                "swap": {
+                  "measurement": [
+                    "swap_used_percent",
+                    "swap_free"
+                  ],
+                  "metrics_collection_interval": 60
+                },
+                "netstat": {
+                  "measurement": [
+                    "tcp_established",
+                    "tcp_time_wait"
+                  ],
+                  "metrics_collection_interval": 60
+                },
+                "processes": {
+                  "measurement": [
+                    "running",
+                    "sleeping",
+                    "zombies"
+                  ],
+                  "metrics_collection_interval": 60
+                }
+              }
+            },
+            "logs": {
+              "logs_collected": {
+                "files": {
+                  "collect_list": [
+                    {
+                      "file_path": "/home/ubuntu/frontend/.next/server/**/*.log",
+                      "log_group_name": "/aws/ec2/frontend",
+                      "log_stream_name": "{instance_id}/nextjs",
+                      "timezone": "UTC"
+                    },
+                    {
+                      "file_path": "/var/log/nginx/access.log",
+                      "log_group_name": "/aws/ec2/frontend",
+                      "log_stream_name": "{instance_id}/nginx-access",
+                      "timezone": "UTC"
+                    },
+                    {
+                      "file_path": "/var/log/nginx/error.log",
+                      "log_group_name": "/aws/ec2/frontend",
+                      "log_stream_name": "{instance_id}/nginx-error",
+                      "timezone": "UTC"
+                    },
+                    {
+                      "file_path": "/home/ubuntu/.pm2/logs/frontend-out.log",
+                      "log_group_name": "/aws/ec2/frontend",
+                      "log_stream_name": "{instance_id}/pm2-out",
+                      "timezone": "UTC"
+                    },
+                    {
+                      "file_path": "/home/ubuntu/.pm2/logs/frontend-error.log",
+                      "log_group_name": "/aws/ec2/frontend",
+                      "log_stream_name": "{instance_id}/pm2-error",
+                      "timezone": "UTC"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        dest: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+        mode: '0644'
+      register: cw_config
+
+    - name: "6/8 - Iniciando CloudWatch Agent com nova configuracao"
+      command: >
+        /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+        -a fetch-config
+        -m ec2
+        -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+        -s
+      when: cw_config.changed or not cw_agent_installed.stat.exists
+
+    - name: "7/8 - Habilitando CloudWatch Agent no boot"
+      systemd:
+        name: amazon-cloudwatch-agent
+        enabled: yes
+        state: started
+
+    - name: "8/8 - Verificando status do CloudWatch Agent"
+      command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a status
+      register: cw_status
+      changed_when: false
+
+    - name: "RESULTADO - Status do CloudWatch Agent"
+      debug:
+        var: cw_status.stdout_lines
+
+    - name: "INFO - Proximos passos"
+      debug:
+        msg:
+          - "CloudWatch Agent instalado e configurado com sucesso!"
+          - ""
+          - "Metricas sendo enviadas para namespace: {{ cloudwatch_namespace }}"
+          - "  - CPU: cpu_usage_idle, cpu_usage_user, cpu_usage_system"
+          - "  - Memoria: mem_used_percent, mem_available"
+          - "  - Disco: disk_used_percent, disk_free"
+          - "  - Swap: swap_used_percent"
+          - "  - Rede: tcp_established, tcp_time_wait"
+          - ""
+          - "Logs sendo enviados para CloudWatch Logs:"
+          - "  - /aws/ec2/frontend/nginx-access"
+          - "  - /aws/ec2/frontend/nginx-error"
+          - "  - /aws/ec2/frontend/pm2-out"
+          - "  - /aws/ec2/frontend/pm2-error"
+          - ""
+          - "Alertas configurados (threshold):"
+          - "  - CPU > 80% por 10min"
+          - "  - Memoria > 90% por 10min"
+          - "  - Disco > 85%"
+          - ""
+          - "As metricas levarao 2-3 minutos para aparecer no CloudWatch."
+          - "Dashboard: https://console.aws.amazon.com/cloudwatch/home?region={{ aws_region }}#dashboards:"

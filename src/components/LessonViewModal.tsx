@@ -22,6 +22,12 @@ import {
   CreditCard,
   Eye,
   EyeOff,
+  Music,
+  Gamepad2,
+  Box,
+  Play,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -50,6 +56,49 @@ interface Assessment {
   quizPosition?: string;
 }
 
+// Interactive Lessons Types
+type LessonType = 'STANDARD' | 'ENVIRONMENT_3D';
+
+interface AudioTranslation {
+  locale: string;
+  title: string;
+  description?: string;
+}
+
+interface AudioData {
+  id: string;
+  filename: string;
+  url: string;
+  durationInSeconds: number;
+  formattedDuration?: string;
+  fileSize: number;
+  mimeType: string;
+  order: number;
+  transcription?: string;
+  translations: AudioTranslation[];
+}
+
+interface AnimationData {
+  id: string;
+  type: 'CompleteSentence' | 'MultipleChoice';
+  order: number;
+  totalQuestions?: number;
+  enabled: boolean;
+}
+
+interface Environment3DTranslation {
+  locale: string;
+  name?: string;
+  title?: string;
+  description?: string;
+}
+
+interface Environment3DData {
+  id: string;
+  slug: string;
+  translations: Environment3DTranslation[];
+}
+
 interface LessonViewData {
   id: string;
   moduleId: string;
@@ -59,6 +108,12 @@ interface LessonViewData {
   imageUrl: string;
   translations: Translation[];
   video: VideoData;
+  // Interactive Lessons fields
+  type?: LessonType;
+  audios?: AudioData[];
+  animations?: AnimationData[];
+  environment3dId?: string;
+  environment3d?: Environment3DData;
   createdAt: string;
   updatedAt: string;
 }
@@ -238,6 +293,31 @@ export default function LessonViewModal({
     return `${minutes}m ${secs}s`;
   };
 
+  // Formatar tamanho de arquivo
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Obter tradução de áudio por locale
+  const getAudioTranslation = (
+    translations: AudioTranslation[],
+    targetLocale: string
+  ): AudioTranslation | undefined => {
+    return translations.find(tr => tr.locale === targetLocale) || translations[0];
+  };
+
+  // Obter tradução de environment3D por locale
+  const getEnv3DTranslation = (
+    translations: Environment3DTranslation[],
+    targetLocale: string
+  ): Environment3DTranslation | undefined => {
+    return translations.find(tr => tr.locale === targetLocale) || translations[0];
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -365,6 +445,31 @@ export default function LessonViewModal({
                     {lesson.order}
                   </span>
                 </div>
+
+                {/* Lesson Type */}
+                {lesson.type && (
+                  <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      {lesson.type === 'ENVIRONMENT_3D' ? (
+                        <Box size={16} className="text-purple-400" />
+                      ) : (
+                        <Play size={16} className="text-secondary" />
+                      )}
+                      <span className="text-sm font-medium text-gray-300">
+                        {t('fields.lessonType')}
+                      </span>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      lesson.type === 'ENVIRONMENT_3D'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-secondary/20 text-secondary'
+                    }`}>
+                      {lesson.type === 'ENVIRONMENT_3D'
+                        ? t('types.environment3d')
+                        : t('types.standard')}
+                    </span>
+                  </div>
+                )}
 
                 {/* URL da Imagem */}
                 <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
@@ -620,6 +725,162 @@ export default function LessonViewModal({
                           ? t('video.fields.seen')
                           : t('video.fields.notSeen')}
                       </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Audios Section */}
+              {lesson.audios && lesson.audios.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Music size={20} className="text-blue-400" />
+                    {t('audios.title')}
+                  </h3>
+
+                  <div className="border border-gray-700 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm text-gray-400">
+                        {lesson.audios.length} {t('audios.count')}
+                      </span>
+                    </div>
+
+                    {lesson.audios
+                      .sort((a, b) => a.order - b.order)
+                      .map((audio) => {
+                        const audioTrans = getAudioTranslation(audio.translations, locale);
+                        return (
+                          <div
+                            key={audio.id}
+                            className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg"
+                          >
+                            <div className="flex items-center justify-center w-8 h-8 bg-blue-500/20 text-blue-400 rounded-full font-bold text-sm">
+                              {audio.order}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-sm font-medium truncate">
+                                {audioTrans?.title || audio.filename}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {audio.formattedDuration || formatDuration(audio.durationInSeconds)} • {formatFileSize(audio.fileSize)}
+                              </p>
+                            </div>
+                            {audio.url && (
+                              <audio src={audio.url} controls className="h-8 w-32 flex-shrink-0" />
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Animations Section */}
+              {lesson.animations && lesson.animations.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Gamepad2 size={20} className="text-purple-400" />
+                    {t('animations.title')}
+                  </h3>
+
+                  <div className="border border-gray-700 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm text-gray-400">
+                        {lesson.animations.length} {t('animations.count')}
+                      </span>
+                    </div>
+
+                    {lesson.animations
+                      .sort((a, b) => a.order - b.order)
+                      .map((animation) => (
+                        <div
+                          key={animation.id}
+                          className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg"
+                        >
+                          <div className="flex items-center justify-center w-8 h-8 bg-purple-500/20 text-purple-400 rounded-full font-bold text-sm">
+                            {animation.order}
+                          </div>
+                          <div className="flex-1">
+                            <span
+                              className={`px-2 py-1 rounded text-xs ${
+                                animation.type === 'CompleteSentence'
+                                  ? 'bg-blue-500/20 text-blue-400'
+                                  : 'bg-purple-500/20 text-purple-400'
+                              }`}
+                            >
+                              {animation.type === 'CompleteSentence'
+                                ? t('animations.types.completeSentence')
+                                : t('animations.types.multipleChoice')}
+                            </span>
+                            {animation.totalQuestions && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {animation.totalQuestions} {t('animations.questions')}
+                              </p>
+                            )}
+                          </div>
+                          <span
+                            className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                              animation.enabled
+                                ? 'bg-green-500/20 text-green-400'
+                                : 'bg-red-500/20 text-red-400'
+                            }`}
+                          >
+                            {animation.enabled ? (
+                              <>
+                                <CheckCircle size={12} />
+                                {t('animations.enabled')}
+                              </>
+                            ) : (
+                              <>
+                                <XCircle size={12} />
+                                {t('animations.disabled')}
+                              </>
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Environment 3D Section */}
+              {lesson.type === 'ENVIRONMENT_3D' && lesson.environment3d && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Box size={20} className="text-purple-400" />
+                    {t('environment3d.title')}
+                  </h3>
+
+                  <div className="border border-purple-500/30 rounded-lg p-4 bg-purple-500/10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <Box size={24} className="text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        {(() => {
+                          const env3dTrans = getEnv3DTranslation(lesson.environment3d.translations, locale);
+                          return (
+                            <>
+                              <p className="text-white font-medium">
+                                {env3dTrans?.name || env3dTrans?.title || lesson.environment3d.slug}
+                              </p>
+                              {env3dTrans?.description && (
+                                <p className="text-gray-400 text-sm">
+                                  {env3dTrans.description}
+                                </p>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-purple-500/20">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">{t('environment3d.slug')}:</span>
+                        <code className="text-purple-300 font-mono">
+                          {lesson.environment3d.slug}
+                        </code>
+                      </div>
                     </div>
                   </div>
                 </div>

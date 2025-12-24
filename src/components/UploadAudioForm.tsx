@@ -1,11 +1,10 @@
 // /src/components/UploadAudioForm.tsx
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useCourseHierarchy, getTranslationByLocale } from '@/hooks/useCourseHierarchy';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
@@ -29,13 +28,48 @@ import {
   FileAudio,
   AlertCircle,
   FileText,
-  Loader2,
 } from 'lucide-react';
 
 interface Translation {
   locale: string;
   title: string;
   description: string;
+}
+
+interface Lesson {
+  id: string;
+  moduleId: string;
+  order: number;
+  translations: Array<{
+    locale: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+interface Module {
+  id: string;
+  slug: string;
+  imageUrl: string | null;
+  order: number;
+  translations: Array<{
+    locale: string;
+    title: string;
+    description: string;
+  }>;
+  lessons?: Lesson[];
+}
+
+interface Course {
+  id: string;
+  slug: string;
+  imageUrl: string;
+  translations: Array<{
+    locale: string;
+    title: string;
+    description: string;
+  }>;
+  modules?: Module[];
 }
 
 interface FormData {
@@ -82,19 +116,9 @@ export default function UploadAudioForm() {
   const locale = params.locale as string;
   const { toast } = useToast();
 
-  // Hook compartilhado para cursos, módulos e aulas (lazy loading)
-  const {
-    courses,
-    modules,
-    lessons,
-    loadingCourses,
-    loadingModules,
-    loadingLessons,
-    selectCourse,
-    selectModule,
-  } = useCourseHierarchy({ fetchLessons: true });
-
   const [loading, setLoading] = useState(false);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [calculatingDuration, setCalculatingDuration] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
@@ -114,6 +138,115 @@ export default function UploadAudioForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({});
 
+  // Fetch lessons for a specific module
+  const fetchLessonsForModule = useCallback(
+    async (courseId: string, moduleId: string): Promise<Lesson[]> => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) return [];
+        const lessonsData = await response.json();
+        return lessonsData.lessons || [];
+      } catch (error) {
+        console.error('Error fetching lessons for module:', error);
+        return [];
+      }
+    },
+    []
+  );
+
+  // Fetch modules for a specific course
+  const fetchModulesForCourse = useCallback(
+    async (courseId: string): Promise<Module[]> => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const response = await fetch(
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) return [];
+        const modules: Module[] = await response.json();
+        // Fetch lessons for each module
+        const modulesWithLessons = await Promise.all(
+          modules.map(async module => {
+            const lessons = await fetchLessonsForModule(courseId, module.id);
+            return { ...module, lessons };
+          })
+        );
+        return modulesWithLessons;
+      } catch (error) {
+        console.error('Error fetching modules for course:', error);
+        return [];
+      }
+    },
+    [fetchLessonsForModule]
+  );
+
+  // Fetch courses with modules and lessons
+  const fetchCourses = useCallback(async () => {
+    setLoadingCourses(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const response = await fetch(`${apiUrl}/api/v1/courses`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+
+      const coursesData: Course[] = await response.json();
+      // Fetch modules and lessons for each course
+      const coursesWithData = await Promise.all(
+        coursesData.map(async course => {
+          const modules = await fetchModulesForCourse(course.id);
+          return { ...course, modules };
+        })
+      );
+      setCourses(coursesWithData);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      toast({
+        title: t('error.fetchCoursesTitle'),
+        description: t('error.fetchCoursesDescription'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingCourses(false);
+    }
+  }, [t, toast, fetchModulesForCourse]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  // Get translation by locale
+  const getTranslation = useCallback(
+    (translations: Array<{ locale: string; title: string }>) => {
+      return (
+        translations.find(tr => tr.locale === locale) ||
+        translations.find(tr => tr.locale === 'pt') ||
+        translations[0]
+      );
+    },
+    [locale]
+  );
+
+  // Get selected course
+  const selectedCourse = courses.find(c => c.id === formData.courseId);
+
+  // Get modules for selected course
+  const modules = selectedCourse?.modules || [];
+
+  // Get selected module
+  const selectedModule = modules.find(m => m.id === formData.moduleId);
+
+  // Get lessons for selected module
+  const lessons = selectedModule?.lessons || [];
+
   // Handle course change
   const handleCourseChange = (courseId: string) => {
     setFormData(prev => ({
@@ -123,8 +256,6 @@ export default function UploadAudioForm() {
       lessonId: '',
     }));
     setTouched(prev => ({ ...prev, courseId: true }));
-    // Buscar módulos via hook (lazy loading)
-    selectCourse(courseId);
   };
 
   // Handle module change
@@ -135,8 +266,6 @@ export default function UploadAudioForm() {
       lessonId: '',
     }));
     setTouched(prev => ({ ...prev, moduleId: true }));
-    // Buscar aulas via hook (lazy loading)
-    selectModule(moduleId);
   };
 
   // Handle lesson change
@@ -459,7 +588,7 @@ export default function UploadAudioForm() {
                 <SelectContent className="bg-gray-700 border-gray-600">
                   {courses.map(course => (
                     <SelectItem key={course.id} value={course.id} className="text-white hover:bg-gray-600">
-                      {getTranslationByLocale(course.translations, locale)?.title || course.slug}
+                      {getTranslation(course.translations)?.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -477,22 +606,19 @@ export default function UploadAudioForm() {
               <Label className="text-gray-300 flex items-center gap-2">
                 <Layers size={16} className="text-secondary" />
                 {t('fields.module')} *
-                {loadingModules && (
-                  <Loader2 size={14} className="animate-spin text-secondary" />
-                )}
               </Label>
               <Select
                 value={formData.moduleId}
                 onValueChange={handleModuleChange}
-                disabled={!formData.courseId || loadingModules}
+                disabled={!formData.courseId}
               >
                 <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder={loadingModules ? t('loading') : t('placeholders.module')} />
+                  <SelectValue placeholder={t('placeholders.module')} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-700 border-gray-600">
                   {modules.map(module => (
                     <SelectItem key={module.id} value={module.id} className="text-white hover:bg-gray-600">
-                      {getTranslationByLocale(module.translations, locale)?.title || module.slug}
+                      {getTranslation(module.translations)?.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -510,22 +636,19 @@ export default function UploadAudioForm() {
               <Label className="text-gray-300 flex items-center gap-2">
                 <Play size={16} className="text-secondary" />
                 {t('fields.lesson')} *
-                {loadingLessons && (
-                  <Loader2 size={14} className="animate-spin text-secondary" />
-                )}
               </Label>
               <Select
                 value={formData.lessonId}
                 onValueChange={handleLessonChange}
-                disabled={!formData.moduleId || loadingLessons}
+                disabled={!formData.moduleId}
               >
                 <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder={loadingLessons ? t('loading') : t('placeholders.lesson')} />
+                  <SelectValue placeholder={t('placeholders.lesson')} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-700 border-gray-600">
                   {lessons.map(lesson => (
                     <SelectItem key={lesson.id} value={lesson.id} className="text-white hover:bg-gray-600">
-                      {getTranslationByLocale(lesson.translations, locale)?.title || `Aula ${lesson.order}`}
+                      {getTranslation(lesson.translations)?.title}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -21,9 +21,11 @@ import {
   Brain,
   AlertTriangle,
   HelpCircle,
+  Gamepad2,
 } from 'lucide-react';
 import TutorAnalytics from './TutorAnalytics';
 import TutorFlashcardStats from './TutorFlashcardStats';
+import TutorAnimationStats from './TutorAnimationStats';
 import TutorReports from './TutorReports';
 import TutorSupport from './TutorSupport';
 
@@ -149,7 +151,7 @@ export default function TutorDashboard({
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'analytics' | 'flashcards' | 'reports' | 'support'
+    'overview' | 'analytics' | 'flashcards' | 'exercises' | 'reports' | 'support'
   >('overview');
   const [analyticsAttempts, setAnalyticsAttempts] =
     useState<AnalyticsAttempt[]>([]);
@@ -750,6 +752,17 @@ export default function TutorDashboard({
           >
             <Brain size={16} className="sm:w-[18px] sm:h-[18px]" />
             <span className="whitespace-nowrap">{t('tabs.flashcards')}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('exercises')}
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base transition-all flex items-center gap-1 sm:gap-2 ${
+              activeTab === 'exercises'
+                ? 'bg-secondary text-primary'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Gamepad2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="whitespace-nowrap">{t('tabs.exercises')}</span>
           </button>
           <button
             onClick={() => setActiveTab('reports')}
@@ -1724,6 +1737,9 @@ export default function TutorDashboard({
         ) : activeTab === 'flashcards' ? (
           /* Flashcards Tab */
           <TutorFlashcardStats locale={locale} />
+        ) : activeTab === 'exercises' ? (
+          /* Exercises Tab */
+          <TutorAnimationStats locale={locale} />
         ) : activeTab === 'reports' ? (
           /* Reports Tab */
           <TutorReports locale={locale} />

@@ -121,6 +121,12 @@ resource "aws_s3_object" "videos_folder" {
   source = "/dev/null"
 }
 
+resource "aws_s3_object" "audios_folder" {
+  bucket = aws_s3_bucket.public_assets.id
+  key    = "audios/"
+  source = "/dev/null"
+}
+
 # Output the bucket URL
 output "s3_bucket_url" {
   value       = "https://${aws_s3_bucket.public_assets.bucket_regional_domain_name}"

@@ -18,6 +18,11 @@ import LessonAccessTracker from '@/components/LessonAccessTracker';
 import CollapsibleAssessments from '@/components/CollapsibleAssessments';
 import LessonCompletionButton from '@/components/LessonCompletionButton';
 import ModuleLessonsList from '@/components/ModuleLessonsList';
+import AudioPlayerSection from '@/components/AudioPlayerSection';
+import AudioLessonPlayer from '@/components/AudioLessonPlayer';
+import AnimationsSection from '@/components/AnimationsSection';
+import ExercisesExpandable from '@/components/exercises/ExercisesExpandable';
+import Environment3DLoader from '@/components/3d-environments/Environment3DLoader';
 import {
   ArrowLeft,
   ChevronRight,
@@ -140,6 +145,15 @@ export default function LessonPageContent({
     flashcardIds,
     enabled: flashcardIds.length > 0,
   });
+
+  // DEBUG: Log lesson data including animations
+  useEffect(() => {
+    if (lesson) {
+      console.log('📚 LessonPageContent - lesson data:', lesson);
+      console.log('📚 LessonPageContent - lesson.animations:', lesson.animations);
+      console.log('📚 LessonPageContent - animations count:', lesson.animations?.length);
+    }
+  }, [lesson]);
 
   // Hydrate cache with initial data on mount
   useEffect(() => {
@@ -308,7 +322,133 @@ export default function LessonPageContent({
 
         {/* Main content */}
         <div className="flex-1">
-          {(lesson.video?.providerVideoId || pandaData?.video_external_id) ? (
+          {lesson.type === 'ENVIRONMENT_3D' && lesson.environment3d?.slug ? (
+            // Layout for 3D Environment
+            <div className="lg:flex">
+              {/* Left column - 3D Environment */}
+              <div className="flex-1 bg-primary">
+                <div className="bg-primary lg:ml-4">
+                  <Environment3DLoader
+                    slug={lesson.environment3d.slug}
+                    lessonId={lessonId}
+                    locale={locale}
+                  />
+                </div>
+
+                <div className="lg:ml-4 mt-8">
+                  <LessonComments
+                    lessonId={lessonId}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    locale={locale}
+                    lessonTitle={lt.title}
+                  />
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <aside className="bg-primary-dark p-6 overflow-y-auto lg:w-96">
+                {/* Course hierarchy */}
+                <div className="mb-6">
+                  <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                        <User size={14} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('course')}</p>
+                        <p className="text-white font-medium">{ct.title}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <BookOpen size={14} className="text-secondary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('module')}</p>
+                        <p className="text-white font-medium">{mt.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lesson info */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="inline-flex items-center bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold">
+                      3D
+                    </div>
+                    <div className="inline-flex items-center bg-accent-light text-white px-3 py-1 rounded-full text-xs font-bold">
+                      {tLesson('lessonNumber', { number: idx + 1 })}
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">{lt.title}</h2>
+                  <p className="text-gray-400 text-sm mb-4">{lt.description}</p>
+
+                  <LessonCompletionButton
+                    lessonId={lesson.id}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    hasVideo={false}
+                  />
+                </div>
+
+                {/* Documents */}
+                <DocumentsSection
+                  documents={documents}
+                  locale={locale}
+                  lessonId={lessonId}
+                />
+
+                {/* Flashcards */}
+                {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                  <div className="mt-6">
+                    <div className="mb-4">
+                      <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                        <div className="p-2 bg-secondary/20 rounded-lg">
+                          <CreditCard size={20} className="text-secondary" />
+                        </div>
+                        {tLesson('flashcards')}
+                      </h4>
+                      <div className="h-0.5 w-16 bg-gradient-to-r from-secondary to-transparent rounded-full ml-11"></div>
+                    </div>
+
+                    <Link
+                      href={`/${locale}/flashcards/study?lessonId=${lessonId}`}
+                      className="w-full text-center py-3 bg-secondary/20 text-secondary rounded-lg hover:bg-secondary/30 transition-colors font-medium border border-secondary/30 flex items-center justify-center gap-2"
+                    >
+                      <CreditCard size={18} />
+                      {tLesson('studyFlashcards')}
+                      <ExternalLink size={14} />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Assessments */}
+                {assessments.length > 0 && (
+                  <CollapsibleAssessments
+                    assessments={assessments}
+                    locale={locale}
+                    lessonId={lessonId}
+                  />
+                )}
+
+                {/* Module lessons list */}
+                <ModuleLessonsList
+                  lessons={sorted}
+                  currentLessonId={lessonId}
+                  moduleId={moduleFound.id}
+                  courseSlug={courseSlug}
+                  moduleSlug={moduleSlug}
+                  locale={locale}
+                  courseId={course.id}
+                  initialPage={lessonsResponse?.pagination.page || 1}
+                  initialTotalPages={lessonsResponse?.pagination.totalPages || 1}
+                  initialTotal={lessonsResponse?.pagination.total || 0}
+                />
+              </aside>
+            </div>
+          ) : (lesson.video?.providerVideoId || pandaData?.video_external_id) ? (
             // Layout WITH video
             <div className="lg:flex">
               {/* Left column - Video and Comments */}
@@ -334,6 +474,16 @@ export default function LessonPageContent({
                     lessonImageUrl={lessonImageUrl}
                   />
                 </div>
+
+                {/* Interactive Exercises - Expandable section below video */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <div className="lg:ml-4 mt-6">
+                    <ExercisesExpandable
+                      lessonId={lessonId}
+                      animations={lesson.animations}
+                    />
+                  </div>
+                )}
 
                 <div className="lg:ml-4 mt-8">
                   <LessonComments
@@ -460,6 +610,19 @@ export default function LessonPageContent({
                   lessonId={lessonId}
                 />
 
+                {/* Audio Player - Interactive Lessons */}
+                {lesson.audios && lesson.audios.length > 0 && (
+                  <AudioPlayerSection
+                    audios={lesson.audios}
+                    locale={locale}
+                  />
+                )}
+
+                {/* Animations - Interactive Lessons */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
+                )}
+
                 {/* Live Sessions */}
                 {lesson.liveSessionRecordings && lesson.liveSessionRecordings.length > 0 && (
                   <div className="mt-12">
@@ -492,6 +655,217 @@ export default function LessonPageContent({
                       <CreditCard size={18} />
                       {tLesson('studyFlashcards')}
                       <ExternalLink size={14} />
+                    </Link>
+                  </div>
+                )}
+
+                {/* Assessments */}
+                {assessments.length > 0 && (
+                  <CollapsibleAssessments
+                    assessments={assessments}
+                    locale={locale}
+                    lessonId={lessonId}
+                  />
+                )}
+
+                {/* Module lessons list */}
+                <ModuleLessonsList
+                  lessons={sorted}
+                  currentLessonId={lessonId}
+                  moduleId={moduleFound.id}
+                  courseSlug={courseSlug}
+                  moduleSlug={moduleSlug}
+                  locale={locale}
+                  courseId={course.id}
+                  initialPage={lessonsResponse?.pagination.page || 1}
+                  initialTotalPages={lessonsResponse?.pagination.totalPages || 1}
+                  initialTotal={lessonsResponse?.pagination.total || 0}
+                />
+              </aside>
+            </div>
+          ) : lesson.audios && lesson.audios.length > 0 ? (
+            // Layout for AUDIO-ONLY lessons
+            <div className="lg:flex">
+              {/* Left column - Audio Player and Comments */}
+              <div className="flex-1 bg-primary">
+                <div className="bg-primary lg:ml-4 lg:mr-4 py-6">
+                  <AudioLessonPlayer
+                    audios={lesson.audios}
+                    locale={locale}
+                    lessonTitle={lt.title}
+                  />
+                </div>
+
+                {/* Interactive Exercises - Expandable section below audio player */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <div className="lg:ml-4 mt-6">
+                    <ExercisesExpandable
+                      lessonId={lessonId}
+                      animations={lesson.animations}
+                    />
+                  </div>
+                )}
+
+                <div className="lg:ml-4 mt-8">
+                  <LessonComments
+                    lessonId={lessonId}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    locale={locale}
+                    lessonTitle={lt.title}
+                  />
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <aside className="bg-primary-dark p-6 overflow-y-auto lg:w-96">
+                {/* Course hierarchy */}
+                <div className="mb-6">
+                  <div className="bg-primary/30 rounded-lg p-3 space-y-2 border border-secondary/20">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                        <User size={14} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('course')}</p>
+                        <p className="text-white font-medium">{ct.title}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <BookOpen size={14} className="text-secondary" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">{tLesson('module')}</p>
+                        <p className="text-white font-medium">{mt.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lesson info */}
+                <div className="mb-6">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="inline-flex items-center bg-secondary/20 text-secondary px-3 py-1 rounded-full text-xs font-bold">
+                        {tLesson('lessonNumber', { number: idx + 1 })}
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-400 text-sm">
+                        <Clock size={14} />
+                        <span>
+                          {Math.ceil(
+                            lesson.audios.reduce((sum, a) => sum + a.durationInSeconds, 0) / 60
+                          )}{' '}
+                          {tLesson('minutes')}
+                        </span>
+                      </div>
+                    </div>
+                    <h1 className="text-xl font-bold text-white mb-2">{lt.title}</h1>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {lt.description}
+                    </p>
+                  </div>
+
+                  <LessonCompletionButton
+                    lessonId={lesson.id}
+                    courseId={course.id}
+                    moduleId={moduleFound.id}
+                    hasVideo={false}
+                  />
+                </div>
+
+                {/* Previous/Next navigation */}
+                <div className="border-t border-secondary/20 pt-4 mb-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    {prev ? (
+                      <Link
+                        href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${prev.id}`}
+                        className="group flex flex-col p-3 bg-primary/40 rounded-lg hover:bg-primary/60 transition-all duration-300 border border-secondary/30 hover:border-secondary/50"
+                      >
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                          <ChevronLeft
+                            size={14}
+                            className="group-hover:-translate-x-1 transition-transform"
+                          />
+                          {tLesson('previousLesson')}
+                        </div>
+                        <p className="text-sm text-white font-medium truncate">
+                          {prev.translations.find(t => t.locale === locale)?.title}
+                        </p>
+                      </Link>
+                    ) : (
+                      <div></div>
+                    )}
+                    {next ? (
+                      <Link
+                        href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${next.id}`}
+                        className="group flex flex-col p-3 bg-primary/40 rounded-lg hover:bg-primary/60 transition-all duration-300 border border-secondary/30 hover:border-secondary/50"
+                      >
+                        <div className="flex items-center justify-end gap-2 text-xs text-gray-500 mb-1">
+                          {tLesson('nextLesson')}
+                          <ChevronRight
+                            size={14}
+                            className="group-hover:translate-x-1 transition-transform"
+                          />
+                        </div>
+                        <p className="text-sm text-white font-medium truncate text-right">
+                          {next.translations.find(t => t.locale === locale)?.title}
+                        </p>
+                      </Link>
+                    ) : (
+                      <div></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Documents */}
+                <DocumentsSection
+                  documents={documents}
+                  locale={locale}
+                  lessonId={lessonId}
+                />
+
+                {/* Animations section (summary) */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
+                )}
+
+                {/* Live Sessions */}
+                {lesson.liveSessionRecordings && lesson.liveSessionRecordings.length > 0 && (
+                  <div className="mt-6">
+                    <LiveSessionsSection
+                      liveSessionRecordings={lesson.liveSessionRecordings}
+                      locale={locale}
+                      courses={courses}
+                      modules={modules}
+                    />
+                  </div>
+                )}
+
+                {/* Flashcards */}
+                {flashcards.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <CreditCard size={20} className="text-accent" />
+                      {tLesson('flashcards')}
+                    </h4>
+                    <Link
+                      href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lessonId}/flashcards`}
+                      className="flex items-center justify-between p-4 bg-primary/30 hover:bg-primary/50 rounded-lg border border-secondary/20 transition-colors group"
+                    >
+                      <div>
+                        <p className="text-white font-medium group-hover:text-secondary transition-colors">
+                          {tLesson('studyFlashcards')}
+                        </p>
+                        <p className="text-gray-400 text-sm">
+                          {flashcards.length} {tLesson('flashcard')}
+                          {flashcards.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={18}
+                        className="text-gray-400 group-hover:text-secondary transition-colors"
+                      />
                     </Link>
                   </div>
                 )}
@@ -603,6 +977,23 @@ export default function LessonPageContent({
                           locale={locale}
                           lessonId={lessonId}
                         />
+                      </div>
+                    )}
+
+                    {/* Audio Player - Interactive Lessons */}
+                    {lesson.audios && lesson.audios.length > 0 && (
+                      <div>
+                        <AudioPlayerSection
+                          audios={lesson.audios}
+                          locale={locale}
+                        />
+                      </div>
+                    )}
+
+                    {/* Animations - Interactive Lessons */}
+                    {lesson.animations && lesson.animations.length > 0 && (
+                      <div>
+                        <AnimationsSection animations={lesson.animations} lessonId={lessonId} />
                       </div>
                     )}
 

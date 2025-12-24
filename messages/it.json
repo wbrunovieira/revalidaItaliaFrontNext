@@ -1042,6 +1042,7 @@
         "assessmentOverview": "Valutazioni - Panoramica",
         "assessmentAnalysis": "Valutazioni - Analisi",
         "flashcards": "Flashcards",
+        "exercises": "Esercizi",
         "reports": "Segnalazioni",
         "support": "Supporto"
       },
@@ -1151,6 +1152,138 @@
         "previous": "Precedente",
         "next": "Successiva",
         "pageOf": "Pagina {current} di {total}"
+      }
+    },
+    "tutorAnimations": {
+      "tabs": {
+        "byStudent": "Per Studente",
+        "byLesson": "Per Lezione"
+      },
+      "loading": "Caricamento statistiche esercizi...",
+      "stats": {
+        "totalStudents": "Studenti Totali",
+        "activeStudents": "Studenti Attivi",
+        "ofTotal": "del totale",
+        "averageSuccessRate": "Tasso Medio di Successo",
+        "performanceDistribution": "Distribuzione delle Prestazioni",
+        "successRate": "Tasso di Successo",
+        "firstTryRate": "1° Tentativo",
+        "completed": "Completati",
+        "attempted": "Tentati",
+        "avgAttempts": "Media Tentativi",
+        "last7Days": "Ultimi 7 giorni",
+        "lastActivity": "Ultima attività"
+      },
+      "tooltip": {
+        "successRate": "Completati ÷ Tentati × 100",
+        "firstTryRate": "Successi al 1° tentativo ÷ Tentati × 100"
+      },
+      "activityStatus": {
+        "active": "Attivo",
+        "moderate": "Moderato",
+        "inactive": "Inattivo"
+      },
+      "performanceLevel": {
+        "excellent": "Eccellente",
+        "good": "Buono",
+        "needsAttention": "Necessita Attenzione",
+        "critical": "Critico"
+      },
+      "filters": {
+        "title": "Filtri",
+        "searchPlaceholder": "Cerca studente nel sistema...",
+        "quickPeriod": "Periodo Rapido",
+        "today": "Oggi",
+        "last7Days": "Ultimi 7 giorni",
+        "last30Days": "Ultimi 30 giorni",
+        "allPeriods": "Tutti i periodi",
+        "sortBy": "Ordina per",
+        "order": "Ordine",
+        "startDate": "Data Iniziale",
+        "endDate": "Data Finale",
+        "sortOptions": {
+          "name": "Nome",
+          "successRate": "Tasso di Successo",
+          "totalCompleted": "Totale Completato",
+          "lastActivity": "Ultima Attività"
+        },
+        "orderOptions": {
+          "asc": "Crescente",
+          "desc": "Decrescente"
+        }
+      },
+      "search": {
+        "foundSingle": "{count} studente trovato per \"{term}\"",
+        "foundMultiple": "{count} studenti trovati per \"{term}\"",
+        "noResults": "Nessun risultato trovato",
+        "noResultsDescription": "Nessuno studente trovato con \"{term}\" nel nome o email.",
+        "noStudents": "Nessuno studente trovato",
+        "noStudentsDescription": "Non ci sono studenti con attività negli esercizi per i filtri selezionati."
+      },
+      "pagination": {
+        "previous": "Precedente",
+        "next": "Successiva",
+        "pageOf": "Pagina {current} di {total}"
+      },
+      "actions": {
+        "viewDetails": "Vedi dettagli"
+      },
+      "types": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      },
+      "detail": {
+        "back": "Indietro",
+        "studentDetail": "Dettagli Studente",
+        "animationProgress": "Progresso per Lezione",
+        "exerciseTypes": "Tipi di Esercizi",
+        "attempts": "Tentativi",
+        "noProgress": "Nessun progresso registrato"
+      },
+      "error": {
+        "fetchTitle": "Errore nel caricamento",
+        "fetchDescription": "Impossibile caricare le statistiche degli esercizi.",
+        "fetchUserDetail": "Impossibile caricare i dettagli dell'utente.",
+        "fetchLessonDetail": "Impossibile caricare i dettagli della lezione.",
+        "noData": "Errore nel caricamento dati",
+        "tryAgain": "Impossibile caricare le statistiche. Riprova."
+      },
+      "lessonStats": {
+        "totalLessons": "Totale Lezioni",
+        "activeLessons": "Lezioni Attive",
+        "totalAnimations": "Totale Esercizi",
+        "studentsInteracted": "Studenti Hanno Interagito",
+        "difficulty": "Difficoltà",
+        "course": "Corso",
+        "module": "Modulo",
+        "lesson": "Lezione",
+        "noLessons": "Nessuna lezione trovata",
+        "noLessonsDescription": "Non ci sono lezioni con esercizi per i filtri selezionati."
+      },
+      "difficultyLevel": {
+        "easy": "Facile",
+        "medium": "Medio",
+        "hard": "Difficile"
+      },
+      "difficultyDistribution": "Distribuzione Difficoltà",
+      "lessonDetail": {
+        "back": "Indietro",
+        "lessonDetail": "Dettagli Lezione",
+        "studentsProgress": "Progresso Studenti",
+        "exerciseBreakdown": "Dettaglio per Esercizio",
+        "noStudents": "Nessuno studente ha interagito con questa lezione",
+        "noExercises": "Nessun esercizio trovato"
+      },
+      "lessonFilters": {
+        "allCourses": "Tutti i Corsi",
+        "allModules": "Tutti i Moduli",
+        "sortOptions": {
+          "title": "Titolo",
+          "successRate": "Tasso di Successo",
+          "students": "Nº di Studenti",
+          "difficulty": "Difficoltà",
+          "lastActivity": "Ultima Attività"
+        }
       }
     }
   }
@@ -1795,7 +1928,13 @@
     "answered": "Risposti",
     "correct": "Corretti",
     "accuracy": "Precisione",
-    "lastReview": "Ultima Revisione"
+    "lastReview": "Ultima Revisione",
+    "exercises": "Esercizi Interattivi",
+    "activeToday": "Attivo Oggi",
+    "exercisesCompleted": "Completati",
+    "successRate": "Tasso di Successo",
+    "avgAttempts": "Media Tentativi",
+    "exercisesProgress": "Progresso"
   },
   "LogoutButton": {
     "logout": "Esci",
@@ -2083,6 +2222,108 @@
     "imageContent": "Contenuto immagine",
     "answerType": "Tipo di risposta",
     "studyFlashcards": "Studia flashcard",
+    "audios": {
+      "title": "Audio",
+      "description": "Ascolta gli audio di questa lezione",
+      "nowPlaying": "In riproduzione",
+      "duration": "Durata",
+      "track": "Traccia {current} di {total}",
+      "previous": "Precedente",
+      "next": "Successivo",
+      "play": "Riproduci",
+      "pause": "Pausa",
+      "mute": "Disattiva audio",
+      "unmute": "Attiva audio",
+      "playlist": "Lista delle tracce"
+    },
+    "audioPlayer": {
+      "track": "Traccia {current} di {total}",
+      "trackSingular": "traccia",
+      "trackPlural": "tracce",
+      "total": "totale",
+      "previous": "Precedente",
+      "next": "Successiva",
+      "play": "Riproduci",
+      "pause": "Pausa",
+      "mute": "Disattiva audio",
+      "unmute": "Attiva audio",
+      "playlist": "Playlist",
+      "shuffle": "Casuale",
+      "repeat": "Ripeti",
+      "speed": "Velocità",
+      "transcription": "Trascrizione",
+      "keyboardHint": "Scorciatoie: Spazio (play/pausa) • ← → (precedente/successiva) • M (muto)"
+    },
+    "animations": {
+      "title": "Esercizi Interattivi",
+      "description": "Completa gli esercizi per fissare il contenuto",
+      "questions": "{count} domande",
+      "start": "Inizia",
+      "continue": "Continua",
+      "completed": "completati",
+      "of": "di",
+      "locked": "Bloccato",
+      "disabled": "Disabilitato",
+      "available": "disponibili",
+      "exercise": "Esercizio {number}",
+      "continueFromHere": "Continua da qui",
+      "allCompleted": "Tutti completati!",
+      "types": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      }
+    },
+    "exercises": {
+      "title": "Esercizi Interattivi",
+      "expandToStart": "Clicca per vedere gli esercizi disponibili",
+      "available": "disponibili",
+      "backToList": "Torna alla lista",
+      "score": "Punteggio",
+      "comingSoon": "Prossimamente!",
+      "question": "Domanda",
+      "of": "di",
+      "completed": "completati",
+      "reset": "Ricomincia",
+      "dropHere": "Trascina qui",
+      "tapToSelect": "Tocca una parola per selezionarla",
+      "check": "Verifica",
+      "correct": "Corretto!",
+      "incorrect": "Ops! Riprova",
+      "correctAnswer": "Risposta corretta",
+      "exercise": "Esercizio {number}",
+      "types": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      },
+      "gameTypes": {
+        "dragWord": "Trascina la Parola",
+        "reorderWords": "Riordina le Parole",
+        "fillBlank": "Compila lo Spazio",
+        "selectOption": "Seleziona Opzione",
+        "typeCompletion": "Digita la Risposta",
+        "multipleBlanks": "Spazi Multipli",
+        "multipleChoice": "Quiz"
+      },
+      "quiz": {
+        "explanation": "Spiegazione",
+        "next": "Avanti",
+        "finish": "Termina"
+      },
+      "reorderInstruction": "Trascina le parole per formare la frase corretta",
+      "tapToSwap": "Tocca una parola, poi un'altra per scambiarle",
+      "showHint": "Mostra suggerimento",
+      "checkOrder": "Verifica Ordine",
+      "typeInstruction": "Digita la parola che completa la frase",
+      "multipleBlanksInstruction": "Compila tutti gli spazi per completare la frase",
+      "blanksCount": "{count} spazi da compilare",
+      "correctAnswers": "Risposte corrette",
+      "exerciseSingular": "esercizio",
+      "exercisePlural": "esercizi",
+      "questionSingular": "domanda",
+      "questionPlural": "domande",
+      "allCompleted": "Tutto completato!",
+      "replay": "Ripeti"
+    },
     "markAsComplete": "Segna come completata",
     "markAsIncomplete": "Rimuovi completamento",
     "lessonCompleted": "Lezione completata!",
@@ -2566,6 +2807,62 @@
   "title": "Pannello Amministrativo",
   "description": "Gestisci utenti, corsi e impostazioni del sistema",
   "comingSoon": "Prossimamente...",
+
+  "uploadAudio": {
+    "title": "Carica Audio",
+    "description": "Carica file audio da associare a una lezione specifica.",
+    "fields": {
+      "course": "Corso",
+      "module": "Modulo",
+      "lesson": "Lezione",
+      "file": "File Audio",
+      "translations": "Traduzioni",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "transcription": "Trascrizione"
+    },
+    "placeholders": {
+      "course": "Seleziona un corso",
+      "module": "Seleziona un modulo",
+      "lesson": "Seleziona una lezione",
+      "title": "Inserisci il titolo dell'audio",
+      "description": "Descrizione opzionale dell'audio",
+      "transcription": "Inserisci o incolla il testo della trascrizione dell'audio..."
+    },
+    "uploadHint": "Clicca per selezionare un file audio",
+    "supportedFormats": "Formati supportati: MP3, WAV, OGG, AAC, M4A, WebM",
+    "maxSize": "Dimensione massima: 200MB",
+    "transcriptionHint": "Opzionale: testo della trascrizione del contenuto audio",
+    "calculatingDuration": "Calcolo durata...",
+    "loading": "Caricamento...",
+    "uploading": "Caricamento in corso...",
+    "submit": "Carica Audio",
+    "success": {
+      "title": "Audio caricato",
+      "description": "L'audio è stato caricato con successo!"
+    },
+    "error": {
+      "fetchCoursesTitle": "Errore nel caricamento corsi",
+      "fetchCoursesDescription": "Impossibile caricare la lista dei corsi",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Per favore, compila tutti i campi obbligatori",
+      "uploadTitle": "Errore nel caricamento",
+      "uploadDescription": "Impossibile caricare l'audio",
+      "lessonNotFound": "La lezione selezionata non è stata trovata",
+      "fileTooLarge": "Il file è troppo grande. Dimensione massima: 200MB",
+      "authRequired": "Sessione scaduta. Per favore, effettua nuovamente l'accesso."
+    },
+    "errors": {
+      "courseRequired": "Per favore, seleziona un corso",
+      "moduleRequired": "Per favore, seleziona un modulo",
+      "lessonRequired": "Per favore, seleziona una lezione",
+      "fileRequired": "Per favore, seleziona un file audio",
+      "titleRequired": "Il titolo è obbligatorio",
+      "invalidFileType": "Tipo di file non supportato. Usa MP3, WAV, OGG, AAC, M4A o WebM",
+      "fileTooLarge": "Il file è troppo grande. Dimensione massima: 200MB",
+      "durationCalculationFailed": "Impossibile calcolare la durata dell'audio"
+    }
+  },
 
   "studentDocuments": {
     "pageTitle": "Documenti degli Studenti",
@@ -4922,7 +5219,449 @@
     "personalSessions": "Lezioni 1:1",
     "transactions": "Transazioni",
     "tutor": "Tutor",
-    "studentDocuments": "Analisi Docs"
+    "studentDocuments": "Analisi Docs",
+    "environments3d": "Ambienti 3D",
+    "audios": "Audio",
+    "animations": "Animazioni"
+  },
+
+  "environments3d": {
+    "create": "Crea Ambiente",
+    "list": "Lista Ambienti"
+  },
+
+  "audios": {
+    "upload": "Carica Audio",
+    "list": "Lista Audio"
+  },
+
+  "animations": {
+    "create": "Crea",
+    "list": "Lista"
+  },
+
+  "listAudios": {
+    "title": "Lista Audio",
+    "description": "Visualizza gli audio registrati per lezione.",
+    "searchPlaceholder": "Cerca per corso, modulo, lezione o audio...",
+    "loading": "Caricamento audio...",
+    "noAudios": "Nessun audio registrato per questa lezione",
+    "noLessons": "Nessuna lezione trovata",
+    "noModules": "Nessun modulo trovato",
+    "noCourses": "Nessun corso trovato",
+    "noResults": "Nessun risultato trovato",
+    "noTitle": "Senza titolo",
+    "view": "Visualizza",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "order": "Ordine",
+    "slug": "Slug",
+    "modules": "moduli",
+    "lessons": "lezioni",
+    "audios": "audio",
+    "stats": {
+      "courses": "Corsi",
+      "modules": "Moduli",
+      "lessons": "Lezioni",
+      "audios": "Audio"
+    },
+    "error": {
+      "fetchCoursesTitle": "Errore nel caricamento dei corsi",
+      "fetchCoursesDescription": "Non è stato possibile caricare la lista dei corsi",
+      "fetchTitle": "Errore nel caricamento degli audio",
+      "fetchDescription": "Non è stato possibile caricare la lista degli audio",
+      "deleteTitle": "Errore nell'eliminazione",
+      "deleteDescription": "Non è stato possibile eliminare l'audio"
+    },
+    "success": {
+      "deleteTitle": "Audio eliminato",
+      "deleteDescription": "L'audio è stato eliminato con successo"
+    },
+    "deleteConfirmation": {
+      "title": "Conferma eliminazione",
+      "message": "Vuoi davvero eliminare l'audio \"{audioName}\"?",
+      "audio": "Audio",
+      "lesson": "Lezione",
+      "duration": "Durata",
+      "size": "Dimensione",
+      "warning": "⚠️ Questa azione non può essere annullata. Il file verrà rimosso permanentemente.",
+      "confirm": "Elimina"
+    },
+    "modal": {
+      "title": "Dettagli Audio",
+      "player": "Riproduci Audio",
+      "order": "Ordine",
+      "duration": "Durata",
+      "size": "Dimensione",
+      "createdAt": "Creato il",
+      "updatedAt": "Aggiornato il",
+      "transcription": "Trascrizione",
+      "noTranscription": "Nessuna trascrizione",
+      "translations": "Traduzioni",
+      "noDescription": "Nessuna descrizione",
+      "close": "Chiudi"
+    }
+  },
+
+  "editAudio": {
+    "title": "Modifica Audio",
+    "loadingOrders": "Caricamento ordini...",
+    "noOrdersAvailable": "Nessun ordine disponibile",
+    "current": "attuale",
+    "usedOrders": "Ordini occupati",
+    "fields": {
+      "order": "Ordine",
+      "replaceFile": "Sostituisci File",
+      "transcription": "Trascrizione",
+      "title": "Titolo",
+      "description": "Descrizione"
+    },
+    "placeholders": {
+      "order": "Seleziona l'ordine",
+      "transcription": "Inserisci la trascrizione dell'audio...",
+      "title": "Inserisci il titolo",
+      "description": "Inserisci la descrizione (opzionale)"
+    },
+    "upload": {
+      "click": "Clicca per selezionare un nuovo file",
+      "formats": "MP3, WAV, OGG, AAC, M4A, WebM (max. 200MB)"
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "spanish": "Spagnolo",
+      "italian": "Italiano"
+    },
+    "errors": {
+      "title": "Errore nell'aggiornamento",
+      "orderRequired": "L'ordine è obbligatorio",
+      "orderExists": "Questo ordine è già in uso",
+      "titleRequired": "Il titolo è obbligatorio",
+      "fileTooLarge": "File troppo grande (max. 200MB)",
+      "invalidFileType": "Tipo di file non supportato",
+      "durationCalculation": "Errore nel calcolo della durata dell'audio",
+      "orderConflict": "Questo ordine esiste già per un altro audio",
+      "saveFailed": "Errore nel salvataggio delle modifiche"
+    },
+    "success": {
+      "title": "Audio aggiornato",
+      "description": "Le modifiche sono state salvate con successo"
+    },
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saving": "Salvataggio..."
+  },
+
+  "createAnimation": {
+    "title": "Crea Animazione Interattiva",
+    "description": "Crea animazioni interattive per coinvolgere gli studenti nelle lezioni.",
+    "loading": "Caricamento...",
+    "fields": {
+      "course": "Corso",
+      "module": "Modulo",
+      "lesson": "Lezione",
+      "animationType": "Tipo di Animazione",
+      "gameType": "Tipo di Gioco",
+      "sentences": "Frasi",
+      "sentence": "Frase",
+      "fullSentence": "Frase Completa",
+      "targetWord": "Parola Target",
+      "targetWords": "Parole Target",
+      "wordPosition": "Posizione della Parola",
+      "position": "Posizione",
+      "hint": "Suggerimento",
+      "distractors": "Parole Distraenti",
+      "shuffleWords": "Mescola Parole",
+      "question": "Domanda",
+      "options": "Opzioni di Risposta",
+      "explanation": "Spiegazione"
+    },
+    "placeholders": {
+      "course": "Seleziona un corso",
+      "module": "Seleziona un modulo",
+      "lesson": "Seleziona una lezione",
+      "fullSentence": "Es: Il gatto mangia il pesce",
+      "targetWord": "Es: gatto",
+      "hint": "Es: Animale domestico (opzionale)",
+      "distractor": "Parola distraente",
+      "question": "Inserisci la domanda",
+      "option": "Opzione",
+      "explanation": "Spiegazione della risposta corretta (opzionale)"
+    },
+    "types": {
+      "completeSentence": "Completa la Frase",
+      "completeSentenceDesc": "Lo studente completa le frasi trascinando o digitando parole",
+      "multipleChoice": "Scelta Multipla",
+      "multipleChoiceDesc": "Lo studente seleziona la risposta corretta tra 3 opzioni"
+    },
+    "gameTypes": {
+      "dragWord": "Trascina Parola",
+      "reorderWords": "Riordina Parole",
+      "typeCompletion": "Digita Parola",
+      "multipleBlanks": "Spazi Multipli"
+    },
+    "actions": {
+      "addSentence": "Aggiungi Frase",
+      "addDistractor": "Aggiungi Distraente",
+      "addTargetWord": "Aggiungi Parola",
+      "create": "Crea Animazione",
+      "creating": "Creazione..."
+    },
+    "hints": {
+      "distractors": "Parole extra che saranno mostrate come opzioni errate",
+      "correctOption": "Clicca sul numero per selezionare l'opzione corretta",
+      "markCorrect": "Segna come corretta",
+      "multipleBlanks": "Minimo 2 parole target per frase"
+    },
+    "errors": {
+      "lessonRequired": "Seleziona una lezione",
+      "gameTypeRequired": "Seleziona un tipo di gioco",
+      "sentenceRequired": "Aggiungi almeno una frase con parola target",
+      "multipleBlanksRequired": "Aggiungi almeno una frase con 2 parole target",
+      "questionRequired": "Inserisci una domanda",
+      "threeOptionsRequired": "Compila tutte e 3 le opzioni"
+    },
+    "apiErrors": {
+      "sentencePrefix": "Frase {number}: ",
+      "wordNotFound": "La parola \"{word}\" non è stata trovata nella frase. Verifica l'ortografia.",
+      "requiresTargetWordsArray": "Questo tipo di gioco richiede più parole target.",
+      "requiresAtLeast2Words": "Questo tipo di gioco richiede almeno 2 parole target.",
+      "positionsLengthMismatch": "Il numero di posizioni deve essere uguale al numero di parole target.",
+      "emptyTargetWord": "La parola target {index} non può essere vuota.",
+      "invalidPosition": "La posizione {index} deve essere un numero maggiore o uguale a zero."
+    },
+    "success": {
+      "title": "Animazione creata",
+      "description": "L'animazione è stata creata con successo"
+    },
+    "error": {
+      "title": "Errore nella creazione dell'animazione",
+      "description": "Non è stato possibile creare l'animazione"
+    }
+  },
+
+  "listAnimations": {
+    "title": "Lista Animazioni",
+    "loading": "Caricamento animazioni...",
+    "searchPlaceholder": "Cerca animazioni...",
+    "filters": "Filtri",
+    "filterBy": "Filtra per",
+    "clearFilters": "Cancella filtri",
+    "noAnimations": "Nessuna animazione registrata",
+    "noResults": "Nessuna animazione trovata",
+    "animations": "animazioni",
+    "view": "Visualizza",
+    "order": "Ordine",
+    "questions": "domande",
+    "fields": {
+      "course": "Corso",
+      "module": "Modulo",
+      "lesson": "Lezione"
+    },
+    "placeholders": {
+      "allCourses": "Tutti i corsi",
+      "allModules": "Tutti i moduli",
+      "allLessons": "Tutte le lezioni"
+    },
+    "stats": {
+      "lessons": "Lezioni",
+      "animations": "Animazioni",
+      "completeSentence": "Completa Frase",
+      "multipleChoice": "Scelta Multipla"
+    },
+    "types": {
+      "completeSentence": "Completa Frase",
+      "multipleChoice": "Scelta Multipla"
+    },
+    "gameTypes": {
+      "dragWord": "Trascina Parola",
+      "reorderWords": "Riordina Parole",
+      "typeCompletion": "Digita Parola",
+      "multipleBlanks": "Spazi Multipli"
+    },
+    "modal": {
+      "title": "Dettagli Animazione",
+      "sentences": "Frasi",
+      "targetWord": "Parola Obiettivo",
+      "position": "Posizione",
+      "hint": "Suggerimento",
+      "distractors": "Distrattori",
+      "question": "Domanda",
+      "options": "Opzioni",
+      "correct": "Corretta",
+      "explanation": "Spiegazione",
+      "createdAt": "Creato il",
+      "updatedAt": "Aggiornato il",
+      "close": "Chiudi"
+    },
+    "error": {
+      "fetchTitle": "Errore nel caricamento delle animazioni",
+      "fetchDescription": "Non è stato possibile caricare la lista delle animazioni"
+    },
+    "edit": {
+      "button": "Modifica",
+      "title": "Modifica Animazione",
+      "typeReadOnly": "(il tipo non può essere modificato)",
+      "order": "Ordine",
+      "gameType": "Tipo di Gioco",
+      "sentences": "Frasi",
+      "sentence": "Frase",
+      "addSentence": "Aggiungi Frase",
+      "fullSentence": "Frase Completa",
+      "targetWord": "Parola Obiettivo",
+      "position": "Posizione",
+      "hint": "Suggerimento",
+      "distractors": "Distrattori",
+      "addDistractor": "Aggiungi",
+      "distractorPlaceholder": "Parola",
+      "shuffleWords": "Mescola Parole",
+      "question": "Domanda",
+      "options": "Opzioni",
+      "option": "Opzione",
+      "markCorrect": "Segna come corretta",
+      "explanation": "Spiegazione",
+      "explanationPlaceholder": "Spiegazione della risposta corretta (opzionale)",
+      "cancel": "Annulla",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "successTitle": "Animazione aggiornata",
+      "successDescription": "Le modifiche sono state salvate con successo",
+      "errorTitle": "Errore nell'aggiornamento",
+      "errorDescription": "Non è stato possibile salvare le modifiche",
+      "validation": {
+        "title": "Errore di validazione",
+        "noSentences": "Aggiungi almeno una frase",
+        "emptySentence": "La frase {index} è vuota",
+        "emptyTargetWord": "La parola obiettivo della frase {index} è vuota",
+        "targetWordNotInSentence": "La parola \"{targetWord}\" non esiste nella frase {index}",
+        "emptyQuestion": "La domanda è vuota",
+        "emptyOption": "L'opzione {index} è vuota"
+      }
+    },
+    "toggle": {
+      "enable": "Abilita",
+      "disable": "Disabilita",
+      "disabled": "Disabilitato",
+      "enabledTitle": "Animazione abilitata",
+      "enabledDescription": "L'animazione è visibile agli studenti",
+      "disabledTitle": "Animazione disabilitata",
+      "disabledDescription": "L'animazione non è più visibile agli studenti",
+      "errorTitle": "Errore nel cambio stato",
+      "errorDescription": "Non è stato possibile cambiare lo stato dell'animazione"
+    },
+    "delete": {
+      "button": "Elimina animazione",
+      "confirmTitle": "Conferma eliminazione",
+      "confirmMessage": "Sei sicuro di voler eliminare questa animazione?",
+      "type": "Tipo",
+      "lesson": "Lezione",
+      "order": "Ordine",
+      "warning": "Questa azione non può essere annullata. L'animazione sarà eliminata permanentemente.",
+      "confirm": "Elimina",
+      "successTitle": "Animazione eliminata",
+      "successDescription": "L'animazione è stata rimossa con successo",
+      "errorTitle": "Errore nell'eliminazione",
+      "errorDescription": "Non è stato possibile eliminare l'animazione",
+      "conflictTitle": "Impossibile eliminare",
+      "conflictDescription": "Questa animazione ha registri di progresso degli studenti. Disabilitala invece di eliminarla."
+    }
+  },
+
+  "listEnvironments3D": {
+    "title": "Ambienti 3D",
+    "loading": "Caricamento ambienti...",
+    "noEnvironments": "Nessun ambiente 3D registrato",
+    "view": "Visualizza",
+    "error": {
+      "fetchTitle": "Errore nel caricamento degli ambienti",
+      "fetchDescription": "Non è stato possibile caricare la lista degli ambienti 3D",
+      "notFound": "Ambiente non trovato",
+      "fetchDetailsTitle": "Errore nel caricamento dei dettagli",
+      "fetchDetailsDescription": "Non è stato possibile caricare i dettagli dell'ambiente"
+    },
+    "modal": {
+      "title": "Dettagli Ambiente 3D",
+      "loading": "Caricamento dettagli...",
+      "createdAt": "Creato il",
+      "updatedAt": "Aggiornato il",
+      "translations": "Traduzioni",
+      "noDescription": "Nessuna descrizione",
+      "close": "Chiudi"
+    },
+    "edit": {
+      "button": "Modifica",
+      "title": "Modifica Ambiente 3D",
+      "slugHint": "Solo lettere minuscole, numeri e trattini",
+      "titleLabel": "Titolo",
+      "descriptionLabel": "Descrizione",
+      "cancel": "Annulla",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "successTitle": "Ambiente aggiornato",
+      "successDescription": "L'ambiente 3D è stato aggiornato con successo!",
+      "errorTitle": "Errore nell'aggiornamento",
+      "errorDescription": "Non è stato possibile aggiornare l'ambiente 3D",
+      "conflictDescription": "Esiste già un ambiente con questo slug"
+    },
+    "delete": {
+      "button": "Elimina",
+      "title": "Elimina Ambiente 3D",
+      "confirmation": "Sei sicuro di voler eliminare questo ambiente?",
+      "warning": "Questa azione non può essere annullata.",
+      "cancel": "Annulla",
+      "confirm": "Elimina",
+      "deleting": "Eliminazione...",
+      "successTitle": "Ambiente eliminato",
+      "successDescription": "L'ambiente 3D è stato eliminato con successo!",
+      "errorTitle": "Errore nell'eliminazione",
+      "errorDescription": "Non è stato possibile eliminare l'ambiente 3D",
+      "inUseDescription": "Questo ambiente è utilizzato da lezioni e non può essere eliminato"
+    }
+  },
+
+  "createEnvironment3D": {
+    "title": "Crea Ambiente 3D",
+    "description": "Configura un nuovo ambiente 3D con traduzioni per tutte le lingue supportate.",
+    "fields": {
+      "slug": "Identificatore (slug)",
+      "title": "Titolo",
+      "description": "Descrizione"
+    },
+    "placeholders": {
+      "slug": "es: clinic-environment",
+      "title": "Inserisci il titolo dell'ambiente",
+      "description": "Descrizione opzionale dell'ambiente"
+    },
+    "hints": {
+      "slug": "Solo lettere minuscole, numeri e trattini. Verrà usato nell'URL."
+    },
+    "translations": {
+      "title": "Traduzioni",
+      "portuguese": "Portoghese",
+      "italian": "Italiano",
+      "spanish": "Spagnolo"
+    },
+    "errors": {
+      "slugRequired": "Lo slug è obbligatorio",
+      "slugMax": "Lo slug non può superare 100 caratteri",
+      "slugInvalid": "Sono ammessi solo lettere minuscole, numeri e trattini",
+      "titleRequired": "Il titolo è obbligatorio",
+      "titleMax": "Il titolo non può superare 200 caratteri",
+      "descriptionMax": "La descrizione non può superare 1000 caratteri"
+    },
+    "error": {
+      "title": "Errore nella creazione dell'ambiente",
+      "description": "Impossibile creare l'ambiente 3D. Riprova.",
+      "validationTitle": "Errore di validazione",
+      "validationDescription": "Controlla i campi del modulo.",
+      "conflictDescription": "Esiste già un ambiente 3D con questo slug."
+    },
+    "success": {
+      "title": "Ambiente creato",
+      "description": "L'ambiente 3D è stato creato con successo!"
+    },
+    "create": "Crea Ambiente",
+    "creating": "Creazione in corso..."
   },
 
   "personalSessions": {
@@ -6190,8 +6929,30 @@
     "video": "Video",
     "title": "Titolo",
     "description": "Descrizione",
-    "order": "Ordine"
+    "order": "Ordine",
+    "lessonType": "Tipo di Lezione",
+    "contentType": "Tipo di Contenuto",
+    "environment3D": "Ambiente 3D",
+    "audios": "Audio",
+    "animations": "Animazioni Interattive"
   },
+  "lessonTypes": {
+    "standard": "Lezione Standard",
+    "standardDesc": "Lezione con video o audio, documenti, flashcard e animazioni interattive",
+    "environment3D": "Ambiente 3D",
+    "environment3DDesc": "Lezione con simulazione 3D immersiva (contenuto esclusivo)"
+  },
+  "contentTypes": {
+    "video": "Video",
+    "videoDesc": "Lezione principale con contenuto video",
+    "audio": "Audio",
+    "audioDesc": "Lezione principale con contenuto audio",
+    "xorInfo": "Una lezione può avere video O audio, ma non entrambi contemporaneamente"
+  },
+  "loading": "Caricamento...",
+  "optional": "opzionale",
+  "noAudiosAvailable": "Nessun audio disponibile. Carica prima degli audio.",
+  "noAnimationsAvailable": "Nessuna animazione disponibile. Crea prima delle animazioni.",
   "placeholders": {
     "course": "Seleziona un corso",
     "module": "Seleziona un modulo",
@@ -6200,7 +6961,8 @@
     "noVideo": "Senza video",
     "title": "Inserisci il titolo della lezione",
     "description": "Inserisci la descrizione della lezione",
-    "order": "Numero dell'ordine"
+    "order": "Numero dell'ordine",
+    "environment3D": "Seleziona un ambiente 3D"
   },
   "hints": {
     "imageUrl": "URL dell'immagine di copertina della lezione",
@@ -6386,6 +7148,7 @@
       "description": "Descrizione",
       "imageUrl": "URL dell'Immagine",
       "order": "Ordine",
+      "lessonType": "Tipo di Lezione",
       "flashcards": "Flashcard",
       "flashcardsCount": "flashcard",
       "assessments": "Valutazioni",
@@ -6394,6 +7157,31 @@
       "commentsCount": "commenti",
       "createdAt": "Data di Creazione",
       "updatedAt": "Ultimo Aggiornamento"
+    },
+    "types": {
+      "standard": "Standard",
+      "environment3d": "Ambiente 3D"
+    },
+    "audios": {
+      "title": "Audio della Lezione",
+      "count": "audio",
+      "duration": "Durata",
+      "fileSize": "Dimensione"
+    },
+    "animations": {
+      "title": "Animazioni Interattive",
+      "count": "animazioni",
+      "questions": "domande",
+      "types": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      },
+      "enabled": "Attivo",
+      "disabled": "Inattivo"
+    },
+    "environment3d": {
+      "title": "Ambiente 3D",
+      "slug": "Slug"
     },
     "video": {
       "title": "Informazioni del Video",
@@ -6509,7 +7297,41 @@
     "noAssessment": "Nessuna valutazione",
     "cancel": "Annulla",
     "save": "Salva",
-    "saving": "Salvataggio..."
+    "saving": "Salvataggio...",
+    "interactiveLessons": {
+      "title": "Lezioni Interattive",
+      "lessonType": "Tipo di Lezione",
+      "typeReadOnly": "non può essere modificato",
+      "types": {
+        "standard": "Standard",
+        "environment3d": "Ambiente 3D"
+      },
+      "environment3d": "Ambiente 3D",
+      "loadingEnvironments": "Caricamento ambienti...",
+      "selectEnvironment": "Seleziona un ambiente...",
+      "noEnvironment": "Nessun ambiente",
+      "environment3dHint": "Seleziona l'ambiente 3D per questa lezione interattiva",
+      "audios": "Audio",
+      "loadingAudios": "Caricamento audio...",
+      "noAudiosAvailable": "Nessun audio disponibile",
+      "noAudiosInLesson": "Nessun audio registrato in questa lezione",
+      "audiosHint": "Seleziona gli audio per questa lezione",
+      "audiosHintReadOnly": "Gli audio sono gestiti nella scheda Audio",
+      "audiosCount": "{count} audio registrato/i",
+      "selectedAudios": "{count} audio selezionato/i",
+      "animations": "Animazioni",
+      "loadingAnimations": "Caricamento animazioni...",
+      "noAnimationsAvailable": "Nessuna animazione disponibile",
+      "noAnimationsInLesson": "Nessuna animazione registrata in questa lezione",
+      "animationsHint": "Seleziona le animazioni per questa lezione",
+      "animationsHintReadOnly": "Le animazioni sono gestite nella scheda Animazioni",
+      "animationsCount": "{count} animazione/i registrata/e",
+      "selectedAnimations": "{count} animazione/i selezionata/e",
+      "animationTypes": {
+        "completeSentence": "Completa la Frase",
+        "multipleChoice": "Scelta Multipla"
+      }
+    }
   },
     "videos": {
       "create": "Crea Video",

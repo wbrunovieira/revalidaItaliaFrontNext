@@ -54,6 +54,47 @@ interface LiveSessionRecording {
   };
 }
 
+interface AudioTranslation {
+  locale: string;
+  title: string;
+  description?: string;
+}
+
+interface Audio {
+  id: string;
+  lessonId?: string;
+  filename: string;
+  url: string;
+  durationInSeconds: number;
+  formattedDuration?: string;
+  fileSize: number;
+  mimeType: string;
+  order: number;
+  transcription?: string;
+  translations: AudioTranslation[];
+}
+
+interface Animation {
+  id: string;
+  lessonId?: string;
+  type: 'CompleteSentence' | 'MultipleChoice';
+  order: number;
+  totalQuestions?: number;
+  enabled: boolean;
+}
+
+interface Environment3DTranslation {
+  locale: string;
+  name?: string;
+  description?: string;
+}
+
+interface Environment3D {
+  id: string;
+  slug: string;
+  translations: Environment3DTranslation[];
+}
+
 interface Lesson {
   id: string;
   moduleId: string;
@@ -64,6 +105,12 @@ interface Lesson {
   liveSessionRecordings?: LiveSessionRecording[];
   createdAt: string;
   updatedAt: string;
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  audios?: Audio[];
+  animations?: Animation[];
+  environment3dId?: string;
+  environment3d?: Environment3D;
 }
 
 interface LessonsResponse {

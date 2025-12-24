@@ -34,6 +34,11 @@ export interface LessonItem {
   order: number;
   imageUrl?: string;
   translations: Translation[];
+  // Interactive Lessons fields
+  type?: 'STANDARD' | 'ENVIRONMENT_3D';
+  hasAudios?: boolean;
+  hasAnimations?: boolean;
+  environment3dId?: string | null;
 }
 
 interface UseCourseHierarchyOptions {

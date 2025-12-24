@@ -130,6 +130,9 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
     }
   };
 
+  // Internal tab state
+  const [activeTab, setActiveTab] = useState<'byStudent' | 'byExercise'>('byStudent');
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatsResponse['data'] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -645,8 +648,41 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Internal Tab Navigation */}
+      <div className="bg-gray-800 rounded-lg p-1.5 inline-flex gap-1">
+        <button
+          onClick={() => setActiveTab('byStudent')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'byStudent'
+              ? 'bg-secondary text-white'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Users size={16} />
+            {t('tabs.byStudent')}
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('byExercise')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'byExercise'
+              ? 'bg-secondary text-white'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Gamepad2 size={16} />
+            {t('tabs.byExercise')}
+          </div>
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'byStudent' && (
+        <>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gray-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
             <Users className="w-8 h-8 text-blue-400" />
@@ -1105,6 +1141,21 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
             {t('pagination.next')}
             <ChevronRight size={20} />
           </button>
+        </div>
+      )}
+        </>
+      )}
+
+      {/* By Exercise Tab - Placeholder */}
+      {activeTab === 'byExercise' && (
+        <div className="bg-gray-800 rounded-lg p-12 text-center">
+          <Gamepad2 size={64} className="mx-auto mb-4 text-gray-600" />
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">
+            {t('tabs.byExercise')}
+          </h3>
+          <p className="text-gray-500">
+            Em breve...
+          </p>
         </div>
       )}
     </div>

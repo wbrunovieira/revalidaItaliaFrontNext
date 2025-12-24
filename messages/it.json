@@ -1155,6 +1155,10 @@
       }
     },
     "tutorAnimations": {
+      "tabs": {
+        "byStudent": "Per Studente",
+        "byExercise": "Per Esercizio"
+      },
       "loading": "Caricamento statistiche esercizi...",
       "stats": {
         "totalStudents": "Studenti Totali",

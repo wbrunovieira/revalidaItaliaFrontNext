@@ -21,6 +21,8 @@ import {
   CheckCircle,
   Clock,
   ArrowLeft,
+  Zap,
+  Info,
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ptBR, it, es } from 'date-fns/locale';
@@ -36,6 +38,7 @@ interface AnimationUserStats {
     totalAttempted: number;
     totalCompleted: number;
     successRate: number;
+    firstTrySuccessRate?: number;
     averageAttempts: number;
     lastActivityAt?: string;
   };
@@ -57,6 +60,7 @@ interface AnimationUserDetail {
     totalAttempted: number;
     totalCompleted: number;
     successRate: number;
+    firstTrySuccessRate?: number;
     averageAttempts: number;
     lastActivityAt?: string;
   };
@@ -425,20 +429,52 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
         </div>
 
         {/* User summary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gray-800 rounded-lg p-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {/* Success Rate with tooltip */}
+          <div className="bg-gray-800 rounded-lg p-4 relative group">
             <div className="flex items-center gap-3">
-              <Target className="w-8 h-8 text-yellow-400" />
+              <Target className="w-8 h-8 text-green-400" />
               <div>
-                <p className="text-2xl font-bold text-white">{userDetail.summary.successRate.toFixed(1)}%</p>
-                <p className="text-gray-400 text-sm">{t('stats.successRate')}</p>
+                <p className="text-2xl font-bold text-green-400">{userDetail.summary.successRate.toFixed(1)}%</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-400 text-sm">{t('stats.successRate')}</p>
+                  <Info size={12} className="text-gray-500" />
+                </div>
+              </div>
+            </div>
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 w-52 text-center">
+              {t('tooltip.successRate')}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                <div className="border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* First Try Success Rate with tooltip */}
+          <div className="bg-gray-800 rounded-lg p-4 relative group">
+            <div className="flex items-center gap-3">
+              <Zap className="w-8 h-8 text-yellow-400" />
+              <div>
+                <p className="text-2xl font-bold text-yellow-400">{userDetail.summary.firstTrySuccessRate?.toFixed(1) ?? '-'}%</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-400 text-sm">{t('stats.firstTryRate')}</p>
+                  <Info size={12} className="text-gray-500" />
+                </div>
+              </div>
+            </div>
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 w-52 text-center">
+              {t('tooltip.firstTryRate')}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                <div className="border-4 border-transparent border-t-gray-900"></div>
               </div>
             </div>
           </div>
 
           <div className="bg-gray-800 rounded-lg p-4">
             <div className="flex items-center gap-3">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <CheckCircle className="w-8 h-8 text-blue-400" />
               <div>
                 <p className="text-2xl font-bold text-white">
                   {userDetail.summary.totalCompleted}{userDetail.summary.totalAvailable ? `/${userDetail.summary.totalAvailable}` : ''}
@@ -450,7 +486,7 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
 
           <div className="bg-gray-800 rounded-lg p-4">
             <div className="flex items-center gap-3">
-              <Clock className="w-8 h-8 text-blue-400" />
+              <Clock className="w-8 h-8 text-orange-400" />
               <div>
                 <p className="text-2xl font-bold text-white">{userDetail.summary.averageAttempts.toFixed(1)}</p>
                 <p className="text-gray-400 text-sm">{t('stats.avgAttempts')}</p>
@@ -959,37 +995,66 @@ export default function TutorAnimationStats({ locale }: TutorAnimationStatsProps
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-white">
-                    {user.stats.successRate.toFixed(1)}%
-                  </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                {/* Success Rate with tooltip */}
+                <div className="bg-gray-700/50 rounded-lg p-3 relative group">
+                  <div className="flex items-center gap-1">
+                    <Target size={14} className="text-green-400" />
+                    <p className="text-xl font-bold text-green-400">
+                      {user.stats.successRate.toFixed(1)}%
+                    </p>
+                  </div>
                   <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.successRate')}</p>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 w-48 text-center">
+                    {t('tooltip.successRate')}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                      <div className="border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* First Try Success Rate with tooltip */}
+                <div className="bg-gray-700/50 rounded-lg p-3 relative group">
+                  <div className="flex items-center gap-1">
+                    <Zap size={14} className="text-yellow-400" />
+                    <p className="text-xl font-bold text-yellow-400">
+                      {user.stats.firstTrySuccessRate?.toFixed(1) ?? '-'}%
+                    </p>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.firstTryRate')}</p>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 w-48 text-center">
+                    {t('tooltip.firstTryRate')}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                      <div className="border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-xl font-bold text-white">
                     {user.stats.totalCompleted}{user.stats.totalAvailable ? `/${user.stats.totalAvailable}` : ''}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.completed')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-xl font-bold text-white">
                     {user.stats.totalAttempted}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.attempted')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-xl font-bold text-white">
                     {user.stats.averageAttempts.toFixed(1)}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.avgAttempts')}</p>
                 </div>
 
                 <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-xl font-bold text-white">
                     {user.recentActivity?.last7Days ?? '-'}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-400">{t('stats.last7Days')}</p>

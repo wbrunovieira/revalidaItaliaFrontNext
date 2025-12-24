@@ -1163,11 +1163,16 @@
         "averageSuccessRate": "Tasso Medio di Successo",
         "performanceDistribution": "Distribuzione delle Prestazioni",
         "successRate": "Tasso di Successo",
+        "firstTryRate": "1° Tentativo",
         "completed": "Completati",
         "attempted": "Tentati",
         "avgAttempts": "Media Tentativi",
         "last7Days": "Ultimi 7 giorni",
         "lastActivity": "Ultima attività"
+      },
+      "tooltip": {
+        "successRate": "Completati ÷ Tentati × 100",
+        "firstTryRate": "Successi al 1° tentativo ÷ Tentati × 100"
       },
       "activityStatus": {
         "active": "Attivo",

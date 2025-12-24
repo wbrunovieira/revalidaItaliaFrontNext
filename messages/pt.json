@@ -1154,7 +1154,7 @@
     "tutorAnimations": {
       "tabs": {
         "byStudent": "Por Aluno",
-        "byExercise": "Por Exercício"
+        "byLesson": "Por Aula"
       },
       "loading": "Carregando estatísticas de exercícios...",
       "stats": {
@@ -1241,8 +1241,46 @@
         "fetchTitle": "Erro ao carregar",
         "fetchDescription": "Não foi possível carregar as estatísticas de exercícios.",
         "fetchUserDetail": "Não foi possível carregar os detalhes do usuário.",
+        "fetchLessonDetail": "Não foi possível carregar os detalhes da aula.",
         "noData": "Erro ao carregar dados",
         "tryAgain": "Não foi possível carregar as estatísticas. Tente novamente."
+      },
+      "lessonStats": {
+        "totalLessons": "Total de Aulas",
+        "activeLessons": "Aulas Ativas",
+        "totalAnimations": "Total de Exercícios",
+        "studentsInteracted": "Alunos Interagiram",
+        "difficulty": "Dificuldade",
+        "course": "Curso",
+        "module": "Módulo",
+        "lesson": "Aula",
+        "noLessons": "Nenhuma aula encontrada",
+        "noLessonsDescription": "Não há aulas com exercícios para os filtros selecionados."
+      },
+      "difficultyLevel": {
+        "easy": "Fácil",
+        "medium": "Médio",
+        "hard": "Difícil"
+      },
+      "difficultyDistribution": "Distribuição de Dificuldade",
+      "lessonDetail": {
+        "back": "Voltar",
+        "lessonDetail": "Detalhes da Aula",
+        "studentsProgress": "Progresso dos Alunos",
+        "exerciseBreakdown": "Detalhamento por Exercício",
+        "noStudents": "Nenhum aluno interagiu com esta aula ainda",
+        "noExercises": "Nenhum exercício encontrado"
+      },
+      "lessonFilters": {
+        "allCourses": "Todos os Cursos",
+        "allModules": "Todos os Módulos",
+        "sortOptions": {
+          "title": "Título",
+          "successRate": "Taxa de Sucesso",
+          "students": "Nº de Alunos",
+          "difficulty": "Dificuldade",
+          "lastActivity": "Última Atividade"
+        }
       }
     }
   }

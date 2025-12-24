@@ -1157,7 +1157,7 @@
     "tutorAnimations": {
       "tabs": {
         "byStudent": "Per Studente",
-        "byExercise": "Per Esercizio"
+        "byLesson": "Per Lezione"
       },
       "loading": "Caricamento statistiche esercizi...",
       "stats": {
@@ -1244,8 +1244,46 @@
         "fetchTitle": "Errore nel caricamento",
         "fetchDescription": "Impossibile caricare le statistiche degli esercizi.",
         "fetchUserDetail": "Impossibile caricare i dettagli dell'utente.",
+        "fetchLessonDetail": "Impossibile caricare i dettagli della lezione.",
         "noData": "Errore nel caricamento dati",
         "tryAgain": "Impossibile caricare le statistiche. Riprova."
+      },
+      "lessonStats": {
+        "totalLessons": "Totale Lezioni",
+        "activeLessons": "Lezioni Attive",
+        "totalAnimations": "Totale Esercizi",
+        "studentsInteracted": "Studenti Hanno Interagito",
+        "difficulty": "Difficoltà",
+        "course": "Corso",
+        "module": "Modulo",
+        "lesson": "Lezione",
+        "noLessons": "Nessuna lezione trovata",
+        "noLessonsDescription": "Non ci sono lezioni con esercizi per i filtri selezionati."
+      },
+      "difficultyLevel": {
+        "easy": "Facile",
+        "medium": "Medio",
+        "hard": "Difficile"
+      },
+      "difficultyDistribution": "Distribuzione Difficoltà",
+      "lessonDetail": {
+        "back": "Indietro",
+        "lessonDetail": "Dettagli Lezione",
+        "studentsProgress": "Progresso Studenti",
+        "exerciseBreakdown": "Dettaglio per Esercizio",
+        "noStudents": "Nessuno studente ha interagito con questa lezione",
+        "noExercises": "Nessun esercizio trovato"
+      },
+      "lessonFilters": {
+        "allCourses": "Tutti i Corsi",
+        "allModules": "Tutti i Moduli",
+        "sortOptions": {
+          "title": "Titolo",
+          "successRate": "Tasso di Successo",
+          "students": "Nº di Studenti",
+          "difficulty": "Difficoltà",
+          "lastActivity": "Ultima Attività"
+        }
       }
     }
   }

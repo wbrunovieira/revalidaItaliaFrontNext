@@ -1157,7 +1157,7 @@
     "tutorAnimations": {
       "tabs": {
         "byStudent": "Por Estudiante",
-        "byExercise": "Por Ejercicio"
+        "byLesson": "Por Lección"
       },
       "loading": "Cargando estadísticas de ejercicios...",
       "stats": {
@@ -1244,8 +1244,46 @@
         "fetchTitle": "Error al cargar",
         "fetchDescription": "No fue posible cargar las estadísticas de ejercicios.",
         "fetchUserDetail": "No fue posible cargar los detalles del usuario.",
+        "fetchLessonDetail": "No fue posible cargar los detalles de la lección.",
         "noData": "Error al cargar datos",
         "tryAgain": "No fue posible cargar las estadísticas. Inténtalo de nuevo."
+      },
+      "lessonStats": {
+        "totalLessons": "Total de Lecciones",
+        "activeLessons": "Lecciones Activas",
+        "totalAnimations": "Total de Ejercicios",
+        "studentsInteracted": "Estudiantes Interactuaron",
+        "difficulty": "Dificultad",
+        "course": "Curso",
+        "module": "Módulo",
+        "lesson": "Lección",
+        "noLessons": "No se encontraron lecciones",
+        "noLessonsDescription": "No hay lecciones con ejercicios para los filtros seleccionados."
+      },
+      "difficultyLevel": {
+        "easy": "Fácil",
+        "medium": "Medio",
+        "hard": "Difícil"
+      },
+      "difficultyDistribution": "Distribución de Dificultad",
+      "lessonDetail": {
+        "back": "Volver",
+        "lessonDetail": "Detalles de la Lección",
+        "studentsProgress": "Progreso de Estudiantes",
+        "exerciseBreakdown": "Desglose por Ejercicio",
+        "noStudents": "Ningún estudiante ha interactuado con esta lección",
+        "noExercises": "No se encontraron ejercicios"
+      },
+      "lessonFilters": {
+        "allCourses": "Todos los Cursos",
+        "allModules": "Todos los Módulos",
+        "sortOptions": {
+          "title": "Título",
+          "successRate": "Tasa de Éxito",
+          "students": "Nº de Estudiantes",
+          "difficulty": "Dificultad",
+          "lastActivity": "Última Actividad"
+        }
       }
     }
   }

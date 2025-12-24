@@ -24,7 +24,7 @@ import TypeCompletionExercise from './TypeCompletionExercise';
 import MultipleBlanksExercise from './MultipleBlanksExercise';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import type { Animation, GameType, MultipleChoiceContent } from '@/hooks/queries/useLesson';
-import { useCompleteAnimation, useRecordAnimationAttempt } from '@/hooks/queries/useLesson';
+import { useCompleteAnimation, useRecordAnimationAttempt, useAnimationsProgress } from '@/hooks/queries/useLesson';
 
 interface ExercisesExpandableProps {
   lessonId: string;
@@ -59,6 +59,22 @@ export default function ExercisesExpandable({
   const completeAnimation = useCompleteAnimation();
   const recordAttempt = useRecordAnimationAttempt();
 
+  // Fetch progress data from API
+  const { data: progressData, refetch: refetchProgress } = useAnimationsProgress({
+    lessonId,
+    enabled: !!lessonId,
+  });
+
+  // Check if an animation is completed (from API)
+  const isAnimationCompletedFromApi = useCallback(
+    (animationId: string): boolean => {
+      if (!progressData?.progress) return false;
+      const progress = progressData.progress.find(p => p.animationId === animationId);
+      return progress?.completed ?? false;
+    },
+    [progressData]
+  );
+
   // Expanded state
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -76,25 +92,40 @@ export default function ExercisesExpandable({
     }))
   );
 
-  // Sync exercise states when animations change (e.g., new data from API)
+  // Sync exercise states when animations or API progress changes
   useEffect(() => {
     setExerciseStates(prev => {
-      // Create a map of existing states to preserve completed status
+      // Create a map of existing states to preserve local completed status
       const existingStates = new Map(prev.map(e => [e.animationId, e]));
 
       return animations.map(anim => {
         const existing = existingStates.get(anim.id);
-        // Preserve completed status, otherwise check enabled
-        if (existing?.status === 'completed') {
-          return existing;
+        const isCompletedFromApi = isAnimationCompletedFromApi(anim.id);
+
+        // If completed from API or locally, mark as completed
+        if (isCompletedFromApi || existing?.status === 'completed') {
+          return {
+            animationId: anim.id,
+            status: 'completed' as ExerciseStatus,
+            score: existing?.score,
+          };
         }
+
+        // Check if locked
+        if (anim.enabled === false) {
+          return {
+            animationId: anim.id,
+            status: 'locked' as ExerciseStatus,
+          };
+        }
+
         return {
           animationId: anim.id,
-          status: anim.enabled === false ? 'locked' : 'available',
+          status: 'available' as ExerciseStatus,
         };
       });
     });
-  }, [animations]);
+  }, [animations, isAnimationCompletedFromApi]);
 
   // Sort animations by order
   const sortedAnimations = useMemo(
@@ -163,9 +194,6 @@ export default function ExercisesExpandable({
     return activeGroupAnimations[currentExerciseIndex];
   }, [activeGroupAnimations, currentExerciseIndex]);
 
-  // Count totals
-  const totalCompleted = exerciseStates.filter(e => e.status === 'completed').length;
-  const totalAvailable = exerciseStates.filter(e => e.status === 'available').length;
 
   // Handle exercise completion - auto advance to next
   const handleExerciseComplete = useCallback(async (
@@ -193,6 +221,9 @@ export default function ExercisesExpandable({
         if (result.isFirstCompletion) {
           console.log('[Exercise] First completion! 🎉', { animationId, score });
         }
+
+        // Refetch progress to update the UI
+        refetchProgress();
       } catch (error) {
         console.error('[Exercise] Failed to record completion:', error);
         // Continue with the exercise even if API fails
@@ -213,7 +244,7 @@ export default function ExercisesExpandable({
         setCurrentExerciseIndex(0);
       }, 500);
     }
-  }, [currentExerciseIndex, activeGroupAnimations.length, lessonId, completeAnimation]);
+  }, [currentExerciseIndex, activeGroupAnimations.length, lessonId, completeAnimation, refetchProgress]);
 
   // Handle individual attempt (called for each answer, correct or incorrect)
   const handleAttempt = useCallback(async (
@@ -335,37 +366,69 @@ export default function ExercisesExpandable({
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-800/30 transition-colors"
+        className="w-full p-4 hover:bg-gray-800/30 transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-secondary/20 rounded-lg">
-            <Gamepad2 size={24} className="text-secondary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-secondary/20 rounded-lg">
+              <Gamepad2 size={24} className="text-secondary" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                {t('title')}
+                {progressData && progressData.percentComplete === 100 && (
+                  <span className="flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                    <CheckCircle size={12} />
+                    {t('allCompleted')}
+                  </span>
+                )}
+              </h3>
+              <p className="text-sm text-gray-400">
+                {progressData ? (
+                  <span>
+                    {progressData.completedAnimations} {t('of')} {progressData.totalAnimations} {t('completed')}
+                  </span>
+                ) : (
+                  t('expandToStart')
+                )}
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              {t('title')}
-              {totalCompleted > 0 && (
-                <span className="flex items-center gap-1 text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
-                  <Sparkles size={12} />
-                  {totalCompleted}/{sortedAnimations.length}
+
+          <div className="flex items-center gap-3">
+            {progressData && progressData.totalAnimations > 0 && (
+              <div className="text-right text-sm">
+                <span className={`font-medium ${progressData.percentComplete === 100 ? 'text-green-400' : 'text-secondary'}`}>
+                  {progressData.percentComplete}%
                 </span>
-              )}
-            </h3>
-            <p className="text-sm text-gray-400">{t('expandToStart')}</p>
+              </div>
+            )}
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown size={24} className="text-gray-400" />
+            </motion.div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="text-right text-sm">
-            <span className="text-secondary">{totalAvailable} {t('available')}</span>
+        {/* Progress bar - always visible when we have progress data */}
+        {progressData && progressData.totalAnimations > 0 && (
+          <div className="mt-3 mx-11">
+            <div className="h-2 bg-gray-700/50 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${
+                  progressData.percentComplete === 100
+                    ? 'bg-gradient-to-r from-green-500 to-green-400'
+                    : 'bg-gradient-to-r from-secondary to-accent'
+                }`}
+                initial={{ width: 0 }}
+                animate={{ width: `${progressData.percentComplete}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
           </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <ChevronDown size={24} className="text-gray-400" />
-          </motion.div>
-        </div>
+        )}
       </button>
 
       {/* Expandable content */}

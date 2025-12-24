@@ -1039,6 +1039,7 @@
         "assessmentOverview": "Avaliações - Visão Geral",
         "assessmentAnalysis": "Avaliações - Análise",
         "flashcards": "Flashcards",
+        "exercises": "Exercícios",
         "reports": "Denúncias",
         "support": "Suporte"
       },
@@ -1148,6 +1149,91 @@
         "previous": "Anterior",
         "next": "Próxima",
         "pageOf": "Página {current} de {total}"
+      }
+    },
+    "tutorAnimations": {
+      "loading": "Carregando estatísticas de exercícios...",
+      "stats": {
+        "totalStudents": "Total de Alunos",
+        "activeStudents": "Alunos Ativos",
+        "ofTotal": "do total",
+        "averageSuccessRate": "Taxa Média de Sucesso",
+        "performanceDistribution": "Distribuição de Performance",
+        "successRate": "Taxa de Sucesso",
+        "completed": "Completados",
+        "attempted": "Tentados",
+        "avgAttempts": "Média de Tentativas",
+        "last7Days": "Últimos 7 dias",
+        "lastActivity": "Última atividade"
+      },
+      "activityStatus": {
+        "active": "Ativo",
+        "moderate": "Moderado",
+        "inactive": "Inativo"
+      },
+      "performanceLevel": {
+        "excellent": "Excelente",
+        "good": "Bom",
+        "needsAttention": "Precisa Atenção",
+        "critical": "Crítico"
+      },
+      "filters": {
+        "title": "Filtros",
+        "searchPlaceholder": "Buscar aluno no sistema...",
+        "quickPeriod": "Período Rápido",
+        "today": "Hoje",
+        "last7Days": "Últimos 7 dias",
+        "last30Days": "Últimos 30 dias",
+        "allPeriods": "Todos os períodos",
+        "sortBy": "Ordenar por",
+        "order": "Ordem",
+        "startDate": "Data Inicial",
+        "endDate": "Data Final",
+        "sortOptions": {
+          "name": "Nome",
+          "successRate": "Taxa de Sucesso",
+          "totalCompleted": "Total Completado",
+          "lastActivity": "Última Atividade"
+        },
+        "orderOptions": {
+          "asc": "Crescente",
+          "desc": "Decrescente"
+        }
+      },
+      "search": {
+        "foundSingle": "{count} aluno encontrado para \"{term}\"",
+        "foundMultiple": "{count} alunos encontrados para \"{term}\"",
+        "noResults": "Nenhum resultado encontrado",
+        "noResultsDescription": "Nenhum aluno encontrado com \"{term}\" no nome ou email.",
+        "noStudents": "Nenhum aluno encontrado",
+        "noStudentsDescription": "Não há alunos com atividade em exercícios para os filtros selecionados."
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Próxima",
+        "pageOf": "Página {current} de {total}"
+      },
+      "actions": {
+        "viewDetails": "Ver detalhes"
+      },
+      "types": {
+        "completeSentence": "Completar Frase",
+        "multipleChoice": "Múltipla Escolha"
+      },
+      "detail": {
+        "back": "Voltar",
+        "studentDetail": "Detalhes do Aluno",
+        "animationProgress": "Progresso por Aula",
+        "exerciseTypes": "Tipos de Exercícios",
+        "attempts": "Tentativas",
+        "noProgress": "Nenhum progresso registrado ainda"
+      },
+      "error": {
+        "fetchTitle": "Erro ao carregar",
+        "fetchDescription": "Não foi possível carregar as estatísticas de exercícios.",
+        "fetchUserDetail": "Não foi possível carregar os detalhes do usuário.",
+        "noData": "Erro ao carregar dados",
+        "tryAgain": "Não foi possível carregar as estatísticas. Tente novamente."
       }
     }
   }

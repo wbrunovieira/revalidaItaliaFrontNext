@@ -1798,7 +1798,13 @@
     "answered": "Respondidos",
     "correct": "Correctos",
     "accuracy": "Precisión",
-    "lastReview": "Última Revisión"
+    "lastReview": "Última Revisión",
+    "exercises": "Ejercicios Interactivos",
+    "activeToday": "Activo Hoy",
+    "exercisesCompleted": "Completados",
+    "successRate": "Tasa de Acierto",
+    "avgAttempts": "Promedio Intentos",
+    "exercisesProgress": "Progreso"
   },
   "LogoutButton": {
     "logout": "Salir",

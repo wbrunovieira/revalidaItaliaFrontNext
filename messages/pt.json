@@ -1800,7 +1800,13 @@
     "answered": "Respondidos",
     "correct": "Corretos",
     "accuracy": "Precisão",
-    "lastReview": "Última Revisão"
+    "lastReview": "Última Revisão",
+    "exercises": "Exercícios Interativos",
+    "activeToday": "Ativo Hoje",
+    "exercisesCompleted": "Completados",
+    "successRate": "Taxa de Acerto",
+    "avgAttempts": "Média Tentativas",
+    "exercisesProgress": "Progresso"
   },
   "LogoutButton": {
     "logout": "Sair",

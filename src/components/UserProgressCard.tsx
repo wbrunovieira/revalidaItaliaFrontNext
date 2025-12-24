@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Activity,
   Calendar,
+  Gamepad2,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -57,6 +58,15 @@ interface UserProgress {
     accuracy: number;
     todayCompleted: boolean;
     lastReviewDate?: string;
+  };
+  animationsStats?: {
+    totalAvailable: number;
+    totalAttempted: number;
+    totalCompleted: number;
+    successRate: number;
+    averageAttempts: number;
+    todayActivity: boolean;
+    lastActivityAt?: string;
   };
 }
 
@@ -451,6 +461,60 @@ export default function UserProgressCard() {
                 </p>
               )}
             </div>
+
+            {/* Animations/Exercises */}
+            {progress.animationsStats && progress.animationsStats.totalAvailable > 0 && (
+              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-400 flex items-center gap-1.5">
+                    <Gamepad2 className="w-3.5 h-3.5" />
+                    {t('exercises')}
+                  </span>
+                  {progress.animationsStats.todayActivity && (
+                    <span className="text-xs bg-secondary/20 text-secondary px-2 py-1 rounded-full">
+                      {t('activeToday')}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-3 mt-2">
+                  <div>
+                    <p className="text-xs text-gray-500">{t('exercisesCompleted')}</p>
+                    <p className="text-lg font-bold text-white">
+                      {progress.animationsStats.totalCompleted}
+                      <span className="text-sm text-gray-500 font-normal">/{progress.animationsStats.totalAvailable}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">{t('successRate')}</p>
+                    <p className="text-lg font-bold text-green-400">{progress.animationsStats.successRate}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">{t('avgAttempts')}</p>
+                    <p className="text-lg font-bold text-secondary">{progress.animationsStats.averageAttempts.toFixed(1)}</p>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-gray-500">{t('exercisesProgress')}</span>
+                    <span className="text-secondary">
+                      {Math.round((progress.animationsStats.totalCompleted / progress.animationsStats.totalAvailable) * 100)}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-secondary to-accent transition-all duration-500"
+                      style={{ width: `${(progress.animationsStats.totalCompleted / progress.animationsStats.totalAvailable) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                {progress.animationsStats.lastActivityAt && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {t('lastActivity')}: {formatDate(progress.animationsStats.lastActivityAt)}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

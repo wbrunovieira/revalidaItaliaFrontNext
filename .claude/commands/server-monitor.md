@@ -187,6 +187,56 @@ aws logs filter-log-events \
   --profile bruno-admin-revalida-aws
 ```
 
+#### 3.5 Tempos de Carregamento das Páginas (IMPORTANTE)
+
+Buscar eventos de performance de navegação para analisar tempos de carregamento:
+
+```bash
+# Primeiro, obter o log stream mais recente
+LOG_STREAM=$(aws logs describe-log-streams \
+  --log-group-name '/aws/vendedlogs/RUMService_portalrevalida-frontendf46a2188' \
+  --order-by LastEventTime \
+  --descending \
+  --limit 1 \
+  --region us-east-2 \
+  --profile bruno-admin-revalida-aws \
+  --query 'logStreams[0].logStreamName' \
+  --output text)
+
+# Buscar eventos de navegação com tempos
+aws logs get-log-events \
+  --log-group-name '/aws/vendedlogs/RUMService_portalrevalida-frontendf46a2188' \
+  --log-stream-name "$LOG_STREAM" \
+  --limit 100 \
+  --region us-east-2 \
+  --profile bruno-admin-revalida-aws 2>&1 | grep performance_navigation_event
+```
+
+**Métricas importantes nos eventos:**
+- `duration` - Tempo total de carregamento (ms)
+- `timeToFirstByte` - TTFB (ms) - tempo até primeiro byte do servidor
+- `domInteractive` - Tempo até DOM interativo (ms)
+- `domComplete` - Tempo até DOM completo (ms)
+- `transferSize` - Tamanho transferido (bytes)
+
+**Referências de performance:**
+| Métrica | Bom | Aceitável | Ruim |
+|---------|-----|-----------|------|
+| TTFB | < 200ms | 200-600ms | > 600ms |
+| DOM Complete | < 1000ms | 1000-2500ms | > 2500ms |
+| Route Change | < 500ms | 500-1500ms | > 1500ms |
+
+**Formato de saída para o relatório:**
+
+```
+## Performance - Tempos de Carregamento
+
+| Página | Tempo Total | TTFB | DOM Complete | Tipo |
+|--------|-------------|------|--------------|------|
+| /pt | Xms | Xms | Xms | Full reload |
+| /pt/courses | Xms | - | - | Route change |
+```
+
 ---
 
 ### 4. Logs da Aplicação (PM2/Next.js)
@@ -265,7 +315,22 @@ Páginas mais acessadas:
 Erros detectados:
 - [TIPO] - [URL] - [STATUS]
 
-## 4. Recomendações
+## 4. Performance - Tempos de Carregamento
+
+| Página | Tempo Total | TTFB | DOM Complete | Tipo |
+|--------|-------------|------|--------------|------|
+| /pt | Xms | Xms | Xms | Full reload |
+| /pt/courses | Xms | - | - | Route change |
+
+| Métrica | Valor | Status |
+|---------|-------|--------|
+| TTFB médio | Xms | OK/WARN/CRÍTICO |
+| DOM Complete médio | Xms | OK/WARN/CRÍTICO |
+| Route Change médio | Xms | OK/WARN/CRÍTICO |
+
+Referência: TTFB < 200ms (bom), DOM < 1s (bom), Route < 500ms (bom)
+
+## 5. Recomendações
 
 - [Lista de ações recomendadas baseadas nos dados]
 ```

@@ -2,7 +2,7 @@
 
 Gera um relatório completo de monitoramento do servidor de produção, incluindo CloudWatch, CloudWatch RUM e Fail2ban.
 
-## Configurações Necessárias
+## Configurações
 
 ### AWS CLI
 - **Profile**: `bruno-admin-revalida-aws`
@@ -14,9 +14,27 @@ Gera um relatório completo de monitoramento do servidor de produção, incluind
 - **Log Group**: `/aws/vendedlogs/RUMService_portalrevalida-frontendf46a2188`
 
 ### Servidor SSH
-- **Host**: `18.118.97.189`
-- **User**: `ubuntu`
-- **Key**: `~/.ssh/revalida-frontend.pem`
+- **Inventory**: `ansible/inventory_frontend.yml` (fonte de verdade para IP/credenciais)
+
+---
+
+## Como Conectar ao Servidor
+
+O IP e credenciais estão no inventory do Ansible. Use este comando para conectar:
+
+```bash
+# Extrair IP do inventory e conectar
+ansible frontend -i ansible/inventory_frontend.yml -m ping
+
+# Ou SSH direto usando o inventory
+ssh -i ~/.ssh/revalida-key ubuntu@$(grep ansible_host ansible/inventory_frontend.yml | awk -F'"' '{print $2}')
+```
+
+**Variável de conveniência** (execute no início da sessão):
+```bash
+export SERVER_IP=$(grep ansible_host ansible/inventory_frontend.yml | awk -F'"' '{print $2}')
+export SSH_CMD="ssh -i ~/.ssh/revalida-key ubuntu@$SERVER_IP"
+```
 
 ---
 
@@ -27,7 +45,16 @@ Gera um relatório completo de monitoramento do servidor de produção, incluind
 Conecte ao servidor e colete métricas básicas:
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
+# Usando Ansible (recomendado)
+ansible frontend -i ansible/inventory_frontend.yml -m shell -a "
+uptime && echo '' &&
+free -h && echo '' &&
+df -h / && echo '' &&
+pm2 status
+"
+
+# Ou usando SSH direto
+$SSH_CMD "
 echo '=== UPTIME ===' && uptime && echo '' &&
 echo '=== MEMORIA ===' && free -h && echo '' &&
 echo '=== DISCO ===' && df -h / && echo '' &&
@@ -50,13 +77,13 @@ echo '=== NGINX STATUS ===' && sudo systemctl status nginx --no-pager -l | head 
 O Fail2ban protege contra ataques de força bruta bloqueando IPs suspeitos.
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "
 echo '=== FAIL2BAN STATUS ===' &&
-sudo fail2ban-client status && echo '' &&
+fail2ban-client status && echo '' &&
 echo '=== JAIL SSHD ===' &&
-sudo fail2ban-client status sshd && echo '' &&
+fail2ban-client status sshd && echo '' &&
 echo '=== IPs BANIDOS (últimas 24h) ===' &&
-sudo grep 'Ban' /var/log/fail2ban.log 2>/dev/null | tail -20 || echo 'Nenhum ban recente'
+grep 'Ban' /var/log/fail2ban.log 2>/dev/null | tail -20 || echo 'Nenhum ban recente'
 "
 ```
 
@@ -69,11 +96,10 @@ sudo grep 'Ban' /var/log/fail2ban.log 2>/dev/null | tail -20 || echo 'Nenhum ban
 **Comandos úteis adicionais:**
 ```bash
 # Desbanir um IP específico
-sudo fail2ban-client set sshd unbanip <IP>
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "fail2ban-client set sshd unbanip <IP>"
 
 # Ver configuração atual
-sudo fail2ban-client get sshd maxretry
-sudo fail2ban-client get sshd bantime
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "fail2ban-client get sshd maxretry && fail2ban-client get sshd bantime"
 ```
 
 ---
@@ -166,18 +192,13 @@ aws logs filter-log-events \
 ### 4. Logs da Aplicação (PM2/Next.js)
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
-echo '=== LOGS PM2 (últimas 50 linhas) ===' &&
-pm2 logs frontend --lines 50 --nostream
-"
+ansible frontend -i ansible/inventory_frontend.yml -m shell -a "pm2 logs frontend --lines 50 --nostream"
 ```
 
 Para filtrar apenas erros:
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
-pm2 logs frontend --lines 100 --nostream 2>&1 | grep -i 'error\|failed\|exception' | tail -20
-"
+ansible frontend -i ansible/inventory_frontend.yml -m shell -a "pm2 logs frontend --lines 100 --nostream 2>&1 | grep -i 'error\|failed\|exception' | tail -20"
 ```
 
 ---
@@ -185,20 +206,18 @@ pm2 logs frontend --lines 100 --nostream 2>&1 | grep -i 'error\|failed\|exceptio
 ### 5. Logs do Nginx
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "
 echo '=== ERROS NGINX (últimas 20 linhas) ===' &&
-sudo tail -20 /var/log/nginx/error.log && echo '' &&
+tail -20 /var/log/nginx/error.log && echo '' &&
 echo '=== ACESSOS RECENTES (últimas 10 linhas) ===' &&
-sudo tail -10 /var/log/nginx/access.log
+tail -10 /var/log/nginx/access.log
 "
 ```
 
 Para ver requisições com erro (4xx, 5xx):
 
 ```bash
-ssh -i ~/.ssh/revalida-frontend.pem ubuntu@18.118.97.189 "
-sudo cat /var/log/nginx/access.log | awk '\$9 >= 400' | tail -20
-"
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "cat /var/log/nginx/access.log | awk '\$9 >= 400' | tail -20"
 ```
 
 ---
@@ -261,11 +280,17 @@ Verifique se o profile está configurado:
 aws configure list --profile bruno-admin-revalida-aws
 ```
 
-### SSH não conecta
-Verifique a chave e permissões:
+### SSH/Ansible não conecta
+Verifique o inventory e a chave:
 ```bash
-chmod 600 ~/.ssh/revalida-frontend.pem
-ssh -i ~/.ssh/revalida-frontend.pem -v ubuntu@18.118.97.189
+# Testar conectividade
+ansible frontend -i ansible/inventory_frontend.yml -m ping
+
+# Verificar IP no inventory
+grep ansible_host ansible/inventory_frontend.yml
+
+# Verificar permissões da chave
+chmod 600 ~/.ssh/revalida-key
 ```
 
 ### RUM não mostra dados
@@ -275,8 +300,7 @@ ssh -i ~/.ssh/revalida-frontend.pem -v ubuntu@18.118.97.189
 
 ### Fail2ban não está rodando
 ```bash
-sudo systemctl start fail2ban
-sudo systemctl enable fail2ban
+ansible frontend -i ansible/inventory_frontend.yml -b -m shell -a "systemctl start fail2ban && systemctl enable fail2ban"
 ```
 
 ---

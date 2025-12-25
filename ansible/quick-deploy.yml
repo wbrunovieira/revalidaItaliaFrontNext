@@ -40,6 +40,10 @@
     aws_region: us-east-2
     s3_bucket_name: revalida-documents-891ff933
     s3_public_url: "https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com/public"
+    # CloudWatch RUM Configuration
+    rum_application_id: "f46a2188-0ce6-434a-9b97-a8f352bc2d55"
+    rum_identity_pool_id: "us-east-2:6739164b-cfa8-47a8-a35b-8e50212efe36"
+    rum_guest_role_arn: "arn:aws:iam::546132122685:role/portalrevalida-rum-unauthenticated"
 
   tasks:
     - name: "🔄 INICIANDO - Atualização do código frontend"
@@ -105,6 +109,8 @@
         sed -i '/^AWS_REGION=/d' .env.local 2>/dev/null || true
         sed -i '/^NODE_ENV=/d' .env.local 2>/dev/null || true
         sed -i '/^CDN_URL=/d' .env.local 2>/dev/null || true
+        # Remove variáveis RUM antigas
+        sed -i '/^NEXT_PUBLIC_RUM_/d' .env.local 2>/dev/null || true
         # Adiciona variáveis S3 corretas
         echo "" >> .env.local
         echo "# S3 Storage Configuration (auto-added by quick-deploy)" >> .env.local
@@ -112,12 +118,19 @@
         echo "AWS_REGION={{ aws_region }}" >> .env.local
         echo "CDN_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
         echo "NODE_ENV=production" >> .env.local
+        echo "" >> .env.local
+        echo "# CloudWatch RUM Configuration (auto-added by quick-deploy)" >> .env.local
+        echo "NEXT_PUBLIC_RUM_APPLICATION_ID={{ rum_application_id }}" >> .env.local
+        echo "NEXT_PUBLIC_RUM_APPLICATION_VERSION=1.0.0" >> .env.local
+        echo "NEXT_PUBLIC_RUM_REGION={{ aws_region }}" >> .env.local
+        echo "NEXT_PUBLIC_RUM_IDENTITY_POOL_ID={{ rum_identity_pool_id }}" >> .env.local
+        echo "NEXT_PUBLIC_RUM_GUEST_ROLE_ARN={{ rum_guest_role_arn }}" >> .env.local
       become_user: ubuntu
       register: env_s3_update
 
-    - name: "✅ ENV - Variáveis S3 configuradas"
+    - name: "✅ ENV - Variáveis S3 e RUM configuradas"
       debug:
-        msg: "Variáveis S3_BUCKET, AWS_REGION, CDN_URL e NODE_ENV adicionadas ao .env.local"
+        msg: "Variáveis S3 e CloudWatch RUM adicionadas ao .env.local"
 
     - name: "✅ GIT - Código atualizado"
       debug:

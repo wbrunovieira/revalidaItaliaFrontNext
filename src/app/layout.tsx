@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import PandaVideoErrorSuppressor from '@/components/PandaVideoErrorSuppressor';
 import DevToolsManager from '@/components/DevToolsManager';
+import CloudWatchRUM from '@/components/CloudWatchRUM';
 
 import {
   Plus_Jakarta_Sans,
@@ -39,6 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
+        <CloudWatchRUM />
         <PandaVideoErrorSuppressor />
         <DevToolsManager />
         {children}

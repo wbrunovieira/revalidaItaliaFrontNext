@@ -16,7 +16,6 @@ const RUM_CONFIG = {
 };
 
 // Lazy load RUM to avoid SSR issues
-let awsRum: typeof import('aws-rum-web').AwsRum | null = null;
 let rumInstance: InstanceType<typeof import('aws-rum-web').AwsRum> | null = null;
 
 async function initializeRUM() {
@@ -33,7 +32,6 @@ async function initializeRUM() {
   try {
     // Dynamic import to avoid SSR issues
     const { AwsRum } = await import('aws-rum-web');
-    awsRum = AwsRum;
 
     rumInstance = new AwsRum(
       RUM_CONFIG.applicationId,

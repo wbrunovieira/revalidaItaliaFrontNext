@@ -400,8 +400,8 @@ export default function LessonPageContent({
                   lessonId={lessonId}
                 />
 
-                {/* Flashcards */}
-                {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                {/* Flashcards - only show if there are enabled flashcards */}
+                {flashcards.length > 0 && (
                   <div className="mt-6">
                     <div className="mb-4">
                       <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
@@ -635,8 +635,8 @@ export default function LessonPageContent({
                   </div>
                 )}
 
-                {/* Flashcards */}
-                {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                {/* Flashcards - only show if there are enabled flashcards */}
+                {flashcards.length > 0 && (
                   <div className="mt-12">
                     <div className="mb-4">
                       <h4 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
@@ -1009,8 +1009,8 @@ export default function LessonPageContent({
                       </div>
                     )}
 
-                    {/* Flashcards */}
-                    {(flashcards.length > 0 || (initialFlashcards && initialFlashcards.length > 0)) && (
+                    {/* Flashcards - only show if there are enabled flashcards */}
+                    {flashcards.length > 0 && (
                       <div className="bg-primary/30 rounded-lg p-4 border border-secondary/20">
                         <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                           <CreditCard size={18} className="text-secondary" />

@@ -4540,6 +4540,7 @@
     "filters": {
       "questionType": "Tipo di Domanda",
       "answerType": "Tipo di Risposta",
+      "enabledStatus": "Stato",
       "sortBy": "Ordina per",
       "all": "Tutti"
     },
@@ -4587,9 +4588,23 @@
     "success": {
       "deleteTitle": "Flashcard eliminata",
       "deleteDescription": "La flashcard è stata eliminata con successo"
+    },
+    "status": {
+      "enabled": "Attivo",
+      "disabled": "Disattivato"
+    },
+    "toggle": {
+      "enable": "Attiva flashcard",
+      "disable": "Disattiva flashcard",
+      "enabledTitle": "Flashcard attivata",
+      "enabledDescription": "La flashcard è visibile agli studenti",
+      "disabledTitle": "Flashcard disattivata",
+      "disabledDescription": "La flashcard non sarà visualizzata agli studenti",
+      "errorTitle": "Errore nel cambio stato",
+      "errorDescription": "Impossibile cambiare lo stato della flashcard"
     }
   },
-  
+
   "questionView": {
     "title": "Dettagli Domanda",
     "questionText": "Testo della Domanda",

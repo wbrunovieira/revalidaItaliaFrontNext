@@ -20,6 +20,8 @@ import {
   Loader2,
   Edit2,
   Trash2,
+  Power,
+  Ban,
 } from 'lucide-react';
 import EditFlashcardModal from '@/components/EditFlashcardModal';
 import {
@@ -50,9 +52,13 @@ interface Flashcard {
   importBatchId: string | null;
   exportedAt: string | null;
   tags: FlashcardTag[];
+  enabled: boolean;
+  disabledAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
+type EnabledStatusFilter = 'all' | 'enabled' | 'disabled';
 
 interface PaginationInfo {
   page: number;
@@ -93,9 +99,14 @@ export default function FlashcardsList() {
   const [questionType, setQuestionType] =
     useState<string>('');
   const [answerType, setAnswerType] = useState<string>('');
+  const [enabledStatus, setEnabledStatus] =
+    useState<EnabledStatusFilter>('all');
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] =
     useState<string>('desc');
+
+  // Toggle state
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] =
@@ -144,6 +155,9 @@ export default function FlashcardsList() {
         if (answerType && answerType !== 'ALL') {
           queryParams.append('answerType', answerType);
         }
+        if (enabledStatus) {
+          queryParams.append('enabledStatus', enabledStatus);
+        }
         if (sortBy) {
           queryParams.append('sortBy', sortBy);
         }
@@ -188,6 +202,7 @@ export default function FlashcardsList() {
       debouncedSearch,
       questionType,
       answerType,
+      enabledStatus,
       sortBy,
       sortOrder,
       pagination.limit,
@@ -214,6 +229,7 @@ export default function FlashcardsList() {
     debouncedSearch,
     questionType,
     answerType,
+    enabledStatus,
     sortBy,
     sortOrder,
     loadFlashcards,
@@ -383,6 +399,67 @@ export default function FlashcardsList() {
     [t, toast, deleteFlashcard, deletingId]
   );
 
+  // Toggle flashcard enabled/disabled
+  const toggleFlashcardEnabled = useCallback(
+    async (flashcard: Flashcard) => {
+      const newEnabled = !flashcard.enabled;
+
+      // Add to toggling set
+      setTogglingIds(prev => new Set(prev).add(flashcard.id));
+
+      try {
+        if (!token || !isAuthenticated) {
+          throw new Error('No authentication token');
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/flashcards/${flashcard.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ enabled: newEnabled }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to toggle flashcard');
+        }
+
+        // Update local state
+        setFlashcards(prev =>
+          prev.map(f =>
+            f.id === flashcard.id
+              ? { ...f, enabled: newEnabled, disabledAt: newEnabled ? null : new Date().toISOString() }
+              : f
+          )
+        );
+
+        toast({
+          title: newEnabled ? t('toggle.enabledTitle') : t('toggle.disabledTitle'),
+          description: newEnabled ? t('toggle.enabledDescription') : t('toggle.disabledDescription'),
+        });
+      } catch (error) {
+        console.error('Error toggling flashcard:', error);
+        toast({
+          title: t('toggle.errorTitle'),
+          description: t('toggle.errorDescription'),
+          variant: 'destructive',
+        });
+      } finally {
+        // Remove from toggling set
+        setTogglingIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(flashcard.id);
+          return newSet;
+        });
+      }
+    },
+    [token, isAuthenticated, toast, t]
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -405,7 +482,7 @@ export default function FlashcardsList() {
 
       {/* Filters */}
       <div className="bg-gray-800/50 rounded-lg p-4 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search */}
           <div className="relative">
             <Search
@@ -497,6 +574,44 @@ export default function FlashcardsList() {
             </SelectContent>
           </Select>
 
+          {/* Enabled Status Filter */}
+          <Select
+            value={enabledStatus}
+            onValueChange={(value: EnabledStatusFilter) => setEnabledStatus(value)}
+          >
+            <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+              <SelectValue
+                placeholder={t('filters.enabledStatus')}
+              />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-700 border-gray-600">
+              <SelectItem
+                value="all"
+                className="text-gray-300"
+              >
+                {t('filters.all')}
+              </SelectItem>
+              <SelectItem
+                value="enabled"
+                className="text-white hover:bg-gray-600"
+              >
+                <div className="flex items-center gap-2">
+                  <Power size={16} className="text-green-400" />
+                  {t('status.enabled')}
+                </div>
+              </SelectItem>
+              <SelectItem
+                value="disabled"
+                className="text-white hover:bg-gray-600"
+              >
+                <div className="flex items-center gap-2">
+                  <Ban size={16} className="text-red-400" />
+                  {t('status.disabled')}
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* Sort By */}
           <Select
             value={`${sortBy}-${sortOrder}`}
@@ -543,8 +658,9 @@ export default function FlashcardsList() {
         {/* Active Filters Summary */}
         {(debouncedSearch ||
           (questionType && questionType !== 'ALL') ||
-          (answerType && answerType !== 'ALL')) && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          (answerType && answerType !== 'ALL') ||
+          enabledStatus !== 'all') && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
             <Filter size={16} />
             <span>{t('activeFilters')}:</span>
             {debouncedSearch && (
@@ -562,6 +678,16 @@ export default function FlashcardsList() {
               <span className="px-2 py-1 bg-gray-700 rounded text-white">
                 {t('answerType')}:{' '}
                 {t(`types.${answerType.toLowerCase()}`)}
+              </span>
+            )}
+            {enabledStatus !== 'all' && (
+              <span className={`px-2 py-1 rounded flex items-center gap-1 ${
+                enabledStatus === 'enabled'
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-red-500/20 text-red-400'
+              }`}>
+                {enabledStatus === 'enabled' ? <Power size={12} /> : <Ban size={12} />}
+                {t(`status.${enabledStatus}`)}
               </span>
             )}
           </div>
@@ -607,13 +733,48 @@ export default function FlashcardsList() {
 
           {/* Flashcards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {flashcards.map(flashcard => (
+            {flashcards.map(flashcard => {
+              const isDisabled = flashcard.enabled === false;
+              const isToggling = togglingIds.has(flashcard.id);
+
+              return (
               <div
                 key={flashcard.id}
-                className="bg-gray-800 rounded-lg p-3 border border-gray-700 hover:border-secondary/50 transition-all relative"
+                className={`rounded-lg p-3 border transition-all relative ${
+                  isDisabled
+                    ? 'bg-gray-800/50 border-red-500/20'
+                    : 'bg-gray-800 border-gray-700 hover:border-secondary/50'
+                }`}
               >
+                {/* Disabled Badge */}
+                {isDisabled && (
+                  <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded">
+                    <Ban size={10} />
+                    {t('status.disabled')}
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="absolute top-2 right-2 flex items-center gap-1">
+                  {/* Toggle Enable/Disable Button */}
+                  <button
+                    onClick={() => toggleFlashcardEnabled(flashcard)}
+                    disabled={isToggling}
+                    className={`p-1.5 rounded transition-all ${
+                      isToggling
+                        ? 'text-gray-500 cursor-wait'
+                        : isDisabled
+                          ? 'text-red-400 hover:text-green-400 hover:bg-green-500/20'
+                          : 'text-green-400 hover:text-red-400 hover:bg-red-500/20'
+                    }`}
+                    title={isDisabled ? t('toggle.enable') : t('toggle.disable')}
+                  >
+                    {isToggling ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Power size={14} />
+                    )}
+                  </button>
                   <button
                     onClick={() => {
                       setEditingFlashcard(flashcard);
@@ -639,7 +800,7 @@ export default function FlashcardsList() {
                 </div>
 
                 {/* Question */}
-                <div className="mb-3">
+                <div className={`mb-3 ${isDisabled ? 'opacity-60' : ''} ${isDisabled ? 'mt-6' : ''}`}>
                   <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                     {flashcard.questionType === 'TEXT' ? (
                       <Type size={16} />
@@ -648,7 +809,7 @@ export default function FlashcardsList() {
                     )}
                     <span>{t('question')}</span>
                   </div>
-                  <div className="text-white">
+                  <div className={isDisabled ? 'text-gray-400' : 'text-white'}>
                     {flashcard.questionType === 'TEXT' ? (
                       <p className="line-clamp-2">
                         {flashcard.questionText}
@@ -670,7 +831,7 @@ export default function FlashcardsList() {
                 </div>
 
                 {/* Answer */}
-                <div className="mb-3">
+                <div className={`mb-3 ${isDisabled ? 'opacity-60' : ''}`}>
                   <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                     {flashcard.answerType === 'TEXT' ? (
                       <Type size={16} />
@@ -679,7 +840,7 @@ export default function FlashcardsList() {
                     )}
                     <span>{t('answer')}</span>
                   </div>
-                  <div className="text-white">
+                  <div className={isDisabled ? 'text-gray-400' : 'text-white'}>
                     {flashcard.answerType === 'TEXT' ? (
                       <p className="line-clamp-2">
                         {flashcard.answerText}
@@ -702,7 +863,7 @@ export default function FlashcardsList() {
 
                 {/* Tags */}
                 {flashcard.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className={`flex flex-wrap gap-1 mb-3 ${isDisabled ? 'opacity-60' : ''}`}>
                     {flashcard.tags.map(tag => (
                       <span
                         key={tag.id}
@@ -727,7 +888,8 @@ export default function FlashcardsList() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Pagination */}

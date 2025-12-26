@@ -250,6 +250,7 @@ export default function FlashcardStudyPage() {
         const urlWithParams = new URL(url);
         urlWithParams.searchParams.append('includeUserInteractions', 'true');
         urlWithParams.searchParams.append('randomize', 'true');
+        urlWithParams.searchParams.append('enabledStatus', 'enabled');
         
         console.log('Final URL with params:', urlWithParams.toString());
         
@@ -515,29 +516,30 @@ export default function FlashcardStudyPage() {
       const urlWithParams = new URL(url);
       urlWithParams.searchParams.append('includeUserInteractions', 'true');
       urlWithParams.searchParams.append('randomize', 'true');
-      
+      urlWithParams.searchParams.append('enabledStatus', 'enabled');
+
       const response = await fetch(urlWithParams.toString(), {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch flashcards');
       }
-      
+
       const data = await response.json();
-      
+
       if (data.metadata) {
         setMetadata(data.metadata);
       }
-      
+
       const flashcardsList = data.flashcards || data || [];
-      const uniqueFlashcards = flashcardsList.filter((card: FlashcardData, index: number, self: FlashcardData[]) => 
+      const uniqueFlashcards = flashcardsList.filter((card: FlashcardData, index: number, self: FlashcardData[]) =>
         index === self.findIndex((c) => c.id === card.id)
       );
-      
+
       const shuffled = [...uniqueFlashcards].sort(() => Math.random() - 0.5);
       setFlashcards(shuffled);
       setTotalFlashcards(shuffled.length);

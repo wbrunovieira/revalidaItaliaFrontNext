@@ -16,6 +16,8 @@ export interface Flashcard {
   answerImageUrl?: string;
   answerType: 'TEXT' | 'IMAGE';
   translations?: FlashcardTranslation[];
+  enabled?: boolean;
+  disabledAt?: string | null;
 }
 
 interface UseLessonFlashcardsOptions {
@@ -55,8 +57,8 @@ async function fetchFlashcards(flashcardIds: string[]): Promise<Flashcard[]> {
       })
     );
 
-    // Filter out nulls
-    return flashcards.filter((f): f is Flashcard => f !== null);
+    // Filter out nulls and disabled flashcards
+    return flashcards.filter((f): f is Flashcard => f !== null && f.enabled !== false);
   } catch (error) {
     console.error('Error fetching flashcards:', error);
     return [];

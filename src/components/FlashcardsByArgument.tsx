@@ -99,9 +99,9 @@ export default function FlashcardsByArgument() {
       const argumentsWithStats = await Promise.all(
         result.arguments.map(async (arg: Argument) => {
           try {
-            // Fetch flashcard count for this argument
+            // Fetch flashcard count for this argument (only enabled flashcards)
             const flashcardResponse = await fetch(
-              `${API_URL}/api/v1/flashcards/by-argument/${arg.id}?limit=1&includeUserInteractions=true`,
+              `${API_URL}/api/v1/flashcards/by-argument/${arg.id}?limit=1&includeUserInteractions=true&enabledStatus=enabled`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,

@@ -32,7 +32,6 @@ import {
   CheckCircle,
   RefreshCw,
 } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import NavSidebar from '@/components/NavSidebar';
 import { useToast } from '@/hooks/use-toast';
@@ -693,18 +692,12 @@ export default function FlashcardStudyPage() {
               {t('error.title')}
             </h2>
             <p className="text-gray-400 mb-6">{t('error.description')}</p>
-            <Link
-              href={
-                lessonId
-                  ? `/${locale}/lessons/${lessonId}`
-                  : argumentId
-                  ? `/${locale}/flashcards/progress`
-                  : `/${locale}`
-              }
+            <button
+              onClick={() => router.back()}
               className="inline-block py-3 px-6 bg-secondary text-primary rounded-lg font-semibold hover:bg-secondary/90 transition-colors"
             >
               {t('error.back')}
-            </Link>
+            </button>
           </div>
         </div>
         
@@ -771,18 +764,12 @@ export default function FlashcardStudyPage() {
                 </button>
               )}
               
-              <Link
-                href={
-                  lessonId
-                    ? `/${locale}/lessons/${lessonId}`
-                    : argumentId
-                    ? `/${locale}/flashcards/progress`
-                    : `/${locale}`
-                }
-                className="inline-block w-full text-center py-3 px-6 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
+              <button
+                onClick={() => router.back()}
+                className="w-full text-center py-3 px-6 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
               >
                 {t('noFlashcards.back')}
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -866,18 +853,12 @@ export default function FlashcardStudyPage() {
                   {t('results.studyAgain')}
                 </button>
 
-                <Link
-                  href={
-                    lessonId
-                      ? `/${locale}/lessons/${lessonId}`
-                      : argumentId
-                      ? `/${locale}/flashcards/progress`
-                      : `/${locale}`
-                  }
-                  className="block w-full py-3 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
+                <button
+                  onClick={() => router.back()}
+                  className="w-full py-3 bg-primary/50 text-white rounded-lg font-semibold hover:bg-primary/70 transition-colors border border-secondary/20"
                 >
                   {t('results.back')}
-                </Link>
+                </button>
               </div>
             </div>
           </motion.div>
@@ -893,19 +874,13 @@ export default function FlashcardStudyPage() {
         <div className="absolute top-32 sm:top-28 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-4">
-              <Link
-                href={
-                  lessonId
-                    ? `/${locale}/lessons/${lessonId}`
-                    : argumentId
-                    ? `/${locale}/flashcards/progress`
-                    : `/${locale}`
-                }
+              <button
+                onClick={() => router.back()}
                 className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
               >
                 <ArrowLeft size={20} />
                 <span>{t('back')}</span>
-              </Link>
+              </button>
 
               <div className="flex items-center gap-3">
                 <button

@@ -871,15 +871,15 @@ export default function FlashcardStudyPage() {
     <NavSidebar>
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary overflow-hidden relative">
         {/* Header */}
-        <div className="absolute top-32 sm:top-28 lg:top-20 left-0 right-0 z-10 p-6 lg:pl-24">
+        <div className="absolute top-32 sm:top-28 lg:top-20 left-0 right-0 z-50 p-6 lg:pl-24">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-secondary/20 hover:bg-secondary/30 text-secondary rounded-lg transition-all cursor-pointer border border-secondary/30"
               >
-                <ArrowLeft size={20} />
-                <span>{t('back')}</span>
+                <ArrowLeft size={18} />
+                <span className="text-sm font-medium">{t('exit')}</span>
               </button>
 
               <div className="flex items-center gap-3">

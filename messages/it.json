@@ -2573,7 +2573,7 @@
     }
   },
   "FlashcardStudy": {
-    "back": "Indietro",
+    "exit": "Esci",
     "shuffle": "Mescola",
     "question": "Domanda",
     "answer": "Risposta",

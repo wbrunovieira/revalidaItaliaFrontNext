@@ -2576,7 +2576,7 @@
     }
   },
   "FlashcardStudy": {
-    "back": "Volver",
+    "exit": "Salir",
     "shuffle": "Mezclar",
     "question": "Pregunta",
     "answer": "Respuesta",

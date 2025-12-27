@@ -4608,7 +4608,8 @@
       "deleteTitle": "Error al eliminar",
       "notFound": "Flashcard no encontrada",
       "deleteFailed": "Error al eliminar la flashcard",
-      "connectionError": "Error de conexión. Verifica tu conexión a internet"
+      "connectionError": "Error de conexión. Verifica tu conexión a internet",
+      "hasInteractions": "Esta flashcard tiene interacciones de estudiantes y no puede ser eliminada. Considera deshabilitarla en lugar de eliminarla."
     },
     "actions": {
       "edit": "Editar flashcard",

@@ -4639,7 +4639,8 @@
       "deleteTitle": "Erro ao excluir",
       "notFound": "Flashcard não encontrado",
       "deleteFailed": "Falha ao excluir o flashcard",
-      "connectionError": "Erro de conexão. Verifique sua internet"
+      "connectionError": "Erro de conexão. Verifique sua internet",
+      "hasInteractions": "Este flashcard possui interações de alunos e não pode ser excluído. Considere desabilitar ao invés de excluir."
     },
     "actions": {
       "edit": "Editar flashcard",

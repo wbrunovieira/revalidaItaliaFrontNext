@@ -116,7 +116,7 @@ export default function CourseProgressBar({
     );
   }
 
-  const totalModules = progressData?.totalModules || initialTotalModules;
+  const totalModules = initialTotalModules || progressData?.totalModules || 0;
   const completedModules = progressData?.completedModules || 0;
   const totalLessons = progressData?.totalLessons || 0;
   const completedLessons = progressData?.completedLessons || 0;

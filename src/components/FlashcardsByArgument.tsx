@@ -46,7 +46,7 @@ interface PaginationInfo {
   total: number;
   totalPages: number;
   hasNext: boolean;
-  hasPrev: boolean;
+  hasPrevious: boolean;
 }
 
 export default function FlashcardsByArgument() {
@@ -320,7 +320,7 @@ export default function FlashcardsByArgument() {
         <div className="mt-8 flex justify-center gap-2">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={!pagination.hasPrev}
+            disabled={!pagination.hasPrevious}
             className="px-4 py-2 bg-primary-dark/50 rounded-lg text-gray-300 hover:bg-primary-dark/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('pagination.previous')}

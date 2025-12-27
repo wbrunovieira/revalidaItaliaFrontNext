@@ -16,6 +16,7 @@ interface Lesson {
   id: string;
   moduleId: string;
   imageUrl?: string;
+  order?: number;
   translations: Translation[];
   createdAt: string;
   updatedAt: string;
@@ -153,10 +154,8 @@ export default function ModuleLessonsList({
     fetchLessonsPage(newPage);
   }, [currentPage, totalPages, fetchLessonsPage]);
 
-  // Sort lessons by creation date
-  const sortedLessons = [...lessons].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
+  // Sort lessons by order (fallback to 0 if order is undefined)
+  const sortedLessons = [...lessons].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
     <div className="mt-12">

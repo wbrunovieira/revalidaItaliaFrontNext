@@ -161,7 +161,7 @@ function HospitalWalls() {
 
 // Chalkboard with instructions
 interface InstructionsChalkboardProps {
-  gameMode?: 'study' | 'challenge' | 'consultation';
+  gameMode?: 'study' | 'challenge' | 'consultation' | 'scrivi';
 }
 
 function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardProps) {
@@ -199,7 +199,7 @@ function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardPr
             anchorY="middle"
             fontWeight={700}
           >
-            🎯 Modalità Sfida
+            🎯 Modalità Trova
             <meshBasicMaterial color="#FFD700" />
           </Text>
 
@@ -283,7 +283,7 @@ function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardPr
             anchorY="middle"
             fontWeight={700}
           >
-            🩺 Modalità Consulta
+            🎧 Modalità Ascolta
             <meshBasicMaterial color="#87CEEB" />
           </Text>
 
@@ -339,6 +339,76 @@ function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardPr
             fontWeight={700}
           >
             🏥 Diventa un ottimo medico! 🏥
+            <meshBasicMaterial color="#90EE90" />
+          </Text>
+        </>
+      ) : gameMode === 'scrivi' ? (
+        <>
+          {/* Scrivi Mode Title */}
+          <Text
+            position={[0, 1.1, 0.07]}
+            fontSize={0.22}
+            color="#FF9F43"
+            anchorX="center"
+            anchorY="middle"
+            fontWeight={700}
+          >
+            ✏️ Modalità Scrivi
+            <meshBasicMaterial color="#FF9F43" />
+          </Text>
+
+          {/* Scrivi Instruction 1 */}
+          <Text
+            position={[-2.1, 0.5, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            1. Osserva la parte del corpo evidenziata
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Scrivi Instruction 2 */}
+          <Text
+            position={[-2.1, 0.05, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            2. Scrivi il nome in italiano
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Scrivi Instruction 3 */}
+          <Text
+            position={[-2.1, -0.4, 0.07]}
+            fontSize={0.15}
+            color="#F5F5DC"
+            anchorX="left"
+            anchorY="middle"
+            maxWidth={4.2}
+            fontWeight={700}
+          >
+            3. Premi Invio per confermare
+            <meshBasicMaterial color="#F5F5DC" />
+          </Text>
+
+          {/* Scrivi Closing message */}
+          <Text
+            position={[0, -1.0, 0.07]}
+            fontSize={0.16}
+            color="#90EE90"
+            anchorX="center"
+            anchorY="middle"
+            fontWeight={700}
+          >
+            📝 Impara a scrivere correttamente! 📝
             <meshBasicMaterial color="#90EE90" />
           </Text>
         </>
@@ -662,6 +732,7 @@ interface HotspotProps {
   // Challenge mode props
   challengeMode?: boolean;
   showCorrectAnswer?: boolean;
+  isScriviTarget?: boolean; // Highlight this hotspot as the target in scrivi mode
   onHover?: (isHovered: boolean) => void;
   onAudioPlay?: () => void;
   onChallengeClick?: (hotspotId: string) => void;
@@ -679,6 +750,7 @@ function Hotspot({
   isActiveFromMenu = false,
   challengeMode = false,
   showCorrectAnswer = false,
+  isScriviTarget = false,
   onHover,
   onAudioPlay,
   onChallengeClick,
@@ -809,12 +881,14 @@ function Hotspot({
   // Challenge mode colors and visibility
   const getChallengeColor = () => {
     if (showCorrectAnswer) return '#4CAF50'; // Green flash for correct answer
+    if (isScriviTarget) return '#FF9F43'; // Orange highlight for scrivi target
     if (hovered) return '#3887A6'; // Show hover feedback
     return '#1a1a2e'; // Nearly invisible (match background)
   };
 
   const getChallengeEmissive = () => {
     if (showCorrectAnswer) return 1.5;
+    if (isScriviTarget) return 1.2; // Visible glow for scrivi target
     if (hovered) return 0.8;
     return 0.1;
   };
@@ -831,13 +905,13 @@ function Hotspot({
         />
       </mesh>
 
-      {/* Pulsing ring - hidden in challenge mode unless showing answer */}
+      {/* Pulsing ring - hidden in challenge mode unless showing answer or scrivi target */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
         <meshStandardMaterial
-          color={challengeMode ? (showCorrectAnswer ? '#4CAF50' : '#1a1a2e') : isActive ? '#4CAF50' : '#3887A6'}
+          color={challengeMode ? (showCorrectAnswer ? '#4CAF50' : isScriviTarget ? '#FF9F43' : '#1a1a2e') : isActive ? '#4CAF50' : '#3887A6'}
           transparent
-          opacity={challengeMode ? (showCorrectAnswer ? 0.9 : 0.1) : isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+          opacity={challengeMode ? (showCorrectAnswer ? 0.9 : isScriviTarget ? 0.9 : 0.1) : isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5}
         />
       </mesh>
 
@@ -1451,6 +1525,7 @@ interface HumanBodyModelProps {
   challengeMode?: boolean;
   challengeTargetId?: string | null;
   showCorrectAnswer?: boolean;
+  scriviTargetId?: string | null;
   onChallengeClick?: (hotspotId: string) => void;
 }
 
@@ -1462,6 +1537,7 @@ function HumanBodyModel({
   challengeMode = false,
   challengeTargetId = null,
   showCorrectAnswer = false,
+  scriviTargetId = null,
   onChallengeClick,
 }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
@@ -1536,11 +1612,9 @@ function HumanBodyModel({
   // Model settings (single model now)
   const modelSettings = { scale: 0.012, baseY: -1.0, rotationOffset: 0 };
 
-  // Subtle floating animation + horizontal rotation
-  useFrame(state => {
+  // Horizontal rotation only (floating animation removed)
+  useFrame(() => {
     if (groupRef.current) {
-      // Base Y position + floating animation
-      groupRef.current.position.y = modelSettings.baseY + Math.sin(state.clock.elapsedTime * 0.5) * 0.03;
       groupRef.current.rotation.y = rotation + modelSettings.rotationOffset;
     }
   });
@@ -1568,6 +1642,7 @@ function HumanBodyModel({
           isActiveFromMenu={activeHotspotId === hotspot.id}
           challengeMode={challengeMode}
           showCorrectAnswer={showCorrectAnswer && challengeTargetId === hotspot.id}
+          isScriviTarget={scriviTargetId === hotspot.id}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
           onChallengeClick={onChallengeClick}
         />
@@ -1629,10 +1704,11 @@ interface SceneProps {
   audioVolume: number;
   activeHotspotId: string | null;
   // Game mode props
-  gameMode?: 'study' | 'challenge' | 'consultation';
+  gameMode?: 'study' | 'challenge' | 'consultation' | 'scrivi';
   challengeMode?: boolean;
   challengeTargetId?: string | null;
   showCorrectAnswer?: boolean;
+  scriviTargetId?: string | null;
   onChallengeClick?: (hotspotId: string) => void;
 }
 
@@ -1646,6 +1722,7 @@ function Scene({
   challengeMode = false,
   challengeTargetId = null,
   showCorrectAnswer = false,
+  scriviTargetId = null,
   onChallengeClick,
 }: SceneProps) {
   return (
@@ -1685,6 +1762,7 @@ function Scene({
         challengeMode={challengeMode}
         challengeTargetId={challengeTargetId}
         showCorrectAnswer={showCorrectAnswer}
+        scriviTargetId={scriviTargetId}
         onChallengeClick={onChallengeClick}
       />
 
@@ -1918,7 +1996,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
 
   // Challenge mode state
-  const [gameMode, setGameMode] = useState<'study' | 'challenge' | 'consultation'>('study');
+  const [gameMode, setGameMode] = useState<'study' | 'challenge' | 'consultation' | 'scrivi'>('study');
   const [isModeMenuExpanded, setIsModeMenuExpanded] = useState(true);
   const [challengeState, setChallengeState] = useState<'idle' | 'playing' | 'won' | 'lost'>('idle');
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
@@ -1938,6 +2016,17 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [usedConsultationHotspots, setUsedConsultationHotspots] = useState<string[]>([]);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const consultationAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Scrivi mode state
+  const SCRIVI_ROUNDS = 10;
+  const [scriviState, setScriviState] = useState<'idle' | 'playing' | 'finished'>('idle');
+  const [scriviRound, setScriviRound] = useState(0);
+  const [scriviScore, setScriviScore] = useState(0);
+  const [scriviTargetId, setScriviTargetId] = useState<string | null>(null);
+  const [scriviInput, setScriviInput] = useState('');
+  const [usedScriviHotspots, setUsedScriviHotspots] = useState<string[]>([]);
+  const [scriviAnswerFeedback, setScriviAnswerFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const scriviInputRef = useRef<HTMLInputElement | null>(null);
 
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -2159,6 +2248,157 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     return { emoji: '💪', title: 'Non mollare!', message: 'La pratica rende perfetti!' };
   }, [consultationScore]);
 
+  // Get random hotspot for scrivi (avoiding repeats)
+  const getRandomScriviTarget = useCallback((used: string[]) => {
+    const available = ANATOMY_HOTSPOTS.filter(h => !used.includes(h.id));
+    if (available.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    return available[randomIndex].id;
+  }, []);
+
+  // Get camera position for a hotspot (for auto-zoom)
+  const getHotspotCameraPosition = useCallback((hotspotId: string) => {
+    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
+    if (!hotspot) return null;
+
+    // Calculate camera position based on hotspot Y position
+    const yPos = hotspot.position[1] / 100; // Convert from cm to meters
+
+    // Find the appropriate body part for this hotspot
+    if (yPos >= 1.0) {
+      return BODY_PARTS.find(p => p.id === 'head');
+    } else if (yPos >= 0.0) {
+      return BODY_PARTS.find(p => p.id === 'torso');
+    } else if (yPos >= -0.5) {
+      return BODY_PARTS.find(p => p.id === 'legs');
+    }
+    return BODY_PARTS.find(p => p.id === 'full');
+  }, []);
+
+  // Start scrivi mode
+  const startScrivi = useCallback(() => {
+    setGameMode('scrivi');
+    setScriviState('playing');
+    setScriviRound(1);
+    setScriviScore(0);
+    setScriviInput('');
+    setUsedScriviHotspots([]);
+    setScriviAnswerFeedback(null);
+
+    // Get first random target
+    const firstTarget = getRandomScriviTarget([]);
+    setScriviTargetId(firstTarget);
+
+    // Auto-zoom to the body part
+    if (firstTarget) {
+      const cameraConfig = getHotspotCameraPosition(firstTarget);
+      if (cameraConfig) {
+        setFocusedPart(cameraConfig.id);
+      }
+    }
+
+    // Focus input after a short delay
+    setTimeout(() => {
+      scriviInputRef.current?.focus();
+    }, 500);
+  }, [getRandomScriviTarget, getHotspotCameraPosition]);
+
+  // Handle scrivi input submission
+  const handleScriviSubmit = useCallback(() => {
+    if (scriviState !== 'playing' || !scriviTargetId || !scriviInput.trim()) return;
+
+    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === scriviTargetId);
+    if (!hotspot) return;
+
+    // Normalize both strings for comparison (lowercase, trim)
+    const normalizedInput = scriviInput.trim().toLowerCase();
+    const normalizedLabel = hotspot.label.toLowerCase();
+
+    const isCorrect = normalizedInput === normalizedLabel;
+
+    // Set feedback
+    setScriviAnswerFeedback(isCorrect ? 'correct' : 'wrong');
+
+    if (isCorrect) {
+      setScriviScore(prev => prev + 1);
+    }
+
+    // Move to next round after feedback
+    const newUsed = [...usedScriviHotspots, scriviTargetId];
+    setUsedScriviHotspots(newUsed);
+
+    if (scriviRound >= SCRIVI_ROUNDS) {
+      // Finished all rounds
+      setTimeout(() => {
+        setScriviState('finished');
+        setScriviTargetId(null);
+        setScriviInput('');
+        setScriviAnswerFeedback(null);
+      }, 1500);
+    } else {
+      // Next round
+      setTimeout(() => {
+        const nextTarget = getRandomScriviTarget(newUsed);
+        setScriviTargetId(nextTarget);
+        setScriviRound(prev => prev + 1);
+        setScriviInput('');
+        setScriviAnswerFeedback(null);
+
+        // Auto-zoom to the new body part
+        if (nextTarget) {
+          const cameraConfig = getHotspotCameraPosition(nextTarget);
+          if (cameraConfig) {
+            setFocusedPart(cameraConfig.id);
+          }
+        }
+
+        // Focus input
+        setTimeout(() => {
+          scriviInputRef.current?.focus();
+        }, 100);
+      }, 1500);
+    }
+  }, [
+    scriviState,
+    scriviTargetId,
+    scriviInput,
+    scriviRound,
+    usedScriviHotspots,
+    getRandomScriviTarget,
+    getHotspotCameraPosition,
+  ]);
+
+  // Exit scrivi mode
+  const exitScrivi = useCallback(() => {
+    setGameMode('study');
+    setScriviState('idle');
+    setScriviRound(0);
+    setScriviScore(0);
+    setScriviTargetId(null);
+    setScriviInput('');
+    setUsedScriviHotspots([]);
+    setScriviAnswerFeedback(null);
+  }, []);
+
+  // Get scrivi diagnosis based on score
+  const getScriviDiagnosis = useCallback(() => {
+    const percentage = (scriviScore / SCRIVI_ROUNDS) * 100;
+    if (percentage === 100)
+      return { emoji: '🏆', title: 'Scrittura Perfetta!', message: 'Conosci tutti i nomi anatomici!' };
+    if (percentage >= 80) return { emoji: '🌟', title: 'Ottimo lavoro!', message: 'Scrivi quasi tutto correttamente!' };
+    if (percentage >= 60) return { emoji: '👍', title: 'Buon lavoro!', message: 'Continua a praticare la scrittura!' };
+    if (percentage >= 40)
+      return { emoji: '📚', title: 'Devi studiare!', message: 'Ripassa i nomi delle parti del corpo.' };
+    return { emoji: '✏️', title: 'Non mollare!', message: 'La pratica rende perfetti!' };
+  }, [scriviScore]);
+
+  // Get current scrivi target label
+  const currentScriviLabel = useMemo(() => {
+    if (!scriviTargetId) return '';
+    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === scriviTargetId);
+    return hotspot?.label || '';
+  }, [scriviTargetId]);
+
   // Get current target label
   const currentTargetLabel = useMemo(() => {
     if (!currentTargetId) return '';
@@ -2268,10 +2508,17 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             audioVolume={audioVolume}
             activeHotspotId={playingHotspotId}
             gameMode={gameMode}
-            challengeMode={gameMode === 'challenge' || gameMode === 'consultation'}
-            challengeTargetId={gameMode === 'challenge' ? currentTargetId : consultationTargetId}
+            challengeMode={gameMode === 'challenge' || gameMode === 'consultation' || gameMode === 'scrivi'}
+            challengeTargetId={
+              gameMode === 'challenge'
+                ? currentTargetId
+                : gameMode === 'consultation'
+                ? consultationTargetId
+                : null
+            }
             showCorrectAnswer={showCorrectAnswer}
-            onChallengeClick={gameMode === 'challenge' ? handleChallengeClick : handleConsultationClick}
+            scriviTargetId={gameMode === 'scrivi' ? scriviTargetId : null}
+            onChallengeClick={gameMode === 'challenge' ? handleChallengeClick : gameMode === 'consultation' ? handleConsultationClick : undefined}
           />
         </Canvas>
 
@@ -2305,6 +2552,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   onClick={() => {
                     if (gameMode === 'challenge') exitChallenge();
                     else if (gameMode === 'consultation') exitConsultation();
+                    else if (gameMode === 'scrivi') exitScrivi();
                     else setGameMode('study');
                   }}
                   className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
@@ -2349,7 +2597,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg shadow-[#3887A6]/50 scale-[1.02]'
                       : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
                   }`}
-                  title="Modalità Sfida"
+                  title="Modalità Trova"
                 >
                   <div className="flex items-center gap-3">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2361,7 +2609,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       />
                     </svg>
                     <div className="flex-1 text-left">
-                      <div className="font-bold">Sfida</div>
+                      <div className="font-bold">Trova</div>
                       <div
                         className={`text-xs mt-0.5 transition-opacity ${
                           gameMode === 'challenge' ? 'text-white/90' : 'text-white/40'
@@ -2398,7 +2646,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       />
                     </svg>
                     <div className="flex-1 text-left">
-                      <div className="font-bold">Consulta</div>
+                      <div className="font-bold">Ascolta</div>
                       <div
                         className={`text-xs mt-0.5 transition-opacity ${
                           gameMode === 'consultation' ? 'text-white/90' : 'text-white/40'
@@ -2408,6 +2656,43 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       </div>
                     </div>
                     {gameMode === 'consultation' && (
+                      <span className="flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={startScrivi}
+                  className={`group relative px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                    gameMode === 'scrivi'
+                      ? 'bg-gradient-to-r from-[#FF9F43] to-[#FFC107] text-white shadow-lg shadow-[#FF9F43]/50 scale-[1.02]'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90 hover:scale-[1.01]'
+                  }`}
+                  title="Modalità Scrivi"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                    <div className="flex-1 text-left">
+                      <div className="font-bold">Scrivi</div>
+                      <div
+                        className={`text-xs mt-0.5 transition-opacity ${
+                          gameMode === 'scrivi' ? 'text-white/90' : 'text-white/40'
+                        }`}
+                      >
+                        Pratica di scrittura
+                      </div>
+                    </div>
+                    {gameMode === 'scrivi' && (
                       <span className="flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-white opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
@@ -2437,6 +2722,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   onClick={() => {
                     if (gameMode === 'challenge') exitChallenge();
                     else if (gameMode === 'consultation') exitConsultation();
+                    else if (gameMode === 'scrivi') exitScrivi();
                     else setGameMode('study');
                   }}
                   className={`p-2 rounded-lg transition-all duration-200 ${
@@ -2464,7 +2750,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
                       : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
                   }`}
-                  title="Sfida"
+                  title="Trova"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -2484,7 +2770,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
                       : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
                   }`}
-                  title="Consulta"
+                  title="Ascolta"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -2492,6 +2778,26 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                       strokeLinejoin="round"
                       strokeWidth={2}
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </button>
+
+                {/* Scrivi Mode */}
+                <button
+                  onClick={startScrivi}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    gameMode === 'scrivi'
+                      ? 'bg-gradient-to-r from-[#FF9F43] to-[#FFC107] text-white shadow-lg'
+                      : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                  }`}
+                  title="Scrivi"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                     />
                   </svg>
                 </button>
@@ -2778,7 +3084,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                           {consultationRound}/{CONSULTATION_ROUNDS}
                         </span>
                         <span className="hidden md:inline w-24">
-                          Consulta {consultationRound}/{CONSULTATION_ROUNDS}
+                          Ascolta {consultationRound}/{CONSULTATION_ROUNDS}
                         </span>
                       </div>
                       <div className="w-16 md:w-40 h-1.5 md:h-2 bg-[#0F2940] rounded-full overflow-hidden">
@@ -2849,6 +3155,223 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     </button>
                     <button
                       onClick={exitConsultation}
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#0F2940] text-white/70 rounded-lg text-sm md:text-base font-medium hover:bg-[#1a3a55] transition-all"
+                    >
+                      📚 Studio
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Scrivi Mode UI */}
+        {gameMode === 'scrivi' && (
+          <>
+            {/* Scrivi Body Parts Navigation - Responsive */}
+            {/* Mobile: Bottom horizontal bar */}
+            <div className="md:hidden absolute bottom-16 left-0 right-0 z-20 px-2">
+              <div className="bg-[#0C3559]/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-[#FF9F43]/30">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {BODY_PARTS.filter(p => p.id !== 'rules').map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                        focusedPart === part.id
+                          ? 'bg-gradient-to-r from-[#FF9F43] to-[#FFC107] text-white shadow-lg'
+                          : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
+                      }`}
+                      title={part.label}
+                    >
+                      <span className="text-lg">{part.icon}</span>
+                      <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop: Right side panel */}
+            <div className="hidden md:block absolute top-16 right-4 z-20">
+              <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#FF9F43]/30">
+                <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
+                <div className="flex flex-col gap-2">
+                  {BODY_PARTS.filter(p => p.id !== 'rules').map(part => (
+                    <button
+                      key={part.id}
+                      onClick={() => setFocusedPart(part.id)}
+                      className={`
+                        w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                        flex items-center gap-2 border-2 whitespace-nowrap
+                        ${
+                          focusedPart === part.id
+                            ? 'bg-[#FF9F43] text-white border-[#FF9F43] shadow-md'
+                            : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
+                        }
+                      `}
+                    >
+                      <span className="text-base">{part.icon}</span>
+                      {part.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Input Card - Responsive */}
+            {scriviState === 'playing' && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 md:top-32 md:left-auto md:translate-x-0 md:right-[200px] z-20">
+                <div
+                  className={`bg-[#0C3559] backdrop-blur-sm rounded-xl px-4 md:px-6 py-3 md:py-4 shadow-2xl border-2 transition-all duration-300 ${
+                    scriviAnswerFeedback === 'correct'
+                      ? 'border-[#4CAF50]'
+                      : scriviAnswerFeedback === 'wrong'
+                      ? 'border-red-500'
+                      : 'border-[#FF9F43]'
+                  }`}
+                >
+                  <div className="text-center">
+                    {/* Feedback indicator */}
+                    {scriviAnswerFeedback !== null ? (
+                      <div
+                        className={`text-2xl md:text-4xl mb-1 md:mb-2 ${
+                          scriviAnswerFeedback === 'correct' ? 'animate-bounce' : 'animate-pulse'
+                        }`}
+                      >
+                        {scriviAnswerFeedback === 'correct' ? '✅' : '❌'}
+                      </div>
+                    ) : (
+                      <div className="text-2xl md:text-4xl mb-1 md:mb-2">✏️</div>
+                    )}
+                    <div className="text-white/60 text-xs md:text-sm mb-2">
+                      {scriviAnswerFeedback === 'correct'
+                        ? 'Corretto!'
+                        : scriviAnswerFeedback === 'wrong'
+                        ? `Era: ${currentScriviLabel}`
+                        : 'Scrivi il nome della parte evidenziata'}
+                    </div>
+
+                    {/* Input field */}
+                    {scriviAnswerFeedback === null && (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleScriviSubmit();
+                        }}
+                        className="flex flex-col gap-2"
+                      >
+                        <input
+                          ref={scriviInputRef}
+                          type="text"
+                          value={scriviInput}
+                          onChange={(e) => setScriviInput(e.target.value)}
+                          placeholder="Scrivi qui..."
+                          className="w-full px-3 py-2 bg-[#0F2940] border border-[#FF9F43]/30 rounded-lg text-white placeholder-white/40 text-sm md:text-base focus:outline-none focus:border-[#FF9F43] transition-colors"
+                          autoComplete="off"
+                          autoCapitalize="none"
+                        />
+                        <button
+                          type="submit"
+                          disabled={!scriviInput.trim()}
+                          className="px-4 py-2 bg-[#FF9F43] text-white rounded-lg text-sm font-medium hover:bg-[#e8903d] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          <span>Conferma</span>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Bar - Responsive */}
+            {scriviState === 'playing' && (
+              <div className="absolute top-4 right-4 md:top-16 md:right-auto md:left-1/2 md:transform md:-translate-x-1/2 z-20">
+                <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg px-2 md:px-4 py-2 md:py-3 shadow-xl border border-[#FF9F43]/30">
+                  <div className="flex flex-col gap-1.5 md:gap-2">
+                    {/* General progress */}
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="text-white/60 text-xs md:text-sm">
+                        <span className="md:hidden">
+                          {scriviRound}/{SCRIVI_ROUNDS}
+                        </span>
+                        <span className="hidden md:inline w-24">
+                          Scrivi {scriviRound}/{SCRIVI_ROUNDS}
+                        </span>
+                      </div>
+                      <div className="w-16 md:w-40 h-1.5 md:h-2 bg-[#0F2940] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#FF9F43] transition-all duration-300"
+                          style={{ width: `${(scriviRound / SCRIVI_ROUNDS) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    {/* Correct/Wrong counts - Hidden on mobile for space */}
+                    <div className="hidden md:flex items-center gap-4 justify-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#4CAF50] text-sm">✅</span>
+                        <div className="w-16 h-1.5 bg-[#0F2940] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#4CAF50] transition-all duration-300"
+                            style={{ width: `${(scriviScore / SCRIVI_ROUNDS) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[#4CAF50] text-sm font-medium">{scriviScore}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-red-400 text-sm">❌</span>
+                        <div className="w-16 h-1.5 bg-[#0F2940] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-red-500 transition-all duration-300"
+                            style={{
+                              width: `${((scriviRound - 1 - scriviScore) / SCRIVI_ROUNDS) * 100}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-red-400 text-sm font-medium">
+                          {Math.max(0, scriviRound - 1 - scriviScore)}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Mobile: Compact score */}
+                    <div className="flex md:hidden items-center gap-2 justify-center text-xs">
+                      <span className="text-[#4CAF50]">✅{scriviScore}</span>
+                      <span className="text-red-400">❌{Math.max(0, scriviRound - 1 - scriviScore)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Finished Modal - Responsive */}
+            {scriviState === 'finished' && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/50 p-4">
+                <div className="bg-[#0C3559] rounded-2xl p-4 md:p-8 shadow-2xl border-2 border-[#FF9F43] max-w-md text-center">
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4">{getScriviDiagnosis().emoji}</div>
+                  <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">
+                    {getScriviDiagnosis().title}
+                  </h2>
+                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">
+                    {getScriviDiagnosis().message}
+                  </p>
+                  <div className="text-[#FF9F43] text-lg md:text-xl font-bold mb-3 md:mb-4">
+                    Punteggio: {scriviScore}/{SCRIVI_ROUNDS}
+                  </div>
+                  <div className="flex gap-2 md:gap-4 justify-center">
+                    <button
+                      onClick={startScrivi}
+                      className="px-4 md:px-6 py-2 md:py-3 bg-[#FF9F43] text-white rounded-lg text-sm md:text-base font-medium hover:bg-[#e8903d] transition-all"
+                    >
+                      🔄 <span className="hidden md:inline">Gioca ancora</span>
+                      <span className="md:hidden">Riprova</span>
+                    </button>
+                    <button
+                      onClick={exitScrivi}
                       className="px-4 md:px-6 py-2 md:py-3 bg-[#0F2940] text-white/70 rounded-lg text-sm md:text-base font-medium hover:bg-[#1a3a55] transition-all"
                     >
                       📚 Studio

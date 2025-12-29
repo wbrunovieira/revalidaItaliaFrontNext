@@ -611,11 +611,7 @@ function HotspotLegend() {
         {/* Sphere symbol - big */}
         <mesh>
           <sphereGeometry args={[0.12, 16, 16]} />
-          <meshStandardMaterial
-            color={primaryColor}
-            emissive={primaryColor}
-            emissiveIntensity={0.5}
-          />
+          <meshStandardMaterial color={primaryColor} emissive={primaryColor} emissiveIntensity={0.5} />
         </mesh>
         {/* Point label */}
         <Text
@@ -630,14 +626,7 @@ function HotspotLegend() {
           <meshBasicMaterial color={primaryColor} />
         </Text>
         {/* Point description */}
-        <Text
-          position={[0.35, -0.2, 0]}
-          fontSize={0.11}
-          color="#444444"
-          anchorX="left"
-          anchorY="middle"
-          maxWidth={1.5}
-        >
+        <Text position={[0.35, -0.2, 0]} fontSize={0.11} color="#444444" anchorX="left" anchorY="middle" maxWidth={1.5}>
           Sede anatomica precisa
           <meshBasicMaterial color="#444444" />
         </Text>
@@ -648,20 +637,12 @@ function HotspotLegend() {
         {/* Hexagon symbol - big */}
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.14, 0.14, 0.05, 6]} />
-          <meshStandardMaterial
-            color={secondaryColor}
-            emissive={secondaryColor}
-            emissiveIntensity={0.5}
-          />
+          <meshStandardMaterial color={secondaryColor} emissive={secondaryColor} emissiveIntensity={0.5} />
         </mesh>
         {/* Outer ring for area */}
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.18, 0.22, 6]} />
-          <meshStandardMaterial
-            color={secondaryColor}
-            transparent
-            opacity={0.4}
-          />
+          <meshStandardMaterial color={secondaryColor} transparent opacity={0.4} />
         </mesh>
         {/* Area label */}
         <Text
@@ -676,14 +657,7 @@ function HotspotLegend() {
           <meshBasicMaterial color={secondaryColor} />
         </Text>
         {/* Area description */}
-        <Text
-          position={[0.35, -0.2, 0]}
-          fontSize={0.11}
-          color="#444444"
-          anchorX="left"
-          anchorY="middle"
-          maxWidth={1.5}
-        >
+        <Text position={[0.35, -0.2, 0]} fontSize={0.11} color="#444444" anchorX="left" anchorY="middle" maxWidth={1.5}>
           Regione corporea estesa
           <meshBasicMaterial color="#444444" />
         </Text>
@@ -879,11 +853,13 @@ function Hotspot({
 }: HotspotProps) {
   const [hovered, setHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showTranscription, setShowTranscription] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Detect touch device and mobile screen
   useEffect(() => {
@@ -939,6 +915,15 @@ function Hotspot({
     audio.onplay = () => {
       setIsPlaying(true);
       onAudioPlay?.();
+
+      // Show transcription with 8-second timeout
+      if (transcriptionTimeoutRef.current) {
+        clearTimeout(transcriptionTimeoutRef.current);
+      }
+      setShowTranscription(true);
+      transcriptionTimeoutRef.current = setTimeout(() => {
+        setShowTranscription(false);
+      }, 8000);
     };
 
     audio.onended = () => {
@@ -963,29 +948,26 @@ function Hotspot({
       return;
     }
 
-    // On touch device: show tooltip for 3 seconds + play audio
-    if (isTouchDevice) {
-      // Clear any existing timeout
-      if (tooltipTimeoutRef.current) {
-        clearTimeout(tooltipTimeoutRef.current);
-      }
-
-      // Show tooltip
-      setShowTooltip(true);
-      onHover?.(true);
-
-      // Hide tooltip after 3 seconds
-      tooltipTimeoutRef.current = setTimeout(() => {
-        setShowTooltip(false);
-        onHover?.(false);
-      }, 3000);
+    // Clear any existing timeout
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
     }
+
+    // Show tooltip (both desktop and mobile)
+    setShowTooltip(true);
+    onHover?.(true);
+
+    // Hide tooltip after 8 seconds (enough time to read transcription)
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setShowTooltip(false);
+      onHover?.(false);
+    }, 8000);
 
     // Play audio (both desktop and mobile)
     if (audioUrl) {
       playAudio();
     }
-  }, [isTouchDevice, audioUrl, playAudio, onHover, challengeMode, hotspotId, onChallengeClick]);
+  }, [audioUrl, playAudio, onHover, challengeMode, hotspotId, onChallengeClick]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -997,7 +979,18 @@ function Hotspot({
       if (tooltipTimeoutRef.current) {
         clearTimeout(tooltipTimeoutRef.current);
       }
+      if (transcriptionTimeoutRef.current) {
+        clearTimeout(transcriptionTimeoutRef.current);
+      }
     };
+  }, []);
+
+  // Close transcription manually
+  const closeTranscription = useCallback(() => {
+    setShowTranscription(false);
+    if (transcriptionTimeoutRef.current) {
+      clearTimeout(transcriptionTimeoutRef.current);
+    }
   }, []);
 
   // Pulsing animation for scrivi target - alternates between primary and secondary colors
@@ -1250,7 +1243,7 @@ function Hotspot({
                     : '0 4px 20px rgba(12, 53, 89, 0.4), 0 0 15px rgba(56, 135, 166, 0.3)',
                   marginLeft: '-2px',
                   cursor: audioUrl ? 'pointer' : 'default',
-                  minWidth: isActive && transcription ? (isMobile ? '80px' : isZoomedView ? '120px' : '180px') : 'auto',
+                  minWidth: showTranscription && transcription ? (isMobile ? '80px' : isZoomedView ? '120px' : '180px') : 'auto',
                   maxWidth: isMobile ? '120px' : 'none',
                 }}
                 onClick={e => {
@@ -1286,21 +1279,59 @@ function Hotspot({
                     </div>
                   )}
                 </div>
-                {/* Transcription shown when playing - truncated on mobile */}
-                {isActive && transcription && (
+                {/* Transcription shown for 8 seconds after audio plays */}
+                {showTranscription && transcription && (
                   <div
                     style={{
-                      fontSize: isMobile ? '7px' : isZoomedView ? '8px' : '12px',
-                      fontWeight: 400,
-                      fontStyle: 'italic',
-                      opacity: 0.9,
-                      whiteSpace: isMobile ? 'nowrap' : 'nowrap',
-                      overflow: isMobile ? 'hidden' : 'visible',
-                      textOverflow: isMobile ? 'ellipsis' : 'clip',
-                      maxWidth: isMobile ? '100px' : 'none',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '6px',
                     }}
                   >
-                    &ldquo;{transcription}&rdquo;
+                    <div
+                      style={{
+                        fontSize: isMobile ? '7px' : isZoomedView ? '8px' : '12px',
+                        fontWeight: 400,
+                        fontStyle: 'italic',
+                        opacity: 0.9,
+                        whiteSpace: isMobile ? 'nowrap' : 'normal',
+                        overflow: isMobile ? 'hidden' : 'visible',
+                        textOverflow: isMobile ? 'ellipsis' : 'clip',
+                        maxWidth: isMobile ? '100px' : 'none',
+                        flex: 1,
+                      }}
+                    >
+                      &ldquo;{transcription}&rdquo;
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTranscription();
+                      }}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: isMobile ? '14px' : '18px',
+                        height: isMobile ? '14px' : '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: isMobile ? '8px' : '10px',
+                        color: '#fff',
+                        flexShrink: 0,
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.2)';
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 )}
               </div>
@@ -1403,7 +1434,7 @@ const ANATOMY_HOTSPOTS: {
   },
   {
     id: 'labbro',
-    position: [0.8, 166, 8],
+    position: [0.8, 166, 10],
     label: 'Labbro',
     yMin: 1.1,
     yMax: 1.25,
@@ -1414,14 +1445,14 @@ const ANATOMY_HOTSPOTS: {
   },
   {
     id: 'bocca',
-    position: [-1.2, 166, 8],
+    position: [-1.2, 166, 12],
     label: 'Bocca',
     yMin: 1.05,
     yMax: 1.2,
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho un sapore amaro in bocca.',
-    type: 'point',
+    type: 'area',
   },
   {
     id: 'mento',
@@ -1436,7 +1467,7 @@ const ANATOMY_HOTSPOTS: {
   },
   {
     id: 'guancia',
-    position: [6, 170, 4],
+    position: [7, 170, 4],
     label: 'Guancia',
     yMin: 1.2,
     yMax: 1.5,
@@ -1468,6 +1499,17 @@ const ANATOMY_HOTSPOTS: {
     type: 'area',
   },
   {
+    id: 'nuca',
+    position: [0, 162, -12],
+    label: 'Nuca',
+    yMin: 0.9,
+    yMax: 1.1,
+    size: 1,
+    audioUrl: getAudioPath('testa.wav'),
+    transcription: 'Ho rigidità alla nuca.',
+    type: 'point',
+  },
+  {
     id: 'spalla',
     position: [17, 153, -1],
     label: 'Spalla',
@@ -1487,6 +1529,28 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Sento una pressione al torace.',
+    type: 'area',
+  },
+  {
+    id: 'schiena',
+    position: [0, 135, -18],
+    label: 'Schiena',
+    yMin: 0.4,
+    yMax: 0.9,
+    size: 1.8,
+    audioUrl: getAudioPath('testa.wav'),
+    transcription: 'Ho un dolore alla schiena.',
+    type: 'area',
+  },
+  {
+    id: 'lombare',
+    position: [0, 110, -10],
+    label: 'Lombare',
+    yMin: 0.1,
+    yMax: 0.4,
+    size: 1.5,
+    audioUrl: getAudioPath('testa.wav'),
+    transcription: 'Ho mal di schiena nella zona lombare.',
     type: 'area',
   },
   {
@@ -1568,7 +1632,7 @@ const ANATOMY_HOTSPOTS: {
   },
   {
     id: 'fianco',
-    position: [8, 105, -10],
+    position: [13, 105, -8],
     label: 'Fianco',
     yMin: 0.1,
     yMax: 0.4,
@@ -1609,6 +1673,17 @@ const ANATOMY_HOTSPOTS: {
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho dolore alla natica quando siedo.',
     type: 'area',
+  },
+  {
+    id: 'ano',
+    position: [0, 95, -15],
+    label: 'Ano',
+    yMin: -0.1,
+    yMax: 0.1,
+    size: 1.2,
+    audioUrl: getAudioPath('testa.wav'),
+    transcription: "Ho dolore vicino all'ano.",
+    type: 'point',
   },
   {
     id: 'genitali',
@@ -2824,16 +2899,18 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             gameMode={gameMode}
             challengeMode={gameMode === 'challenge' || gameMode === 'consultation'}
             challengeTargetId={
-              gameMode === 'challenge'
-                ? currentTargetId
-                : gameMode === 'consultation'
-                ? consultationTargetId
-                : null
+              gameMode === 'challenge' ? currentTargetId : gameMode === 'consultation' ? consultationTargetId : null
             }
             showCorrectAnswer={showCorrectAnswer}
             scriviTargetId={gameMode === 'scrivi' ? scriviTargetId : null}
             isScriviMode={gameMode === 'scrivi'}
-            onChallengeClick={gameMode === 'challenge' ? handleChallengeClick : gameMode === 'consultation' ? handleConsultationClick : undefined}
+            onChallengeClick={
+              gameMode === 'challenge'
+                ? handleChallengeClick
+                : gameMode === 'consultation'
+                ? handleConsultationClick
+                : undefined
+            }
           />
         </Canvas>
 
@@ -2846,16 +2923,19 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
               <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-[#3887A6]/30">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#3887A6] animate-pulse"></div>
-                  <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
-                    Modalità
-                  </span>
+                  <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">Modalità</span>
                 </div>
                 <button
                   onClick={() => setIsModeMenuExpanded(false)}
                   className="p-1 rounded-md hover:bg-[#3887A6]/30 transition-colors"
                   title="Riduci menu"
                 >
-                  <svg className="w-4 h-4 text-white/60 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg
+                    className="w-4 h-4 text-white/60 hover:text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -3571,7 +3651,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                     {/* Input field */}
                     {scriviAnswerFeedback === null && (
                       <form
-                        onSubmit={(e) => {
+                        onSubmit={e => {
                           e.preventDefault();
                           handleScriviSubmit();
                         }}
@@ -3581,7 +3661,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                           ref={scriviInputRef}
                           type="text"
                           value={scriviInput}
-                          onChange={(e) => setScriviInput(e.target.value)}
+                          onChange={e => setScriviInput(e.target.value)}
                           placeholder="Scrivi qui..."
                           className="w-full px-3 py-2 bg-[#0F2940] border border-[#FF9F43]/30 rounded-lg text-white placeholder-white/40 text-sm md:text-base focus:outline-none focus:border-[#FF9F43] transition-colors"
                           autoComplete="off"
@@ -3594,7 +3674,12 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                         >
                           <span>Conferma</span>
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
                           </svg>
                         </button>
                       </form>
@@ -3671,9 +3756,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                   <h2 className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">
                     {getScriviDiagnosis().title}
                   </h2>
-                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">
-                    {getScriviDiagnosis().message}
-                  </p>
+                  <p className="text-white/70 text-sm md:text-base mb-3 md:mb-4">{getScriviDiagnosis().message}</p>
                   <div className="text-[#FF9F43] text-lg md:text-xl font-bold mb-3 md:mb-4">
                     Punteggio: {scriviScore}/{SCRIVI_ROUNDS}
                   </div>

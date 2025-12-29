@@ -104,20 +104,37 @@
     - name: "🔧 ENV - Garantindo variáveis S3 no .env.local"
       shell: |
         cd {{ app_dir }}
-        # Remove variáveis S3 antigas (se existirem com valores incorretos)
+        # Remove variáveis S3 antigas (server-side)
         sed -i '/^S3_BUCKET=/d' .env.local 2>/dev/null || true
+        sed -i '/^S3_BUCKET_NAME=/d' .env.local 2>/dev/null || true
         sed -i '/^AWS_REGION=/d' .env.local 2>/dev/null || true
         sed -i '/^NODE_ENV=/d' .env.local 2>/dev/null || true
         sed -i '/^CDN_URL=/d' .env.local 2>/dev/null || true
+        sed -i '/^S3_BASE_URL=/d' .env.local 2>/dev/null || true
+        sed -i '/^STORAGE_TYPE=/d' .env.local 2>/dev/null || true
+        # Remove variáveis S3 antigas (client-side NEXT_PUBLIC_)
+        sed -i '/^NEXT_PUBLIC_CDN_URL=/d' .env.local 2>/dev/null || true
+        sed -i '/^NEXT_PUBLIC_S3_BUCKET=/d' .env.local 2>/dev/null || true
+        sed -i '/^NEXT_PUBLIC_S3_REGION=/d' .env.local 2>/dev/null || true
+        sed -i '/^NEXT_PUBLIC_S3_URL=/d' .env.local 2>/dev/null || true
         # Remove variáveis RUM antigas
         sed -i '/^NEXT_PUBLIC_RUM_/d' .env.local 2>/dev/null || true
-        # Adiciona variáveis S3 corretas
+        # Adiciona variáveis S3 corretas (server-side)
         echo "" >> .env.local
-        echo "# S3 Storage Configuration (auto-added by quick-deploy)" >> .env.local
+        echo "# S3 Storage Configuration - Server Side (auto-added by quick-deploy)" >> .env.local
+        echo "STORAGE_TYPE=s3" >> .env.local
         echo "S3_BUCKET={{ s3_bucket_name }}" >> .env.local
+        echo "S3_BUCKET_NAME={{ s3_bucket_name }}" >> .env.local
         echo "AWS_REGION={{ aws_region }}" >> .env.local
+        echo "S3_BASE_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
         echo "CDN_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
         echo "NODE_ENV=production" >> .env.local
+        echo "" >> .env.local
+        echo "# S3 Storage Configuration - Client Side (auto-added by quick-deploy)" >> .env.local
+        echo "NEXT_PUBLIC_CDN_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
+        echo "NEXT_PUBLIC_S3_BUCKET={{ s3_bucket_name }}" >> .env.local
+        echo "NEXT_PUBLIC_S3_REGION={{ aws_region }}" >> .env.local
+        echo "NEXT_PUBLIC_S3_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com" >> .env.local
         echo "" >> .env.local
         echo "# CloudWatch RUM Configuration (auto-added by quick-deploy)" >> .env.local
         echo "NEXT_PUBLIC_RUM_APPLICATION_ID={{ rum_application_id }}" >> .env.local
@@ -130,7 +147,10 @@
 
     - name: "✅ ENV - Variáveis S3 e RUM configuradas"
       debug:
-        msg: "Variáveis S3 e CloudWatch RUM adicionadas ao .env.local"
+        msg:
+          - "Variáveis S3 (server + client) e CloudWatch RUM adicionadas ao .env.local"
+          - "S3_BUCKET={{ s3_bucket_name }}"
+          - "NEXT_PUBLIC_S3_URL=https://{{ s3_bucket_name }}.s3.{{ aws_region }}.amazonaws.com"
 
     - name: "✅ GIT - Código atualizado"
       debug:

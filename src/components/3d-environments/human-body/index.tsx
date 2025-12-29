@@ -580,6 +580,124 @@ function HospitalWindow() {
   );
 }
 
+// Legend for hotspot types on wall (next to chalkboard)
+function HotspotLegend() {
+  const primaryColor = '#0C3559';
+  const secondaryColor = '#3887A6';
+
+  return (
+    <group position={[2.5, 2.5, -4.85]}>
+      {/* Legend frame - white background */}
+      <mesh position={[0.1, -0.1, 0]}>
+        <planeGeometry args={[2.6, 2.0]} />
+        <meshStandardMaterial color="#f8f5f0" />
+      </mesh>
+
+      {/* Title */}
+      <Text
+        position={[0, 0.5, 0.01]}
+        fontSize={0.12}
+        color={primaryColor}
+        anchorX="center"
+        anchorY="middle"
+        fontWeight={700}
+      >
+        LEGENDA ANATOMICA
+        <meshBasicMaterial color={primaryColor} />
+      </Text>
+
+      {/* Point section */}
+      <group position={[-0.5, 0.1, 0.01]}>
+        {/* Sphere symbol - big */}
+        <mesh>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshStandardMaterial
+            color={primaryColor}
+            emissive={primaryColor}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+        {/* Point label */}
+        <Text
+          position={[0.35, 0.02, 0]}
+          fontSize={0.16}
+          color={primaryColor}
+          anchorX="left"
+          anchorY="middle"
+          fontWeight={700}
+        >
+          Punto
+          <meshBasicMaterial color={primaryColor} />
+        </Text>
+        {/* Point description */}
+        <Text
+          position={[0.35, -0.2, 0]}
+          fontSize={0.11}
+          color="#444444"
+          anchorX="left"
+          anchorY="middle"
+          maxWidth={1.5}
+        >
+          Sede anatomica precisa
+          <meshBasicMaterial color="#444444" />
+        </Text>
+      </group>
+
+      {/* Area section */}
+      <group position={[-0.5, -0.5, 0.01]}>
+        {/* Hexagon symbol - big */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.14, 0.14, 0.05, 6]} />
+          <meshStandardMaterial
+            color={secondaryColor}
+            emissive={secondaryColor}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+        {/* Outer ring for area */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.18, 0.22, 6]} />
+          <meshStandardMaterial
+            color={secondaryColor}
+            transparent
+            opacity={0.4}
+          />
+        </mesh>
+        {/* Area label */}
+        <Text
+          position={[0.35, 0.02, 0]}
+          fontSize={0.16}
+          color={secondaryColor}
+          anchorX="left"
+          anchorY="middle"
+          fontWeight={700}
+        >
+          Area
+          <meshBasicMaterial color={secondaryColor} />
+        </Text>
+        {/* Area description */}
+        <Text
+          position={[0.35, -0.2, 0]}
+          fontSize={0.11}
+          color="#444444"
+          anchorX="left"
+          anchorY="middle"
+          maxWidth={1.5}
+        >
+          Regione corporea estesa
+          <meshBasicMaterial color="#444444" />
+        </Text>
+      </group>
+
+      {/* Decorative border */}
+      <mesh position={[0.1, -0.1, -0.01]}>
+        <planeGeometry args={[2.7, 2.1]} />
+        <meshStandardMaterial color={secondaryColor} />
+      </mesh>
+    </group>
+  );
+}
+
 // Anatomy poster on wall
 function AnatomyPoster() {
   const primaryColor = '#0C3559';
@@ -733,6 +851,8 @@ interface HotspotProps {
   challengeMode?: boolean;
   showCorrectAnswer?: boolean;
   isScriviTarget?: boolean; // Highlight this hotspot as the target in scrivi mode
+  isScriviMode?: boolean; // True when in scrivi mode (to show all hotspots)
+  hotspotType?: 'point' | 'area'; // point = sphere, area = hexagon with ring
   onHover?: (isHovered: boolean) => void;
   onAudioPlay?: () => void;
   onChallengeClick?: (hotspotId: string) => void;
@@ -751,6 +871,8 @@ function Hotspot({
   challengeMode = false,
   showCorrectAnswer = false,
   isScriviTarget = false,
+  isScriviMode = false,
+  hotspotType = 'point',
   onHover,
   onAudioPlay,
   onChallengeClick,
@@ -878,42 +1000,182 @@ function Hotspot({
     };
   }, []);
 
-  // Challenge mode colors and visibility
-  const getChallengeColor = () => {
-    if (showCorrectAnswer) return '#4CAF50'; // Green flash for correct answer
-    if (isScriviTarget) return '#FF9F43'; // Orange highlight for scrivi target
-    if (hovered) return '#3887A6'; // Show hover feedback
-    return '#1a1a2e'; // Nearly invisible (match background)
+  // Pulsing animation for scrivi target - alternates between primary and secondary colors
+  const [pulseScale, setPulseScale] = useState(1);
+  const [scriviColorPhase, setScriviColorPhase] = useState(0); // 0 = primary, 1 = secondary
+
+  useEffect(() => {
+    if (!isScriviTarget) {
+      setPulseScale(1);
+      setScriviColorPhase(0);
+      return;
+    }
+
+    // Animate pulse for scrivi target
+    let frame: number;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      // Pulse between 1.0 and 1.3 scale
+      const scale = 1 + Math.sin(elapsed * 4) * 0.15;
+      setPulseScale(scale);
+      // Alternate colors - use sin wave to smoothly transition (every ~0.5 seconds)
+      const colorPhase = (Math.sin(elapsed * 6) + 1) / 2; // 0 to 1
+      setScriviColorPhase(colorPhase);
+      frame = requestAnimationFrame(animate);
+    };
+
+    animate();
+    return () => cancelAnimationFrame(frame);
+  }, [isScriviTarget]);
+
+  // Interpolate between primary and secondary colors for scrivi target
+  const getScriviTargetColor = () => {
+    const primary = { r: 12, g: 53, b: 89 }; // #0C3559
+    const secondary = { r: 56, g: 135, b: 166 }; // #3887A6
+    const r = Math.round(primary.r + (secondary.r - primary.r) * scriviColorPhase);
+    const g = Math.round(primary.g + (secondary.g - primary.g) * scriviColorPhase);
+    const b = Math.round(primary.b + (secondary.b - primary.b) * scriviColorPhase);
+    return `rgb(${r}, ${g}, ${b})`;
   };
 
-  const getChallengeEmissive = () => {
-    if (showCorrectAnswer) return 1.5;
-    if (isScriviTarget) return 1.2; // Visible glow for scrivi target
-    if (hovered) return 0.8;
-    return 0.1;
+  // Base colors based on hotspot type
+  // Point: Primary (#0C3559) - specific location
+  // Area: Secondary (#3887A6) - body region
+  const baseColor = hotspotType === 'area' ? '#3887A6' : '#0C3559';
+  const hoverColor = hotspotType === 'area' ? '#4ECDC4' : '#3887A6'; // Lighter version on hover
+
+  // In scrivi mode: show all hotspots like study mode, but target is animated
+  const getHotspotColor = () => {
+    if (isScriviTarget) return getScriviTargetColor(); // Animated color between primary and secondary
+    if (isScriviMode && !isScriviTarget) {
+      // Scrivi mode non-target - show like study mode
+      if (isActive) return '#4CAF50';
+      if (tooltipVisible || hovered) return hoverColor;
+      return baseColor;
+    }
+    if (challengeMode) {
+      // Challenge/Consultation mode - hide unless hovered or correct answer
+      if (showCorrectAnswer) return '#4CAF50';
+      if (hovered) return hoverColor;
+      return '#1a1a2e';
+    }
+    // Study mode - normal colors based on type
+    if (isActive) return '#4CAF50';
+    if (tooltipVisible || hovered) return hoverColor;
+    return baseColor;
   };
+
+  const getHotspotEmissive = () => {
+    if (isScriviTarget) return 1.5 + scriviColorPhase * 1.5; // Pulses between 1.5 and 3.0
+    if (isScriviMode && !isScriviTarget) {
+      // Scrivi mode non-target - show like study mode
+      if (isActive) return 1.5;
+      if (tooltipVisible || hovered) return 1.2;
+      return 0.6;
+    }
+    if (challengeMode) {
+      if (showCorrectAnswer) return 1.5;
+      if (hovered) return 0.8;
+      return 0.1;
+    }
+    if (isActive) return 1.5;
+    if (tooltipVisible || hovered) return 1.2;
+    return 0.6;
+  };
+
+  const getHotspotOpacity = () => {
+    if (isScriviTarget) return 1.0;
+    if (isScriviMode && !isScriviTarget) {
+      // Scrivi mode non-target - show like study mode
+      if (isActive) return 0.9;
+      if (tooltipVisible || hovered) return 0.9;
+      return 0.5;
+    }
+    if (challengeMode) {
+      if (showCorrectAnswer) return 0.9;
+      return 0.1;
+    }
+    if (isActive) return 0.9;
+    if (tooltipVisible || hovered) return 0.9;
+    return 0.5;
+  };
+
+  // Animation for area outer ring
+  const [areaRingScale, setAreaRingScale] = useState(1);
+
+  useEffect(() => {
+    if (hotspotType !== 'area' || challengeMode) {
+      setAreaRingScale(1);
+      return;
+    }
+
+    // Gentle pulsing animation for area rings
+    let frame: number;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      // Pulse between 1.0 and 1.15 scale (subtle)
+      const scale = 1 + Math.sin(elapsed * 2) * 0.075;
+      setAreaRingScale(scale);
+      frame = requestAnimationFrame(animate);
+    };
+
+    animate();
+    return () => cancelAnimationFrame(frame);
+  }, [hotspotType, challengeMode]);
 
   return (
     <group position={position}>
-      {/* Hotspot point - clickable */}
-      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
-        <sphereGeometry args={[size, 16, 16]} />
+      {/* Main hotspot - different geometry based on type */}
+      <mesh
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        onClick={handleClick}
+        scale={isScriviTarget ? pulseScale : 1}
+        rotation={hotspotType === 'area' ? [-Math.PI / 2, 0, 0] : [0, 0, 0]}
+      >
+        {hotspotType === 'area' ? (
+          // Hexagon (6-sided cylinder) for areas - flattened
+          <cylinderGeometry args={[size * 1.2, size * 1.2, size * 0.4, 6]} />
+        ) : (
+          // Sphere for points
+          <sphereGeometry args={[size, 16, 16]} />
+        )}
         <meshStandardMaterial
-          color={challengeMode ? getChallengeColor() : isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissive={challengeMode ? getChallengeColor() : isActive ? '#4CAF50' : tooltipVisible ? '#3887A6' : '#0C3559'}
-          emissiveIntensity={challengeMode ? getChallengeEmissive() : isActive ? 1.5 : tooltipVisible ? 1.2 : 0.6}
+          color={getHotspotColor()}
+          emissive={getHotspotColor()}
+          emissiveIntensity={getHotspotEmissive()}
         />
       </mesh>
 
-      {/* Pulsing ring - hidden in challenge mode unless showing answer or scrivi target */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[size * 1.3, size * 1.7, 32]} />
+      {/* Inner ring - for both types */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={isScriviTarget ? pulseScale : 1}>
+        <ringGeometry args={[size * 1.3, size * 1.7, hotspotType === 'area' ? 6 : 32]} />
         <meshStandardMaterial
-          color={challengeMode ? (showCorrectAnswer ? '#4CAF50' : isScriviTarget ? '#FF9F43' : '#1a1a2e') : isActive ? '#4CAF50' : '#3887A6'}
+          color={isScriviTarget ? '#3887A6' : showCorrectAnswer ? '#4CAF50' : getHotspotColor()}
+          emissive={isScriviTarget ? '#3887A6' : undefined}
+          emissiveIntensity={isScriviTarget ? 1.5 : 0}
           transparent
-          opacity={challengeMode ? (showCorrectAnswer ? 0.9 : isScriviTarget ? 0.9 : 0.1) : isActive ? 0.9 : tooltipVisible ? 0.9 : 0.5}
+          opacity={getHotspotOpacity()}
         />
       </mesh>
+
+      {/* Outer pulsing ring - only for areas (indicates region) */}
+      {hotspotType === 'area' && !challengeMode && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={areaRingScale}>
+          <ringGeometry args={[size * 2.0, size * 2.3, 6]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={baseColor}
+            emissiveIntensity={0.4}
+            transparent
+            opacity={0.3}
+          />
+        </mesh>
+      )}
 
       {/* Label tooltip - positioned to the right (hidden in challenge mode unless showing correct answer) */}
       {/* Mobile: Smaller and more compact */}
@@ -1082,6 +1344,7 @@ const ANATOMY_HOTSPOTS: {
   size?: number;
   audioUrl?: string;
   transcription?: string;
+  type: 'point' | 'area'; // point = specific location, area = body region
 }[] = [
   {
     id: 'testa',
@@ -1092,6 +1355,7 @@ const ANATOMY_HOTSPOTS: {
     size: 3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Dottore, ho un forte mal di testa.',
+    type: 'area',
   },
   {
     id: 'fronte',
@@ -1102,6 +1366,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi scotti la fronte, ho la febbre.',
+    type: 'area',
   },
   {
     id: 'sopracciglio',
@@ -1112,6 +1377,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi fa male sopra il sopracciglio.',
+    type: 'point',
   },
   {
     id: 'occhio',
@@ -1122,6 +1388,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Ho l'occhio rosso e mi brucia.",
+    type: 'point',
   },
   {
     id: 'naso',
@@ -1132,6 +1399,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho il naso chiuso da giorni.',
+    type: 'point',
   },
   {
     id: 'labbro',
@@ -1142,6 +1410,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi si è gonfiato il labbro.',
+    type: 'point',
   },
   {
     id: 'bocca',
@@ -1152,6 +1421,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho un sapore amaro in bocca.',
+    type: 'point',
   },
   {
     id: 'mento',
@@ -1162,6 +1432,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho un brufolo doloroso sul mento.',
+    type: 'point',
   },
   {
     id: 'guancia',
@@ -1172,6 +1443,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'La guancia è gonfia per il dente.',
+    type: 'area',
   },
   {
     id: 'mandibola',
@@ -1182,6 +1454,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Sento un click nella mandibola.',
+    type: 'point',
   },
   {
     id: 'collo',
@@ -1192,6 +1465,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Non riesco a girare il collo.',
+    type: 'area',
   },
   {
     id: 'spalla',
@@ -1202,6 +1476,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho la spalla bloccata da ieri.',
+    type: 'area',
   },
   {
     id: 'torace',
@@ -1212,6 +1487,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Sento una pressione al torace.',
+    type: 'area',
   },
   {
     id: 'ascella',
@@ -1222,6 +1498,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Ho un nodulo sotto l'ascella.",
+    type: 'area',
   },
   {
     id: 'seno',
@@ -1232,6 +1509,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Sento un dolore al seno.',
+    type: 'area',
   },
   {
     id: 'capezzolo',
@@ -1242,6 +1520,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Il capezzolo mi fa male.',
+    type: 'point',
   },
   {
     id: 'braccio',
@@ -1252,6 +1531,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Non riesco ad alzare il braccio.',
+    type: 'area',
   },
   {
     id: 'gomito',
@@ -1262,6 +1542,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho sbattuto il gomito e fa male.',
+    type: 'point',
   },
   {
     id: 'addome',
@@ -1272,6 +1553,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Se premo l'addome mi fa male.",
+    type: 'area',
   },
   {
     id: 'ombelico',
@@ -1282,6 +1564,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.2,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Ho dolore intorno all'ombelico.",
+    type: 'point',
   },
   {
     id: 'fianco',
@@ -1292,6 +1575,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi fa male il fianco destro.',
+    type: 'area',
   },
   {
     id: 'anca',
@@ -1302,6 +1586,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "L'anca mi fa male quando cammino.",
+    type: 'area',
   },
   {
     id: 'avambraccio',
@@ -1312,6 +1597,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Ho un crampo all'avambraccio.",
+    type: 'area',
   },
   {
     id: 'natica',
@@ -1322,6 +1608,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho dolore alla natica quando siedo.',
+    type: 'area',
   },
   {
     id: 'genitali',
@@ -1332,6 +1619,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho bruciore ai genitali.',
+    type: 'area',
   },
   {
     id: 'inguine',
@@ -1342,6 +1630,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Sento dolore all'inguine.",
+    type: 'area',
   },
   {
     id: 'coscia',
@@ -1352,6 +1641,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho uno strappo alla coscia.',
+    type: 'area',
   },
   {
     id: 'ginocchio',
@@ -1362,6 +1652,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Il ginocchio scricchiola quando piego.',
+    type: 'point',
   },
   {
     id: 'gamba',
@@ -1372,6 +1663,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho la gamba addormentata.',
+    type: 'area',
   },
   {
     id: 'tibia',
@@ -1382,6 +1674,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho preso un colpo sulla tibia.',
+    type: 'area',
   },
   {
     id: 'polpaccio',
@@ -1392,6 +1685,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.3,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho un crampo al polpaccio.',
+    type: 'area',
   },
   {
     id: 'caviglia',
@@ -1402,6 +1696,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.2,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi sono storto la caviglia.',
+    type: 'point',
   },
   {
     id: 'piede',
@@ -1412,6 +1707,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho il piede gonfio.',
+    type: 'area',
   },
   {
     id: 'tallone',
@@ -1422,6 +1718,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.2,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi fa male il tallone al mattino.',
+    type: 'point',
   },
   {
     id: 'polso',
@@ -1432,6 +1729,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.2,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho il polso debole.',
+    type: 'point',
   },
   {
     id: 'mano',
@@ -1442,6 +1740,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.5,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'La mano mi trema.',
+    type: 'area',
   },
   {
     id: 'palmo',
@@ -1452,6 +1751,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.2,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho prurito sul palmo della mano.',
+    type: 'area',
   },
   {
     id: 'dito',
@@ -1462,6 +1762,7 @@ const ANATOMY_HOTSPOTS: {
     size: 1.0,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Mi sono tagliato il dito.',
+    type: 'point',
   },
   // Dedos da mão esquerda (base)
   {
@@ -1473,6 +1774,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Non riesco a muovere il pollice.',
+    type: 'point',
   },
   {
     id: 'indice',
@@ -1483,6 +1785,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "Ho l'indice intorpidito.",
+    type: 'point',
   },
   {
     id: 'medio',
@@ -1493,6 +1796,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Il dito medio è gonfio.',
+    type: 'point',
   },
   {
     id: 'anulare',
@@ -1503,6 +1807,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: "L'anulare non si piega bene.",
+    type: 'point',
   },
   {
     id: 'mignolo',
@@ -1513,6 +1818,7 @@ const ANATOMY_HOTSPOTS: {
     size: 0.8,
     audioUrl: getAudioPath('testa.wav'),
     transcription: 'Ho sbattuto il mignolo.',
+    type: 'point',
   },
 ];
 
@@ -1526,6 +1832,7 @@ interface HumanBodyModelProps {
   challengeTargetId?: string | null;
   showCorrectAnswer?: boolean;
   scriviTargetId?: string | null;
+  isScriviMode?: boolean;
   onChallengeClick?: (hotspotId: string) => void;
 }
 
@@ -1538,6 +1845,7 @@ function HumanBodyModel({
   challengeTargetId = null,
   showCorrectAnswer = false,
   scriviTargetId = null,
+  isScriviMode = false,
   onChallengeClick,
 }: HumanBodyModelProps) {
   const groupRef = useRef<THREE.Group>(null);
@@ -1643,6 +1951,8 @@ function HumanBodyModel({
           challengeMode={challengeMode}
           showCorrectAnswer={showCorrectAnswer && challengeTargetId === hotspot.id}
           isScriviTarget={scriviTargetId === hotspot.id}
+          isScriviMode={isScriviMode}
+          hotspotType={hotspot.type}
           onHover={isHovered => handleHotspotHover(hotspot.id, isHovered)}
           onChallengeClick={onChallengeClick}
         />
@@ -1709,6 +2019,7 @@ interface SceneProps {
   challengeTargetId?: string | null;
   showCorrectAnswer?: boolean;
   scriviTargetId?: string | null;
+  isScriviMode?: boolean;
   onChallengeClick?: (hotspotId: string) => void;
 }
 
@@ -1723,6 +2034,7 @@ function Scene({
   challengeTargetId = null,
   showCorrectAnswer = false,
   scriviTargetId = null,
+  isScriviMode = false,
   onChallengeClick,
 }: SceneProps) {
   return (
@@ -1750,6 +2062,7 @@ function Scene({
       <WallText />
       <HospitalWindow />
       <AnatomyPoster />
+      <HotspotLegend />
       <InstructionsChalkboard gameMode={gameMode} />
       <CeilingLights />
 
@@ -1763,6 +2076,7 @@ function Scene({
         challengeTargetId={challengeTargetId}
         showCorrectAnswer={showCorrectAnswer}
         scriviTargetId={scriviTargetId}
+        isScriviMode={isScriviMode}
         onChallengeClick={onChallengeClick}
       />
 
@@ -2508,7 +2822,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             audioVolume={audioVolume}
             activeHotspotId={playingHotspotId}
             gameMode={gameMode}
-            challengeMode={gameMode === 'challenge' || gameMode === 'consultation' || gameMode === 'scrivi'}
+            challengeMode={gameMode === 'challenge' || gameMode === 'consultation'}
             challengeTargetId={
               gameMode === 'challenge'
                 ? currentTargetId
@@ -2518,6 +2832,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             }
             showCorrectAnswer={showCorrectAnswer}
             scriviTargetId={gameMode === 'scrivi' ? scriviTargetId : null}
+            isScriviMode={gameMode === 'scrivi'}
             onChallengeClick={gameMode === 'challenge' ? handleChallengeClick : gameMode === 'consultation' ? handleConsultationClick : undefined}
           />
         </Canvas>

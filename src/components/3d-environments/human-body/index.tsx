@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer from '../Environment3DContainer';
+import { CanvasLoadingOverlay } from '../common';
 
 // Import data from extracted modules
 import { ANATOMY_HOTSPOTS } from './data';
@@ -236,6 +237,10 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
+
+          {/* Loading overlay with progress */}
+          <CanvasLoadingOverlay />
+
           <Scene
             bodyRotation={bodyRotation}
             focusedPart={focusedPart}

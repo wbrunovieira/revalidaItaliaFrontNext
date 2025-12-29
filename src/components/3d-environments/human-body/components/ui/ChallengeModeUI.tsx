@@ -1,6 +1,7 @@
 'use client';
 
 import { BODY_PARTS, ANATOMY_HOTSPOTS } from '../../data';
+import { FullscreenButton } from './FullscreenButton';
 
 interface ChallengeModeUIProps {
   focusedPart: string;
@@ -49,6 +50,8 @@ export function ChallengeModeUI({
                 <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
               </button>
             ))}
+            {/* Fullscreen Button */}
+            <FullscreenButton compact />
           </div>
         </div>
       </div>
@@ -78,6 +81,10 @@ export function ChallengeModeUI({
                 {index === 0 && <div className="border-b border-white/10 my-2" />}
               </div>
             ))}
+            {/* Fullscreen Button */}
+            <div className="border-t border-white/10 mt-2 pt-2">
+              <FullscreenButton />
+            </div>
           </div>
         </div>
       </div>

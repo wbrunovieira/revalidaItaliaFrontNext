@@ -2,6 +2,7 @@
 
 import { RefObject } from 'react';
 import { BODY_PARTS } from '../../data';
+import { FullscreenButton } from './FullscreenButton';
 
 const SCRIVI_ROUNDS = 10;
 
@@ -60,6 +61,8 @@ export function ScriviModeUI({
                 <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
               </button>
             ))}
+            {/* Fullscreen Button */}
+            <FullscreenButton compact />
           </div>
         </div>
       </div>
@@ -87,6 +90,10 @@ export function ScriviModeUI({
                 {part.label}
               </button>
             ))}
+            {/* Fullscreen Button */}
+            <div className="border-t border-white/10 mt-2 pt-2">
+              <FullscreenButton />
+            </div>
           </div>
         </div>
       </div>

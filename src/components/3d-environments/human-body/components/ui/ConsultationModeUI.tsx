@@ -1,6 +1,7 @@
 'use client';
 
 import { BODY_PARTS } from '../../data';
+import { FullscreenButton } from './FullscreenButton';
 
 const CONSULTATION_ROUNDS = 10;
 
@@ -53,6 +54,8 @@ export function ConsultationModeUI({
                 <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
               </button>
             ))}
+            {/* Fullscreen Button */}
+            <FullscreenButton compact />
           </div>
         </div>
       </div>
@@ -82,6 +85,10 @@ export function ConsultationModeUI({
                 {index === 0 && <div className="border-b border-white/10 my-2" />}
               </div>
             ))}
+            {/* Fullscreen Button */}
+            <div className="border-t border-white/10 mt-2 pt-2">
+              <FullscreenButton />
+            </div>
           </div>
         </div>
       </div>

@@ -284,6 +284,31 @@ interface ListItem {
 4. **Loading States**: Use loading UI components for async operations
 5. **Type Safety**: Define TypeScript types for all API responses and props
 
+### File Size Limits (Mandatory)
+**Maximum ~300 lines per component file.** When a file grows beyond this limit, break it into smaller pieces:
+
+- **Components**: Extract sub-components to separate files
+- **Hooks**: Extract custom hooks to `hooks/` folder
+- **Utils**: Extract helper functions to `utils/` folder
+- **Data**: Extract constants/configs to `data/` folder
+
+**Example structure for large features:**
+```
+feature/
+├── index.tsx           # Main component (~200-300 lines max)
+├── components/         # Sub-components
+│   ├── FeatureHeader.tsx
+│   └── FeatureList.tsx
+├── hooks/              # Custom hooks
+│   └── useFeatureLogic.ts
+├── utils/              # Helper functions
+│   └── featureHelpers.ts
+└── data/               # Constants, configs
+    └── featureConfig.ts
+```
+
+**Benefits:** Better maintainability, testability, readability, and code reuse.
+
 ---
 
 ## Project Management & Issue Creation

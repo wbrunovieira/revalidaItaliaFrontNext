@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query-client';
 
 interface Translation {
   locale: string;
@@ -193,6 +194,30 @@ export function useLesson({
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false,
     retry: 2,
+  });
+}
+
+/**
+ * Prefetch lesson data for faster navigation
+ *
+ * Call this on hover to preload lesson data before user clicks.
+ * Data will be instantly available when they navigate.
+ */
+export function prefetchLesson(
+  courseId: string,
+  moduleId: string,
+  lessonId: string
+): void {
+  if (!courseId || !moduleId || !lessonId) return;
+
+  // Check if already cached and fresh
+  const cached = queryClient.getQueryData(['lesson', courseId, moduleId, lessonId]);
+  if (cached) return;
+
+  queryClient.prefetchQuery({
+    queryKey: ['lesson', courseId, moduleId, lessonId],
+    queryFn: () => fetchLesson(courseId, moduleId, lessonId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

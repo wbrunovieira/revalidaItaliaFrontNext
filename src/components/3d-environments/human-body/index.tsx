@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment, RoundedBox, useGLTF, Html, Text } from '@react-three/drei';
+import { OrbitControls, Environment, useGLTF, Html, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer, { useFullscreen } from '../Environment3DContainer';
@@ -21,94 +21,14 @@ import {
   HAND_HOTSPOTS,
 } from './data';
 
-// Hospital room floor with tile pattern
-function HospitalFloor() {
-  const floorTexture = useMemo(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      // Base color - light gray tiles
-      ctx.fillStyle = '#e8eef2';
-      ctx.fillRect(0, 0, 512, 512);
-
-      // Tile grid
-      ctx.strokeStyle = '#d0d8e0';
-      ctx.lineWidth = 2;
-      const tileSize = 64;
-      for (let x = 0; x <= 512; x += tileSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, 512);
-        ctx.stroke();
-      }
-      for (let y = 0; y <= 512; y += tileSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(512, y);
-        ctx.stroke();
-      }
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(4, 4);
-    return texture;
-  }, []);
-
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.1, 0]} receiveShadow>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial map={floorTexture} roughness={0.3} metalness={0.1} />
-    </mesh>
-  );
-}
-
-// Hospital walls
-function HospitalWalls() {
-  const wallColor = '#f5f7fa';
-  const accentColor = '#3887A6';
-
-  return (
-    <group>
-      {/* Back wall */}
-      <mesh position={[0, 2, -5]} receiveShadow>
-        <planeGeometry args={[20, 8]} />
-        <meshStandardMaterial color={wallColor} roughness={0.9} />
-      </mesh>
-
-      {/* Back wall accent stripe */}
-      <mesh position={[0, 0.5, -4.98]}>
-        <planeGeometry args={[20, 0.3]} />
-        <meshStandardMaterial color={accentColor} roughness={0.5} />
-      </mesh>
-
-      {/* Left wall */}
-      <mesh position={[-6, 2, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[12, 8]} />
-        <meshStandardMaterial color={wallColor} roughness={0.9} />
-      </mesh>
-
-      {/* Left wall accent stripe */}
-      <mesh position={[-5.98, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[12, 0.3]} />
-        <meshStandardMaterial color={accentColor} roughness={0.5} />
-      </mesh>
-
-      {/* Right wall */}
-      <mesh position={[6, 2, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[12, 8]} />
-        <meshStandardMaterial color={wallColor} roughness={0.9} />
-      </mesh>
-
-      {/* Right wall accent stripe */}
-      <mesh position={[5.98, 0.5, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <planeGeometry args={[12, 0.3]} />
-        <meshStandardMaterial color={accentColor} roughness={0.5} />
-      </mesh>
-    </group>
-  );
-}
+// Import room components
+import {
+  HospitalFloor,
+  HospitalWalls,
+  HospitalCeiling,
+  CeilingLights,
+  HospitalWindow,
+} from './components/room';
 
 // Chalkboard with instructions
 interface InstructionsChalkboardProps {
@@ -434,99 +354,6 @@ function InstructionsChalkboard({ gameMode = 'study' }: InstructionsChalkboardPr
           </Text>
         </>
       )}
-    </group>
-  );
-}
-
-// Hospital ceiling
-function HospitalCeiling() {
-  return (
-    <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 5, 0]}>
-      <planeGeometry args={[20, 20]} />
-      <meshStandardMaterial color="#f5efe6" roughness={0.9} />
-    </mesh>
-  );
-}
-
-// Ceiling lights
-function CeilingLights() {
-  return (
-    <group>
-      {/* Main surgical light */}
-      <group position={[0, 4.5, 0]}>
-        {/* Light arm */}
-        <mesh position={[0, 0.3, 0]}>
-          <cylinderGeometry args={[0.05, 0.05, 0.6, 16]} />
-          <meshStandardMaterial color="#888" metalness={0.8} roughness={0.2} />
-        </mesh>
-
-        {/* Light housing */}
-        <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.6, 0.5, 0.2, 32]} />
-          <meshStandardMaterial color="#fff" metalness={0.3} roughness={0.5} />
-        </mesh>
-
-        {/* Light surface */}
-        <mesh position={[0, -0.11, 0]} rotation={[Math.PI, 0, 0]}>
-          <circleGeometry args={[0.45, 32]} />
-          <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.5} />
-        </mesh>
-
-        {/* Actual light */}
-        <pointLight position={[0, -0.5, 0]} intensity={2} distance={8} color="#fff" castShadow />
-      </group>
-
-      {/* Secondary ceiling lights */}
-      {[
-        [-3, 4.8, -2],
-        [3, 4.8, -2],
-        [-3, 4.8, 2],
-        [3, 4.8, 2],
-      ].map((pos, i) => (
-        <group key={i} position={pos as [number, number, number]}>
-          <RoundedBox args={[1.2, 0.1, 0.4]} radius={0.02}>
-            <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={0.3} />
-          </RoundedBox>
-          <pointLight position={[0, -0.3, 0]} intensity={0.5} distance={5} color="#f0f5ff" />
-        </group>
-      ))}
-    </group>
-  );
-}
-
-// Window with blinds
-function HospitalWindow() {
-  const blindsCount = 12;
-
-  return (
-    <group position={[5.9, 2, -1]} rotation={[0, -Math.PI / 2, 0]}>
-      {/* Window frame */}
-      <mesh>
-        <boxGeometry args={[2.5, 2, 0.1]} />
-        <meshStandardMaterial color="#c0c0c0" metalness={0.6} roughness={0.3} />
-      </mesh>
-
-      {/* Venetian blinds */}
-      <group position={[0, 0, 0.06]}>
-        {Array.from({ length: blindsCount }).map((_, i) => (
-          <mesh key={i} position={[0, 0.85 - i * 0.15, 0]} rotation={[0.3, 0, 0]}>
-            <boxGeometry args={[2.2, 0.08, 0.01]} />
-            <meshStandardMaterial color="#e8e0d0" roughness={0.8} />
-          </mesh>
-        ))}
-
-        {/* Blinds cord */}
-        <mesh position={[1.0, 0, 0]}>
-          <cylinderGeometry args={[0.01, 0.01, 1.8, 8]} />
-          <meshStandardMaterial color="#d0c8b8" />
-        </mesh>
-      </group>
-
-      {/* Window sill */}
-      <mesh position={[0, -1.05, 0.15]}>
-        <boxGeometry args={[2.6, 0.08, 0.3]} />
-        <meshStandardMaterial color="#e0e0e0" roughness={0.5} />
-      </mesh>
     </group>
   );
 }

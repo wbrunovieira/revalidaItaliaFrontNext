@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, memo, useMemo } from 'react';
 import { useDeviceDetection, useHotspotAudio, useHotspotAnimation } from './hooks';
-import { getHotspotColor, getHotspotEmissive, getHotspotOpacity, getBaseColors } from './utils/hotspotStyles';
+import {
+  getHotspotColor,
+  getHotspotEmissive,
+  getHotspotOpacity,
+  getBaseColors,
+} from './utils/hotspotStyles';
 import { HotspotTooltip } from './HotspotTooltip';
+import { useSharedGeometries, getHotspotGeometries } from './SharedGeometries';
 
 type HotspotType = 'point' | 'area';
 
@@ -28,7 +34,16 @@ interface HotspotProps {
   onChallengeClick?: (hotspotId: string) => void;
 }
 
-export function Hotspot({
+/**
+ * Optimized Hotspot Component
+ *
+ * Performance optimizations:
+ * 1. Uses shared geometries instead of creating new ones
+ * 2. Wrapped with React.memo
+ * 3. Memoized style context
+ * 4. Uses centralized animation manager
+ */
+function HotspotComponent({
   position,
   label,
   forms,
@@ -52,6 +67,13 @@ export function Hotspot({
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Get shared geometries
+  const sharedGeometries = useSharedGeometries();
+  const geometries = useMemo(
+    () => getHotspotGeometries(sharedGeometries, hotspotType),
+    [sharedGeometries, hotspotType]
+  );
+
   // Custom hooks
   const { isTouchDevice, isMobile } = useDeviceDetection();
   const { isPlaying, showTranscription, playAudio, closeTranscription } = useHotspotAudio({
@@ -59,44 +81,59 @@ export function Hotspot({
     volume,
     onAudioPlay,
   });
-  const { pulseScale, scriviColorPhase, areaRingScale, getScriviTargetColor } = useHotspotAnimation({
-    isScriviTarget,
-    hotspotType,
-    challengeMode,
-  });
+  const { pulseScale, scriviColorPhase, areaRingScale, getScriviTargetColor } =
+    useHotspotAnimation({
+      isScriviTarget,
+      hotspotType,
+      challengeMode,
+    });
 
   // Derived state
   const tooltipVisible = showTooltip || hovered || isPlaying || isActiveFromMenu;
   const isActive = isPlaying || isActiveFromMenu;
   const { baseColor } = getBaseColors(hotspotType);
 
-  // Style context for helper functions
-  const styleContext = {
-    hotspotType,
-    isScriviTarget,
-    isScriviMode,
-    challengeMode,
-    showCorrectAnswer,
-    isActive,
-    tooltipVisible,
-    hovered,
-    scriviColorPhase,
-    getScriviTargetColor,
-  };
+  // Memoized style context to prevent recalculation
+  const styleContext = useMemo(
+    () => ({
+      hotspotType,
+      isScriviTarget,
+      isScriviMode,
+      challengeMode,
+      showCorrectAnswer,
+      isActive,
+      tooltipVisible,
+      hovered,
+      scriviColorPhase,
+      getScriviTargetColor,
+    }),
+    [
+      hotspotType,
+      isScriviTarget,
+      isScriviMode,
+      challengeMode,
+      showCorrectAnswer,
+      isActive,
+      tooltipVisible,
+      hovered,
+      scriviColorPhase,
+      getScriviTargetColor,
+    ]
+  );
 
-  const handlePointerOver = () => {
+  const handlePointerOver = useCallback(() => {
     if (!isTouchDevice) {
       setHovered(true);
       onHover?.(true);
     }
-  };
+  }, [isTouchDevice, onHover]);
 
-  const handlePointerOut = () => {
+  const handlePointerOut = useCallback(() => {
     if (!isTouchDevice) {
       setHovered(false);
       onHover?.(false);
     }
-  };
+  }, [isTouchDevice, onHover]);
 
   const handleClick = useCallback(() => {
     if (challengeMode) {
@@ -127,19 +164,15 @@ export function Hotspot({
 
   return (
     <group position={position}>
-      {/* Main hotspot mesh */}
+      {/* Main hotspot mesh - uses shared geometry with scale */}
       <mesh
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
         onClick={handleClick}
-        scale={isScriviTarget ? pulseScale : 1}
+        scale={isScriviTarget ? pulseScale * size : size}
         rotation={hotspotType === 'area' ? [-Math.PI / 2, 0, 0] : [0, 0, 0]}
+        geometry={geometries.mainGeometry}
       >
-        {hotspotType === 'area' ? (
-          <cylinderGeometry args={[size * 1.2, size * 1.2, size * 0.4, 6]} />
-        ) : (
-          <sphereGeometry args={[size, 16, 16]} />
-        )}
         <meshStandardMaterial
           color={currentColor}
           emissive={currentColor}
@@ -147,9 +180,12 @@ export function Hotspot({
         />
       </mesh>
 
-      {/* Inner ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={isScriviTarget ? pulseScale : 1}>
-        <ringGeometry args={[size * 1.3, size * 1.7, hotspotType === 'area' ? 6 : 32]} />
+      {/* Inner ring - uses shared geometry with scale */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={isScriviTarget ? pulseScale * size : size}
+        geometry={geometries.innerRingGeometry}
+      >
         <meshStandardMaterial
           color={isScriviTarget ? '#3887A6' : showCorrectAnswer ? '#4CAF50' : currentColor}
           emissive={isScriviTarget ? '#3887A6' : undefined}
@@ -160,9 +196,12 @@ export function Hotspot({
       </mesh>
 
       {/* Outer pulsing ring - only for areas */}
-      {hotspotType === 'area' && !challengeMode && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={areaRingScale}>
-          <ringGeometry args={[size * 2.0, size * 2.3, 6]} />
+      {hotspotType === 'area' && !challengeMode && geometries.outerRingGeometry && (
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={areaRingScale * size}
+          geometry={geometries.outerRingGeometry}
+        >
           <meshStandardMaterial
             color={baseColor}
             emissive={baseColor}
@@ -191,3 +230,6 @@ export function Hotspot({
     </group>
   );
 }
+
+// Export memoized component
+export const Hotspot = memo(HotspotComponent);

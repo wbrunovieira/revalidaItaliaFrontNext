@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { Environment, OrbitControls } from '@react-three/drei';
 
 import {
@@ -24,7 +25,6 @@ interface SceneProps {
   controlsRef: React.RefObject<React.ComponentRef<typeof OrbitControls> | null>;
   audioVolume: number;
   activeHotspotId: string | null;
-  // Game mode props
   gameMode?: 'study' | 'challenge' | 'consultation' | 'scrivi';
   challengeMode?: boolean;
   challengeTargetId?: string | null;
@@ -32,9 +32,19 @@ interface SceneProps {
   scriviTargetId?: string | null;
   isScriviMode?: boolean;
   onChallengeClick?: (hotspotId: string) => void;
+  // Performance props
+  shadowMapSize?: number;
 }
 
-export function Scene({
+/**
+ * Optimized Scene Component
+ *
+ * Performance optimizations:
+ * 1. Wrapped with React.memo
+ * 2. Dynamic shadow map size based on device
+ * 3. Memoized shadow map array
+ */
+function SceneComponent({
   bodyRotation,
   focusedPart,
   controlsRef,
@@ -47,18 +57,25 @@ export function Scene({
   scriviTargetId = null,
   isScriviMode = false,
   onChallengeClick,
+  shadowMapSize = 2048,
 }: SceneProps) {
+  // Memoize shadow map size tuple
+  const shadowMapSizeTuple = useMemo(
+    () => [shadowMapSize, shadowMapSize] as [number, number],
+    [shadowMapSize]
+  );
+
   return (
     <>
       {/* Ambient lighting */}
       <ambientLight intensity={0.3} color="#f0f5ff" />
 
-      {/* Main directional light */}
+      {/* Main directional light with dynamic shadow map size */}
       <directionalLight
         position={[5, 8, 5]}
         intensity={0.5}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={shadowMapSizeTuple}
         shadow-camera-far={20}
         shadow-camera-left={-10}
         shadow-camera-right={10}
@@ -91,8 +108,8 @@ export function Scene({
         onChallengeClick={onChallengeClick}
       />
 
-      {/* Environment for subtle reflections */}
-      <Environment preset="apartment" />
+      {/* Environment for subtle reflections - using 'city' for lighter load */}
+      <Environment preset="city" />
 
       {/* Camera controller for smooth transitions */}
       <CameraController focusedPart={focusedPart} controlsRef={controlsRef} />
@@ -110,3 +127,6 @@ export function Scene({
     </>
   );
 }
+
+// Export memoized component
+export const Scene = memo(SceneComponent);

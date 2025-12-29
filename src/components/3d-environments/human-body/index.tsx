@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Environment3DProps } from '../registry';
@@ -18,7 +18,53 @@ import { Scene } from './components/scene';
 // Import hooks
 import { useChallengeMode, useConsultationMode, useScriviMode } from './hooks';
 
+/**
+ * Throttle hook for pointer events
+ * Limits how often the callback is invoked to once per delay period
+ */
+function useThrottledPointerMove(
+  callback: (e: React.PointerEvent) => void,
+  delay: number
+): (e: React.PointerEvent) => void {
+  const lastCall = useRef(0);
+
+  return useCallback(
+    (e: React.PointerEvent) => {
+      const now = Date.now();
+
+      if (now - lastCall.current >= delay) {
+        lastCall.current = now;
+        callback(e);
+      }
+    },
+    [callback, delay]
+  );
+}
+
+/**
+ * Hook to detect if device is mobile
+ */
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return isMobile;
+}
+
 export default function HumanBodyEnvironment({}: Environment3DProps) {
+  // Device detection for performance optimization
+  const isMobile = useIsMobile();
+
   // Basic state
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
@@ -36,6 +82,20 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
+
+  // Canvas/GL settings optimized for device
+  const glSettings = useMemo(
+    () => ({
+      antialias: !isMobile, // Disable antialiasing on mobile
+      powerPreference: (isMobile ? 'low-power' : 'high-performance') as WebGLPowerPreference,
+      stencil: false, // We don't use stencil buffer
+      depth: true,
+    }),
+    [isMobile]
+  );
+
+  // Shadow map size based on device
+  const shadowMapSize = isMobile ? 1024 : 2048;
 
   // Game mode hooks
   const {
@@ -136,12 +196,16 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }, []);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+  // Raw pointer move handler
+  const handlePointerMoveRaw = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     const deltaX = e.clientX - lastX.current;
     lastX.current = e.clientX;
     setBodyRotation(prev => prev + deltaX * 0.01);
   }, []);
+
+  // Throttled pointer move (16ms = ~60fps max)
+  const handlePointerMove = useThrottledPointerMove(handlePointerMoveRaw, 16);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     isDragging.current = false;
@@ -165,6 +229,10 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             near: 0.1,
             far: 100,
           }}
+          gl={glSettings}
+          // Performance settings
+          dpr={isMobile ? [1, 1.5] : [1, 2]} // Lower DPR on mobile
+          performance={{ min: 0.5 }} // Allow frame rate to drop to 30fps if needed
         >
           <color attach="background" args={['#1a1a2e']} />
           <fog attach="fog" args={['#1a1a2e', 8, 20]} />
@@ -189,6 +257,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                 ? handleConsultationClick
                 : undefined
             }
+            shadowMapSize={shadowMapSize}
           />
         </Canvas>
 

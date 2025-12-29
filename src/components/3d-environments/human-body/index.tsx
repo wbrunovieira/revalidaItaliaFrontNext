@@ -814,6 +814,7 @@ const MODEL_PATH =
 interface HotspotProps {
   position: [number, number, number];
   label: string;
+  forms?: string; // Singular with article + plural, e.g., "(l'orecchio, le orecchie)"
   hotspotId: string;
   size?: number;
   audioUrl?: string;
@@ -835,6 +836,7 @@ interface HotspotProps {
 function Hotspot({
   position,
   label,
+  forms,
   hotspotId,
   size = 3,
   audioUrl,
@@ -1252,7 +1254,7 @@ function Hotspot({
                 }}
               >
                 <div className="flex items-center gap-1 whitespace-nowrap" style={{ gap: isMobile ? '2px' : '8px' }}>
-                  {label}
+                  {label} {forms && <span style={{ opacity: 0.7, fontSize: '0.85em' }}>{forms}</span>}
                   {/* Animated bars when playing */}
                   {isActive && (
                     <div
@@ -1370,6 +1372,7 @@ const ANATOMY_HOTSPOTS: {
   id: string;
   position: [number, number, number];
   label: string;
+  forms?: string; // Singular with article + plural, e.g., "(l'orecchio, le orecchie)"
   yMin: number;
   yMax: number;
   size?: number;
@@ -1381,6 +1384,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'testa',
     position: [0, 185, 3],
     label: 'Testa',
+    forms: '(la testa, le teste)',
     yMin: 1.4,
     yMax: 2.0,
     size: 3,
@@ -1392,6 +1396,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'fronte',
     position: [0, 178, 6],
     label: 'Fronte',
+    forms: '(la fronte, le fronti)',
     yMin: 1.3,
     yMax: 1.6,
     size: 1.5,
@@ -1403,6 +1408,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'sopracciglio',
     position: [4, 175, 5.5],
     label: 'Sopracciglio',
+    forms: '(il sopracciglio, le sopracciglia)',
     yMin: 1.25,
     yMax: 1.45,
     size: 1.5,
@@ -1414,6 +1420,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'occhio',
     position: [4, 173, 6],
     label: 'Occhio',
+    forms: "(l'occhio, gli occhi)",
     yMin: 1.2,
     yMax: 1.4,
     size: 1,
@@ -1425,6 +1432,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'naso',
     position: [0, 170, 12],
     label: 'Naso',
+    forms: '(il naso, i nasi)',
     yMin: 1.15,
     yMax: 1.35,
     size: 1,
@@ -1436,6 +1444,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'labbro',
     position: [0.8, 166, 10],
     label: 'Labbro',
+    forms: '(il labbro, le labbra)',
     yMin: 1.1,
     yMax: 1.25,
     size: 1,
@@ -1447,6 +1456,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'bocca',
     position: [-1.2, 166, 12],
     label: 'Bocca',
+    forms: '(la bocca, le bocche)',
     yMin: 1.05,
     yMax: 1.2,
     size: 1,
@@ -1458,6 +1468,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'mento',
     position: [0, 162, 8],
     label: 'Mento',
+    forms: '(il mento, i menti)',
     yMin: 1.0,
     yMax: 1.15,
     size: 1,
@@ -1469,6 +1480,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'guancia',
     position: [7, 170, 4],
     label: 'Guancia',
+    forms: '(la guancia, le guance)',
     yMin: 1.2,
     yMax: 1.5,
     size: 1.5,
@@ -1480,6 +1492,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'mandibola',
     position: [5, 162, 5],
     label: 'Mandibola',
+    forms: '(la mandibola, le mandibole)',
     yMin: 1.0,
     yMax: 1.3,
     size: 1,
@@ -1491,6 +1504,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'collo',
     position: [0, 157, 5],
     label: 'Collo',
+    forms: '(il collo, i colli)',
     yMin: 0.8,
     yMax: 1.1,
     size: 1.5,
@@ -1502,6 +1516,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'nuca',
     position: [0, 162, -12],
     label: 'Nuca',
+    forms: '(la nuca, le nuche)',
     yMin: 0.9,
     yMax: 1.1,
     size: 1,
@@ -1513,6 +1528,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'spalla',
     position: [17, 153, -1],
     label: 'Spalla',
+    forms: '(la spalla, le spalle)',
     yMin: 0.6,
     yMax: 0.9,
     size: 1.5,
@@ -1524,6 +1540,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'torace',
     position: [0, 140, 10],
     label: 'Torace',
+    forms: '(il torace, i toraci)',
     yMin: 0.6,
     yMax: 0.9,
     size: 1.5,
@@ -1535,6 +1552,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'schiena',
     position: [0, 135, -18],
     label: 'Schiena',
+    forms: '(la schiena, le schiene)',
     yMin: 0.4,
     yMax: 0.9,
     size: 1.8,
@@ -1546,6 +1564,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'lombare',
     position: [0, 110, -10],
     label: 'Lombare',
+    forms: '(la zona lombare, le zone lombari)',
     yMin: 0.1,
     yMax: 0.4,
     size: 1.5,
@@ -1557,6 +1576,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'ascella',
     position: [17, 135, 2],
     label: 'Ascella',
+    forms: "(l'ascella, le ascelle)",
     yMin: 0.5,
     yMax: 0.8,
     size: 1.5,
@@ -1568,6 +1588,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'seno',
     position: [10, 130, 12],
     label: 'Seno',
+    forms: '(il seno, i seni)',
     yMin: 0.5,
     yMax: 0.8,
     size: 1,
@@ -1579,6 +1600,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'capezzolo',
     position: [12, 135, 11],
     label: 'Capezzolo',
+    forms: '(il capezzolo, i capezzoli)',
     yMin: 0.5,
     yMax: 0.7,
     size: 0.8,
@@ -1590,6 +1612,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'braccio',
     position: [22, 130, 0],
     label: 'Braccio',
+    forms: '(il braccio, le braccia)',
     yMin: 0.3,
     yMax: 0.6,
     size: 1.5,
@@ -1601,6 +1624,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'gomito',
     position: [28, 120, -5],
     label: 'Gomito',
+    forms: '(il gomito, i gomiti)',
     yMin: 0.2,
     yMax: 0.5,
     size: 1.5,
@@ -1612,6 +1636,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'addome',
     position: [0, 125, 12],
     label: 'Addome',
+    forms: "(l'addome, gli addomi)",
     yMin: 0.3,
     yMax: 0.6,
     size: 1.5,
@@ -1623,6 +1648,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'ombelico',
     position: [0, 115, 15],
     label: 'Ombelico',
+    forms: "(l'ombelico, gli ombelichi)",
     yMin: 0.2,
     yMax: 0.5,
     size: 1.2,
@@ -1634,6 +1660,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'fianco',
     position: [13, 105, -8],
     label: 'Fianco',
+    forms: '(il fianco, i fianchi)',
     yMin: 0.1,
     yMax: 0.4,
     size: 1.5,
@@ -1645,6 +1672,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'anca',
     position: [16, 100, 5],
     label: 'Anca',
+    forms: "(l'anca, le anche)",
     yMin: 0.05,
     yMax: 0.3,
     size: 1.3,
@@ -1656,6 +1684,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'avambraccio',
     position: [30, 109, 2],
     label: 'Avambraccio',
+    forms: "(l'avambraccio, gli avambracci)",
     yMin: 0.1,
     yMax: 0.4,
     size: 1.5,
@@ -1667,6 +1696,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'natica',
     position: [6, 95, -15],
     label: 'Natica',
+    forms: '(la natica, le natiche)',
     yMin: 0.0,
     yMax: 0.3,
     size: 1.5,
@@ -1678,6 +1708,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'ano',
     position: [0, 95, -15],
     label: 'Ano',
+    forms: "(l'ano, gli ani)",
     yMin: -0.1,
     yMax: 0.1,
     size: 1.2,
@@ -1689,6 +1720,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'genitali',
     position: [0, 85, 15],
     label: 'Genitali',
+    forms: '(i genitali)',
     yMin: 0.0,
     yMax: 0.2,
     size: 1.3,
@@ -1700,6 +1732,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'inguine',
     position: [0, 93, 12],
     label: 'Inguine',
+    forms: "(l'inguine, gli inguini)",
     yMin: 0.0,
     yMax: 0.2,
     size: 1.3,
@@ -1711,6 +1744,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'coscia',
     position: [6, 75, 10],
     label: 'Coscia',
+    forms: '(la coscia, le cosce)',
     yMin: -0.1,
     yMax: 0.2,
     size: 1.5,
@@ -1722,6 +1756,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'ginocchio',
     position: [6, 50, 6],
     label: 'Ginocchio',
+    forms: '(il ginocchio, le ginocchia)',
     yMin: -0.2,
     yMax: 0.1,
     size: 1.3,
@@ -1733,6 +1768,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'gamba',
     position: [15, 55, 8],
     label: 'Gamba',
+    forms: '(la gamba, le gambe)',
     yMin: -0.3,
     yMax: 0.0,
     size: 1.5,
@@ -1744,6 +1780,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'tibia',
     position: [8, 35, 4],
     label: 'Tibia',
+    forms: '(la tibia, le tibie)',
     yMin: -0.35,
     yMax: -0.05,
     size: 1.3,
@@ -1755,6 +1792,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'polpaccio',
     position: [6, 35, -11],
     label: 'Polpaccio',
+    forms: '(il polpaccio, i polpacci)',
     yMin: -0.35,
     yMax: -0.05,
     size: 1.3,
@@ -1766,6 +1804,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'caviglia',
     position: [7, 12, 2],
     label: 'Caviglia',
+    forms: '(la caviglia, le caviglie)',
     yMin: -0.4,
     yMax: -0.1,
     size: 1.2,
@@ -1777,6 +1816,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'piede',
     position: [8, 5, 10],
     label: 'Piede',
+    forms: '(il piede, i piedi)',
     yMin: -0.5,
     yMax: -0.2,
     size: 1.5,
@@ -1788,6 +1828,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'tallone',
     position: [8, 3, -12],
     label: 'Tallone',
+    forms: '(il tallone, i talloni)',
     yMin: -0.5,
     yMax: -0.2,
     size: 1.2,
@@ -1799,6 +1840,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'polso',
     position: [30, 98, 6],
     label: 'Polso',
+    forms: '(il polso, i polsi)',
     yMin: 0.1,
     yMax: 0.3,
     size: 1.2,
@@ -1810,6 +1852,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'mano',
     position: [42, 92, 9],
     label: 'Mano',
+    forms: '(la mano, le mani)',
     yMin: 0.1,
     yMax: 0.3,
     size: 1.5,
@@ -1821,6 +1864,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'palmo',
     position: [30, 90, 6],
     label: 'Palmo',
+    forms: '(il palmo, i palmi)',
     yMin: 0.1,
     yMax: 0.3,
     size: 1.2,
@@ -1832,6 +1876,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'dito',
     position: [32, 85, 10],
     label: 'Dito',
+    forms: '(il dito, le dita)',
     yMin: 0.1,
     yMax: 0.3,
     size: 1.0,
@@ -1844,6 +1889,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'pollice',
     position: [38, 90, 12.5],
     label: 'Pollice',
+    forms: '(il pollice, i pollici)',
     yMin: 0.3,
     yMax: 0.5,
     size: 0.8,
@@ -1855,6 +1901,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'indice',
     position: [38, 80, 9.5],
     label: 'Indice',
+    forms: "(l'indice, gli indici)",
     yMin: 0.3,
     yMax: 0.5,
     size: 0.8,
@@ -1866,6 +1913,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'medio',
     position: [33, 77, 9.5],
     label: 'Medio',
+    forms: '(il medio, i medi)',
     yMin: 0.3,
     yMax: 0.5,
     size: 0.8,
@@ -1877,6 +1925,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'anulare',
     position: [29, 79, 9],
     label: 'Anulare',
+    forms: "(l'anulare, gli anulari)",
     yMin: 0.3,
     yMax: 0.5,
     size: 0.8,
@@ -1888,6 +1937,7 @@ const ANATOMY_HOTSPOTS: {
     id: 'mignolo',
     position: [26, 82, 9],
     label: 'Mignolo',
+    forms: '(il mignolo, i mignoli)',
     yMin: 0.3,
     yMax: 0.5,
     size: 0.8,
@@ -2017,6 +2067,7 @@ function HumanBodyModel({
           hotspotId={hotspot.id}
           position={hotspot.position}
           label={hotspot.label}
+          forms={hotspot.forms}
           size={hotspot.size}
           audioUrl={hotspot.audioUrl}
           transcription={hotspot.transcription}
@@ -3052,7 +3103,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
                           gameMode === 'consultation' ? 'text-white/90' : 'text-white/40'
                         }`}
                       >
-                        Pratica clinica
+                        Pratica l&apos;ascolto
                       </div>
                     </div>
                     {gameMode === 'consultation' && (

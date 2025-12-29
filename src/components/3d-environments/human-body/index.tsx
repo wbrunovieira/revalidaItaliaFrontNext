@@ -2645,23 +2645,28 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
     return available[randomIndex].id;
   }, []);
 
-  // Get camera position for a hotspot (for auto-zoom)
+  // Get camera position for a hotspot (for auto-zoom in scrivi mode)
   const getHotspotCameraPosition = useCallback((hotspotId: string) => {
     const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
     if (!hotspot) return null;
 
-    // Calculate camera position based on hotspot Y position
-    const yPos = hotspot.position[1] / 100; // Convert from cm to meters
+    const xPos = hotspot.position[0]; // X position (lateral)
+    const yPos = hotspot.position[1]; // Y position (vertical in cm)
 
-    // Find the appropriate body part for this hotspot
-    if (yPos >= 1.0) {
-      return BODY_PARTS.find(p => p.id === 'head');
-    } else if (yPos >= 0.0) {
-      return BODY_PARTS.find(p => p.id === 'torso');
-    } else if (yPos >= -0.5) {
-      return BODY_PARTS.find(p => p.id === 'legs');
+    // Hand hotspots have x > 25 (lateral position)
+    if (Math.abs(xPos) > 25) {
+      return BODY_PARTS.find(p => p.id === 'hand');
     }
-    return BODY_PARTS.find(p => p.id === 'full');
+    // Head: y > 155 (testa, fronte, naso, bocca, occhio, etc.)
+    if (yPos > 155) {
+      return BODY_PARTS.find(p => p.id === 'head');
+    }
+    // Torso: y > 80 (spalla, schiena, petto, addome, lombare, etc.)
+    if (yPos > 80) {
+      return BODY_PARTS.find(p => p.id === 'torso');
+    }
+    // Legs: y <= 80 (coscia, ginocchio, gamba, piede, etc.)
+    return BODY_PARTS.find(p => p.id === 'legs');
   }, []);
 
   // Start scrivi mode

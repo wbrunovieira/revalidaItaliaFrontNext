@@ -33,7 +33,7 @@ export function HotspotTooltip({
       distanceFactor={6}
       center={false}
       style={{
-        pointerEvents: 'auto',
+        pointerEvents: 'none',
         transform: 'translate(0, -50%)',
       }}
     >
@@ -80,6 +80,7 @@ export function HotspotTooltip({
               isMobile ? 'px-1.5 py-0.5' : isZoomedView ? 'px-2 py-1' : 'px-4 py-2'
             } rounded-xl font-semibold flex flex-col gap-0.5`}
             style={{
+              pointerEvents: audioUrl ? 'auto' : 'none',
               background: isActive
                 ? 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)'
                 : 'linear-gradient(135deg, #0C3559 0%, #0a2a47 100%)',
@@ -164,6 +165,7 @@ export function HotspotTooltip({
                     onCloseTranscription();
                   }}
                   style={{
+                    pointerEvents: 'auto',
                     background: 'rgba(255, 255, 255, 0.2)',
                     border: 'none',
                     borderRadius: '50%',

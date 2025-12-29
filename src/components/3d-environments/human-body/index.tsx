@@ -5,10 +5,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { Environment3DProps } from '../registry';
-import Environment3DContainer, { useFullscreen } from '../Environment3DContainer';
+import Environment3DContainer from '../Environment3DContainer';
 
-// Import types
-import type { BodyPartConfig } from './types';
 
 // Import data from extracted modules
 import {
@@ -40,6 +38,9 @@ import {
 
 // Import hotspot component
 import { Hotspot } from './components/hotspot';
+
+// Import UI components
+import { BodyPartButton, HotspotMenuItem, FullscreenButton } from './components/ui';
 
 
 interface HumanBodyModelProps {
@@ -318,146 +319,6 @@ function Scene({
         maxDistance={8}
       />
     </>
-  );
-}
-
-// Body part selection button
-interface BodyPartButtonProps {
-  part: BodyPartConfig;
-  isActive: boolean;
-  onClick: () => void;
-  label: string;
-  hasExpander?: boolean;
-  isExpanded?: boolean;
-  onExpandToggle?: () => void;
-}
-
-function BodyPartButton({
-  part,
-  isActive,
-  onClick,
-  label,
-  hasExpander,
-  isExpanded,
-  onExpandToggle,
-}: BodyPartButtonProps) {
-  return (
-    <div className="flex items-center gap-1">
-      <button
-        onClick={onClick}
-        className={`
-          flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-          flex items-center gap-2 border-2 whitespace-nowrap
-          ${
-            isActive
-              ? 'bg-[#3887A6] text-white border-[#3887A6] shadow-md'
-              : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
-          }
-        `}
-      >
-        <span className="text-base">{part.icon}</span>
-        {label}
-      </button>
-      {hasExpander && (
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            onExpandToggle?.();
-          }}
-          className={`
-            p-2 rounded-lg transition-all duration-300 border-2
-            ${
-              isExpanded
-                ? 'bg-[#3887A6] text-white border-[#3887A6]'
-                : 'bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white'
-            }
-          `}
-          title={isExpanded ? 'Chiudi dettagli' : 'Mostra dettagli'}
-        >
-          <svg
-            className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      )}
-    </div>
-  );
-}
-
-// Hotspot menu item
-interface HotspotMenuItemProps {
-  hotspot: { id: string; label: string };
-  isPlaying: boolean;
-  transcription: string;
-  onPlay: () => void;
-}
-
-function HotspotMenuItem({ hotspot, isPlaying, transcription, onPlay }: HotspotMenuItemProps) {
-  return (
-    <button
-      onClick={onPlay}
-      className={`
-        w-full px-2 py-1.5 rounded-md text-xs transition-all duration-200
-        flex items-center gap-2 text-left
-        ${isPlaying ? 'bg-[#2E7D32] text-white' : 'bg-[#0a2a47] text-white/80 hover:bg-[#1a3a55] hover:text-white'}
-      `}
-    >
-      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="font-medium">{hotspot.label}</div>
-        {isPlaying && <div className="text-[10px] opacity-80 truncate italic mt-0.5">{transcription}</div>}
-      </div>
-      {isPlaying && (
-        <div className="flex gap-0.5 items-end h-3">
-          {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              className="w-0.5 bg-white rounded-sm"
-              style={{
-                animation: 'soundBar 0.5s ease-in-out infinite alternate',
-                animationDelay: `${i * 0.1}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </button>
-  );
-}
-
-// Fullscreen button component that uses the context
-function FullscreenButton({ compact = false }: { compact?: boolean }) {
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
-
-  if (compact) {
-    return (
-      <button
-        onClick={toggleFullscreen}
-        className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-          isFullscreen
-            ? 'bg-gradient-to-r from-[#3887A6] to-[#4a9dc0] text-white shadow-lg'
-            : 'bg-[#0F2940] text-white/60 hover:bg-[#1a3a55] hover:text-white/90'
-        }`}
-        title={isFullscreen ? 'Esci Schermo Intero' : 'Schermo Intero'}
-      >
-        <span className="text-lg">{isFullscreen ? '🔲' : '⛶'}</span>
-        <span className="text-[10px] font-medium whitespace-nowrap">{isFullscreen ? 'Esci' : 'Full'}</span>
-      </button>
-    );
-  }
-
-  return (
-    <button
-      onClick={toggleFullscreen}
-      className="w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-2 border-2 whitespace-nowrap bg-[#0F2940] text-white/70 border-transparent hover:bg-[#1a3a55] hover:text-white"
-    >
-      <span className="text-base">{isFullscreen ? '🔲' : '⛶'}</span>
-      {isFullscreen ? 'Esci Schermo Intero' : 'Schermo Intero'}
-    </button>
   );
 }
 

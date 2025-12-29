@@ -46,6 +46,10 @@ export function ScriviModeUI({
       <div className="md:hidden absolute bottom-16 left-0 right-0 z-20 px-2">
         <div className="bg-[#0C3559]/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-[#FF9F43]/30">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {/* Fullscreen button first */}
+            <FullscreenButton compact />
+            {/* Separator */}
+            <div className="w-px h-8 bg-white/20 flex-shrink-0" />
             {BODY_PARTS.filter(p => p.id !== 'rules').map(part => (
               <button
                 key={part.id}
@@ -61,8 +65,6 @@ export function ScriviModeUI({
                 <span className="text-[10px] font-medium whitespace-nowrap">{part.label}</span>
               </button>
             ))}
-            {/* Fullscreen Button */}
-            <FullscreenButton compact />
           </div>
         </div>
       </div>
@@ -70,6 +72,13 @@ export function ScriviModeUI({
       {/* Desktop: Right side panel */}
       <div className="hidden md:block absolute top-16 right-4 z-20">
         <div className="bg-[#0C3559] backdrop-blur-sm rounded-lg p-3 shadow-xl border border-[#FF9F43]/30">
+          {/* Visualizzazione Section */}
+          <div className="flex flex-col gap-2 mb-2">
+            <div className="text-xs text-white/60 font-medium px-1">Visualizzazione</div>
+            <FullscreenButton />
+            <div className="border-b border-white/10 my-1" />
+          </div>
+          {/* Naviga Section */}
           <div className="text-xs text-white/60 font-medium mb-2 px-1">Naviga</div>
           <div className="flex flex-col gap-2">
             {BODY_PARTS.filter(p => p.id !== 'rules').map(part => (
@@ -90,10 +99,6 @@ export function ScriviModeUI({
                 {part.label}
               </button>
             ))}
-            {/* Fullscreen Button */}
-            <div className="border-t border-white/10 mt-2 pt-2">
-              <FullscreenButton />
-            </div>
           </div>
         </div>
       </div>

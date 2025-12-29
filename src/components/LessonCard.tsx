@@ -7,6 +7,7 @@ import { useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { preloadEnvironment } from '@/components/3d-environments/preload';
+import { prefetchLesson } from '@/hooks/queries/useLesson';
 
 interface Translation {
   locale: string;
@@ -48,20 +49,24 @@ interface LessonCardProps {
   lesson: Lesson;
   courseSlug: string;
   moduleSlug: string;
+  courseId: string;
+  moduleId: string;
   locale: string;
   index: number;
   totalLessons: number;
   isCompleted?: boolean;
 }
 
-export default function LessonCard({ 
-  lesson, 
+export default function LessonCard({
+  lesson,
   courseSlug,
-  moduleSlug, 
-  locale, 
-  index, 
+  moduleSlug,
+  courseId,
+  moduleId,
+  locale,
+  index,
   totalLessons,
-  isCompleted = false 
+  isCompleted = false
 }: LessonCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -84,12 +89,16 @@ export default function LessonCard({
   // 2. video.isSeen (vem do backend quando includeVideo=true)
   const isLessonCompleted = isCompleted || lesson.video?.isSeen || false;
 
-  // Preload 3D environment assets on hover
-  const handlePreload3D = useCallback(() => {
+  // Prefetch lesson data and preload 3D assets on hover
+  const handlePrefetch = useCallback(() => {
+    // Prefetch lesson data via TanStack Query
+    prefetchLesson(courseId, moduleId, lesson.id);
+
+    // Preload 3D environment assets if applicable
     if (lesson.type === 'ENVIRONMENT_3D' && lesson.environment3d?.slug) {
       preloadEnvironment(lesson.environment3d.slug);
     }
-  }, [lesson.type, lesson.environment3d?.slug]);
+  }, [courseId, moduleId, lesson.id, lesson.type, lesson.environment3d?.slug]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
@@ -147,7 +156,7 @@ export default function LessonCard({
       <Link
         href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lesson.id}`}
         className="block"
-        onMouseEnter={handlePreload3D}
+        onMouseEnter={handlePrefetch}
       >
         <div 
           ref={cardRef}

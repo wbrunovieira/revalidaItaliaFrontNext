@@ -9,6 +9,33 @@ const nextConfig: NextConfig = {
     '192.168.0.*',     // Toda rede 192.168.0.x
     '192.168.56.*',    // Toda rede 192.168.56.x
   ],
+
+  // Cache headers for static assets
+  async headers() {
+    return [
+      {
+        // 3D models - cache for 1 year (immutable assets)
+        source: '/models/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Audio files - cache for 1 month
+        source: '/audio/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {

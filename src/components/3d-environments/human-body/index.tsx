@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Preload } from '@react-three/drei';
 import { Environment3DProps } from '../registry';
 import Environment3DContainer from '../Environment3DContainer';
 import { CanvasLoadingOverlay } from '../common';
@@ -264,6 +264,9 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             }
             shadowMapSize={shadowMapSize}
           />
+
+          {/* Precompile all shaders for faster subsequent renders */}
+          <Preload all />
         </Canvas>
 
 

@@ -200,6 +200,8 @@ export default function ModuleLessonsGrid({
             lesson={lesson}
             courseSlug={courseSlug}
             moduleSlug={moduleSlug}
+            courseId={courseId}
+            moduleId={moduleId}
             locale={locale}
             index={index + ((currentPage - 1) * 10)}
             totalLessons={total}

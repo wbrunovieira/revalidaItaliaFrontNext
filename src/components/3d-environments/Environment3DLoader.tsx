@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { environment3DRegistry, Environment3DProps } from './registry';
 import { LoadingSpinner3D, ErrorBoundary3D } from './common';
 import { AlertTriangle } from 'lucide-react';
+import { useRegister3DEnvironment } from './hooks';
 
 interface Environment3DLoaderProps extends Environment3DProps {
   slug: string;
@@ -30,6 +31,10 @@ function Environment3DNotFound({ slug, message }: { slug: string; message: strin
 export default function Environment3DLoader({ slug, ...props }: Environment3DLoaderProps) {
   const t = useTranslations('Environment3D');
   const loader = environment3DRegistry[slug];
+
+  // Register with persistent 3D provider (if available)
+  // This keeps the environment active while the component is mounted
+  useRegister3DEnvironment(slug);
 
   if (!loader) {
     return <Environment3DNotFound slug={slug} message={t('error.notFound')} />;

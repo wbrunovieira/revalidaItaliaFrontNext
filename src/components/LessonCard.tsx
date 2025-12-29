@@ -3,9 +3,10 @@
 
 import { PlayCircle, Clock, FileText, CheckCircle, Music, Gamepad2, Box } from 'lucide-react';
 import Link from 'next/link';
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { preloadEnvironment } from '@/components/3d-environments/preload';
 
 interface Translation {
   locale: string;
@@ -22,6 +23,11 @@ interface Video {
   isSeen: boolean;
 }
 
+interface Environment3D {
+  id: string;
+  slug: string;
+}
+
 interface Lesson {
   id: string;
   slug: string;
@@ -35,6 +41,7 @@ interface Lesson {
   hasAudios?: boolean;
   hasAnimations?: boolean;
   environment3dId?: string | null;
+  environment3d?: Environment3D | null;
 }
 
 interface LessonCardProps {
@@ -76,6 +83,13 @@ export default function LessonCard({
   // 1. Props isCompleted (vem de ModuleLessonsGrid via API de progresso)
   // 2. video.isSeen (vem do backend quando includeVideo=true)
   const isLessonCompleted = isCompleted || lesson.video?.isSeen || false;
+
+  // Preload 3D environment assets on hover
+  const handlePreload3D = useCallback(() => {
+    if (lesson.type === 'ENVIRONMENT_3D' && lesson.environment3d?.slug) {
+      preloadEnvironment(lesson.environment3d.slug);
+    }
+  }, [lesson.type, lesson.environment3d?.slug]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !imageRef.current) return;
@@ -133,6 +147,7 @@ export default function LessonCard({
       <Link
         href={`/${locale}/courses/${courseSlug}/modules/${moduleSlug}/lessons/${lesson.id}`}
         className="block"
+        onMouseEnter={handlePreload3D}
       >
         <div 
           ref={cardRef}

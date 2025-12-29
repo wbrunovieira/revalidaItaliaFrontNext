@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Environment3DProps } from '../registry';
@@ -22,8 +22,15 @@ import { BodyPartButton, HotspotMenuItem, FullscreenButton } from './components/
 // Import scene components
 import { Scene } from './components/scene';
 
+// Import hooks
+import { useChallengeMode, useConsultationMode, useScriviMode } from './hooks';
+
+// Game mode constants
+const CONSULTATION_ROUNDS = 10;
+const SCRIVI_ROUNDS = 10;
 
 export default function HumanBodyEnvironment({}: Environment3DProps) {
+  // Basic state
   const [bodyRotation, setBodyRotation] = useState(0);
   const [focusedPart, setFocusedPart] = useState('full');
   const [audioVolume, setAudioVolume] = useState(0.7);
@@ -32,432 +39,60 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
   const [legsExpanded, setLegsExpanded] = useState(false);
   const [handExpanded, setHandExpanded] = useState(false);
   const [playingHotspotId, setPlayingHotspotId] = useState<string | null>(null);
-
-  // Challenge mode state
   const [gameMode, setGameMode] = useState<'study' | 'challenge' | 'consultation' | 'scrivi'>('study');
   const [isModeMenuExpanded, setIsModeMenuExpanded] = useState(true);
-  const [challengeState, setChallengeState] = useState<'idle' | 'playing' | 'won' | 'lost'>('idle');
-  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [score, setScore] = useState(0);
-  const [completedHotspots, setCompletedHotspots] = useState<string[]>([]);
-  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [endTime, setEndTime] = useState<number | null>(null);
 
-  // Consultation mode state
-  const CONSULTATION_ROUNDS = 10;
-  const [consultationState, setConsultationState] = useState<'idle' | 'playing' | 'finished'>('idle');
-  const [consultationRound, setConsultationRound] = useState(0);
-  const [consultationScore, setConsultationScore] = useState(0);
-  const [consultationTargetId, setConsultationTargetId] = useState<string | null>(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [usedConsultationHotspots, setUsedConsultationHotspots] = useState<string[]>([]);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
-  const consultationAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Scrivi mode state
-  const SCRIVI_ROUNDS = 10;
-  const [scriviState, setScriviState] = useState<'idle' | 'playing' | 'finished'>('idle');
-  const [scriviRound, setScriviRound] = useState(0);
-  const [scriviScore, setScriviScore] = useState(0);
-  const [scriviTargetId, setScriviTargetId] = useState<string | null>(null);
-  const [scriviInput, setScriviInput] = useState('');
-  const [usedScriviHotspots, setUsedScriviHotspots] = useState<string[]>([]);
-  const [scriviAnswerFeedback, setScriviAnswerFeedback] = useState<'correct' | 'wrong' | null>(null);
-  const scriviInputRef = useRef<HTMLInputElement | null>(null);
-
+  // Refs
   const controlsRef = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const menuAudioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef(false);
   const lastX = useRef(0);
 
-  // Get random hotspot from remaining ones
-  const getNextRandomTarget = useCallback((completed: string[]) => {
-    const remaining = ANATOMY_HOTSPOTS.filter(h => !completed.includes(h.id));
-    if (remaining.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * remaining.length);
-    return remaining[randomIndex].id;
-  }, []);
+  // Game mode hooks
+  const {
+    challengeState,
+    currentTargetId,
+    score,
+    completedHotspots,
+    showCorrectAnswer,
+    currentTargetLabel,
+    startChallenge,
+    handleChallengeClick,
+    restartChallenge,
+    exitChallenge,
+    getElapsedTime,
+  } = useChallengeMode(setGameMode, setFocusedPart);
 
-  // Start challenge
-  const startChallenge = useCallback(() => {
-    setGameMode('challenge');
-    setChallengeState('playing');
-    setScore(0);
-    setCompletedHotspots([]);
-    setShowCorrectAnswer(false);
-    setStartTime(Date.now());
-    setEndTime(null);
-    setFocusedPart('full');
-    // Get first random target
-    const firstTarget = getNextRandomTarget([]);
-    setCurrentTargetId(firstTarget);
-  }, [getNextRandomTarget]);
+  const {
+    consultationState,
+    consultationRound,
+    consultationScore,
+    consultationTargetId,
+    isAudioPlaying,
+    lastAnswerCorrect,
+    showCorrectAnswer: showConsultationCorrectAnswer,
+    startConsultation,
+    handleConsultationClick,
+    replayConsultationAudio,
+    exitConsultation,
+    getConsultationDiagnosis,
+  } = useConsultationMode(audioVolume, setGameMode, setFocusedPart);
 
-  // Handle challenge click
-  const handleChallengeClick = useCallback(
-    (clickedId: string) => {
-      if (challengeState !== 'playing' || !currentTargetId) return;
-
-      if (clickedId === currentTargetId) {
-        // Correct!
-        const newCompleted = [...completedHotspots, currentTargetId];
-        setCompletedHotspots(newCompleted);
-        setScore(prev => prev + 1);
-
-        // Check if all completed
-        if (newCompleted.length === ANATOMY_HOTSPOTS.length) {
-          setChallengeState('won');
-          setEndTime(Date.now());
-          setCurrentTargetId(null);
-        } else {
-          // Get next target
-          const nextTarget = getNextRandomTarget(newCompleted);
-          setCurrentTargetId(nextTarget);
-        }
-      } else {
-        // Wrong! Show correct answer and reset
-        setShowCorrectAnswer(true);
-        setChallengeState('lost');
-
-        // After 2 seconds, show the lost state
-        setTimeout(() => {
-          setShowCorrectAnswer(false);
-        }, 2000);
-      }
-    },
-    [challengeState, currentTargetId, completedHotspots, getNextRandomTarget]
-  );
-
-  // Restart challenge after losing
-  const restartChallenge = useCallback(() => {
-    startChallenge();
-  }, [startChallenge]);
-
-  // Exit challenge mode
-  const exitChallenge = useCallback(() => {
-    setGameMode('study');
-    setChallengeState('idle');
-    setCurrentTargetId(null);
-    setScore(0);
-    setCompletedHotspots([]);
-    setShowCorrectAnswer(false);
-    setStartTime(null);
-    setEndTime(null);
-  }, []);
-
-  // Get random hotspot for consultation (avoiding repeats)
-  const getRandomConsultationTarget = useCallback((used: string[]) => {
-    const available = ANATOMY_HOTSPOTS.filter(h => !used.includes(h.id) && h.audioUrl);
-    if (available.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * available.length);
-    return available[randomIndex].id;
-  }, []);
-
-  // Play consultation audio
-  const playConsultationAudio = useCallback(
-    (hotspotId: string) => {
-      const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
-      if (!hotspot?.audioUrl) return;
-
-      // Stop any currently playing audio
-      if (consultationAudioRef.current) {
-        consultationAudioRef.current.pause();
-        consultationAudioRef.current.currentTime = 0;
-      }
-
-      const audio = new Audio(hotspot.audioUrl);
-      audio.volume = audioVolume;
-      consultationAudioRef.current = audio;
-
-      audio.onplay = () => setIsAudioPlaying(true);
-      audio.onended = () => setIsAudioPlaying(false);
-      audio.onerror = () => setIsAudioPlaying(false);
-
-      audio.play().catch(() => setIsAudioPlaying(false));
-    },
-    [audioVolume]
-  );
-
-  // Start consultation mode
-  const startConsultation = useCallback(() => {
-    setGameMode('consultation');
-    setConsultationState('playing');
-    setConsultationRound(1);
-    setConsultationScore(0);
-    setUsedConsultationHotspots([]);
-    setFocusedPart('full');
-
-    // Get first random target
-    const firstTarget = getRandomConsultationTarget([]);
-    setConsultationTargetId(firstTarget);
-
-    // Play audio after a short delay
-    if (firstTarget) {
-      setTimeout(() => playConsultationAudio(firstTarget), 500);
-    }
-  }, [getRandomConsultationTarget, playConsultationAudio]);
-
-  // Handle consultation click
-  const handleConsultationClick = useCallback(
-    (clickedId: string) => {
-      if (consultationState !== 'playing' || !consultationTargetId) return;
-
-      const isCorrect = clickedId === consultationTargetId;
-
-      // Set feedback
-      setLastAnswerCorrect(isCorrect);
-
-      if (isCorrect) {
-        setConsultationScore(prev => prev + 1);
-      }
-
-      // Show correct answer briefly
-      setShowCorrectAnswer(true);
-      setTimeout(() => {
-        setShowCorrectAnswer(false);
-        setLastAnswerCorrect(null);
-      }, 1500);
-
-      // Move to next round or finish
-      const newUsed = [...usedConsultationHotspots, consultationTargetId];
-      setUsedConsultationHotspots(newUsed);
-
-      if (consultationRound >= CONSULTATION_ROUNDS) {
-        // Finished all rounds
-        setTimeout(() => {
-          setConsultationState('finished');
-          setConsultationTargetId(null);
-        }, 1500);
-      } else {
-        // Next round
-        setTimeout(() => {
-          const nextTarget = getRandomConsultationTarget(newUsed);
-          setConsultationTargetId(nextTarget);
-          setConsultationRound(prev => prev + 1);
-
-          if (nextTarget) {
-            setTimeout(() => playConsultationAudio(nextTarget), 300);
-          }
-        }, 1500);
-      }
-    },
-    [
-      consultationState,
-      consultationTargetId,
-      consultationRound,
-      usedConsultationHotspots,
-      getRandomConsultationTarget,
-      playConsultationAudio,
-    ]
-  );
-
-  // Replay consultation audio
-  const replayConsultationAudio = useCallback(() => {
-    if (consultationTargetId) {
-      playConsultationAudio(consultationTargetId);
-    }
-  }, [consultationTargetId, playConsultationAudio]);
-
-  // Exit consultation mode
-  const exitConsultation = useCallback(() => {
-    if (consultationAudioRef.current) {
-      consultationAudioRef.current.pause();
-      consultationAudioRef.current = null;
-    }
-    setGameMode('study');
-    setConsultationState('idle');
-    setConsultationRound(0);
-    setConsultationScore(0);
-    setConsultationTargetId(null);
-    setUsedConsultationHotspots([]);
-    setIsAudioPlaying(false);
-  }, []);
-
-  // Get consultation diagnosis based on score
-  const getConsultationDiagnosis = useCallback(() => {
-    const percentage = (consultationScore / CONSULTATION_ROUNDS) * 100;
-    if (percentage === 100)
-      return { emoji: '🏆', title: 'Medico Esperto!', message: 'Perfetto! Hai identificato tutte le parti!' };
-    if (percentage >= 80) return { emoji: '🌟', title: 'Ottimo lavoro!', message: 'Sei quasi un esperto!' };
-    if (percentage >= 60) return { emoji: '👍', title: 'Buon lavoro!', message: 'Continua a studiare!' };
-    if (percentage >= 40)
-      return { emoji: '📚', title: 'Devi studiare!', message: 'Torna al modo studio per migliorare.' };
-    return { emoji: '💪', title: 'Non mollare!', message: 'La pratica rende perfetti!' };
-  }, [consultationScore]);
-
-  // Get random hotspot for scrivi (avoiding repeats)
-  const getRandomScriviTarget = useCallback((used: string[]) => {
-    const available = ANATOMY_HOTSPOTS.filter(h => !used.includes(h.id));
-    if (available.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * available.length);
-    return available[randomIndex].id;
-  }, []);
-
-  // Get camera position for a hotspot (for auto-zoom in scrivi mode)
-  const getHotspotCameraPosition = useCallback((hotspotId: string) => {
-    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === hotspotId);
-    if (!hotspot) return null;
-
-    const xPos = hotspot.position[0]; // X position (lateral)
-    const yPos = hotspot.position[1]; // Y position (vertical in cm)
-
-    // Hand hotspots have x > 25 (lateral position)
-    if (Math.abs(xPos) > 25) {
-      return BODY_PARTS.find(p => p.id === 'hand');
-    }
-    // Head: y > 155 (testa, fronte, naso, bocca, occhio, etc.)
-    if (yPos > 155) {
-      return BODY_PARTS.find(p => p.id === 'head');
-    }
-    // Torso: y > 80 (spalla, schiena, petto, addome, lombare, etc.)
-    if (yPos > 80) {
-      return BODY_PARTS.find(p => p.id === 'torso');
-    }
-    // Legs: y <= 80 (coscia, ginocchio, gamba, piede, etc.)
-    return BODY_PARTS.find(p => p.id === 'legs');
-  }, []);
-
-  // Start scrivi mode
-  const startScrivi = useCallback(() => {
-    setGameMode('scrivi');
-    setScriviState('playing');
-    setScriviRound(1);
-    setScriviScore(0);
-    setScriviInput('');
-    setUsedScriviHotspots([]);
-    setScriviAnswerFeedback(null);
-
-    // Get first random target
-    const firstTarget = getRandomScriviTarget([]);
-    setScriviTargetId(firstTarget);
-
-    // Auto-zoom to the body part
-    if (firstTarget) {
-      const cameraConfig = getHotspotCameraPosition(firstTarget);
-      if (cameraConfig) {
-        setFocusedPart(cameraConfig.id);
-      }
-    }
-
-    // Focus input after a short delay
-    setTimeout(() => {
-      scriviInputRef.current?.focus();
-    }, 500);
-  }, [getRandomScriviTarget, getHotspotCameraPosition]);
-
-  // Handle scrivi input submission
-  const handleScriviSubmit = useCallback(() => {
-    if (scriviState !== 'playing' || !scriviTargetId || !scriviInput.trim()) return;
-
-    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === scriviTargetId);
-    if (!hotspot) return;
-
-    // Normalize both strings for comparison (lowercase, trim)
-    const normalizedInput = scriviInput.trim().toLowerCase();
-    const normalizedLabel = hotspot.label.toLowerCase();
-
-    const isCorrect = normalizedInput === normalizedLabel;
-
-    // Set feedback
-    setScriviAnswerFeedback(isCorrect ? 'correct' : 'wrong');
-
-    if (isCorrect) {
-      setScriviScore(prev => prev + 1);
-    }
-
-    // Move to next round after feedback
-    const newUsed = [...usedScriviHotspots, scriviTargetId];
-    setUsedScriviHotspots(newUsed);
-
-    if (scriviRound >= SCRIVI_ROUNDS) {
-      // Finished all rounds
-      setTimeout(() => {
-        setScriviState('finished');
-        setScriviTargetId(null);
-        setScriviInput('');
-        setScriviAnswerFeedback(null);
-      }, 1500);
-    } else {
-      // Next round
-      setTimeout(() => {
-        const nextTarget = getRandomScriviTarget(newUsed);
-        setScriviTargetId(nextTarget);
-        setScriviRound(prev => prev + 1);
-        setScriviInput('');
-        setScriviAnswerFeedback(null);
-
-        // Auto-zoom to the new body part
-        if (nextTarget) {
-          const cameraConfig = getHotspotCameraPosition(nextTarget);
-          if (cameraConfig) {
-            setFocusedPart(cameraConfig.id);
-          }
-        }
-
-        // Focus input
-        setTimeout(() => {
-          scriviInputRef.current?.focus();
-        }, 100);
-      }, 1500);
-    }
-  }, [
+  const {
     scriviState,
+    scriviRound,
+    scriviScore,
     scriviTargetId,
     scriviInput,
-    scriviRound,
-    usedScriviHotspots,
-    getRandomScriviTarget,
-    getHotspotCameraPosition,
-  ]);
-
-  // Exit scrivi mode
-  const exitScrivi = useCallback(() => {
-    setGameMode('study');
-    setScriviState('idle');
-    setScriviRound(0);
-    setScriviScore(0);
-    setScriviTargetId(null);
-    setScriviInput('');
-    setUsedScriviHotspots([]);
-    setScriviAnswerFeedback(null);
-  }, []);
-
-  // Get scrivi diagnosis based on score
-  const getScriviDiagnosis = useCallback(() => {
-    const percentage = (scriviScore / SCRIVI_ROUNDS) * 100;
-    if (percentage === 100)
-      return { emoji: '🏆', title: 'Scrittura Perfetta!', message: 'Conosci tutti i nomi anatomici!' };
-    if (percentage >= 80) return { emoji: '🌟', title: 'Ottimo lavoro!', message: 'Scrivi quasi tutto correttamente!' };
-    if (percentage >= 60) return { emoji: '👍', title: 'Buon lavoro!', message: 'Continua a praticare la scrittura!' };
-    if (percentage >= 40)
-      return { emoji: '📚', title: 'Devi studiare!', message: 'Ripassa i nomi delle parti del corpo.' };
-    return { emoji: '✏️', title: 'Non mollare!', message: 'La pratica rende perfetti!' };
-  }, [scriviScore]);
-
-  // Get current scrivi target label
-  const currentScriviLabel = useMemo(() => {
-    if (!scriviTargetId) return '';
-    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === scriviTargetId);
-    return hotspot?.label || '';
-  }, [scriviTargetId]);
-
-  // Get current target label
-  const currentTargetLabel = useMemo(() => {
-    if (!currentTargetId) return '';
-    const hotspot = ANATOMY_HOTSPOTS.find(h => h.id === currentTargetId);
-    return hotspot?.label || '';
-  }, [currentTargetId]);
-
-  // Calculate elapsed time
-  const getElapsedTime = useCallback(() => {
-    if (!startTime) return '0:00';
-    const end = endTime || Date.now();
-    const seconds = Math.floor((end - startTime) / 1000);
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }, [startTime, endTime]);
+    scriviAnswerFeedback,
+    scriviInputRef,
+    currentScriviLabel,
+    setScriviInput,
+    startScrivi,
+    handleScriviSubmit,
+    exitScrivi,
+    getScriviDiagnosis,
+  } = useScriviMode(setGameMode, setFocusedPart);
 
   // Play audio from menu
   const handlePlayFromMenu = useCallback(
@@ -555,7 +190,7 @@ export default function HumanBodyEnvironment({}: Environment3DProps) {
             challengeTargetId={
               gameMode === 'challenge' ? currentTargetId : gameMode === 'consultation' ? consultationTargetId : null
             }
-            showCorrectAnswer={showCorrectAnswer}
+            showCorrectAnswer={gameMode === 'challenge' ? showCorrectAnswer : showConsultationCorrectAnswer}
             scriviTargetId={gameMode === 'scrivi' ? scriviTargetId : null}
             isScriviMode={gameMode === 'scrivi'}
             onChallengeClick={

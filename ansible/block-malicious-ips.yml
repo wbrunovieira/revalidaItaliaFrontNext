@@ -11,6 +11,7 @@
 #   ansible-playbook -i inventory_frontend.yml block-malicious-ips.yml
 #
 # Ou passe como variável:
+
 #   ansible-playbook -i inventory_frontend.yml block-malicious-ips.yml \
 #     -e "cloudflare_api_token=seu_token"
 # =============================================================================
@@ -30,39 +31,39 @@
     # Ref: https://aws.amazon.com/blogs/security/china-nexus-cyber-threat-groups-rapidly-exploit-react2shell-vulnerability-cve-2025-55182/
     blocked_ips:
       # === CVE-2025-55182 React2Shell Attackers ===
-      - ip: "52.221.210.62"
-        reason: "AWS Alert - CVE-2025-55182 React2Shell exploit - 05/Dec/2025"
-      - ip: "206.237.3.150"
-        reason: "Earth Lamia (China-nexus) - CVE-2025-55182 - 04/Dec/2025"
-      - ip: "45.77.33.136"
-        reason: "Jackpot Panda (China-nexus) - CVE-2025-55182 - 04/Dec/2025"
-      - ip: "143.198.92.82"
-        reason: "Anonymization Network - CVE-2025-55182 - 04/Dec/2025"
-      - ip: "183.6.80.214"
-        reason: "Unattributed China cluster - CVE-2025-55182 - 116 requests in 52min"
+      - ip: '52.221.210.62'
+        reason: 'AWS Alert - CVE-2025-55182 React2Shell exploit - 05/Dec/2025'
+      - ip: '206.237.3.150'
+        reason: 'Earth Lamia (China-nexus) - CVE-2025-55182 - 04/Dec/2025'
+      - ip: '45.77.33.136'
+        reason: 'Jackpot Panda (China-nexus) - CVE-2025-55182 - 04/Dec/2025'
+      - ip: '143.198.92.82'
+        reason: 'Anonymization Network - CVE-2025-55182 - 04/Dec/2025'
+      - ip: '183.6.80.214'
+        reason: 'Unattributed China cluster - CVE-2025-55182 - 116 requests in 52min'
       # === Previous attackers ===
-      - ip: "95.214.52.170"
-        reason: "Scanner bot - 152 requests"
-      - ip: "45.61.157.12"
-        reason: "Suspicious POST requests"
-      - ip: "128.14.227.179"
-        reason: "Path traversal attack"
-      - ip: "64.227.97.118"
-        reason: "Path traversal attack"
-      - ip: "47.99.150.111"
-        reason: "Command injection attempt"
-      - ip: "45.84.107.47"
-        reason: "Python requests bot"
-      - ip: "171.25.193.38"
-        reason: "Python requests bot"
-      - ip: "202.120.234.163"
-        reason: "Assetnote scanner"
-      - ip: "27.74.251.56"
-        reason: "Assetnote scanner"
-      - ip: "198.98.56.220"
-        reason: "Assetnote scanner"
-      - ip: "167.86.107.35"
-        reason: "Suspicious minimal UA"
+      - ip: '95.214.52.170'
+        reason: 'Scanner bot - 152 requests'
+      - ip: '45.61.157.12'
+        reason: 'Suspicious POST requests'
+      - ip: '128.14.227.179'
+        reason: 'Path traversal attack'
+      - ip: '64.227.97.118'
+        reason: 'Path traversal attack'
+      - ip: '47.99.150.111'
+        reason: 'Command injection attempt'
+      - ip: '45.84.107.47'
+        reason: 'Python requests bot'
+      - ip: '171.25.193.38'
+        reason: 'Python requests bot'
+      - ip: '202.120.234.163'
+        reason: 'Assetnote scanner'
+      - ip: '27.74.251.56'
+        reason: 'Assetnote scanner'
+      - ip: '198.98.56.220'
+        reason: 'Assetnote scanner'
+      - ip: '167.86.107.35'
+        reason: 'Suspicious minimal UA'
 
   tasks:
     # =========================================================================
@@ -82,7 +83,7 @@
 
     - name: Display IPs to be blocked on Cloudflare
       debug:
-        msg: "Will block {{ blocked_ips | length }} IPs on Cloudflare WAF"
+        msg: 'Will block {{ blocked_ips | length }} IPs on Cloudflare WAF'
       delegate_to: localhost
       become: false
       run_once: true
@@ -90,20 +91,20 @@
 
     - name: Block malicious IPs on Cloudflare WAF
       uri:
-        url: "https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/firewall/access_rules/rules"
+        url: 'https://api.cloudflare.com/client/v4/zones/{{ cloudflare_zone_id }}/firewall/access_rules/rules'
         method: POST
         headers:
-          Authorization: "Bearer {{ cloudflare_api_token }}"
-          Content-Type: "application/json"
+          Authorization: 'Bearer {{ cloudflare_api_token }}'
+          Content-Type: 'application/json'
         body_format: json
         body:
-          mode: "block"
+          mode: 'block'
           configuration:
-            target: "ip"
-            value: "{{ item.ip }}"
-          notes: "Ansible: {{ item.reason }}"
-        status_code: [200, 409]  # 409 = already exists, which is ok
-      loop: "{{ blocked_ips }}"
+            target: 'ip'
+            value: '{{ item.ip }}'
+          notes: 'Ansible: {{ item.reason }}'
+        status_code: [200, 409] # 409 = already exists, which is ok
+      loop: '{{ blocked_ips }}'
       delegate_to: localhost
       become: false
       run_once: true
@@ -114,7 +115,7 @@
     - name: Show Cloudflare blocking results
       debug:
         msg: "Blocked {{ item.item.ip }} - Status: {{ item.status | default('error') }}"
-      loop: "{{ cloudflare_result.results }}"
+      loop: '{{ cloudflare_result.results }}'
       delegate_to: localhost
       become: false
       run_once: true
@@ -187,79 +188,79 @@
     - name: Update main nginx.conf to include security configs
       lineinfile:
         path: /etc/nginx/nginx.conf
-        line: "    include /etc/nginx/security/rate-limiting.conf;"
-        insertafter: "http {"
+        line: '    include /etc/nginx/security/rate-limiting.conf;'
+        insertafter: 'http {'
         state: present
       notify: Reload Nginx
 
     - name: Update HTTP site config to include blocked IPs and security
       blockinfile:
         path: /etc/nginx/sites-available/portalrevalida.com
-        marker: "# {mark} ANSIBLE MANAGED BLOCK - Security"
-        insertafter: "server {"
+        marker: '# {mark} ANSIBLE MANAGED BLOCK - Security'
+        insertafter: 'server {'
         block: |
-              # Include blocked IPs
-              include /etc/nginx/security/blocked-ips.conf;
+          # Include blocked IPs
+          include /etc/nginx/security/blocked-ips.conf;
 
-              # Rate limiting
-              limit_req zone=general burst=20 nodelay;
-              limit_conn addr 10;
+          # Rate limiting
+          limit_req zone=general burst=20 nodelay;
+          limit_conn addr 10;
 
-              # Block common attack patterns
-              location ~* "(base64_encode|base64_decode|eval\(|exec\()" {
-                  return 403;
-              }
+          # Block common attack patterns
+          location ~* "(base64_encode|base64_decode|eval\(|exec\()" {
+              return 403;
+          }
 
-              # Block access to sensitive files
-              location ~* "\.(env|git|htaccess|htpasswd|ini|log|sh|sql|bak)$" {
-                  deny all;
-                  return 404;
-              }
+          # Block access to sensitive files
+          location ~* "\.(env|git|htaccess|htpasswd|ini|log|sh|sql|bak)$" {
+              deny all;
+              return 404;
+          }
 
-              # Block WordPress/PHP attacks (we don't use PHP)
-              location ~* "(wp-admin|wp-login|xmlrpc\.php|\.php)" {
-                  return 404;
-              }
+          # Block WordPress/PHP attacks (we don't use PHP)
+          location ~* "(wp-admin|wp-login|xmlrpc\.php|\.php)" {
+              return 404;
+          }
 
-              # Block path traversal attempts
-              location ~* "(\.\./|\.\.\\\\)" {
-                  return 403;
-              }
+          # Block path traversal attempts
+          location ~* "(\.\./|\.\.\\\\)" {
+              return 403;
+          }
       notify: Reload Nginx
 
     - name: Update HTTPS site config to include blocked IPs and security
       blockinfile:
         path: /etc/nginx/sites-available/portalrevalida.com-ssl
-        marker: "# {mark} ANSIBLE MANAGED BLOCK - Security"
-        insertafter: "server {"
+        marker: '# {mark} ANSIBLE MANAGED BLOCK - Security'
+        insertafter: 'server {'
         block: |
-              # Include blocked IPs
-              include /etc/nginx/security/blocked-ips.conf;
+          # Include blocked IPs
+          include /etc/nginx/security/blocked-ips.conf;
 
-              # Rate limiting
-              limit_req zone=general burst=20 nodelay;
-              limit_conn addr 10;
+          # Rate limiting
+          limit_req zone=general burst=20 nodelay;
+          limit_conn addr 10;
 
-              # Block common attack patterns
-              location ~* "(base64_encode|base64_decode|eval\(|exec\()" {
-                  return 403;
-              }
+          # Block common attack patterns
+          location ~* "(base64_encode|base64_decode|eval\(|exec\()" {
+              return 403;
+          }
 
-              # Block access to sensitive files
-              location ~* "\.(env|git|htaccess|htpasswd|ini|log|sh|sql|bak)$" {
-                  deny all;
-                  return 404;
-              }
+          # Block access to sensitive files
+          location ~* "\.(env|git|htaccess|htpasswd|ini|log|sh|sql|bak)$" {
+              deny all;
+              return 404;
+          }
 
-              # Block WordPress/PHP attacks (we don't use PHP)
-              location ~* "(wp-admin|wp-login|xmlrpc\.php|\.php)" {
-                  return 404;
-              }
+          # Block WordPress/PHP attacks (we don't use PHP)
+          location ~* "(wp-admin|wp-login|xmlrpc\.php|\.php)" {
+              return 404;
+          }
 
-              # Block path traversal attempts
-              location ~* "(\.\./|\.\.\\\\)" {
-                  return 403;
-              }
+          # Block path traversal attempts
+          location ~* "(\.\./|\.\.\\\\)" {
+              return 403;
+          }
       notify: Reload Nginx
 
     - name: Test Nginx configuration

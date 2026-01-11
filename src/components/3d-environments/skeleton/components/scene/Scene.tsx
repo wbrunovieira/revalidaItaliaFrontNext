@@ -14,7 +14,7 @@ import {
   HotspotLegend,
   AnatomyPoster,
 } from '../../../human-body/components/decorations';
-import { SkeletonPlaceholder } from './SkeletonPlaceholder';
+import { SkeletonModel } from './SkeletonModel';
 import { CameraController } from './CameraController';
 
 interface SceneProps {
@@ -42,7 +42,15 @@ function SceneComponent({
   bodyRotation,
   focusedPart,
   controlsRef,
+  audioVolume,
+  activeHotspotId,
   gameMode = 'study',
+  challengeMode = false,
+  challengeTargetId = null,
+  showCorrectAnswer = false,
+  scriviTargetId = null,
+  isScriviMode = false,
+  onChallengeClick,
   shadowMapSize = 2048,
 }: SceneProps) {
   // Memoize shadow map size tuple
@@ -80,8 +88,19 @@ function SceneComponent({
       <InstructionsChalkboard gameMode={gameMode} />
       <CeilingLights />
 
-      {/* Skeleton placeholder (rotates horizontally) */}
-      <SkeletonPlaceholder rotation={bodyRotation} />
+      {/* Skeleton model (rotates horizontally) */}
+      <SkeletonModel
+        rotation={bodyRotation}
+        audioVolume={audioVolume}
+        focusedPart={focusedPart}
+        activeHotspotId={activeHotspotId}
+        challengeMode={challengeMode}
+        challengeTargetId={challengeTargetId}
+        showCorrectAnswer={showCorrectAnswer}
+        scriviTargetId={scriviTargetId}
+        isScriviMode={isScriviMode}
+        onChallengeClick={onChallengeClick}
+      />
 
       {/* Environment for subtle reflections - using 'city' for lighter load */}
       <Environment preset="city" />

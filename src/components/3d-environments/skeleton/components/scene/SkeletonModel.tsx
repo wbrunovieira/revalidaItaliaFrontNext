@@ -83,11 +83,11 @@ const SKELETON_MESHES = [
   'R_phalanges',
 ];
 
-// Model path - using the complete model
+// Model path - using optimized skeleton-only model
 const MODEL_PATH =
   process.env.NODE_ENV === 'production'
-    ? '/public/models/skeleton/anatomy-complete.glb'
-    : '/models/skeleton/anatomy-complete.glb';
+    ? '/public/models/skeleton/skeleton-bones.glb'
+    : '/models/skeleton/skeleton-bones.glb';
 
 interface SkeletonModelProps {
   rotation: number;

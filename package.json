@@ -54,6 +54,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.182.0",
+    "draco3dgltf": "^1.5.7",
     "eslint": "^9",
     "eslint-config-next": "15.3.6",
     "tailwindcss": "^4",

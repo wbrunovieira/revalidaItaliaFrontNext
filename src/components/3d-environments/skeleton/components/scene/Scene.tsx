@@ -4,17 +4,15 @@ import { memo, useMemo } from 'react';
 import { Environment, OrbitControls } from '@react-three/drei';
 
 import {
-  HospitalFloor,
-  HospitalWalls,
   HospitalCeiling,
   CeilingLights,
   HospitalWindow,
 } from '../../../human-body/components/room';
+import { SkeletonFloor, SkeletonWalls, SkeletonWallText } from '../room';
 import {
   InstructionsChalkboard,
   HotspotLegend,
   AnatomyPoster,
-  WallText,
 } from '../../../human-body/components/decorations';
 import { SkeletonPlaceholder } from './SkeletonPlaceholder';
 import { CameraController } from './CameraController';
@@ -71,11 +69,11 @@ function SceneComponent({
         shadow-camera-bottom={-10}
       />
 
-      {/* Hospital environment (fixed) - Reusing from human-body */}
-      <HospitalFloor />
-      <HospitalWalls />
+      {/* Room environment with primary color theme */}
+      <SkeletonFloor />
+      <SkeletonWalls />
       <HospitalCeiling />
-      <WallText />
+      <SkeletonWallText />
       <HospitalWindow />
       <AnatomyPoster />
       <HotspotLegend />

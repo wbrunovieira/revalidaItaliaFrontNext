@@ -1,4 +1,25 @@
 {
+  "AccessDenied": {
+    "notEnrolled": {
+      "title": "Acceso No Autorizado",
+      "description": "No estás inscrito en este curso o tu acceso ha expirado. Contacta con soporte para más información."
+    },
+    "moduleLocked": {
+      "title": "Módulo Bloqueado",
+      "description": "Este módulo estará disponible en {days} días después de tu inscripción.",
+      "availableIn": "Disponible en",
+      "days": "días"
+    },
+    "accessExpired": {
+      "title": "Acceso Expirado",
+      "description": "Tu período de acceso a este curso ha terminado. Renueva tu inscripción para continuar estudiando."
+    },
+    "backToCourse": "Volver al Curso",
+    "backToHome": "Ir al Inicio",
+    "viewCourses": "Ver Cursos Disponibles",
+    "needHelp": "¿Necesitas ayuda?",
+    "contactSupport": "Contactar Soporte"
+  },
   "Environment3D": {
     "controls": {
       "reset": "Restablecer",

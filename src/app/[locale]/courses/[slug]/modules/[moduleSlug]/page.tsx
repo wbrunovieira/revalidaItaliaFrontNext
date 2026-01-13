@@ -33,6 +33,9 @@ interface ModuleData {
   imageUrl: string | null;
   order: number;
   translations: Translation[];
+  // Access control fields (only for students)
+  isLocked?: boolean;
+  daysUntilUnlock?: number;
 }
 interface Video {
   id: string;
@@ -102,8 +105,17 @@ export default async function ModulePage({
       },
     }
   );
+
+  // Tratar erros de acesso
+  if (coursesRes.status === 403) {
+    redirect(`/${locale}/access-denied?reason=not-enrolled`);
+  }
+  if (coursesRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
   if (!coursesRes.ok)
     throw new Error('Failed to fetch courses');
+
   const courses: Course[] = await coursesRes.json();
   const courseFound =
     courses.find(c => c.slug === slug) ?? notFound();
@@ -117,6 +129,15 @@ export default async function ModulePage({
       },
     }
   );
+
+  // Tratar erros de acesso ao módulo
+  if (modulesRes.status === 403) {
+    // Aluno não está inscrito no curso ou acesso expirou
+    redirect(`/${locale}/access-denied?reason=course-access-denied&course=${slug}`);
+  }
+  if (modulesRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
   if (!modulesRes.ok)
     throw new Error('Failed to fetch modules');
   const moduleFound: ModuleData[] = await modulesRes.json();
@@ -124,12 +145,40 @@ export default async function ModulePage({
     moduleFound.find(m => m.slug === moduleSlug) ??
     notFound();
 
+  // Se módulo está bloqueado para o aluno, redireciona de volta para a página do curso
+  if (moduleData.isLocked) {
+    redirect(`/${locale}/courses/${slug}?locked=true&module=${moduleSlug}&days=${moduleData.daysUntilUnlock || 0}`);
+  }
+
   const lessonsRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules/${moduleData.id}/lessons?page=1&limit=10&includeVideo=true`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
+
+  // Tratar erros de acesso às aulas
+  if (lessonsRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
+  if (lessonsRes.status === 403) {
+    // Verificar se é módulo bloqueado ou acesso negado
+    try {
+      const errorData = await lessonsRes.json();
+      if (errorData.type?.includes('module-locked')) {
+        redirect(`/${locale}/access-denied?reason=module-locked&course=${slug}&module=${moduleSlug}&days=${errorData.daysUntilUnlock || 0}`);
+      }
+    } catch {
+      // Se não conseguir parsear, usa erro genérico
+    }
+    redirect(`/${locale}/access-denied?reason=course-access-denied&course=${slug}`);
+  }
   if (!lessonsRes.ok)
     throw new Error('Failed to fetch lessons');
+
   const { lessons, pagination }: LessonsResponse =
     await lessonsRes.json();
 

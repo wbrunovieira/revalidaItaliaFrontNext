@@ -147,6 +147,17 @@ interface UseLessonOptions {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 /**
+ * Get token from cookie
+ */
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
+/**
  * Fetch lesson data from API
  */
 async function fetchLesson(
@@ -154,11 +165,13 @@ async function fetchLesson(
   moduleId: string,
   lessonId: string
 ): Promise<Lesson> {
+  const token = getToken();
   const response = await fetch(
     `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
     {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
     }
   );
@@ -242,11 +255,13 @@ async function fetchModuleLessons(
   page: number = 1,
   limit: number = 10
 ): Promise<LessonsResponse> {
+  const token = getToken();
   const response = await fetch(
     `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=${limit}`,
     {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
     }
   );

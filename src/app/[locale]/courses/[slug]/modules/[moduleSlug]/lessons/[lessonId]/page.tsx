@@ -39,6 +39,9 @@ interface ModuleData {
   imageUrl: string | null;
   order: number;
   translations: Translation[];
+  // Access control fields (only for students)
+  isLocked?: boolean;
+  daysUntilUnlock?: number;
 }
 
 interface LiveSessionRecording {
@@ -235,7 +238,8 @@ export default async function LessonPage({
   const token = (await cookies()).get('token')?.value;
   if (!token) redirect(`/${locale}/login`);
 
-  const courses: Course[] = await fetch(
+  // Buscar cursos com tratamento de erro de acesso
+  const coursesRes = await fetch(
     `${API_URL}/api/v1/courses`,
     {
       cache: 'no-store',
@@ -243,11 +247,20 @@ export default async function LessonPage({
         'Authorization': `Bearer ${token}`,
       },
     }
-  ).then(r => (r.ok ? r.json() : Promise.reject()));
+  );
+  if (coursesRes.status === 403) {
+    redirect(`/${locale}/access-denied?reason=not-enrolled`);
+  }
+  if (coursesRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
+  if (!coursesRes.ok) throw new Error('Failed to fetch courses');
+  const courses: Course[] = await coursesRes.json();
   const course =
     courses.find(c => c.slug === slug) ?? notFound();
 
-  const modules: ModuleData[] = await fetch(
+  // Buscar módulos com tratamento de erro de acesso
+  const modulesRes = await fetch(
     `${API_URL}/api/v1/courses/${course.id}/modules`,
     {
       cache: 'no-store',
@@ -255,14 +268,52 @@ export default async function LessonPage({
         'Authorization': `Bearer ${token}`,
       },
     }
-  ).then(r => (r.ok ? r.json() : Promise.reject()));
+  );
+  if (modulesRes.status === 403) {
+    redirect(`/${locale}/access-denied?reason=course-access-denied&course=${slug}`);
+  }
+  if (modulesRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
+  if (!modulesRes.ok) throw new Error('Failed to fetch modules');
+  const modules: ModuleData[] = await modulesRes.json();
   const moduleFound =
     modules.find(m => m.slug === moduleSlug) ?? notFound();
 
-  const lesson: Lesson = await fetch(
+  // Verificar se módulo está bloqueado
+  if (moduleFound.isLocked) {
+    redirect(`/${locale}/courses/${slug}?locked=true&module=${moduleSlug}&days=${moduleFound.daysUntilUnlock || 0}`);
+  }
+
+  // Buscar aula com JWT
+  const lessonRes = await fetch(
     `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons/${lessonId}`,
-    { cache: 'no-store' }
-  ).then(r => (r.ok ? r.json() : notFound()));
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
+  );
+
+  // Tratar erros de acesso à aula
+  if (lessonRes.status === 401) {
+    redirect(`/${locale}/login`);
+  }
+  if (lessonRes.status === 403) {
+    // Verificar se é módulo bloqueado ou acesso negado
+    try {
+      const errorData = await lessonRes.json();
+      if (errorData.type?.includes('module-locked')) {
+        redirect(`/${locale}/access-denied?reason=module-locked&course=${slug}&module=${moduleSlug}&days=${errorData.daysUntilUnlock || 0}`);
+      }
+    } catch {
+      // Se não conseguir parsear, usa erro genérico
+    }
+    redirect(`/${locale}/access-denied?reason=course-access-denied&course=${slug}`);
+  }
+  if (!lessonRes.ok) notFound();
+  const lesson: Lesson = await lessonRes.json();
 
   const pandaData = lesson.video?.providerVideoId
     ? await fetchPandaVideoData(
@@ -277,7 +328,12 @@ export default async function LessonPage({
   ] = await Promise.all([
     fetch(
       `${API_URL}/api/v1/courses/${course.id}/modules/${moduleFound.id}/lessons?page=1&limit=10`,
-      { cache: 'no-store' }
+      {
+        cache: 'no-store',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
     ).then(r => (r.ok ? r.json() : Promise.reject())),
     fetch(
       `${API_URL}/api/v1/assessments?lessonId=${lessonId}`,

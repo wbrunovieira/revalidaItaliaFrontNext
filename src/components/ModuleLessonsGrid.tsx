@@ -146,8 +146,18 @@ export default function ModuleLessonsGrid({
     setLoadingPage(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
+
       const response = await fetch(
-        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10&includeVideo=true`
+        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10&includeVideo=true`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {

@@ -1,4 +1,25 @@
 {
+  "AccessDenied": {
+    "notEnrolled": {
+      "title": "Accesso Non Autorizzato",
+      "description": "Non sei iscritto a questo corso o il tuo accesso è scaduto. Contatta il supporto per maggiori informazioni."
+    },
+    "moduleLocked": {
+      "title": "Modulo Bloccato",
+      "description": "Questo modulo sarà disponibile tra {days} giorni dalla tua iscrizione.",
+      "availableIn": "Disponibile tra",
+      "days": "giorni"
+    },
+    "accessExpired": {
+      "title": "Accesso Scaduto",
+      "description": "Il tuo periodo di accesso a questo corso è terminato. Rinnova la tua iscrizione per continuare a studiare."
+    },
+    "backToCourse": "Torna al Corso",
+    "backToHome": "Vai alla Home",
+    "viewCourses": "Vedi Corsi Disponibili",
+    "needHelp": "Hai bisogno di aiuto?",
+    "contactSupport": "Contatta il Supporto"
+  },
   "Environment3D": {
     "controls": {
       "reset": "Reimposta",

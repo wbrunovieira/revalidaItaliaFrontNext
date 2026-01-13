@@ -7063,6 +7063,7 @@
     "imageReady": "Imagen lista",
     "selectModuleFirst": "Seleccione un módulo primero",
     "loadingOrders": "Cargando órdenes disponibles...",
+    "loadingCourses": "Cargando cursos...",
     "noAvailableOrders": "Ningún orden disponible",
     "usedOrders": "Órdenes en uso"
   },

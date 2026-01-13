@@ -7065,6 +7065,7 @@
     "imageReady": "Imagem pronta",
     "selectModuleFirst": "Selecione um módulo primeiro",
     "loadingOrders": "Carregando ordens disponíveis...",
+    "loadingCourses": "Carregando cursos...",
     "noAvailableOrders": "Nenhuma ordem disponível",
     "usedOrders": "Ordens em uso"
   },

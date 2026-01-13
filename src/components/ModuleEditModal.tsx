@@ -273,8 +273,14 @@ export default function ModuleEditModal({
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
+        const token = getAuthToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {

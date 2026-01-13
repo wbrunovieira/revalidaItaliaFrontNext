@@ -108,12 +108,25 @@ export default function CourseEditModal({
   };
 
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar cursos existentes
   const fetchExistingCourses = useCallback(async () => {
     setLoadingOrders(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
-      const response = await fetch(`${apiUrl}/api/v1/courses`);
+      const token = getToken();
+      const response = await fetch(`${apiUrl}/api/v1/courses`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch courses: ${response.status}`);
@@ -133,7 +146,7 @@ export default function CourseEditModal({
     } finally {
       setLoadingOrders(false);
     }
-  }, [toast, t]);
+  }, [toast, t, getToken]);
 
   // Função para gerar lista de ordens disponíveis
   const getAvailableOrders = useCallback((): number[] => {

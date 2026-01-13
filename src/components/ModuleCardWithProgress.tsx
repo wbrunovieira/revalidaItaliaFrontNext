@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, CheckCircle, PlayCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, PlayCircle, Lock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface Translation {
@@ -19,6 +19,10 @@ interface ModuleData {
   imageUrl: string | null;
   order: number;
   translations: Translation[];
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
+  isLocked?: boolean;
+  daysUntilUnlock?: number;
 }
 
 interface ModuleCardWithProgressProps {
@@ -94,123 +98,164 @@ export default function ModuleCardWithProgress({
   };
   const isCompleted = progress?.completed || false;
   const progressPercentage = progress?.progressPercentage || 0;
+  const isLocked = module.isLocked === true;
 
-  return (
-    <Link
-      href={`/${locale}/courses/${courseSlug}/modules/${module.slug}`}
-      className="group relative block"
-    >
-      <div className="relative bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-700 hover:border-secondary">
-        {/* Completion Badge */}
-        {isCompleted && (
-          <div className="absolute top-3 right-3 z-10 bg-green-500 rounded-full p-2 shadow-lg">
-            <CheckCircle className="w-5 h-5 text-white" />
+  // Content card that can be wrapped in Link or div based on lock state
+  const cardContent = (
+    <div className={`relative bg-gray-800 rounded-lg overflow-hidden transition-all duration-300 border border-gray-700 ${
+      isLocked
+        ? 'opacity-60 cursor-not-allowed'
+        : 'hover:shadow-xl hover:-translate-y-1 hover:border-secondary'
+    }`}>
+      {/* Lock Badge for locked modules */}
+      {isLocked && (
+        <div className="absolute top-3 right-3 z-10 bg-yellow-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+          <Lock className="w-5 h-5 text-white" />
+        </div>
+      )}
+
+      {/* Completion Badge */}
+      {!isLocked && isCompleted && (
+        <div className="absolute top-3 right-3 z-10 bg-green-500 rounded-full p-2 shadow-lg">
+          <CheckCircle className="w-5 h-5 text-white" />
+        </div>
+      )}
+
+      {/* Module Number Badge */}
+      <div className="absolute top-3 left-3 z-10 bg-primary/90 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-bold">
+        {t('moduleNumber', { number: index + 1 })}
+      </div>
+
+      {/* Image Section */}
+      <div className="relative h-48 bg-gradient-to-br from-gray-700 to-gray-800">
+        {module.imageUrl ? (
+          <Image
+            src={module.imageUrl}
+            alt={translation.title}
+            fill
+            className={`object-cover transition-transform duration-300 ${!isLocked ? 'group-hover:scale-105' : 'grayscale'}`}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen className="w-16 h-16 text-gray-600" />
           </div>
         )}
 
-        {/* Module Number Badge */}
-        <div className="absolute top-3 left-3 z-10 bg-primary/90 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-bold">
-          {t('moduleNumber', { number: index + 1 })}
-        </div>
+        {/* Overlay gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent ${isLocked ? 'opacity-80' : 'opacity-60'}`} />
 
-        {/* Image Section */}
-        <div className="relative h-48 bg-gradient-to-br from-gray-700 to-gray-800">
-          {module.imageUrl ? (
-            <Image
-              src={module.imageUrl}
-              alt={translation.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <BookOpen className="w-16 h-16 text-gray-600" />
-            </div>
-          )}
-          
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60" />
-        </div>
+        {/* Lock overlay for locked modules */}
+        {isLocked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Lock className="w-12 h-12 text-yellow-400/80" />
+          </div>
+        )}
+      </div>
 
-        {/* Content Section */}
-        <div className="p-5">
-          <h3 className="text-lg font-bold text-white mb-2 group-hover:text-secondary transition-colors">
-            {translation.title}
-          </h3>
-          
-          <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-            {translation.description}
-          </p>
+      {/* Content Section */}
+      <div className="p-5">
+        <h3 className={`text-lg font-bold mb-2 transition-colors ${
+          isLocked ? 'text-gray-400' : 'text-white group-hover:text-secondary'
+        }`}>
+          {translation.title}
+        </h3>
 
-          {/* Progress Section */}
-          {!isLoading && progress && (
-            <div className="space-y-3">
-              {/* Progress Bar */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-500">
-                    {t('progress')}
-                  </span>
-                  <span className="text-white font-medium">
-                    {Math.round(progressPercentage)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={progressPercentage} 
-                  className="h-2"
-                  indicatorClassName={
-                    isCompleted 
-                      ? "bg-gradient-to-r from-green-500 to-green-400" 
-                      : "bg-gradient-to-r from-secondary to-blue-500"
-                  }
-                />
+        <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+          {translation.description}
+        </p>
+
+        {/* Locked Message */}
+        {isLocked && (
+          <div className="flex items-center gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20 mb-4">
+            <Lock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+            <span className="text-sm text-yellow-400 font-medium">
+              {t('lockedModule', { days: module.daysUntilUnlock || 0 })}
+            </span>
+          </div>
+        )}
+
+        {/* Progress Section - only show if not locked */}
+        {!isLocked && !isLoading && progress && (
+          <div className="space-y-3">
+            {/* Progress Bar */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">
+                  {t('progress')}
+                </span>
+                <span className="text-white font-medium">
+                  {Math.round(progressPercentage)}%
+                </span>
               </div>
-
-              {/* Lessons Count */}
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <PlayCircle className="w-4 h-4" />
-                  <span>{progress.totalLessons} {t('lessons')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {isCompleted ? (
-                    <span className="text-green-400 font-medium">
-                      {t('completed')}
-                    </span>
-                  ) : progress.completedLessons > 0 ? (
-                    <span className="text-secondary">
-                      {progress.completedLessons}/{progress.totalLessons} {t('done')}
-                    </span>
-                  ) : (
-                    <span className="text-gray-500">
-                      {t('notStarted')}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="space-y-2 animate-pulse">
-              <div className="h-2 bg-gray-700 rounded"></div>
-              <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-            </div>
-          )}
-
-          {/* Action Button */}
-          <div className="mt-4 pt-4 border-t border-gray-700">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary text-sm font-medium group-hover:text-white transition-colors">
-                {isCompleted 
-                  ? t('reviewModule')
-                  : progress?.completedLessons && progress.completedLessons > 0
-                  ? t('continueModule')
-                  : t('startModule')
+              <Progress
+                value={progressPercentage}
+                className="h-2"
+                indicatorClassName={
+                  isCompleted
+                    ? "bg-gradient-to-r from-green-500 to-green-400"
+                    : "bg-gradient-to-r from-secondary to-blue-500"
                 }
-              </span>
-              <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center group-hover:bg-secondary/30 transition-colors">
+              />
+            </div>
+
+            {/* Lessons Count */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2 text-gray-400">
+                <PlayCircle className="w-4 h-4" />
+                <span>{progress.totalLessons} {t('lessons')}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {isCompleted ? (
+                  <span className="text-green-400 font-medium">
+                    {t('completed')}
+                  </span>
+                ) : progress.completedLessons > 0 ? (
+                  <span className="text-secondary">
+                    {progress.completedLessons}/{progress.totalLessons} {t('done')}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">
+                    {t('notStarted')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State - only show if not locked */}
+        {!isLocked && isLoading && (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-2 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+          </div>
+        )}
+
+        {/* Action Button */}
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="flex items-center justify-between">
+            <span className={`text-sm font-medium transition-colors ${
+              isLocked
+                ? 'text-gray-500'
+                : 'text-secondary group-hover:text-white'
+            }`}>
+              {isLocked
+                ? t('moduleLocked')
+                : isCompleted
+                ? t('reviewModule')
+                : progress?.completedLessons && progress.completedLessons > 0
+                ? t('continueModule')
+                : t('startModule')
+              }
+            </span>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+              isLocked
+                ? 'bg-gray-600/20'
+                : 'bg-secondary/20 group-hover:bg-secondary/30'
+            }`}>
+              {isLocked ? (
+                <Lock className="w-4 h-4 text-gray-500" />
+              ) : (
                 <svg
                   className="w-4 h-4 text-secondary group-hover:translate-x-0.5 transition-transform"
                   fill="none"
@@ -224,11 +269,30 @@ export default function ModuleCardWithProgress({
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  // If locked, don't wrap in Link (not clickable)
+  if (isLocked) {
+    return (
+      <div className="relative block cursor-not-allowed">
+        {cardContent}
+      </div>
+    );
+  }
+
+  // If not locked, wrap in Link
+  return (
+    <Link
+      href={`/${locale}/courses/${courseSlug}/modules/${module.slug}`}
+      className="group relative block"
+    >
+      {cardContent}
     </Link>
   );
 }

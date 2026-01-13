@@ -1835,7 +1835,9 @@
   "notStarted": "Non iniziato",
   "reviewModule": "Rivedi Modulo",
   "continueModule": "Continua Modulo",
-  "startModule": "Inizia Modulo"
+  "startModule": "Inizia Modulo",
+  "moduleLocked": "Modulo Bloccato",
+  "lockedModule": "Disponibile tra {days} giorni"
   },
   "Module": {
     "back": "Torna al Corso",

@@ -468,6 +468,14 @@ export default function CreateTrackForm() {
     [toast, t]
   );
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar cursos
   const fetchCourses = useCallback(async () => {
     setLoadingCourses(true);
@@ -476,7 +484,12 @@ export default function CreateTrackForm() {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
-      const response = await fetch(`${apiUrl}/api/v1/courses`);
+      const token = getToken();
+      const response = await fetch(`${apiUrl}/api/v1/courses`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -486,10 +499,10 @@ export default function CreateTrackForm() {
 
       const data = await response.json();
       console.log('Courses API Response:', data);
-      
+
       // Handle different response formats
       let coursesData: Course[] = [];
-      
+
       if (Array.isArray(data)) {
         // If it's already an array
         coursesData = data.map(course => ({
@@ -507,7 +520,7 @@ export default function CreateTrackForm() {
           translations: course.translations || []
         }));
       }
-      
+
       setCourses(coursesData);
     } catch (error) {
       handleApiError(error, 'Courses fetch error');
@@ -519,7 +532,7 @@ export default function CreateTrackForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [toast, t, handleApiError]);
+  }, [toast, t, handleApiError, getToken]);
 
   useEffect(() => {
     fetchCourses();

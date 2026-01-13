@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Play,
   BookOpen,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import Image from 'next/image';
 import ModuleViewModal from './ModuleViewModal';
@@ -31,6 +33,8 @@ interface Module {
   slug: string;
   imageUrl: string | null;
   order: number;
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
   translations: Translation[];
 }
 
@@ -39,6 +43,8 @@ interface ModuleForEdit {
   slug: string;
   imageUrl: string;
   order: number;
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
   translations: Translation[];
 }
 
@@ -82,6 +88,14 @@ export default function ModulesList() {
     process.env.NEXT_PUBLIC_API_URL ||
     'http://localhost:3333';
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
@@ -99,8 +113,14 @@ export default function ModulesList() {
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -116,7 +136,7 @@ export default function ModulesList() {
         return [];
       }
     },
-    [handleApiError, apiUrl]
+    [handleApiError, apiUrl, getToken]
   );
 
   // Função principal para buscar todos os dados
@@ -124,8 +144,14 @@ export default function ModulesList() {
     setLoading(true);
 
     try {
+      const token = getToken();
       const coursesResponse = await fetch(
-        `${apiUrl}/api/v1/courses`
+        `${apiUrl}/api/v1/courses`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!coursesResponse.ok) {
@@ -163,6 +189,7 @@ export default function ModulesList() {
     handleApiError,
     fetchModulesForCourse,
     apiUrl,
+    getToken,
   ]);
 
   useEffect(() => {
@@ -604,10 +631,12 @@ export default function ModulesList() {
                                 locale
                               );
 
+                            const hasDelayedAccess = moduleItem.immediateAccess === false;
+
                             return (
                               <div
                                 key={moduleItem.id}
-                                className="flex items-center gap-4 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                className={`flex items-center gap-4 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors ${hasDelayedAccess ? 'opacity-60' : ''}`}
                               >
                                 {/* Ordem do módulo */}
                                 <div className="flex items-center justify-center w-10 h-10 bg-secondary/20 text-secondary rounded-full font-bold">
@@ -640,10 +669,22 @@ export default function ModulesList() {
 
                                 {/* Informações do módulo */}
                                 <div className="flex-1">
-                                  <h5 className="text-white font-medium">
-                                    {moduleTranslation?.title ||
-                                      'Sem título'}
-                                  </h5>
+                                  <div className="flex items-center gap-2">
+                                    <h5 className="text-white font-medium">
+                                      {moduleTranslation?.title ||
+                                        'Sem título'}
+                                    </h5>
+                                    {hasDelayedAccess ? (
+                                      <span className="flex items-center gap-1 text-xs text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">
+                                        <Lock size={10} />
+                                        {moduleItem.unlockAfterDays}d
+                                      </span>
+                                    ) : (
+                                      <span className="flex items-center text-xs text-green-400">
+                                        <Unlock size={10} />
+                                      </span>
+                                    )}
+                                  </div>
                                   <p className="text-xs text-gray-400 line-clamp-1">
                                     {moduleTranslation?.description ||
                                       'Sem descrição'}

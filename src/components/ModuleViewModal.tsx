@@ -61,6 +61,14 @@ export default function ModuleViewModal({
     useState<ModuleViewData | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Buscar detalhes do módulo
   const fetchModuleDetails =
     useCallback(async (): Promise<void> => {
@@ -68,8 +76,14 @@ export default function ModuleViewModal({
 
       setLoading(true);
       try {
+        const token = getToken();
         const moduleResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!moduleResponse.ok) {
@@ -92,7 +106,7 @@ export default function ModuleViewModal({
       } finally {
         setLoading(false);
       }
-    }, [courseId, moduleId, t, toast]);
+    }, [courseId, moduleId, t, toast, getToken]);
 
   // Buscar dados quando abrir o modal
   useEffect(() => {

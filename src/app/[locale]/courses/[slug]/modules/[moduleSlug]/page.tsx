@@ -95,7 +95,12 @@ export default async function ModulePage({
   // Buscar cursos e módulo
   const coursesRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
   if (!coursesRes.ok)
     throw new Error('Failed to fetch courses');
@@ -105,7 +110,12 @@ export default async function ModulePage({
 
   const modulesRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
   if (!modulesRes.ok)
     throw new Error('Failed to fetch modules');

@@ -116,6 +116,14 @@ export default function UploadAudioForm() {
   const locale = params.locale as string;
   const { toast } = useToast();
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -143,9 +151,15 @@ export default function UploadAudioForm() {
     async (courseId: string, moduleId: string): Promise<Lesson[]> => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const token = getToken();
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
-          { credentials: 'include' }
+          {
+            credentials: 'include',
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
         if (!response.ok) return [];
         const lessonsData = await response.json();
@@ -155,7 +169,7 @@ export default function UploadAudioForm() {
         return [];
       }
     },
-    []
+    [getToken]
   );
 
   // Fetch modules for a specific course
@@ -163,9 +177,15 @@ export default function UploadAudioForm() {
     async (courseId: string): Promise<Module[]> => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+        const token = getToken();
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules`,
-          { credentials: 'include' }
+          {
+            credentials: 'include',
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
         if (!response.ok) return [];
         const modules: Module[] = await response.json();
@@ -182,7 +202,7 @@ export default function UploadAudioForm() {
         return [];
       }
     },
-    [fetchLessonsForModule]
+    [fetchLessonsForModule, getToken]
   );
 
   // Fetch courses with modules and lessons
@@ -190,8 +210,12 @@ export default function UploadAudioForm() {
     setLoadingCourses(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+      const token = getToken();
       const response = await fetch(`${apiUrl}/api/v1/courses`, {
         credentials: 'include',
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
       });
 
       if (!response.ok) {
@@ -217,7 +241,7 @@ export default function UploadAudioForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [t, toast, fetchModulesForCourse]);
+  }, [t, toast, fetchModulesForCourse, getToken]);
 
   useEffect(() => {
     fetchCourses();

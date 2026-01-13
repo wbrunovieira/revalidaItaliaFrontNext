@@ -526,6 +526,14 @@ export default function CreateModuleForm() {
     return availableOrders;
   }, [existingOrders]);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar módulos existentes do curso
   const fetchExistingModules = useCallback(
     async (courseId: string) => {
@@ -534,8 +542,14 @@ export default function CreateModuleForm() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL ||
           'http://localhost:3333';
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -573,7 +587,7 @@ export default function CreateModuleForm() {
         setLoadingOrders(false);
       }
     },
-    []
+    [getToken]
   );
 
   // Função para buscar cursos
@@ -584,7 +598,12 @@ export default function CreateModuleForm() {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         'http://localhost:3333';
-      const response = await fetch(`${apiUrl}/api/v1/courses`);
+      const token = getToken();
+      const response = await fetch(`${apiUrl}/api/v1/courses`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -604,7 +623,7 @@ export default function CreateModuleForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [toast, t, handleApiError]);
+  }, [toast, t, handleApiError, getToken]);
 
   useEffect(() => {
     fetchCourses();

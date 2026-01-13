@@ -237,14 +237,24 @@ export default async function LessonPage({
 
   const courses: Course[] = await fetch(
     `${API_URL}/api/v1/courses`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   ).then(r => (r.ok ? r.json() : Promise.reject()));
   const course =
     courses.find(c => c.slug === slug) ?? notFound();
 
   const modules: ModuleData[] = await fetch(
     `${API_URL}/api/v1/courses/${course.id}/modules`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   ).then(r => (r.ok ? r.json() : Promise.reject()));
   const moduleFound =
     modules.find(m => m.slug === moduleSlug) ?? notFound();

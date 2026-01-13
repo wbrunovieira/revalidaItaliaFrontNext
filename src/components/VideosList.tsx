@@ -140,6 +140,14 @@ export default function VideosList() {
     []
   );
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar vídeos de uma aula específica
   const fetchVideosForLesson = useCallback(
     async (
@@ -147,8 +155,14 @@ export default function VideosList() {
       lessonId: string
     ): Promise<VideoItem[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos?limit=100`
+          `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos?limit=100`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -164,7 +178,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError, apiUrl]
+    [handleApiError, apiUrl, getToken]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -175,8 +189,14 @@ export default function VideosList() {
       page: number = 1
     ): Promise<Lesson[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -222,7 +242,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError, fetchVideosForLesson, apiUrl]
+    [handleApiError, fetchVideosForLesson, apiUrl, getToken]
   );
 
   // Função para mudar de página de aulas
@@ -262,8 +282,14 @@ export default function VideosList() {
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules?limit=100`
+          `${apiUrl}/api/v1/courses/${courseId}/modules?limit=100`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -295,7 +321,7 @@ export default function VideosList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule, apiUrl]
+    [handleApiError, fetchLessonsForModule, apiUrl, getToken]
   );
 
   // Função principal para buscar todos os dados
@@ -303,8 +329,14 @@ export default function VideosList() {
     setLoading(true);
 
     try {
+      const token = getToken();
       const coursesResponse = await fetch(
-        `${apiUrl}/api/v1/courses`
+        `${apiUrl}/api/v1/courses`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!coursesResponse.ok) {
@@ -342,6 +374,7 @@ export default function VideosList() {
     handleApiError,
     fetchModulesForCourse,
     apiUrl,
+    getToken,
   ]);
 
   useEffect(() => {

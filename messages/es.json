@@ -1838,7 +1838,9 @@
   "notStarted": "No iniciado",
   "reviewModule": "Revisar Módulo",
   "continueModule": "Continuar Módulo",
-  "startModule": "Iniciar Módulo"
+  "startModule": "Iniciar Módulo",
+  "moduleLocked": "Módulo Bloqueado",
+  "lockedModule": "Disponible en {days} días"
   },
   "Module": {
     "back": "Volver al Curso",

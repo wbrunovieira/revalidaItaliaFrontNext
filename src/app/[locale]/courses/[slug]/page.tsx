@@ -31,6 +31,10 @@ interface ModuleData {
   imageUrl: string | null;
   order: number;
   translations: Translation[];
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
+  isLocked?: boolean;
+  daysUntilUnlock?: number;
 }
 
 export default async function CoursePage({
@@ -52,7 +56,12 @@ export default async function CoursePage({
   // Buscar curso e módulos
   const resCourses = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
   if (!resCourses.ok)
     throw new Error('Failed to fetch courses');
@@ -62,7 +71,12 @@ export default async function CoursePage({
 
   const resModules = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseFound.id}/modules`,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
   if (!resModules.ok)
     throw new Error('Failed to fetch modules');

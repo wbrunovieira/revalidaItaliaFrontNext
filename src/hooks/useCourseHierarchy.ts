@@ -124,6 +124,14 @@ export function useCourseHierarchy(
   const { toast } = useToast();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // ============ States ============
 
   // Dados
@@ -167,7 +175,12 @@ export function useCourseHierarchy(
     setErrorCourses(null);
 
     try {
-      const response = await fetchWithRetry(`${apiUrl}/api/v1/courses`);
+      const token = getToken();
+      const response = await fetchWithRetry(`${apiUrl}/api/v1/courses`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch courses: ${response.status}`);
@@ -186,7 +199,7 @@ export function useCourseHierarchy(
     } finally {
       setLoadingCourses(false);
     }
-  }, [apiUrl, handleError, toast]);
+  }, [apiUrl, handleError, toast, getToken]);
 
   // Buscar módulos de um curso específico
   const fetchModulesForCourse = useCallback(async (courseId: string) => {
@@ -197,8 +210,14 @@ export function useCourseHierarchy(
     setModules([]);
 
     try {
+      const token = getToken();
       const response = await fetchWithRetry(
-        `${apiUrl}/api/v1/courses/${courseId}/modules`
+        `${apiUrl}/api/v1/courses/${courseId}/modules`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {
@@ -218,7 +237,7 @@ export function useCourseHierarchy(
     } finally {
       setLoadingModules(false);
     }
-  }, [apiUrl, handleError, toast]);
+  }, [apiUrl, handleError, toast, getToken]);
 
   // Buscar aulas de um módulo específico
   const fetchLessonsForModule = useCallback(async (courseId: string, moduleId: string) => {

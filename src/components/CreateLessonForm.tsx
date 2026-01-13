@@ -700,14 +700,28 @@ export default function CreateLessonForm() {
     }
   }, [formData.lessonType, formData.contentType, fetchEnvironments3D, fetchAvailableAudios, fetchAvailableAnimations]);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar módulos de um curso específico (chamada apenas quando curso é selecionado)
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<void> => {
       setLoadingModules(true);
       setModules([]);
       try {
+        const token = getToken();
         const response = await fetchWithRetry(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -725,7 +739,7 @@ export default function CreateLessonForm() {
         setLoadingModules(false);
       }
     },
-    [handleApiError]
+    [handleApiError, getToken]
   );
 
   // Função para buscar apenas os cursos (módulos são carregados sob demanda)
@@ -733,8 +747,14 @@ export default function CreateLessonForm() {
     setLoadingCourses(true);
 
     try {
+      const token = getToken();
       const response = await fetchWithRetry(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {
@@ -755,7 +775,7 @@ export default function CreateLessonForm() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [toast, t, handleApiError]);
+  }, [toast, t, handleApiError, getToken]);
 
 
   useEffect(() => {

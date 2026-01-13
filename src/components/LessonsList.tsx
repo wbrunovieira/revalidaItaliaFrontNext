@@ -191,6 +191,14 @@ export default function LessonsList() {
     []
   );
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // 3. Função para buscar aulas de um módulo específico
   const fetchLessonsForModule = useCallback(
     async (
@@ -199,8 +207,14 @@ export default function LessonsList() {
       page: number = 1
     ): Promise<Lesson[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -234,15 +248,21 @@ export default function LessonsList() {
         return [];
       }
     },
-    [handleApiError, apiUrl]
+    [handleApiError, apiUrl, getToken]
   );
 
   // 4. Função para buscar módulos de um curso específico
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules`
+          `${apiUrl}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -274,7 +294,7 @@ export default function LessonsList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule, apiUrl]
+    [handleApiError, fetchLessonsForModule, apiUrl, getToken]
   );
 
   // 5. Função principal para buscar todos os dados
@@ -282,8 +302,14 @@ export default function LessonsList() {
     setLoading(true);
 
     try {
+      const token = getToken();
       const coursesResponse = await fetch(
-        `${apiUrl}/api/v1/courses`
+        `${apiUrl}/api/v1/courses`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!coursesResponse.ok) {
@@ -321,6 +347,7 @@ export default function LessonsList() {
     handleApiError,
     fetchModulesForCourse,
     apiUrl,
+    getToken,
   ]);
 
   useEffect(() => {

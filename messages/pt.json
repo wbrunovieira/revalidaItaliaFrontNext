@@ -1840,7 +1840,9 @@
   "notStarted": "Não iniciado",
   "reviewModule": "Revisar Módulo",
   "continueModule": "Continuar Módulo",
-  "startModule": "Iniciar Módulo"
+  "startModule": "Iniciar Módulo",
+  "moduleLocked": "Módulo Bloqueado",
+  "lockedModule": "Disponível em {days} dias"
   },
   "Module": {
     "back": "Voltar ao Curso",

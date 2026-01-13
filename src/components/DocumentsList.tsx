@@ -145,6 +145,14 @@ export default function DocumentsList() {
     }
   }, [isDocumentModalOpen, selectedDocumentData]);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para tratamento centralizado de erros
   const handleApiError = useCallback(
     (error: unknown, context: string) => {
@@ -260,8 +268,14 @@ export default function DocumentsList() {
   const fetchModulesForCourse = useCallback(
     async (courseId: string): Promise<Module[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -293,7 +307,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, fetchLessonsForModule]
+    [handleApiError, fetchLessonsForModule, getToken]
   );
 
   // Função para navegar entre páginas de documentos
@@ -368,8 +382,14 @@ export default function DocumentsList() {
     setLoading(true);
 
     try {
+      const token = getToken();
       const coursesResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!coursesResponse.ok) {
@@ -406,6 +426,7 @@ export default function DocumentsList() {
     t,
     handleApiError,
     fetchModulesForCourse,
+    getToken,
   ]);
 
   useEffect(() => {

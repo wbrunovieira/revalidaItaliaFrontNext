@@ -183,15 +183,25 @@ export default function AssessmentsList() {
     }
   }, [pagination.page, pagination.limit, typeFilter, lessonFilter, t, toast]);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Load courses when lesson filter is opened
   const loadCourses = useCallback(async () => {
     setLoadingCourses(true);
+    const token = getToken();
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -212,7 +222,7 @@ export default function AssessmentsList() {
     } finally {
       setLoadingCourses(false);
     }
-  }, [t, toast]);
+  }, [t, toast, getToken]);
 
   // Load modules when course is selected
   const loadModules = async (courseId: string) => {
@@ -220,13 +230,15 @@ export default function AssessmentsList() {
     setModules([]);
     setLessons([]);
     setSelectedModule('');
-    
+    const token = getToken();
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -253,13 +265,15 @@ export default function AssessmentsList() {
   const loadLessons = async (courseId: string, moduleId: string) => {
     setLoadingLessons(true);
     setLessons([]);
-    
+    const token = getToken();
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );

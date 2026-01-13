@@ -143,8 +143,17 @@ export default function CreateAssessmentForm({
     Partial<Record<keyof FormData, boolean>>
   >({});
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   const loadLessons = useCallback(async () => {
     setLoadingLessons(true);
+    const token = getToken();
     try {
       // First, fetch all courses
       const coursesResponse = await fetch(
@@ -152,6 +161,7 @@ export default function CreateAssessmentForm({
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -171,6 +181,7 @@ export default function CreateAssessmentForm({
             {
               headers: {
                 'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
               },
             }
           );
@@ -189,6 +200,7 @@ export default function CreateAssessmentForm({
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
                   },
                 }
               );
@@ -228,7 +240,7 @@ export default function CreateAssessmentForm({
     } finally {
       setLoadingLessons(false);
     }
-  }, [t, toast]);
+  }, [t, toast, getToken]);
 
   // Load lessons when component mounts
   useEffect(() => {

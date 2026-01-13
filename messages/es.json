@@ -6760,6 +6760,14 @@
     "spanish": "Español",
     "italian": "Italiano"
   },
+  "accessControl": {
+    "title": "Control de Acceso",
+    "immediateAccess": "Acceso Inmediato",
+    "immediateAccessHint": "Cuando está activado, el módulo estará disponible inmediatamente después de la inscripción",
+    "unlockAfterDays": "Liberar después de",
+    "unlockAfterDaysHint": "Número de días después de la fecha de inicio del estudiante para liberar este módulo",
+    "days": "días"
+  },
   "validation": {
     "courseValid": "Curso seleccionado",
     "slugValid": "Slug válido",
@@ -6785,6 +6793,8 @@
     "orderRequired": "Orden es obligatorio",
     "orderMax": "Orden no puede ser mayor que 999",
     "orderExists": "Este orden ya está siendo usado por otro módulo",
+    "unlockAfterDaysRequired": "Días para liberación es obligatorio",
+    "unlockAfterDaysMax": "Días no puede ser mayor que 365",
     "titleRequired": "Título es obligatorio",
     "titleMin": "Título debe tener al menos 3 caracteres",
     "titleMax": "Título no puede tener más de 100 caracteres",
@@ -6909,11 +6919,23 @@
         "spanish": "Español",
         "italian": "Italiano"
       },
+      "accessControl": {
+        "title": "Control de Acceso",
+        "immediateAccess": "Acceso Inmediato",
+        "immediateAccessHint": "Cuando está activado, el módulo estará disponible inmediatamente después de la inscripción",
+        "unlockAfterDays": "Liberar después de",
+        "unlockAfterDaysHint": "Número de días después de la fecha de inicio del estudiante para liberar este módulo",
+        "days": "días"
+      },
       "errors": {
         "slugRequired": "URL es obligatoria",
         "slugInvalid": "URL debe contener solo letras minúsculas, números y guiones",
         "imageRequired": "Imagen es obligatoria",
         "orderRequired": "Orden debe ser mayor que 0",
+        "orderMax": "Orden no puede ser mayor que 999",
+        "orderExists": "Este orden ya está siendo usado por otro módulo",
+        "unlockAfterDaysRequired": "Días para liberación es obligatorio",
+        "unlockAfterDaysMax": "Días no puede ser mayor que 365",
         "titleRequired": "Título es obligatorio",
         "descriptionRequired": "Descripción es obligatoria",
         "invalidImageType": "Tipo de archivo inválido. Usa JPEG, PNG, GIF o WebP",
@@ -6948,8 +6970,13 @@
         "description": "Descripción",
         "imageUrl": "URL de la Imagen",
         "order": "Orden",
+        "accessControl": "Control de Acceso",
         "createdAt": "Fecha de Creación",
         "updatedAt": "Última Actualización"
+      },
+      "accessControl": {
+        "immediate": "Acceso Inmediato",
+        "delayed": "Liberación en {days} días"
       },
       "translations": {
         "title": "Traducciones",
@@ -6961,8 +6988,8 @@
         "fetchTitle": "Error al cargar el módulo",
         "fetchDescription": "No se pudieron cargar los detalles del módulo. Inténtalo de nuevo."
       }
-    },  
-  
+    },
+
   "lessons": {
     "create": "Crear Lección",
     "list": "Listar Lecciones"

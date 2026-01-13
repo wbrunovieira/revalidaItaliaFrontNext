@@ -16,6 +16,8 @@ import {
   Hash,
   ListOrdered,
   Copy,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -30,6 +32,8 @@ interface ModuleViewData {
   slug: string;
   imageUrl: string;
   order: number;
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
   translations: Translation[];
   createdAt?: string;
   updatedAt?: string;
@@ -283,6 +287,31 @@ export default function ModuleViewModal({
                     <span className="text-sm text-white font-medium">
                       {module.order}
                     </span>
+                  </div>
+                </div>
+
+                {/* Access Control */}
+                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    {module.immediateAccess !== false ? (
+                      <Unlock size={16} className="text-green-400" />
+                    ) : (
+                      <Lock size={16} className="text-yellow-400" />
+                    )}
+                    <span className="text-sm font-medium text-gray-300">
+                      {t('fields.accessControl')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {module.immediateAccess !== false ? (
+                      <span className="text-sm text-green-400 font-medium">
+                        {t('accessControl.immediate')}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-yellow-400 font-medium">
+                        {t('accessControl.delayed', { days: module.unlockAfterDays ?? 0 })}
+                      </span>
+                    )}
                   </div>
                 </div>
 

@@ -6723,6 +6723,14 @@
     "spanish": "Spagnolo",
     "italian": "Italiano"
   },
+  "accessControl": {
+    "title": "Controllo Accessi",
+    "immediateAccess": "Accesso Immediato",
+    "immediateAccessHint": "Quando attivato, il modulo sarà disponibile immediatamente dopo l'iscrizione",
+    "unlockAfterDays": "Sblocca dopo",
+    "unlockAfterDaysHint": "Numero di giorni dopo la data di inizio dello studente per sbloccare questo modulo",
+    "days": "giorni"
+  },
   "validation": {
     "courseValid": "Corso selezionato",
     "slugValid": "Slug valido",
@@ -6748,6 +6756,8 @@
     "orderRequired": "Ordine è obbligatorio",
     "orderMax": "Ordine non può essere maggiore di 999",
     "orderExists": "Questo ordine è già utilizzato da un altro modulo",
+    "unlockAfterDaysRequired": "Giorni per lo sblocco è obbligatorio",
+    "unlockAfterDaysMax": "Giorni non può essere maggiore di 365",
     "titleRequired": "Titolo è obbligatorio",
     "titleMin": "Titolo deve avere almeno 3 caratteri",
     "titleMax": "Titolo non può avere più di 100 caratteri",
@@ -6850,8 +6860,13 @@
     "description": "Descrizione",
     "imageUrl": "URL dell'Immagine",
     "order": "Ordine",
+    "accessControl": "Controllo Accessi",
     "createdAt": "Data di Creazione",
     "updatedAt": "Ultimo Aggiornamento"
+  },
+  "accessControl": {
+    "immediate": "Accesso Immediato",
+    "delayed": "Sblocco in {days} giorni"
   },
   "translations": {
     "title": "Traduzioni",
@@ -6904,11 +6919,23 @@
     "spanish": "Spagnolo",
     "italian": "Italiano"
   },
+  "accessControl": {
+    "title": "Controllo Accessi",
+    "immediateAccess": "Accesso Immediato",
+    "immediateAccessHint": "Quando attivato, il modulo sarà disponibile immediatamente dopo l'iscrizione",
+    "unlockAfterDays": "Sblocca dopo",
+    "unlockAfterDaysHint": "Numero di giorni dopo la data di inizio dello studente per sbloccare questo modulo",
+    "days": "giorni"
+  },
   "errors": {
     "slugRequired": "L'URL è obbligatorio",
     "slugInvalid": "L'URL deve contenere solo lettere minuscole, numeri e trattini",
     "imageRequired": "L'immagine è obbligatoria",
     "orderRequired": "L'ordine deve essere maggiore di 0",
+    "orderMax": "L'ordine non può essere maggiore di 999",
+    "orderExists": "Questo ordine è già utilizzato da un altro modulo",
+    "unlockAfterDaysRequired": "Giorni per lo sblocco è obbligatorio",
+    "unlockAfterDaysMax": "Giorni non può essere maggiore di 365",
     "titleRequired": "Il titolo è obbligatorio",
     "descriptionRequired": "La descrizione è obbligatoria",
     "invalidImageType": "Tipo di file non valido. Usa JPEG, PNG, GIF o WebP",
@@ -6927,7 +6954,7 @@
   "cancel": "Annulla",
   "save": "Salva",
   "saving": "Salvando..."
-}, 
+},
   "lessons": {
     "create": "Crea Lezione",
     "list": "Elenco Lezioni"

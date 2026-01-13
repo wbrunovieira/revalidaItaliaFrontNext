@@ -6759,6 +6759,14 @@
     "spanish": "Espanhol",
     "italian": "Italiano"
   },
+  "accessControl": {
+    "title": "Controle de Acesso",
+    "immediateAccess": "Acesso Imediato",
+    "immediateAccessHint": "Quando ativado, o módulo estará disponível imediatamente após a inscrição",
+    "unlockAfterDays": "Liberar após",
+    "unlockAfterDaysHint": "Número de dias após a data de início do aluno para liberar este módulo",
+    "days": "dias"
+  },
   "validation": {
     "courseValid": "Curso selecionado",
     "slugValid": "Slug válido",
@@ -6784,6 +6792,8 @@
     "orderRequired": "Ordem é obrigatória",
     "orderMax": "Ordem não pode ser maior que 999",
     "orderExists": "Esta ordem já está sendo usada por outro módulo",
+    "unlockAfterDaysRequired": "Dias para liberação é obrigatório",
+    "unlockAfterDaysMax": "Dias não pode ser maior que 365",
     "titleRequired": "Título é obrigatório",
     "titleMin": "Título deve ter pelo menos 3 caracteres",
     "titleMax": "Título não pode ter mais de 100 caracteres",
@@ -6886,13 +6896,18 @@
         "description": "Descrição",
         "imageUrl": "URL da Imagem",
         "order": "Ordem",
+        "accessControl": "Controle de Acesso",
         "createdAt": "Data de Criação",
         "updatedAt": "Última Atualização"
+      },
+      "accessControl": {
+        "immediate": "Acesso Imediato",
+        "delayed": "Liberação em {days} dias"
       },
       "translations": {
         "title": "Traduções",
         "portuguese": "Português",
-        "spanish": "Espanhol", 
+        "spanish": "Espanhol",
         "italian": "Italiano"
       },
       "error": {
@@ -6940,11 +6955,23 @@
         "spanish": "Espanhol",
         "italian": "Italiano"
       },
+      "accessControl": {
+        "title": "Controle de Acesso",
+        "immediateAccess": "Acesso Imediato",
+        "immediateAccessHint": "Quando ativado, o módulo estará disponível imediatamente após a inscrição",
+        "unlockAfterDays": "Liberar após",
+        "unlockAfterDaysHint": "Número de dias após a data de início do aluno para liberar este módulo",
+        "days": "dias"
+      },
       "errors": {
         "slugRequired": "URL é obrigatória",
         "slugInvalid": "URL deve conter apenas letras minúsculas, números e hífens",
         "imageRequired": "Imagem é obrigatória",
         "orderRequired": "Ordem deve ser maior que 0",
+        "orderMax": "Ordem não pode ser maior que 999",
+        "orderExists": "Esta ordem já está sendo usada por outro módulo",
+        "unlockAfterDaysRequired": "Dias para liberação é obrigatório",
+        "unlockAfterDaysMax": "Dias não pode ser maior que 365",
         "titleRequired": "Título é obrigatório",
         "descriptionRequired": "Descrição é obrigatória",
         "invalidImageType": "Tipo de arquivo inválido. Use JPEG, PNG, GIF ou WebP",

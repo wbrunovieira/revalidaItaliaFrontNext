@@ -18,7 +18,12 @@ import {
   Hash,
   Upload,
   ArrowRight,
+  Lock,
+  Unlock,
+  Calendar,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -38,6 +43,8 @@ interface Module {
   slug: string;
   order: number;
   imageUrl?: string;
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
   translations: Translation[];
 }
 
@@ -46,6 +53,8 @@ interface ModuleEditData {
   slug: string;
   imageUrl: string;
   order: number;
+  immediateAccess?: boolean;
+  unlockAfterDays?: number;
   translations: Translation[];
 }
 
@@ -69,6 +78,8 @@ interface FormData {
   newImageUrl: string;
   newImageFile: File | undefined;
   order: number;
+  immediateAccess: boolean;
+  unlockAfterDays: number | undefined;
   translations: FormTranslations;
 }
 
@@ -92,6 +103,8 @@ export default function ModuleEditModal({
     newImageUrl: '',
     newImageFile: undefined,
     order: 1,
+    immediateAccess: true,
+    unlockAfterDays: undefined,
     translations: {
       pt: { locale: 'pt', title: '', description: '' },
       es: { locale: 'es', title: '', description: '' },
@@ -332,6 +345,15 @@ export default function ModuleEditModal({
       newErrors.order = t('errors.orderExists');
     }
 
+    // Validar unlockAfterDays (obrigatório quando immediateAccess é false)
+    if (!formData.immediateAccess) {
+      if (!formData.unlockAfterDays || formData.unlockAfterDays < 1) {
+        newErrors.unlockAfterDays = t('errors.unlockAfterDaysRequired');
+      } else if (formData.unlockAfterDays > 365) {
+        newErrors.unlockAfterDays = t('errors.unlockAfterDaysMax');
+      }
+    }
+
     // Validar traduções
     const locales = ['pt', 'es', 'it'] as const;
     locales.forEach(locale => {
@@ -440,17 +462,35 @@ export default function ModuleEditModal({
         formData.translations
       );
 
+      // Build payload with access control fields
+      const payload: {
+        slug: string;
+        imageUrl: string;
+        order: number;
+        translations: Translation[];
+        immediateAccess?: boolean;
+        unlockAfterDays?: number;
+      } = {
+        slug: module.slug, // Mantém o slug original, sem permitir edição
+        imageUrl: finalImageUrl.trim(),
+        order: formData.order,
+        translations,
+      };
+
+      // Add access control fields
+      if (formData.immediateAccess) {
+        payload.immediateAccess = true;
+      } else {
+        payload.immediateAccess = false;
+        payload.unlockAfterDays = formData.unlockAfterDays;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${module.id}`,
         {
           method: 'PATCH',
           headers,
-          body: JSON.stringify({
-            slug: module.slug, // Mantém o slug original, sem permitir edição
-            imageUrl: finalImageUrl.trim(),
-            order: formData.order,
-            translations,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -521,6 +561,51 @@ export default function ModuleEditModal({
     [existingOrders, originalOrder, t]
   );
 
+  // Handler para mudança de immediateAccess
+  const handleImmediateAccessChange = useCallback(
+    (checked: boolean) => {
+      setFormData(prev => ({
+        ...prev,
+        immediateAccess: checked,
+        // Clear unlockAfterDays when switching to immediate access
+        unlockAfterDays: checked ? undefined : prev.unlockAfterDays,
+      }));
+      // Clear unlockAfterDays error when switching to immediate access
+      if (checked) {
+        setErrors(prev => ({ ...prev, unlockAfterDays: undefined }));
+      }
+    },
+    []
+  );
+
+  // Handler para mudança de unlockAfterDays
+  const handleUnlockAfterDaysChange = useCallback(
+    (value: string) => {
+      const days = value ? parseInt(value) : undefined;
+      setFormData(prev => ({
+        ...prev,
+        unlockAfterDays: days,
+      }));
+      // Validar em tempo real
+      if (!formData.immediateAccess) {
+        if (!days || days < 1) {
+          setErrors(prev => ({
+            ...prev,
+            unlockAfterDays: t('errors.unlockAfterDaysRequired'),
+          }));
+        } else if (days > 365) {
+          setErrors(prev => ({
+            ...prev,
+            unlockAfterDays: t('errors.unlockAfterDaysMax'),
+          }));
+        } else {
+          setErrors(prev => ({ ...prev, unlockAfterDays: undefined }));
+        }
+      }
+    },
+    [formData.immediateAccess, t]
+  );
+
   // Atualizar formulário quando module mudar
   useEffect(() => {
     if (module && isOpen && courseId) {
@@ -553,6 +638,8 @@ export default function ModuleEditModal({
         newImageUrl: '',
         newImageFile: undefined,
         order: module.order || 1,
+        immediateAccess: module.immediateAccess !== false, // Default to true if undefined
+        unlockAfterDays: module.unlockAfterDays,
         translations: translationsObj,
       });
 
@@ -843,6 +930,71 @@ export default function ModuleEditModal({
                   <p className="text-red-400 text-sm mt-1">
                     {errors.imageUrl}
                   </p>
+                )}
+              </div>
+            </div>
+
+            {/* Access Control */}
+            <div className="border border-gray-700 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                {formData.immediateAccess ? (
+                  <Unlock size={20} className="text-green-400" />
+                ) : (
+                  <Lock size={20} className="text-yellow-400" />
+                )}
+                {t('accessControl.title')}
+              </h3>
+
+              <div className="space-y-4">
+                {/* Immediate Access Toggle */}
+                <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                  <div className="flex-1">
+                    <Label className="text-gray-300 flex items-center gap-2">
+                      {t('accessControl.immediateAccess')}
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('accessControl.immediateAccessHint')}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.immediateAccess}
+                    onCheckedChange={handleImmediateAccessChange}
+                  />
+                </div>
+
+                {/* Unlock After Days - Only visible when immediateAccess is false */}
+                {!formData.immediateAccess && (
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <Label className="text-gray-300 flex items-center gap-2 mb-2">
+                      <Calendar size={16} />
+                      {t('accessControl.unlockAfterDays')}
+                      <span className="text-red-400">*</span>
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={formData.unlockAfterDays || ''}
+                        onChange={(e) => handleUnlockAfterDaysChange(e.target.value)}
+                        className={`w-24 px-3 py-2 bg-gray-700 border rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary ${
+                          errors.unlockAfterDays ? 'border-red-500' : 'border-gray-600'
+                        }`}
+                        placeholder="7"
+                      />
+                      <span className="text-gray-400 text-sm">
+                        {t('accessControl.days')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {t('accessControl.unlockAfterDaysHint')}
+                    </p>
+                    {errors.unlockAfterDays && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.unlockAfterDays}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

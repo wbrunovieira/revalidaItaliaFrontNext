@@ -1941,7 +1941,8 @@
     "exercisesCompleted": "Completados",
     "successRate": "Taxa de Acerto",
     "avgAttempts": "Média Tentativas",
-    "exercisesProgress": "Progresso"
+    "exercisesProgress": "Progresso",
+    "noCoursesStarted": "Nenhum curso iniciado ainda"
   },
   "LogoutButton": {
     "logout": "Sair",

@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { 
-  X, 
-  Package, 
-  Clock, 
+import {
+  Package,
+  Clock,
   Calendar,
   DollarSign,
   Users,
@@ -200,17 +199,9 @@ export default function ProductDetailsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between text-xl text-white">
-            <div className="flex items-center gap-3">
-              <Package className="text-secondary" size={24} />
-              {t('title')}
-            </div>
-            <button
-              onClick={onClose}
-              className="rounded-lg p-1.5 hover:bg-gray-800 transition-colors"
-            >
-              <X className="h-5 w-5 text-gray-400" />
-            </button>
+          <DialogTitle className="flex items-center gap-3 text-xl text-white">
+            <Package className="text-secondary" size={24} />
+            {t('title')}
           </DialogTitle>
           <DialogDescription className="sr-only">
             {t('title')}

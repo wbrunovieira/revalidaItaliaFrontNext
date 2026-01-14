@@ -3782,6 +3782,11 @@
       "maxSimultaneousDevices": "Dispositivi Simultanei",
       "allowDownloads": "Download Consentiti",
       "supportPriority": "Priorità Supporto",
+      "fullAccess": "Accesso Completo",
+      "liveSupport": "Supporto Live",
+      "certificates": "Certificati",
+      "maxLessonsPerDay": "Massimo Lezioni al Giorno",
+      "downloadMaterials": "Download Materiali",
       "support": {
         "standard": "Standard",
         "priority": "Prioritario",

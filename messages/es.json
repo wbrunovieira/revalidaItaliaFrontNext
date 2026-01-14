@@ -3432,7 +3432,23 @@
       "description": "Características y capacidades del producto",
       "noFeatures": "Sin características disponibles",
       "enabled": "Habilitado",
-      "disabled": "Deshabilitado"
+      "disabled": "Deshabilitado",
+      "hasLiveAccess": "Acceso a Clases en Vivo",
+      "hasRecordingAccess": "Acceso a Grabaciones",
+      "hasCertificate": "Certificado de Conclusión",
+      "maxSimultaneousDevices": "Dispositivos Simultáneos",
+      "allowDownloads": "Descargas Permitidas",
+      "supportPriority": "Prioridad de Soporte",
+      "fullAccess": "Acceso Completo",
+      "liveSupport": "Soporte en Vivo",
+      "certificates": "Certificados",
+      "maxLessonsPerDay": "Máximo de Lecciones por Día",
+      "downloadMaterials": "Descarga de Materiales",
+      "support": {
+        "standard": "Estándar",
+        "priority": "Prioritario",
+        "vip": "VIP"
+      }
     },
     "mappings": {
       "title": "Mapeos de Proveedores",

@@ -7031,6 +7031,10 @@
   "optional": "opzionale",
   "noAudiosAvailable": "Nessun audio disponibile. Carica prima degli audio.",
   "noAnimationsAvailable": "Nessuna animazione disponibile. Crea prima delle animazioni.",
+  "animationFilter": {
+    "all": "Tutte le animazioni",
+    "unassigned": "Solo non assegnate"
+  },
   "placeholders": {
     "course": "Seleziona un corso",
     "module": "Seleziona un modulo",

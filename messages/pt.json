@@ -7090,6 +7090,7 @@
     "selectModuleFirst": "Selecione um módulo primeiro",
     "loadingOrders": "Carregando ordens disponíveis...",
     "loadingCourses": "Carregando cursos...",
+    "loadingModules": "Carregando módulos...",
     "noAvailableOrders": "Nenhuma ordem disponível",
     "usedOrders": "Ordens em uso"
   },

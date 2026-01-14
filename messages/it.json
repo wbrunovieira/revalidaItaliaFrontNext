@@ -7053,6 +7053,7 @@
     "selectModuleFirst": "Seleziona prima un modulo",
     "loadingOrders": "Caricamento ordini disponibili...",
     "loadingCourses": "Caricamento corsi...",
+    "loadingModules": "Caricamento moduli...",
     "noAvailableOrders": "Nessun ordine disponibile",
     "usedOrders": "Ordini in uso"
   },

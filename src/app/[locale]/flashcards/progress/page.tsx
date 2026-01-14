@@ -1,40 +1,26 @@
 // src/app/[locale]/flashcards/progress/page.tsx
-'use client';
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import NavSidebar from '@/components/NavSidebar';
 import FlashcardProgressTabs from '@/components/FlashcardProgressTabs';
-import { useAuth } from '@/stores/auth.store';
-import { Loader2 } from 'lucide-react';
 
-export default function FlashcardProgressPage() {
-  const params = useParams();
-  const router = useRouter();
-  const locale = params.locale as string;
-  const { token, isAuthenticated, isLoading } = useAuth();
+export function generateStaticParams(): { locale: string }[] {
+  return ['pt', 'it', 'es'].map(locale => ({ locale }));
+}
 
-  // Verificação de autenticação client-side
-  useEffect(() => {
-    if (!isLoading && (!token || !isAuthenticated)) {
-      router.push(`/${locale}/login`);
-    }
-  }, [token, isAuthenticated, isLoading, locale, router]);
+export default async function FlashcardProgressPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
 
-  // Loading state enquanto verifica autenticação
-  if (isLoading) {
-    return (
-      <NavSidebar>
-        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-        </div>
-      </NavSidebar>
-    );
-  }
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
 
-  // Se não autenticado, não renderiza (vai redirecionar)
-  if (!token || !isAuthenticated) {
-    return null;
+  if (!token) {
+    redirect(`/${locale}/login`);
   }
 
   return (

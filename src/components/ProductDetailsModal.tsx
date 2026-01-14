@@ -5,20 +5,8 @@ import { useTranslations } from 'next-intl';
 import {
   Package,
   Clock,
-  Calendar,
-  DollarSign,
-  Users,
-  CheckCircle,
-  XCircle,
   BookOpen,
-  Route,
-  AlertCircle,
-  Download,
-  Video,
-  Award,
-  Headphones,
-  Smartphone,
-  TrendingUp
+  Route
 } from 'lucide-react';
 import {
   Dialog,
@@ -29,7 +17,6 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { SimpleDivider } from '@/components/ui/modern-divider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -157,13 +144,6 @@ export default function ProductDetailsModal({
     }
   }, [isOpen, productId, fetchProductDetails]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -181,18 +161,6 @@ export default function ProductDetailsModal({
     if (days === 90) return '3 ' + t('months');
     if (days === 30) return '1 ' + t('month');
     return `${days} ${t('days')}`;
-  };
-
-  const getFeatureIcon = (feature: string) => {
-    switch (feature) {
-      case 'hasLiveAccess': return <Video className="text-blue-400" size={16} />;
-      case 'hasRecordingAccess': return <Video className="text-purple-400" size={16} />;
-      case 'hasCertificate': return <Award className="text-yellow-400" size={16} />;
-      case 'allowDownloads': return <Download className="text-green-400" size={16} />;
-      case 'maxSimultaneousDevices': return <Smartphone className="text-orange-400" size={16} />;
-      case 'supportPriority': return <Headphones className="text-red-400" size={16} />;
-      default: return <CheckCircle className="text-gray-400" size={16} />;
-    }
   };
 
   return (
@@ -253,21 +221,12 @@ export default function ProductDetailsModal({
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid grid-cols-5 w-full bg-gray-800 p-1">
+              <TabsList className="grid grid-cols-2 w-full max-w-md bg-gray-800 p-1">
                 <TabsTrigger value="overview" className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark">
                   {t('tabs.overview')}
                 </TabsTrigger>
                 <TabsTrigger value="content" className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark">
                   {t('tabs.content')}
-                </TabsTrigger>
-                <TabsTrigger value="features" className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark">
-                  {t('tabs.features')}
-                </TabsTrigger>
-                <TabsTrigger value="mappings" className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark">
-                  {t('tabs.mappings')}
-                </TabsTrigger>
-                <TabsTrigger value="stats" className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark">
-                  {t('tabs.stats')}
                 </TabsTrigger>
               </TabsList>
 
@@ -361,153 +320,6 @@ export default function ProductDetailsModal({
                     </Badge>
                   </div>
                 </Card>
-              </TabsContent>
-
-              {/* Features Tab */}
-              <TabsContent value="features" className="space-y-4">
-                <Card className="bg-gray-800 border-gray-700 p-4">
-                  <h4 className="text-white font-semibold mb-3">{t('features.title')}</h4>
-                  <div className="space-y-3">
-                    {Object.entries(product.features).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          {getFeatureIcon(key)}
-                          <span className="text-white">{t(`features.${key}`)}</span>
-                        </div>
-                        <div>
-                          {typeof value === 'boolean' ? (
-                            value ? (
-                              <CheckCircle className="text-green-400" size={20} />
-                            ) : (
-                              <XCircle className="text-gray-500" size={20} />
-                            )
-                          ) : key === 'supportPriority' ? (
-                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                              {t(`features.support.${value}`)}
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                              {value}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </TabsContent>
-
-              {/* Mappings Tab */}
-              <TabsContent value="mappings" className="space-y-4">
-                {product.mappings.length > 0 ? (
-                  product.mappings.map((mapping) => (
-                    <Card key={mapping.id} className="bg-gray-800 border-gray-700 p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-white font-semibold capitalize">{mapping.provider}</h4>
-                            <Badge className={mapping.isActive 
-                              ? 'bg-green-500/20 text-green-400 border-green-500/30' 
-                              : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}>
-                              {mapping.isActive ? t('mappings.active') : t('mappings.inactive')}
-                            </Badge>
-                          </div>
-                          <div className="space-y-2 text-sm">
-                            <div>
-                              <span className="text-gray-400">{t('mappings.externalName')}: </span>
-                              <span className="text-white">{mapping.externalName || mapping.externalId}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-400">{t('mappings.externalId')}: </span>
-                              <code className="text-gray-300">{mapping.externalId}</code>
-                            </div>
-                            <div>
-                              <span className="text-gray-400">{t('mappings.createdAt')}: </span>
-                              <span className="text-gray-300">{formatDate(mapping.createdAt)}</span>
-                            </div>
-                          </div>
-
-                          {mapping.metadata && Object.keys(mapping.metadata).length > 0 && (
-                            <>
-                              <SimpleDivider spacing="sm" />
-                              <div className="mt-3">
-                                <p className="text-gray-400 text-sm mb-2">{t('mappings.metadata')}</p>
-                                <div className="bg-gray-900 p-2 rounded text-xs font-mono text-gray-300">
-                                  <pre>{JSON.stringify(mapping.metadata, null, 2)}</pre>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                ) : (
-                  <Card className="bg-gray-800 border-gray-700 p-8 text-center">
-                    <AlertCircle className="mx-auto text-gray-500 mb-4" size={48} />
-                    <p className="text-gray-400">{t('mappings.noMappings')}</p>
-                  </Card>
-                )}
-              </TabsContent>
-
-              {/* Stats Tab */}
-              <TabsContent value="stats" className="space-y-4">
-                {product.stats ? (
-                  <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Card className="bg-gray-800 border-gray-700 p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-400 text-sm">{t('stats.activeSubscriptions')}</p>
-                            <p className="text-2xl font-bold text-white">{product.stats.activeSubscriptions}</p>
-                          </div>
-                          <Users className="text-blue-400 opacity-50" size={32} />
-                        </div>
-                      </Card>
-
-                      <Card className="bg-gray-800 border-gray-700 p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-400 text-sm">{t('stats.totalTransactions')}</p>
-                            <p className="text-2xl font-bold text-white">{product.stats.totalTransactions}</p>
-                          </div>
-                          <TrendingUp className="text-purple-400 opacity-50" size={32} />
-                        </div>
-                      </Card>
-
-                      <Card className="bg-gray-800 border-gray-700 p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-400 text-sm">{t('stats.totalRevenue')}</p>
-                            <p className="text-xl font-bold text-green-400">
-                              {formatCurrency(product.stats.totalRevenue)}
-                            </p>
-                          </div>
-                          <DollarSign className="text-green-400 opacity-50" size={32} />
-                        </div>
-                      </Card>
-
-                      <Card className="bg-gray-800 border-gray-700 p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-400 text-sm">{t('stats.lastPurchase')}</p>
-                            <p className="text-sm text-white">
-                              {product.stats.lastPurchaseDate 
-                                ? formatDate(product.stats.lastPurchaseDate)
-                                : t('stats.noPurchases')}
-                            </p>
-                          </div>
-                          <Calendar className="text-orange-400 opacity-50" size={32} />
-                        </div>
-                      </Card>
-                    </div>
-                  </>
-                ) : (
-                  <Card className="bg-gray-800 border-gray-700 p-8 text-center">
-                    <AlertCircle className="mx-auto text-gray-500 mb-4" size={48} />
-                    <p className="text-gray-400">{t('stats.noStats')}</p>
-                  </Card>
-                )}
               </TabsContent>
             </Tabs>
           </div>

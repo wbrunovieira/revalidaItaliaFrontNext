@@ -20,9 +20,13 @@ import {
   ChevronRight,
   GraduationCap,
   FileText,
+  KeyRound,
+  Gift,
 } from 'lucide-react';
 import UserViewModal from './UserViewModal';
 import UserEditModal from './UserEditModal';
+import UserAccessesModal from './UserAccessesModal';
+import GrantAccessModal from './GrantAccessModal';
 
 interface User {
   identityId: string;
@@ -89,6 +93,12 @@ export default function UsersList() {
     useState<UserEditData | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] =
     useState(false);
+
+  // Estados para modais de acesso
+  const [accessesModalOpen, setAccessesModalOpen] = useState(false);
+  const [selectedUserForAccess, setSelectedUserForAccess] = useState<User | null>(null);
+  const [grantAccessModalOpen, setGrantAccessModalOpen] = useState(false);
+  const [selectedUserForGrant, setSelectedUserForGrant] = useState<User | null>(null);
 
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -307,6 +317,26 @@ export default function UsersList() {
   const handleCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
     setEditingUser(null);
+  }, []);
+
+  const handleViewAccesses = useCallback((user: User) => {
+    setSelectedUserForAccess(user);
+    setAccessesModalOpen(true);
+  }, []);
+
+  const handleCloseAccessesModal = useCallback(() => {
+    setAccessesModalOpen(false);
+    setSelectedUserForAccess(null);
+  }, []);
+
+  const handleGrantAccess = useCallback((user: User) => {
+    setSelectedUserForGrant(user);
+    setGrantAccessModalOpen(true);
+  }, []);
+
+  const handleCloseGrantModal = useCallback(() => {
+    setGrantAccessModalOpen(false);
+    setSelectedUserForGrant(null);
   }, []);
 
   const handleSaveUser = useCallback(
@@ -710,7 +740,7 @@ export default function UsersList() {
                   </div>
 
                   {/* Action Buttons - Bottom */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-600">
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-600">
                     <button
                       onClick={() => handleViewUser(user.identityId)}
                       title={t('actions.view')}
@@ -718,6 +748,22 @@ export default function UsersList() {
                     >
                       <Eye size={16} />
                       <span className="text-xs">Ver</span>
+                    </button>
+                    <button
+                      onClick={() => handleViewAccesses(user)}
+                      title={t('actions.viewAccesses')}
+                      className="flex-1 py-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded flex items-center justify-center gap-2"
+                    >
+                      <KeyRound size={16} />
+                      <span className="text-xs">Acessos</span>
+                    </button>
+                    <button
+                      onClick={() => handleGrantAccess(user)}
+                      title={t('actions.grantAccess')}
+                      className="flex-1 py-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded flex items-center justify-center gap-2"
+                    >
+                      <Gift size={16} />
+                      <span className="text-xs">Conceder</span>
                     </button>
                     <button
                       onClick={() => handleEditUser(user)}
@@ -789,6 +835,20 @@ export default function UsersList() {
                       className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                     >
                       <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleViewAccesses(user)}
+                      title={t('actions.viewAccesses')}
+                      className="p-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded"
+                    >
+                      <KeyRound size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleGrantAccess(user)}
+                      title={t('actions.grantAccess')}
+                      className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded"
+                    >
+                      <Gift size={18} />
                     </button>
                     <button
                       onClick={() => handleEditUser(user)}
@@ -881,6 +941,33 @@ export default function UsersList() {
         onClose={handleCloseEditModal}
         onSave={handleSaveUser}
       />
+      {selectedUserForAccess && (
+        <UserAccessesModal
+          isOpen={accessesModalOpen}
+          onClose={handleCloseAccessesModal}
+          userId={selectedUserForAccess.identityId}
+          userName={selectedUserForAccess.fullName}
+          userEmail={selectedUserForAccess.email}
+          token={token || ''}
+        />
+      )}
+      {selectedUserForGrant && (
+        <GrantAccessModal
+          isOpen={grantAccessModalOpen}
+          onClose={handleCloseGrantModal}
+          user={{
+            id: selectedUserForGrant.identityId,
+            name: selectedUserForGrant.fullName,
+            email: selectedUserForGrant.email,
+          }}
+          onSuccess={() => {
+            toast({
+              title: t('accessGranted'),
+              description: t('accessGrantedDesc'),
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

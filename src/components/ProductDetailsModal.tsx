@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Package,
-  Clock,
   BookOpen,
   Route
 } from 'lucide-react';
@@ -154,15 +153,6 @@ export default function ProductDetailsModal({
     });
   };
 
-  const getAccessDurationLabel = (days: number) => {
-    if (days === 0 || days >= 36500) return t('lifetime');
-    if (days === 365) return '1 ' + t('year');
-    if (days === 180) return '6 ' + t('months');
-    if (days === 90) return '3 ' + t('months');
-    if (days === 30) return '1 ' + t('month');
-    return `${days} ${t('days')}`;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
@@ -204,10 +194,6 @@ export default function ProductDetailsModal({
                       <code className="bg-gray-900 px-2 py-0.5 rounded text-gray-400">
                         {product.internalCode}
                       </code>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-400">
-                      <Clock size={14} />
-                      {getAccessDurationLabel(product.accessDurationDays)}
                     </div>
                     {product.dripContentEnabled && (
                       <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">

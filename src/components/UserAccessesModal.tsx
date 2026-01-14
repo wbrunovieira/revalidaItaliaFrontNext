@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, CheckCircle, XCircle, AlertCircle, Clock, Ban, Settings } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Clock, Ban, Settings } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -253,14 +253,8 @@ export default function UserAccessesModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between text-xl text-white">
+          <DialogTitle className="text-xl text-white">
             {t('title')}
-            <button
-              onClick={onClose}
-              className="rounded-lg p-1.5 hover:bg-gray-800 transition-colors"
-            >
-              <X className="h-5 w-5 text-gray-400" />
-            </button>
           </DialogTitle>
           <DialogDescription className="sr-only">
             {t('title')}

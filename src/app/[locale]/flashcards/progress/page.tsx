@@ -19,18 +19,9 @@ export default async function FlashcardProgressPage({
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
-  // DEBUG: Log all cookies
-  const allCookies = cookieStore.getAll();
-  console.log('[FlashcardProgress] All cookies:', allCookies.map(c => c.name));
-  console.log('[FlashcardProgress] Token exists:', !!token);
-  console.log('[FlashcardProgress] Token value (first 20 chars):', token?.substring(0, 20));
-
   if (!token) {
-    console.log('[FlashcardProgress] No token found, redirecting to login');
     redirect(`/${locale}/login`);
   }
-
-  console.log('[FlashcardProgress] Token found, rendering page');
 
   return (
     <NavSidebar>

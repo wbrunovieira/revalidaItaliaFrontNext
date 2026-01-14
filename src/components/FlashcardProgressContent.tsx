@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   CalendarDays,
@@ -81,23 +81,28 @@ const useFlashcardInteractions = (filters: {
   const [data, setData] = useState<InteractionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token, isAuthenticated } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchInteractions = async () => {
       try {
         setLoading(true);
-        
-        // Aguardar um pouco para o token ser carregado do storage
-        if (!isAuthenticated) {
-          console.log('User not authenticated, skipping fetch');
-          setError('Please login to view flashcard progress');
-          setLoading(false);
+
+        // Wait for auth store to hydrate before making decisions
+        if (authLoading) {
           return;
         }
-        
-        if (!token) {
-          console.log('No token available yet');
+
+        // Get token from cookie if not in store yet (for SSR/hydration scenarios)
+        const cookieToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+
+        const authToken = token || cookieToken;
+
+        if (!authToken) {
+          console.log('No token available');
           setLoading(false);
           return;
         }
@@ -119,7 +124,7 @@ const useFlashcardInteractions = (filters: {
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const response = await fetch(`${API_URL}/api/v1/flashcard-interactions?${params}`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
           },
         });
@@ -140,17 +145,16 @@ const useFlashcardInteractions = (filters: {
     };
 
     fetchInteractions();
-  }, [filters.page, filters.limit, filters.difficultyLevel, filters.dateFrom, filters.dateTo, token, isAuthenticated]);
+  }, [filters.page, filters.limit, filters.difficultyLevel, filters.dateFrom, filters.dateTo, token, authLoading]);
 
   return { data, loading, error };
 };
 
 export default function FlashcardProgressContent() {
   const params = useParams();
-  const router = useRouter();
   const t = useTranslations('FlashcardProgress');
   const locale = params.locale as string;
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isLoading: authLoading } = useAuth();
 
   // States
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('all');
@@ -191,14 +195,6 @@ export default function FlashcardProgressContent() {
     dateFrom: dateRange.dateFrom,
     dateTo: dateRange.dateTo,
   });
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      console.log('User not authenticated, redirecting to login');
-      router.push(`/${locale}/login`);
-    }
-  }, [authLoading, isAuthenticated, router, locale]);
 
   // Calculate statistics
   useEffect(() => {
@@ -297,18 +293,13 @@ export default function FlashcardProgressContent() {
     );
   }
 
-  // Show loading while checking authentication
+  // Show loading while auth store is hydrating
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary p-4 lg:p-8 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
-  }
-
-  // Don't render if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (

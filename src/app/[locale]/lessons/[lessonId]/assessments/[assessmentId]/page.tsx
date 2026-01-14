@@ -84,7 +84,7 @@ export default async function AssessmentPage({
     {
       cache: 'no-store',
       headers: {
-        Cookie: `token=${token}`,
+        'Authorization': `Bearer ${token}`,
       },
     }
   );
@@ -107,7 +107,7 @@ export default async function AssessmentPage({
     {
       cache: 'no-store',
       headers: {
-        Cookie: `token=${token}`,
+        'Authorization': `Bearer ${token}`,
       },
     }
   );

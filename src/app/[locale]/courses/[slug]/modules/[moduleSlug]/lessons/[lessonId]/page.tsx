@@ -337,13 +337,23 @@ export default async function LessonPage({
     ).then(r => (r.ok ? r.json() : Promise.reject())),
     fetch(
       `${API_URL}/api/v1/assessments?lessonId=${lessonId}`,
-      { cache: 'no-store' }
+      {
+        cache: 'no-store',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
     ).then(r =>
       r.ok ? r.json() : { assessments: [], pagination: {} }
     ),
     fetch(
       `${API_URL}/api/v1/lessons/${lessonId}/documents?page=1&limit=100`,
-      { cache: 'no-store' }
+      {
+        cache: 'no-store',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
     ).then(r => {
       if (!r.ok) return [];
       const data = r.json();

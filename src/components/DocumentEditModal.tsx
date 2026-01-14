@@ -71,6 +71,15 @@ interface ValidationResult {
   message?: string;
 }
 
+// Get token from cookie
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
 export default function DocumentEditModal({
   lessonId,
   documentId,
@@ -236,8 +245,14 @@ export default function DocumentEditModal({
 
     setLoading(true);
     try {
+      const token = getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {

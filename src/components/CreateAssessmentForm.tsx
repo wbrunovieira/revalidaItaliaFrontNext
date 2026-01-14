@@ -449,6 +449,7 @@ export default function CreateAssessmentForm({
   };
 
   const createAssessment = async () => {
+    const token = getToken();
     const payload = {
       title: formData.title.trim(),
       type: formData.type,
@@ -480,6 +481,7 @@ export default function CreateAssessmentForm({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify(payload),
       }

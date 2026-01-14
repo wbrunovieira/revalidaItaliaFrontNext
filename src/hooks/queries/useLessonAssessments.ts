@@ -36,14 +36,27 @@ interface UseLessonAssessmentsOptions {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 /**
+ * Get token from cookie
+ */
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
+/**
  * Fetch assessments for a lesson
  */
 async function fetchLessonAssessments(lessonId: string): Promise<AssessmentsResponse> {
+  const token = getToken();
   const response = await fetch(
     `${apiUrl}/api/v1/assessments?lessonId=${lessonId}`,
     {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
     }
   );

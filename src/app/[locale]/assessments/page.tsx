@@ -357,11 +357,17 @@ export default function AssessmentsPage({
 
   const fetchAssessments = useCallback(async () => {
     try {
+      const token = document.cookie
+        .split(';')
+        .find(c => c.trim().startsWith('token='))
+        ?.split('=')[1];
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?page=1&limit=100`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );

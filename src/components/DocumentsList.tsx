@@ -169,11 +169,13 @@ export default function DocumentsList() {
   const fetchDocumentsForLesson = useCallback(
     async (lessonId: string, page: number = 1): Promise<DocumentItem[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents?page=${page}&limit=10`,
           {
             headers: {
               'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
             },
           }
         );
@@ -205,7 +207,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError]
+    [handleApiError, getToken]
   );
 
   // Função para buscar aulas de um módulo específico
@@ -216,8 +218,14 @@ export default function DocumentsList() {
       page: number = 1
     ): Promise<Lesson[]> => {
       try {
+        const token = getToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?page=${page}&limit=10`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -261,7 +269,7 @@ export default function DocumentsList() {
         return [];
       }
     },
-    [handleApiError, fetchDocumentsForLesson]
+    [handleApiError, fetchDocumentsForLesson, getToken]
   );
 
   // Função para buscar módulos de um curso específico

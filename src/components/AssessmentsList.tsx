@@ -136,28 +136,38 @@ export default function AssessmentsList() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Load assessments
   const loadAssessments = useCallback(async () => {
     setLoading(true);
+    const token = getToken();
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
       });
-      
+
       if (typeFilter !== 'ALL') {
         params.append('type', typeFilter);
       }
-      
+
       if (lessonFilter) {
         params.append('lessonId', lessonFilter);
       }
-      
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -181,15 +191,7 @@ export default function AssessmentsList() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, typeFilter, lessonFilter, t, toast]);
-
-  // Função para obter token do cookie
-  const getToken = useCallback(() => {
-    return document.cookie
-      .split('; ')
-      .find(row => row.startsWith('token='))
-      ?.split('=')[1];
-  }, []);
+  }, [pagination.page, pagination.limit, typeFilter, lessonFilter, t, toast, getToken]);
 
   // Load courses when lesson filter is opened
   const loadCourses = useCallback(async () => {
@@ -385,6 +387,7 @@ export default function AssessmentsList() {
   const deleteAssessment = useCallback(
     async (assessmentId: string) => {
       setDeletingId(assessmentId);
+      const token = getToken();
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${assessmentId}`,
@@ -392,6 +395,7 @@ export default function AssessmentsList() {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
             },
           }
         );
@@ -444,7 +448,7 @@ export default function AssessmentsList() {
         setDeletingId(null);
       }
     },
-    [t, toast, loadAssessments]
+    [t, toast, loadAssessments, getToken]
   );
 
   // Handle delete with confirmation

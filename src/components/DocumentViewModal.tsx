@@ -43,6 +43,15 @@ interface DocumentViewModalProps {
   onClose: () => void;
 }
 
+// Get token from cookie
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
 // Function to normalize document URL by adding /api/v1/ prefix if needed
 function normalizeDocumentUrl(url: string): string {
   if (!url) return url;
@@ -92,7 +101,12 @@ export default function DocumentViewModal({
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lessons/${lessonId}/documents/${documentId}`;
         console.log('🔍 [DocumentViewModal] Fetching document from:', apiUrl);
 
-        const documentResponse = await fetch(apiUrl);
+        const token = getToken();
+        const documentResponse = await fetch(apiUrl, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        });
 
         console.log('📡 [DocumentViewModal] Response status:', documentResponse.status, documentResponse.statusText);
 

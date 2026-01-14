@@ -25,14 +25,27 @@ interface UseLessonDocumentsOptions {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 /**
+ * Get token from cookie
+ */
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
+/**
  * Fetch documents for a lesson
  */
 async function fetchLessonDocuments(lessonId: string): Promise<Document[]> {
+  const token = getToken();
   const response = await fetch(
     `${apiUrl}/api/v1/lessons/${lessonId}/documents?page=1&limit=100&_t=${Date.now()}`,
     {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
       cache: 'no-store', // Força não usar cache
     }

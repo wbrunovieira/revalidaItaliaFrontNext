@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Loader2,
   Calendar,
-  Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -177,15 +176,6 @@ export default function ProductsList() {
     });
   };
 
-  const getAccessDurationLabel = (days: number) => {
-    if (days === 0 || days >= 36500) return t('lifetime');
-    if (days === 365) return t('oneYear');
-    if (days === 180) return t('sixMonths');
-    if (days === 90) return t('threeMonths');
-    if (days === 30) return t('oneMonth');
-    return t('days', { count: days });
-  };
-
   const handleViewDetails = (productId: string) => {
     setSelectedProductId(productId);
     setDetailsModalOpen(true);
@@ -271,7 +261,6 @@ export default function ProductsList() {
                   <TableHead className="text-gray-300">{t('columns.status')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.name')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.code')}</TableHead>
-                  <TableHead className="text-gray-300">{t('columns.duration')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.courses')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.createdAt')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.actions')}</TableHead>
@@ -318,14 +307,6 @@ export default function ProductsList() {
                         </code>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Clock className="text-gray-400" size={14} />
-                          <span className="text-white text-sm">
-                            {getAccessDurationLabel(product.accessDurationDays)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
                         <Badge variant="outline" className="bg-gray-700 text-gray-300">
                           {product.courseIds.length} {t('courses')}
                         </Badge>
@@ -365,7 +346,7 @@ export default function ProductsList() {
                     {/* Expanded Details */}
                     {expandedProducts.has(product.id) && (
                       <TableRow key={`${product.id}-expanded`} className="bg-gray-900/50">
-                        <TableCell colSpan={8} className="p-4">
+                        <TableCell colSpan={7} className="p-4">
                           <div className="space-y-4">
                             {/* Features */}
                             {product.features && Object.keys(product.features).length > 0 && (

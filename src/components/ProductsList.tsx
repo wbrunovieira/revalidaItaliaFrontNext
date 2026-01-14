@@ -4,15 +4,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
-import { 
+import {
   Package,
   Search,
   Filter,
   ChevronLeft,
   ChevronRight,
   Loader2,
-  DollarSign,
-  Users,
   Calendar,
   Clock,
   CheckCircle,
@@ -27,8 +25,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -105,7 +101,6 @@ export default function ProductsList() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [includeStats, setIncludeStats] = useState(false);
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -120,7 +115,6 @@ export default function ProductsList() {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         pageSize: pagination.pageSize.toString(),
-        includeStats: includeStats.toString(),
       });
 
       if (searchQuery) queryParams.append('search', searchQuery);
@@ -159,11 +153,11 @@ export default function ProductsList() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, pagination.pageSize, searchQuery, activeFilter, includeStats, t, toast]);
+  }, [token, pagination.pageSize, searchQuery, activeFilter, t, toast]);
 
   useEffect(() => {
     fetchProducts(1);
-  }, [searchQuery, activeFilter, includeStats, fetchProducts]);
+  }, [searchQuery, activeFilter, fetchProducts]);
 
   const toggleProductExpanded = (productId: string) => {
     const newExpanded = new Set(expandedProducts);
@@ -173,13 +167,6 @@ export default function ProductsList() {
       newExpanded.add(productId);
     }
     setExpandedProducts(newExpanded);
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
   };
 
   const formatDate = (date: string) => {
@@ -253,17 +240,6 @@ export default function ProductsList() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center space-x-2 p-2 bg-gray-900 rounded-lg">
-            <Checkbox
-              id="includeStats"
-              checked={includeStats}
-              onCheckedChange={(checked) => setIncludeStats(checked as boolean)}
-            />
-            <Label htmlFor="includeStats" className="text-white cursor-pointer">
-              {t('includeStats')}
-            </Label>
-          </div>
-
           <Button
             onClick={() => fetchProducts(1)}
             variant="outline"
@@ -297,12 +273,6 @@ export default function ProductsList() {
                   <TableHead className="text-gray-300">{t('columns.code')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.duration')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.courses')}</TableHead>
-                  {includeStats && (
-                    <>
-                      <TableHead className="text-gray-300">{t('columns.subscriptions')}</TableHead>
-                      <TableHead className="text-gray-300">{t('columns.revenue')}</TableHead>
-                    </>
-                  )}
                   <TableHead className="text-gray-300">{t('columns.createdAt')}</TableHead>
                   <TableHead className="text-gray-300">{t('columns.actions')}</TableHead>
                 </TableRow>
@@ -360,26 +330,6 @@ export default function ProductsList() {
                           {product.courseIds.length} {t('courses')}
                         </Badge>
                       </TableCell>
-                      {includeStats && (
-                        <>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Users className="text-blue-400" size={14} />
-                              <span className="text-white font-semibold">
-                                {product.activeSubscriptions || 0}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="text-green-400" size={14} />
-                              <span className="text-white font-semibold">
-                                {formatCurrency(product.totalRevenue || 0)}
-                              </span>
-                            </div>
-                          </TableCell>
-                        </>
-                      )}
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Calendar className="text-gray-400" size={14} />
@@ -415,7 +365,7 @@ export default function ProductsList() {
                     {/* Expanded Details */}
                     {expandedProducts.has(product.id) && (
                       <TableRow key={`${product.id}-expanded`} className="bg-gray-900/50">
-                        <TableCell colSpan={includeStats ? 10 : 8} className="p-4">
+                        <TableCell colSpan={8} className="p-4">
                           <div className="space-y-4">
                             {/* Features */}
                             {product.features && Object.keys(product.features).length > 0 && (

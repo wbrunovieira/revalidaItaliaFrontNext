@@ -248,8 +248,14 @@ export function useCourseHierarchy(
     setLessons([]);
 
     try {
+      const token = getToken();
       const response = await fetchWithRetry(
-        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
+        `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {
@@ -269,7 +275,7 @@ export function useCourseHierarchy(
     } finally {
       setLoadingLessons(false);
     }
-  }, [apiUrl, fetchLessons, handleError, toast]);
+  }, [apiUrl, fetchLessons, handleError, toast, getToken]);
 
   // ============ Selection Handlers ============
 

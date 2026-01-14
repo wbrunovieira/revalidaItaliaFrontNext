@@ -4866,6 +4866,7 @@
     "selectCourse": "Selecione um curso",
     "module": "Módulo",
     "selectModule": "Selecione um módulo",
+    "loading": "Carregando...",
     "selectLessons": "Selecione as aulas",
     "selectedLessonsCount": "{count} aulas selecionadas",
     "selectTags": "Selecionar tags",

@@ -301,15 +301,23 @@ export default async function LessonPage({
     redirect(`/${locale}/login`);
   }
   if (lessonRes.status === 403) {
-    // Verificar se é módulo bloqueado ou acesso negado
+    // Verificar tipo de erro: módulo bloqueado ou acesso negado ao curso
     try {
       const errorData = await lessonRes.json();
-      if (errorData.type?.includes('module-locked')) {
+
+      if (errorData.type === 'module-locked') {
+        // Módulo ainda não desbloqueou (drip content)
         redirect(`/${locale}/access-denied?reason=module-locked&course=${slug}&module=${moduleSlug}&days=${errorData.daysUntilUnlock || 0}`);
       }
+
+      if (errorData.type === 'course-access-denied') {
+        // Estudante não está inscrito no curso
+        redirect(`/${locale}/access-denied?reason=not-enrolled&course=${slug}`);
+      }
     } catch {
-      // Se não conseguir parsear, usa erro genérico
+      // Se não conseguir parsear JSON, usa erro genérico
     }
+    // Fallback para erro genérico de acesso
     redirect(`/${locale}/access-denied?reason=course-access-denied&course=${slug}`);
   }
   if (!lessonRes.ok) notFound();

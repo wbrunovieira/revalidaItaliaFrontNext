@@ -6461,8 +6461,12 @@
   "actions": {
     "view": "Visualizza",
     "edit": "Modifica",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "viewAccesses": "Vedi accessi",
+    "grantAccess": "Concedi accesso"
   },
+  "accessGranted": "Accesso concesso",
+  "accessGrantedDesc": "L'accesso è stato concesso con successo.",
   "deleteConfirm": "Sei sicuro di voler eliminare questo utente?",
   "deleteConfirmation": {
     "title": "⚠️ Conferma eliminazione",

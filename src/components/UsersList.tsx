@@ -752,7 +752,7 @@ export default function UsersList() {
                     <button
                       onClick={() => handleViewAccesses(user)}
                       title={t('actions.viewAccesses')}
-                      className="flex-1 py-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded flex items-center justify-center gap-2"
+                      className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2"
                     >
                       <KeyRound size={16} />
                       <span className="text-xs">Acessos</span>
@@ -760,7 +760,7 @@ export default function UsersList() {
                     <button
                       onClick={() => handleGrantAccess(user)}
                       title={t('actions.grantAccess')}
-                      className="flex-1 py-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded flex items-center justify-center gap-2"
+                      className="flex-1 py-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded flex items-center justify-center gap-2"
                     >
                       <Gift size={16} />
                       <span className="text-xs">Conceder</span>
@@ -839,14 +839,14 @@ export default function UsersList() {
                     <button
                       onClick={() => handleViewAccesses(user)}
                       title={t('actions.viewAccesses')}
-                      className="p-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                     >
                       <KeyRound size={18} />
                     </button>
                     <button
                       onClick={() => handleGrantAccess(user)}
                       title={t('actions.grantAccess')}
-                      className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded"
                     >
                       <Gift size={18} />
                     </button>

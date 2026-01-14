@@ -4837,6 +4837,7 @@
     "selectModule": "Seleccione un módulo",
     "loading": "Cargando...",
     "selectLessons": "Seleccione las clases",
+    "noLessons": "No hay clases disponibles en este módulo",
     "selectedLessonsCount": "{count} clases seleccionadas",
     "selectTags": "Seleccionar etiquetas",
     "addMoreTags": "Agregar más etiquetas ({count} seleccionadas)",

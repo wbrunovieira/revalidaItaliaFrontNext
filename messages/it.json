@@ -4796,6 +4796,7 @@
     "selectModule": "Seleziona un modulo",
     "loading": "Caricamento...",
     "selectLessons": "Seleziona le lezioni",
+    "noLessons": "Nessuna lezione disponibile in questo modulo",
     "selectedLessonsCount": "{count} lezioni selezionate",
     "selectTags": "Seleziona tag",
     "addMoreTags": "Aggiungi altri tag ({count} selezionati)",

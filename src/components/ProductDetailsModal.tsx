@@ -296,26 +296,6 @@ export default function ProductDetailsModal({
                     )}
                   </div>
                 </Card>
-
-                <Card className="bg-gray-800 border-gray-700 p-4">
-                  <h4 className="text-white font-semibold mb-3">{t('overview.accessConfig')}</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">{t('overview.duration')}</span>
-                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                        {getAccessDurationLabel(product.accessDurationDays)}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">{t('overview.dripContent')}</span>
-                      {product.dripContentEnabled ? (
-                        <CheckCircle className="text-green-400" size={20} />
-                      ) : (
-                        <XCircle className="text-gray-500" size={20} />
-                      )}
-                    </div>
-                  </div>
-                </Card>
               </TabsContent>
 
               {/* Content Tab */}

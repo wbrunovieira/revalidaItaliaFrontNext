@@ -18,11 +18,14 @@ export const metadata = {
   description: 'Participe de aulas ao vivo com nossos tutores especializados',
 };
 
-async function getCourses() {
+async function getCourses(token: string) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   try {
     const response = await fetch(`${apiUrl}/api/v1/courses`, {
       cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
     if (!response.ok) return [];
     return await response.json();
@@ -32,7 +35,7 @@ async function getCourses() {
   }
 }
 
-async function getAllModules(courses: Course[]) {
+async function getAllModules(courses: Course[], token: string) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   try {
     // Fetch modules for each course
@@ -40,6 +43,9 @@ async function getAllModules(courses: Course[]) {
       try {
         const response = await fetch(`${apiUrl}/api/v1/courses/${course.id}/modules`, {
           cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
         if (!response.ok) return [];
         return await response.json();
@@ -76,8 +82,8 @@ export default async function LiveSessionsPage({
   }
 
   // Fetch courses and modules for URL mapping
-  const courses = await getCourses();
-  const modules = await getAllModules(courses);
+  const courses = await getCourses(token);
+  const modules = await getAllModules(courses, token);
 
   return (
     <NavSidebar>

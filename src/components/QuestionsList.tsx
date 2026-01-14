@@ -27,6 +27,15 @@ import QuestionViewModal from '@/components/QuestionViewModal';
 import QuestionEditModal from '@/components/QuestionEditModal';
 import QuestionDeleteModal from '@/components/QuestionDeleteModal';
 
+// Get token from cookie
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
 interface Assessment {
   id: string;
   title: string;
@@ -123,11 +132,13 @@ export default function QuestionsList() {
   const loadAssessments = useCallback(async () => {
     setLoadingAssessments(true);
     try {
+      const token = getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -156,11 +167,13 @@ export default function QuestionsList() {
 
     setLoading(true);
     try {
+      const token = getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments/${selectedAssessmentId}/questions/detailed`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -266,12 +279,14 @@ export default function QuestionsList() {
           <button
             onClick={async () => {
               try {
+                const token = getToken();
                 const response = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/api/v1/questions/${question.id}/complete`,
                   {
                     method: 'DELETE',
                     headers: {
                       'Content-Type': 'application/json',
+                      ...(token && { 'Authorization': `Bearer ${token}` }),
                     },
                     body: JSON.stringify({ deleteQuestion: true }),
                   }

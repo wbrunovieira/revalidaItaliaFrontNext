@@ -21,6 +21,15 @@ import {
   Check,
 } from 'lucide-react';
 
+// Get token from cookie
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
 interface FormData {
   title: string;
   assessmentId: string;
@@ -64,11 +73,13 @@ export default function CreateArgumentPage() {
   const loadAssessments = useCallback(async () => {
     setLoadingAssessments(true);
     try {
+      const token = getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -185,12 +196,14 @@ export default function CreateArgumentPage() {
 
     console.log('Argument payload:', payload);
 
+    const token = getToken();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/arguments`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify(payload),
       }

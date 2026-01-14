@@ -7,7 +7,6 @@ import { useAuth } from '@/stores/auth.store';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Users, Package, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TransactionsList from '@/components/TransactionsList';
 import ManageUserAccesses from '@/components/ManageUserAccesses';
 import ProductsManager from '@/components/ProductsManager';
 
@@ -19,7 +18,7 @@ export default function TransactionsPage() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [activeTab, setActiveTab] = useState('manage-accesses');
 
   // Check if user is admin
   useEffect(() => {
@@ -77,33 +76,22 @@ export default function TransactionsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-2xl bg-gray-800 p-1">
-            <TabsTrigger 
-              value="transactions" 
-              className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark flex items-center gap-2"
-            >
-              <DollarSign size={16} />
-              {t('tabs.transactions')}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="manage-accesses" 
+          <TabsList className="grid grid-cols-2 w-full max-w-md bg-gray-800 p-1">
+            <TabsTrigger
+              value="manage-accesses"
               className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark flex items-center gap-2"
             >
               <Users size={16} />
               {t('tabs.manageAccesses')}
             </TabsTrigger>
-            <TabsTrigger 
-              value="products" 
+            <TabsTrigger
+              value="products"
               className="data-[state=active]:bg-secondary data-[state=active]:text-primary-dark flex items-center gap-2"
             >
               <Package size={16} />
               {t('tabs.products')}
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="transactions" className="space-y-6">
-            <TransactionsList />
-          </TabsContent>
 
           <TabsContent value="manage-accesses" className="space-y-6">
             <ManageUserAccesses />

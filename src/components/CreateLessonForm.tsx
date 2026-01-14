@@ -585,13 +585,27 @@ export default function CreateLessonForm() {
     return availableOrders;
   }, [existingOrders]);
 
+  // Função para obter token do cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Função para buscar aulas existentes do módulo
   const fetchExistingLessons = useCallback(
     async (courseId: string, moduleId: string) => {
       setLoadingOrders(true);
       try {
+        const token = getToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons?limit=100`,
+          {
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -630,15 +644,21 @@ export default function CreateLessonForm() {
         setLoadingOrders(false);
       }
     },
-    []
+    [getToken]
   );
 
   // Fetch environments 3D
   const fetchEnvironments3D = useCallback(async () => {
     setLoadingEnvironments(true);
     try {
+      const token = getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/environments-3d`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/environments-3d`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -649,14 +669,20 @@ export default function CreateLessonForm() {
     } finally {
       setLoadingEnvironments(false);
     }
-  }, []);
+  }, [getToken]);
 
   // Fetch available audios (all audios without lesson assignment)
   const fetchAvailableAudios = useCallback(async () => {
     setLoadingAudios(true);
     try {
+      const token = getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/audios?unassigned=true`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/audios?unassigned=true`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -667,14 +693,20 @@ export default function CreateLessonForm() {
     } finally {
       setLoadingAudios(false);
     }
-  }, []);
+  }, [getToken]);
 
   // Fetch available animations (all animations without lesson assignment)
   const fetchAvailableAnimations = useCallback(async () => {
     setLoadingAnimations(true);
     try {
+      const token = getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/animations?unassigned=true`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/animations?unassigned=true`,
+        {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -685,7 +717,7 @@ export default function CreateLessonForm() {
     } finally {
       setLoadingAnimations(false);
     }
-  }, []);
+  }, [getToken]);
 
   // Fetch interactive content when lesson type changes
   useEffect(() => {
@@ -699,14 +731,6 @@ export default function CreateLessonForm() {
       fetchAvailableAnimations();
     }
   }, [formData.lessonType, formData.contentType, fetchEnvironments3D, fetchAvailableAudios, fetchAvailableAnimations]);
-
-  // Função para obter token do cookie
-  const getToken = useCallback(() => {
-    return document.cookie
-      .split('; ')
-      .find(row => row.startsWith('token='))
-      ?.split('=')[1];
-  }, []);
 
   // Função para buscar módulos de um curso específico (chamada apenas quando curso é selecionado)
   const fetchModulesForCourse = useCallback(
@@ -916,11 +940,15 @@ export default function CreateLessonForm() {
 
   const createLesson = useCallback(
     async (payload: CreateLessonPayload): Promise<void> => {
+      const token = getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${formData.courseId}/modules/${formData.moduleId}/lessons`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
           body: JSON.stringify(payload),
         }
       );
@@ -932,7 +960,7 @@ export default function CreateLessonForm() {
         );
       }
     },
-    [formData.courseId, formData.moduleId]
+    [formData.courseId, formData.moduleId, getToken]
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

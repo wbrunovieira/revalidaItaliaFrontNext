@@ -1,26 +1,40 @@
 // src/app/[locale]/flashcards/progress/page.tsx
+'use client';
 
-export const dynamic = 'force-dynamic';
-
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import NavSidebar from '@/components/NavSidebar';
 import FlashcardProgressTabs from '@/components/FlashcardProgressTabs';
-import { isTokenExpired } from '@/lib/auth-utils';
+import { useAuth } from '@/stores/auth.store';
+import { Loader2 } from 'lucide-react';
 
-export default async function FlashcardProgressPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default function FlashcardProgressPage() {
+  const params = useParams();
+  const router = useRouter();
+  const locale = params.locale as string;
+  const { token, isAuthenticated, isLoading } = useAuth();
 
-  // Verificação de autenticação server-side
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  // Verificação de autenticação client-side
+  useEffect(() => {
+    if (!isLoading && (!token || !isAuthenticated)) {
+      router.push(`/${locale}/login`);
+    }
+  }, [token, isAuthenticated, isLoading, locale, router]);
 
-  if (!token || isTokenExpired(token)) {
-    redirect(`/${locale}/login`);
+  // Loading state enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <NavSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-primary flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+        </div>
+      </NavSidebar>
+    );
+  }
+
+  // Se não autenticado, não renderiza (vai redirecionar)
+  if (!token || !isAuthenticated) {
+    return null;
   }
 
   return (

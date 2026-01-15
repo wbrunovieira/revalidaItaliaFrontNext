@@ -895,28 +895,17 @@ export default function LessonPageContent({
               </aside>
             </div>
           ) : (
-            // Layout WITHOUT video
+            // Layout WITHOUT video - show placeholder image
             <>
               <div className="bg-primary-dark p-6">
-                {/* No video message */}
-                <div className="mb-8 max-w-md mx-auto">
-                  <div className="p-4 bg-primary/50 rounded-lg border border-secondary/30 text-center">
-                    <div className="text-gray-400 mb-2">
-                      <svg
-                        className="w-12 h-12 mx-auto mb-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-gray-300 text-sm">{tLesson('noVideo')}</p>
+                {/* Placeholder image */}
+                <div className="mb-8 max-w-2xl mx-auto">
+                  <div className="rounded-lg overflow-hidden border border-secondary/30">
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_S3_URL || ''}/images/lesson-placeholder.png`}
+                      alt="Revalida Italia"
+                      className="w-full h-auto object-contain"
+                    />
                   </div>
                 </div>
 

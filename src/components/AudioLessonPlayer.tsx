@@ -64,6 +64,7 @@ export default function AudioLessonPlayer({
   const [showTranscription, setShowTranscription] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -190,6 +191,7 @@ export default function AudioLessonPlayer({
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
       audio.playbackRate = playbackRate;
+      setAudioError(null); // Clear error on successful load
     };
     const handleEnded = () => {
       if (isLooping && sortedAudios.length === 1) {
@@ -201,14 +203,45 @@ export default function AudioLessonPlayer({
         setIsPlaying(false);
       }
     };
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setAudioError(null);
+    };
     const handlePause = () => setIsPlaying(false);
+    const handleError = () => {
+      const error = audio.error;
+      let errorMessage = 'Failed to load audio';
+      if (error) {
+        switch (error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Audio loading aborted';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error while loading audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'Audio decode error';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported or URL inaccessible';
+            break;
+        }
+      }
+      console.error('[AudioLessonPlayer] Audio error:', {
+        code: error?.code,
+        message: errorMessage,
+        url: currentAudio?.url
+      });
+      setAudioError(errorMessage);
+      setIsPlaying(false);
+    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -216,8 +249,9 @@ export default function AudioLessonPlayer({
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('error', handleError);
     };
-  }, [currentIndex, sortedAudios.length, handleNext, isLooping, playbackRate]);
+  }, [currentIndex, sortedAudios.length, handleNext, isLooping, playbackRate, currentAudio?.url]);
 
   // Auto-play when track changes
   useEffect(() => {
@@ -260,6 +294,21 @@ export default function AudioLessonPlayer({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [togglePlay, handlePrevious, handleNext, toggleMute]);
 
+  // Log audio data on mount
+  useEffect(() => {
+    console.log('[AudioLessonPlayer] Audio data received:', {
+      totalAudios: sortedAudios.length,
+      currentIndex,
+      currentAudio: currentAudio ? {
+        id: currentAudio.id,
+        filename: currentAudio.filename,
+        url: currentAudio.url,
+        mimeType: currentAudio.mimeType,
+        durationInSeconds: currentAudio.durationInSeconds,
+      } : null
+    });
+  }, [sortedAudios, currentIndex, currentAudio]);
+
   if (!sortedAudios.length) return null;
 
   const currentTranslation = getAudioTranslation(currentAudio);
@@ -272,6 +321,14 @@ export default function AudioLessonPlayer({
     <div className="w-full">
       {/* Hidden audio element */}
       <audio ref={audioRef} src={currentAudio.url} preload="metadata" />
+
+      {/* Audio Error Display */}
+      {audioError && (
+        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 text-sm font-medium">{audioError}</p>
+          <p className="text-red-400/70 text-xs mt-1">URL: {currentAudio.url}</p>
+        </div>
+      )}
 
       {/* Main Player Card */}
       <motion.div

@@ -6,6 +6,7 @@ export const HEAD_HOTSPOTS: HotspotGroupItem[] = [
   { id: 'fronte', label: 'Fronte' },
   { id: 'sopracciglio', label: 'Sopracciglio' },
   { id: 'occhio', label: 'Occhio' },
+  { id: 'orecchio', label: 'Orecchio' },
   { id: 'naso', label: 'Naso' },
   { id: 'labbro', label: 'Labbro' },
   { id: 'bocca', label: 'Bocca' },
@@ -13,6 +14,7 @@ export const HEAD_HOTSPOTS: HotspotGroupItem[] = [
   { id: 'guancia', label: 'Guancia' },
   { id: 'mandibola', label: 'Mandibola' },
   { id: 'collo', label: 'Collo' },
+  { id: 'nuca', label: 'Nuca' },
 ];
 
 // Torso hotspots configuration
@@ -28,7 +30,10 @@ export const TORSO_HOTSPOTS: HotspotGroupItem[] = [
   { id: 'braccio', label: 'Braccio' },
   { id: 'gomito', label: 'Gomito' },
   { id: 'anca', label: 'Anca' },
+  { id: 'schiena', label: 'Schiena' },
+  { id: 'lombare', label: 'Lombare' },
   { id: 'natica', label: 'Natica' },
+  { id: 'ano', label: 'Ano' },
   { id: 'genitali', label: 'Genitali' },
   { id: 'inguine', label: 'Inguine' },
   { id: 'avambraccio', label: 'Avambraccio' },

@@ -108,7 +108,16 @@ export function HotspotTooltip({
             }}
           >
             <div className="flex items-center gap-1 whitespace-nowrap" style={{ gap: isMobile ? '2px' : '8px' }}>
-              {label} {forms && <span style={{ opacity: 0.7, fontSize: '0.85em' }}>{forms}</span>}
+              {label} {forms && (
+                <span style={{ opacity: 0.7, fontSize: '0.85em' }}>
+                  {forms.includes('*') ? (
+                    <>
+                      {forms.split('*')[0]}
+                      <span style={{ fontSize: '0.8em', opacity: 0.8 }}>*{forms.split('*')[1]}</span>
+                    </>
+                  ) : forms}
+                </span>
+              )}
               {/* Animated bars when playing */}
               {isActive && (
                 <div

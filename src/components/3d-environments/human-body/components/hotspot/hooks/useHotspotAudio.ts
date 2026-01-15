@@ -74,6 +74,10 @@ export function useHotspotAudio({
 
     audio.onended = () => {
       setIsPlaying(false);
+      setShowTranscription(false);
+      if (transcriptionTimeoutRef.current) {
+        clearTimeout(transcriptionTimeoutRef.current);
+      }
     };
 
     audio.onerror = () => {

@@ -366,6 +366,19 @@ export default function PandaVideoPlayer({
       );
   }, []);
 
+  // Handle startTime changes (for resume/restart functionality)
+  const prevStartTimeRef = useRef<number>(startTime);
+  useEffect(() => {
+    // Only seek if startTime actually changed (not on initial mount)
+    if (prevStartTimeRef.current !== startTime && playerRef.current) {
+      console.log('[PandaVideoPlayer] ⏩ Seeking to:', startTime);
+      playerRef.current.setCurrentTime(startTime);
+      // Also start playing after seek
+      playerRef.current.play();
+    }
+    prevStartTimeRef.current = startTime;
+  }, [startTime]);
+
   const openInNewWindow = () =>
     window.open(embedUrl, '_blank');
 

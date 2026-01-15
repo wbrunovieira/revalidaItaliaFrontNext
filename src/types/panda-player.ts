@@ -120,6 +120,7 @@ export interface PandaVideoPlayerProps {
   onPlay?: () => void;
   onPause?: () => void;
   startTime?: number;
+  seekId?: number; // Unique ID to force seek even when startTime is the same
   autoplay?: boolean;
   muted?: boolean;
   saveProgress?: boolean;

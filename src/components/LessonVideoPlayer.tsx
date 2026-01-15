@@ -63,8 +63,8 @@ export default function LessonVideoPlayer({
     }
   }, [courseTitle, moduleTitle]);
   
-  // State for managing start time
-  const [startTime, setStartTime] = useState<number>(0);
+  // State for managing start time with seekId to force re-seek even for same time value
+  const [seekRequest, setSeekRequest] = useState<{ time: number; seekId: number }>({ time: 0, seekId: 0 });
   const [showBanner, setShowBanner] = useState<boolean>(true);
 
   // Log when component mounts
@@ -196,8 +196,9 @@ export default function LessonVideoPlayer({
   const handleResume = useCallback(() => {
     // Use setTimeout to avoid setState during render
     setTimeout(() => {
-      console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', progress?.currentTime);
-      setStartTime(progress?.currentTime || 0);
+      const resumeTime = progress?.currentTime || 0;
+      console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', resumeTime);
+      setSeekRequest(prev => ({ time: resumeTime, seekId: prev.seekId + 1 }));
       setShowBanner(false);
     }, 0);
   }, [progress]);
@@ -205,8 +206,13 @@ export default function LessonVideoPlayer({
   const handleRestart = useCallback(() => {
     // Use setTimeout to avoid setState during render
     setTimeout(() => {
-      console.log('[LessonVideoPlayer] 🔄 Restarting from beginning');
-      setStartTime(0);
+      console.log('[LessonVideoPlayer] 🔄 Restarting from beginning - CLICKED');
+      // Use seekId to force re-seek even when time is already 0
+      setSeekRequest(prev => {
+        const newRequest = { time: 0, seekId: prev.seekId + 1 };
+        console.log('[LessonVideoPlayer] 🔄 New seekRequest:', newRequest);
+        return newRequest;
+      });
       setShowBanner(false);
       // Clear the saved progress
       clearProgress();
@@ -243,7 +249,8 @@ export default function LessonVideoPlayer({
         onPause={handlePause}
         saveProgress={true} // Enable Panda's saveProgress for dual tracking
         smartAutoplay={true}
-        startTime={startTime} // Use our managed start time
+        startTime={seekRequest.time} // Use our managed start time
+        seekId={seekRequest.seekId} // Unique ID to force seek even for same time value
       />
     </div>
   );

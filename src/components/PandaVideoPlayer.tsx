@@ -34,6 +34,7 @@ export default function PandaVideoPlayer({
   onPlay,
   onPause,
   startTime = 0,
+  seekId,
   autoplay = false,
   muted = false,
   saveProgress = true,
@@ -366,18 +367,26 @@ export default function PandaVideoPlayer({
       );
   }, []);
 
-  // Handle startTime changes (for resume/restart functionality)
-  const prevStartTimeRef = useRef<number>(startTime);
+  // Handle seek requests (for resume/restart functionality)
+  // Uses seekId to force re-seek even when startTime is the same value (e.g., 0 -> 0)
+  const prevSeekIdRef = useRef<number | undefined>(undefined);
   useEffect(() => {
-    // Only seek if startTime actually changed (not on initial mount)
-    if (prevStartTimeRef.current !== startTime && playerRef.current) {
-      console.log('[PandaVideoPlayer] ⏩ Seeking to:', startTime);
+    console.log('[PandaVideoPlayer] 🔍 Seek useEffect triggered:', {
+      seekId,
+      prevSeekId: prevSeekIdRef.current,
+      startTime,
+      hasPlayer: !!playerRef.current,
+    });
+
+    // Only seek when seekId changes and we have a player (skip initial mount)
+    if (seekId !== undefined && prevSeekIdRef.current !== undefined && prevSeekIdRef.current !== seekId && playerRef.current) {
+      console.log('[PandaVideoPlayer] ⏩ Seeking to:', startTime, 'seekId:', seekId);
       playerRef.current.setCurrentTime(startTime);
       // Also start playing after seek
       playerRef.current.play();
     }
-    prevStartTimeRef.current = startTime;
-  }, [startTime]);
+    prevSeekIdRef.current = seekId;
+  }, [seekId, startTime]);
 
   const openInNewWindow = () =>
     window.open(embedUrl, '_blank');

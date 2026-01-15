@@ -222,7 +222,7 @@ export const ANATOMY_HOTSPOTS: AnatomyHotspot[] = [
     id: 'seno',
     position: [10, 130, 12],
     label: 'Seno',
-    forms: '(il seno, i seni)',
+    forms: '(il seno, i seni) *nelle donne',
     yMin: 0.5,
     yMax: 0.8,
     size: 1,
@@ -256,7 +256,7 @@ export const ANATOMY_HOTSPOTS: AnatomyHotspot[] = [
   },
   {
     id: 'gomito',
-    position: [28, 120, -5],
+    position: [24, 118, -10],
     label: 'Gomito',
     forms: '(il gomito, i gomiti)',
     yMin: 0.2,
@@ -268,7 +268,7 @@ export const ANATOMY_HOTSPOTS: AnatomyHotspot[] = [
   },
   {
     id: 'addome',
-    position: [0, 125, 12],
+    position: [0, 121, 12],
     label: 'Addome',
     forms: "(l'addome, gli addomi)",
     yMin: 0.3,
@@ -280,7 +280,7 @@ export const ANATOMY_HOTSPOTS: AnatomyHotspot[] = [
   },
   {
     id: 'ombelico',
-    position: [0, 115, 15],
+    position: [0, 113, 15],
     label: 'Ombelico',
     forms: "(l'ombelico, gli ombelichi)",
     yMin: 0.2,
@@ -364,7 +364,7 @@ export const ANATOMY_HOTSPOTS: AnatomyHotspot[] = [
   },
   {
     id: 'inguine',
-    position: [0, 93, 12],
+    position: [-8, 93, 12],
     label: 'Inguine',
     forms: "(l'inguine, gli inguini)",
     yMin: 0.0,

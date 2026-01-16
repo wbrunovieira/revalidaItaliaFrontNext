@@ -101,6 +101,13 @@ export default function CreateQuestionForm({
   const t = useTranslations('Admin.createQuestion');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [argumentsList, setArgumentsList] = useState<Argument[]>([]);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
@@ -139,11 +146,13 @@ export default function CreateQuestionForm({
   const loadAssessments = useCallback(async () => {
     setLoadingAssessments(true);
     try {
+      const token = getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -164,11 +173,12 @@ export default function CreateQuestionForm({
     } finally {
       setLoadingAssessments(false);
     }
-  }, [t, toast]);
+  }, [t, toast, getToken]);
 
   const loadArguments = useCallback(async (page = 1) => {
     setLoadingArguments(true);
     try {
+      const token = getToken();
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '10',
@@ -179,6 +189,7 @@ export default function CreateQuestionForm({
         {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
           },
         }
       );
@@ -201,7 +212,7 @@ export default function CreateQuestionForm({
     } finally {
       setLoadingArguments(false);
     }
-  }, []);
+  }, [getToken]);
 
   // Load assessments and arguments when component mounts
   useEffect(() => {

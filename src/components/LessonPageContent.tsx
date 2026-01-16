@@ -897,7 +897,7 @@ export default function LessonPageContent({
                 <div className="mb-8 max-w-2xl mx-auto">
                   <div className="rounded-lg overflow-hidden border border-secondary/30">
                     <img
-                      src={`${process.env.NEXT_PUBLIC_S3_URL || ''}/images/lesson-placeholder.png`}
+                      src="/images/lesson-placeholder.png"
                       alt="Revalida Italia"
                       className="w-full h-auto object-contain"
                     />

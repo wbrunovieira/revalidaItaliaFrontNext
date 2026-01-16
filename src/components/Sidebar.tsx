@@ -362,8 +362,9 @@ export default function Sidebar({
 
       {/* Sidebar */}
       <motion.aside
-        initial={isMobile ? { x: '-100%' } : false}
-        animate={isMobile ? { x: collapsed ? '-100%' : '0%' } : false}
+        key={isMobile ? 'mobile' : 'desktop'}
+        initial={isMobile ? { x: '-100%' } : { x: 0 }}
+        animate={isMobile ? { x: collapsed ? '-100%' : '0%' } : { x: 0 }}
         transition={
           isMobile
             ? {
@@ -372,7 +373,7 @@ export default function Sidebar({
                 damping: 30,
                 mass: 0.8,
               }
-            : undefined
+            : { duration: 0 }
         }
         className={`
           fixed flex flex-col bg-primary text-background-white shadow-2xl overflow-visible

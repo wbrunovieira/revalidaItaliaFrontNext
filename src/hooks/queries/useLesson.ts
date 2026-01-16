@@ -279,6 +279,7 @@ interface UseModuleLessonsOptions {
   page?: number;
   limit?: number;
   enabled?: boolean;
+  initialData?: LessonsResponse;
 }
 
 /**
@@ -295,11 +296,13 @@ export function useModuleLessons({
   page = 1,
   limit = 10,
   enabled = true,
+  initialData,
 }: UseModuleLessonsOptions) {
   return useQuery({
     queryKey: ['module-lessons', courseId, moduleId, page, limit],
     queryFn: () => fetchModuleLessons(courseId, moduleId, page, limit),
     enabled: enabled && !!courseId && !!moduleId,
+    initialData, // Use server-side data immediately, avoiding race condition
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     refetchOnWindowFocus: false,

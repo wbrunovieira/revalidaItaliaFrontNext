@@ -125,6 +125,7 @@ export default function LessonPageContent({
     page: 1,
     limit: 10,
     enabled: !!course?.id && !!moduleFound?.id,
+    initialData: initialLessons, // Use server-side data immediately
   });
 
   // Fetch assessments
@@ -169,12 +170,7 @@ export default function LessonPageContent({
         initialLesson
       );
     }
-    if (initialLessons && course?.id && moduleFound?.id) {
-      queryClient.setQueryData(
-        ['module-lessons', course.id, moduleFound.id, 1, 10],
-        initialLessons
-      );
-    }
+    // Note: initialLessons hydration removed - now handled by useModuleLessons initialData prop
     if (initialAssessments) {
       queryClient.setQueryData(['lesson-assessments', lessonId], initialAssessments);
     }
@@ -193,7 +189,6 @@ export default function LessonPageContent({
     initialCourse,
     initialModule,
     initialLesson,
-    initialLessons,
     initialAssessments,
     initialDocuments,
     initialFlashcards,

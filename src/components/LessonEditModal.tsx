@@ -467,8 +467,15 @@ export default function LessonEditModal({
     async (courseId: string, moduleId: string) => {
       setLoadingOrders(true);
       try {
+        const token = getAuthToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -506,11 +513,13 @@ export default function LessonEditModal({
     async (courseId: string, lessonId: string) => {
       setLoadingVideos(true);
       try {
+        const token = getAuthToken();
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/lessons/${lessonId}/videos`,
           {
             headers: {
               Accept: 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
             },
           }
         );
@@ -552,11 +561,13 @@ export default function LessonEditModal({
     useCallback(async () => {
       setLoadingAssessments(true);
       try {
+        const token = getAuthToken();
         const response = await fetch(
           `${apiUrl}/api/v1/assessments`,
           {
             headers: {
               Accept: 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
             },
           }
         );
@@ -591,11 +602,13 @@ export default function LessonEditModal({
   const fetchLinkedAssessments = useCallback(
     async (lessonId: string) => {
       try {
+        const token = getAuthToken();
         const response = await fetch(
           `${apiUrl}/api/v1/assessments?lessonId=${lessonId}`,
           {
             headers: {
               Accept: 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
             },
           }
         );
@@ -627,9 +640,11 @@ export default function LessonEditModal({
   const fetchEnvironments3D = useCallback(async () => {
     setLoadingEnvironments(true);
     try {
+      const token = getAuthToken();
       const response = await fetch(`${apiUrl}/api/v1/environments-3d`, {
         headers: {
           Accept: 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
       });
 
@@ -1104,12 +1119,14 @@ export default function LessonEditModal({
       // Update assessment's lessonId
       if (lesson) {
         try {
+          const token = getAuthToken();
           const response = await fetch(
             `${apiUrl}/api/v1/assessments/${assessmentId}`,
             {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
               },
               body: JSON.stringify({
                 lessonId: lesson.id,

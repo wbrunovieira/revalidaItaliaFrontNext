@@ -26,6 +26,7 @@ import {
   Music,
   Gamepad2,
   Box,
+  Loader2,
 } from 'lucide-react';
 import Image from 'next/image';
 import LessonViewModal from './LessonViewModal';
@@ -909,16 +910,17 @@ export default function LessonsList() {
   if (loading) {
     return (
       <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div
-                key={i}
-                className="h-24 bg-gray-700 rounded"
-              ></div>
-            ))}
-          </div>
+        <div className="flex items-center gap-2 mb-4">
+          <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+          <span className="text-gray-400">{t('loading')}</span>
+        </div>
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="h-24 bg-gray-700 rounded"
+            ></div>
+          ))}
         </div>
       </div>
     );

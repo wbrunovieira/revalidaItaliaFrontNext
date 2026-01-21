@@ -7160,6 +7160,7 @@
 },
 "lessonsList": {
       "title": "Lista de Lecciones",
+      "loading": "Cargando lecciones...",
       "searchPlaceholder": "Buscar lecciones...",
       "modules": "módulos",
       "lessons": "lecciones",

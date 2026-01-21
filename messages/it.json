@@ -7114,6 +7114,7 @@
 },
 "lessonsList": {
       "title": "Elenco Lezioni",
+      "loading": "Caricamento lezioni...",
       "searchPlaceholder": "Cerca lezioni...",
       "modules": "moduli",
       "lessons": "lezioni",

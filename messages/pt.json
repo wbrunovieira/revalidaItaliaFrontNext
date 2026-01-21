@@ -7147,7 +7147,6 @@
 },
 "lessonsList": {
   "title": "Lista de Aulas",
-  "loading": "Carregando aulas...",
   "searchPlaceholder": "Buscar aulas...",
   "modules": "módulos",
   "lessons": "aulas",
@@ -7433,6 +7432,7 @@
     },
     "lessonsList": {
       "title": "Lista de Aulas",
+      "loading": "Carregando aulas...",
       "searchPlaceholder": "Buscar aulas...",
       "modules": "módulos",
       "lessons": "aulas",

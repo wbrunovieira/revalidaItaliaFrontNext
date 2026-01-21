@@ -145,6 +145,14 @@ export default function LessonViewModal({
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loadingQuizzes, setLoadingQuizzes] = useState(false);
 
+  // Get JWT token from cookie
+  const getToken = useCallback(() => {
+    return document.cookie
+      .split('; ')
+      .find(row => row.startsWith('token='))
+      ?.split('=')[1];
+  }, []);
+
   // Buscar detalhes da lição
   const fetchLessonDetails =
     useCallback(async (): Promise<void> => {
@@ -152,8 +160,15 @@ export default function LessonViewModal({
 
       setLoading(true);
       try {
+        const token = getToken();
         const lessonResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!lessonResponse.ok) {
@@ -176,7 +191,7 @@ export default function LessonViewModal({
       } finally {
         setLoading(false);
       }
-    }, [courseId, moduleId, lessonId, t, toast]);
+    }, [courseId, moduleId, lessonId, t, toast, getToken]);
 
   // Buscar quizzes da lição
   const fetchLessonQuizzes = useCallback(async (): Promise<void> => {
@@ -184,8 +199,15 @@ export default function LessonViewModal({
 
     setLoadingQuizzes(true);
     try {
+      const token = getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?type=QUIZ&lessonId=${lessonId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?type=QUIZ&lessonId=${lessonId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        }
       );
 
       if (!response.ok) {
@@ -202,7 +224,7 @@ export default function LessonViewModal({
     } finally {
       setLoadingQuizzes(false);
     }
-  }, [lessonId]);
+  }, [lessonId, getToken]);
 
   // Buscar dados quando abrir o modal
   useEffect(() => {

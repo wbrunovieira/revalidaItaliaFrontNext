@@ -366,11 +366,15 @@ export default function LessonsList() {
         const course = coursesWithLessons.find(c => c.id === courseId);
         const foundModule = course?.modules?.find(m => m.id === moduleId);
         const lesson = foundModule?.lessons?.find(l => l.id === lessonId);
-        
+
+        const token = getToken();
         const response = await fetch(
           `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
           {
             method: 'DELETE',
+            headers: {
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
           }
         );
 
@@ -538,7 +542,7 @@ export default function LessonsList() {
         });
       }
     },
-    [t, toast, fetchData, handleApiError, apiUrl, coursesWithLessons]
+    [t, toast, fetchData, handleApiError, apiUrl, coursesWithLessons, getToken]
   );
 
   // 7. Função para mostrar confirmação personalizada usando toast
@@ -686,8 +690,15 @@ export default function LessonsList() {
     ): Promise<void> => {
       try {
         // Buscar detalhes completos da lição
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -728,7 +739,7 @@ export default function LessonsList() {
         });
       }
     },
-    [toast, t, apiUrl]
+    [toast, t, apiUrl, getToken]
   );
 
   // 10. Função para abrir modal de conversão
@@ -740,8 +751,15 @@ export default function LessonsList() {
     ): Promise<void> => {
       try {
         // Buscar detalhes completos da lição incluindo dados do vídeo
+        const token = getToken();
         const response = await fetch(
-          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+          `${apiUrl}/api/v1/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
 
         if (!response.ok) {
@@ -762,7 +780,7 @@ export default function LessonsList() {
         });
       }
     },
-    [toast, t, apiUrl]
+    [toast, t, apiUrl, getToken]
   );
 
   // 11. Função para expandir/contrair curso

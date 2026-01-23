@@ -189,9 +189,9 @@ async function fetchLesson(
  * Hook to fetch lesson data with caching
  *
  * Cache strategy:
- * - staleTime: 5 minutes (lesson content rarely changes)
- * - gcTime: 30 minutes (keep in cache for navigation)
- * - refetchOnWindowFocus: false (avoid unnecessary refetches)
+ * - staleTime: 30 seconds (lesson content may be updated by admin)
+ * - gcTime: 5 minutes (keep in cache for navigation)
+ * - refetchOnWindowFocus: true (refetch when user returns to tab)
  */
 export function useLesson({
   courseId,
@@ -203,9 +203,9 @@ export function useLesson({
     queryKey: ['lesson', courseId, moduleId, lessonId],
     queryFn: () => fetchLesson(courseId, moduleId, lessonId),
     enabled: enabled && !!courseId && !!moduleId && !!lessonId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
     retry: 2,
   });
 }
@@ -230,7 +230,7 @@ export function prefetchLesson(
   queryClient.prefetchQuery({
     queryKey: ['lesson', courseId, moduleId, lessonId],
     queryFn: () => fetchLesson(courseId, moduleId, lessonId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds
   });
 }
 
@@ -286,8 +286,9 @@ interface UseModuleLessonsOptions {
  * Hook to fetch all lessons in a module with caching
  *
  * Cache strategy:
- * - staleTime: 3 minutes (list changes when new lessons added)
- * - gcTime: 15 minutes
+ * - staleTime: 30 seconds (list may be updated by admin - order, titles)
+ * - gcTime: 5 minutes
+ * - refetchOnWindowFocus: true (refetch when user returns)
  * - Cached per page to enable pagination
  */
 export function useModuleLessons({
@@ -303,9 +304,9 @@ export function useModuleLessons({
     queryFn: () => fetchModuleLessons(courseId, moduleId, page, limit),
     enabled: enabled && !!courseId && !!moduleId,
     initialData, // Use server-side data immediately, avoiding race condition
-    staleTime: 3 * 60 * 1000, // 3 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
     retry: 2,
   });
 }

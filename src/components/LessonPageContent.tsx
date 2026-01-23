@@ -213,10 +213,9 @@ export default function LessonPageContent({
   const assessments = assessmentsData?.assessments || [];
   const allLessons = lessonsResponse?.lessons || [];
 
-  // Sort lessons and find prev/next
+  // Sort lessons by order field and find prev/next
   const sorted = [...allLessons].sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    (a, b) => (a.order ?? 0) - (b.order ?? 0)
   );
   const idx = sorted.findIndex(l => l.id === lessonId);
   const prev = idx > 0 ? sorted[idx - 1] : null;

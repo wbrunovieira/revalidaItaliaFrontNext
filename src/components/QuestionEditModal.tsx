@@ -14,6 +14,7 @@ import {
   Languages,
   FileText,
   CircleDot,
+  GripVertical,
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -80,6 +81,11 @@ export default function QuestionEditModal({
   const t = useTranslations('Admin.questionEdit');
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // Drag and drop state for reordering options
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const [formData, setFormData] = useState<FormData>({
     text: '',
     options: [],
@@ -211,6 +217,65 @@ export default function QuestionEditModal({
       },
     }));
   }, []);
+
+  // Drag and drop handlers for reordering options
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    if (loading) return;
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+
+    // Make drag image slightly transparent
+    const target = e.target as HTMLElement;
+    setTimeout(() => {
+      target.style.opacity = '0.5';
+    }, 0);
+  }, [loading]);
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  }, [draggedIndex]);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+
+    if (draggedIndex === null || draggedIndex === targetIndex || loading) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Reorder options
+    setFormData(prev => {
+      const newOptions = [...prev.options];
+      const [draggedOption] = newOptions.splice(draggedIndex, 1);
+      newOptions.splice(targetIndex, 0, draggedOption);
+      return { ...prev, options: newOptions };
+    });
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    toast({
+      title: 'Ordem alterada',
+      description: 'Arraste para reordenar. Lembre-se de salvar as alterações.',
+    });
+  }, [draggedIndex, loading, toast]);
 
   // Validate form
   const validateForm = useCallback((): boolean => {
@@ -458,22 +523,56 @@ export default function QuestionEditModal({
                   </button>
                 </div>
 
+                {/* Info: Drag to reorder */}
+                <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20 mb-3">
+                  <GripVertical size={16} className="text-blue-400" />
+                  <span className="text-sm text-blue-300">
+                    Arraste as opções para reordenar (A, B, C, D, E)
+                  </span>
+                </div>
+
                 <div className="space-y-3">
                   {formData.options.map((option, index) => {
                     if (option._delete) return null;
-                    
-                    const optionLetter = String.fromCharCode(65 + index);
+
+                    // Calculate visible index (excluding deleted options)
+                    const visibleOptions = formData.options.filter(o => !o._delete);
+                    const visibleIndex = visibleOptions.findIndex(o => o === option);
+                    const optionLetter = String.fromCharCode(65 + visibleIndex);
+
                     const isCorrect = option.id === formData.answer.correctOptionId ||
                                     (option.isNew && option.text === formData.answer.correctOptionId);
-                    
+                    const isDragging = draggedIndex === index;
+                    const isDragOver = dragOverIndex === index;
+
                     return (
-                      <div key={index} className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
-                        isCorrect
-                          ? 'bg-purple-500/10 border-purple-500/30'
-                          : 'bg-gray-800/50 border-gray-700'
-                      }`}>
+                      <div
+                        key={option.id || `new-${index}`}
+                        draggable={!loading}
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className={`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                          isDragging
+                            ? 'opacity-50 border-dashed border-secondary'
+                            : isDragOver
+                            ? 'border-secondary bg-secondary/10 transform scale-[1.02]'
+                            : isCorrect
+                            ? 'bg-purple-500/10 border-purple-500/30'
+                            : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
+                        }`}
+                      >
+                        {/* Drag handle */}
+                        <div className="flex items-center mt-2 cursor-grab active:cursor-grabbing">
+                          <GripVertical size={18} className="text-gray-500 hover:text-gray-300" />
+                        </div>
+
                         <div className="flex items-center gap-3 mt-1">
-                          <span className="text-gray-400 font-bold text-lg w-6">{optionLetter}</span>
+                          <span className={`font-bold text-lg w-6 ${
+                            isDragOver ? 'text-secondary' : 'text-gray-400'
+                          }`}>{optionLetter}</span>
                           <input
                             type="radio"
                             name="correctOption"

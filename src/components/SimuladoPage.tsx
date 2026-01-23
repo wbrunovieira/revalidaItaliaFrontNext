@@ -1,7 +1,7 @@
 // /src/components/SimuladoPage.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -165,6 +165,9 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const [savingAnswer, setSavingAnswer] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Ref para prevenir dupla submissão (refs atualizam sincronamente, diferente de state)
+  const isSubmittingRef = useRef(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -438,6 +441,22 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const handleSubmitSimulado = async () => {
     if (!attempt) return;
 
+    // Prevenir dupla submissão usando ref (atualiza sincronamente)
+    if (isSubmittingRef.current) {
+      console.log('⚠️ Submissão já em andamento, ignorando clique duplicado');
+      return;
+    }
+
+    // Verificar se o simulado já foi finalizado
+    if (attempt.status !== 'ACTIVE') {
+      console.log('⚠️ Simulado já finalizado, status:', attempt.status);
+      toast({
+        title: 'Simulado já finalizado',
+        description: 'Este simulado já foi finalizado anteriormente.',
+      });
+      return;
+    }
+
     // Verificar se todas as questões foram respondidas
     if (answers.size < questions.length) {
       const unanswered = questions.length - answers.size;
@@ -452,6 +471,8 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
     // Parar o timer
     clearTimer();
 
+    // Marcar submissão em andamento (ref para proteção síncrona)
+    isSubmittingRef.current = true;
     setSubmitting(true);
     try {
       const token = document.cookie
@@ -520,6 +541,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
         variant: 'destructive',
       });
     } finally {
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };

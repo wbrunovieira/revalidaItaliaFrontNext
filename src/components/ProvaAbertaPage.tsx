@@ -1,7 +1,7 @@
 // /src/components/ProvaAbertaPage.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -137,6 +137,9 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
   const [autoSaveTimeouts, setAutoSaveTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map());
   const [savingAnswers, setSavingAnswers] = useState<Set<string>>(new Set()); // Track which answers are being saved
   const [existingAttempt, setExistingAttempt] = useState<Attempt | null>(null);
+
+  // Ref para prevenir dupla submissão (refs atualizam sincronamente, diferente de state)
+  const isSubmittingRef = useRef(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
@@ -453,6 +456,12 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
   const handleSubmitExam = async () => {
     if (!attempt) return;
 
+    // Prevenir dupla submissão usando ref (atualiza sincronamente)
+    if (isSubmittingRef.current) {
+      console.log('⚠️ Submissão já em andamento, ignorando clique duplicado');
+      return;
+    }
+
     // Prevent double submission
     if (submitting || attempt.status !== 'IN_PROGRESS') {
       console.log(`Submission already in progress or attempt not active (status: ${attempt.status})`);
@@ -471,6 +480,8 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
       return;
     }
 
+    // Marcar submissão em andamento (ref para proteção síncrona)
+    isSubmittingRef.current = true;
     setSubmitting(true);
     try {
       const token = document.cookie
@@ -538,6 +549,7 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
         variant: 'destructive',
       });
     } finally {
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };

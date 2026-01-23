@@ -519,11 +519,20 @@ export default function CreateQuestionForm({
     // If it's a multiple choice question, create options and answer
     if (formData.type === 'MULTIPLE_CHOICE') {
       const questionId = questionResponse.id || questionResponse.question?.id;
-      
-      // Step 2: Create options in parallel
-      console.log('Creating options...');
-      const optionPromises = formData.options.map((option, index) =>
-        createWithRetry(async () => {
+
+      // Step 2: Create options SEQUENTIALLY to preserve order (A, B, C, D, E)
+      // IMPORTANT: Using sequential creation instead of Promise.all to ensure
+      // the backend receives and saves options in the correct order
+      console.log('Creating options sequentially to preserve order...');
+      const optionResponses = [];
+
+      for (let index = 0; index < formData.options.length; index++) {
+        const option = formData.options[index];
+        const optionLetter = String.fromCharCode(65 + index); // A, B, C, D, E
+
+        console.log(`Creating option ${optionLetter}:`, option.text.slice(0, 50));
+
+        const optionData = await createWithRetry(async () => {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/v1/questions/${questionId}/options`,
             {
@@ -537,17 +546,24 @@ export default function CreateQuestionForm({
 
           if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Failed to create option ${index + 1}: ${response.status} - ${errorText}`);
+            throw new Error(`Failed to create option ${optionLetter}: ${response.status} - ${errorText}`);
           }
 
-          const optionData = await response.json();
-          console.log('Option created:', optionData);
-          return { ...optionData, isCorrect: option.isCorrect };
-        })
-      );
+          return response.json();
+        });
 
-      const optionResponses = await Promise.all(optionPromises);
-      console.log('All options created:', optionResponses);
+        console.log(`Option ${optionLetter} created:`, optionData);
+        optionResponses.push({ ...optionData, isCorrect: option.isCorrect });
+
+        // Small delay between options to ensure proper ordering in database
+        if (index < formData.options.length - 1) {
+          await delay(50);
+        }
+      }
+
+      console.log('All options created in order:', optionResponses.map((o, i) =>
+        `${String.fromCharCode(65 + i)}: ${o.questionOption?.id || o.id}`
+      ));
       
       // Find the correct option
       const correctOption = optionResponses.find(opt => opt.isCorrect);

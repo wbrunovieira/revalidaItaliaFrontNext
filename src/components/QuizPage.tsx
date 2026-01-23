@@ -1,7 +1,7 @@
 // /src/components/QuizPage.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -163,6 +163,9 @@ export default function QuizPage({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [savingAnswer, setSavingAnswer] = useState(false);
+
+  // Ref para prevenir dupla submissão (refs atualizam sincronamente, diferente de state)
+  const isSubmittingRef = useRef(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -447,6 +450,22 @@ export default function QuizPage({
   const handleSubmitQuiz = async () => {
     if (!attempt) return;
 
+    // Prevenir dupla submissão usando ref (atualiza sincronamente)
+    if (isSubmittingRef.current) {
+      console.log('⚠️ Submissão já em andamento, ignorando clique duplicado');
+      return;
+    }
+
+    // Verificar se o quiz já foi finalizado
+    if (attempt.status !== 'ACTIVE') {
+      console.log('⚠️ Quiz já finalizado, status:', attempt.status);
+      toast({
+        title: 'Quiz já finalizado',
+        description: 'Este quiz já foi finalizado anteriormente.',
+      });
+      return;
+    }
+
     // Verificar se todas as questões foram respondidas
     if (answers.size < questions.length) {
       const unanswered = questions.length - answers.size;
@@ -458,6 +477,8 @@ export default function QuizPage({
       return;
     }
 
+    // Marcar submissão em andamento (ref para proteção síncrona)
+    isSubmittingRef.current = true;
     setSubmitting(true);
     try {
       // Get token from Auth Store
@@ -549,6 +570,7 @@ export default function QuizPage({
         variant: 'destructive',
       });
     } finally {
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };

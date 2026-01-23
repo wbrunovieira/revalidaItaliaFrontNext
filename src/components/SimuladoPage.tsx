@@ -166,6 +166,14 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
+  // Estado para controlar quando o tempo expirou
+  const [timeExpired, setTimeExpired] = useState(false);
+  const [showTimeExpiredModal, setShowTimeExpiredModal] = useState(false);
+
+  // Refs para alertas de tempo (evita múltiplos toasts)
+  const warned5MinRef = useRef(false);
+  const warned1MinRef = useRef(false);
+
   // Ref para prevenir dupla submissão (refs atualizam sincronamente, diferente de state)
   const isSubmittingRef = useRef(false);
 
@@ -237,18 +245,50 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const startTimer = (durationInMinutes: number) => {
     const totalSeconds = durationInMinutes * 60;
     setTimeLeft(totalSeconds);
-    
+    setTimeExpired(false);
+    setShowTimeExpiredModal(false);
+    warned5MinRef.current = false;
+    warned1MinRef.current = false;
+
     const interval = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev === null || prev <= 1) {
-          // Tempo esgotado - submeter automaticamente
-          handleSubmitSimulado();
+        if (prev === null) return null;
+
+        const newTime = prev - 1;
+
+        // Alerta de 5 minutos restantes
+        if (newTime === 300 && !warned5MinRef.current) {
+          warned5MinRef.current = true;
+          toast({
+            title: '⚠️ Atenção!',
+            description: 'Restam apenas 5 minutos para finalizar o simulado.',
+            variant: 'destructive',
+          });
+        }
+
+        // Alerta de 1 minuto restante
+        if (newTime === 60 && !warned1MinRef.current) {
+          warned1MinRef.current = true;
+          toast({
+            title: '🚨 Último minuto!',
+            description: 'Você tem apenas 1 minuto para finalizar!',
+            variant: 'destructive',
+          });
+        }
+
+        // Tempo esgotado
+        if (newTime <= 0) {
+          clearInterval(interval);
+          setTimerInterval(null);
+          setTimeExpired(true);
+          setShowTimeExpiredModal(true);
           return 0;
         }
-        return prev - 1;
+
+        return newTime;
       });
     }, 1000);
-    
+
     setTimerInterval(interval);
   };
 
@@ -621,8 +661,105 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   }
 
   if (phase === 'simulado') {
+    const allQuestionsAnswered = answers.size >= questions.length;
+
     return (
       <div className="flex-1 flex flex-col">
+        {/* Modal de Tempo Esgotado */}
+        {showTimeExpiredModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div className="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md mx-4 border border-gray-700">
+              <div className="text-center space-y-6">
+                {/* Ícone */}
+                <div className="flex justify-center">
+                  <div className="w-20 h-20 rounded-full bg-red-900/30 flex items-center justify-center">
+                    <Timer size={40} className="text-red-400" />
+                  </div>
+                </div>
+
+                {/* Título */}
+                <h2 className="text-2xl font-bold text-white">
+                  ⏰ Tempo Esgotado
+                </h2>
+
+                {/* Mensagem */}
+                <p className="text-gray-300">
+                  O tempo do simulado terminou.
+                </p>
+
+                {/* Status das questões */}
+                {allQuestionsAnswered ? (
+                  <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center justify-center gap-2 text-green-400">
+                      <CheckCircle size={20} />
+                      <span className="font-medium">
+                        Todas as {questions.length} questões respondidas
+                      </span>
+                    </div>
+                    <p className="text-green-300 text-sm mt-2">
+                      Clique abaixo para enviar suas respostas.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                    <div className="flex items-center justify-center gap-2 text-red-400">
+                      <XCircle size={20} />
+                      <span className="font-medium">
+                        Você respondeu {answers.size} de {questions.length} questões
+                      </span>
+                    </div>
+                    <p className="text-red-300 text-sm mt-2">
+                      Não é possível finalizar o simulado com questões em branco.
+                    </p>
+                  </div>
+                )}
+
+                {/* Botões */}
+                <div className="space-y-3">
+                  {allQuestionsAnswered ? (
+                    <button
+                      onClick={() => {
+                        setShowTimeExpiredModal(false);
+                        handleSubmitSimulado();
+                      }}
+                      disabled={submitting}
+                      className="w-full flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          Finalizando...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={20} />
+                          Finalizar Simulado
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setShowTimeExpiredModal(false);
+                        setPhase('start');
+                        setAttempt(null);
+                        setAnswers(new Map());
+                        setTimeLeft(null);
+                        setTimeExpired(false);
+                        clearTimer();
+                      }}
+                      className="w-full flex items-center justify-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-500 transition-colors font-medium"
+                    >
+                      <RotateCcw size={20} />
+                      Voltar ao Início
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header com Timer e Progress */}
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center justify-between mb-2">
@@ -632,13 +769,22 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
             
             {/* Timer */}
             {timeLeft !== null && (
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
-                timeLeft <= 300 ? 'bg-red-900/20 text-red-400' : 'bg-blue-900/20 text-blue-400'
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-lg transition-all ${
+                timeLeft <= 60
+                  ? 'bg-red-900/30 text-red-400 animate-pulse'
+                  : timeLeft <= 300
+                  ? 'bg-red-900/20 text-red-400'
+                  : 'bg-blue-900/20 text-blue-400'
               }`}>
-                <Timer size={16} />
-                <span className="font-mono font-bold">
-                  {formatTime(timeLeft)}
+                <Timer size={16} className={timeLeft <= 60 ? 'animate-bounce' : ''} />
+                <span className={`font-mono font-bold ${timeLeft <= 60 ? 'text-lg' : ''}`}>
+                  {timeExpired ? '00:00' : formatTime(timeLeft)}
                 </span>
+                {timeLeft <= 300 && timeLeft > 0 && (
+                  <span className="text-xs ml-1">
+                    {timeLeft <= 60 ? '⚠️' : ''}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -678,11 +824,12 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                       <button
                         key={option.id}
                         onClick={() => saveAnswer(currentQuestion.id, option.id)}
+                        disabled={timeExpired || savingAnswer}
                         className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                           currentAnswer?.selectedOptionId === option.id
                             ? 'border-secondary bg-secondary/10'
                             : 'border-gray-700 bg-gray-800 hover:border-gray-600'
-                        }`}
+                        } ${timeExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
@@ -712,7 +859,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
           <div className="flex items-center justify-between max-w-3xl mx-auto">
             <button
               onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-              disabled={currentQuestionIndex === 0}
+              disabled={currentQuestionIndex === 0 || timeExpired}
               className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={20} />
@@ -723,10 +870,10 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
               <span className="text-sm text-gray-300">
                 {answeredCount}/{questions.length} respondidas
               </span>
-              
+
               <button
                 onClick={handleSubmitSimulado}
-                disabled={submitting || savingAnswer}
+                disabled={submitting || savingAnswer || timeExpired}
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
                 {submitting ? (
@@ -750,7 +897,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
 
             <button
               onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-              disabled={currentQuestionIndex === questions.length - 1}
+              disabled={currentQuestionIndex === questions.length - 1 || timeExpired}
               className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Próxima
@@ -933,6 +1080,10 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                 setAttempt(null);
                 setAnswers(new Map());
                 setTimeLeft(null);
+                setTimeExpired(false);
+                setShowTimeExpiredModal(false);
+                warned5MinRef.current = false;
+                warned1MinRef.current = false;
                 clearTimer();
               }}
               className="flex items-center justify-center gap-2 bg-secondary text-primary px-6 py-3 rounded-lg hover:bg-secondary/90 transition-colors"

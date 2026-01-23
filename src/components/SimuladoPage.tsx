@@ -162,6 +162,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const [answers, setAnswers] = useState<Map<string, AttemptAnswer>>(new Map());
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [savingAnswer, setSavingAnswer] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
@@ -393,6 +394,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const saveAnswer = async (questionId: string, selectedOptionId?: string, textAnswer?: string) => {
     if (!attempt) return;
 
+    setSavingAnswer(true);
     try {
       const token = document.cookie
         .split(';')
@@ -428,6 +430,8 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
         description: t('error.saveAnswer'),
         variant: 'destructive',
       });
+    } finally {
+      setSavingAnswer(false);
     }
   };
 
@@ -700,13 +704,18 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
               
               <button
                 onClick={handleSubmitSimulado}
-                disabled={submitting}
+                disabled={submitting || savingAnswer}
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
                 {submitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Finalizando...
+                  </>
+                ) : savingAnswer ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Salvando...
                   </>
                 ) : (
                   <>

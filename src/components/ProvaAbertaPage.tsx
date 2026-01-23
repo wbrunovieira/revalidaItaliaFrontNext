@@ -887,13 +887,18 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
               {answeredCount === openQuestions.length ? (
                 <button
                   onClick={handleSubmitExam}
-                  disabled={submitting || attempt?.status === 'SUBMITTED'}
+                  disabled={submitting || attempt?.status === 'SUBMITTED' || savingAnswers.size > 0}
                   className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                       Enviando...
+                    </>
+                  ) : savingAnswers.size > 0 ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Salvando...
                     </>
                   ) : (
                     <>

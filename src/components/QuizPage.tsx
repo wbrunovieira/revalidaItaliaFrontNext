@@ -162,6 +162,7 @@ export default function QuizPage({
   >(new Map());
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [savingAnswer, setSavingAnswer] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -395,6 +396,7 @@ export default function QuizPage({
   ) => {
     if (!attempt) return;
 
+    setSavingAnswer(true);
     try {
       // Get token from Auth Store
       if (!token || !isAuthenticated) {
@@ -437,6 +439,8 @@ export default function QuizPage({
         description: t('error.saveAnswer'),
         variant: 'destructive',
       });
+    } finally {
+      setSavingAnswer(false);
     }
   };
 
@@ -706,13 +710,18 @@ export default function QuizPage({
 
               <button
                 onClick={handleSubmitQuiz}
-                disabled={submitting}
+                disabled={submitting || savingAnswer}
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
                 {submitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     {t('submitting')}
+                  </>
+                ) : savingAnswer ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    {t('saving') || 'Salvando...'}
                   </>
                 ) : (
                   <>

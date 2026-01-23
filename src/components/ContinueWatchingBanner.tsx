@@ -24,6 +24,12 @@ export default function ContinueWatchingBanner({
   const t = useTranslations('Video');
 
   useEffect(() => {
+    // Don't show banner if user already dismissed it
+    if (isPaused) {
+      console.log('[ContinueWatchingBanner] ⏸️ Banner was dismissed, not showing');
+      return;
+    }
+
     // Only show banner if progress is meaningful (> 5% and < 95%)
     if (progress && progress.percentage > 5 && progress.percentage < 95) {
       setIsVisible(true);
@@ -34,7 +40,7 @@ export default function ContinueWatchingBanner({
     } else {
       setIsVisible(false);
     }
-  }, [progress]);
+  }, [progress, isPaused]);
 
   const handleResume = useCallback(() => {
     console.log('[ContinueWatchingBanner] ▶️ User chose to resume');

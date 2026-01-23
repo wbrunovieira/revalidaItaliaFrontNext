@@ -5,6 +5,7 @@ import PandaVideoPlayer from './PandaVideoPlayer';
 import ContinueWatchingBanner from './ContinueWatchingBanner';
 import { VideoProgress } from '@/types/panda-player';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
+import { useLessonAccess } from '@/hooks/useLessonAccess';
 
 // Load heartbeat test utility in development
 if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
@@ -49,6 +50,9 @@ export default function LessonVideoPlayer({
     courseId,
     moduleId
   );
+
+  // Initialize lesson access hook to sync "continue learning" card
+  const { updateLessonProgress } = useLessonAccess();
   
   // Initialize heartbeat service directly here
   useEffect(() => {
@@ -90,6 +94,13 @@ export default function LessonVideoPlayer({
 
     // Update progress using the hook
     updateProgress(newProgress);
+
+    // Sync with lesson access for "continue learning" card
+    updateLessonProgress(lessonId, {
+      percentage: newProgress.percentage,
+      currentTime: newProgress.currentTime,
+      duration: newProgress.duration,
+    });
 
     // Send to heartbeat service with full context for new API
     const heartbeatService = (window as unknown as Record<string, unknown>).videoProgressHeartbeat as { 
@@ -151,7 +162,7 @@ export default function LessonVideoPlayer({
         },
       })
     );
-  }, [lessonId, courseId, moduleId, updateProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
+  }, [lessonId, courseId, moduleId, updateProgress, updateLessonProgress, lessonTitle, title, courseTitle, courseSlug, moduleTitle, moduleSlug, lessonImageUrl, thumbnailUrl]);
 
   const handleComplete = useCallback(async () => {
     console.log('[LessonVideoPlayer] ✅ Video completed:', {

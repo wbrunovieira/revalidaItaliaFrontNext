@@ -127,9 +127,45 @@ export function useLessonAccess() {
     });
   }, [saveLessonAccess]);
 
+  // Update progress for the current lesson access
+  const updateLessonProgress = useCallback((
+    lessonId: string,
+    progress: {
+      percentage: number;
+      currentTime: number;
+      duration: number;
+    }
+  ) => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored) as LessonAccessData;
+
+        // Only update if it's the same lesson
+        if (data.lessonId === lessonId) {
+          const updatedData: LessonAccessData = {
+            ...data,
+            progress,
+            accessedAt: new Date().toISOString(),
+          };
+
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+
+          console.log(`${LOG_PREFIX} 📊 Lesson progress updated:`, {
+            lessonId,
+            percentage: progress.percentage.toFixed(2) + '%',
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`${LOG_PREFIX} ❌ Error updating lesson progress:`, error);
+    }
+  }, []);
+
   return {
     trackLessonAccess,
     getLastLessonAccess,
     clearLessonAccess,
+    updateLessonProgress,
   };
 }

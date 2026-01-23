@@ -436,12 +436,12 @@ export default function QuizPage({
   const handleSubmitQuiz = async () => {
     if (!attempt) return;
 
-    // Check if all questions are answered (this might be required by the backend)
-    if (answers.size === 0) {
+    // Verificar se todas as questões foram respondidas
+    if (answers.size < questions.length) {
+      const unanswered = questions.length - answers.size;
       toast({
         title: t('error.title'),
-        description:
-          'Você precisa responder pelo menos uma questão antes de finalizar.',
+        description: `Você ainda tem ${unanswered} questão(ões) sem resposta. Responda todas antes de finalizar.`,
         variant: 'destructive',
       });
       return;
@@ -620,7 +620,7 @@ export default function QuizPage({
           {currentQuestion && (
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-white leading-relaxed">
+                <h2 className="text-xl font-semibold text-white leading-relaxed whitespace-pre-wrap">
                   {currentQuestion.text}
                 </h2>
 
@@ -658,7 +658,7 @@ export default function QuizPage({
                                 <div className="w-2 h-2 bg-primary rounded-full" />
                               )}
                             </div>
-                            <span className="text-gray-300 flex-1">
+                            <span className="text-gray-300 flex-1 whitespace-pre-wrap">
                               {String.fromCharCode(
                                 65 + index
                               )}
@@ -699,7 +699,7 @@ export default function QuizPage({
 
               <button
                 onClick={handleSubmitQuiz}
-                disabled={submitting || answeredCount === 0}
+                disabled={submitting}
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
                 {submitting ? (
@@ -944,7 +944,7 @@ export default function QuizPage({
                           />
                         )}
                         <div className="flex-1">
-                          <h4 className="font-medium text-white mb-2">
+                          <h4 className="font-medium text-white mb-2 whitespace-pre-wrap">
                             {t('question')} {index + 1}:{' '}
                             {answer.questionText}
                           </h4>
@@ -1001,7 +1001,7 @@ export default function QuizPage({
                                   {t('explanation')}
                                 </span>
                               </div>
-                              <p className="text-gray-300 text-sm leading-relaxed">
+                              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
                                 {answer.explanation}
                               </p>
                             </div>
@@ -1032,7 +1032,7 @@ export default function QuizPage({
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-white mb-2">
+                        <h4 className="font-medium text-white mb-2 whitespace-pre-wrap">
                           {question.text}
                         </h4>
 

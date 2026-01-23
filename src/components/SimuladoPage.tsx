@@ -427,6 +427,17 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
   const handleSubmitSimulado = async () => {
     if (!attempt) return;
 
+    // Verificar se todas as questões foram respondidas
+    if (answers.size < questions.length) {
+      const unanswered = questions.length - answers.size;
+      toast({
+        title: 'Questões não respondidas',
+        description: `Você ainda tem ${unanswered} questão(ões) sem resposta. Responda todas antes de finalizar.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Parar o timer
     clearTimer();
 
@@ -624,7 +635,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
               )}
               
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-white leading-relaxed">
+                <h2 className="text-xl font-semibold text-white leading-relaxed whitespace-pre-wrap">
                   {currentQuestion.text}
                 </h2>
                 
@@ -650,7 +661,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                               <div className="w-2 h-2 bg-primary rounded-full" />
                             )}
                           </div>
-                          <span className="text-gray-300 flex-1">
+                          <span className="text-gray-300 flex-1 whitespace-pre-wrap">
                             {String.fromCharCode(65 + index)}. {option.text}
                           </span>
                         </div>
@@ -811,7 +822,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                         <XCircle size={20} className="text-red-400 mt-1 flex-shrink-0" />
                       )}
                       <div className="flex-1">
-                        <h4 className="font-medium text-white mb-2">
+                        <h4 className="font-medium text-white mb-2 whitespace-pre-wrap">
                           Questão {index + 1}: {answer.questionText}
                         </h4>
                         
@@ -850,7 +861,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                                 Explicação
                               </span>
                             </div>
-                            <p className="text-gray-300 text-sm leading-relaxed">
+                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
                               {answer.explanation}
                             </p>
                           </div>

@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import PandaVideoPlayer from './PandaVideoPlayer';
-import ContinueWatchingBanner from './ContinueWatchingBanner';
 import { VideoProgress } from '@/types/panda-player';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
 import { useLessonAccess } from '@/hooks/useLessonAccess';
@@ -45,7 +44,7 @@ export default function LessonVideoPlayer({
   lessonImageUrl,
 }: LessonVideoPlayerProps) {
   // Initialize video progress hook with course and module context
-  const { progress, updateProgress, clearProgress, isLoading } = useVideoProgress(
+  const { progress, updateProgress, isLoading } = useVideoProgress(
     lessonId,
     courseId,
     moduleId
@@ -67,10 +66,7 @@ export default function LessonVideoPlayer({
     }
   }, [courseTitle, moduleTitle]);
   
-  // State for managing start time with seekId to force re-seek even for same time value
-  const [seekRequest, setSeekRequest] = useState<{ time: number; seekId: number }>({ time: 0, seekId: 0 });
-  const [showBanner, setShowBanner] = useState<boolean>(true);
-
+  
   // Log when component mounts
   useEffect(() => {
     console.log('[LessonVideoPlayer] 🎬 Component mounted:', {
@@ -204,32 +200,6 @@ export default function LessonVideoPlayer({
     });
   }, [lessonId, progress]);
 
-  const handleResume = useCallback(() => {
-    // Use setTimeout to avoid setState during render
-    setTimeout(() => {
-      const resumeTime = progress?.currentTime || 0;
-      console.log('[LessonVideoPlayer] ▶️ Resuming from saved position:', resumeTime);
-      setSeekRequest(prev => ({ time: resumeTime, seekId: prev.seekId + 1 }));
-      setShowBanner(false);
-    }, 0);
-  }, [progress]);
-
-  const handleRestart = useCallback(() => {
-    // Use setTimeout to avoid setState during render
-    setTimeout(() => {
-      console.log('[LessonVideoPlayer] 🔄 Restarting from beginning - CLICKED');
-      // Use seekId to force re-seek even when time is already 0
-      setSeekRequest(prev => {
-        const newRequest = { time: 0, seekId: prev.seekId + 1 };
-        console.log('[LessonVideoPlayer] 🔄 New seekRequest:', newRequest);
-        return newRequest;
-      });
-      setShowBanner(false);
-      // Clear the saved progress
-      clearProgress();
-    }, 0);
-  }, [clearProgress]);
-
   // Log loading state
   if (isLoading) {
     console.log('[LessonVideoPlayer] ⏳ Loading saved progress...');
@@ -237,16 +207,6 @@ export default function LessonVideoPlayer({
 
   return (
     <div className="relative w-full h-full">
-      {/* Continue Watching Banner */}
-      {showBanner && !isLoading && (
-        <ContinueWatchingBanner
-          progress={progress}
-          onResume={handleResume}
-          onRestart={handleRestart}
-          autoResumeDelay={5}
-        />
-      )}
-      
       {/* Video Player */}
       <PandaVideoPlayer
         videoId={videoId}
@@ -260,8 +220,8 @@ export default function LessonVideoPlayer({
         onPause={handlePause}
         saveProgress={true} // Enable Panda's saveProgress for dual tracking
         smartAutoplay={true}
-        startTime={seekRequest.time} // Use our managed start time
-        seekId={seekRequest.seekId} // Unique ID to force seek even for same time value
+        startTime={0}
+        seekId={0}
       />
     </div>
   );

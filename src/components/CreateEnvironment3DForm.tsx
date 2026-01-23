@@ -4,7 +4,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
-import { generateSlug } from '@/lib/slug';
 import TextField from '@/components/TextField';
 import Button from '@/components/Button';
 import { Label } from '@/components/ui/label';
@@ -51,7 +50,6 @@ export default function CreateEnvironment3DForm() {
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
-  const [, setSlugGenerated] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     slug: '',
@@ -176,7 +174,6 @@ export default function CreateEnvironment3DForm() {
     });
     setErrors({});
     setTouched({});
-    setSlugGenerated(false);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -308,26 +305,16 @@ export default function CreateEnvironment3DForm() {
       field: TranslationField,
       value: string
     ) => {
-      setFormData(prev => {
-        const newFormData = {
-          ...prev,
-          translations: {
-            ...prev.translations,
-            [locale]: {
-              ...prev.translations[locale],
-              [field]: value,
-            },
+      setFormData(prev => ({
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [locale]: {
+            ...prev.translations[locale],
+            [field]: value,
           },
-        };
-
-        // Gerar slug automaticamente quando o título em português mudar
-        if (locale === 'pt' && field === 'title' && value.trim()) {
-          newFormData.slug = generateSlug(value);
-          setSlugGenerated(true);
-        }
-
-        return newFormData;
-      });
+        },
+      }));
     },
     []
   );

@@ -61,13 +61,11 @@ export default function Environment3DContainer({
         <div className="w-full h-full">{children}</div>
 
         {/* Instructions */}
-        <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
-          <div className="flex justify-center">
-            <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-              <p className="text-white/60 text-sm text-center">
-                Trascina per ruotare • Scorri per ingrandire • Clicca per selezionare
-              </p>
-            </div>
+        <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
+          <div className="bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2">
+            <p className="text-white/60 text-sm">• Trascina per ruotare</p>
+            <p className="text-white/60 text-sm">• Scorri per ingrandire</p>
+            <p className="text-white/60 text-sm">• Clicca per selezionare</p>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 'use client';
 
-// Skeleton walls with primary color theme
+// Skeleton walls with dark slate theme for better hotspot contrast
 export function SkeletonWalls() {
-  const wallColor = '#0C3559'; // Primary color
+  const wallColor = '#0F172A'; // Slate-900 - dark neutral that contrasts with cyan/blue hotspots
   const accentColor = '#3887A6'; // Secondary color
 
   return (

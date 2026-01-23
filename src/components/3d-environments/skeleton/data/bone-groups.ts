@@ -5,35 +5,35 @@ import { BONE_HOTSPOTS } from './bone-hotspots';
 
 // CRANIO (Skull region)
 export const SKULL_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['cranio', 'frontale', 'parietale', 'temporale', 'occipitale', 'mandibola'].includes(h.id)
+  ['cranio', 'frontale', 'parietale', 'temporale', 'zigomatico', 'occipitale', 'mandibola', 'atlante', 'epistrofeo', 'clavicola'].includes(h.id)
 );
 
 // COLONNA VERTEBRALE (Spine region)
 export const SPINE_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['vertebre-cervicali', 'vertebre-toraciche', 'vertebre-lombari', 'sacro', 'coccige'].includes(h.id)
+  ['colonna-vertebrale', 'vertebre-cervicali', 'vertebre-toraciche', 'vertebre-lombari', 'sacro', 'coccige', 'scapola', 'spina-della-scapola', 'acromion'].includes(h.id)
 );
 
 // GABBIA TORACICA (Rib cage region)
 export const RIBCAGE_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['sterno', 'costole', 'clavicola', 'scapola'].includes(h.id)
+  ['sterno', 'costole', 'costola-fluttuante'].includes(h.id)
 );
 
 // BACINO (Pelvis region)
 export const PELVIS_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['osso-iliaco', 'ischio', 'pube'].includes(h.id)
+  ['ileo', 'ischio'].includes(h.id)
 );
 
 // ARTO SUPERIORE (Upper limb)
 export const UPPER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['omero', 'radio', 'ulna', 'carpo', 'metacarpo', 'falangi-mano'].includes(h.id)
+  ['omero', 'testa-dell-omero', 'epicondilo', 'radio', 'ulna', 'olecrano', 'carpo', 'metacarpo'].includes(h.id)
 );
 
 // ARTO INFERIORE (Lower limb)
 export const LOWER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['femore', 'rotula', 'tibia', 'perone', 'tarso', 'metatarso', 'falangi-piede'].includes(h.id)
+  ['femore', 'grande-trocantere', 'collo-del-femore', 'testa-del-femore', 'condilo-mediale-femore', 'condilo-laterale-femore', 'rotula', 'tibia', 'perone', 'astragalo', 'calcagno', 'tarso', 'metatarso', 'falangi-piede', 'prima-falange', 'seconda-falange'].includes(h.id)
 );
 
 // ARTICOLAZIONI (Joints)
 export const JOINTS_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['gomito', 'polso', 'anca', 'ginocchio', 'caviglia'].includes(h.id)
+  ['anca', 'caviglia'].includes(h.id)
 );

@@ -55,8 +55,8 @@ export const BONE_PARTS: BonePartConfig[] = [
     id: 'limbs',
     labelKey: 'limbs',
     label: 'Arti',
-    cameraPosition: [0.8, 0, 2],
-    cameraTarget: [0, 0, 0],
+    cameraPosition: [0.6, -0.3, 1.8],
+    cameraTarget: [0, -0.2, 0],
     icon: '🦴',
   },
 ];

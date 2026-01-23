@@ -167,25 +167,35 @@ export function BonePartsPanel({
                     <div
                       className={`
                       overflow-hidden transition-all duration-300 ease-in-out
-                      ${expandConfig.expanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
+                      ${expandConfig.expanded ? 'max-h-[300px] opacity-100 mt-2' : 'max-h-0 opacity-0'}
                     `}
                     >
-                      <div className="bg-[#0a2a47] rounded-lg p-2 space-y-1 ml-2 border-l-2 border-[#3887A6]/50">
-                        <div className="text-[10px] text-white/50 font-medium px-1 mb-1">
+                      <div className="bg-[#0a2a47] rounded-lg p-2 ml-2 border-l-2 border-[#3887A6]/50 max-h-[280px] overflow-y-auto
+                        [&::-webkit-scrollbar]:w-1.5
+                        [&::-webkit-scrollbar-track]:bg-[#0a2a47]
+                        [&::-webkit-scrollbar-track]:rounded-full
+                        [&::-webkit-scrollbar-thumb]:bg-[#3887A6]
+                        [&::-webkit-scrollbar-thumb]:rounded-full
+                        [&::-webkit-scrollbar-thumb]:hover:bg-[#4a9dc0]
+                        scrollbar-thin scrollbar-track-[#0a2a47] scrollbar-thumb-[#3887A6]"
+                      >
+                        <div className="text-[10px] text-white/50 font-medium px-1 mb-1 sticky top-0 bg-[#0a2a47] pb-1">
                           {expandConfig.title}
                         </div>
-                        {expandConfig.hotspots.map(hotspot => {
-                          const boneHotspot = BONE_HOTSPOTS.find(h => h.id === hotspot.id);
-                          return (
-                            <HotspotMenuItem
-                              key={hotspot.id}
-                              hotspot={hotspot}
-                              isPlaying={playingHotspotId === hotspot.id}
-                              transcription={boneHotspot?.transcription || ''}
-                              onPlay={() => handlePlayFromMenu(hotspot.id)}
-                            />
-                          );
-                        })}
+                        <div className="space-y-1">
+                          {expandConfig.hotspots.map(hotspot => {
+                            const boneHotspot = BONE_HOTSPOTS.find(h => h.id === hotspot.id);
+                            return (
+                              <HotspotMenuItem
+                                key={hotspot.id}
+                                hotspot={hotspot}
+                                isPlaying={playingHotspotId === hotspot.id}
+                                transcription={boneHotspot?.transcription || ''}
+                                onPlay={() => handlePlayFromMenu(hotspot.id)}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}

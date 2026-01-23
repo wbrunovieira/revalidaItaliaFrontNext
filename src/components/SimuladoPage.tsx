@@ -20,6 +20,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 
+// Normaliza quebras de linha - converte \\n escapado para \n real
+// Necessário para dados antigos que podem ter sido salvos com escape incorreto
+const normalizeText = (text: string | undefined): string => {
+  if (!text) return '';
+  return text.replace(/\\n/g, '\n');
+};
+
 interface Assessment {
   id: string;
   title: string;
@@ -636,7 +643,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
               
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-white leading-relaxed whitespace-pre-wrap">
-                  {currentQuestion.text}
+                  {normalizeText(currentQuestion.text)}
                 </h2>
                 
                 {currentQuestion.type === 'MULTIPLE_CHOICE' && (
@@ -662,7 +669,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                             )}
                           </div>
                           <span className="text-gray-300 flex-1 whitespace-pre-wrap">
-                            {String.fromCharCode(65 + index)}. {option.text}
+                            {String.fromCharCode(65 + index)}. {normalizeText(option.text)}
                           </span>
                         </div>
                       </button>
@@ -823,7 +830,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                       )}
                       <div className="flex-1">
                         <h4 className="font-medium text-white mb-2 whitespace-pre-wrap">
-                          Questão {index + 1}: {answer.questionText}
+                          Questão {index + 1}: {normalizeText(answer.questionText)}
                         </h4>
                         
                         {/* Argumento */}
@@ -862,7 +869,7 @@ export default function SimuladoPage({ assessment, questions, backUrl }: Simulad
                               </span>
                             </div>
                             <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                              {answer.explanation}
+                              {normalizeText(answer.explanation)}
                             </p>
                           </div>
                         )}

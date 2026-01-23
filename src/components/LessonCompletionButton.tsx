@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,51 @@ export default function LessonCompletionButton({
   const t = useTranslations('Lesson');
   const [isCompleted, setIsCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingStatus, setIsFetchingStatus] = useState(true);
   const [videoProgress, setVideoProgress] = useState(initialVideoProgress);
+  const hasAutoCompletedRef = useRef(false);
+
+  // Fetch initial completion status from progress endpoint
+  useEffect(() => {
+    const fetchCompletionStatus = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('token='))
+          ?.split('=')[1];
+
+        if (!token) {
+          setIsFetchingStatus(false);
+          return;
+        }
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(
+          `${apiUrl}/api/v1/progress/lesson/${lessonId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[LessonCompletion] Initial status from progress API:', data);
+          setIsCompleted(data.completed || false);
+          if (data.completed) {
+            hasAutoCompletedRef.current = true;
+          }
+        }
+      } catch (error) {
+        console.error('[LessonCompletion] Error fetching status:', error);
+      } finally {
+        setIsFetchingStatus(false);
+      }
+    };
+
+    fetchCompletionStatus();
+  }, [lessonId]);
 
   // Listen for video progress updates
   useEffect(() => {
@@ -38,7 +82,7 @@ export default function LessonCompletionButton({
     };
 
     window.addEventListener('videoProgressUpdate', handleVideoProgress as EventListener);
-    
+
     return () => {
       window.removeEventListener('videoProgressUpdate', handleVideoProgress as EventListener);
     };
@@ -137,6 +181,34 @@ export default function LessonCompletionButton({
   const handleToggleCompletion = () => {
     handleComplete(!isCompleted);
   };
+
+  // Auto-complete when video reaches 90%
+  useEffect(() => {
+    if (
+      hasVideo &&
+      videoProgress >= 90 &&
+      !isCompleted &&
+      !hasAutoCompletedRef.current &&
+      !isLoading &&
+      !isFetchingStatus
+    ) {
+      console.log('[LessonCompletion] Auto-completing lesson (video >= 90%)');
+      hasAutoCompletedRef.current = true;
+      handleComplete(true);
+    }
+  }, [videoProgress, isCompleted, hasVideo, isLoading, isFetchingStatus, handleComplete]);
+
+  // Show loading while fetching initial status
+  if (isFetchingStatus) {
+    return (
+      <div className={cn('flex flex-col gap-2', className)}>
+        <Button disabled variant="outline" className="w-full">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {t('loading')}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>

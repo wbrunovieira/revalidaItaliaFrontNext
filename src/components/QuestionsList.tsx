@@ -10,10 +10,12 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   HelpCircle,
   ClipboardList,
   Calendar,
   Clock,
+  Filter,
 } from 'lucide-react';
 import {
   Select,
@@ -114,6 +116,20 @@ export default function QuestionsList() {
   const [loading, setLoading] = useState(false);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+
+  // Pagination state for assessments
+  const [assessmentsPage, setAssessmentsPage] = useState(1);
+  const [assessmentsPagination, setAssessmentsPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false,
+  });
+
+  // Type filter state
+  const [typeFilter, setTypeFilter] = useState<string>('');
   
   // View modal state
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -128,13 +144,24 @@ export default function QuestionsList() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingQuestion, setDeletingQuestion] = useState<Question | null>(null);
 
-  // Load assessments
-  const loadAssessments = useCallback(async () => {
+  // Load assessments with pagination and type filter
+  const loadAssessments = useCallback(async (page = 1, type = '') => {
     setLoadingAssessments(true);
     try {
       const token = getToken();
+
+      // Build query params
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+      });
+
+      if (type) {
+        params.append('type', type);
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/assessments?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -149,6 +176,13 @@ export default function QuestionsList() {
 
       const data = await response.json();
       setAssessments(data.assessments || []);
+
+      // Update pagination state
+      if (data.pagination) {
+        setAssessmentsPagination(data.pagination);
+      }
+
+      setAssessmentsPage(page);
     } catch (error) {
       console.error('Error loading assessments:', error);
       toast({
@@ -196,10 +230,31 @@ export default function QuestionsList() {
     }
   }, [selectedAssessmentId, t, toast]);
 
-  // Load assessments when component mounts
+  // Load assessments when component mounts or type filter changes
   useEffect(() => {
-    loadAssessments();
-  }, [loadAssessments]);
+    loadAssessments(1, typeFilter);
+  }, [loadAssessments, typeFilter]);
+
+  // Handle type filter change
+  const handleTypeFilterChange = useCallback((type: string) => {
+    setTypeFilter(type);
+    setAssessmentsPage(1);
+    setSelectedAssessmentId('');
+    setDetailedData(null);
+  }, []);
+
+  // Handle pagination
+  const handleAssessmentsPrevPage = useCallback(() => {
+    if (assessmentsPagination.hasPrevious) {
+      loadAssessments(assessmentsPage - 1, typeFilter);
+    }
+  }, [assessmentsPagination.hasPrevious, assessmentsPage, typeFilter, loadAssessments]);
+
+  const handleAssessmentsNextPage = useCallback(() => {
+    if (assessmentsPagination.hasNext) {
+      loadAssessments(assessmentsPage + 1, typeFilter);
+    }
+  }, [assessmentsPagination.hasNext, assessmentsPage, typeFilter, loadAssessments]);
 
   // Load detailed questions when assessment is selected
   useEffect(() => {
@@ -377,7 +432,68 @@ export default function QuestionsList() {
             <ClipboardList size={20} className="text-green-400" />
             <Label className="text-white font-medium">{t('selectAssessment')}</Label>
           </div>
-          
+
+          {/* Type Filter Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Filter size={16} className="text-gray-400" />
+            <span className="text-sm text-gray-400 mr-2">Filtrar por tipo:</span>
+            <button
+              type="button"
+              onClick={() => handleTypeFilterChange('')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === ''
+                  ? 'bg-secondary text-primary'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTypeFilterChange('SIMULADO')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === 'SIMULADO'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Simulado
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTypeFilterChange('QUIZ')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === 'QUIZ'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Quiz
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTypeFilterChange('PROVA_ABERTA')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === 'PROVA_ABERTA'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Prova Aberta
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTypeFilterChange('ORAL_EXAM')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === 'ORAL_EXAM'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Prova Oral
+            </button>
+          </div>
+
           <Select
             value={selectedAssessmentId}
             onValueChange={handleAssessmentChange}
@@ -386,28 +502,79 @@ export default function QuestionsList() {
             <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
               <SelectValue placeholder={t('selectAssessmentPlaceholder')} />
             </SelectTrigger>
-            <SelectContent className="bg-gray-700 border-gray-600">
-              {assessments.map((assessment) => (
-                <SelectItem
-                  key={assessment.id}
-                  value={assessment.id}
-                  className="text-white hover:bg-gray-600"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>{assessment.title}</span>
-                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getQuestionTypeBadge(assessment.type)}`}>
-                      {t(`assessmentTypes.${assessment.type.toLowerCase()}`)}
-                    </span>
+            <SelectContent className="bg-gray-700 border-gray-600 max-h-80">
+              {assessments.length === 0 ? (
+                <div className="px-4 py-3 text-gray-400 text-center">
+                  {loadingAssessments ? 'Carregando...' : 'Nenhuma avaliação encontrada'}
+                </div>
+              ) : (
+                assessments.map((assessment) => (
+                  <SelectItem
+                    key={assessment.id}
+                    value={assessment.id}
+                    className="text-white hover:bg-gray-600"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{assessment.title}</span>
+                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getQuestionTypeBadge(assessment.type)}`}>
+                        {t(`assessmentTypes.${assessment.type.toLowerCase()}`)}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))
+              )}
+
+              {/* Pagination Controls inside dropdown */}
+              {assessmentsPagination.totalPages > 1 && (
+                <div className="flex items-center justify-between px-3 py-3 mt-1 border-t border-gray-600 bg-gray-800/80 sticky bottom-0">
+                  <div className="text-xs text-gray-400">
+                    Pág. {assessmentsPagination.page}/{assessmentsPagination.totalPages} ({assessmentsPagination.total} total)
                   </div>
-                </SelectItem>
-              ))}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleAssessmentsPrevPage();
+                      }}
+                      disabled={!assessmentsPagination.hasPrevious || loadingAssessments}
+                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Página anterior"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleAssessmentsNextPage();
+                      }}
+                      disabled={!assessmentsPagination.hasNext || loadingAssessments}
+                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Próxima página"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </SelectContent>
           </Select>
-          
+
           {loadingAssessments && (
             <div className="flex items-center gap-2 text-gray-400">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-secondary"></div>
               {t('loadingAssessments')}
+            </div>
+          )}
+
+          {/* Pagination info outside dropdown */}
+          {assessmentsPagination.total > 0 && (
+            <div className="text-sm text-gray-400">
+              Mostrando {assessments.length} de {assessmentsPagination.total} avaliações
+              {typeFilter && ` (filtrado por ${typeFilter.replace('_', ' ')})`}
             </div>
           )}
         </div>

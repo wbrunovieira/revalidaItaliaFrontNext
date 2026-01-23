@@ -19,6 +19,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/stores/auth.store';
 
+// Normaliza quebras de linha - converte \\n escapado para \n real
+// Necessário para dados antigos que podem ter sido salvos com escape incorreto
+const normalizeText = (text: string | undefined): string => {
+  if (!text) return '';
+  return text.replace(/\\n/g, '\n');
+};
+
 interface Assessment {
   id: string;
   title: string;
@@ -803,8 +810,8 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
               )}
               
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-white leading-relaxed">
-                  {currentQuestion.text}
+                <h2 className="text-xl font-semibold text-white leading-relaxed whitespace-pre-wrap">
+                  {normalizeText(currentQuestion.text)}
                 </h2>
                 
                 {/* Área de resposta dissertativa */}
@@ -977,8 +984,8 @@ export default function ProvaAbertaPage({ assessment, questions, locale, backUrl
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-white mb-2">
-                        {question.text}
+                      <h4 className="font-medium text-white mb-2 whitespace-pre-wrap">
+                        {normalizeText(question.text)}
                       </h4>
                       
                       {/* Argumento */}

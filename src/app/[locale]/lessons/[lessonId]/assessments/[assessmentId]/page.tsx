@@ -101,9 +101,9 @@ export default async function AssessmentPage({
     return notFound();
   }
 
-  // Fetch questions for this assessment
+  // Fetch questions for this assessment (usando /detailed para aplicar randomização do backend)
   const questionsResponse = await fetch(
-    `${API_URL}/api/v1/assessments/${assessmentId}/questions`,
+    `${API_URL}/api/v1/assessments/${assessmentId}/questions/detailed`,
     {
       cache: 'no-store',
       headers: {

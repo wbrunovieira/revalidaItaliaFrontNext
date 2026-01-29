@@ -1,0 +1,440 @@
+---
+# configure-safe-updates.yml
+# Configura atualizações automáticas de forma segura para produção
+#
+# O que faz:
+# - Configura apenas atualizações de SEGURANÇA (não todas)
+# - Define horário fixo: Domingo às 04:00 UTC
+# - Desabilita reboot automático
+# - Desabilita reinício automático de serviços
+# - Cria script para verificar updates pendentes
+#
+# Uso: ansible-playbook -i inventory_frontend.yml configure-safe-updates.yml
+#
+# Problema que resolve:
+# O apt-daily-upgrade causou "systemd Reexecuting" que parou todos os serviços
+# simultaneamente, incluindo o DNS (systemd-resolved), fazendo o Nginx falhar
+# ao tentar resolver o upstream S3.
+
+- name: Configure Safe Automatic Updates for Production
+  hosts: frontend
+  become: true
+
+  vars:
+    # Horário das atualizações (UTC)
+    update_hour: "04"
+    update_minute: "00"
+    update_day: "Sun"  # Domingo
+
+    # Email para notificações (opcional - deixe vazio para desabilitar)
+    admin_email: ""
+
+  tasks:
+    # =========================================================================
+    # BACKUP DAS CONFIGURAÇÕES ATUAIS
+    # =========================================================================
+    - name: Create backup directory
+      file:
+        path: /root/apt-config-backup
+        state: directory
+        mode: '0700'
+
+    - name: Backup current unattended-upgrades config
+      copy:
+        src: /etc/apt/apt.conf.d/50unattended-upgrades
+        dest: /root/apt-config-backup/50unattended-upgrades.bak.{{ ansible_date_time.epoch }}
+        remote_src: yes
+      ignore_errors: yes
+
+    # =========================================================================
+    # INSTALAR PACOTES NECESSÁRIOS
+    # =========================================================================
+    - name: Ensure unattended-upgrades is installed
+      apt:
+        name:
+          - unattended-upgrades
+          - apt-listchanges
+        state: present
+        update_cache: yes
+
+    # =========================================================================
+    # CONFIGURAR UNATTENDED-UPGRADES (APENAS SEGURANÇA)
+    # =========================================================================
+    - name: Configure unattended-upgrades for security only
+      copy:
+        content: |
+          // Configuração segura para produção - Gerado por Ansible
+          // Data: {{ ansible_date_time.iso8601 }}
+
+          // APENAS atualizações de segurança (NÃO updates gerais)
+          Unattended-Upgrade::Allowed-Origins {
+              "${distro_id}:${distro_codename}-security";
+              "${distro_id}ESMApps:${distro_codename}-apps-security";
+              "${distro_id}ESM:${distro_codename}-infra-security";
+              // "${distro_id}:${distro_codename}-updates";  // DESABILITADO
+          };
+
+          // Pacotes para NUNCA atualizar automaticamente (críticos)
+          Unattended-Upgrade::Package-Blacklist {
+              "nginx";
+              "nodejs";
+              "npm";
+              "docker-ce";
+              "docker-ce-cli";
+              "containerd.io";
+          };
+
+          // NÃO reiniciar automaticamente (CRÍTICO para produção)
+          Unattended-Upgrade::Automatic-Reboot "false";
+
+          // Se fosse reiniciar, seria neste horário (mas está desabilitado)
+          Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+
+          // NÃO reiniciar serviços automaticamente durante upgrade
+          Unattended-Upgrade::InstallOnShutdown "false";
+
+          // Remover dependências não utilizadas
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+          Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+
+          // Remover kernels antigos não utilizados
+          Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+
+          // Logging detalhado
+          Unattended-Upgrade::SyslogEnable "true";
+          Unattended-Upgrade::SyslogFacility "daemon";
+
+          // Baixar mas NÃO instalar automaticamente (mais seguro)
+          // Descomente a linha abaixo para modo ultra-seguro
+          // Unattended-Upgrade::Download-Only "true";
+
+          {% if admin_email %}
+          // Enviar email apenas em caso de erro
+          Unattended-Upgrade::Mail "{{ admin_email }}";
+          Unattended-Upgrade::MailReport "only-on-error";
+          {% endif %}
+
+          // Limitar banda para não impactar produção
+          Acquire::http::Dl-Limit "1000";
+
+          // Não atualizar se houver usuários logados (opcional)
+          // Unattended-Upgrade::Skip-Updates-On-Metered-Connections "true";
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart unattended-upgrades
+
+    # =========================================================================
+    # CONFIGURAR PERIODICIDADE
+    # =========================================================================
+    - name: Configure APT periodic settings
+      copy:
+        content: |
+          // Configuração de periodicidade - Gerado por Ansible
+
+          // Atualizar lista de pacotes diariamente
+          APT::Periodic::Update-Package-Lists "1";
+
+          // Baixar atualizações diariamente (mas não instalar)
+          APT::Periodic::Download-Upgradeable-Packages "1";
+
+          // Executar unattended-upgrade diariamente (apenas segurança)
+          APT::Periodic::Unattended-Upgrade "1";
+
+          // Limpar cache de pacotes a cada 7 dias
+          APT::Periodic::AutocleanInterval "7";
+
+          // Verbose logging
+          APT::Periodic::Verbose "1";
+        dest: /etc/apt/apt.conf.d/10periodic
+        owner: root
+        group: root
+        mode: '0644'
+
+    # =========================================================================
+    # CONFIGURAR TIMER PARA HORÁRIO ESPECÍFICO
+    # =========================================================================
+    - name: Create custom apt-daily-upgrade timer override directory
+      file:
+        path: /etc/systemd/system/apt-daily-upgrade.timer.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure apt-daily-upgrade timer for specific time (Sunday 4AM)
+      copy:
+        content: |
+          # Override para executar apenas no domingo às 04:00 UTC
+          # Gerado por Ansible
+          [Timer]
+          OnCalendar=
+          OnCalendar={{ update_day }} *-*-* {{ update_hour }}:{{ update_minute }}
+          RandomizedDelaySec=0
+          Persistent=true
+        dest: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload systemd
+
+    - name: Create custom apt-daily timer override directory
+      file:
+        path: /etc/systemd/system/apt-daily.timer.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure apt-daily timer for early morning
+      copy:
+        content: |
+          # Override para executar às 03:00 UTC (antes do upgrade)
+          # Gerado por Ansible
+          [Timer]
+          OnCalendar=
+          OnCalendar=*-*-* 03:00
+          RandomizedDelaySec=0
+          Persistent=true
+        dest: /etc/systemd/system/apt-daily.timer.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload systemd
+
+    # =========================================================================
+    # DESABILITAR NEEDRESTART AUTOMÁTICO (evita reinício de serviços)
+    # =========================================================================
+    - name: Check if needrestart is installed
+      stat:
+        path: /etc/needrestart/needrestart.conf
+      register: needrestart_config
+
+    - name: Configure needrestart to not restart services automatically
+      lineinfile:
+        path: /etc/needrestart/needrestart.conf
+        regexp: '^\$nrconf\{restart\}'
+        line: "$nrconf{restart} = 'l';"  # 'l' = list only, don't restart
+        backup: yes
+      when: needrestart_config.stat.exists
+
+    # =========================================================================
+    # CRIAR SCRIPT DE VERIFICAÇÃO DE UPDATES
+    # =========================================================================
+    - name: Create script to check pending updates
+      copy:
+        content: |
+          #!/bin/bash
+          # check-updates.sh - Verifica atualizações pendentes
+          # Gerado por Ansible
+
+          echo "=========================================="
+          echo "  Verificação de Atualizações Pendentes"
+          echo "  Data: $(date)"
+          echo "=========================================="
+          echo ""
+
+          # Atualizar lista de pacotes
+          apt-get update -qq
+
+          # Verificar atualizações de segurança
+          echo "🔒 Atualizações de SEGURANÇA pendentes:"
+          apt-get -s dist-upgrade | grep "^Inst" | grep -i security || echo "   Nenhuma"
+          echo ""
+
+          # Verificar todas as atualizações
+          echo "📦 TODAS as atualizações pendentes:"
+          apt list --upgradable 2>/dev/null | tail -n +2 || echo "   Nenhuma"
+          echo ""
+
+          # Verificar se reboot é necessário
+          if [ -f /var/run/reboot-required ]; then
+              echo "⚠️  ATENÇÃO: Reboot pendente!"
+              cat /var/run/reboot-required.pkgs 2>/dev/null
+          else
+              echo "✅ Nenhum reboot pendente"
+          fi
+          echo ""
+
+          # Verificar último upgrade
+          echo "📅 Último unattended-upgrade:"
+          grep "Packages that will be upgraded" /var/log/unattended-upgrades/unattended-upgrades.log 2>/dev/null | tail -3 || echo "   Sem registros"
+          echo ""
+
+          # Status dos timers
+          echo "⏰ Status dos timers APT:"
+          systemctl list-timers apt-daily apt-daily-upgrade --no-pager
+          echo ""
+
+          echo "=========================================="
+        dest: /usr/local/bin/check-updates
+        owner: root
+        group: root
+        mode: '0755'
+
+    # =========================================================================
+    # CRIAR SCRIPT DE UPDATE MANUAL SEGURO
+    # =========================================================================
+    - name: Create safe manual update script
+      copy:
+        content: |
+          #!/bin/bash
+          # safe-update.sh - Atualização manual segura para produção
+          # Gerado por Ansible
+
+          set -e
+
+          echo "=========================================="
+          echo "  Atualização Manual Segura"
+          echo "  Data: $(date)"
+          echo "=========================================="
+          echo ""
+
+          # Verificar se é root
+          if [ "$EUID" -ne 0 ]; then
+              echo "❌ Execute como root: sudo $0"
+              exit 1
+          fi
+
+          # Mostrar o que será atualizado
+          echo "📋 Verificando atualizações disponíveis..."
+          apt-get update -qq
+
+          UPDATES=$(apt list --upgradable 2>/dev/null | tail -n +2)
+          if [ -z "$UPDATES" ]; then
+              echo "✅ Sistema já está atualizado!"
+              exit 0
+          fi
+
+          echo ""
+          echo "Pacotes a serem atualizados:"
+          echo "$UPDATES"
+          echo ""
+
+          # Confirmar
+          read -p "Deseja continuar? (s/N): " confirm
+          if [ "$confirm" != "s" ] && [ "$confirm" != "S" ]; then
+              echo "Cancelado."
+              exit 0
+          fi
+
+          # Fazer backup do estado dos serviços
+          echo ""
+          echo "📸 Salvando estado dos serviços..."
+          systemctl list-units --type=service --state=running > /tmp/services-before-update.txt
+
+          # Executar atualização
+          echo ""
+          echo "🔄 Executando atualização..."
+          apt-get upgrade -y
+
+          # Verificar serviços
+          echo ""
+          echo "🔍 Verificando serviços críticos..."
+
+          for service in nginx pm2-ubuntu; do
+              if systemctl is-active --quiet $service 2>/dev/null; then
+                  echo "   ✅ $service: running"
+              else
+                  echo "   ❌ $service: NOT RUNNING - tentando reiniciar..."
+                  systemctl start $service || true
+              fi
+          done
+
+          # Verificar se reboot é necessário
+          echo ""
+          if [ -f /var/run/reboot-required ]; then
+              echo "⚠️  ATENÇÃO: Reboot necessário para completar atualização"
+              echo "   Pacotes que requerem reboot:"
+              cat /var/run/reboot-required.pkgs 2>/dev/null
+              echo ""
+              echo "   Execute 'sudo reboot' quando possível"
+          else
+              echo "✅ Atualização completa! Nenhum reboot necessário."
+          fi
+
+          echo ""
+          echo "=========================================="
+        dest: /usr/local/bin/safe-update
+        owner: root
+        group: root
+        mode: '0755'
+
+    # =========================================================================
+    # RECARREGAR CONFIGURAÇÕES
+    # =========================================================================
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart apt-daily timer
+      systemd:
+        name: apt-daily.timer
+        state: restarted
+        enabled: yes
+
+    - name: Restart apt-daily-upgrade timer
+      systemd:
+        name: apt-daily-upgrade.timer
+        state: restarted
+        enabled: yes
+
+    # =========================================================================
+    # VERIFICAÇÃO FINAL
+    # =========================================================================
+    - name: Show timer configuration
+      command: systemctl list-timers apt-daily apt-daily-upgrade --no-pager
+      register: timer_status
+      changed_when: false
+
+    - name: Display timer status
+      debug:
+        msg: "{{ timer_status.stdout_lines }}"
+
+    - name: Show unattended-upgrades configuration summary
+      shell: |
+        echo "=== Configuração Atual ==="
+        echo ""
+        echo "Origens permitidas:"
+        grep -A5 "Allowed-Origins" /etc/apt/apt.conf.d/50unattended-upgrades | head -10
+        echo ""
+        echo "Pacotes bloqueados:"
+        grep -A10 "Package-Blacklist" /etc/apt/apt.conf.d/50unattended-upgrades | head -12
+        echo ""
+        echo "Reboot automático:"
+        grep "Automatic-Reboot" /etc/apt/apt.conf.d/50unattended-upgrades
+      register: config_summary
+      changed_when: false
+
+    - name: Display configuration summary
+      debug:
+        msg: "{{ config_summary.stdout_lines }}"
+
+    - name: Final instructions
+      debug:
+        msg:
+          - "=========================================="
+          - "✅ Configuração de atualizações seguras aplicada!"
+          - ""
+          - "📅 Atualizações de SEGURANÇA serão aplicadas:"
+          - "   - Dia: Domingo"
+          - "   - Horário: 04:00 UTC (01:00 Brasília)"
+          - ""
+          - "🛡️ Proteções ativadas:"
+          - "   - Apenas patches de segurança"
+          - "   - nginx, nodejs, npm bloqueados"
+          - "   - Reboot automático DESABILITADO"
+          - "   - Reinício de serviços DESABILITADO"
+          - ""
+          - "📋 Comandos úteis:"
+          - "   - Verificar updates: sudo check-updates"
+          - "   - Update manual: sudo safe-update"
+          - ""
+          - "=========================================="
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart unattended-upgrades
+      systemd:
+        name: unattended-upgrades
+        state: restarted

@@ -1,0 +1,179 @@
+---
+# fix-nginx-s3-resolver.yml
+# Corrige problema de DNS do S3 no Nginx que impede o startup
+# Problema: Nginx falha ao iniciar quando não consegue resolver DNS do S3 bucket
+# Solução: Usar resolver + variável para resolver DNS em runtime
+#
+# Uso: ansible-playbook -i inventory_frontend.yml fix-nginx-s3-resolver.yml
+
+- name: Fix Nginx S3 DNS Resolution Issue
+  hosts: frontend
+  become: true
+
+  vars:
+    nginx_ssl_config: /etc/nginx/sites-available/portalrevalida.com-ssl
+    s3_bucket: "revalida-documents-891ff933.s3.us-east-2.amazonaws.com"
+
+  tasks:
+    - name: Check if Nginx SSL config exists
+      stat:
+        path: "{{ nginx_ssl_config }}"
+      register: ssl_config
+
+    - name: Fail if SSL config not found
+      fail:
+        msg: "Nginx SSL config not found at {{ nginx_ssl_config }}"
+      when: not ssl_config.stat.exists
+
+    - name: Backup current Nginx SSL config
+      copy:
+        src: "{{ nginx_ssl_config }}"
+        dest: "{{ nginx_ssl_config }}.bak.{{ ansible_date_time.epoch }}"
+        remote_src: yes
+        mode: '0644'
+
+    - name: Create corrected Nginx SSL configuration
+      copy:
+        content: |
+          server {
+              listen 443 ssl http2;
+              listen [::]:443 ssl http2;
+              server_name portalrevalida.com www.portalrevalida.com;
+
+              # SSL Configuration
+              ssl_certificate /etc/nginx/ssl/portalrevalida.com.crt;
+              ssl_certificate_key /etc/nginx/ssl/portalrevalida.com.key;
+
+              # SSL Security Settings
+              ssl_protocols TLSv1.2 TLSv1.3;
+              ssl_ciphers HIGH:!aNULL:!MD5;
+              ssl_prefer_server_ciphers on;
+
+              # Security headers
+              add_header X-Frame-Options "SAMEORIGIN" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header X-Content-Type-Options "nosniff" always;
+              add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+              # Cloudflare Real IP
+              set_real_ip_from 173.245.48.0/20;
+              set_real_ip_from 103.21.244.0/22;
+              set_real_ip_from 103.22.200.0/22;
+              set_real_ip_from 103.31.4.0/22;
+              set_real_ip_from 141.101.64.0/18;
+              set_real_ip_from 108.162.192.0/18;
+              set_real_ip_from 190.93.240.0/20;
+              set_real_ip_from 188.114.96.0/20;
+              set_real_ip_from 197.234.240.0/22;
+              set_real_ip_from 198.41.128.0/17;
+              set_real_ip_from 162.158.0.0/15;
+              set_real_ip_from 104.16.0.0/13;
+              set_real_ip_from 104.24.0.0/14;
+              set_real_ip_from 172.64.0.0/13;
+              set_real_ip_from 131.0.72.0/22;
+              real_ip_header CF-Connecting-IP;
+
+              # Proxy para assets públicos do S3
+              # CORREÇÃO: Usar resolver + variável para resolver DNS em runtime
+              # Isso evita que o Nginx falhe ao iniciar se o DNS do S3 não resolver
+              location /public/ {
+                  resolver 8.8.8.8 8.8.4.4 valid=300s;
+                  resolver_timeout 5s;
+
+                  set $s3_bucket "{{ s3_bucket }}";
+
+                  proxy_pass https://$s3_bucket/public/;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host $s3_bucket;
+                  proxy_ssl_server_name on;
+                  proxy_cache_valid 200 7d;
+                  proxy_cache_valid 404 1m;
+                  expires 7d;
+                  add_header Cache-Control "public, immutable";
+              }
+
+              # Proxy para Next.js (aplicação)
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_cache_bypass $http_upgrade;
+
+                  # Timeouts
+                  proxy_connect_timeout 60s;
+                  proxy_send_timeout 60s;
+                  proxy_read_timeout 60s;
+
+                  # Buffer settings
+                  proxy_buffering off;
+                  proxy_buffer_size 4k;
+                  proxy_buffers 8 4k;
+                  proxy_busy_buffers_size 8k;
+
+                  # Max body size
+                  client_max_body_size 50M;
+              }
+          }
+        dest: "{{ nginx_ssl_config }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Test Nginx configuration
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Display Nginx test result
+      debug:
+        var: nginx_test.stderr_lines
+
+    - name: Start Nginx service
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      when: nginx_test.rc == 0
+
+    - name: Reload Nginx if already running
+      systemd:
+        name: nginx
+        state: reloaded
+      when: nginx_test.rc == 0
+      ignore_errors: yes
+
+    - name: Check Nginx status
+      command: systemctl status nginx
+      register: nginx_status
+      changed_when: false
+
+    - name: Display Nginx status
+      debug:
+        msg: "{{ nginx_status.stdout_lines }}"
+
+    - name: Verify ports are listening
+      shell: ss -tlnp | grep -E ':80|:443' || echo "Ports not listening yet"
+      register: ports_check
+      changed_when: false
+
+    - name: Display listening ports
+      debug:
+        msg: "{{ ports_check.stdout_lines }}"
+
+    - name: Test local connectivity
+      uri:
+        url: http://localhost:80
+        method: HEAD
+        status_code: [200, 301, 302, 307]
+        timeout: 10
+      register: http_test
+      ignore_errors: yes
+
+    - name: Display HTTP test result
+      debug:
+        msg: "HTTP test: {{ 'SUCCESS' if http_test.status is defined else 'FAILED' }}"

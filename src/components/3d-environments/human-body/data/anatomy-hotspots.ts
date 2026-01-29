@@ -1,15 +1,10 @@
 import type { AnatomyHotspot } from '../types';
 
-// Audio path helper - handles dev vs production paths
-export const getAudioPath = (filename: string) => {
-  return process.env.NODE_ENV === 'production' ? `/public/audios/${filename}` : `/audios/${filename}`;
-};
+// Audio path helper - Next.js serves public/ files from root /
+export const getAudioPath = (filename: string) => `/audios/${filename}`;
 
-// Model path helper - handles dev vs production paths
-export const MODEL_PATH =
-  process.env.NODE_ENV === 'production'
-    ? '/public/models/human-body/anatomy-internal.glb'
-    : '/models/human-body/anatomy-internal.glb';
+// Model path - Next.js serves public/ files from root /
+export const MODEL_PATH = '/models/human-body/anatomy-internal.glb';
 
 // Anatomy hotspots data (positions relative to model)
 // yMin/yMax define the vertical range of meshes to highlight

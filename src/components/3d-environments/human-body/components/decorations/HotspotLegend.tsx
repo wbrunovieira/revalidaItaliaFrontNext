@@ -4,7 +4,8 @@ import { Text } from '@react-three/drei';
 
 // Legend for hotspot types on wall (next to chalkboard)
 export function HotspotLegend() {
-  const primaryColor = '#0C3559';
+  const titleColor = '#0C3559'; // Primary dark for title
+  const pointColor = '#D97B5A'; // Coral/terracotta for points
   const secondaryColor = '#3887A6';
 
   return (
@@ -19,13 +20,13 @@ export function HotspotLegend() {
       <Text
         position={[0, 0.5, 0.01]}
         fontSize={0.12}
-        color={primaryColor}
+        color={titleColor}
         anchorX="center"
         anchorY="middle"
         fontWeight={700}
       >
         LEGENDA ANATOMICA
-        <meshBasicMaterial color={primaryColor} />
+        <meshBasicMaterial color={titleColor} />
       </Text>
 
       {/* Point section */}
@@ -33,19 +34,19 @@ export function HotspotLegend() {
         {/* Sphere symbol - big */}
         <mesh>
           <sphereGeometry args={[0.12, 16, 16]} />
-          <meshStandardMaterial color={primaryColor} emissive={primaryColor} emissiveIntensity={0.5} />
+          <meshStandardMaterial color={pointColor} emissive={pointColor} emissiveIntensity={0.5} />
         </mesh>
         {/* Point label */}
         <Text
           position={[0.35, 0.02, 0]}
           fontSize={0.16}
-          color={primaryColor}
+          color={pointColor}
           anchorX="left"
           anchorY="middle"
           fontWeight={700}
         >
           Punto
-          <meshBasicMaterial color={primaryColor} />
+          <meshBasicMaterial color={pointColor} />
         </Text>
         {/* Point description */}
         <Text position={[0.35, -0.2, 0]} fontSize={0.11} color="#444444" anchorX="left" anchorY="middle" maxWidth={1.5}>

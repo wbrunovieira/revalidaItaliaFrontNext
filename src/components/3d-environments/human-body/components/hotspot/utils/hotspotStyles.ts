@@ -14,11 +14,11 @@ interface HotspotStyleContext {
 }
 
 // Base colors based on hotspot type
-// Point: Primary (#0C3559) - specific location
-// Area: Secondary (#3887A6) - body region
+// Point: Coral/Terracotta (#D97B5A) - specific location (warm, darker for visibility)
+// Area: Secondary (#3887A6) - body region (cyan)
 export function getBaseColors(hotspotType: HotspotType) {
-  const baseColor = hotspotType === 'area' ? '#3887A6' : '#0C3559';
-  const hoverColor = hotspotType === 'area' ? '#4ECDC4' : '#3887A6';
+  const baseColor = hotspotType === 'area' ? '#3887A6' : '#D97B5A';
+  const hoverColor = hotspotType === 'area' ? '#4ECDC4' : '#E8956E';
   return { baseColor, hoverColor };
 }
 

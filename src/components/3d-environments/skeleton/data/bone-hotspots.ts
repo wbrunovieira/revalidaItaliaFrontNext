@@ -523,8 +523,9 @@ export const BONE_HOTSPOTS: BoneHotspot[] = [
     yMin: -0.65,
     yMax: -0.5,
     size: 1.2,
-    audioUrl: getAudioPath('skeletonCondiloFemorale.mp3'),
-    transcription: 'Frattura del condilo laterale del femore.',
+    audioUrl: getAudioPath('skeletonCondiloLateraleFemorale.mp3'),
+    transcription:
+      'Dolore localizzato a livello del condilo femorale laterale, con sospetto interessamento articolare.',
     type: 'bone',
   },
   {

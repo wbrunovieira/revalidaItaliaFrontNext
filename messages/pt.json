@@ -2211,6 +2211,7 @@
     "breadcrumb": {
       "dashboard": "Dashboard"
     },
+    "loading": "Carregando...",
     "back": "Voltar à aula",
     "lessonNumber": "Aula {number}",
     "minutes": "minutos",

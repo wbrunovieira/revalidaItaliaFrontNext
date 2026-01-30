@@ -1,7 +1,7 @@
 // src/components/LessonPageContent.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLesson, useModuleLessons } from '@/hooks/queries/useLesson';
 import { useLessonAssessments } from '@/hooks/queries/useLessonAssessments';
@@ -147,55 +147,58 @@ export default function LessonPageContent({
     enabled: flashcardIds.length > 0,
   });
 
-  // DEBUG: Log lesson data including animations
-  useEffect(() => {
-    if (lesson) {
-      console.log('📚 LessonPageContent - lesson data:', lesson);
-      console.log('📚 LessonPageContent - lesson.animations:', lesson.animations);
-      console.log('📚 LessonPageContent - animations count:', lesson.animations?.length);
-    }
-  }, [lesson]);
 
-  // Hydrate cache with initial data on mount
+  // Track if hydration has been done for this lessonId
+  const hydratedLessonIdRef = useRef<string | null>(null);
+
+  // Hydrate cache with initial data on mount (only once per lessonId)
   useEffect(() => {
+    // Skip if already hydrated for this lesson
+    if (hydratedLessonIdRef.current === lessonId) {
+      return;
+    }
+
+    // Use initial* values (from server props) for hydration
+    const courseId = initialCourse?.id;
+    const moduleId = initialModule?.id;
+
     if (initialCourse) {
       queryClient.setQueryData(['courses'], [initialCourse]);
     }
-    if (initialModule && course?.id) {
-      queryClient.setQueryData(['course-modules', course.id], [initialModule]);
+    if (initialModule && courseId) {
+      queryClient.setQueryData(['course-modules', courseId], [initialModule]);
     }
-    if (initialLesson && course?.id && moduleFound?.id) {
+    if (initialLesson && courseId && moduleId) {
       queryClient.setQueryData(
-        ['lesson', course.id, moduleFound.id, lessonId],
+        ['lesson', courseId, moduleId, lessonId],
         initialLesson
       );
     }
-    // Note: initialLessons hydration removed - now handled by useModuleLessons initialData prop
     if (initialAssessments) {
       queryClient.setQueryData(['lesson-assessments', lessonId], initialAssessments);
     }
     if (initialDocuments) {
       queryClient.setQueryData(['lesson-documents', lessonId], initialDocuments);
     }
-    const hydrateFlashcardIds = initialLesson?.flashcardIds || lesson?.flashcardIds;
+    const hydrateFlashcardIds = initialLesson?.flashcardIds;
     if (initialFlashcards && hydrateFlashcardIds && hydrateFlashcardIds.length > 0) {
       queryClient.setQueryData(
         ['flashcards', [...hydrateFlashcardIds].sort().join(',')],
         initialFlashcards
       );
     }
+
+    // Mark as hydrated
+    hydratedLessonIdRef.current = lessonId;
   }, [
     queryClient,
+    lessonId,
     initialCourse,
     initialModule,
     initialLesson,
     initialAssessments,
     initialDocuments,
     initialFlashcards,
-    course?.id,
-    moduleFound?.id,
-    lessonId,
-    lesson?.flashcardIds,
   ]);
 
   // Show loading state

@@ -2206,6 +2206,7 @@
     "breadcrumb": {
       "dashboard": "Dashboard"
     },
+    "loading": "Caricamento...",
     "back": "Torna alla lezione",
     "lessonNumber": "Lezione {number}",
     "minutes": "minuti",

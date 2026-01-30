@@ -928,6 +928,16 @@ export default function LessonPageContent({
                   </div>
                 </div>
 
+                {/* Interactive Exercises - Expandable section for lessons without video */}
+                {lesson.animations && lesson.animations.length > 0 && (
+                  <div className="max-w-4xl mx-auto mb-8">
+                    <ExercisesExpandable
+                      lessonId={lessonId}
+                      animations={lesson.animations}
+                    />
+                  </div>
+                )}
+
                 {/* Content sections */}
                 <div className="max-w-7xl mx-auto">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

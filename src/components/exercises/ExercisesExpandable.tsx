@@ -514,8 +514,8 @@ export default function ExercisesExpandable({
                         {/* Animated shimmer effect for available exercises */}
                         {!group.isLocked && !group.isCompleted && (
                           <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full"
-                            animate={{ translateX: ['−100%', '200%'] }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full pointer-events-none"
+                            animate={{ translateX: ['-100%', '200%'] }}
                             transition={{
                               duration: 3,
                               repeat: Infinity,

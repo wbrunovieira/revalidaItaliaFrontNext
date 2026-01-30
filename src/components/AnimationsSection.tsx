@@ -10,7 +10,6 @@ import {
   ListChecks,
   ChevronDown,
   CheckCircle,
-  Circle,
   Trophy,
 } from 'lucide-react';
 import { useAnimationsProgress } from '@/hooks/queries/useLesson';
@@ -251,32 +250,20 @@ export default function AnimationsSection({
                       : tExercises('questionPlural')}
                   </p>
                 </div>
-                {/* Completion status */}
+                {/* Completion status - compact display */}
                 {lessonId && progressData && (
-                  <div className="flex items-center gap-1 mr-2">
+                  <div className="flex items-center gap-2 mr-2">
                     {(() => {
                       const completedCount = getGroupCompletionCount(group.animations);
                       const totalCount = group.animations.length;
                       const isGroupComplete = completedCount === totalCount;
 
-                      return (
-                        <div className="flex items-center gap-1.5">
-                          {isGroupComplete ? (
-                            <CheckCircle size={16} className="text-green-400" />
-                          ) : (
-                            <>
-                              {group.animations.map((anim) => (
-                                <div key={anim.id} className="w-2 h-2">
-                                  {isAnimationCompleted(anim.id) ? (
-                                    <div className="w-2 h-2 rounded-full bg-green-400" />
-                                  ) : (
-                                    <Circle size={8} className="text-gray-500" />
-                                  )}
-                                </div>
-                              ))}
-                            </>
-                          )}
-                        </div>
+                      return isGroupComplete ? (
+                        <CheckCircle size={16} className="text-green-400" />
+                      ) : (
+                        <span className="text-xs text-gray-400">
+                          {completedCount}/{totalCount}
+                        </span>
                       );
                     })()}
                   </div>

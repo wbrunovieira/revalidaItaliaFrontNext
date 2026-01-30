@@ -25,7 +25,7 @@ export const PELVIS_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
 
 // ARTO SUPERIORE (Upper limb)
 export const UPPER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['omero', 'testa-dell-omero', 'epicondilo', 'radio', 'ulna', 'olecrano', 'carpo', 'metacarpo'].includes(h.id)
+  ['omero', 'testa-dell-omero', 'epicondilo', 'epitroclea', 'radio', 'ulna', 'olecrano', 'carpo', 'metacarpo'].includes(h.id)
 );
 
 // ARTO INFERIORE (Lower limb)
@@ -35,5 +35,5 @@ export const LOWER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
 
 // ARTICOLAZIONI (Joints)
 export const JOINTS_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['anca', 'caviglia'].includes(h.id)
+  ['caviglia'].includes(h.id)
 );

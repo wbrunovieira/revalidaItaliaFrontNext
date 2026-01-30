@@ -33,7 +33,3 @@ export const LOWER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
   ['femore', 'grande-trocantere', 'collo-del-femore', 'testa-del-femore', 'condilo-mediale-femore', 'condilo-laterale-femore', 'rotula', 'tibia', 'perone', 'astragalo', 'calcagno', 'tarso', 'metatarso', 'falangi-piede', 'prima-falange', 'seconda-falange'].includes(h.id)
 );
 
-// ARTICOLAZIONI (Joints)
-export const JOINTS_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['caviglia'].includes(h.id)
-);

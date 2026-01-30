@@ -8,5 +8,4 @@ export {
   PELVIS_HOTSPOTS,
   UPPER_LIMB_HOTSPOTS,
   LOWER_LIMB_HOTSPOTS,
-  JOINTS_HOTSPOTS,
 } from './bone-groups';

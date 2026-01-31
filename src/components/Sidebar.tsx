@@ -29,6 +29,17 @@ import {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * Get token from cookie
+ */
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
 interface Module {
   id: string;
   slug: string;
@@ -121,9 +132,16 @@ export default function Sidebar({
   const fetchTrackAndCourses = useCallback(
     async (slug: string) => {
       try {
+        const token = getToken();
         // Fetch track details
         const trackResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/tracks?slug=${slug}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
         if (trackResponse.ok) {
           const tracks = await trackResponse.json();
@@ -144,9 +162,16 @@ export default function Sidebar({
   const fetchCourseAndModules = useCallback(
     async (slug: string) => {
       try {
+        const token = getToken();
         // Fetch course details
         const courseResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?slug=${slug}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses?slug=${slug}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          }
         );
         if (courseResponse.ok) {
           const courses = await courseResponse.json();
@@ -159,7 +184,13 @@ export default function Sidebar({
 
             // Fetch modules
             const modulesResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules`
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/courses/${course.id}/modules`,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(token && { 'Authorization': `Bearer ${token}` }),
+                },
+              }
             );
             if (modulesResponse.ok) {
               const modulesData =

@@ -287,8 +287,33 @@ Após concluir cada etapa, informe:
   teste.
 - Reavalie seus pressupostos caso comportamentos inesperados
   ocorram.
-- Quando um arquivo ficar muito grande, divida-o em arquivos
-  menores.
+- **Limite de Tamanho de Arquivos (Obrigatório):**
+  **Máximo ~300 linhas por arquivo de componente ou página.**
+  Quando um arquivo ultrapassar esse limite, divida-o em partes menores:
+  - **Componentes**: Extraia sub-componentes para arquivos separados
+  - **Hooks**: Extraia hooks customizados para pasta `hooks/`
+  - **Utils**: Extraia funções auxiliares para pasta `utils/`
+  - **Data**: Extraia constantes/configs para pasta `data/`
+
+  **Exemplo de estrutura para features/páginas grandes:**
+  ```
+  feature/
+  ├── page.tsx            # Página principal (server component, ~100 linhas)
+  ├── FeatureContent.tsx  # Componente cliente (~200-300 linhas max)
+  ├── components/         # Sub-componentes
+  │   ├── FeatureHeader.tsx
+  │   └── FeatureList.tsx
+  ├── hooks/              # Hooks customizados
+  │   └── useFeatureLogic.ts
+  ├── utils/              # Funções auxiliares
+  │   └── featureHelpers.ts
+  └── data/               # Constantes, configs
+      └── featureConfig.ts
+  ```
+
+  **Benefícios:** Melhor manutenibilidade, testabilidade,
+  legibilidade e reuso de código.
+
 - Quando uma função ficar muito longa, divida-a em funções
   menores.
 - Após escrever o código, reflita profundamente sobre a

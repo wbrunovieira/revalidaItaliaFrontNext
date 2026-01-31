@@ -285,17 +285,19 @@ interface ListItem {
 5. **Type Safety**: Define TypeScript types for all API responses and props
 
 ### File Size Limits (Mandatory)
-**Maximum ~300 lines per component file.** When a file grows beyond this limit, break it into smaller pieces:
+**Maximum ~300 lines per component or page file.** When a file grows beyond this limit, break it into smaller pieces:
 
+- **Pages**: Keep page.tsx minimal (~100 lines), extract logic to *Content.tsx components
 - **Components**: Extract sub-components to separate files
 - **Hooks**: Extract custom hooks to `hooks/` folder
 - **Utils**: Extract helper functions to `utils/` folder
 - **Data**: Extract constants/configs to `data/` folder
 
-**Example structure for large features:**
+**Example structure for large features/pages:**
 ```
 feature/
-├── index.tsx           # Main component (~200-300 lines max)
+├── page.tsx            # Page file (server component, ~100 lines)
+├── FeatureContent.tsx  # Client component (~200-300 lines max)
 ├── components/         # Sub-components
 │   ├── FeatureHeader.tsx
 │   └── FeatureList.tsx

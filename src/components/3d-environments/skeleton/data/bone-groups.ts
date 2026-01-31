@@ -30,6 +30,6 @@ export const UPPER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
 
 // ARTO INFERIORE (Lower limb)
 export const LOWER_LIMB_HOTSPOTS: BoneHotspot[] = BONE_HOTSPOTS.filter(h =>
-  ['femore', 'grande-trocantere', 'collo-del-femore', 'testa-del-femore', 'condilo-mediale-femore', 'condilo-laterale-femore', 'rotula', 'tibia', 'perone', 'astragalo', 'calcagno', 'tarso', 'metatarso', 'falangi-piede', 'prima-falange', 'seconda-falange'].includes(h.id)
+  ['femore', 'grande-trocantere', 'testa-del-femore', 'condilo-mediale-femore', 'condilo-laterale-femore', 'rotula', 'tibia', 'perone', 'astragalo', 'calcagno', 'tarso', 'metatarso', 'falangi-piede', 'prima-falange', 'seconda-falange'].includes(h.id)
 );
 

@@ -24,12 +24,25 @@ export interface Module {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
 
 /**
+ * Get token from cookie
+ */
+function getToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith('token='))
+    ?.split('=')[1];
+}
+
+/**
  * Fetch all courses
  */
 async function fetchCourses(): Promise<Course[]> {
+  const token = getToken();
   const response = await fetch(`${apiUrl}/api/v1/courses`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
     },
   });
 
@@ -64,11 +77,13 @@ export function useCourses(enabled: boolean = true) {
  * Fetch course modules
  */
 async function fetchCourseModules(courseId: string): Promise<Module[]> {
+  const token = getToken();
   const response = await fetch(
     `${apiUrl}/api/v1/courses/${courseId}/modules`,
     {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
       },
     }
   );

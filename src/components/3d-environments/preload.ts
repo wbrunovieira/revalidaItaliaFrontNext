@@ -10,11 +10,24 @@
 const preloadingCache = new Set<string>();
 
 /**
- * Model paths for each environment
+ * Check if we're in production environment
+ */
+const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * Get the correct model path based on environment
+ * Production uses /public/ prefix for NGINX routing to S3
+ */
+function getModelPath(basePath: string): string {
+  return isProduction ? `/public${basePath}` : basePath;
+}
+
+/**
+ * Model paths for each environment (base paths without /public/ prefix)
  */
 const ENVIRONMENT_MODELS: Record<string, string> = {
   'human-body': '/models/human-body/anatomy-internal.glb',
-  // Add more environments as needed
+  'skeleton': '/models/skeleton/skeleton-bones.glb',
 };
 
 /**
@@ -46,9 +59,10 @@ export function preloadModel(modelPath: string): void {
  * to start loading the model before they click.
  */
 export function preloadEnvironment(environmentSlug: string): void {
-  const modelPath = ENVIRONMENT_MODELS[environmentSlug];
+  const basePath = ENVIRONMENT_MODELS[environmentSlug];
 
-  if (modelPath) {
+  if (basePath) {
+    const modelPath = getModelPath(basePath);
     preloadModel(modelPath);
   }
 }
@@ -66,6 +80,17 @@ export function preloadHumanBodyEnvironment(): void {
  * Check if an environment's assets are already preloaded
  */
 export function isEnvironmentPreloaded(environmentSlug: string): boolean {
-  const modelPath = ENVIRONMENT_MODELS[environmentSlug];
-  return modelPath ? preloadingCache.has(modelPath) : false;
+  const basePath = ENVIRONMENT_MODELS[environmentSlug];
+  if (!basePath) return false;
+  const modelPath = getModelPath(basePath);
+  return preloadingCache.has(modelPath);
+}
+
+/**
+ * Preload the skeleton environment
+ *
+ * Convenience function for skeleton environment
+ */
+export function preloadSkeletonEnvironment(): void {
+  preloadEnvironment('skeleton');
 }

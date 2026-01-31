@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { preloadEnvironment, preloadHumanBodyEnvironment } from '../preload';
+import { preloadEnvironment, preloadHumanBodyEnvironment, preloadSkeletonEnvironment } from '../preload';
 
 /**
  * Hook to get preload handlers for 3D environments
@@ -44,6 +44,32 @@ export function usePreloadHumanBody() {
 
   const onMouseEnter = useCallback(() => {
     preloadHumanBodyEnvironment();
+  }, []);
+
+  return { preload, onMouseEnter };
+}
+
+/**
+ * Hook specifically for skeleton environment preloading
+ *
+ * Usage:
+ * ```tsx
+ * const { preload, onMouseEnter } = usePreloadSkeleton();
+ *
+ * // Manual preload
+ * useEffect(() => { preload(); }, []);
+ *
+ * // Or on hover
+ * <Link onMouseEnter={onMouseEnter}>...</Link>
+ * ```
+ */
+export function usePreloadSkeleton() {
+  const preload = useCallback(() => {
+    preloadSkeletonEnvironment();
+  }, []);
+
+  const onMouseEnter = useCallback(() => {
+    preloadSkeletonEnvironment();
   }, []);
 
   return { preload, onMouseEnter };
